@@ -17,15 +17,16 @@
 # Summary
 #########################################################################################################
 
-The is a small project to illustrate the usage of some 3rd party libraries to do SIF REST.
-At this point in time it doesn't form a framework it only holds a few java classes that demo some
-typical usage if SIF REST. The demo classes are found under the 'demo' source directory.
+The SIF3 Framework is a Java Framework that enables developers to efficiently implement SIF3 
+services (consumers and/or providers). It fully encapsulates the low level SIF3 infrastructure. It also
+provides a basic environment provider which is core to SIF3.
+
+The framework has some basic demo classes that illustrate how to use the framework. It also has a
+developer's guide that can be found in the "documentation/UserGuide" directory.
 
 NOTE:
-In the sif3InfraCommon and sif3Datamodel source directory are a number of classes that have been
-generated with xjc. This is a JAXB utility to generate POJOs from XSDs. Neither the XSDs nor the
-xjc utility is part of this project. The POJOs have been generated as part of another project. In
-future that code generation might be added to this project for completeness.
+As of November 2013 the framework works for SIF3 with a DIRECT environment and IMMEDIATE responses. It
+doesn't support brokered or delayed response solutions, yet.
 
 
 #########################################################################################################
@@ -41,7 +42,7 @@ Click on the button marked "ZIP" available from the Code tab.
 
 Option 2 - Using a Git client.
 ==============================
-From the command-line type: git clone git://github.com/nsip/sif-rest-demo-java.git
+From the command-line type: git clone git://github.com/nsip/sif3-framework-java.git
 
 Note that if you want to use this option but don't have the client installed, it can be 
 downloaded from http://git-scm.com/download.
