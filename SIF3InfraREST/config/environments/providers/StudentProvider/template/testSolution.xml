@@ -1,0 +1,52 @@
+<environment type="DIRECT" id="064ed657-6ef2-46d6-96e6-629753fef375" xmlns="http://www.sifassociation.org/infrastructure/3.0">
+    <sessionToken>875278d729531ec2cacd98bb7536c2f4</sessionToken>
+    <solutionId>testSolution</solutionId>
+    <authenticationMethod>Basic</authenticationMethod>
+    <consumerName></consumerName>
+    <infrastructureServices>
+        <infrastructureService name="environment">http://rest3api.sifassociation.org/api/solutions/testSolution/environments/</infrastructureService>
+        <infrastructureService name="requestsConnector">http://rest3api.sifassociation.org/api/solutions/testSolution/requestsConnector</infrastructureService>
+        <infrastructureService name="provisionRequests">http://rest3api.sifassociation.org/api/solutions/testSolution/provisionRequests</infrastructureService>
+        <infrastructureService name="queues">http://rest3api.sifassociation.org/api/solutions/testSolution/queues</infrastructureService>
+        <infrastructureService name="subscriptions">http://rest3api.sifassociation.org/api/solutions/testSolution/subscriptions</infrastructureService>
+    </infrastructureServices>
+    <provisionedZones>
+        <provisionedZone id="schoolTestingZone">
+            <services>
+                <service name="alerts" contextId="DEFAULT">
+                    <rights>
+                        <right type="QUERY"/>
+                        <right type="CREATE"/>
+                        <right type="UPDATE"/>
+                        <right type="DELETE"/>
+                        <right type="PROVIDE"/>
+                        <right type="SUBSCRIBE"/>
+                        <right type="ADMIN"/>
+                    </rights>
+                </service>
+                <service name="students" contextId="DEFAULT">
+                    <rights>
+                        <right type="QUERY"/>
+                        <right type="CREATE"/>
+                        <right type="UPDATE"/>
+                        <right type="DELETE"/>
+                        <right type="PROVIDE"/>
+                        <right type="SUBSCRIBE"/>
+                        <right type="ADMIN"/>
+                    </rights>
+                </service>
+                <service name="zones" contextId="DEFAULT">
+                    <rights>
+                        <right type="QUERY"/>
+                        <right type="CREATE"/>
+                        <right type="UPDATE"/>
+                        <right type="DELETE"/>
+                        <right type="PROVIDE"/>
+                        <right type="SUBSCRIBE"/>
+                        <right type="ADMIN"/>
+                    </rights>
+                </service>
+            </services>
+        </provisionedZone>
+    </provisionedZones>
+</environment>

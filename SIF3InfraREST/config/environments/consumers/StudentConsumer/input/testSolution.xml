@@ -1,0 +1,17 @@
+<environment>
+    <solutionId>testSolution</solutionId>
+    <authenticationMethod>Basic</authenticationMethod>
+    <consumerName>SAMPLE AU Subscriber</consumerName>
+    <applicationInfo>
+        <applicationKey>TEST_CODE</applicationKey>
+        <supportedInfrastructureVersion>3.0</supportedInfrastructureVersion>
+        <supportedDataModel>SIF-US</supportedDataModel>
+        <supportedDataModelVersion>3.0</supportedDataModelVersion>
+        <transport>REST</transport>
+        <applicationProduct>
+            <vendorName>Systemic Pty Ltd</vendorName>
+            <productName>Test Driver</productName>
+            <productVersion>0.1alpha</productVersion>
+        </applicationProduct>
+    </applicationInfo>
+</environment>

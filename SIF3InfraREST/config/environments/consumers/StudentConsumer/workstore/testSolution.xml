@@ -1,0 +1,64 @@
+<environment type="DIRECT" id="7064db39-e920-4ff0-bae5-e3270d164bcf" xmlns="http://www.sifassociation.org/infrastructure/3.0">
+    <sessionToken>5a01a5c708a8a971d08141578188dc81</sessionToken>
+    <solutionId>testSolution</solutionId>
+    <authenticationMethod>Basic</authenticationMethod>
+    <consumerName>SAMPLE AU Subscriber</consumerName>
+    <applicationInfo>
+        <applicationKey>TEST_CODE</applicationKey>
+        <supportedInfrastructureVersion>3.0</supportedInfrastructureVersion>
+        <supportedDataModel>SIF-US</supportedDataModel>
+        <supportedDataModelVersion>3.0</supportedDataModelVersion>
+        <transport>REST</transport>
+        <applicationProduct>
+            <vendorName>Systemic Pty Ltd</vendorName>
+            <productName>Test Driver</productName>
+            <productVersion>0.1alpha</productVersion>
+        </applicationProduct>
+    </applicationInfo>
+    <infrastructureServices>
+        <infrastructureService name="environment">http://rest3api.sifassociation.org/api/solutions/testSolution/environments/7064db39-e920-4ff0-bae5-e3270d164bcf</infrastructureService>
+        <infrastructureService name="requestsConnector">http://rest3api.sifassociation.org/api/solutions/testSolution/requestsConnector</infrastructureService>
+        <infrastructureService name="provisionRequests">http://rest3api.sifassociation.org/api/solutions/testSolution/provisionRequests</infrastructureService>
+        <infrastructureService name="queues">http://rest3api.sifassociation.org/api/solutions/testSolution/queues</infrastructureService>
+        <infrastructureService name="subscriptions">http://rest3api.sifassociation.org/api/solutions/testSolution/subscriptions</infrastructureService>
+    </infrastructureServices>
+    <provisionedZones>
+        <provisionedZone id="schoolTestingZone">
+            <services>
+                <service name="alerts" contextId="DEFAULT">
+                    <rights>
+                        <right type="QUERY">APPROVED</right>
+                        <right type="CREATE">APPROVED</right>
+                        <right type="UPDATE">APPROVED</right>
+                        <right type="DELETE">APPROVED</right>
+                        <right type="PROVIDE">REJECTED</right>
+                        <right type="SUBSCRIBE">SUPPORTED</right>
+                        <right type="ADMIN">REJECTED</right>
+                    </rights>
+                </service>
+                <service name="students" contextId="DEFAULT">
+                    <rights>
+                        <right type="QUERY">APPROVED</right>
+                        <right type="CREATE">REJECTED</right>
+                        <right type="UPDATE">REJECTED</right>
+                        <right type="DELETE">REJECTED</right>
+                        <right type="PROVIDE">REJECTED</right>
+                        <right type="SUBSCRIBE">SUPPORTED</right>
+                        <right type="ADMIN">REJECTED</right>
+                    </rights>
+                </service>
+                <service name="zones" contextId="DEFAULT">
+                    <rights>
+                        <right type="QUERY">APPROVED</right>
+                        <right type="CREATE">APPROVED</right>
+                        <right type="UPDATE">APPROVED</right>
+                        <right type="DELETE">APPROVED</right>
+                        <right type="PROVIDE">REJECTED</right>
+                        <right type="SUBSCRIBE">SUPPORTED</right>
+                        <right type="ADMIN">REJECTED</right>
+                    </rights>
+                </service>
+            </services>
+        </provisionedZone>
+    </provisionedZones>
+</environment>

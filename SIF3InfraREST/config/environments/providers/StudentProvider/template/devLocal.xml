@@ -1,0 +1,92 @@
+<environment xmlns="http://www.sifassociation.org/infrastructure/3.0">
+    <sessionToken></sessionToken>
+    <solutionId>devLocal</solutionId>
+    <defaultZone id="auSchoolTestingZone">
+        <description>AU Testing Zone: Default Zone</description>
+    </defaultZone>
+    <authenticationMethod>Basic</authenticationMethod>
+    <consumerName></consumerName>
+    <infrastructureServices>
+        <infrastructureService name="environment">http://localhost:9080//SIF3InfraREST/sif3/environments/</infrastructureService>
+        <infrastructureService name="requestsConnector">http://localhost:9080/SIF3InfraREST/sif3/requests</infrastructureService>
+        <infrastructureService name="provisionRequests">http://localhost:9080/SIF3InfraREST/sif3/provision</infrastructureService>
+        <infrastructureService name="queues">http://localhost:9080/SIF3InfraREST/sif3/queues</infrastructureService>
+        <infrastructureService name="subscriptions">http://localhost:9080/SIF3InfraREST/sif3/subscriptions</infrastructureService>
+    </infrastructureServices>
+    <provisionedZones>
+        <provisionedZone id="auSchoolTestingZone">
+            <services>
+                <service name="alerts" contextId="DEFAULT" type="UTILITY">
+                  <rights>
+                    <right type="QUERY">APPROVED</right>
+                    <right type="CREATE">APPROVED</right>
+                    <right type="UPDATE">APPROVED</right>
+                    <right type="DELETE">APPROVED</right>
+                    <right type="PROVIDE">SUPPORTED</right>
+                    <right type="SUBSCRIBE">SUPPORTED</right>
+                    <right type="ADMIN">APPROVED</right>
+                  </rights>
+                </service>
+                <service name="StudentPesonals" contextId="DEFAULT">
+                  <rights>
+                    <right type="QUERY">APPROVED</right>
+                    <right type="CREATE">REJECTED</right>
+                    <right type="UPDATE">REJECTED</right>
+                    <right type="DELETE">REJECTED</right>
+                    <right type="PROVIDE">REJECTED</right>
+                    <right type="SUBSCRIBE">SUPPORTED</right>
+                    <right type="ADMIN">REJECTED</right>
+                  </rights>
+                </service>
+                <service name="zones" contextId="DEFAULT" type="UTILITY">
+                  <rights>
+                    <right type="QUERY">APPROVED</right>
+                    <right type="CREATE">APPROVED</right>
+                    <right type="UPDATE">APPROVED</right>
+                    <right type="DELETE">APPROVED</right>
+                    <right type="PROVIDE">SUPPORTED</right>
+                    <right type="SUBSCRIBE">SUPPORTED</right>
+                    <right type="ADMIN">APPROVED</right>
+                  </rights>
+                </service>
+            </services>            
+        </provisionedZone>
+        <provisionedZone id="auRolloverTestingZone">
+            <services>
+                <service name="alerts" contextId="DEFAULT" type="UTILITY">
+                  <rights>
+                    <right type="QUERY">APPROVED</right>
+                    <right type="CREATE">APPROVED</right>
+                    <right type="UPDATE">APPROVED</right>
+                    <right type="DELETE">APPROVED</right>
+                    <right type="PROVIDE">SUPPORTED</right>
+                    <right type="SUBSCRIBE">SUPPORTED</right>
+                    <right type="ADMIN">APPROVED</right>
+                  </rights>
+                </service>
+                <service name="StudentSchoolEnrolments" contextId="EndOfYear">
+                  <rights>
+                    <right type="QUERY">APPROVED</right>
+                    <right type="CREATE">REJECTED</right>
+                    <right type="UPDATE">REJECTED</right>
+                    <right type="DELETE">REJECTED</right>
+                    <right type="PROVIDE">REJECTED</right>
+                    <right type="SUBSCRIBE">SUPPORTED</right>
+                    <right type="ADMIN">REJECTED</right>
+                  </rights>
+                </service>
+                <service name="StudentSchoolEnrolments">
+                  <rights>
+                    <right type="QUERY">APPROVED</right>
+                    <right type="CREATE">REJECTED</right>
+                    <right type="UPDATE">REJECTED</right>
+                    <right type="DELETE">REJECTED</right>
+                    <right type="PROVIDE">REJECTED</right>
+                    <right type="SUBSCRIBE">SUPPORTED</right>
+                    <right type="ADMIN">REJECTED</right>
+                  </rights>
+                </service>
+            </services>
+        </provisionedZone>
+    </provisionedZones>
+</environment>
