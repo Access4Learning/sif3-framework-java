@@ -1,0 +1,22 @@
+<jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+               xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+               xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+               jaxb:version="2.0">
+
+  <jaxb:globalBindings typesafeEnumMaxMembers="1500">
+    <xjc:noMarshaller />
+    <xjc:noValidator />
+    <xjc:noUnmarshaller /> 
+    <xjc:noValidatingUnmarshaller /> 
+  </jaxb:globalBindings>
+
+  <jaxb:bindings schemaLocation="file:/c:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/Generator/data/input/tmp/sif/SIF_Message.xsd">
+<!--
+  <jaxb:bindings schemaLocation="file:/C:/DEV/eclipseWorkspace/SIF3InfraREST/Generator/data/input/tmp/sif/SIF_Message.xsd">
+-->  
+    <jaxb:bindings node="//xs:complexType[@name='CalendarDateType']">
+      <jaxb:class name="CalendarDate"/>
+    </jaxb:bindings>
+  </jaxb:bindings>
+
+</jaxb:bindings>
