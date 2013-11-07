@@ -8,6 +8,10 @@
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/sif3InfraREST/src"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/sif3InfraCommon/src"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/sif3Datamodel/src"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/config"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/config/providers"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/config/consumers"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/sif3Common/src"/>
         <property name="context-root" value="SIF3InfraREST"/>
         <property name="java-output-path" value="/SIF3InfraREST/build/classes"/>
     </wb-module>
