@@ -10,31 +10,31 @@
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>com.sun.jersey.config.property.packages</param-name>
-            <param-value>systemic.sif3.rest.infra.jersey,systemic.sif3.rest.infra.resource</param-value>
+            <param-value>sif3.infra.rest.resource</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <!--  SIF Direct REST mapping according to SIF REST Direct Spec -->
     <servlet-mapping>
         <servlet-name>Jersey REST Service</servlet-name>
-        <url-pattern>/sif/*</url-pattern>
+        <url-pattern>/sif3/*</url-pattern>
     </servlet-mapping>
 
     <!-- ********* -->
     <!-- Variables -->
     <!-- ********* -->
-<!--    
+    <!--  
+      ***************************************************************************************************************************
+      The name of the service (consumber/propvider) property file to use in this deployment.  
+      Note this file will be used to identify the service ID, service type (consumer/provider), environment store etc.
+      ***************************************************************************************************************************
+    -->
     <env-entry>
-        <env-entry-name>SIF_DIRECT_REST_PROP_FILE</env-entry-name>
+        <env-entry-name>SERVICE_PROPERTY_FILE</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>SIFDirectREST</env-entry-value>
+        <env-entry-value>StudentProvider</env-entry-value>
     </env-entry>
-    <env-entry>
-        <env-entry-name>SERVICE_ID</env-entry-name>
-        <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>StudentSubscriber</env-entry-value>
-    </env-entry>
--->
+
     
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
