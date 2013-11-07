@@ -1,0 +1,64 @@
+<environment id="5b72f2d4-7a83-4297-a71f-8b5fb26cbf14" type="DIRECT">
+  <sessionToken>2e5dd3ca282fc8ddb3d08dcacc407e8a</sessionToken>
+  <solutionId>auTestSolution</solutionId>
+  <defaultZoneId>auSchoolTestingZone</defaultZoneId>
+  <authenticationMethod>Basic</authenticationMethod>
+  <consumerName>AUTestProvider</consumerName>
+  <applicationInfo>
+    <applicationKey>AUDemoAppKey</applicationKey>
+    <supportedInfrastructureVersion>3.0</supportedInfrastructureVersion>
+    <supportedDataModel>SIF-AU</supportedDataModel>
+    <supportedDataModelVersion>3.0</supportedDataModelVersion>
+    <transport>REST</transport>
+    <applicationProduct>
+      <vendorName>NSIP EDU</vendorName>
+      <productName>NSIP Edu SIF Demo</productName>
+    </applicationProduct>
+  </applicationInfo>
+  <infrastructureServices>
+    <infrastructureService name="environment">http://rest3api.sifassociation.org/api/solutions/auTestSolution/environments/5b72f2d4-7a83-4297-a71f-8b5fb26cbf14</infrastructureService>
+    <infrastructureService name="requestsConnector">http://rest3api.sifassociation.org/api/solutions/auTestSolution/requestsConnector</infrastructureService>
+    <infrastructureService name="provisionRequests">http://rest3api.sifassociation.org/api/solutions/auTestSolution/provisionRequests</infrastructureService>
+    <infrastructureService name="queues">http://rest3api.sifassociation.org/api/solutions/auTestSolution/queues</infrastructureService>
+    <infrastructureService name="subscriptions">http://rest3api.sifassociation.org/api/solutions/auTestSolution/subscriptions</infrastructureService>
+  </infrastructureServices>
+  <provisionedZones>
+    <provisionedZone id="auSchoolTestingZone">
+      <services>
+        <service name="alerts" contextId="DEFAULT">
+          <rights>
+            <right type="QUERY">APPROVED</right>
+            <right type="CREATE">APPROVED</right>
+            <right type="UPDATE">APPROVED</right>
+            <right type="DELETE">APPROVED</right>
+            <right type="PROVIDE">SUPPORTED</right>
+            <right type="SUBSCRIBE">SUPPORTED</right>
+            <right type="ADMIN">APPROVED</right>
+          </rights>
+        </service>
+        <service name="students" contextId="DEFAULT">
+          <rights>
+            <right type="QUERY">APPROVED</right>
+            <right type="CREATE">REJECTED</right>
+            <right type="UPDATE">REJECTED</right>
+            <right type="DELETE">REJECTED</right>
+            <right type="PROVIDE">REJECTED</right>
+            <right type="SUBSCRIBE">SUPPORTED</right>
+            <right type="ADMIN">REJECTED</right>
+          </rights>
+        </service>
+        <service name="zones" contextId="DEFAULT">
+          <rights>
+            <right type="QUERY">APPROVED</right>
+            <right type="CREATE">APPROVED</right>
+            <right type="UPDATE">APPROVED</right>
+            <right type="DELETE">APPROVED</right>
+            <right type="PROVIDE">SUPPORTED</right>
+            <right type="SUBSCRIBE">SUPPORTED</right>
+            <right type="ADMIN">APPROVED</right>
+          </rights>
+        </service>
+      </services>
+    </provisionedZone>
+  </provisionedZones>
+</environment>
