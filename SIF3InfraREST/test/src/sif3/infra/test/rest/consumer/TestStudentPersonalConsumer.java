@@ -285,8 +285,8 @@ public class TestStudentPersonalConsumer
 
 		StudentPersonalConsumer consumer = tester.getConsumer();
 		
-//		tester.getStudents(consumer);
-		tester.createStudent(consumer);
+		tester.getStudents(consumer);
+//		tester.createStudent(consumer);
 //		tester.removeStudent(consumer);
 //		tester.getStudent(consumer);
 //		tester.updateStudent(consumer);
