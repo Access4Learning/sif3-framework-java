@@ -19,6 +19,7 @@
 package sif3.infra.common.env;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.List;
 
 import javax.ws.rs.core.MediaType;
@@ -390,6 +391,32 @@ public class EnvironmentStore implements Serializable
               
               // Media Type
               envInfo.setMediaType(convertMediaType(props.getPropertyAsString("env.mediaType."+envName, null)));
+              
+              //Base URL for connectors
+              String baseURLStr = props.getPropertyAsString("env.connector.url."+envName, null);
+              if (StringUtils.isEmpty(baseURLStr))
+              {
+                  logger.error("env.connector.url."+envName+" is missing. You must provide this URL for this environment.");
+                  errorsFound = true;                                   	  
+              }
+              else
+              {
+                  // Remove trailing '/' if it is there
+            	  baseURLStr = baseURLStr.trim();
+            	  if (baseURLStr.endsWith("/"))
+            	  {
+            		  baseURLStr = baseURLStr.substring(0, baseURLStr.length()-1);
+            	  }
+            	  try
+            	  {
+            		  envInfo.setBaseURI(new URI(baseURLStr));
+            	  }
+            	  catch (Exception ex)
+            	  {
+                      logger.error("env.connector.url."+envName+" is not a valid URL. Please correct the URL for this environment.");
+                      errorsFound = true;                                   	              		  
+            	  }
+              }
               
               // Data Models for this environment
               List<String> dmList = props.getFromCommaSeparated("env.dmInfo."+envName);

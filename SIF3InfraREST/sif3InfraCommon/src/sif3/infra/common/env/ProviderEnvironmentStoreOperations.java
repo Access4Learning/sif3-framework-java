@@ -87,7 +87,7 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 	 * Before a new environment can be created it must be read from a template. This method loads the environment from the template 
 	 * directory. If no such environment exists then null is returned.
 	 * 
-	 * @param envName The name of the environement (file name) to be located and loaded form the template directory.
+	 * @param envName The name of the environment (file name) to be located and loaded form the template directory.
 	 * 
 	 * @return See desc.
 	 */
@@ -99,7 +99,7 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 	/**
 	 * This method loads the environment for a given consumer. Before it is loaded it checks if it does already exist. If it doesn't then
 	 * null is returned, otherwise the environment is returned. Note if it doesn't exist it WON'T create it. To create the environment
-	 * from a temaplate then the 'createAndStoreEnvForConsumer(...)' method in this class must be called.
+	 * from a template then the 'createAndStoreEnvForConsumer(...)' method in this class must be called.
 	 * 
    * @param envName The name of the environment to load.
    * @param consumerID The ID of the consumer for which the environment shall be loaded.
@@ -133,13 +133,13 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 			logger.error("The consumer input environment is null or does not have the Application Info set. Environment cannot be created.");
 			return null;
 		}
-    if (StringUtils.isEmpty(inputEnv.getSolutionId()) || StringUtils.isEmpty(inputEnv.getConsumerName()))
-    {
-      logger.error("The consumer name and/or the solution id in the input environment is null or empty. Environment cannot be created.");
-      return null;
-    }
-    String envName = inputEnv.getSolutionId().trim();
-    String consumerID = inputEnv.getConsumerName().trim();
+	    if (StringUtils.isEmpty(inputEnv.getSolutionId()) || StringUtils.isEmpty(inputEnv.getConsumerName()))
+	    {
+	      logger.error("The consumer name and/or the solution id in the input environment is null or empty. Environment cannot be created.");
+	      return null;
+	    }
+	    String envName = inputEnv.getSolutionId().trim();
+	    String consumerID = inputEnv.getConsumerName().trim();
     
 		if (environmentKnown(envName, true) && consumerKnown(envName, consumerID, true))
 		{
@@ -165,10 +165,7 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 			// Create environmentID and sessionToken and environment Service
 			environment.setId(UUIDGenerator.getUUID());
 			environment.setSessionToken(UUIDGenerator.getUUIDWithoutDashes());
-			if (!updateEnvironmentURL(environment))
-			{
-				return null; // error already logged
-			}
+			updateConnectorURLs(environment, envName);
 			
 			// Store the environment in the store.
 			if (!storeEnvironmentData(getOutputDirectoryForConsumer(envName, consumerID), envName, environment))
@@ -291,6 +288,23 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 			}
 		}
 		
+		// Get template for this environment. Extract the connector URLs and update them.
+		if (environment != null)
+		{
+			EnvironmentType templateEnv = loadEnvironmentFromTemplate(envName);
+			if (templateEnv != null)
+			{
+				environment.setInfrastructureServices(templateEnv.getInfrastructureServices());
+				updateConnectorURLs(environment, envName);
+				
+				//TODO: Should I store it back to the provider's workstore of this consumer?
+			}
+			else
+			{
+				logger.error("No environment template found for "+environment.getSolutionId()+". Cannot update connector URLs.");
+			}
+		}
+		
 		return environment;
 	}
 	
@@ -306,29 +320,43 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 		}
 	}
 	
-	private boolean updateEnvironmentURL(EnvironmentType environment)
+	private void updateConnectorURLs(EnvironmentType environment, String envName)
 	{
+		ProviderEnvironment env = (ProviderEnvironment)getEnvironmentStore().getEnvironments().getEnvironment(envName);
+		String baseURIStr = env.getBaseURI().toString();
+		
 		InfrastructureServicesType infraServices = environment.getInfrastructureServices();
+		
 		if (infraServices != null)
 		{
-			// Search for service called "environment"
 			List<PropertyType> services = infraServices.getInfrastructureService();
 			for (PropertyType service : services)
 			{
+				String connectorURL = service.getValue();
+				
+                // Remove trailing '/' if it is there
+          	  	if (connectorURL.endsWith("/"))
+          	  	{
+          	  		connectorURL = connectorURL.substring(0, connectorURL.length()-1);
+          	  	}
+
+				//check if it has a leading '/'
+				boolean hasSlash = connectorURL.startsWith("/");
+				
+				// Search for service called "environment" and also add the environment ID
 				if (service.getName().equals(ConsumerEnvironment.ConnectorName.environment.toString()))
 				{
-					service.setValue(service.getValue()+environment.getId());
-					return true;
+					service.setValue(baseURIStr+(hasSlash?"":"/")+connectorURL+"/"+environment.getId());
+				}
+				else
+				{
+					service.setValue(baseURIStr+(hasSlash?"":"/")+connectorURL);
 				}
 			}
-			// if I get here then no service with name environment was found
-			logger.error("No Infrastructure service with the name environment found in environment "+environment.getSolutionId()+". This must be set.");
-			return false;
 		}
 		else
 		{
 			logger.error("Infrastructure Services not defined in environment template for environment "+environment.getSolutionId()+". This must be set.");
-			return false;
 		}
 	}
 }
