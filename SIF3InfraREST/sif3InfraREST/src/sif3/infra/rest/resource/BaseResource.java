@@ -24,15 +24,17 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.log4j.Logger;
 
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.exception.MarshalException;
 import sif3.common.exception.UnmarshalException;
+import sif3.common.header.HeaderValues;
+import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.TransportHeaderProperties;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryMetadata;
@@ -63,6 +65,7 @@ import sif3.infra.rest.header.RESTHeaderProperties;
 import sif3.infra.rest.header.RequestHeaderConstants;
 import sif3.infra.rest.header.ResponseHeaderConstants;
 import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.DateUtils;
 import au.com.systemic.framework.utils.PropertyManager;
 import au.com.systemic.framework.utils.StringUtils;
 
@@ -75,7 +78,7 @@ import au.com.systemic.framework.utils.StringUtils;
  *  
  * @author Joerg Huber
  */
-public class BaseResource
+public abstract class BaseResource
 {
 	protected final Logger logger = Logger.getLogger(getClass());
 
@@ -92,12 +95,13 @@ public class BaseResource
 	private InfraMarshalFactory infraMarshaller = new InfraMarshalFactory();
 	private InfraUnmarshalFactory infraUnmarshaller = new InfraUnmarshalFactory();
 	private TransportHeaderProperties hdrProperties = new RESTHeaderProperties();
-  private SIFZone sifZone = null;
+	private SIFZone sifZone = null;
 	private SIFContext sifContext = null;
+	private String serviceName = null;
 
 	/* Metadata extracted from URI relating to query */ 
 	private QueryMetadata queryMetadata;
-
+	
 	/**
 	 * Constructor. Initialises the REST resource with a number of important properties that are needed throughout the SIF3 REST
 	 * resources. If a resource is accessed for the first time then this method will ensure that all environmental components such
@@ -107,11 +111,12 @@ public class BaseResource
 	 * @param requestHeaders All headers of the original request.
 	 * @param request The actual request in its raw form.
 	 */
-	public BaseResource(UriInfo uriInfo, HttpHeaders requestHeaders, Request request)
+	public BaseResource(UriInfo uriInfo, HttpHeaders requestHeaders, Request request, String serviceName)
 	{
 		this.uriInfo = uriInfo;
 		this.request = request;
 		this.requestHeaders = requestHeaders;
+		this.serviceName = serviceName;
 		this.servicePropFileName = WebUtils.getInstance().getServicePropertyFileName();
 		extractHeaderProperties(requestHeaders);
 
@@ -137,7 +142,8 @@ public class BaseResource
 		// Some debug output
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Request Received for Resource: " + getClass().getSimpleName());
+			logger.debug("Request Received for Resource: " + getClass().getSimpleName()+" - "+getServiceName());
+			logger.debug("Full URI: " + getUriInfo().getRequestUri().toString());
 			logger.debug("SIF3 Specific Request Headers: " + getHeaderProperties());
 			logger.debug("Request Media Type           : " + getMediaType());
 			logger.debug("Is Resource Initialisation ok: " + allOK);
@@ -157,6 +163,11 @@ public class BaseResource
 	public AdvancedProperties getServiceProperties()
 	{
 		return propertyManager.getProperties(servicePropFileName);
+	}
+
+	public String getServiceName()
+	{
+		return serviceName;
 	}
 
 	public boolean isInitialised()
@@ -287,27 +298,9 @@ public class BaseResource
 	 * 
 	 * @return REST Response Object.
 	 */
-	public Response makeErrorResponse(ErrorDetails error)
+	public Response makeErrorResponse(ErrorDetails error, ResponseAction responseAction)
 	{
-//		ErrorType sifError = makeError(error);
-		return makeResponse(makeError(error), error.getErrorCode(), true, infraMarshaller);
-		
-//		ResponseBuilder response = null;
-//		try
-//		{
-//			String payload = infraMarshaller.marschal(sifError, getMediaType());
-//			response = Response.status((int)sifError.getCode()).entity(payload);
-//			response = response.header(ResponseHeaderConstants.HDR_CONTENT_LENGTH, payload.length());
-//		}
-//		catch (MarshalException ex)
-//		{
-//			logger.error("Failed to marshal ErrorType based on the follwoing values: " + error);
-//			logger.error("Marshal Exception info: " + ex.getMessage(), ex);
-//			response = Response.noContent().status((int)sifError.getCode());
-//		}
-//		response = response.header(ResponseHeaderConstants.HDR_MESSAGE_TYPE, "ERROR");
-//		response = response.header(ResponseHeaderConstants.HDR_PROVIDER_ID, getProviderID());
-//		return response.build();
+		return makeResponse(makeError(error), error.getErrorCode(), true, responseAction, infraMarshaller);	
 	}
 	
 	/**
@@ -317,11 +310,21 @@ public class BaseResource
 	 * 
 	 * @return A HTTP Response to be sent back to the client.
 	 */
-	public Response makeResopnseWithNoContent(boolean isError)
+	public Response makeResopnseWithNoContent(boolean isError, ResponseAction responseAction)
 	{
 		ResponseBuilder response = Response.noContent();
 		response = response.header(ResponseHeaderConstants.HDR_PROVIDER_ID, getProviderID());
-		response = response.header(ResponseHeaderConstants.HDR_MESSAGE_TYPE, (isError) ? ResponseHeaderConstants.ERROR_RESPONSE_TYPE : ResponseHeaderConstants.STANDARD_RESPONSE_TYPE);					
+		response = response.header(ResponseHeaderConstants.HDR_DATE_TIME, DateUtils.nowAsISO8601());
+		response = response.header(ResponseHeaderConstants.HDR_MESSAGE_TYPE, (isError) ? HeaderValues.ResponseType.ERROR.name() : HeaderValues.ResponseType.RESPONSE.name());					
+		response = response.header(ResponseHeaderConstants.HDR_RESPONSE_ACTION, responseAction.name());
+		response = response.header(ResponseHeaderConstants.HDR_SERVICE_NAME, getServiceName());
+
+		// Mirror requestId if available
+		String requestID = hdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_REQUEST_ID);
+		if (requestID != null)
+		{
+			response = response.header(ResponseHeaderConstants.HDR_REQUEST_ID, requestID);				
+		}
 		return response.build();
 	}
 	
@@ -335,9 +338,9 @@ public class BaseResource
 	 * 
 	 * @return A HTTP Response to be sent back to the client.
 	 */
-	public Response makeResponse(Object data, int status, boolean isError, MarshalFactory marshaller)
+	public Response makeResponse(Object data, int status, boolean isError, ResponseAction responseAction, MarshalFactory marshaller)
 	{
-		return makeFullResponse(data, status, null, isError, marshaller);
+		return makeFullResponse(data, status, null, isError, responseAction, marshaller);
 	}
 	
 	/**
@@ -353,7 +356,7 @@ public class BaseResource
 	 */
 	public Response makePagedResponse(Object data, PagingInfo pagingInfo, boolean isError, MarshalFactory marshaller)
 	{
-		return makeFullResponse(data, Status.OK.getStatusCode(), pagingInfo, isError, marshaller);
+		return makeFullResponse(data, Status.OK.getStatusCode(), pagingInfo, isError, ResponseAction.QUERY, marshaller);
 	}
 
 	/**
@@ -382,7 +385,7 @@ public class BaseResource
 			}	
 			creates.add(createType);
 		}
-		return makeResponse(createManyResponse, overallStatus.getStatusCode(), false, infraMarshaller);
+		return makeResponse(createManyResponse, overallStatus.getStatusCode(), false, ResponseAction.CREATE, infraMarshaller);
 	}
 	
 	/**
@@ -411,7 +414,7 @@ public class BaseResource
 			}	
 			updates.add(updateType);
 		}
-		return makeResponse(updateManyResponse, overallStatus.getStatusCode(), false, infraMarshaller);
+		return makeResponse(updateManyResponse, overallStatus.getStatusCode(), false, ResponseAction.UPDATE, infraMarshaller);
 	}
 
 	/**
@@ -440,7 +443,7 @@ public class BaseResource
 			}	
 			deletes.add(deleteStatus);
 		}
-		return makeResponse(deleteManyResponse, overallStatus.getStatusCode(), false, infraMarshaller);
+		return makeResponse(deleteManyResponse, overallStatus.getStatusCode(), false, ResponseAction.DELETE, infraMarshaller);
 	}
 
 	/*---------------------*/
@@ -468,7 +471,7 @@ public class BaseResource
 		{
 			logger.error("Failed to convert media type '"+mediaTypeStr+"' from request header (Content-Type) to MediaType class. Default to APPLICATION_XML");
 			mediaType = MediaType.APPLICATION_XML_TYPE;
-		}
+		}		
 	}
 
 	private ErrorType makeError(ErrorDetails error)
@@ -483,7 +486,7 @@ public class BaseResource
 		return sifError;
 	}
 	
-	private Response makeFullResponse(Object data, int status, PagingInfo pagingInfo, boolean isError, MarshalFactory marshaller)
+	private Response makeFullResponse(Object data, int status, PagingInfo pagingInfo, boolean isError, ResponseAction responseAction, MarshalFactory marshaller)
 	{
 		ResponseBuilder response = null;
 		try
@@ -498,8 +501,13 @@ public class BaseResource
 			{
 				response = Response.status(Status.NO_CONTENT);
 			}
+			
+			// Date & Time format must be: YYYY-MM-DDTHH:mm:ssZ (i.e. 2013-08-12T12:13:14Z)
+			response = response.header(ResponseHeaderConstants.HDR_DATE_TIME, DateUtils.nowAsISO8601());
 			response = response.header(ResponseHeaderConstants.HDR_PROVIDER_ID, getProviderID());
-			response = response.header(ResponseHeaderConstants.HDR_MESSAGE_TYPE, (isError) ? ResponseHeaderConstants.ERROR_RESPONSE_TYPE : ResponseHeaderConstants.STANDARD_RESPONSE_TYPE);					
+			response = response.header(ResponseHeaderConstants.HDR_MESSAGE_TYPE, (isError) ? HeaderValues.ResponseType.ERROR.name() : HeaderValues.ResponseType.RESPONSE.name());					
+			response = response.header(ResponseHeaderConstants.HDR_RESPONSE_ACTION, responseAction.name());
+			response = response.header(ResponseHeaderConstants.HDR_SERVICE_NAME, getServiceName());
 			if (pagingInfo != null)
 			{
 				response = response.header(ResponseHeaderConstants.HDR_LAST_PAGE_NO, pagingInfo.getMaxPages());
@@ -507,12 +515,19 @@ public class BaseResource
 				response = response.header(ResponseHeaderConstants.HDR_PAGE_SIZE, pagingInfo.getPageSize());
 				response = response.header(ResponseHeaderConstants.HDR_TOTAL_ITEMS, pagingInfo.getTotalObjects());
 			}
+
+			// Mirror requestId if available
+			String requestID = hdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_REQUEST_ID);
+			if (requestID != null)
+			{
+				response = response.header(ResponseHeaderConstants.HDR_REQUEST_ID, requestID);				
+			}
 			
 			return response.build();		
 		}
 		catch (MarshalException ex)
 		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+": "+ex.getMessage()));
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+": "+ex.getMessage()), responseAction);
 		}
 	}
 

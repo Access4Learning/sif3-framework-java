@@ -27,14 +27,25 @@ import javax.ws.rs.core.HttpHeaders;
 public class RequestHeaderConstants
 {
 	/*
-	 * Names of valid REST Request Header Values.
+	 * Names of valid REST Request Header Fields.
 	 */
 	public static final String HDR_AUTH_TOKEN = HttpHeaders.AUTHORIZATION;
 	public static final String HDR_GENERATOR_ID = "generatorId";
 	public static final String HDR_IF_NOT_MATCH = HttpHeaders.IF_NONE_MATCH;
 	public static final String HDR_NAVIGATION_ID = "navigationId";
 	public static final String HDR_MESSAGE_TYPE = "messageType";
+	public static final String HDR_REQUEST_ID = "requestId";
+	public static final String HDR_QUEUE_ID = "queueId";
 	
-	public static final String[] HEADER_NAME_ARRAY = {HDR_AUTH_TOKEN, HDR_GENERATOR_ID, HDR_IF_NOT_MATCH, HDR_NAVIGATION_ID, HDR_MESSAGE_TYPE};
+	public static final String[] HEADER_NAME_ARRAY = 
+	{
+		HDR_AUTH_TOKEN, 
+		HDR_GENERATOR_ID, 
+		HDR_IF_NOT_MATCH, 
+		HDR_NAVIGATION_ID, 
+		HDR_MESSAGE_TYPE,
+		HDR_REQUEST_ID,
+		HDR_QUEUE_ID
+	};
 
 }

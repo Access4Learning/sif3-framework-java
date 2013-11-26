@@ -30,14 +30,14 @@ import sif3.infra.common.conversion.InfraUnmarshalFactory;
  * 
  * @author Joerg Huber
  */
-public class InfraResource extends BaseResource
+public abstract class InfraResource extends BaseResource
 {
 	private MarshalFactory marshaller = new InfraMarshalFactory();
 	private UnmarshalFactory unmarshaller = new InfraUnmarshalFactory();
 
-	public InfraResource(UriInfo uriInfo, HttpHeaders requestHeaders, Request request)
+	public InfraResource(UriInfo uriInfo, HttpHeaders requestHeaders, Request request, String serviceName)
 	{
-		super(uriInfo, requestHeaders, request);
+		super(uriInfo, requestHeaders, request, serviceName);
 	}
 
 	public MarshalFactory getMarshaller()

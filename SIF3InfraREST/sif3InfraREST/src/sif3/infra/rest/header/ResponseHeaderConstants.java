@@ -27,7 +27,7 @@ import javax.ws.rs.core.HttpHeaders;
 public class ResponseHeaderConstants
 {
 	/*
-	 * Names of valid REST Response Header Values.
+	 * Names of valid REST Response Header Fields.
 	 */
 	public static final String HDR_AUTH_TOKEN = HttpHeaders.AUTHORIZATION;
 	public static final String HDR_GENERATOR_ID = "generatorId";
@@ -35,12 +35,17 @@ public class ResponseHeaderConstants
 	public static final String HDR_NAVIGATION_ID = "navigationId";	
 	public static final String HDR_ETAG = HttpHeaders.ETAG;
 	public static final String HDR_CONTENT_LENGTH = HttpHeaders.CONTENT_LENGTH;
+	public static final String HDR_LOCATION = HttpHeaders.LOCATION;
 	public static final String HDR_PROVIDER_ID = "providerId";
 	public static final String HDR_PAGE_SIZE = "navigationPageSize";
 	public static final String HDR_PAGE_NO = "navigationPage";
 	public static final String HDR_TOTAL_ITEMS = "navigationItemCount";
 	public static final String HDR_LAST_PAGE_NO = "navigationLastPage";
+	public static final String HDR_DATE_TIME = "messageDateTime";
 	public static final String HDR_MESSAGE_TYPE = "messageType";
+	public static final String HDR_REQUEST_ID = "requestId";
+	public static final String HDR_RESPONSE_ACTION = "responseAction";
+	public static final String HDR_SERVICE_NAME = "serviceName";
 	
 	 public static final String[] HEADER_NAME_ARRAY = 
 	 {
@@ -55,10 +60,15 @@ public class ResponseHeaderConstants
 	   HDR_PAGE_NO,
 	   HDR_TOTAL_ITEMS,
 	   HDR_LAST_PAGE_NO,
-	   HDR_MESSAGE_TYPE
+	   HDR_MESSAGE_TYPE,
+	   HDR_DATE_TIME,
+	   HDR_REQUEST_ID,
+	   HDR_RESPONSE_ACTION,
+	   HDR_LOCATION,
+	   HDR_SERVICE_NAME
 	 };
 
-	 public static final String ERROR_RESPONSE_TYPE = "ERROR";
-	 public static final String STANDARD_RESPONSE_TYPE = "RESPONSE";
-	 public static final String EVENT_RESPONSE_TYPE = "EVENT";
+//	 public static final String ERROR_RESPONSE_TYPE = "ERROR";
+//	 public static final String STANDARD_RESPONSE_TYPE = "RESPONSE";
+//	 public static final String EVENT_RESPONSE_TYPE = "EVENT";
 }

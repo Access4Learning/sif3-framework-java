@@ -31,14 +31,11 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
-import au.com.systemic.framework.utils.StringUtils;
-
-import sif3.common.exception.MarshalException;
 import sif3.common.exception.UnmarshalException;
+import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.utils.AuthenticationUtils;
 import sif3.common.ws.ErrorDetails;
 import sif3.infra.common.env.EnvironmentStore;
@@ -46,7 +43,7 @@ import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.rest.env.ProviderEnvironmentManager;
-import sif3.infra.rest.header.ResponseHeaderConstants;
+import au.com.systemic.framework.utils.StringUtils;
 
 /*
  * http://localhost:9080/SIF3InfraREST/sif3/environments/69df9d79-8e01-43e8-825f-d0dc1775761b
@@ -64,16 +61,18 @@ import sif3.infra.rest.header.ResponseHeaderConstants;
 public class EnvironmentResource extends InfraResource
 {
 	private ProviderEnvironmentManager envMgr = null;
+	
+	private static final String SERVICE_NAME = "environments";
 
 	public EnvironmentResource(@Context UriInfo uriInfo,
 			                   @Context HttpHeaders requestHeaders,
 			                   @Context Request request)
 	{
-		super(uriInfo, requestHeaders, request);
+		super(uriInfo, requestHeaders, request, SERVICE_NAME);
 	    envMgr = ProviderEnvironmentManager.getInstance(EnvironmentStore.getInstance(getServicePropFileName()));
 	}
 
-	// -------------------------------------------------//
+    // -------------------------------------------------//
 	// -- POST Section: This is the C(reate) in CRUD. --//
 	// -------------------------------------------------//
 	@POST
@@ -94,7 +93,7 @@ public class EnvironmentResource extends InfraResource
 			ArrayList<String> envError = envDataValid(inputEnv); 
 			if (envError != null)
 			{
-				return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Cannot create Consumer Environment.", "Missing or invalid data: "+envError));
+				return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Cannot create Consumer Environment.", "Missing or invalid data: "+envError), ResponseAction.CREATE);
 			}
 
 			String envName = inputEnv.getSolutionId();			
@@ -106,7 +105,7 @@ public class EnvironmentResource extends InfraResource
 			ProviderEnvironment providerEnv = (ProviderEnvironment)envMgr.getEnvironmentStore().getEnvironments().getEnvironment(envName);
 			if (providerEnv == null)
 			{
-				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Environment with solutionId = '"+envName+"' not supported. Ensure that you provide a valid solutionId."));
+				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Environment with solutionId = '"+envName+"' not supported. Ensure that you provide a valid solutionId."), ResponseAction.CREATE);
 			}
 			
 			ConsumerEnvironment consumerEnv = providerEnv.getConsumer(consumerID);
@@ -121,7 +120,7 @@ public class EnvironmentResource extends InfraResource
 				}
 				else // Report an error because it is an invalid consumer for this environment
 				{
-					return makeErrorResponse(new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Consumer '"+consumerID+"' is not authorised to access this environment."));
+					return makeErrorResponse(new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Consumer '"+consumerID+"' is not authorised to access this environment."), ResponseAction.CREATE);
 				}
 			}
 			else // valid consumer found
@@ -133,14 +132,14 @@ public class EnvironmentResource extends InfraResource
 			//check Auth Token if it is a valid client. At this stage we only have the initial auth token.
 			if (!AuthenticationUtils.getBasicAuthToken(userName, password).equals(getAuthToken())) // not allowed credentials
 			{
-				return makeErrorResponse(new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Invalid authorisation token provided."));
+				return makeErrorResponse(new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Invalid authorisation token provided."), ResponseAction.CREATE);
 			}
 			
 			// If we get here then all the credentials are fine.
 			// Check if the environment is valid for this provider and consumer
 			if (!envMgr.isEnvironmentSupportedForConsumer(envName, consumerID, false))
 			{
-				return makeErrorResponse(new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Consumer '"+consumerID+"' is not authorised to access this environment with solutionId = '"+envName+"'."));
+				return makeErrorResponse(new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Consumer '"+consumerID+"' is not authorised to access this environment with solutionId = '"+envName+"'."), ResponseAction.CREATE);
 			}
 			
 			// Check if an environment does already exist. if so we need to see if we return an error or if we shall just return the environment
@@ -148,7 +147,7 @@ public class EnvironmentResource extends InfraResource
 			if (environment != null)
 			{		  
 				//TODO: JH - Confirm if we shall return it
-				return createEnvResponse(environment, Status.CONFLICT.getStatusCode());
+				return createEnvResponse(environment, Status.CONFLICT.getStatusCode(), ResponseAction.CREATE);
 			}
 			
 			// if it doesn't exist then create it the environment store and also add it to the EnvironmentManager.
@@ -156,17 +155,17 @@ public class EnvironmentResource extends InfraResource
 			
 			if (environment == null) // We had a problem. Error logged
 			{
-				return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create environment with solutionId = '"+envName+"' for consumer '"+consumerID+"'.", "Internal System error. Please contact your system administrator."));
+				return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create environment with solutionId = '"+envName+"' for consumer '"+consumerID+"'.", "Internal System error. Please contact your system administrator."), ResponseAction.CREATE);
 			}
 			
 			//if we get here then all is fine and we can return the environment.
-			return createEnvResponse(environment, Status.CREATED.getStatusCode());
+			return createEnvResponse(environment, Status.CREATED.getStatusCode(), ResponseAction.CREATE);
 		}
 		catch (UnmarshalException ex)
 		{
 			logger.error("Failed to unmarshal payload into an environment: "+ ex.getMessage(), ex);
 			logger.error("Environment Payload: "+ payload);
-			return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal environment payload: "+ ex.getMessage()));
+			return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal environment payload: "+ ex.getMessage()), ResponseAction.CREATE);
 		}
 	}
 
@@ -192,15 +191,15 @@ public class EnvironmentResource extends InfraResource
 			if (!id.equals(environment.getId()))
 			{
 				error = new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Environment with id "+id+" does not exist.");
-				return makeErrorResponse(error);
+				return makeErrorResponse(error, ResponseAction.QUERY);
 			}
 			
-			return createEnvResponse(environment, Status.OK.getStatusCode());
+			return createEnvResponse(environment, Status.OK.getStatusCode(), ResponseAction.QUERY);
 		}
 		else
 		{
 			logger.debug("Error Found: "+error);
-			return makeErrorResponse(error);
+			return makeErrorResponse(error, ResponseAction.QUERY);
 		}
 	}
 
@@ -226,25 +225,24 @@ public class EnvironmentResource extends InfraResource
 			if (!id.equals(environment.getId()))
 			{
 				error = new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Environment with id "+id+" does not exist. No action taken.");
-				return makeErrorResponse(error);
+				return makeErrorResponse(error, ResponseAction.DELETE);
 			}
 			
 			if (envMgr.removeEnvironmentByAuthToken(getAuthToken()))
 			{
-				return makeResopnseWithNoContent(false);
+				return makeResopnseWithNoContent(false, ResponseAction.DELETE);
 			}
 			else
 			{
 				logger.error("Environment with id "+id+" couldn't be deleted. See error log for details/");
 				error = new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Environment with id "+id+" couldn't be deleted.");
-				return makeErrorResponse(error);
-				
+				return makeErrorResponse(error, ResponseAction.DELETE);
 			}
 		}
 		else
 		{
 			logger.debug("Error Found: "+error);
-			return makeErrorResponse(error);
+			return makeErrorResponse(error, ResponseAction.DELETE);
 		}
 	}
 
@@ -288,22 +286,9 @@ public class EnvironmentResource extends InfraResource
 	  }
   }
 
-	private Response createEnvResponse(EnvironmentType environment, int statusCode)
+	private Response createEnvResponse(EnvironmentType environment, int statusCode, ResponseAction responseAction)
 	{
-	    try
-	    {
-	      String payload = getMarshaller().marschal(environment, getMediaType());
-	      ResponseBuilder response = Response.status(statusCode).entity(payload);
-	      response = response.header(ResponseHeaderConstants.HDR_PROVIDER_ID, getProviderID());
-	      response = response.header(ResponseHeaderConstants.HDR_CONTENT_LENGTH, payload.length());
-	      return response.build();
-	    }
-	    catch (MarshalException ex)
-	    {
-	      logger.error("Failed to marshal environment: "+ ex.getMessage(), ex);
-	      ErrorDetails error = new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to marshal environment: "+ ex.getMessage());
-	      return makeErrorResponse(error);
-	    }
+		return makeResponse(environment, statusCode, false, responseAction, getMarshaller());
 	}
 	
 	private void checkValue(String value, String elementName, ArrayList<String> errors)
