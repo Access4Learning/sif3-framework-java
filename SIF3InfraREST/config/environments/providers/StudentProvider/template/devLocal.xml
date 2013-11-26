@@ -7,14 +7,14 @@
     <authenticationMethod>Basic</authenticationMethod>
     <consumerName></consumerName>
     <infrastructureServices>
-        <infrastructureService name="environment">http://localhost:9080//SIF3InfraREST/sif3/environments/</infrastructureService>
-        <infrastructureService name="requestsConnector">http://localhost:9080/SIF3InfraREST/sif3/requests</infrastructureService>
-        <infrastructureService name="provisionRequests">http://localhost:9080/SIF3InfraREST/sif3/provision</infrastructureService>
-        <infrastructureService name="queues">http://localhost:9080/SIF3InfraREST/sif3/queues</infrastructureService>
-        <infrastructureService name="subscriptions">http://localhost:9080/SIF3InfraREST/sif3/subscriptions</infrastructureService>
+        <infrastructureService name="environment">environments/</infrastructureService>
+        <infrastructureService name="requestsConnector">requests</infrastructureService>
+        <infrastructureService name="provisionRequests">provision</infrastructureService>
+        <infrastructureService name="queues">/queues</infrastructureService>
+        <infrastructureService name="subscriptions">/subscriptions/</infrastructureService>
     </infrastructureServices>
     <provisionedZones>
-        <provisionedZone id="auSchoolTestingZone">
+       <provisionedZone id="auSchoolTestingZone">
             <services>
                 <service name="alerts" contextId="DEFAULT" type="UTILITY">
                   <rights>

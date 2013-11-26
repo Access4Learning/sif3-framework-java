@@ -4,11 +4,11 @@
     <authenticationMethod>Basic</authenticationMethod>
     <consumerName></consumerName>
     <infrastructureServices>
-        <infrastructureService name="environment">http://rest3api.sifassociation.org/api/solutions/testSolution/environments/</infrastructureService>
-        <infrastructureService name="requestsConnector">http://rest3api.sifassociation.org/api/solutions/testSolution/requestsConnector</infrastructureService>
-        <infrastructureService name="provisionRequests">http://rest3api.sifassociation.org/api/solutions/testSolution/provisionRequests</infrastructureService>
-        <infrastructureService name="queues">http://rest3api.sifassociation.org/api/solutions/testSolution/queues</infrastructureService>
-        <infrastructureService name="subscriptions">http://rest3api.sifassociation.org/api/solutions/testSolution/subscriptions</infrastructureService>
+        <infrastructureService name="environment">/environments/</infrastructureService>
+        <infrastructureService name="requestsConnector">requestsConnector</infrastructureService>
+        <infrastructureService name="provisionRequests">provisionRequests</infrastructureService>
+        <infrastructureService name="queues">/queues</infrastructureService>
+        <infrastructureService name="subscriptions">subscriptions</infrastructureService>
     </infrastructureServices>
     <provisionedZones>
         <provisionedZone id="schoolTestingZone">
