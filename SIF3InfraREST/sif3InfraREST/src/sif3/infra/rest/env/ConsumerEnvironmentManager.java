@@ -29,6 +29,7 @@ import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.TransportHeaderProperties;
 import sif3.common.utils.AuthenticationUtils;
+import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
@@ -364,13 +365,10 @@ public class ConsumerEnvironmentManager extends BaseEnvironmentManager
 	
 	private EnvironmentType retrieveEnvironment(ConsumerEnvironment envInfo)
 	{
-		TransportHeaderProperties hdrProps = new RESTHeaderProperties();
-		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, envInfo.getAuthenticationToken());
-		
 		Response response = null;
 		try
 		{
-		  response = getClient(envInfo).getSingle(PLURAL_ENV_URI, envInfo.getEnvGUID(), hdrProps, EnvironmentType.class, null, null);
+		  response = getClient(envInfo).getSingle(PLURAL_ENV_URI, envInfo.getEnvGUID(), getHeaderProperties(envInfo.getAuthenticationToken()), EnvironmentType.class, null, null);
 		}
 		catch (ServiceInvokationException ex)
 		{
@@ -396,17 +394,14 @@ public class ConsumerEnvironmentManager extends BaseEnvironmentManager
 		{
 			if (AuthenticationUtils.AUTHENTICATION_METHOD.Basic.toString().equals(inputEnv.getAuthenticationMethod()))
 			{
-				TransportHeaderProperties hdrProps = new RESTHeaderProperties();
 				String authToken = AuthenticationUtils.getBasicAuthToken(envInfo.getUserName(), envInfo.getPassword());
 				logger.debug("Initial Authentication Token for creating Environment "+envInfo.getEnvironmentName()+" is '"+authToken+"'");
-				
-				hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, authToken);
-								
+												
 				// Create Environments
 				Response response = null;
 				try
 				{
-				  response = getClient(envInfo).createSingle(PLURAL_ENV_URI+"/"+SINGLE_ENV_URI, inputEnv, hdrProps, EnvironmentType.class, null, null);
+				  response = getClient(envInfo).createSingle(PLURAL_ENV_URI+"/"+SINGLE_ENV_URI, inputEnv, getHeaderProperties(authToken), EnvironmentType.class, null, null);
 				}
 				catch (ServiceInvokationException ex)
 				{
@@ -438,12 +433,10 @@ public class ConsumerEnvironmentManager extends BaseEnvironmentManager
 	
 	private boolean removeEnvironment(ConsumerEnvironment envInfo)
 	{
-		TransportHeaderProperties hdrProps = new RESTHeaderProperties();
-		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, envInfo.getAuthenticationToken());
 		Response response = null;
 	    try
 	    {
-	      response = getClient(envInfo).removeSingle(PLURAL_ENV_URI, envInfo.getEnvGUID(), hdrProps, null, null);
+	      response = getClient(envInfo).removeSingle(PLURAL_ENV_URI, envInfo.getEnvGUID(), getHeaderProperties(envInfo.getAuthenticationToken()), null, null);
 	    }
 	    catch (ServiceInvokationException ex)
 	    {
@@ -461,15 +454,21 @@ public class ConsumerEnvironmentManager extends BaseEnvironmentManager
 			logger.info("Environment with ID = "+envInfo.getEnvGUID()+" has been removed from remote location.");
 			return true;
 	    }
-	}
-	
+	}	
 	
 	private ClientInterface getClient(ConsumerEnvironment envInfo)
 	{
 		return new ClientInterface(envInfo.getBaseURI(), envInfo.getMediaType(), marshaller, unmarshaller);
 	}
 
-	
+	private TransportHeaderProperties getHeaderProperties(String authToken)
+	{
+		TransportHeaderProperties hdrProps = new RESTHeaderProperties();
+		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, authToken);
+		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_ID, UUIDGenerator.getUUID());
+		return hdrProps;
+	}
+
 	private boolean populateFullEnvInfoFromEnvironment(ConsumerEnvironment envInfo, EnvironmentType env)
 	{
 		envInfo.setEnvGUID(env.getId());
