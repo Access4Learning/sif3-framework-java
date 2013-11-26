@@ -28,6 +28,52 @@ NOTE:
 As of November 2013 the framework works for SIF3 with a DIRECT environment and IMMEDIATE responses. It
 doesn't support brokered or delayed response solutions, yet.
 
+#########################################################################################################
+# Version History and Update
+#########################################################################################################
+
+=======================
+Version from 26/1//2013
+=======================
+If you have downloaded the framework before Nov 26, 2013 and get an updated version after this date 
+you must perform a few steps to make the framework function correctly. There are NO code changes only
+configuration changes.
+
+Step 1:
+-------
+Remove all environment XML files in the provider's and consumer's 'workstore' and all XML files in the provider's 
+environment store under the 'any' directory. Please refer to the developer's guide section 5.3.1.2.1 (consumer)
+and 5.3.1.2.2 (provider) for details where the 'workstore' is located for both these components.
+
+Step 2:
+-------
+Open all environment XML files in the provider's 'template' directory. Note if you have more than one provider
+configured then you must open the files in all provider's 'template' directories. Please refer to the developer's 
+guide section 5.3.1.2.2 for details about the location of the 'template' directory. Each environment XML file
+has a section with the name <infrastructureServices>. Replace that entire section with the following XML:
+
+   <infrastructureServices>
+      <infrastructureService name="environment">environments</infrastructureService>
+      <infrastructureService name="requestsConnector">requests</infrastructureService>
+      <infrastructureService name="provisionRequests">provision</infrastructureService>
+      <infrastructureService name="queues">queues</infrastructureService>
+      <infrastructureService name="subscriptions">subscriptions</infrastructureService>
+   </infrastructureServices>
+
+For details about that XML snipped please see section 5.3.1.2.2 in the developer's guide, paragraph with the title
+'Infrastructure Service URIs'.
+
+Step 3:
+------
+Open the provider's properties file (i.e. StudentProvider.properties). For each environment the provider supports
+add the following new property:
+
+env.connector.url.<env_name>=<baseURI>
+
+<env_name>: Name of the environment (i.e. devLocal)
+<baseURI>: The base URI of the provider. This is the value that used to be in the  <infrastructureService> node
+           of each service. (i.e. http://localhost:9080/SIF3InfraREST/sif3).
+           Also refer to section 5.6.2.1.2 and 5.6.2.3 of the developer's guide for details about this property.
 
 #########################################################################################################
 # Download Instructions
