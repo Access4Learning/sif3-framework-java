@@ -31,6 +31,7 @@ import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.TransportHeaderProperties;
 import sif3.common.model.EnvironmentZoneContextInfo;
 import sif3.common.model.PagingInfo;
+import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.BulkOperationResponse;
 import sif3.common.ws.Response;
 import sif3.infra.common.env.EnvironmentStore;
@@ -489,6 +490,7 @@ public abstract class AbstractConsumer implements Consumer
 	{
 		TransportHeaderProperties hdrProps = new RESTHeaderProperties();
 		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, envInfo.getAuthenticationToken());
+		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_ID, UUIDGenerator.getUUID());
 		
 		return hdrProps;
 	}
