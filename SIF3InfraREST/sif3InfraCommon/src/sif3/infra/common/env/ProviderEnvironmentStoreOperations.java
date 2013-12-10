@@ -73,10 +73,10 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 	 * If 'Any' is allowed in the environment then the consumer may have an environment in the 'any' environment store location. This
 	 * method checks if this is the case.
 	 * 
-   * @param envName The name of the environment to check for.
-   * @param consumerID The ID of the consumer for which the check shall be performed.
-   * 
-   * @return TRUE: Environment already exists. FALSE: The environment for the given consumer doen't exists.
+     * @param envName The name of the environment to check for.
+     * @param consumerID The ID of the consumer for which the check shall be performed.
+     * 
+     * @return TRUE: Environment already exists. FALSE: The environment for the given consumer doen't exists.
 	 */
 	public boolean existEnvironmentForAnyConsumer(String envName, String consumerID)
 	{
@@ -95,22 +95,25 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 	{
 		return loadEnvironmentData(getFullFileName(getEnvironmentStore().getFullTemplateDirName(), envName));
 	}
-	
+
 	/**
-	 * This method loads the environment for a given consumer. Before it is loaded it checks if it does already exist. If it doesn't then
-	 * null is returned, otherwise the environment is returned. Note if it doesn't exist it WON'T create it. To create the environment
-	 * from a template then the 'createAndStoreEnvForConsumer(...)' method in this class must be called.
+	 * This method loads the environment for a given consumer. Before it is loaded it checks if it
+	 * does already exist. If it doesn't then null is returned, otherwise the environment is
+	 * returned. Note if it doesn't exist it WON'T create it. To create the environment from a
+	 * template then the 'createAndStoreEnvForConsumer(...)' method in this class must be called.
 	 * 
-   * @param envName The name of the environment to load.
-   * @param consumerID The ID of the consumer for which the environment shall be loaded.
+	 * @param envName The name of the environment to load.
+	 * @param consumerID The ID of the consumer for which the environment shall be loaded.
+	 * @param useSecured Indicate if the environment to load should use secured (TRUE) service URIs (https://...) or
+	 *                   unsecured URIs (http://...)
 	 * 
 	 * @return See desc.
 	 */
-	public EnvironmentType loadEnvironmentForConsumer(String envName, String consumerID)
+	public EnvironmentType loadEnvironmentForConsumer(String envName, String consumerID, boolean useSecured)
 	{
 		if (environmentKnown(envName, true) && consumerKnown(envName, consumerID, true))
 		{
-			return loadEnvForConsumerNoChecks(envName, consumerID);
+			return loadEnvForConsumerNoChecks(envName, consumerID, useSecured);
 		}
 		return null;
 	}
@@ -125,8 +128,10 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 	 * If an environment does already exist for the given consumer then that environment is returned and no new one is created.
 	 * 
 	 * @param inputEnv The environment as provided by a consumer. This is a cut-down version with minimal data as specified in the SIF3 spec.
+	 * @param useSecured Indicate if the environment to load should use secured (TRUE) service URIs (https://...) or
+	 *                   unsecured URIs (http://...)
 	 */
-	public EnvironmentType createAndStoreEnvForConsumer(EnvironmentType inputEnv)
+	public EnvironmentType createAndStoreEnvForConsumer(EnvironmentType inputEnv, boolean useSecured)
 	{
 		if ((inputEnv == null) || (inputEnv.getApplicationInfo() == null))
 		{
@@ -143,7 +148,7 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
     
 		if (environmentKnown(envName, true) && consumerKnown(envName, consumerID, true))
 		{
-			EnvironmentType environment = loadEnvForConsumerNoChecks(envName, consumerID);
+			EnvironmentType environment = loadEnvForConsumerNoChecks(envName, consumerID, useSecured);
 			if (environment != null) // environment for this consumer does already exist => return it as is.
 			{
 				logger.info("Environment "+getFullFileName(getOutputDirectoryForConsumer(envName, consumerID), envName)+" exists already. Simply return it and do not create it again.");
@@ -165,7 +170,7 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 			// Create environmentID and sessionToken and environment Service
 			environment.setId(UUIDGenerator.getUUID());
 			environment.setSessionToken(UUIDGenerator.getUUIDWithoutDashes());
-			updateConnectorURLs(environment, envName);
+			updateConnectorURLs(environment, envName, useSecured);
 			
 			// Store the environment in the store.
 			if (!storeEnvironmentData(getOutputDirectoryForConsumer(envName, consumerID), envName, environment))
@@ -186,9 +191,9 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 	 * Remove and environment for a consumer. It is checked if the environment exists and only then it is removed (physically deleted from
 	 * the environment store!).
 	 * 
-   * @param envName The name of the environment to remove.
-   * @param consumerID The ID of the consumer for which the environment shall be removed.
-   * 
+     * @param envName The name of the environment to remove.
+     * @param consumerID The ID of the consumer for which the environment shall be removed.
+     * 
 	 * @return TRUE: It existed and has been removed. FALSE: Didn't exist or could not be removed (see error.log for details).
 	 */
 	public boolean deleteEnvironmentForConsumer(String envName, String consumerID)
@@ -206,8 +211,8 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 	/**
 	 * This method checks if a consumer is allowed to access an environment of a given name.
 	 * 
-   * @param envName The name of the environment to check for.
-   * @param consumerID The ID of the consumer for which the environment shall be checked.
+     * @param envName The name of the environment to check for.
+     * @param consumerID The ID of the consumer for which the environment shall be checked.
 	 * @param logError Indicate if the consumer has no access to an environment if that fact shall be logged.
 	 * 
 	 * @return TRUE: Consumer has access to environment. FALSE: Consumer has no access.
@@ -271,7 +276,7 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 	 *  Attempts to load the environment data for a given consumer. No checks are performed. It is assumed checks of environment and consumerID
 	 * existence is already done.
 	 */
-	private EnvironmentType loadEnvForConsumerNoChecks(String envName, String consumerID)
+	private EnvironmentType loadEnvForConsumerNoChecks(String envName, String consumerID, boolean useSecured)
 	{
 		EnvironmentType environment = null;
 		
@@ -295,7 +300,7 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 			if (templateEnv != null)
 			{
 				environment.setInfrastructureServices(templateEnv.getInfrastructureServices());
-				updateConnectorURLs(environment, envName);
+				updateConnectorURLs(environment, envName, useSecured);
 				
 				//TODO: Should I store it back to the provider's workstore of this consumer?
 			}
@@ -320,10 +325,10 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 		}
 	}
 	
-	private void updateConnectorURLs(EnvironmentType environment, String envName)
+	private void updateConnectorURLs(EnvironmentType environment, String envName, boolean useSecured)
 	{
 		ProviderEnvironment env = (ProviderEnvironment)getEnvironmentStore().getEnvironments().getEnvironment(envName);
-		String baseURIStr = env.getBaseURI().toString();
+		String baseURIStr = useSecured ? env.getSecureBaseURI().toString() : env.getBaseURI().toString();
 		
 		InfrastructureServicesType infraServices = environment.getInfrastructureServices();
 		
@@ -334,11 +339,11 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 			{
 				String connectorURL = service.getValue();
 				
-                // Remove trailing '/' if it is there
-          	  	if (connectorURL.endsWith("/"))
-          	  	{
-          	  		connectorURL = connectorURL.substring(0, connectorURL.length()-1);
-          	  	}
+        // Remove trailing '/' if it is there
+  	  	if (connectorURL.endsWith("/"))
+  	  	{
+  	  		connectorURL = connectorURL.substring(0, connectorURL.length()-1);
+  	  	}
 
 				//check if it has a leading '/'
 				boolean hasSlash = connectorURL.startsWith("/");

@@ -43,10 +43,12 @@ public class EnvironmentInfo implements Serializable
     private String    userName              = null;
     private String    password              = null;
     private URI       baseURI               = null;
+    private URI       secureBaseURI         = null;
     private String    sessionToken          = null;
     private String    envGUID               = null;
     private String    authenticationToken   = null;
-    private MediaType mediaType             = MediaType.APPLICATION_XML_TYPE;
+    private boolean   secureConnection      = false;
+   	private MediaType mediaType             = MediaType.APPLICATION_XML_TYPE;
 	private SIFZone   defaultZone           = null;
 	private ArrayList<ServiceInfo> services = new ArrayList<ServiceInfo>();
     
@@ -106,6 +108,16 @@ public class EnvironmentInfo implements Serializable
     	this.password = password;
     }
 	
+    public boolean getIsSecureConnection()
+    {
+    	return this.secureConnection;
+    }
+
+	public void setSecureConnection(boolean secureConnection)
+    {
+    	this.secureConnection = secureConnection;
+    }
+
 	public URI getBaseURI()
     {
     	return this.baseURI;
@@ -116,19 +128,41 @@ public class EnvironmentInfo implements Serializable
     	this.baseURI = baseURI;
     }
 
-	public void setBaseURI(String baseURI)
+  public void setBaseURI(String baseURI)
+  {
+    try
     {
-		try
-		{
-			this.baseURI = new URI(baseURI);
-		} 
-		catch (Exception ex)
-		{
-			this.baseURI = null;
-		}
+      this.baseURI = new URI(baseURI);
     }
+    catch (Exception ex)
+    {
+      this.baseURI = null;
+    }
+  }
 
-	public String getSessionToken()
+  public URI getSecureBaseURI()
+  {
+    return secureBaseURI;
+  }
+
+  public void setSecureBaseURI(URI secureBaseURI)
+  {
+    this.secureBaseURI = secureBaseURI;
+  }
+
+  public void setSecureBaseURI(String secureBaseURI)
+  {
+    try
+    {
+      this.secureBaseURI = new URI(secureBaseURI);
+    }
+    catch (Exception ex)
+    {
+      this.secureBaseURI = null;
+    }
+  }
+
+  public String getSessionToken()
     {
     	return this.sessionToken;
     }
@@ -196,14 +230,14 @@ public class EnvironmentInfo implements Serializable
     }
 
 	@Override
-    public String toString()
-    {
-	    return "EnvironmentInfo [adapterName=" + this.adapterName + ", environmentName="
-	            + this.environmentName + ", userName=" + this.userName + ", password="
-	            + this.password + ", baseURI=" + this.baseURI + ", sessionToken="
-	            + this.sessionToken + ", envGUID=" + this.envGUID + ", authenticationToken="
-	            + this.authenticationToken + ", mediaType=" + this.mediaType + ", defaultZone="
-	            + this.defaultZone + ", services=" + this.services + "]";
-    }
-	
+  public String toString()
+  {
+    return "EnvironmentInfo [adapterName=" + adapterName
+        + ", authenticationToken=" + authenticationToken + ", baseURI="
+        + baseURI + ", defaultZone=" + defaultZone + ", envGUID=" + envGUID
+        + ", environmentName=" + environmentName + ", mediaType=" + mediaType
+        + ", password=" + password + ", secureBaseURI=" + secureBaseURI
+        + ", secureConnection=" + secureConnection + ", services=" + services
+        + ", sessionToken=" + sessionToken + ", userName=" + userName + "]";
+  }
 }

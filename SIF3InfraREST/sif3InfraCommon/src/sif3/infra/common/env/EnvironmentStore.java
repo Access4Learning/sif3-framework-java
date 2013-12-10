@@ -26,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 
+import sif3.common.CommonConstants;
 import sif3.common.utils.FileAndFolderUtils;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.env.types.EnvironmentInfo;
@@ -59,7 +60,6 @@ public class EnvironmentStore implements Serializable
 
 	protected final Logger logger = Logger.getLogger(getClass());
 
-	private static final String ENV_PROP_FILE_NAME = "environment";
 	private static final String INPUT_DIR_NAME = "/input/";
 	private static final String WORK_DIR_NAME = "/workstore/";
 	private static final String TEMPLATE_DIR_NAME = "/template/";
@@ -285,7 +285,7 @@ public class EnvironmentStore implements Serializable
     
     private boolean loadEnvironmentProperties()
     {
-      AdvancedProperties props = getProperties(ENV_PROP_FILE_NAME);
+      AdvancedProperties props = getProperties(CommonConstants.ENV_PROP_FILE_NAME);
       if (props == null)
       {
         logger.error("Properties file 'environment.properties' could not be read. Ensure it exists and is on the classpath.");
@@ -330,6 +330,7 @@ public class EnvironmentStore implements Serializable
   				{
       				ConsumerEnvironment envInfo = new ConsumerEnvironment(envName, environments.getAdapterName());
       				envInfo.setMediaType(convertMediaType(props.getPropertyAsString("env.mediaType."+envName, null)));
+      				envInfo.setSecureConnection(getSecureConnectionInfo(envName, props));
       				envInfo.setBaseURI(props.getPropertyAsString("env.baseURI."+envName, null));
       				envInfo.setUserName(props.getPropertyAsString("env.user."+envName, null));
       				envInfo.setPassword(props.getPropertyAsString("env.pwd."+envName, null));
@@ -374,8 +375,9 @@ public class EnvironmentStore implements Serializable
           if (StringUtils.notEmpty(envName))
           {
               ProviderEnvironment envInfo = new ProviderEnvironment(envName, environments.getAdapterName());
-              
-              //Check for the 'any' properies. If they aren't defined assume 'any' is not allowed!
+              envInfo.setSecureConnection(getSecureConnectionInfo(envName, props));
+
+              //Check for the 'any' properties. If they aren't defined assume 'any' is not allowed!
               envInfo.setAllowAny(props.getPropertyAsBool("env.allowAny."+envName, false));
               if (envInfo.getAllowAny()) // 'any' is allowed. Read username and password
               {
@@ -394,28 +396,33 @@ public class EnvironmentStore implements Serializable
               
               //Base URL for connectors
               String baseURLStr = props.getPropertyAsString("env.connector.url."+envName, null);
-              if (StringUtils.isEmpty(baseURLStr))
+
+              // Secure URL
+              String secureBaseURLStr = props.getPropertyAsString("env.connector.url.secure."+envName, null);
+
+              if (StringUtils.isEmpty(baseURLStr) && StringUtils.isEmpty(secureBaseURLStr))
               {
-                  logger.error("env.connector.url."+envName+" is missing. You must provide this URL for this environment.");
-                  errorsFound = true;                                   	  
+                logger.error("env.connector.url."+envName+" is missing AND env.connector.url.secure."+envName+" is missing. You must provide at least one of these URLs for this environment.");
+                errorsFound = true;                                                       
               }
               else
               {
-                  // Remove trailing '/' if it is there
-            	  baseURLStr = baseURLStr.trim();
-            	  if (baseURLStr.endsWith("/"))
-            	  {
-            		  baseURLStr = baseURLStr.substring(0, baseURLStr.length()-1);
-            	  }
-            	  try
-            	  {
-            		  envInfo.setBaseURI(new URI(baseURLStr));
-            	  }
-            	  catch (Exception ex)
-            	  {
-                      logger.error("env.connector.url."+envName+" is not a valid URL. Please correct the URL for this environment.");
-                      errorsFound = true;                                   	              		  
-            	  }
+                  if (StringUtils.notEmpty(baseURLStr))
+                  {
+                    envInfo.setBaseURI(cleanURI(baseURLStr, envName, false));
+                    if (envInfo.getBaseURI() == null)
+                    {
+                      errorsFound = true;
+                    }
+                  }
+                  if (StringUtils.notEmpty(secureBaseURLStr))
+                  {
+                    envInfo.setSecureBaseURI(cleanURI(secureBaseURLStr, envName, true));
+                    if (envInfo.getSecureBaseURI() == null)
+                    {
+                      errorsFound = true;
+                    }
+                  }
               }
               
               // Data Models for this environment
@@ -477,6 +484,25 @@ public class EnvironmentStore implements Serializable
       return errorsFound;
     } 
     	
+    private URI cleanURI(String rawURI, String envName, boolean isSecureURI)
+    {
+      // Remove trailing '/' if it is there
+      rawURI = rawURI.trim();
+      if (rawURI.endsWith("/"))
+      {
+        rawURI = rawURI.substring(0, rawURI.length() - 1);
+      }
+      try
+      {
+        return new URI(rawURI);
+      }
+      catch (Exception ex)
+      {
+        logger.error("The "+((isSecureURI) ? "secure" : "") +" URI "+rawURI+" is an invalid URL for the environment "+envName+". Please correct the URI for this environment.");
+        return null;
+      }
+    }
+    
     private boolean checkAndCreateDir(String fullDirName)
     {
     	if (StringUtils.isEmpty(fullDirName)) // Directory not required
@@ -502,6 +528,18 @@ public class EnvironmentStore implements Serializable
     	}
     	return true;
     }
+    
+    private boolean getSecureConnectionInfo(String envName, AdvancedProperties props)
+    {
+    	Boolean secureConnection = props.getPropertyAsBool("env.use.https."+envName);
+    	if (secureConnection == null) // check if it is set at the top level and if not default to false
+    	{
+    		secureConnection = props.getPropertyAsBool("env.use.https", false);
+    	}
+    	
+    	return secureConnection;
+    }
+    
     
     private String getComplexProperty(AdvancedProperties props, String basePropName, String postfixPropName)
     {
