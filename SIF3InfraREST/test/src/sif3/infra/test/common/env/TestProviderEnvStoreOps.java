@@ -107,7 +107,7 @@ public class TestProviderEnvStoreOps
 
 	private void testLoadEnvironmentForConsumer()
 	{
-		printEnvironment(envOps.loadEnvironmentForConsumer(SOLUTION_NAME, CONSUMER_NAME));
+		printEnvironment(envOps.loadEnvironmentForConsumer(SOLUTION_NAME, CONSUMER_NAME, false));
 	}
 
 	private void testRemoveEnvironmentForConsumer()
@@ -118,7 +118,7 @@ public class TestProviderEnvStoreOps
 	private void testCreateEnvironmentForConsumer()
 	{
 		EnvironmentType inputEnv = getInputEnvironment();
-		printEnvironment(envOps.createAndStoreEnvForConsumer(inputEnv));
+		printEnvironment(envOps.createAndStoreEnvForConsumer(inputEnv, false));
 	}
 
 	public static void main(String[] args)

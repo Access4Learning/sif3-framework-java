@@ -56,7 +56,7 @@ public class TestClientInterface
 		try
 		{
 			System.out.println("Connect to: "+BASE_URL);
-			ClientInterface client = new ClientInterface(new URI(BASE_URL), marshaller, unmarshaller);
+			ClientInterface client = new ClientInterface(new URI(BASE_URL), marshaller, unmarshaller, false);
 
 			RESTHeaderProperties hdrProps = new RESTHeaderProperties();
 			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AUTH_TOKEN);
