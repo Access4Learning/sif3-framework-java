@@ -82,12 +82,14 @@ public class ProviderEnvironmentManager extends BaseEnvironmentManager
 	 * 
 	 * @param envName The name of the environment for which the information shall be returned.
 	 * @param consumerID The consumer for which the environment shall be returned.
+	 * @param useSecured Indicate if the environment to get should use secured (TRUE) service URIs (https://...) or
+	 *                   unsecured URIs (http://...)
 	 * 
 	 * @return The environment or null if the given consumer has no environment known to the environment provider.
 	 */
-	public EnvironmentType getEnvironmentForConsumer(String envName, String consumerID)
+	public EnvironmentType getEnvironmentForConsumer(String envName, String consumerID, boolean useSecured)
 	{
-		return envOps.loadEnvironmentForConsumer(envName, consumerID);
+		return envOps.loadEnvironmentForConsumer(envName, consumerID, useSecured);
 	}
 
 	/**
@@ -113,12 +115,14 @@ public class ProviderEnvironmentManager extends BaseEnvironmentManager
 	 * @param userName Initial user name for environment creation.
 	 * @param password Initial password  for environment creation. Is used to create the new AuthenticationToken.
 	 * @param mediaType Indicates if the consumer is using XML or JSON.
+	 * @param useSecured Indicate if the environment to load should use secured (TRUE) service URIs (https://...) or
+	 *                   unsecured URIs (http://...)
 	 * 
 	 * @return See desc.
 	 */
-	public EnvironmentType createEnvironment(EnvironmentType inputEnvironment, String userName, String password, MediaType mediaType)
+	public EnvironmentType createEnvironment(EnvironmentType inputEnvironment, String userName, String password, MediaType mediaType, boolean useSecured)
 	{
-		EnvironmentType newEnv = envOps.createAndStoreEnvForConsumer(inputEnvironment);
+		EnvironmentType newEnv = envOps.createAndStoreEnvForConsumer(inputEnvironment, useSecured);
 		if (newEnv != null)
 		{
 			ConsumerEnvironment consumerEnv = new ConsumerEnvironment(newEnv.getSolutionId(), newEnv.getConsumerName());
@@ -137,21 +141,24 @@ public class ProviderEnvironmentManager extends BaseEnvironmentManager
 		}
 		return newEnv;
 	}
-	
-  /**
-   * This method will load an environment from the environment store. This is used to get an environment rather than creating one.
-   * If no environment for the given authentication token exists in the environment store then null is returned.
-   * 
-   * @param authToken The authorisation token based on which the environment shall be returned.
-   * 
-   * @return See desc.
-   */
-	public EnvironmentType loadEnvironmentByAuthToken(String authToken)
+
+	/**
+	 * This method will load an environment from the environment store. This is used to get an
+	 * environment rather than creating one. If no environment for the given authentication token
+	 * exists in the environment store then null is returned.
+	 * 
+	 * @param authToken The authorisation token based on which the environment shall be returned.
+	 * @param useSecured Indicate if the environment to load should use secured (TRUE) service URIs
+	 *                   (https://...) or unsecured URIs (http://...)
+	 * 
+	 * @return See desc.
+	 */
+	public EnvironmentType loadEnvironmentByAuthToken(String authToken, boolean useSecured)
 	{
 		ConsumerEnvironment consumerEnvironment = getConsumerEnvironmentByAuthToken(authToken);
 		if (consumerEnvironment != null)
 		{
-			return envOps.loadEnvironmentForConsumer(consumerEnvironment.getEnvironmentName(), consumerEnvironment.getAdapterName());
+			return envOps.loadEnvironmentForConsumer(consumerEnvironment.getEnvironmentName(), consumerEnvironment.getAdapterName(), useSecured);
 		}
 		else
 		{
@@ -204,6 +211,8 @@ public class ProviderEnvironmentManager extends BaseEnvironmentManager
 	{
 		super(environmentStore);
 		this.envOps = new ProviderEnvironmentStoreOperations(environmentStore);
+		
+		// At this point in time it doesn't matter if the URIs will be secure or unsecured.
 		loadKnownEnvironments();
 	}
 
@@ -222,7 +231,8 @@ public class ProviderEnvironmentManager extends BaseEnvironmentManager
 				logger.debug("Attempt to load " + environment.getEnvironmentName() + " for specific consumer " + consumerID);
 				if (envOps.existEnvironmentForConsumer(environment.getEnvironmentName(), consumerID))
 				{
-					EnvironmentType consumerEnvironment = envOps.loadEnvironmentForConsumer(environment.getEnvironmentName(), consumerID);
+					// At this point of time it doesn't matter if the URIs are unsecured or secured. Call method with 'false'
+					EnvironmentType consumerEnvironment = envOps.loadEnvironmentForConsumer(environment.getEnvironmentName(), consumerID, false);
 					if (consumerEnvironment != null)
 					{
 						logger.debug("Loaded " + environment.getEnvironmentName() + " for specific consumer " + consumerID);
@@ -265,7 +275,9 @@ public class ProviderEnvironmentManager extends BaseEnvironmentManager
 						if (envOps.existEnvironmentForAnyConsumer(environment.getEnvironmentName(), consumerID))
 						{
 							logger.debug("Attempt to load " + environment.getEnvironmentName() + " for 'any' consumer " + consumerID);
-							EnvironmentType consumerEnvironment = envOps.loadEnvironmentForConsumer(environment.getEnvironmentName(), consumerID);
+
+							// At this point of time it doesn't matter if the URIs are unsecured or secured. Call method with 'false'.
+							EnvironmentType consumerEnvironment = envOps.loadEnvironmentForConsumer(environment.getEnvironmentName(), consumerID, false);
 							if (consumerEnvironment != null)
 							{
 								logger.debug("Loaded " + environment.getEnvironmentName() + " for 'any' consumer " + consumerID);

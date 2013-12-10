@@ -58,7 +58,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
 
 /**
  * This class is a core client class to deal with REST clients for SIF3. It takes care of all the little things that define the
@@ -97,12 +96,13 @@ public class ClientInterface
 	 * 
 	 * @param baseURI The base URI of this client. All URIs are for all other calls are relative to this base URL.
 	 * @param mediaType XML or JSOn are the expected media types. They must be supported by the given marshaller and unmarshaller.
-	 * @param marshaller Marshaller to marshal the payloads of this client to appropriate representations. This marshaller must be valid
+	 * @param marshaller Marshaller to marshal the payload of this client to appropriate representations. This marshaller must be valid
 	 *                   for the data model used with this client.
-	 * @param unmarshaller Unarshaller to unmarshal the payloads of this client to appropriate representations. This unmarshaller 
+	 * @param unmarshaller Unmarshaller to unmarshal the payload of this client to appropriate representations. This unmarshaller 
 	 *                     must be valid for the data model used with this client.
+	 * @param secureConnection TRUE: Use HTTPS, FALSE use HTTP.
 	 */
-	public ClientInterface(URI baseURI, MediaType mediaType, MarshalFactory marshaller, UnmarshalFactory unmarshaller)
+	public ClientInterface(URI baseURI, MediaType mediaType, MarshalFactory marshaller, UnmarshalFactory unmarshaller, boolean secureConnection)
 	{
 		super();
 
@@ -110,8 +110,9 @@ public class ClientInterface
 		this.mediaType = mediaType;
 		this.marshaller = marshaller;
 		this.unmarshaller = unmarshaller;
-
-		this.config = new DefaultClientConfig();
+		
+		ClientConfigMgr cltCfgMgr = new ClientConfigMgr();		
+		this.config = cltCfgMgr.getClientConfig(secureConnection);
 
 		// Create the Client Service
 		this.client = Client.create(config);
@@ -131,9 +132,9 @@ public class ClientInterface
 	 * @param unmarshaller Unarshaller to unmarshal the payloads of this client to appropriate representations. This unmarshaller 
 	 *                     must be valid for the data model used with this client.
 	 */
-	public ClientInterface(URI baseURI, MarshalFactory marshaller, UnmarshalFactory unmarshaller)
+	public ClientInterface(URI baseURI, MarshalFactory marshaller, UnmarshalFactory unmarshaller, boolean secureConnection)
 	{
-		this(baseURI, MediaType.APPLICATION_XML_TYPE, marshaller, unmarshaller);
+		this(baseURI, MediaType.APPLICATION_XML_TYPE, marshaller, unmarshaller, secureConnection);
 	}
 
 	public URI getBaseURI()

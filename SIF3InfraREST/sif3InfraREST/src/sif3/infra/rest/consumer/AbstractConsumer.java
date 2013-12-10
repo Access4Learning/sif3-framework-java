@@ -482,7 +482,8 @@ public abstract class AbstractConsumer implements Consumer
 			return new ClientInterface(envInfo.getConnectorBaseURI(ConsumerEnvironment.ConnectorName.requestsConnector), 
 	                   				   envInfo.getMediaType(), 
 	                   				   getMarshaller(), 
-	                   				   getUnmarshaller());
+	                   				   getUnmarshaller(),
+	                   				   envInfo.getIsSecureConnection());
 		}
 	}
 	

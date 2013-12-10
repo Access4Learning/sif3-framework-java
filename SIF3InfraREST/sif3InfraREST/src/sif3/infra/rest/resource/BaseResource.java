@@ -81,6 +81,8 @@ import au.com.systemic.framework.utils.StringUtils;
 public abstract class BaseResource
 {
 	protected final Logger logger = Logger.getLogger(getClass());
+	
+	private static final String HTTPS_SCHEMA = "https";
 
 	private PropertyManager propertyManager = PropertyManager.getInstance();
 	private boolean allOK = false;
@@ -98,6 +100,7 @@ public abstract class BaseResource
 	private SIFZone sifZone = null;
 	private SIFContext sifContext = null;
 	private String serviceName = null;
+	private boolean isSecure = false;
 
 	/* Metadata extracted from URI relating to query */ 
 	private QueryMetadata queryMetadata;
@@ -105,7 +108,7 @@ public abstract class BaseResource
 	/**
 	 * Constructor. Initialises the REST resource with a number of important properties that are needed throughout the SIF3 REST
 	 * resources. If a resource is accessed for the first time then this method will ensure that all environmental components such
-	 * as the environment store, property files etc are initialiased as necessary.
+	 * as the environment store, property files etc are initialised as necessary.
 	 * 
 	 * @param uriInfo The URI of the request in its original form.
 	 * @param requestHeaders All headers of the original request.
@@ -119,6 +122,7 @@ public abstract class BaseResource
 		this.serviceName = serviceName;
 		this.servicePropFileName = WebUtils.getInstance().getServicePropertyFileName();
 		extractHeaderProperties(requestHeaders);
+		setSecure(HTTPS_SCHEMA.equalsIgnoreCase(getUriInfo().getBaseUri().getScheme()));	
 
 		// initialise the environment store
 		envMgr = ProviderEnvironmentManager.getInstance(EnvironmentStore.getInstance(servicePropFileName));
@@ -142,11 +146,14 @@ public abstract class BaseResource
 		// Some debug output
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Request Received for Resource: " + getClass().getSimpleName()+" - "+getServiceName());
-			logger.debug("Full URI: " + getUriInfo().getRequestUri().toString());
-			logger.debug("SIF3 Specific Request Headers: " + getHeaderProperties());
-			logger.debug("Request Media Type           : " + getMediaType());
-			logger.debug("Is Resource Initialisation ok: " + allOK);
+			logger.debug("Requested Resource: " + getClass().getSimpleName()+" - "+getServiceName());
+			logger.debug("Full URI          : " + getUriInfo().getRequestUri().toString());
+			logger.debug("Base URI          : " + getUriInfo().getBaseUri().toString());
+			logger.debug("Relative URI      : " + getUriInfo().getPath());
+			logger.debug("Protocol          : " + getUriInfo().getBaseUri().getScheme());
+			logger.debug("SIF3 Req. Headers : " + getHeaderProperties());
+			logger.debug("Request Media Type: " + getMediaType());
+			logger.debug("Resource Init ok  : " + allOK);
 		}
 	}
 
@@ -205,25 +212,35 @@ public abstract class BaseResource
     	this.queryMetadata = queryMetadata;
     }
 
-  public SIFZone getSifZone()
-  {
-    return sifZone;
-  }
+	public SIFZone getSifZone()
+	{
+		return sifZone;
+	}
 
-  public void setSifZone(SIFZone sifZone)
-  {
-    this.sifZone = sifZone;
-  }
+	public void setSifZone(SIFZone sifZone)
+	{
+		this.sifZone = sifZone;
+	}
 
-  public SIFContext getSifContext()
-  {
-    return sifContext;
-  }
+	public SIFContext getSifContext()
+	{
+		return sifContext;
+	}
 
-  public void setSifContext(SIFContext sifContext)
-  {
-    this.sifContext = sifContext;
-  }
+	public void setSifContext(SIFContext sifContext)
+	{
+		this.sifContext = sifContext;
+	}
+
+	public boolean isSecure()
+    {
+    	return this.isSecure;
+    }
+
+	public void setSecure(boolean isSecure)
+    {
+    	this.isSecure = isSecure;
+    }
 
 	/*--------------------------------*/
 	/*-- Some handy Utility Methods --*/

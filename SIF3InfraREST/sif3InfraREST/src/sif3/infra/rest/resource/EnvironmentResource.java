@@ -143,7 +143,7 @@ public class EnvironmentResource extends InfraResource
 			}
 			
 			// Check if an environment does already exist. if so we need to see if we return an error or if we shall just return the environment
-			EnvironmentType environment = envMgr.getEnvironmentForConsumer(envName, consumerID);
+			EnvironmentType environment = envMgr.getEnvironmentForConsumer(envName, consumerID, isSecure());
 			if (environment != null)
 			{		  
 				//TODO: JH - Confirm if we shall return it
@@ -151,7 +151,7 @@ public class EnvironmentResource extends InfraResource
 			}
 			
 			// if it doesn't exist then create it the environment store and also add it to the EnvironmentManager.
-			environment = envMgr.createEnvironment(inputEnv, userName, password, providerEnv.getMediaType());
+			environment = envMgr.createEnvironment(inputEnv, userName, password, providerEnv.getMediaType(), isSecure());
 			
 			if (environment == null) // We had a problem. Error logged
 			{
@@ -185,7 +185,7 @@ public class EnvironmentResource extends InfraResource
 		if (error == null)
 		{
 			// If I get here then the client has an environment. Load and return it.
-			EnvironmentType environment = envMgr.loadEnvironmentByAuthToken(getAuthToken());
+			EnvironmentType environment = envMgr.loadEnvironmentByAuthToken(getAuthToken(), isSecure());
 			
 			// Also ensure that the id matches the ID of the environment otherwise we have a bit of a mixup
 			if (!id.equals(environment.getId()))
@@ -219,7 +219,7 @@ public class EnvironmentResource extends InfraResource
 		if (error == null)
 		{
 			// If I get here then the client has an environment. Load and return it.
-			EnvironmentType environment = envMgr.loadEnvironmentByAuthToken(getAuthToken());
+			EnvironmentType environment = envMgr.loadEnvironmentByAuthToken(getAuthToken(), isSecure());
 			
 			// Also ensure that the id matches the ID of the environment otherwise we have a bit of a mixup
 			if (!id.equals(environment.getId()))

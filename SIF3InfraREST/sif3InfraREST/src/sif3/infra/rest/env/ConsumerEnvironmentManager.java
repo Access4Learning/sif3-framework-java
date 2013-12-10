@@ -458,7 +458,7 @@ public class ConsumerEnvironmentManager extends BaseEnvironmentManager
 	
 	private ClientInterface getClient(ConsumerEnvironment envInfo)
 	{
-		return new ClientInterface(envInfo.getBaseURI(), envInfo.getMediaType(), marshaller, unmarshaller);
+		return new ClientInterface(envInfo.getBaseURI(), envInfo.getMediaType(), marshaller, unmarshaller, envInfo.getIsSecureConnection());
 	}
 
 	private TransportHeaderProperties getHeaderProperties(String authToken)
