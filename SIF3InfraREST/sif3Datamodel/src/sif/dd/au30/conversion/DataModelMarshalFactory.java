@@ -28,7 +28,6 @@ import sif.dd.au30.model.StudentPersonalType;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.exception.MarshalException;
 import sif3.common.utils.JAXBUtils;
-import au.com.systemic.framework.utils.Timer;
 
 //TODO: JH - Need to complete this factory
 public class DataModelMarshalFactory implements MarshalFactory
@@ -40,62 +39,36 @@ public class DataModelMarshalFactory implements MarshalFactory
 	@Override
 	public String marshalToXML(Object obj) throws MarshalException
 	{
-		Timer timer = new Timer();
-		timer.start();
-		try
+		DataModel dataModel = DataModelObjectEnum.getDataModelEnum(obj);
+		if (dataModel != null)
 		{
-			DataModel dataModel = DataModelObjectEnum.getDataModelEnum(obj);
-			if (dataModel != null)
+			switch (dataModel)
 			{
-				switch (dataModel)
-				{
-				case StudentCollectionType:
-				{
-					return JAXBUtils.marshalToXML(objFactory.createStudentPersonals((StudentCollectionType) obj));
-				}
-				case StudentPersonalType:
-				{
-					return JAXBUtils.marshalToXML(objFactory.createStudentPersonal((StudentPersonalType) obj));
-				}
-				}
+			case StudentCollectionType:
+			{
+				return JAXBUtils.marshalToXML(objFactory.createStudentPersonals((StudentCollectionType) obj));
 			}
-	
-			// If we get here then we could not marshal because the object type is invalid or null.
-			return null;
-		}
-		finally
-		{
-			timer.finish();
-			if (logger.isDebugEnabled())
+			case StudentPersonalType:
 			{
-				logger.debug("Time taken to marshal "+obj.getClass().getSimpleName()+" to XML: "+timer.timeTaken()+"ms");
+				return JAXBUtils.marshalToXML(objFactory.createStudentPersonal((StudentPersonalType) obj));
+			}
 			}
 		}
+
+		// If we get here then we could not marshal because the object type is invalid or null.
+		return null;
 	}
 
 	@Override
 	public String marshalToJSON(Object obj) throws MarshalException
 	{
-		Timer timer = new Timer();
-		timer.start();
-		try
+		DataModel dataModel = DataModelObjectEnum.getDataModelEnum(obj);
+		if (dataModel != null)
 		{
-			DataModel dataModel = DataModelObjectEnum.getDataModelEnum(obj);
-			if (dataModel != null)
-			{
-				// TODO: JH - Implement from JSON marshaller
-			}
-			logger.warn("Marshal to JSON not supported, yet");
-			throw new MarshalException("Marshal Object to JSON not implemented, yet");
+			// TODO: JH - Implement from JSON marshaller
 		}
-		finally
-		{
-			timer.finish();
-			if (logger.isDebugEnabled())
-			{
-				logger.debug("Time taken to marshal "+obj.getClass().getSimpleName()+" to JSON: "+timer.timeTaken()+"ms");
-			}
-		}
+		logger.warn("Marshal to JSON not supported, yet");
+		throw new MarshalException("Marshal Object to JSON not implemented, yet");
 	}
 
 	@Override

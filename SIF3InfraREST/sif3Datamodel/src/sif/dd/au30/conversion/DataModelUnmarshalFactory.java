@@ -19,8 +19,6 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 
-import au.com.systemic.framework.utils.Timer;
-
 import sif.dd.au30.conversion.DataModelObjectEnum.DataModel;
 import sif.dd.au30.model.StudentCollectionType;
 import sif.dd.au30.model.StudentPersonalType;
@@ -36,67 +34,40 @@ public class DataModelUnmarshalFactory implements UnmarshalFactory
 	@Override
 	public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException
 	{
-		Timer timer = new Timer();
-		timer.start();
-		try
+		DataModel dataModel = DataModelObjectEnum.getDataModelEnum(clazz.getSimpleName());
+		if (dataModel != null)
 		{
-			DataModel dataModel = DataModelObjectEnum.getDataModelEnum(clazz.getSimpleName());
-			if (dataModel != null)
+			switch (dataModel)
 			{
-				switch (dataModel)
-				{
-				case StudentCollectionType:
-				{
-					return (StudentCollectionType) JAXBUtils.unmarshalFromXMLIntoObject(payload, StudentCollectionType.class);
-				}
-				case StudentPersonalType:
-				{
-					return (StudentPersonalType) JAXBUtils.unmarshalFromXMLIntoObject(payload, StudentPersonalType.class);
-				}
-				}
+			case StudentCollectionType:
+			{
+				return (StudentCollectionType) JAXBUtils.unmarshalFromXMLIntoObject(payload, StudentCollectionType.class);
 			}
-	
-			// If we get here then we could not unmarshal because the object type is invalid or null.
-			return null;
-		}
-		finally
-		{
-			timer.finish();
-			if (logger.isDebugEnabled())
+			case StudentPersonalType:
 			{
-				logger.debug("Time taken to unmarshal "+clazz.getSimpleName()+" from XML: "+timer.timeTaken()+"ms");
+				return (StudentPersonalType) JAXBUtils.unmarshalFromXMLIntoObject(payload, StudentPersonalType.class);
+			}
 			}
 		}
+
+		// If we get here then we could not unmarshal because the object type is invalid or null.
+		return null;
 	}
 
 	@Override
 	public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException
 	{
-		Timer timer = new Timer();
-		timer.start();
-		try
+		DataModel dataModel = DataModelObjectEnum.getDataModelEnum(clazz.getSimpleName());
+		if (dataModel != null)
 		{
-			DataModel dataModel = DataModelObjectEnum.getDataModelEnum(clazz.getSimpleName());
-			if (dataModel != null)
-			{
-				// TODO: JH - Implement from JSON unmarshaller
-			}
-			logger.warn("Unmarshal from JSON not supported, yet");
-			throw new UnmarshalException("Unmarshal Object from JSON not implemented, yet");
+			// TODO: JH - Implement from JSON unmarshaller
 		}
-		finally
-		{
-			timer.finish();
-			if (logger.isDebugEnabled())
-			{
-				logger.debug("Time taken to unmarshal "+clazz.getSimpleName()+" from JSON: "+timer.timeTaken()+"ms");
-			}
-		}
+		logger.warn("Unmarshal from JSON not supported, yet");
+		throw new UnmarshalException("Unmarshal Object from JSON not implemented, yet");
 	}
 
 	@Override
-	public Object unmarschal(String payload, Class<?> clazz, MediaType mediaType)
-	        throws UnmarshalException
+	public Object unmarschal(String payload, Class<?> clazz, MediaType mediaType) throws UnmarshalException
 	{
 		if (mediaType != null)
 		{
