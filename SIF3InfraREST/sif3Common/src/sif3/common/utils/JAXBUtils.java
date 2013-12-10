@@ -29,6 +29,10 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.log4j.Logger;
+
+import au.com.systemic.framework.utils.Timer;
+
 import sif3.common.exception.MarshalException;
 import sif3.common.exception.UnmarshalException;
 
@@ -38,6 +42,8 @@ import sif3.common.exception.UnmarshalException;
  */
 public class JAXBUtils
 {	
+	protected static final Logger logger = Logger.getLogger(JAXBUtils.class);
+
 	/* Make JAXBContext a singleton. Otherwise creating the JAXBContext every time is very slow! */
 	private static HashMap<String, JAXBContext> jaxbCtx = new HashMap<String, JAXBContext>();
 	
@@ -53,7 +59,18 @@ public class JAXBUtils
      */
 	public static Object unmarshalFromXMLIntoObject(String xmlStr, Class<?> clazz) throws UnmarshalException
 	{
+		Timer timer = null;	
+		if (logger.isDebugEnabled())
+		{
+			timer = new Timer();
+			timer.start();
+		}
 		JAXBElement<?> elem = unmarshalFromXML(xmlStr, clazz);
+		if (logger.isDebugEnabled())
+		{
+			timer.finish();
+			logger.debug("Time taken to unmarshal "+clazz.getSimpleName()+" from XML: "+timer.timeTaken()+"ms");
+		}
 		
 		return (elem != null) ? elem.getValue() : null;
 	}
@@ -69,6 +86,12 @@ public class JAXBUtils
 	 */
     public static String marshalToXML(JAXBElement<?> object) throws MarshalException
     {
+		Timer timer = null;	
+		if (logger.isDebugEnabled())
+		{
+			timer = new Timer();
+			timer.start();
+		}
 		StringWriter sw = new StringWriter();
 		try
 		{
@@ -89,6 +112,12 @@ public class JAXBUtils
 		catch (JAXBException e)
 		{
 			throw new MarshalException("Failed to marshal to XML: " + e.getMessage(), e);
+		}
+
+		if (logger.isDebugEnabled())
+		{
+			timer.finish();
+			logger.debug("Time taken to marshal "+object.getValue().getClass().getSimpleName()+" to XML: "+timer.timeTaken()+"ms");
 		}
 
 		return sw.toString();
