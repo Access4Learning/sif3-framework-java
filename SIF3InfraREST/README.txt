@@ -33,7 +33,7 @@ doesn't support brokered or delayed response solutions, yet.
 #########################################################################################################
 
 =======================
-Version from 26/1//2013
+Version from 26/11/2013
 =======================
 If you have downloaded the framework before Nov 26, 2013 and get an updated version after this date 
 you must perform a few steps to make the framework function correctly. There are NO code changes only
@@ -74,6 +74,17 @@ env.connector.url.<env_name>=<baseURI>
 <baseURI>: The base URI of the provider. This is the value that used to be in the  <infrastructureService> node
            of each service. (i.e. http://localhost:9080/SIF3InfraREST/sif3).
            Also refer to section 5.6.2.1.2 and 5.6.2.3 of the developer's guide for details about this property.
+
+=======================
+Version from 10/12/2013
+=======================
+If you have downloaded the framework before Nov 26, 2013 and get an updated version after this date you must perform 
+all the steps listed in the "Version from 26/11/2013" first.
+
+This latest version of the framework has the HTTPS (secured connections) capability added. It is recommended
+that you read section "5.7 Security - HTTPS Connections" of the Developer's Guide first. Also check out section
+5.5.2.1.1, 5.5.2.1.2 and 5.6.2.1.2 of the guide about details what properties must be configured to enable 
+HTTPS for a consumer and provider. 
 
 #########################################################################################################
 # Download Instructions
