@@ -22,8 +22,8 @@ import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
 
@@ -31,25 +31,32 @@ import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.exception.UnmarshalException;
+import sif3.common.header.HeaderValues;
 import sif3.common.header.TransportHeaderProperties;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.BaseResponse;
 import sif3.common.ws.BulkOperationResponse;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.common.ws.Response;
+import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.model.CreateResponseType;
 import sif3.infra.common.model.CreateType;
+import sif3.infra.common.model.DeleteIdType;
+import sif3.infra.common.model.DeleteRequestType;
 import sif3.infra.common.model.DeleteResponseType;
 import sif3.infra.common.model.DeleteStatus;
 import sif3.infra.common.model.ErrorType;
+import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.UpdateResponseType;
 import sif3.infra.common.model.UpdateType;
 import sif3.infra.rest.header.RESTHeaderProperties;
+import sif3.infra.rest.header.RequestHeaderConstants;
 import sif3.infra.rest.header.ResponseHeaderConstants;
 import au.com.systemic.framework.utils.StringUtils;
 
@@ -76,9 +83,9 @@ import com.sun.jersey.api.client.config.ClientConfig;
  */
 public class ClientInterface
 {
-  protected final Logger logger = Logger.getLogger(getClass());
+	protected final Logger logger = Logger.getLogger(getClass());
 
-  private URI baseURI = null;
+	private URI baseURI = null;
 	private ClientConfig config = null;
 	private Client client = null;
 	private WebResource service = null;
@@ -88,8 +95,8 @@ public class ClientInterface
 	
 	// This marshaller/unmarshaller are used in a number of operations where the response/request deals with Infrastructure Model Object: ErrorType, CreateResponseType etc.
 	private InfraUnmarshalFactory infraUnmarshaller = new InfraUnmarshalFactory();
-//  private InfraMarshalFactory infraMarshaller = new InfraMarshalFactory();
-//  private ObjectFactory infraObjectFactory = new ObjectFactory();
+	private InfraMarshalFactory infraMarshaller = new InfraMarshalFactory();
+	private ObjectFactory infraObjectFactory = new ObjectFactory();
 
 	/**
 	 * Constructor<br/>
@@ -124,7 +131,7 @@ public class ClientInterface
 	}
 
 	/**
-	 * This constructor will default to XML as media type.
+	 * This constructor will default to XML as media type and default service type of OBJECT
 	 * 
 	 * @param baseURI The base URI of this client. All URIs are for all other calls are relative to this base URL.
 	 * @param marshaller Marshaller to marshal the payloads of this client to appropriate representations. This marshaller must be valid
@@ -187,7 +194,7 @@ public class ClientInterface
 	 * 
 	 * @return The Response to this GET call. See the Response class for details of the content of this object.
 	 * 
-	 * @throws ServiceInvokationException An internal error occured. An error is logged.
+	 * @throws ServiceInvokationException An internal error occurred. An error is logged.
 	 */
 	public Response getSingle(String relURI, String resourceID, TransportHeaderProperties hdrProperties, Class<?> returnObjectClass, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
@@ -222,7 +229,7 @@ public class ClientInterface
 	 * 
 	 * @return Response Object holding appropriate values and results of the call. 
 	 * 
-	 * @throws ServiceInvokationException Any underlying errors occured such as unable to marshal the object into its mediatype, 
+	 * @throws ServiceInvokationException Any underlying errors occurred such as unable to marshal the object into its mediatype, 
 	 *                                    failure to invoke actual web-service etc. 
 	 */
 	public Response createSingle(String relURI, Object payload, TransportHeaderProperties hdrProperties, Class<?> returnObjectClass, SIFZone zone, SIFContext context) throws ServiceInvokationException
@@ -423,11 +430,16 @@ public class ClientInterface
 		try
 		{
 			service = buildURI(service, relURI, null, zone, context);
+
 			String payloadStr = marshaller.marschal(payload, mediaType);
 
 			// TODO: JH - Temporary fix to get Sandbox to work. Remove namespace from string. Remove line below once Sandbox is updated
 			payloadStr = payloadStr.replace(" xmlns=\"http://www.sifassociation.org/infrastructure/3.0\"", "");
-			ClientResponse response = setRequestHeaderAndMediaTypes(hdrProperties).put(ClientResponse.class, payloadStr);
+
+			// Set specific header so that PUT method knows that an UPDATE and not a DELETE is required! 
+			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.UPDATE.name());
+
+																																					ClientResponse response = setRequestHeaderAndMediaTypes(hdrProperties).put(ClientResponse.class, payloadStr);
 
 			return setUpdateBulkResponse(response);
 		}
@@ -461,6 +473,12 @@ public class ClientInterface
 	 */
 	public BulkOperationResponse removeMany(String relURI, List<String> resourceIDs, TransportHeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
+    /*-----------------------------------------------------------------------------------------------------------------------------
+     * Below is the dummy implementation (now commented out). It is what would be done if delete is called one by one because
+     * bulk-deletes are not allowed with the HTTP DELETE. Just Google for "java.net.ProtocolException: HTTP method DELETE doesn't 
+     * support output" for details. This is the exception thrown with the code below.
+     -----------------------------------------------------------------------------------------------------------------------------*/
+/*    
 		BulkOperationResponse bulkResponse = new BulkOperationResponse();
 		bulkResponse.setStatus(Status.OK.getStatusCode());
 		bulkResponse.setStatusMessage(Status.OK.getReasonPhrase());
@@ -487,55 +505,46 @@ public class ClientInterface
 		}
 		
 		return bulkResponse;
-		
-		/*-----------------------------------------------------------------------------------------------------------------------------
-		 * Below is the expected implementation (now commented out). It is what would be done if java.net.HttpURLConnection would
-		 * allow a payload in the DELETE call. Just Google for "java.net.ProtocolException: HTTP method DELETE doesn't support output"
-		 * for details. This is the exception thrown with the code below.
-		 -----------------------------------------------------------------------------------------------------------------------------*/
-//		try
-//		{
-//			if (StringUtils.notEmpty(relURI))
-//			{
-//				service = service.path(relURI);
-//			}
-//	        service = addZoneAndCtx(service, zone, context);
-//			
-//			//Convert List of resources to DeletesTypes
-//			DeleteRequestType deleteRequest = infraObjectFactory.createDeleteRequestType();
-//			deleteRequest.setDeletes(infraObjectFactory.createDeleteIdCollection());
-//			
-//			if (resourceIDs != null)
-//			{
-//			  for (String resourceID : resourceIDs)
-//			  {
-//			    DeleteIdType id = infraObjectFactory.createDeleteIdType();
-//			    id.setId(resourceID);
-//			    deleteRequest.getDeletes().getDelete().add(id);
-//			  }
-//			}
-//			String payloadStr = infraMarshaller.marschal(deleteRequest, mediaType);
-//			
-//			// TODO: JH - Temporary fix to get Sandbox to work. Remove namespace from string. Remove line below once Sandbox is updated
-//			payloadStr = payloadStr.replace(" xmlns=\"http://www.sifassociation.org/infrastructure/3.0\"", "");
-//			//System.out.println("Delete Payload: "+payloadStr);
-//			Builder builder = setRequestHeaderAndMediaTypes(hdrProperties);
-//			builder = builder.header("X-HTTP-Method-Override", "DELETE");
-//			
-//			ClientResponse cltResponse = builder.post(ClientResponse.class, payloadStr);
-//			//ClientResponse cltResponse = setRequestHeaderAndMediaTypes(hdrProperties).delete(ClientResponse.class, payloadStr);
-//			
-//			return setDeleteBulkResponse(cltResponse);
-//		}
-//		catch (Exception ex)
-//		{
-//			String errorMsg = "Failed to invoke 'removeMany' service (REST DELETE) on URI " + service.getURI() + ": " + ex.getMessage();
-//			logger.error(errorMsg);
-//			throw new ServiceInvokationException(errorMsg, ex);
-//		}
-		/*-----------------------------------------------------------------------------------------------------------------------------
-		 * End original code (now commented out).
-		 -----------------------------------------------------------------------------------------------------------------------------*/
+*/		
+    /*-----------------------------------------------------------------------------------------------------------------------------
+     * End original code (now commented out).
+     -----------------------------------------------------------------------------------------------------------------------------*/
+		try
+		{
+      service = buildURI(service, relURI, null, zone, context);
+			
+			//Convert List of resources to DeletesTypes
+			DeleteRequestType deleteRequest = infraObjectFactory.createDeleteRequestType();
+			deleteRequest.setDeletes(infraObjectFactory.createDeleteIdCollection());
+			
+			if (resourceIDs != null)
+			{
+			  for (String resourceID : resourceIDs)
+			  {
+			    DeleteIdType id = infraObjectFactory.createDeleteIdType();
+			    id.setId(resourceID);
+			    deleteRequest.getDeletes().getDelete().add(id);
+			  }
+			}
+			String payloadStr = infraMarshaller.marschal(deleteRequest, mediaType);
+			
+			// TODO: JH - Temporary fix to get Sandbox to work. Remove namespace from string. Remove line below once Sandbox is updated
+			payloadStr = payloadStr.replace(" xmlns=\"http://www.sifassociation.org/infrastructure/3.0\"", "");
+			//System.out.println("Delete Payload: "+payloadStr);
+			
+	    // Set specific header so that PUT method knows that a DELETE and not an UPDATE is required! 
+			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.DELETE.name());
+			
+			ClientResponse cltResponse = setRequestHeaderAndMediaTypes(hdrProperties).put(ClientResponse.class, payloadStr);
+			
+			return setDeleteBulkResponse(cltResponse);
+		}
+		catch (Exception ex)
+		{
+			String errorMsg = "Failed to invoke 'removeMany' service (REST DELETE) on URI " + service.getURI() + ": " + ex.getMessage();
+			logger.error(errorMsg);
+			throw new ServiceInvokationException(errorMsg, ex);
+		}
 	}
 
 	/*---------------------*/
@@ -568,6 +577,10 @@ public class ClientInterface
 	{
 		//System.out.println("MediaType: "+getMediaType());
 		Builder builder = getService().type(getMediaType()).accept(getMediaType());
+		
+		// Always set the requestId.
+		builder = builder.header(RequestHeaderConstants.HDR_REQUEST_ID, UUIDGenerator.getUUID());
+
 		if ((hdrProperties != null) && (hdrProperties.getHeaderProperties() != null) && (!hdrProperties.getHeaderProperties().isEmpty()))
 		{
 			HashMap<String, String> hdrMap = hdrProperties.getHeaderProperties();
@@ -632,8 +645,7 @@ public class ClientInterface
 		return response;
 	}
 
-	@SuppressWarnings("unused")
-    private BulkOperationResponse setDeleteBulkResponse(ClientResponse clientResponse)
+  private BulkOperationResponse setDeleteBulkResponse(ClientResponse clientResponse)
 	{
 		BulkOperationResponse response = new BulkOperationResponse();
 		setBaseResponseData(response, clientResponse);
