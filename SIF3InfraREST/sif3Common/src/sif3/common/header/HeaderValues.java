@@ -25,9 +25,9 @@ package sif3.common.header;
 public class HeaderValues
 {
 	/**
-	 * Valid Response Types. These values will be used in appropriate response header fields.
+	 * Valid Message Types. These values will be used in the "messageType" response header field.
 	 */
-	public enum ResponseType {RESPONSE, EVENT, ERROR};
+	public enum MessageType {RESPONSE, EVENT, ERROR};
 
 	/**
 	 * Valid Event Types. These values will be used in appropriate response header fields.
@@ -35,7 +35,17 @@ public class HeaderValues
 	public enum EventAction {CREATE, UPDATE, DELETE};
 
 	/**
-	 * Valid Response Types. These values will be used in appropriate response header fields.
+	 * Valid Response Types. These values will be used in the "responseAction" response header field.
 	 */
 	public enum ResponseAction {CREATE, UPDATE, DELETE, QUERY};
+	
+	/**
+	 * Valid values for the "methodOverride" header field in the PUT (Update) request.
+	 */
+	public enum MethodType {DELETE, UPDATE};
+	
+	/**
+	 * Valid values for the "serviceType" header field in the request.
+	 */
+	public enum ServiceType {OBJECT, FUNCTION, UTILITY};
 }
