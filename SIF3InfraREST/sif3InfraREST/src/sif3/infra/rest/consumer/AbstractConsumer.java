@@ -19,6 +19,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.log4j.Logger;
 
 import sif3.common.consumer.Consumer;
@@ -28,19 +30,25 @@ import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.exception.UnsupportedQueryException;
+import sif3.common.header.HeaderValues;
 import sif3.common.header.TransportHeaderProperties;
 import sif3.common.model.EnvironmentZoneContextInfo;
 import sif3.common.model.PagingInfo;
-import sif3.common.utils.UUIDGenerator;
+import sif3.common.model.SIFContext;
+import sif3.common.model.SIFZone;
+import sif3.common.ws.BaseResponse;
 import sif3.common.ws.BulkOperationResponse;
+import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.Response;
 import sif3.infra.common.env.EnvironmentStore;
 import sif3.infra.common.env.types.ConsumerEnvironment;
+import sif3.infra.common.env.types.EnvironmentInfo;
+import sif3.infra.common.env.types.ServiceRights.AccessRight;
+import sif3.infra.common.env.types.ServiceRights.AccessType;
 import sif3.infra.rest.client.ClientInterface;
 import sif3.infra.rest.env.ConsumerEnvironmentManager;
 import sif3.infra.rest.header.RESTHeaderProperties;
 import sif3.infra.rest.header.RequestHeaderConstants;
-import au.com.systemic.framework.utils.StringUtils;
 import au.com.systemic.framework.utils.Timer;
 
 /**
@@ -61,6 +69,7 @@ public abstract class AbstractConsumer implements Consumer
 	private UnmarshalFactory unmarshaller = null;
 	private String serviceID = null;
 	private ConsumerEnvironmentManager envMgr = null;
+	private boolean checkACL = true;
 	
 	/**
 	 * Provides information about the Single Object Type to be dealt with in this consumer.
@@ -109,6 +118,7 @@ public abstract class AbstractConsumer implements Consumer
 		setMarshaller(marshaller);
 		setUnmarshaller(unmarshaller);
 		envMgr = ConsumerEnvironmentManager.getInstance(EnvironmentStore.getInstance(serviceID));
+		checkACL = envMgr.getEnvironmentStore().getEnvironments().getCheckACL();
 		
 		// connect to known environments
 		envMgr.connectAll();
@@ -162,19 +172,34 @@ public abstract class AbstractConsumer implements Consumer
 		// We must call the create for each environment we are connected to and that supports this object type
 		for (ConsumerEnvironment env : envMgr.getConnectedEnvironments())
 		{
-			// List is null or empty which means we perform action in default Zone/Context
+			// List is null or empty which means we attempt to perform action in default Zone/Context of each environment
 			if ((envZoneCtxList == null) || (envZoneCtxList.size() == 0)) 
 			{
-				responses.add(getClient(env).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(env), null, null));
+				ErrorDetails error = hasAccess(env, AccessRight.CREATE, AccessType.APPROVED, null, null);
+				if (error == null) //all good
+				{
+					responses.add(getClient(env).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(env, true), null, null));
+				}
+				else  //pretend to have received a 'fake' error Response
+				{
+					responses.add(createBulkErrorResponse(error));
+				}
 			}
 			else // Only perform action where environment matches current environment
 			{
 				for (EnvironmentZoneContextInfo envZoneCtx : envZoneCtxList)
 				{
-					// The environment name must be set. Constructor enforces it.
-					if (validZoneCtxForEnv(env, envZoneCtx))
+					if (env.getEnvironmentName().equals(envZoneCtx.getEnvironmentName()))
 					{
-						responses.add(getClient(env).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(env), envZoneCtx.getZone(), envZoneCtx.getContext()));
+						ErrorDetails error = hasAccess(env, AccessRight.CREATE, AccessType.APPROVED, envZoneCtx.getZone(), envZoneCtx.getContext());
+						if (error == null) //all good
+						{
+							responses.add(getClient(env).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(env, true), envZoneCtx.getZone(), envZoneCtx.getContext()));
+						}
+						else //pretend to have received a 'fake' error Response
+						{
+							responses.add(createBulkErrorResponse(error));
+						}
 					}
 				}					
 			}
@@ -201,16 +226,31 @@ public abstract class AbstractConsumer implements Consumer
 			// List is null or empty which means we perform action in default Zone/Context
 			if ((envZoneCtxList == null) || (envZoneCtxList.size() == 0)) 
 			{
-				responses.add(getClient(env).createSingle(getMultiObjectClassInfo().getObjectName()+"/"+getSingleObjectClassInfo().getObjectName(), data, getHeaderProperties(env), getSingleObjectClassInfo().getObjectType(), null, null));
+				ErrorDetails error = hasAccess(env, AccessRight.CREATE, AccessType.APPROVED, null, null);
+				if (error == null) //all good
+				{
+					responses.add(getClient(env).createSingle(getMultiObjectClassInfo().getObjectName()+"/"+getSingleObjectClassInfo().getObjectName(), data, getHeaderProperties(env, true), getSingleObjectClassInfo().getObjectType(), null, null));
+				}
+				else  //pretend to have received a 'fake' error Response
+				{
+					responses.add(createErrorResponse(error));
+				}
 			}
 			else // Only perform action where environment matches current environment
 			{
 				for (EnvironmentZoneContextInfo envZoneCtx : envZoneCtxList)
 				{
-					// The environment name must be set. Constructor enforces it.
-					if (validZoneCtxForEnv(env, envZoneCtx))
+					if (env.getEnvironmentName().equals(envZoneCtx.getEnvironmentName()))
 					{
-						responses.add(getClient(env).createSingle(getMultiObjectClassInfo().getObjectName()+"/"+getSingleObjectClassInfo().getObjectName(), data, getHeaderProperties(env), getSingleObjectClassInfo().getObjectType(), envZoneCtx.getZone(), envZoneCtx.getContext()));
+						ErrorDetails error = hasAccess(env, AccessRight.CREATE, AccessType.APPROVED, envZoneCtx.getZone(), envZoneCtx.getContext());
+						if (error == null) //all good
+						{
+							responses.add(getClient(env).createSingle(getMultiObjectClassInfo().getObjectName()+"/"+getSingleObjectClassInfo().getObjectName(), data, getHeaderProperties(env, true), getSingleObjectClassInfo().getObjectType(), envZoneCtx.getZone(), envZoneCtx.getContext()));
+						}
+						else //pretend to have received a 'fake' error Response
+						{
+							responses.add(createErrorResponse(error));
+						}
 					}
 				}					
 			}
@@ -241,16 +281,31 @@ public abstract class AbstractConsumer implements Consumer
 			// List is null or empty which means we perform action in default Zone/Context
 			if ((envZoneCtxList == null) || (envZoneCtxList.size() == 0)) 
 			{
-				responses.add(getClient(env).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(env), null, null));
+				ErrorDetails error = hasAccess(env, AccessRight.DELETE, AccessType.APPROVED, null, null);
+				if (error == null) //all good
+				{
+					responses.add(getClient(env).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(env, false), null, null));
+				}
+				else  //pretend to have received a 'fake' error Response
+				{
+					responses.add(createBulkErrorResponse(error));
+				}
 			}
 			else // Only perform action where environment matches current environment
 			{
 				for (EnvironmentZoneContextInfo envZoneCtx : envZoneCtxList)
 				{
-					// The environment name must be set. Constructor enforces it.
-					if (validZoneCtxForEnv(env, envZoneCtx))
+					if (env.getEnvironmentName().equals(envZoneCtx.getEnvironmentName()))
 					{
-						responses.add(getClient(env).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(env), envZoneCtx.getZone(), envZoneCtx.getContext()));
+						ErrorDetails error = hasAccess(env, AccessRight.DELETE, AccessType.APPROVED, envZoneCtx.getZone(), envZoneCtx.getContext());
+						if (error == null) //all good
+						{
+							responses.add(getClient(env).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(env, false), envZoneCtx.getZone(), envZoneCtx.getContext()));
+						}
+						else //pretend to have received a 'fake' error Response
+						{
+							responses.add(createBulkErrorResponse(error));
+						}
 					}
 				}					
 			}
@@ -277,16 +332,31 @@ public abstract class AbstractConsumer implements Consumer
 			// List is null or empty which means we perform action in default Zone/Context
 			if ((envZoneCtxList == null) || (envZoneCtxList.size() == 0)) 
 			{
-				responses.add(getClient(env).removeSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(env), null, null));
+				ErrorDetails error = hasAccess(env, AccessRight.DELETE, AccessType.APPROVED, null, null);
+				if (error == null) //all good
+				{
+					responses.add(getClient(env).removeSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(env, false), null, null));
+				}
+				else  //pretend to have received a 'fake' error Response
+				{
+					responses.add(createErrorResponse(error));
+				}
 			}
 			else // Only perform action where environment matches current environment
 			{
 				for (EnvironmentZoneContextInfo envZoneCtx : envZoneCtxList)
 				{
-					// The environment name must be set. Constructor enforces it.
-					if (validZoneCtxForEnv(env, envZoneCtx))
+					if (env.getEnvironmentName().equals(envZoneCtx.getEnvironmentName()))
 					{
-						responses.add(getClient(env).removeSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(env), envZoneCtx.getZone(), envZoneCtx.getContext()));
+						ErrorDetails error = hasAccess(env, AccessRight.DELETE, AccessType.APPROVED, envZoneCtx.getZone(), envZoneCtx.getContext());
+						if (error == null) //all good
+						{
+							responses.add(getClient(env).removeSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(env, false), envZoneCtx.getZone(), envZoneCtx.getContext()));
+						}
+						else //pretend to have received a 'fake' error Response
+						{
+							responses.add(createErrorResponse(error));
+						}
 					}
 				}					
 			}
@@ -317,16 +387,31 @@ public abstract class AbstractConsumer implements Consumer
 			// List is null or empty which means we perform action in default Zone/Context
 			if ((envZoneCtxList == null) || (envZoneCtxList.size() == 0)) 
 			{
-				responses.add(getClient(env).getSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(env), getSingleObjectClassInfo().getObjectType(), null, null));
+				ErrorDetails error = hasAccess(env, AccessRight.QUERY, AccessType.APPROVED, null, null);
+				if (error == null) //all good
+				{
+					responses.add(getClient(env).getSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(env, false), getSingleObjectClassInfo().getObjectType(), null, null));
+				}
+				else  //pretend to have received a 'fake' error Response
+				{
+					responses.add(createErrorResponse(error));
+				}
 			}
 			else // Only perform action where environment matches current environment
 			{
 				for (EnvironmentZoneContextInfo envZoneCtx : envZoneCtxList)
 				{
-					// The environment name must be set. Constructor enforces it.
-					if (validZoneCtxForEnv(env, envZoneCtx))
+					if (env.getEnvironmentName().equals(envZoneCtx.getEnvironmentName()))
 					{
-						responses.add(getClient(env).getSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(env), getSingleObjectClassInfo().getObjectType(), envZoneCtx.getZone(), envZoneCtx.getContext()));
+						ErrorDetails error = hasAccess(env, AccessRight.QUERY, AccessType.APPROVED, envZoneCtx.getZone(), envZoneCtx.getContext());
+						if (error == null) //all good
+						{
+							responses.add(getClient(env).getSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(env, false), getSingleObjectClassInfo().getObjectType(), envZoneCtx.getZone(), envZoneCtx.getContext()));
+						}
+						else //pretend to have received a 'fake' error Response
+						{
+							responses.add(createErrorResponse(error));
+						}
 					}
 				}					
 			}
@@ -353,16 +438,31 @@ public abstract class AbstractConsumer implements Consumer
 			// List is null or empty which means we perform action in default Zone/Context
 			if ((envZoneCtxList == null) || (envZoneCtxList.size() == 0)) 
 			{
-				responses.add(getClient(env).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, getHeaderProperties(env), getMultiObjectClassInfo().getObjectType(), null, null));
+				ErrorDetails error = hasAccess(env, AccessRight.QUERY, AccessType.APPROVED, null, null);
+				if (error == null) //all good
+				{
+					responses.add(getClient(env).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, getHeaderProperties(env, false), getMultiObjectClassInfo().getObjectType(), null, null));
+				}
+				else  //pretend to have received a 'fake' error Response
+				{
+					responses.add(createErrorResponse(error));
+				}
 			}
 			else // Only perform action where environment matches current environment
 			{
 				for (EnvironmentZoneContextInfo envZoneCtx : envZoneCtxList)
 				{
-					// The environment name must be set. Constructor enforces it.
-					if (validZoneCtxForEnv(env, envZoneCtx))
+					if (env.getEnvironmentName().equals(envZoneCtx.getEnvironmentName()))
 					{
-						responses.add(getClient(env).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, getHeaderProperties(env), getMultiObjectClassInfo().getObjectType(), envZoneCtx.getZone(), envZoneCtx.getContext()));
+						ErrorDetails error = hasAccess(env, AccessRight.QUERY, AccessType.APPROVED, envZoneCtx.getZone(), envZoneCtx.getContext());
+						if (error == null) //all good
+						{
+							responses.add(getClient(env).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, getHeaderProperties(env, false), getMultiObjectClassInfo().getObjectType(), envZoneCtx.getZone(), envZoneCtx.getContext()));
+						}
+						else //pretend to have received a 'fake' error Response
+						{
+							responses.add(createErrorResponse(error));
+						}
 					}
 				}					
 			}
@@ -393,16 +493,31 @@ public abstract class AbstractConsumer implements Consumer
 			// List is null or empty which means we perform action in default Zone/Context
 			if ((envZoneCtxList == null) || (envZoneCtxList.size() == 0)) 
 			{
-				responses.add(getClient(env).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(env), null, null));
+				ErrorDetails error = hasAccess(env, AccessRight.UPDATE, AccessType.APPROVED, null, null);
+				if (error == null) //all good
+				{
+					responses.add(getClient(env).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(env, false), null, null));
+				}
+				else  //pretend to have received a 'fake' error Response
+				{
+					responses.add(createBulkErrorResponse(error));
+				}
 			}
 			else // Only perform action where environment matches current environment
 			{
 				for (EnvironmentZoneContextInfo envZoneCtx : envZoneCtxList)
 				{
-					// The environment name must be set. Constructor enforces it.
-					if (validZoneCtxForEnv(env, envZoneCtx))
+					if (env.getEnvironmentName().equals(envZoneCtx.getEnvironmentName()))
 					{
-						responses.add(getClient(env).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(env), envZoneCtx.getZone(), envZoneCtx.getContext()));
+						ErrorDetails error = hasAccess(env, AccessRight.UPDATE, AccessType.APPROVED, envZoneCtx.getZone(), envZoneCtx.getContext());
+						if (error == null) //all good
+						{
+							responses.add(getClient(env).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(env, false), envZoneCtx.getZone(), envZoneCtx.getContext()));
+						}
+						else //pretend to have received a 'fake' error Response
+						{
+							responses.add(createBulkErrorResponse(error));
+						}
 					}
 				}					
 			}
@@ -429,16 +544,31 @@ public abstract class AbstractConsumer implements Consumer
 			// List is null or empty which means we perform action in default Zone/Context
 			if ((envZoneCtxList == null) || (envZoneCtxList.size() == 0)) 
 			{
-				responses.add(getClient(env).updateSingle(getMultiObjectClassInfo().getObjectName(), resourceID, data, getHeaderProperties(env), null, null));
+				ErrorDetails error = hasAccess(env, AccessRight.UPDATE, AccessType.APPROVED, null, null);
+				if (error == null) //all good
+				{
+					responses.add(getClient(env).updateSingle(getMultiObjectClassInfo().getObjectName(), resourceID, data, getHeaderProperties(env, false), null, null));
+				}
+				else  //pretend to have received a 'fake' error Response
+				{
+					responses.add(createErrorResponse(error));
+				}
 			}
 			else // Only perform action where environment matches current environment
 			{
 				for (EnvironmentZoneContextInfo envZoneCtx : envZoneCtxList)
 				{
-					// The environment name must be set. Constructor enforces it.
-					if (validZoneCtxForEnv(env, envZoneCtx))
+					if (env.getEnvironmentName().equals(envZoneCtx.getEnvironmentName()))
 					{
-						responses.add(getClient(env).updateSingle(getMultiObjectClassInfo().getObjectName(), resourceID, data, getHeaderProperties(env), envZoneCtx.getZone(), envZoneCtx.getContext()));
+						ErrorDetails error = hasAccess(env, AccessRight.UPDATE, AccessType.APPROVED, envZoneCtx.getZone(), envZoneCtx.getContext());
+						if (error == null) //all good
+						{
+							responses.add(getClient(env).updateSingle(getMultiObjectClassInfo().getObjectName(), resourceID, data, getHeaderProperties(env, false), envZoneCtx.getZone(), envZoneCtx.getContext()));
+						}
+						else //pretend to have received a 'fake' error Response
+						{
+							responses.add(createErrorResponse(error));
+						}
 					}
 				}					
 			}
@@ -480,38 +610,61 @@ public abstract class AbstractConsumer implements Consumer
 		else
 		{
 			return new ClientInterface(envInfo.getConnectorBaseURI(ConsumerEnvironment.ConnectorName.requestsConnector), 
-	                   				   envInfo.getMediaType(), 
+	                   				   envInfo.getMediaType(),
 	                   				   getMarshaller(), 
 	                   				   getUnmarshaller(),
 	                   				   envInfo.getIsSecureConnection());
 		}
 	}
 	
-	private TransportHeaderProperties getHeaderProperties(ConsumerEnvironment envInfo)
+	private TransportHeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation)
 	{
 		TransportHeaderProperties hdrProps = new RESTHeaderProperties();
 		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, envInfo.getAuthenticationToken());
-		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_ID, UUIDGenerator.getUUID());
+		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, HeaderValues.ServiceType.OBJECT.name());
+		if (isCreateOperation)
+		{
+		  hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, (envInfo.getUseAdvisory() ? "true" : "false"));
+		}
 		
 		return hdrProps;
 	}
 	
-	private boolean validZoneCtxForEnv(ConsumerEnvironment env, EnvironmentZoneContextInfo envZoneCtx)
+	private void setErrorDetails(BaseResponse response, ErrorDetails errorDetails)
 	{
-		if (env.getEnvironmentName().equals(envZoneCtx.getEnvironmentName()))
+		response.setStatus(errorDetails.getErrorCode());
+		response.setStatusMessage(errorDetails.getMessage());
+		response.setError(errorDetails);
+		response.setContentLength(0);
+		response.setHasEntity(false);
+	}
+	
+	private ErrorDetails hasAccess(EnvironmentInfo env, AccessRight right, AccessType accessType, SIFZone zone, SIFContext context)
+	{
+		ErrorDetails error = null;
+		if (checkACL)
 		{
-			if (((envZoneCtx.getZone() == null) || StringUtils.isEmpty(envZoneCtx.getZone().getId())) &&
-				((envZoneCtx.getContext() == null) || StringUtils.isEmpty(envZoneCtx.getContext().getId())))
+			if (!env.hasAccess(right, accessType, getMultiObjectClassInfo().getObjectName(), zone, context))
 			{
-				return true; // Default Zone and Context
-			}
-			else
-			{
-				//TODO: JH - Check if zone and context are listed in the given environment
-				return true;
+				String zoneID = (zone == null) ? "Default" : zone.getId();
+				String contextID = (context == null) ? "Default" : context.getId();
+				error = new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not authorized.", right.name()+ " access is not set to "+accessType.name()+" for the service "+getMultiObjectClassInfo().getObjectName()+" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+env.getEnvironmentName(), "Client side check.");			
 			}
 		}
-		return false;
+		return error;
 	}
-
+	
+	private Response createErrorResponse(ErrorDetails error)
+	{
+		Response response = new Response();
+		setErrorDetails(response, error);
+		return response;	
+	}
+	
+	private BulkOperationResponse createBulkErrorResponse(ErrorDetails error)
+	{
+		BulkOperationResponse response = new BulkOperationResponse();
+		setErrorDetails(response, error);
+		return response;	
+	}
 }
