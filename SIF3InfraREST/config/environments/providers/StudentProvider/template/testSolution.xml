@@ -1,6 +1,9 @@
 <environment type="DIRECT" id="064ed657-6ef2-46d6-96e6-629753fef375" xmlns="http://www.sifassociation.org/infrastructure/3.0">
     <sessionToken>875278d729531ec2cacd98bb7536c2f4</sessionToken>
     <solutionId>testSolution</solutionId>
+    <defaultZone id="schoolTestingZone">
+        <description>Testing Zone: Default Zone</description>
+    </defaultZone>
     <authenticationMethod>Basic</authenticationMethod>
     <consumerName></consumerName>
     <infrastructureServices>
@@ -15,35 +18,37 @@
             <services>
                 <service name="alerts" contextId="DEFAULT">
                     <rights>
-                        <right type="QUERY"/>
-                        <right type="CREATE"/>
-                        <right type="UPDATE"/>
-                        <right type="DELETE"/>
-                        <right type="PROVIDE"/>
-                        <right type="SUBSCRIBE"/>
-                        <right type="ADMIN"/>
+                  <rights>
+                    <right type="QUERY">APPROVED</right>
+                    <right type="CREATE">APPROVED</right>
+                    <right type="UPDATE">APPROVED</right>
+                    <right type="DELETE">APPROVED</right>
+                    <right type="PROVIDE">SUPPORTED</right>
+                    <right type="SUBSCRIBE">SUPPORTED</right>
+                    <right type="ADMIN">REJECTED</right>
+                  </rights>
                     </rights>
                 </service>
                 <service name="students" contextId="DEFAULT">
                     <rights>
-                        <right type="QUERY"/>
-                        <right type="CREATE"/>
-                        <right type="UPDATE"/>
-                        <right type="DELETE"/>
-                        <right type="PROVIDE"/>
-                        <right type="SUBSCRIBE"/>
-                        <right type="ADMIN"/>
+                    <right type="QUERY">APPROVED</right>
+                    <right type="CREATE">APPROVED</right>
+                    <right type="UPDATE">APPROVED</right>
+                    <right type="DELETE">APPROVED</right>
+                    <right type="PROVIDE">SUPPORTED</right>
+                    <right type="SUBSCRIBE">APPROVED</right>
+                    <right type="ADMIN">REJECTED</right>
                     </rights>
                 </service>
                 <service name="zones" contextId="DEFAULT">
                     <rights>
-                        <right type="QUERY"/>
-                        <right type="CREATE"/>
-                        <right type="UPDATE"/>
-                        <right type="DELETE"/>
-                        <right type="PROVIDE"/>
-                        <right type="SUBSCRIBE"/>
-                        <right type="ADMIN"/>
+                    <right type="QUERY">APPROVED</right>
+                    <right type="CREATE">REJECTED</right>
+                    <right type="UPDATE">REJECTED</right>
+                    <right type="DELETE">REJECTED</right>
+                    <right type="PROVIDE">REJECTED</right>
+                    <right type="SUBSCRIBE">REJECTED</right>
+                    <right type="ADMIN">REJECTED</right>
                     </rights>
                 </service>
             </services>
