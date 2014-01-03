@@ -40,8 +40,8 @@ import au.com.systemic.framework.utils.FileReaderWriter;
  */
 public class TestStudentPersonalConsumer
 {
-	// private final static String SINGLE_STUDENT_FILE_NAME = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
-	// private final static String MULTI_STUDENT_FILE_NAME = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
+//	private final static String SINGLE_STUDENT_FILE_NAME = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
+//	private final static String MULTI_STUDENT_FILE_NAME = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
 	private final static String SINGLE_STUDENT_FILE_NAME = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
 	private final static String MULTI_STUDENT_FILE_NAME = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
 	private static final String CONSUMER_ID = "StudentConsumer";
@@ -129,6 +129,9 @@ public class TestStudentPersonalConsumer
 		StudentPersonalType student = getStudent();
 		try
 		{
+			List<EnvironmentZoneContextInfo> envZoneCtxList = new ArrayList<EnvironmentZoneContextInfo>();
+			envZoneCtxList.add(new EnvironmentZoneContextInfo("devLocal", new SIFZone("auRolloverTestingZone"), null));
+//			List<Response> responses = consumer.createSingle(student, envZoneCtxList);
 			List<Response> responses = consumer.createSingle(student, null);
 			System.out.println("Responses from attempt to Create Student:");
 			printResponses(responses);
@@ -228,6 +231,44 @@ public class TestStudentPersonalConsumer
 		System.out.println("Finished 'Update Student' in all connected environments...");
 	}
 	
+
+	 private void updateStudents(StudentPersonalConsumer consumer)
+	  {
+	    System.out.println("Start 'Update Students - Bulk Operation' in all connected environments...");
+	    StudentCollectionType students = getStudents();
+	    try
+	    {
+	      List<BulkOperationResponse> responses = consumer.updateMany(students, null);
+	      if (responses != null)
+	      {
+	        int i = 1;
+	        for (BulkOperationResponse response : responses)
+	        {
+	          System.out.println("Response "+i+":\n"+response);
+	          if (response.hasError())
+	          {
+	            System.out.println("Error for Response "+i+": "+response.getError());
+	          }
+	          else // We should have a student personal
+	          {
+	            System.out.println("Student Response "+i+": "+response.getOperationStatuses());
+	          }
+	          i++;
+	        }
+	      }
+	      else
+	      {
+	        System.out.println("Responses from attempt to update Students: null");        
+	      }
+	    }
+	    catch (Exception ex)
+	    {
+	      ex.printStackTrace();
+	    }
+	    System.out.println("Finished 'Update Students' in all connected environments...");
+	  }
+
+	
 	
 	private void getStudents(StudentPersonalConsumer consumer)
 	{
@@ -251,8 +292,11 @@ public class TestStudentPersonalConsumer
 		try
 		{
 			List<EnvironmentZoneContextInfo> envZoneCtxList = new ArrayList<EnvironmentZoneContextInfo>();
-			envZoneCtxList.add(new EnvironmentZoneContextInfo("devLocal", new SIFZone("zoneABC"), new SIFContext("ctx123")));
+			envZoneCtxList.add(new EnvironmentZoneContextInfo("devLocal", new SIFZone("auRolloverTestingZone"), null));
+			envZoneCtxList.add(new EnvironmentZoneContextInfo("devLocal", new SIFZone("zone123"),  new SIFContext("abc")));
+			envZoneCtxList.add(new EnvironmentZoneContextInfo("devLocal", (SIFZone)null, (SIFContext)null));
 			List<Response> responses = consumer.retrievByPrimaryKey("24ed508e1ed04bba82198233efa55859", envZoneCtxList);
+//			List<Response> responses = consumer.retrievByPrimaryKey("24ed508e1ed04bba82198233efa55859", null);
 			System.out.println("Responses from attempt to Get Student:");
 			printResponses(responses);
 		}
@@ -285,11 +329,12 @@ public class TestStudentPersonalConsumer
 
 		StudentPersonalConsumer consumer = tester.getConsumer();
 		
-		tester.getStudents(consumer);
+//		tester.getStudents(consumer);
 //		tester.createStudent(consumer);
 //		tester.removeStudent(consumer);
-//		tester.getStudent(consumer);
+		tester.getStudent(consumer);
 //		tester.updateStudent(consumer);
+//		tester.updateStudents(consumer);
 //		tester.createStudents(consumer);
 //		tester.deleteStudents(consumer);
 
