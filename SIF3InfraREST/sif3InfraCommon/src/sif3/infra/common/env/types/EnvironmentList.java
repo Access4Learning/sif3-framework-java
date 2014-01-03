@@ -35,8 +35,9 @@ public class EnvironmentList<T extends EnvironmentInfo> implements Serializable
     
     private String adapterName = null;
     private boolean isConsumer = true;
+    private boolean checkACL = true;
     
-    /* Hashmap: Key = environment Name, Data = ConsumerEnvironment or ProviderEnvironment*/
+	/* Hashmap: Key = environment Name, Data = ConsumerEnvironment or ProviderEnvironment*/
     private HashMap<String, T> environments = new HashMap<String, T>();
     
     public EnvironmentList() 
@@ -71,31 +72,42 @@ public class EnvironmentList<T extends EnvironmentInfo> implements Serializable
     	this.isConsumer = isConsumer;
     }
 	
-  public void addEnvironment(T environment)
-  {
-    environments.put(environment.getEnvironmentName(), environment);
-  }
-  
-  public T getEnvironment(String environmentName)
-  {
-    return environments.get(environmentName);
-  }
+    public boolean getCheckACL()
+    {
+    	return this.checkACL;
+    }
+
+	public void setCheckACL(boolean checkACL)
+    {
+    	this.checkACL = checkACL;
+    }
+
+	public void addEnvironment(T environment)
+	{
+		environments.put(environment.getEnvironmentName(), environment);
+	}
+
+	public T getEnvironment(String environmentName)
+	{
+		return environments.get(environmentName);
+	}
 
 	public HashMap<String, T> getEnvironments()
-  {
-    return environments;
-  }
+	{
+		return environments;
+	}
 
-  public void setEnvironments(HashMap<String, T> environments)
-  {
-    this.environments = environments;
-  }
+	public void setEnvironments(HashMap<String, T> environments)
+	{
+		this.environments = environments;
+	}
 
-  @Override
+	@Override
     public String toString()
     {
 	    return "EnvironmentList [adapterName=" + this.adapterName + ", isConsumer="
-	            + this.isConsumer + ", environments=" + this.environments + "]";
+	            + this.isConsumer + ", checkACL=" + this.checkACL + ", environments="
+	            + this.environments + "]";
     }
 
 }

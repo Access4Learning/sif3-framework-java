@@ -24,7 +24,10 @@ import java.util.ArrayList;
 
 import javax.ws.rs.core.MediaType;
 
+import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.infra.common.env.types.ServiceRights.AccessRight;
+import sif3.infra.common.env.types.ServiceRights.AccessType;
 
 /**
  * This class is a super-class for environment management. It can be used for Consumer and Provider environment managemnt but it is 
@@ -228,6 +231,44 @@ public class EnvironmentInfo implements Serializable
     {
     	this.services = services;
     }
+	
+	/**
+	 * This method checks if this environment has a service with the given name for which the given zone and context 
+	 * is defined and has the given access right and access type. If all these criteria are met then true is returned 
+	 * otherwise false is returned.
+	 * 
+	 * @param right The access right (QUERY, UPDATE etc) that shall be checked for.
+	 * @param accessType The access level (SUPPORTED, APPROVED, etc) that must be met for the given service and right.
+	 * @param serviceName Service for which the access rights shall be checked.
+	 * @param zone The Zone for which the service is valid and for which the access rights shall be checked. This can be 
+	 *             null and would indicate the default zone.
+	 * @param context The context for which the service is valid and for which the access rights shall be checked. This
+	 *                can be null and would indicate the default context.
+	 * 
+	 * @return See desc
+	 */
+	public boolean hasAccess(AccessRight right, AccessType accessType, String serviceName, SIFZone zone, SIFContext context)
+	{
+		boolean accessApproved = false;
+		for (ServiceInfo serviceInfo : getServices())
+		{
+			if (serviceInfo.getServiceName().equals(serviceName)) //service name matches
+			{
+				//Check if Zone matches
+				boolean zoneMatches = (zone == null) ? serviceInfo.getZone().getIsDefault() : zone.getId().equals(serviceInfo.getZone().getId());
+				
+				//check if context matches as well
+				boolean contextMatches = (context == null) ? serviceInfo.getContext().getIsDefault() : context.getId().equals(serviceInfo.getContext().getId());
+
+				// Check if access right is the correct level
+				if (zoneMatches && contextMatches)
+				{
+					accessApproved = serviceInfo.getRights().hasRight(right, accessType);
+				}
+			}
+		}
+		return accessApproved;
+	}
 
 	@Override
   public String toString()

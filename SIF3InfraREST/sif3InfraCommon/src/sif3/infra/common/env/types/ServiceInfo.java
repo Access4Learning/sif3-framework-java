@@ -20,7 +20,12 @@ package sif3.infra.common.env.types;
 
 import java.io.Serializable;
 
+import au.com.systemic.framework.utils.StringUtils;
+
+import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.model.EnvironmentZoneContextInfo;
+import sif3.infra.common.env.types.ServiceRights.AccessRight;
+import sif3.infra.common.env.types.ServiceRights.AccessType;
 
 /**
  * This class is a POJO for service information as provided by the Environment. Each environment has a list of services and each service 
@@ -32,14 +37,13 @@ import sif3.common.model.EnvironmentZoneContextInfo;
  */
 public class ServiceInfo extends EnvironmentZoneContextInfo implements Serializable
 {
-	public static enum ServiceType {OBJECT, UTILITY, FUNCTION};
-	
     private static final long serialVersionUID = -948637161157336728L;
     
 	private String serviceName = null;
     private ServiceType serviceType = ServiceType.OBJECT;
+    private ServiceRights rights = new ServiceRights();
     
-    /**
+	/**
      * Constructor
      * 
      * @param serviceName The name of a service such as 'StudentPersonals', 'alerts', 'zones' etc. This is NOT the name of the adapter!
@@ -83,9 +87,47 @@ public class ServiceInfo extends EnvironmentZoneContextInfo implements Serializa
     	this.serviceType = serviceType;
     }
 
+    public ServiceRights getRights()
+    {
+    	return this.rights;
+    }
+
+	public void setRights(ServiceRights rights)
+    {
+    	this.rights = rights;
+    }
+	
+	/* Convenience method */
+	public void setRight(AccessRight right, AccessType accessType)
+	{
+		getRights().addRight(right, accessType);
+	}
+
+	/* Convenience method: True: Success, False: Failed (i.e. invalid right or access type */
+	public boolean setRight(String right, String accessType)
+	{
+		if (StringUtils.notEmpty(right) && StringUtils.notEmpty(accessType))
+		{
+			try
+			{
+				setRight(AccessRight.valueOf(right.toUpperCase()), AccessType.valueOf(accessType.toUpperCase()));
+				return true;
+			}
+			catch (Exception ex)
+			{
+				return false;
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	@Override
     public String toString()
     {
-	    return "ServiceInfo [serviceName=" + this.serviceName + ", serviceType=" + this.serviceType + ", toString()=" + super.toString() + "]";
+	    return "ServiceInfo [serviceName=" + this.serviceName + ", serviceType=" + this.serviceType
+	            + ", rights=" + this.rights + ", toString()=" + super.toString() + "]";
     }
 }

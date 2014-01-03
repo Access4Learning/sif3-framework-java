@@ -32,6 +32,7 @@ public class ConsumerEnvironment extends EnvironmentInfo
 	private static final long serialVersionUID = -2685814104916173550L;
 
 	private boolean connected = false;
+	private boolean useAdvisory = false; 
 	
 	private HashMap<ConnectorName, URI> connectorBaseURIs = new HashMap<ConnectorName, URI>();
 		
@@ -64,6 +65,16 @@ public class ConsumerEnvironment extends EnvironmentInfo
     	this.connected = connected;
     }
 	
+	public boolean getUseAdvisory()
+	{
+		return useAdvisory;
+	}
+
+	public void setUseAdvisory(boolean useAdvisory)
+	{
+		this.useAdvisory = useAdvisory;
+	}
+
 	public void addConnectorBaseURI(ConnectorName connectorName, URI connectorURI)
 	{
 		connectorBaseURIs.put(connectorName, connectorURI);
@@ -75,8 +86,8 @@ public class ConsumerEnvironment extends EnvironmentInfo
 	}
 
 	@Override
-    public String toString()
-    {
-	    return "ConsumerEnvironment [connected=" + this.connected + ", connectorBaseURIs=" + this.connectorBaseURIs + ", toString()=" + super.toString() + "]";
-    }
+	public String toString()
+	{
+		return "ConsumerEnvironment [connected=" + connected + ", connectorBaseURIs=" + connectorBaseURIs + ", useAdvisory=" + useAdvisory + ", toString()=" + super.toString() + "]";
+	}
 }
