@@ -302,7 +302,7 @@ public class ProviderEnvironmentStoreOperations extends BaseEnvironmentStoreOper
 				environment.setInfrastructureServices(templateEnv.getInfrastructureServices());
 				updateConnectorURLs(environment, envName, useSecured);
 				
-				//TODO: Should I store it back to the provider's workstore of this consumer?
+				//TODO: JH - Should I store it back to the provider's workstore of this consumer?
 			}
 			else
 			{

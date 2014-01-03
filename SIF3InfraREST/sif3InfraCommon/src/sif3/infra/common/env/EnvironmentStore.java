@@ -212,6 +212,7 @@ public class EnvironmentStore implements Serializable
 	            environments = ((isConsumer) ? new EnvironmentList<ConsumerEnvironment>() : new EnvironmentList<ProviderEnvironment>()); 
 	            environments.setAdapterName(serviceName);
 	            environments.setIsConsumer(isConsumer);
+	            environments.setCheckACL(props.getPropertyAsBool("adapter.checkACL", true));
 	            
 	            // Check if input and workstore folder exists. If not then create them.
 	            if (!checkAndCreateDir(getFullInputDirName()))
@@ -314,6 +315,9 @@ public class EnvironmentStore implements Serializable
     {
   		boolean errorsFound = false;
   		
+      boolean useAdvisory = props.getPropertyAsBool("adapter.mustUseAdvisoryIDs", false);
+      //System.out.println("Used Advisory: "+useAdvisory);
+  		
   		// Process through Environment List
   		List<String> envNames = props.getFromCommaSeparated("env.list");
   		if (envNames.isEmpty())
@@ -329,6 +333,7 @@ public class EnvironmentStore implements Serializable
   				if (StringUtils.notEmpty(envName))
   				{
       				ConsumerEnvironment envInfo = new ConsumerEnvironment(envName, environments.getAdapterName());
+      				envInfo.setUseAdvisory(useAdvisory);
       				envInfo.setMediaType(convertMediaType(props.getPropertyAsString("env.mediaType."+envName, null)));
       				envInfo.setSecureConnection(getSecureConnectionInfo(envName, props));
       				envInfo.setBaseURI(props.getPropertyAsString("env.baseURI."+envName, null));
