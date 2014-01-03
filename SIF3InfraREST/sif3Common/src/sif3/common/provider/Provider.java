@@ -54,7 +54,7 @@ public interface Provider
 	 * @return The entity for this resourceID. Null if entity with given resourceID does not exist.
 	 * 
 	 * @throws IllegalArgumentException One of the parameters is invalid.
-	 * @throws PersistenceException Persistance Store could not be accessed successfuly. An error log entry is performed and the 
+	 * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
 	 *                              message of the exceptions holds some info.
 	 */
 	public Object retrievByPrimaryKey(String resourceID, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException;
@@ -65,16 +65,17 @@ public interface Provider
 	 * 
 	 * @param data The data of the actual Object to be created. It may or may not hold the resourceID and the provider may or may not accept it.
 	 *             It is up to the implementation to make that decision. The final resourceID is returned as part of the returned object.
+	 * @param useAdvisory TRUE: RefId/UUID of object should be set and should be used by provider. FALSE: Provider must allocate RefId/UUID
 	 * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
 	 * @param context The Context for which the object shall be created. Can be Null (default Zone)
 	 * 
 	 * @return The object that is created. It may hold additional data than the one provided.
 	 * 
    * @throws IllegalArgumentException One of the parameters is invalid.
-   * @throws PersistenceException Persistance Store could not be accessed successfuly. An error log entry is performed and the 
+   * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
    *                              message of the exceptions holds some info.
 	 */
-	public Object createSingle(Object data, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException;
+	public Object createSingle(Object data, boolean useAdvisory, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException;
 
 	/**
    * This method updates the object given by its resourceID in the given zone for the given context.
@@ -88,7 +89,7 @@ public interface Provider
 	 * @return TRUE: Entity is updated. FALSE: Entity does not exist.
 	 * 
    * @throws IllegalArgumentException One of the parameters is invalid.
-   * @throws PersistenceException Persistance Store could not be accessed successfuly. An error log entry is performed and the 
+   * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
    *                              message of the exceptions holds some info.
 	 */
 	public boolean updateSingle(Object data, String resourceID, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException;
@@ -103,7 +104,7 @@ public interface Provider
 	 * @return TRUE: Entity is removed. FALSE: Entity does not exist.
 	 * 
    * @throws IllegalArgumentException One of the parameters is invalid.
-   * @throws PersistenceException Persistance Store could not be accessed successfuly. An error log entry is performed and the 
+   * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
    *                              message of the exceptions holds some info.
 	 */
 	public boolean deleteSingle(String resourceID, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException;
@@ -132,16 +133,17 @@ public interface Provider
    * model (i.e. StudentPersonals which is a collection of StudentPersonal).
    * 
    * @param data The 'collection' object. Each object in that collection will be created.
+   * @param useAdvisory TRUE: RefId/UUID of object should be set and should be used by provider. FALSE: Provider must allocate RefId/UUID
    * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
    * @param context The Context for which the objects shall be created. Can be Null (default Zone)
 	 * 
 	 * @return List with Status and IDs for each created object, or Status and Error for each object. Null if there was an unknown error. 
 	 * 
    * @throws IllegalArgumentException One of the parameters is invalid.
-   * @throws PersistenceException Persistance Store could not be accessed successfuly. An error log entry is performed and the 
+   * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
    *                              message of the exceptions holds some info.
 	 */
-	public List<OperationStatus> createMany(Object data, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException;
+	public List<OperationStatus> createMany(Object data, boolean useAdvicory, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException;
 
 	/**
    * This method will update many objects in one call. The 'data' parameter is a collection-style object that is defined in the data
@@ -155,7 +157,7 @@ public interface Provider
    * @return List with Status and IDs for each updated object, or Status and Error for each object. Null if there was an unknown error. 
 	 * 
    * @throws IllegalArgumentException One of the parameters is invalid.
-   * @throws PersistenceException Persistance Store could not be accessed successfuly. An error log entry is performed and the 
+   * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
    *                              message of the exceptions holds some info.
 	 */
 	public List<OperationStatus> updateMany(Object data, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException;
@@ -170,7 +172,7 @@ public interface Provider
    * @return List with Status and IDs for each removed object, or Status and Error for each object. Null if there was an unknown error. 
 	 * 
    * @throws IllegalArgumentException One of the parameters is invalid.
-   * @throws PersistenceException Persistance Store could not be accessed successfuly. An error log entry is performed and the 
+   * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
    *                              message of the exceptions holds some info.
 	 */
 	public List<OperationStatus> deleteMany(List<String> resourceIDs, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException;
