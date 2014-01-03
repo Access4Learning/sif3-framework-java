@@ -17,8 +17,7 @@ package sif3.infra.rest.env;
 
 import org.apache.log4j.Logger;
 
-import au.com.systemic.framework.utils.StringUtils;
-
+import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.utils.AuthenticationUtils;
@@ -27,6 +26,8 @@ import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.env.types.ServiceInfo;
 import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.common.model.ProvisionedZoneType;
+import sif3.infra.common.model.RightType;
+import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * The provider and the consumer must do some environment management. This class holds the common functionality for each of those
@@ -84,7 +85,7 @@ public class BaseEnvironmentManager
 			envInfo.setDefaultZone(new SIFZone(env.getDefaultZone().getId().trim(), true));
 		}
 		
-		// Load services
+		// Load services & service rights
 		if ((env.getProvisionedZones() != null) && (env.getProvisionedZones().getProvisionedZone() != null))
 		{
 			for (ProvisionedZoneType zoneType : env.getProvisionedZones().getProvisionedZone())
@@ -99,19 +100,19 @@ public class BaseEnvironmentManager
 				{
 					for (sif3.infra.common.model.ServiceType service : zoneType.getServices().getService())
 					{
-						ServiceInfo.ServiceType serviceType = ServiceInfo.ServiceType.OBJECT;
+						ServiceType serviceType = ServiceType.OBJECT;
 						boolean isDefaultCtx = false;
 						
 						if (StringUtils.notEmpty(service.getType()))
 						{
 							try
 							{
-								serviceType = ServiceInfo.ServiceType.valueOf(service.getType().trim().toUpperCase());
+								serviceType = ServiceType.valueOf(service.getType().trim().toUpperCase());
 							}
 							catch (Exception ex) // log error and assume it is OBJECT
 							{
 								logger.warn("The service '"+service.getName()+"' for environment '"+envInfo.getEnvironmentName()+"' has an invalid 'type' of '"+service.getType().trim()+"' set. Valid values are: OBJECT, UTILITY and FUNCTION.");
-								serviceType = ServiceInfo.ServiceType.OBJECT;
+								serviceType = ServiceType.OBJECT;
 							}
 						}
 						if (StringUtils.isEmpty(service.getContextId())) // no context provided then this service is valid for default context
@@ -127,6 +128,18 @@ public class BaseEnvironmentManager
 						serviceInfo.setContext(new SIFContext((isDefaultCtx) ? DEFAULT : service.getContextId().trim(), isDefaultCtx));
 						serviceInfo.setZone(zone);
 						serviceInfo.setEnvironmentName(envInfo.getEnvironmentName());
+						
+						// Read all the access rights
+						if ((service.getRights() != null) && (service.getRights().getRight() != null))
+						{
+							for (RightType right : service.getRights().getRight())
+							{
+								if (!serviceInfo.setRight(right.getType(), right.getValue()))
+								{
+									logger.error("The service '"+service.getName()+"' for environment '"+envInfo.getEnvironmentName()+"' has an invalid Acces Right type or value: Type = '"+ right.getType() +"' Value = '"+right.getValue()+"'. Contact your environment provider for details.");	
+								}
+							}
+						}
 						envInfo.getServices().add(serviceInfo);
 					}
 				}

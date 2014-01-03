@@ -29,7 +29,6 @@ import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.TransportHeaderProperties;
 import sif3.common.utils.AuthenticationUtils;
-import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
@@ -465,7 +464,6 @@ public class ConsumerEnvironmentManager extends BaseEnvironmentManager
 	{
 		TransportHeaderProperties hdrProps = new RESTHeaderProperties();
 		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, authToken);
-		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_ID, UUIDGenerator.getUUID());
 		return hdrProps;
 	}
 

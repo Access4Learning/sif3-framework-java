@@ -197,6 +197,23 @@ public class ProviderEnvironmentManager extends BaseEnvironmentManager
 			return true;
 		}
 	}
+	
+	/**
+	 * Returns the environment for the given Authentication Token. If no environment is known for the given authentication then 
+	 * null is returned.
+	 * 
+	 * @param authToken The token to return the environment for.
+	 * 
+	 * @return See desc.
+	 */
+	public ConsumerEnvironment getConsumerEnvironmentByAuthToken(String authToken)
+	{
+		if (authToken != null)
+		{
+			return environmentsByAuthToken.get(authToken);
+		}
+		return null;
+	}
 
 	@Override
 	public String toString()
@@ -315,21 +332,5 @@ public class ProviderEnvironmentManager extends BaseEnvironmentManager
 		return !errorFound;
 	}
 	
-	/*
-	 * Returns the environment for the given Authentication Token. If no environment is known for the given authentication then 
-	 * null is returned.
-	 * 
-	 * @param authToken The token to return the environment for.
-	 * 
-	 * @return See desc.
-	 */
-	private ConsumerEnvironment getConsumerEnvironmentByAuthToken(String authToken)
-	{
-		if (authToken != null)
-		{
-			return environmentsByAuthToken.get(authToken);
-		}
-		return null;
-	}
 
 }
