@@ -104,7 +104,7 @@ public class StudentPersonalProvider extends AUDataModelProvider
      * @see sif3.common.provider.Provider#createSingle(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public Object createSingle(Object data, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException
+    public Object createSingle(Object data, boolean useAdvisory, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException
     {
     	// Must be of type StudentPersonalType
     	if (data instanceof StudentPersonalType)
@@ -113,7 +113,12 @@ public class StudentPersonalProvider extends AUDataModelProvider
     		if (StringUtils.isEmpty(student.getRefId()))
     		{
     			//In future this should be a UUID instead of a GUID
-    			student.setRefId(UUIDGenerator.getSIF2GUIDUpperCase());
+    		  if (!useAdvisory)
+    		  {
+    		    // Create new UUID because the advisory shall not be used.
+    		    student.setRefId(UUIDGenerator.getSIF2GUIDUpperCase());
+    		  }
+    		  // else leave student UUID untouched.
     		}
     		
     		//In the real implementation we would call a BL method here to create the Student.
@@ -212,20 +217,37 @@ public class StudentPersonalProvider extends AUDataModelProvider
      * @see sif3.common.provider.Provider#createMany(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public List<OperationStatus> createMany(Object data, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException
+    public List<OperationStatus> createMany(Object data, boolean useAdvisory, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException
     {
     	// Must be of type StudentPersonalType
     	if (data instanceof StudentCollectionType)
     	{
     		logger.debug("Create students (Bulk Operation)");
+        StudentCollectionType students = (StudentCollectionType)data;
+        ArrayList<OperationStatus> opStatus = new ArrayList<OperationStatus>();
+        int i=0;
+        for (StudentPersonalType student : students.getStudentPersonal())
+        {
+          if ((i % 3) == 0)
+          {
+            opStatus.add(new OperationStatus(student.getRefId(), 404, new ErrorDetails(400, "Data not good.")));
+          }
+          else
+          {
+            if (useAdvisory)
+            {
+              opStatus.add(new OperationStatus(student.getRefId(), 201));
+            }
+            else
+            {
+              // TODO: JH - Once XSD for Create is updated then I must set the advidory and the old RefId in this call so that we
+              // can link back the new RefId with the old.
+              opStatus.add(new OperationStatus(UUIDGenerator.getSIF2GUIDUpperCase(), 201));
+            }
+          }
+          i++;
+        }
 
-    		//In the real implementation we would call a BL method here to modify the Student.
-    		ArrayList<OperationStatus> opStatus = new ArrayList<OperationStatus>();
-    		opStatus.add(new OperationStatus(UUIDGenerator.getSIF2GUIDUpperCase(), 201));
-    		opStatus.add(new OperationStatus(UUIDGenerator.getSIF2GUIDUpperCase(), 400, new ErrorDetails(400, "Data not good.")));
-    		opStatus.add(new OperationStatus(UUIDGenerator.getSIF2GUIDUpperCase(), 201));
-    		opStatus.add(new OperationStatus(UUIDGenerator.getSIF2GUIDUpperCase(), 201));
-    		
     		return opStatus;
     	}
     	else
@@ -244,14 +266,21 @@ public class StudentPersonalProvider extends AUDataModelProvider
     	if (data instanceof StudentCollectionType)
     	{
     		logger.debug("Update students (Bulk Operation)");
-
-    		//In the real implementation we would call a BL method here to modify the Student.
-    		ArrayList<OperationStatus> opStatus = new ArrayList<OperationStatus>();
-    		opStatus.add(new OperationStatus(UUIDGenerator.getSIF2GUIDUpperCase(), 200));
-    		opStatus.add(new OperationStatus(UUIDGenerator.getSIF2GUIDUpperCase(), 200));
-    		opStatus.add(new OperationStatus(UUIDGenerator.getSIF2GUIDUpperCase(), 400, new ErrorDetails(400, "Data not good for entry 3.")));
-    		opStatus.add(new OperationStatus(UUIDGenerator.getSIF2GUIDUpperCase(), 400, new ErrorDetails(400, "Data not good for entry 4.")));
-    		opStatus.add(new OperationStatus(UUIDGenerator.getSIF2GUIDUpperCase(), 200));
+    		StudentCollectionType students = (StudentCollectionType)data;
+        ArrayList<OperationStatus> opStatus = new ArrayList<OperationStatus>();
+    		int i=0;
+    		for (StudentPersonalType student : students.getStudentPersonal())
+    		{
+          if ((i % 3) == 0)
+          {
+            opStatus.add(new OperationStatus(student.getRefId(), 404, new ErrorDetails(404, "Student with GUID = "+student.getRefId()+" does not exist.")));
+          }
+          else
+          {
+            opStatus.add(new OperationStatus(student.getRefId(), 200));
+          }
+          i++;
+    		}
     		
     		return opStatus;
     	}
@@ -282,7 +311,7 @@ public class StudentPersonalProvider extends AUDataModelProvider
         }
         i++;
       }
-	    return null;
+	    return opStatus;
     }
 
     /*--------------------------------------*/
