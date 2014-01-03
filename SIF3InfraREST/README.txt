@@ -1,5 +1,5 @@
 #########################################################################################################
-# Copyright 2013 Systemic Pty Ltd
+# Copyright 2013-2014 Systemic Pty Ltd
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ The framework has some basic demo classes that illustrate how to use the framewo
 developer's guide that can be found in the "documentation/UserGuide" directory.
 
 NOTE:
-As of November 2013 the framework works for SIF3 with a DIRECT environment and IMMEDIATE responses. It
+As of January 2014 the framework works for SIF3 with a DIRECT environment and IMMEDIATE responses. It
 doesn't support brokered or delayed response solutions, yet.
 
 #########################################################################################################
@@ -85,6 +85,20 @@ This latest version of the framework has the HTTPS (secured connections) capabil
 that you read section "5.7 Security - HTTPS Connections" of the Developer's Guide first. Also check out section
 5.5.2.1.1, 5.5.2.1.2 and 5.6.2.1.2 of the guide about details what properties must be configured to enable 
 HTTPS for a consumer and provider. 
+
+=======================
+Version from 03/01/2014
+=======================
+Modified some underlying classes to include all header fields as specified in the latest SIF3 specification. Also
+implemented the Bulk Delete which is now managed via a HTTP PUT and an appropriate header fields.
+Also added the functionality for more rigorous ACL checks before any REST calls are made. Before each REST call
+the consumer checks if access to the call is APPROVED (looking up ACLs in the environment XML). To disable or enable
+this ACL check please refer to the Developer's Guide and read up on the 'adapter.checkACL' property for the consumer
+and/or provider.
+
+Please note that with this latest download the Provider Interface has an additional parameter for the two create operation.
+Your code may break! Add the parameter 'boolean useAdvisory' to your provider classes were you may get a compile error.
+Please refer to the latest SIF3 Specification for details what this value means.
 
 #########################################################################################################
 # Download Instructions
