@@ -45,7 +45,7 @@ public class ResponseHeaderConstants
 	public static final String HDR_MESSAGE_TYPE = "messageType";
 	public static final String HDR_REQUEST_ID = "requestId";
 	public static final String HDR_RESPONSE_ACTION = "responseAction";
-	public static final String HDR_SERVICE_NAME = "serviceName";
+	public static final String HDR_REL_SERVICE_PATH = "relativeServicePath";
 	
 	 public static final String[] HEADER_NAME_ARRAY = 
 	 {
@@ -65,10 +65,7 @@ public class ResponseHeaderConstants
 	   HDR_REQUEST_ID,
 	   HDR_RESPONSE_ACTION,
 	   HDR_LOCATION,
-	   HDR_SERVICE_NAME
+	   HDR_REL_SERVICE_PATH
 	 };
 
-//	 public static final String ERROR_RESPONSE_TYPE = "ERROR";
-//	 public static final String STANDARD_RESPONSE_TYPE = "RESPONSE";
-//	 public static final String EVENT_RESPONSE_TYPE = "EVENT";
 }
