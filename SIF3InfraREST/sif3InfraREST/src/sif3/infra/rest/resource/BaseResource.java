@@ -46,6 +46,9 @@ import sif3.common.ws.OperationStatus;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.env.EnvironmentStore;
+import sif3.infra.common.env.types.ConsumerEnvironment;
+import sif3.infra.common.env.types.ServiceRights.AccessRight;
+import sif3.infra.common.env.types.ServiceRights.AccessType;
 import sif3.infra.common.model.CreateResponseType;
 import sif3.infra.common.model.CreateType;
 import sif3.infra.common.model.CreatesType;
@@ -99,8 +102,8 @@ public abstract class BaseResource
 	private TransportHeaderProperties hdrProperties = new RESTHeaderProperties();
 	private SIFZone sifZone = null;
 	private SIFContext sifContext = null;
-	private String serviceName = null;
 	private boolean isSecure = false;
+	private String relativeServicePath = null; 
 
 	/* Metadata extracted from URI relating to query */ 
 	private QueryMetadata queryMetadata;
@@ -114,16 +117,26 @@ public abstract class BaseResource
 	 * @param requestHeaders All headers of the original request.
 	 * @param request The actual request in its raw form.
 	 */
-	public BaseResource(UriInfo uriInfo, HttpHeaders requestHeaders, Request request, String serviceName)
+	public BaseResource(UriInfo uriInfo, HttpHeaders requestHeaders, Request request, String servicePrefixPath, String zoneID, String contextID)
 	{
 		this.uriInfo = uriInfo;
 		this.request = request;
 		this.requestHeaders = requestHeaders;
-		this.serviceName = serviceName;
 		this.servicePropFileName = WebUtils.getInstance().getServicePropertyFileName();
 		extractHeaderProperties(requestHeaders);
-		setSecure(HTTPS_SCHEMA.equalsIgnoreCase(getUriInfo().getBaseUri().getScheme()));	
-
+		setSecure(HTTPS_SCHEMA.equalsIgnoreCase(getUriInfo().getBaseUri().getScheme()));
+		setRelativeServicePath(getUriInfo().getPath(), servicePrefixPath);
+		
+	    if (StringUtils.notEmpty(zoneID))
+	    {
+	      setSifZone(new SIFZone(zoneID));
+	    }
+	    
+	    if (StringUtils.notEmpty(contextID))
+	    {
+	      setSifContext(new SIFContext(contextID));
+	    }
+		
 		// initialise the environment store
 		envMgr = ProviderEnvironmentManager.getInstance(EnvironmentStore.getInstance(servicePropFileName));
 		
@@ -146,13 +159,15 @@ public abstract class BaseResource
 		// Some debug output
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Requested Resource: " + getClass().getSimpleName()+" - "+getServiceName());
 			logger.debug("Full URI          : " + getUriInfo().getRequestUri().toString());
 			logger.debug("Base URI          : " + getUriInfo().getBaseUri().toString());
 			logger.debug("Relative URI      : " + getUriInfo().getPath());
+			logger.debug("Rel. Service Path : " + getRelativeServicePath());
 			logger.debug("Protocol          : " + getUriInfo().getBaseUri().getScheme());
 			logger.debug("SIF3 Req. Headers : " + getHeaderProperties());
 			logger.debug("Request Media Type: " + getMediaType());
+			logger.debug("Zone ID           : " + getSifZone());
+			logger.debug("ContextID         : " + getSifContext());
 			logger.debug("Resource Init ok  : " + allOK);
 		}
 	}
@@ -172,10 +187,19 @@ public abstract class BaseResource
 		return propertyManager.getProperties(servicePropFileName);
 	}
 
-	public String getServiceName()
-	{
-		return serviceName;
-	}
+
+  public String getRelativeServicePath()
+  {
+    return relativeServicePath;
+  }
+
+  public void setRelativeServicePath(String relativeServicePath, String servicePrefixPath)
+  {
+    if (StringUtils.notEmpty(servicePrefixPath))
+    {
+      this.relativeServicePath = relativeServicePath.replaceAll(servicePrefixPath, "");     
+    }
+  }
 
 	public boolean isInitialised()
 	{
@@ -247,11 +271,51 @@ public abstract class BaseResource
 	/*--------------------------------*/
 	/**
 	 * If the client is valid then the ErrorDetails returned is null. If there is something wrong, then the ErrorDetails will be 
-	 * set accordingly and returned.
+	 * set accordingly and returned. Checks include if authentication token is valid for an environment and if the access
+	 * rights for the requested service are at expected levels.
+	 * 
+	 * @param serviceName Service for which the access rights shall be checked.
+	 * @param right The access right (QUERY, UPDATE etc) that shall be checked for.
+	 * @param accessType The access level (SUPPORTED, APPROVED, etc) that must be met for the given service and right.
 	 * 
 	 * @return See desc
 	 */
-	public ErrorDetails validClient()
+	public ErrorDetails validClient(String serviceName, AccessRight right, AccessType accessType)
+	{
+		ErrorDetails error = validEnvironmentForConsumer();
+		
+		if (error != null)
+		{
+			return error;
+		}
+
+		if (envMgr.getEnvironmentStore().getEnvironments().getCheckACL())
+		{
+			// Consumer environment must exist otherwise an error would have been returned with previous check
+			ConsumerEnvironment env = envMgr.getConsumerEnvironmentByAuthToken(getAuthToken());	
+			SIFContext context = getSifContext();
+			SIFZone zone = getSifZone();
+			
+			//Check access rights
+			if (!env.hasAccess(right, accessType, serviceName, zone, context))
+			{
+				String zoneID = (zone == null) ? "Default" : zone.getId();
+				String contextID = (context == null) ? "Default" : context.getId();
+				error = new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not authorized.", right.name()+ " access is not set to "+accessType.name()+" for the service "+serviceName+" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+env.getEnvironmentName(), "Provider side check.");			
+			}
+		}
+		return error;
+	}
+	
+	
+	/**
+	 * If the environment is valid then the ErrorDetails returned is null. If there is something wrong, then the
+     * ErrorDetails will be set accordingly and returned. The main check of this method is to determine if the 
+     * authentication token is valid for an existing environment of this client.
+	 * 
+	 * @return See desc
+	 */
+	public ErrorDetails validEnvironmentForConsumer()
 	{
 		ErrorDetails error = null;
 		// we must have a authentication token and there must be an environment with that authentication token
@@ -332,9 +396,9 @@ public abstract class BaseResource
 		ResponseBuilder response = Response.noContent();
 		response = response.header(ResponseHeaderConstants.HDR_PROVIDER_ID, getProviderID());
 		response = response.header(ResponseHeaderConstants.HDR_DATE_TIME, DateUtils.nowAsISO8601());
-		response = response.header(ResponseHeaderConstants.HDR_MESSAGE_TYPE, (isError) ? HeaderValues.ResponseType.ERROR.name() : HeaderValues.ResponseType.RESPONSE.name());					
+		response = response.header(ResponseHeaderConstants.HDR_MESSAGE_TYPE, (isError) ? HeaderValues.MessageType.ERROR.name() : HeaderValues.MessageType.RESPONSE.name());					
 		response = response.header(ResponseHeaderConstants.HDR_RESPONSE_ACTION, responseAction.name());
-		response = response.header(ResponseHeaderConstants.HDR_SERVICE_NAME, getServiceName());
+		response = response.header(ResponseHeaderConstants.HDR_REL_SERVICE_PATH, getRelativeServicePath());
 
 		// Mirror requestId if available
 		String requestID = hdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_REQUEST_ID);
@@ -522,9 +586,9 @@ public abstract class BaseResource
 			// Date & Time format must be: YYYY-MM-DDTHH:mm:ssZ (i.e. 2013-08-12T12:13:14Z)
 			response = response.header(ResponseHeaderConstants.HDR_DATE_TIME, DateUtils.nowAsISO8601());
 			response = response.header(ResponseHeaderConstants.HDR_PROVIDER_ID, getProviderID());
-			response = response.header(ResponseHeaderConstants.HDR_MESSAGE_TYPE, (isError) ? HeaderValues.ResponseType.ERROR.name() : HeaderValues.ResponseType.RESPONSE.name());					
+			response = response.header(ResponseHeaderConstants.HDR_MESSAGE_TYPE, (isError) ? HeaderValues.MessageType.ERROR.name() : HeaderValues.MessageType.RESPONSE.name());					
 			response = response.header(ResponseHeaderConstants.HDR_RESPONSE_ACTION, responseAction.name());
-			response = response.header(ResponseHeaderConstants.HDR_SERVICE_NAME, getServiceName());
+			response = response.header(ResponseHeaderConstants.HDR_REL_SERVICE_PATH, getRelativeServicePath());
 			if (pagingInfo != null)
 			{
 				response = response.header(ResponseHeaderConstants.HDR_LAST_PAGE_NO, pagingInfo.getMaxPages());

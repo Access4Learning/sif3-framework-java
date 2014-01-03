@@ -35,9 +35,9 @@ public abstract class InfraResource extends BaseResource
 	private MarshalFactory marshaller = new InfraMarshalFactory();
 	private UnmarshalFactory unmarshaller = new InfraUnmarshalFactory();
 
-	public InfraResource(UriInfo uriInfo, HttpHeaders requestHeaders, Request request, String serviceName)
+	public InfraResource(UriInfo uriInfo, HttpHeaders requestHeaders, Request request, String servicePrefixPath, String zoneID, String contextID)
 	{
-		super(uriInfo, requestHeaders, request, serviceName);
+		super(uriInfo, requestHeaders, request, servicePrefixPath, zoneID, contextID);
 	}
 
 	public MarshalFactory getMarshaller()

@@ -34,23 +34,24 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedQueryException;
+import sif3.common.header.HeaderValues;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryMetadata;
-import sif3.common.model.SIFContext;
-import sif3.common.model.SIFZone;
 import sif3.common.provider.Provider;
 import sif3.common.provider.ProviderFactory;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
-import au.com.systemic.framework.utils.StringUtils;
+import sif3.infra.common.env.types.ServiceRights.AccessRight;
+import sif3.infra.common.env.types.ServiceRights.AccessType;
+import sif3.infra.rest.header.RequestHeaderConstants;
 
 /**
  * This is the generic implementation of all Object resources. It implements all the functions required by the SIF3 specification
@@ -93,20 +94,8 @@ public class DataModelResource extends BaseResource
 			                 @MatrixParam("zoneId") String zoneID,
 			                 @MatrixParam("contextId") String contextID)
     {
-	    super(uriInfo, requestHeaders, request, dmObjectNamePlural);
+	    super(uriInfo, requestHeaders, request, "requests", zoneID, contextID);
 	    this.dmObjectNamePlural = dmObjectNamePlural;
-	    
-	    if (StringUtils.notEmpty(zoneID))
-	    {
-	      setSifZone(new SIFZone(zoneID));
-	    }
-	    
-	    if (StringUtils.notEmpty(contextID))
-	    {
-	      setSifContext(new SIFContext(contextID));
-	    }
-
-	    System.out.println("DM Name = "+dmObjectNamePlural+"    Zone ID = "+zoneID+"     Context ID = "+contextID);
 	    
 	    // Initialise Factory if it is accessed for the first time.
 	    if (factory == null)
@@ -131,12 +120,12 @@ public class DataModelResource extends BaseResource
 			logger.debug("Create Single "+dmObjectNameSingle+" (REST POST) with input data: " + payload);
 		}
 		
-		ErrorDetails error = validClient();
+		ErrorDetails error = validClient(dmObjectNamePlural, AccessRight.CREATE, AccessType.APPROVED);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.CREATE);
 		}
-		
+				
 		Provider provider = getProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
@@ -145,7 +134,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			Object returnObj = provider.createSingle(provider.getUnmarshaller().unmarschal(payload, provider.getSingleObjectClassInfo().getObjectType(), getMediaType()), getSifZone(), getSifContext());
+			Object returnObj = provider.createSingle(provider.getUnmarshaller().unmarschal(payload, provider.getSingleObjectClassInfo().getObjectType(), getMediaType()), getAdvisory(), getSifZone(), getSifContext());
 
 			return makeResponse(returnObj, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, provider.getMarshaller());
 		}
@@ -169,7 +158,7 @@ public class DataModelResource extends BaseResource
 			logger.debug("Create Many "+dmObjectNamePlural+" (REST POST) with input data: " + payload);
 		}
 		
-		ErrorDetails error = validClient();
+		ErrorDetails error = validClient(dmObjectNamePlural, AccessRight.CREATE, AccessType.APPROVED);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.CREATE);
@@ -182,7 +171,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			List<OperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarschal(payload, provider.getMultiObjectClassInfo().getObjectType(), getMediaType()), getSifZone(), getSifContext());
+			List<OperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarschal(payload, provider.getMultiObjectClassInfo().getObjectType(), getMediaType()), getAdvisory(), getSifZone(), getSifContext());
 			
 			if (statusList != null)
 			{
@@ -217,7 +206,7 @@ public class DataModelResource extends BaseResource
 			logger.debug("Get Resource by Resoucre ID (REST GET - Single): "+resourceID);
 		}
 		
-		ErrorDetails error = validClient();
+		ErrorDetails error = validClient(dmObjectNamePlural, AccessRight.QUERY, AccessType.APPROVED);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.QUERY);
@@ -262,7 +251,7 @@ public class DataModelResource extends BaseResource
 			logger.debug("Get List (REST GET - Plural)");
 		}
 		
-		ErrorDetails error = validClient();
+		ErrorDetails error = validClient(dmObjectNamePlural, AccessRight.QUERY, AccessType.APPROVED);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.QUERY);
@@ -312,7 +301,7 @@ public class DataModelResource extends BaseResource
 			logger.debug("Update Single "+dmObjectNamePlural+" (REST PUT) with resourceID = "+resourceID+" and input data: " + payload);
 		}
 		
-		ErrorDetails error = validClient();
+		ErrorDetails error = validClient(dmObjectNamePlural, AccessRight.UPDATE, AccessType.APPROVED);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.UPDATE);
@@ -354,45 +343,35 @@ public class DataModelResource extends BaseResource
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response updateMany(String payload)
 	{
+	  // Check what is really required: DELETE or UPDATE
+	  boolean doDelete = HeaderValues.MethodType.DELETE.name().equalsIgnoreCase(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE));
+	  
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Update Collection "+dmObjectNamePlural+" (REST PUT) with input data: " + payload);
+		  if (doDelete)
+		  {
+		    logger.debug("Delete Collection "+dmObjectNamePlural+" (REST PUT, method OVERRODE=DELETE) with input data: " + payload);
+		  }
+		  else
+		  {
+        logger.debug("Update Collection "+dmObjectNamePlural+" (REST PUT) with input data: " + payload);		    
+		  }
 		}
 		
-		ErrorDetails error = validClient();
+		ErrorDetails error = validClient(dmObjectNamePlural, ((doDelete) ? AccessRight.DELETE : AccessRight.UPDATE), AccessType.APPROVED);
 		if (error != null) // Not allowed to access!
 		{
 			logger.debug("Error Found: "+error);
-			return makeErrorResponse(error, ResponseAction.UPDATE);
+			return makeErrorResponse(error, ((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE));
 		}
 
 		Provider provider = getProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.UPDATE);			
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE));			
 		}
 	
-		try
-		{
-			List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarschal(payload, provider.getMultiObjectClassInfo().getObjectType(), getMediaType()), getSifZone(), getSifContext());
-			
-			if (statusList != null)
-			{
-				return makeUpdateMultipleResponse(statusList, Status.OK);
-			}
-			else
-			{
-				return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.UPDATE);
-			}			
-		}
-		catch (PersistenceException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);			
-		}
-		catch (UnmarshalException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getMultiObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);			
-		}
+		return (doDelete) ? deleteMany(provider, payload) : updateMany(provider, payload);
 	}
 
 	// -------------------------------------------------------------//
@@ -409,7 +388,7 @@ public class DataModelResource extends BaseResource
 			logger.debug("Remove Single "+dmObjectNamePlural+" (REST DELETE) with resourceID = "+resourceID);
 		}
 		
-		ErrorDetails error = validClient();
+		ErrorDetails error = validClient(dmObjectNamePlural, AccessRight.DELETE, AccessType.APPROVED);
 		if (error != null) // Not allowed to access!
 		{
 			logger.debug("Error Found: "+error);
@@ -446,47 +425,19 @@ public class DataModelResource extends BaseResource
 	@DELETE
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	/*
+	 * NOTE: 
+	 * This method is not really implemented as DELETE is not supported with a payload. See PUT method for details about the way
+	 * a Bulk-DELETE is implmented according to SIF3 Spec. 
+	 */
 	public Response removeMany(String payload)
 	{
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Delete Collection "+dmObjectNamePlural+" (REST DELETE) with input data: " + payload);
 		}
-		
-		ErrorDetails error = validClient();
-		if (error != null) // Not allowed to access!
-		{
-			logger.debug("Error Found: "+error);
-			return makeErrorResponse(error, ResponseAction.DELETE);
-		}
-
-		Provider provider = getProvider();
-		if (provider == null) // error already logged but we must return an error response for the caller
-		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.DELETE);			
-		}
-	
-		try
-		{
-			List<OperationStatus> statusList = provider.deleteMany(getResourceIDsFromDeleteRequest(payload), getSifZone(), getSifContext());
-			
-			if (statusList != null)
-			{
-				return makeUpdateMultipleResponse(statusList, Status.OK);
-			}
-			else
-			{
-				return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.DELETE);
-			}			
-		}
-		catch (PersistenceException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Problem reported: "+ex.getMessage()), ResponseAction.DELETE);			
-		}
-		catch (UnmarshalException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to DeleteRequestType. Problem reported: "+ex.getMessage()), ResponseAction.DELETE);			
-		}
+		ErrorDetails error = new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Operation not supported.", "Use HTTP PUT with header field '"+RequestHeaderConstants.HDR_METHOD_OVERRIDE+"' set to "+HeaderValues.MethodType.DELETE.name()+" instead.");
+		return makeErrorResponse(error, ResponseAction.DELETE);
 	}
 	
 	/*---------------------*/
@@ -500,5 +451,61 @@ public class DataModelResource extends BaseResource
 		}
 		return provider;
 	}
+	
+	private boolean getAdvisory()
+	{
+	    return Boolean.valueOf(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, "false"));
+	}
+	
+	private Response updateMany(Provider provider, String payload)
+	{
+    try
+    {
+      List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarschal(payload, provider.getMultiObjectClassInfo().getObjectType(), getMediaType()), getSifZone(), getSifContext());
+      
+      if (statusList != null)
+      {
+        return makeUpdateMultipleResponse(statusList, Status.OK);
+      }
+      else
+      {
+        return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.UPDATE);
+      }     
+    }
+    catch (PersistenceException ex)
+    {
+      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);      
+    }
+    catch (UnmarshalException ex)
+    {
+      return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getMultiObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);      
+    }
+	}
+
+  private Response deleteMany(Provider provider, String payload)
+  {
+    try
+    {
+      List<OperationStatus> statusList = provider.deleteMany(getResourceIDsFromDeleteRequest(payload), getSifZone(), getSifContext());
+      
+      if (statusList != null)
+      {
+        return makeDeleteMultipleResponse(statusList, Status.OK);
+      }
+      else
+      {
+        return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.DELETE);
+      }     
+    }
+    catch (PersistenceException ex)
+    {
+      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Problem reported: "+ex.getMessage()), ResponseAction.DELETE);      
+    }
+    catch (UnmarshalException ex)
+    {
+      return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to DeleteRequestType. Problem reported: "+ex.getMessage()), ResponseAction.DELETE);     
+    }
+    
+  }
 
 }

@@ -62,13 +62,13 @@ public class EnvironmentResource extends InfraResource
 {
 	private ProviderEnvironmentManager envMgr = null;
 	
-	private static final String SERVICE_NAME = "environments";
+//	private static final String SERVICE_NAME = "environments";
 
 	public EnvironmentResource(@Context UriInfo uriInfo,
 			                   @Context HttpHeaders requestHeaders,
 			                   @Context Request request)
 	{
-		super(uriInfo, requestHeaders, request, SERVICE_NAME);
+		super(uriInfo, requestHeaders, request, "", null, null);
 	    envMgr = ProviderEnvironmentManager.getInstance(EnvironmentStore.getInstance(getServicePropFileName()));
 	}
 
@@ -181,7 +181,7 @@ public class EnvironmentResource extends InfraResource
 		logger.debug("Retrieve Environment with id = " + id);
 		
 		//check if the caller is valid, i.e. has provided a authentication token.
-		ErrorDetails error = validClient();
+		ErrorDetails error = validEnvironmentForConsumer();
 		if (error == null)
 		{
 			// If I get here then the client has an environment. Load and return it.
@@ -215,7 +215,7 @@ public class EnvironmentResource extends InfraResource
 		logger.debug("Delete Environment with id = " + id);
 		
 		//check if the caller is valid, i.e. has provided a authentication token.
-		ErrorDetails error = validClient();
+		ErrorDetails error = validEnvironmentForConsumer();
 		if (error == null)
 		{
 			// If I get here then the client has an environment. Load and return it.
