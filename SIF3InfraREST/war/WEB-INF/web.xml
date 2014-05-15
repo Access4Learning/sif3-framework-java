@@ -19,21 +19,28 @@
         <servlet-name>Jersey REST Service</servlet-name>
         <url-pattern>/sif3/*</url-pattern>
     </servlet-mapping>
-
-    <!-- ********* -->
-    <!-- Variables -->
-    <!-- ********* -->
+    
+    <!-- *********************************************************************************************** -->
+    <!-- Context listener: Used to initialise (start-up) and free (shut-down) resources of this servlet. -->
+    <!-- *********************************************************************************************** -->
+    <listener>
+        <listener-class>sif3.infra.rest.web.ProviderServletContext</listener-class>
+    </listener>
+    
+    <!-- ************************************************ -->
+    <!-- Parameters to be used in Context Listener above. -->
+    <!-- ************************************************ -->
     <!--  
       ***************************************************************************************************************************
-      The name of the service (consumber/propvider) property file to use in this deployment.  
+      The name of the service (consumer/provider) property file to use in this deployment.  
       Note this file will be used to identify the service ID, service type (consumer/provider), environment store etc.
       ***************************************************************************************************************************
     -->
-    <env-entry>
-        <env-entry-name>SERVICE_PROPERTY_FILE</env-entry-name>
-        <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>StudentProvider</env-entry-value>
-    </env-entry>
+    <context-param> 
+        <param-name>SERVICE_PROPERTY_FILE</param-name> 
+        <!--param-value>BrokeredSISProvider</param-value--> 
+        <param-value>StudentProvider</param-value> 
+    </context-param> 
 
     
   <welcome-file-list>
