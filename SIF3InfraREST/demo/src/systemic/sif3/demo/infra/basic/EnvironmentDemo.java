@@ -79,8 +79,8 @@ public class EnvironmentDemo
 		ApplicationInfoType appInfo = new ApplicationInfoType();
 		appInfo.setApplicationKey("TEST_CODE");
 		appInfo.setSupportedInfrastructureVersion("3.0");
-		appInfo.setSupportedDataModel("SIF-AU");
-		appInfo.setSupportedDataModelVersion("3.0");
+//		appInfo.setSupportedDataModel("SIF-AU");
+		appInfo.setDataModelNamespace("http://www.SIFinfo.org/au/datamodel/1.3");
 		appInfo.setTransport("REST");
 		
 		ProductIdentityType appProd = new ProductIdentityType();
