@@ -16,8 +16,10 @@
 
 package sif3.infra.common.env.types;
 
-import java.net.URI;
-import java.util.HashMap;
+import sif3.common.CommonConstants;
+import sif3.common.CommonConstants.QueuePollingType;
+import sif3.common.CommonConstants.QueueStrategy;
+
 
 /**
  * This class is a sub-class of an environment. It adds properties typical in a consumer environment.
@@ -27,26 +29,34 @@ import java.util.HashMap;
  */
 public class ConsumerEnvironment extends EnvironmentInfo
 {
-	public static enum ConnectorName {environment, requestsConnector, provisionRequests, queues, subscriptions};
+	public static enum ConnectorName {environment, requestsConnector, provisionRequests, eventsConnector, queues, subscriptions};
         	
 	private static final long serialVersionUID = -2685814104916173550L;
 
 	private boolean connected = false;
-	private boolean useAdvisory = false; 
+	private boolean useAdvisory = false;
+	private String templateXMLFileName = null;
 	
-	private HashMap<ConnectorName, URI> connectorBaseURIs = new HashMap<ConnectorName, URI>();
+	/* Event, Queue and Subscription related properties */
+	private boolean eventsEnabled = false;
+	private QueueStrategy queueStrategy = QueueStrategy.ADAPTER_LEVEL;
+	private QueuePollingType queueType = QueuePollingType.IMMEDIATE;
+	private int pollFrequency = CommonConstants.DEFAULT_POLL_FREQ;
+	private int longPollTimeOut = CommonConstants.DEFAULT_LONGPOLL_WAIT;
+	private String queueName = null;
+	private int numMsgQueueReaders = 1;
+	private boolean removeSubscribersOnShutdown = false;
 		
 	/**
 	 * Constructor
 	 * 
-	 * @param environmentName The environment name
 	 * @param serviceName The name of the service/adapter.
 	 */
-	public ConsumerEnvironment(String environmentName, String serviceName)
+	public ConsumerEnvironment(String serviceName)
     {
-	    super(environmentName, serviceName);
+	    super();
+	    setAdapterName(serviceName);
     }
-
 
 	/**
 	 * TRUE if the service/adapter is connected to the given environment. This only happens after an attempt is made to the 
@@ -55,7 +65,7 @@ public class ConsumerEnvironment extends EnvironmentInfo
 	 * 
 	 * @return See desc.
 	 */
-	public boolean isConnected()
+	public boolean getIsConnected()
     {
     	return this.connected;
     }
@@ -75,19 +85,105 @@ public class ConsumerEnvironment extends EnvironmentInfo
 		this.useAdvisory = useAdvisory;
 	}
 
-	public void addConnectorBaseURI(ConnectorName connectorName, URI connectorURI)
-	{
-		connectorBaseURIs.put(connectorName, connectorURI);
-	}
-	
-	public URI getConnectorBaseURI(ConnectorName conectorName)
-	{
-		return connectorBaseURIs.get(conectorName);
-	}
+	public String getTemplateXMLFileName()
+    {
+    	return this.templateXMLFileName;
+    }
+
+	public void setTemplateXMLFileName(String templateXMLFileName)
+    {
+    	this.templateXMLFileName = templateXMLFileName;
+    }
+
+	public boolean getEventsEnabled()
+    {
+    	return this.eventsEnabled;
+    }
+
+	public void setEventsEnabled(boolean eventsEnabled)
+    {
+    	this.eventsEnabled = eventsEnabled;
+    }
+
+	public QueueStrategy getQueueStrategy()
+    {
+    	return this.queueStrategy;
+    }
+
+	public void setQueueStrategy(QueueStrategy queueStrategy)
+    {
+    	this.queueStrategy = queueStrategy;
+    }
+
+	public String getQueueName()
+    {
+    	return this.queueName;
+    }
+
+	public void setQueueName(String queueName)
+    {
+    	this.queueName = queueName;
+    }
+
+	public int getNumMsgQueueReaders()
+    {
+    	return this.numMsgQueueReaders;
+    }
+
+	public void setNumMsgQueueReaders(int numMsgQueueReaders)
+    {
+    	this.numMsgQueueReaders = numMsgQueueReaders;
+    }
+
+	public QueuePollingType getQueueType()
+    {
+    	return this.queueType;
+    }
+
+	public void setQueueType(QueuePollingType queueType)
+    {
+    	this.queueType = queueType;
+    }
+
+	public int getPollFrequency()
+    {
+    	return this.pollFrequency;
+    }
+
+	public void setPollFrequency(int pollFrequency)
+    {
+    	this.pollFrequency = pollFrequency;
+    }
+
+	public int getLongPollTimeOut()
+    {
+    	return this.longPollTimeOut;
+    }
+
+	public void setLongPollTimeOut(int longPollTimeOut)
+    {
+    	this.longPollTimeOut = longPollTimeOut;
+    }
+
+	public boolean getRemoveSubscribersOnShutdown()
+    {
+    	return this.removeSubscribersOnShutdown;
+    }
+
+	public void setRemoveSubscribersOnShutdown(boolean removeSubscribersOnShutdown)
+    {
+    	this.removeSubscribersOnShutdown = removeSubscribersOnShutdown;
+    }
 
 	@Override
-	public String toString()
-	{
-		return "ConsumerEnvironment [connected=" + connected + ", connectorBaseURIs=" + connectorBaseURIs + ", useAdvisory=" + useAdvisory + ", toString()=" + super.toString() + "]";
-	}
+    public String toString()
+    {
+	    return "ConsumerEnvironment [connected=" + this.connected + ", useAdvisory="
+	            + this.useAdvisory + ", templateXMLFileName=" + this.templateXMLFileName
+	            + ", eventsEnabled=" + this.eventsEnabled + ", queueStrategy=" + this.queueStrategy
+	            + ", queueType=" + this.queueType + ", pollFrequency=" + this.pollFrequency
+	            + ", longPollTimeOut=" + this.longPollTimeOut + ", queueName=" + this.queueName
+	            + ", numMsgQueueReaders=" + this.numMsgQueueReaders + ", removeSubscribersOnShutdown="
+	            + this.removeSubscribersOnShutdown + ", toString()=" + super.toString() + "]";
+    }
 }

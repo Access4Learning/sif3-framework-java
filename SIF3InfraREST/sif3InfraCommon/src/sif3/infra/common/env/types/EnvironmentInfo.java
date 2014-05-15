@@ -20,18 +20,18 @@ package sif3.infra.common.env.types;
 
 import java.io.Serializable;
 import java.net.URI;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.ws.rs.core.MediaType;
 
-import sif3.common.model.SIFContext;
-import sif3.common.model.SIFZone;
-import sif3.infra.common.env.types.ServiceRights.AccessRight;
-import sif3.infra.common.env.types.ServiceRights.AccessType;
+import sif3.common.CommonConstants.AdapterType;
+import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
+import sif3.common.model.EnvironmentKey;
+import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 
 /**
- * This class is a super-class for environment management. It can be used for Consumer and Provider environment managemnt but it is 
- * unlikely to be used on its own. It holds base infromation that is required in either environment and must be maintained in either
+ * This class is a super-class for environment management. It can be used for Consumer and Provider environment management but it is 
+ * unlikely to be used on its own. It holds base information that is required in either environment and must be maintained in either
  * environment (Consumer, Provider).
  * 
  * @author Joerg Huber
@@ -39,79 +39,83 @@ import sif3.infra.common.env.types.ServiceRights.AccessType;
  */
 public class EnvironmentInfo implements Serializable
 {
-    private static final long serialVersionUID = 8203669966934384325L;
-    
-    private String    adapterName           = null;
-	private String    environmentName       = null;
-    private String    userName              = null;
-    private String    password              = null;
-    private URI       baseURI               = null;
-    private URI       secureBaseURI         = null;
-    private String    sessionToken          = null;
-    private String    envGUID               = null;
-    private String    authenticationToken   = null;
-    private boolean   secureConnection      = false;
-   	private MediaType mediaType             = MediaType.APPLICATION_XML_TYPE;
-	private SIFZone   defaultZone           = null;
-	private ArrayList<ServiceInfo> services = new ArrayList<ServiceInfo>();
+	private static final long serialVersionUID = 8203669966934384325L;
     
 	/**
-     * @param environmentName
-     */
-    public EnvironmentInfo(String environmentName, String adapterName)
-    {
-	    super();
-	    this.environmentName = environmentName;
-	    this.adapterName = adapterName;
-    }
+	 * Valid Environment Types.
+	 */
+	public enum EnvironmentType {DIRECT, BROKERED};
 
-    /**
-     * Get th adapter name. This is the name of the full service. On the provider side it is something like the name of the web-app where
-     * as on the consumer side it might be the name of the execuatble.
-     * 
-     * @return See desc.
-     */
+    private URI       baseURI                = null; // URI to broker
+    private boolean   secureConnection      = false;
+   	private MediaType mediaType             = MediaType.APPLICATION_XML_TYPE;
+	private AdapterType adapterType         = null;
+    private boolean checkACL                = true;
+    private EnvironmentType environmentType = null;
+    private AuthenticationMethod authMethod = AuthenticationMethod.Basic;
+    private boolean removeEnvOnShutdown = false;
+    private String adapterName = null; ; // consumerName 
+    private EnvironmentKey environmentKey = new EnvironmentKey();
+    private String    password              = null;
+    private boolean eventsSupported = false;
+    
+	/* 
+     * This is a runtime value only. But it is stored here rather than in the session because it is valid for ALL sessions of that
+     * environment.
+    */
+	private HashMap<ConnectorName, URI> connectorBaseURIs = new HashMap<ConnectorName, URI>();
+    
     public String getAdapterName()
     {
-    	return this.adapterName;
+      return adapterName;
     }
 
-	public void setAdapterName(String adapterName)
+    public void setAdapterName(String adapterName)
     {
-    	this.adapterName = adapterName;
+      this.adapterName = adapterName;
     }
 
-	public String getEnvironmentName()
+    public EnvironmentKey getEnvironmentKey()
     {
-    	return this.environmentName;
+      return environmentKey;
     }
 
-	public void setEnvironmentName(String environmentName)
+    public void setEnvironmentKey(EnvironmentKey environmentKey)
     {
-    	this.environmentName = environmentName;
+      this.environmentKey = environmentKey;
     }
 
-	public String getUserName()
+    public String getPassword()
     {
-    	return this.userName;
+      return password;
     }
-	
-	public void setUserName(String userName)
+
+    public void setPassword(String password)
     {
-    	this.userName = userName;
+      this.password = password;
     }
-	
-	public String getPassword()
+
+    public EnvironmentType getEnvironmentType()
     {
-    	return this.password;
+    	return this.environmentType;
     }
-	
-	public void setPassword(String password)
+
+	public void setEnvironmentType(EnvironmentType environmentType)
     {
-    	this.password = password;
+    	this.environmentType = environmentType;
     }
-	
-    public boolean getIsSecureConnection()
+
+	public AdapterType getAdapterType()
+    {
+    	return this.adapterType;
+    }
+
+	public void setAdapterType(AdapterType adapterType)
+    {
+    	this.adapterType = adapterType;
+    }
+
+	public boolean getSecureConnection()
     {
     	return this.secureConnection;
     }
@@ -131,68 +135,49 @@ public class EnvironmentInfo implements Serializable
     	this.baseURI = baseURI;
     }
 
-  public void setBaseURI(String baseURI)
-  {
-    try
-    {
-      this.baseURI = new URI(baseURI);
-    }
-    catch (Exception ex)
-    {
-      this.baseURI = null;
-    }
-  }
+	public void setBaseURI(String baseURI)
+	{
+		try
+		{
+			this.baseURI = new URI(baseURI);
+		}
+		catch (Exception ex)
+		{
+			this.baseURI = null;
+		}
+	}
 
-  public URI getSecureBaseURI()
-  {
-    return secureBaseURI;
-  }
+	public boolean getCheckACL()
+	{
+		return this.checkACL;
+	}
 
-  public void setSecureBaseURI(URI secureBaseURI)
-  {
-    this.secureBaseURI = secureBaseURI;
-  }
+	public void setCheckACL(boolean checkACL)
+	{
+		this.checkACL = checkACL;
+	}
 
-  public void setSecureBaseURI(String secureBaseURI)
-  {
-    try
+    public AuthenticationMethod getAuthMethod()
     {
-      this.secureBaseURI = new URI(secureBaseURI);
-    }
-    catch (Exception ex)
-    {
-      this.secureBaseURI = null;
-    }
-  }
-
-  public String getSessionToken()
-    {
-    	return this.sessionToken;
+    	return this.authMethod;
     }
 
-	public void setSessionToken(String sessionToken)
+	public void setAuthMethod(AuthenticationMethod authMethod)
     {
-    	this.sessionToken = sessionToken;
+    	this.authMethod = authMethod;
     }
 
-	public String getEnvGUID()
+	// authMethod: Valid values are what is listed in AuthenticationUtils.AuthenticationMethod (case sensitive!!!)
+	public void setAuthMethod(String authMethod)
     {
-    	return this.envGUID;
-    }
-
-	public void setEnvGUID(String envGUID)
-    {
-    	this.envGUID = envGUID;
-    }
-
-	public String getAuthenticationToken()
-    {
-    	return this.authenticationToken;
-    }
-
-	public void setAuthenticationToken(String authenticationToken)
-    {
-    	this.authenticationToken = authenticationToken;
+		try
+		{
+			this.authMethod = AuthenticationMethod.valueOf(authMethod);
+		}
+		catch (Exception ex)
+		{
+			this.authMethod = AuthenticationMethod.Basic;
+		}
     }
 
 	public MediaType getMediaType()
@@ -205,80 +190,69 @@ public class EnvironmentInfo implements Serializable
 		this.mediaType = mediaType;
 	}
 
-	public SIFZone getDefaultZone()
-    {
-    	return this.defaultZone;
-    }
-
-	public void setDefaultZone(SIFZone defaultZone)
-    {
-    	this.defaultZone = defaultZone;
-    }
-
-	/**
-	 * List of services available for this environment. This are OBJECT, UTILITY and FUNCTIONal services. Each service also has an
-	 * assigned zone and context with it, both of which can be ommited. If they are ommited then the default zone and context are assumed
-	 * as per SIF3 specification.
-	 * 
-	 * @return See desc.
-	 */
-    public ArrayList<ServiceInfo> getServices()
-    {
-    	return this.services;
-    }
-
-	public void setServices(ArrayList<ServiceInfo> services)
-    {
-    	this.services = services;
-    }
-	
-	/**
-	 * This method checks if this environment has a service with the given name for which the given zone and context 
-	 * is defined and has the given access right and access type. If all these criteria are met then true is returned 
-	 * otherwise false is returned.
-	 * 
-	 * @param right The access right (QUERY, UPDATE etc) that shall be checked for.
-	 * @param accessType The access level (SUPPORTED, APPROVED, etc) that must be met for the given service and right.
-	 * @param serviceName Service for which the access rights shall be checked.
-	 * @param zone The Zone for which the service is valid and for which the access rights shall be checked. This can be 
-	 *             null and would indicate the default zone.
-	 * @param context The context for which the service is valid and for which the access rights shall be checked. This
-	 *                can be null and would indicate the default context.
-	 * 
-	 * @return See desc
-	 */
-	public boolean hasAccess(AccessRight right, AccessType accessType, String serviceName, SIFZone zone, SIFContext context)
+	public boolean getRemoveEnvOnShutdown()
 	{
-		boolean accessApproved = false;
-		for (ServiceInfo serviceInfo : getServices())
-		{
-			if (serviceInfo.getServiceName().equals(serviceName)) //service name matches
-			{
-				//Check if Zone matches
-				boolean zoneMatches = (zone == null) ? serviceInfo.getZone().getIsDefault() : zone.getId().equals(serviceInfo.getZone().getId());
-				
-				//check if context matches as well
-				boolean contextMatches = (context == null) ? serviceInfo.getContext().getIsDefault() : context.getId().equals(serviceInfo.getContext().getId());
-
-				// Check if access right is the correct level
-				if (zoneMatches && contextMatches)
-				{
-					accessApproved = serviceInfo.getRights().hasRight(right, accessType);
-				}
-			}
-		}
-		return accessApproved;
+		return removeEnvOnShutdown;
 	}
 
+	public void setRemoveEnvOnShutdown(boolean removeEnvOnShutdown)
+	{
+		this.removeEnvOnShutdown = removeEnvOnShutdown;
+	}
+
+	public void addConnectorBaseURI(ConnectorName connectorName, URI connectorURI)
+	{
+		connectorBaseURIs.put(connectorName, connectorURI);
+	}
+	
+	public URI getConnectorBaseURI(ConnectorName conectorName)
+	{
+		return connectorBaseURIs.get(conectorName);
+	}
+	
+	public void clearConnectorBaseURIs()
+	{
+		connectorBaseURIs = new HashMap<ConnectorName, URI>();
+	}
+
+    public boolean getEventsSupported()
+    {
+    	return this.eventsSupported;
+    }
+
+	public void setEventsSupported(boolean eventsSupported)
+    {
+    	this.eventsSupported = eventsSupported;
+    }
+
+	/**
+	 * Convenience Method. It simply calls the getEnvironmentName form the SIF3Session property.
+	 * 
+	 * @return A nice to read name for this environment.
+	 */
+	public String getEnvironmentName()
+	{
+	  if (getEnvironmentKey() != null)
+	  {
+	    return getAdapterName()+"/"+getEnvironmentKey().getEnvironmentName();
+	  }
+	  else
+	  {
+	    return getAdapterName();
+	  }
+	}
+
+
 	@Override
-  public String toString()
-  {
-    return "EnvironmentInfo [adapterName=" + adapterName
-        + ", authenticationToken=" + authenticationToken + ", baseURI="
-        + baseURI + ", defaultZone=" + defaultZone + ", envGUID=" + envGUID
-        + ", environmentName=" + environmentName + ", mediaType=" + mediaType
-        + ", password=" + password + ", secureBaseURI=" + secureBaseURI
-        + ", secureConnection=" + secureConnection + ", services=" + services
-        + ", sessionToken=" + sessionToken + ", userName=" + userName + "]";
-  }
+    public String toString()
+    {
+	    return "EnvironmentInfo [baseURI=" + this.baseURI + ", secureConnection="
+	            + this.secureConnection + ", mediaType=" + this.mediaType + ", adapterType="
+	            + this.adapterType + ", checkACL=" + this.checkACL + ", environmentType="
+	            + this.environmentType + ", authMethod=" + this.authMethod
+	            + ", removeEnvOnShutdown=" + this.removeEnvOnShutdown + ", adapterName="
+	            + this.adapterName + ", environmentKey=" + this.environmentKey + ", password="
+	            + this.password + ", eventsSupported=" + this.eventsSupported
+	            + ", connectorBaseURIs=" + this.connectorBaseURIs + "]";
+    }
 }
