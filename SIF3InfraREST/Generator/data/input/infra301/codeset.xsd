@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns="http://www.sifassociation.org/infrastructure/3.0"
-	targetNamespace="http://www.sifassociation.org/infrastructure/3.0">
+	xmlns="http://www.sifassociation.org/infrastructure/3.0.1"
+	targetNamespace="http://www.sifassociation.org/infrastructure/3.0.1">
 	<xs:include schemaLocation="infrastructurecommontypes.xsd"/>
 
 	<xs:element name="codeSet" type="codeSetType"> </xs:element>
@@ -48,7 +48,7 @@
 				<xs:element name="codeItems" minOccurs="0" type="codeItemsType"> </xs:element>
 			</xs:choice>
 		</xs:sequence>
-		<xs:attribute name="id" use="required">
+		<xs:attribute name="id" use="optional">
 			<xs:simpleType>
 				<xs:restriction base="xs:token">
 					<xs:minLength value="0"/>

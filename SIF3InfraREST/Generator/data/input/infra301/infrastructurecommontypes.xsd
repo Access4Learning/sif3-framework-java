@@ -194,7 +194,9 @@
     <xs:restriction base="xs:token">
       <xs:pattern value="UTILITY"/>
       <xs:pattern value="OBJECT"/>
-      <xs:pattern value="FUNCTION"/>
+      <xs:pattern value="FUNCTIONAL"/>
+      <xs:pattern value="SERVICEPATH"/>
+      <xs:pattern value="XQUERYTEMPLATE"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -222,12 +224,12 @@
       </xs:element>
       <xs:element minOccurs="0" name="properties" type="propertiesType"> </xs:element>
     </xs:sequence>
-    <xs:attribute name="id" type="uuidType"/>
+    <xs:attribute name="id" type="xs:token"/>
   </xs:complexType>
 
   <xs:complexType name="propertiesType">
     <xs:sequence>
-      <xs:element name="property" type="propertyType">
+      <xs:element name="property" type="propertyType" maxOccurs="unbounded">
         <xs:annotation>
           <xs:appinfo>
                   <elementName>Property</elementName>
@@ -297,6 +299,7 @@
     <xs:restriction base="xs:token">
       <xs:pattern value="APPROVED"/>
       <xs:pattern value="SUPPORTED"/>
+      <xs:pattern value="UNSUPPORTED"/>
       <xs:pattern value="REJECTED"/>
     </xs:restriction>
   </xs:simpleType>
@@ -366,4 +369,14 @@
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
+  <xs:simpleType name="infrastructureServiceNamesType">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="environment"/>
+      <xs:enumeration value="provisionRequests"/>
+      <xs:enumeration value="requestsConnector"/>
+      <xs:enumeration value="eventsConnector"/>
+      <xs:enumeration value="queues"/>
+      <xs:enumeration value="subscriptions"/>
+    </xs:restriction>
+  </xs:simpleType>
 </xs:schema>

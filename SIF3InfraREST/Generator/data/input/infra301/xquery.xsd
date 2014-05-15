@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns="http://www.sifassociation.org/infrastructure/3.0"
-	targetNamespace="http://www.sifassociation.org/infrastructure/3.0"
+	xmlns="http://www.sifassociation.org/infrastructure/3.0.1"
+	targetNamespace="http://www.sifassociation.org/infrastructure/3.0.1"
 	elementFormDefault="qualified">
 	<xs:include schemaLocation="infrastructurecommontypes.xsd"/>
 	<xs:element name="xquery" type="xqueryType"> </xs:element>
@@ -17,6 +17,7 @@
 				</xs:annotation>
 				<xs:simpleType>
 					<xs:restriction base="xs:token">
+						<xs:enumeration value="SINGULAR"/>
 						<xs:enumeration value="FORMULA"/>
 						<xs:enumeration value="EXTENDED"/>
 					</xs:restriction>
@@ -78,19 +79,11 @@
 				</xs:annotation>
 				<xs:simpleType>
 					<xs:restriction base="xs:string">
-						<xs:maxLength value="1024"/>
+						<xs:minLength value="0"/>
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
-			<xs:element name="include" minOccurs="0" type="includeType">
-				<xs:annotation>
-					<xs:appinfo>
-							<elementName>Include</elementName>
-							<sifChar>O</sifChar>
-						</xs:appinfo>
-					<xs:documentation>Collection of elements to be included in the results.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
+			<xs:element name="returnType" nillable="true" type="xs:anyURI"/>
 		</xs:sequence>
 		<xs:attribute name="id" type="xs:token"/>
 	</xs:complexType>

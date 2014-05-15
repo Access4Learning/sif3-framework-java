@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-  xmlns="http://www.sifassociation.org/infrastructure/3.0"
-  targetNamespace="http://www.sifassociation.org/infrastructure/3.0" elementFormDefault="qualified">
+  xmlns="http://www.sifassociation.org/infrastructure/3.0.1"
+  targetNamespace="http://www.sifassociation.org/infrastructure/3.0.1" elementFormDefault="qualified">
   <xs:include schemaLocation="infrastructurecommontypes.xsd"/>
   <xs:element name="deleteResponse" type="deleteResponseType"> </xs:element>
   <xs:complexType name="deleteResponseType">
@@ -9,7 +9,7 @@
       <xs:element name="deletes" type="deleteStatusCollection"/>
     </xs:sequence>
   </xs:complexType>
-  
+
   <xs:complexType name="deleteStatusCollection">
     <xs:sequence>
       <xs:element name="delete" type="deleteStatus" maxOccurs="unbounded"/>
@@ -19,7 +19,7 @@
     <xs:sequence>
       <xs:element minOccurs="0" name="error" type="errorType"/>
     </xs:sequence>
-    <xs:attribute name="id" use="required" type="xs:token"/>
+    <xs:attribute name="id" use="optional" type="xs:token"/>
     <xs:attribute name="statusCode" use="optional">
       <xs:simpleType>
         <xs:restriction base="xs:token">

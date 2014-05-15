@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns="http://www.sifassociation.org/infrastructure/3.0"
-	targetNamespace="http://www.sifassociation.org/infrastructure/3.0"
+	xmlns="http://www.sifassociation.org/infrastructure/3.0.1"
+	targetNamespace="http://www.sifassociation.org/infrastructure/3.0.1"
 	elementFormDefault="qualified">
 	<xs:include schemaLocation="infrastructurecommontypes.xsd"/>
 	<xs:element name="queue" type="queueType"> </xs:element>
@@ -40,7 +40,7 @@
 					<xs:documentation>A name which the Consumer assigns to the Queue.  It is useful for reporting purposes, but is not guaranteed to be unique.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="queueURI" type="xs:anyURI" minOccurs="1">
+			<xs:element name="queueUri" type="xs:anyURI" minOccurs="0">
 				<xs:annotation>
 					<xs:appinfo>
 							<elementName>Queue URL</elementName>
@@ -49,7 +49,16 @@
 					<xs:documentation>The URI of the Messages Service associated with the Queue instance.  This is the endpoint where the 'get next message' requests are issued.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="idleTimeout" type="xs:unsignedInt" minOccurs="1">
+			<xs:element minOccurs="0" name="ownerUri" type="xs:anyURI">
+				<xs:annotation>
+					<xs:appinfo>
+						<elementName/>
+						<sifChar>O</sifChar>
+					</xs:appinfo>
+					<xs:documentation>When present, this contains the URL which the Queue instance will use when it determines the owner needs to be asynchronously alerted that a new message has arrived in the Queue.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="idleTimeout" type="xs:unsignedInt" minOccurs="0">
 				<xs:annotation>
 					<xs:appinfo>
 							<elementName>Idle Time</elementName>
@@ -81,7 +90,7 @@
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>
-			<xs:element name="created" type="xs:dateTime" minOccurs="1">
+			<xs:element name="created" type="xs:dateTime" minOccurs="0">
 				<xs:annotation>
 					<xs:appinfo>
 							<elementName>Created</elementName>
@@ -90,7 +99,7 @@
 					<xs:documentation>Time that Queue Instance was Created</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="lastAccessed" type="xs:dateTime" minOccurs="1">
+			<xs:element name="lastAccessed" type="xs:dateTime" minOccurs="0">
 				<xs:annotation>
 					<xs:appinfo>
 							<elementName>Last Accessed</elementName>
@@ -99,7 +108,7 @@
 					<xs:documentation>Time that Queue Instance was last Accessed and a message was dequeued.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="lastModified" type="xs:dateTime" minOccurs="1">
+			<xs:element name="lastModified" type="xs:dateTime" minOccurs="0">
 				<xs:annotation>
 					<xs:appinfo>
 							<elementName>Last Modified</elementName>
@@ -108,7 +117,7 @@
 					<xs:documentation>Time that Queue Instance was last Modified by receiving a new incoming message.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="messageCount" type="xs:unsignedInt" minOccurs="1">
+			<xs:element name="messageCount" type="xs:unsignedInt" minOccurs="0">
 				<xs:annotation>
 					<xs:appinfo>
 							<elementName>Message Count</elementName>

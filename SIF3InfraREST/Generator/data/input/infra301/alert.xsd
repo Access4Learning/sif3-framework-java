@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns="http://www.sifassociation.org/infrastructure/3.0"
-	targetNamespace="http://www.sifassociation.org/infrastructure/3.0"
+	xmlns="http://www.sifassociation.org/infrastructure/3.0.1"
+	targetNamespace="http://www.sifassociation.org/infrastructure/3.0.1"
 	elementFormDefault="qualified">
 	<xs:include schemaLocation="infrastructurecommontypes.xsd"/>
 	<xs:element name="alert" type="alertType"> </xs:element>
@@ -111,7 +111,7 @@
 							<elementName>Category</elementName>
 							<sifChar>MC</sifChar>
 						</xs:appinfo>
-					<xs:documentation>If the Alert Level is an error, this value must be the SIF 3.0 Error Category corresponding to the type of Error being reported</xs:documentation>
+					<xs:documentation>If the Alert Level is an error, this value must be the SIF 3.0.1 Error Category corresponding to the type of Error being reported</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="code" type="xs:unsignedInt" minOccurs="0">
@@ -120,7 +120,7 @@
 							<elementName>Code</elementName>
 							<sifChar>MC</sifChar>
 						</xs:appinfo>
-					<xs:documentation>If the Alert Level is an error, this value must be the SIF 3.0 Error Code corresponding to the type of Error being reported.</xs:documentation>
+					<xs:documentation>If the Alert Level is an error, this value must be the SIF 3.0.1 Error Code corresponding to the type of Error being reported.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="internal" type="xs:token" minOccurs="0">
@@ -133,6 +133,6 @@
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
-		<xs:attribute name="id" type="uuidType"/>
+		<xs:attribute name="id" type="uuidType" use="optional"/>
 	</xs:complexType>
 </xs:schema>

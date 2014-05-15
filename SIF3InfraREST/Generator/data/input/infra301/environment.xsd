@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-	xmlns="http://www.sifassociation.org/infrastructure/3.0"
-	targetNamespace="http://www.sifassociation.org/infrastructure/3.0"
+	xmlns="http://www.sifassociation.org/infrastructure/3.0.1"
+	targetNamespace="http://www.sifassociation.org/infrastructure/3.0.1"
 	elementFormDefault="qualified">
 	<xs:include schemaLocation="infrastructurecommontypes.xsd"/>
 	<xs:element name="environment" type="environmentType"> </xs:element>
@@ -68,14 +68,7 @@
 			<xs:element name="provisionedZones" minOccurs="0" type="provisionedZonesType">
 			</xs:element>
 		</xs:sequence>
-		<xs:attribute name="type" use="required">
-			<xs:simpleType>
-				<xs:restriction base="xs:token">
-					<xs:enumeration value="DIRECT"/>
-					<xs:enumeration value="BROKERED"/>
-				</xs:restriction>
-			</xs:simpleType>
-		</xs:attribute>
+		<xs:attribute name="type" use="optional" type="environmentTypeType"> </xs:attribute>
 		<xs:attribute name="id" type="uuidType"/>
 	</xs:complexType>
 	<xs:complexType name="applicationInfoType">
@@ -98,7 +91,7 @@
 					<xs:documentation>The version of the SIF infrastructure which the Consumer supports.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-            <xs:element name="supportedDataModel" type="xs:string" minOccurs="1">
+			<xs:element name="dataModelNamespace" type="xs:anyURI" minOccurs="1">
 				<xs:annotation>
 					<xs:appinfo>
 							<elementName>Data Model Namespace</elementName>
@@ -107,15 +100,6 @@
 					<xs:documentation>The namespace of the data payloads conveyed by this environment.  Returns may be of a diffrent minor version.  Utility payloads will be of the infrastructure namespace.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-              <xs:element name="supportedDataModelVersion" type="xs:string" minOccurs="1">
-                <xs:annotation>
-                  <xs:appinfo>
-              <elementName>Data Model Namespace</elementName>
-              <sifChar>M</sifChar>
-            </xs:appinfo>
-                  <xs:documentation>The namespace of the data or utility payloads conveyed by this environment.  Returns may be of a diffrent minor version.</xs:documentation>
-                </xs:annotation>
-              </xs:element>
 			<xs:element name="transport" type="xs:string" minOccurs="0">
 				<xs:annotation>
 					<xs:appinfo>
@@ -126,17 +110,31 @@
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="applicationProduct" type="productIdentityType"> </xs:element>
-			<xs:element name="adapterProduct" type="productIdentityType"> </xs:element>
+			<xs:element name="adapterProduct" type="productIdentityType" minOccurs="0">
+			</xs:element>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="infrastructureServicesType">
 		<xs:sequence>
-			<xs:element name="infrastructureService" minOccurs="1" maxOccurs="unbounded"
-				type="propertyType">
+			<xs:element name="infrastructureService" minOccurs="2" maxOccurs="unbounded"
+				type="infrastructureServiceType">
 				<xs:annotation>
 					<xs:documentation>There must be an InfrastructureService element present for each defined Infrastructure Service.   The value of each InfrastructureService Property value subelement defines the URL location of that Infrastructure Service.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 		</xs:sequence>
 	</xs:complexType>
+	<xs:complexType name="infrastructureServiceType">
+		<xs:simpleContent>
+			<xs:extension base="xs:token">
+				<xs:attribute name="name" type="infrastructureServiceNamesType"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="environmentTypeType">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="DIRECT"/>
+			<xs:enumeration value="BROKERED"/>
+		</xs:restriction>
+	</xs:simpleType>
 </xs:schema>
