@@ -35,6 +35,11 @@ public class HeaderValues
 	public enum EventAction {CREATE, UPDATE, DELETE};
 
 	/**
+	 * Valid values for the "replacement" header field in an update event.
+	 */
+	public enum UpdateType {FULL, PARTIAL};
+
+	/**
 	 * Valid Response Types. These values will be used in the "responseAction" response header field.
 	 */
 	public enum ResponseAction {CREATE, UPDATE, DELETE, QUERY};
@@ -47,5 +52,10 @@ public class HeaderValues
 	/**
 	 * Valid values for the "serviceType" header field in the request.
 	 */
-	public enum ServiceType {OBJECT, FUNCTION, UTILITY};
+	public enum ServiceType {OBJECT, FUNCTION, UTILITY, SERVICEPATH, XQUERYTEMPLATE};
+
+	/**
+	 * Valid values for the "requestType" header field in the request.
+	 */
+	public enum RequestType {IMMEDIATE, DELAYED};
 }

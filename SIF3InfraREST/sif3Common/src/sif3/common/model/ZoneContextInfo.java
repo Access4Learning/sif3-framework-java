@@ -1,5 +1,5 @@
 /*
- * EnvironmentZoneContextInfo.java
+ * ZoneContextInfo.java
  * Created: 17/10/2013
  *
  * Copyright 2013 Systemic Pty Ltd
@@ -21,54 +21,42 @@ package sif3.common.model;
 import java.io.Serializable;
 
 /**
- * This class links up environment with its zone and context. In SIF3 each environment has a number of services that are valid in
+ * This class links up a zone with a context. In SIF3 each environment has a number of services that are valid in
  * a given zone and context. To enable that link this class is used.
  * 
  * @author Joerg Huber
  */
-public class EnvironmentZoneContextInfo implements Serializable
+public class ZoneContextInfo implements Serializable
 {
     private static final long serialVersionUID = 2062088818816762019L;
     
-    private String environmentName = null;
     private SIFZone zone = null;
     private SIFContext context = null;
-        
-    public EnvironmentZoneContextInfo(String environmentName)
+            
+    public ZoneContextInfo()
     {
-    	this(environmentName, (SIFZone)null, (SIFContext)null);
+    	this((SIFZone)null, (SIFContext)null);
+    }
+
+    public ZoneContextInfo(SIFZone zone)
+    {
+    	this(zone, (SIFContext)null);
     }
     
-    public EnvironmentZoneContextInfo(String environmentName, SIFZone zone)
-    {
-    	this(environmentName, zone, (SIFContext)null);
-    }
-    
-    public EnvironmentZoneContextInfo(String environmentName, SIFZone zone, SIFContext context)
+    public ZoneContextInfo(SIFZone zone, SIFContext context)
     {
     	super();
-    	setEnvironmentName(environmentName);
     	setZone(zone);
     	setContext(context);
     }
-    public EnvironmentZoneContextInfo(String environmentName, String zoneID)
+    public ZoneContextInfo(String zoneID)
     {
-    	this(environmentName, new SIFZone(zoneID), (SIFContext)null);
+    	this(new SIFZone(zoneID), (SIFContext)null);
     }
 
-    public EnvironmentZoneContextInfo(String environmentName, String zoneID, String contextID)
+    public ZoneContextInfo(String zoneID, String contextID)
     {
-    	this(environmentName, new SIFZone(zoneID), new SIFContext(contextID));
-    }
-
-    public String getEnvironmentName()
-    {
-    	return this.environmentName;
-    }
-	
-	public void setEnvironmentName(String environmentName)
-    {
-    	this.environmentName = environmentName;
+    	this(new SIFZone(zoneID), new SIFContext(contextID));
     }
 	
 	public SIFZone getZone()
@@ -94,8 +82,7 @@ public class EnvironmentZoneContextInfo implements Serializable
 	@Override
     public String toString()
     {
-	    return "EnvironmentZoneContextInfo [environmentName=" + this.environmentName + ", zone="
-	            + this.zone + ", context=" + this.context + "]";
+	    return "ZoneContextInfo [zone="+ this.zone + ", context=" + this.context + "]";
     }
 
 }

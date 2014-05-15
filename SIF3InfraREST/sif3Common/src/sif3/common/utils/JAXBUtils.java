@@ -164,6 +164,7 @@ public class JAXBUtils
     	JAXBContext ctx = jaxbCtx.get(clazz.getSimpleName());
 		if (ctx == null)
 		{
+			logger.debug("No context for "+clazz.getSimpleName()+" exists yet. Create and add it to context map.");
 			ctx = JAXBContext.newInstance(clazz);
 			jaxbCtx.put(clazz.getSimpleName(), ctx);
 		}

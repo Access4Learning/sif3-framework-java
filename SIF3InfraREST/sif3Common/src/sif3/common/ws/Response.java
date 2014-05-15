@@ -20,7 +20,7 @@ package sif3.common.ws;
 import java.net.URI;
 
 /**
- * The HTTP response of all Operations (Create, Update, Delete, Query) that are not Bulk Operation have a certain structure in SIF3. 
+ * The HTTP response of all Operations (Create, Update, Delete, Query), that are not Bulk Operations, have a certain structure in SIF3. 
  * This class is an abstract representation of such a response, so that developers don't need to know the low level infrastructure 
  * details of a response. It also allows to abstract the actual transport (REST or SOAP). The higher levels of this framework only
  * deal with this Response class rather than the low level HTTP response and the SIF3 infrastructure details.

@@ -22,7 +22,7 @@ import java.io.Serializable;
 
 import javax.ws.rs.core.MediaType;
 
-import sif3.common.header.TransportHeaderProperties;
+import sif3.common.header.HeaderProperties;
 
 /**
  * This is a utility class. All HTTP responses (over REST or SOAP) have a number of fields set. This class encapsulates some of these
@@ -40,7 +40,7 @@ public class BaseResponse implements Serializable
 	private String statusMessage = null;
 	private boolean hasEntity = false;
 	private ErrorDetails error = null;
-	private TransportHeaderProperties hdrProperties = null;
+	private HeaderProperties hdrProperties = null;
 	private MediaType mediaType = null;
 	private int contentLength = -1;
 	
@@ -110,12 +110,12 @@ public class BaseResponse implements Serializable
 	 * 
 	 * @return See desc.
 	 */
-	public TransportHeaderProperties getHdrProperties()
+	public HeaderProperties getHdrProperties()
     {
     	return this.hdrProperties;
     }
 	
-	public void setHdrProperties(TransportHeaderProperties hdrProperties)
+	public void setHdrProperties(HeaderProperties hdrProperties)
     {
     	this.hdrProperties = hdrProperties;
     }

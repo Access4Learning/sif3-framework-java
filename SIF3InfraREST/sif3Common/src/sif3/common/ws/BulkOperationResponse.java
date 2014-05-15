@@ -29,18 +29,18 @@ import java.util.List;
  * @author Joerg Huber
  *
  */
-public class BulkOperationResponse extends BaseResponse
+public class BulkOperationResponse<E extends OperationStatus> extends BaseResponse
 {
     private static final long serialVersionUID = -8767410410574237898L;
 
-    private List<OperationStatus> operationStatuses = null;
+    private List<E> operationStatuses = null;
 
-	public List<OperationStatus> getOperationStatuses()
+	public List<E> getOperationStatuses()
     {
     	return this.operationStatuses;
     }
 
-	public void setOperationStatuses(List<OperationStatus> operationStatuses)
+	public void setOperationStatuses(List<E> operationStatuses)
     {
     	this.operationStatuses = operationStatuses;
     }

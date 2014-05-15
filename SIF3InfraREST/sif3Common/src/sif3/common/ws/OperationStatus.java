@@ -45,7 +45,7 @@ public class OperationStatus implements Serializable
     /**
      * Constructor
      * 
-     * @param resourceID The Id of the resouce for which the status is returned.
+     * @param resourceID The Id of the resource for which the status is returned.
      * @param status The status of the operation. This is most likely a HTTP status code as defined for each operation in SIF3.
      */
     public OperationStatus(String resourceID, int status) 
@@ -56,9 +56,9 @@ public class OperationStatus implements Serializable
     /**
      * Constructor
      * 
-     * @param resourceID The Id of the resouce for which the status is returned.
+     * @param resourceID The Id of the resource for which the status is returned.
      * @param status The status of the operation. This is most likely a HTTP status code as defined for each operation in SIF3.
-     * @param error If the status code indicates an error (HTTP status of 4xx or 5xx) then this porperty will hold the actual error details.
+     * @param error If the status code indicates an error (HTTP status of 4xx or 5xx) then this property will hold the actual error details.
      */
     public OperationStatus(String resourceID, int status, ErrorDetails error) 
     {

@@ -1,5 +1,5 @@
 /*
- * TransportHeaderProperties.java
+ * HeaderProperties.java
  * Created: 03/09/2013
  *
  * Copyright 2013 Systemic Pty Ltd
@@ -20,16 +20,28 @@ package sif3.common.header;
 
 import java.util.HashMap;
 
+import au.com.systemic.framework.utils.StringUtils;
+
 /**
- * This class provides an interface into the various header properties that need to be dealt with in SIF3. It is transport independent.
- * There is the possibility that different header properties are required for REST and/or SOAP. With this interface it makes that
- * distinction transparent.
+ * This is a helper class to manage all header properties that are SIF3 requests and responses. Simple setters and getters are provided as 
+ * well as some other useful methods to manage header properties for SIF3.
+ * 
+ * Ideally all methods in this class should use the constants from the RequestHeaderConstants and ResponseHeaderConstants class to 
+ * set or retrieve header properties by the property name.
  * 
  * @author Joerg Huber
- *
  */
-public interface TransportHeaderProperties
-{
+public class HeaderProperties
+{	
+	private HashMap<String, String> hdrProperties = new HashMap<String, String>();
+	
+	public HeaderProperties() {}
+	
+	public HeaderProperties(HashMap<String, String> hdrProperties) 
+	{
+		this.hdrProperties = createCopy(hdrProperties);
+	}
+	
 	/**
 	 * Stores the value of a header property. If the property with that name is already set then it will be overwritten. If the 
 	 * 'hdrPropertyValue' is null then then the property with the name 'hdrPropertyName' will be removed. If the 'hdrPropertyName' is
@@ -38,23 +50,42 @@ public interface TransportHeaderProperties
 	 * @param hdrPropertyName Header property name.
 	 * @param hdrPropertyValue Header property value.
 	 */
-	public void setHeaderProperty(String hdrPropertyName, String hdrPropertyValue);
-	
+	public void setHeaderProperty(String hdrPropertyName, String hdrPropertyValue)
+	{
+		if (StringUtils.notEmpty(hdrPropertyName))
+		{
+			if (hdrPropertyValue == null)
+			{
+				hdrProperties.remove(hdrPropertyName);
+			}
+			else
+			{
+				hdrProperties.put(hdrPropertyName, hdrPropertyValue);
+			}
+		}
+	}
+
 	/**
 	 * Stores all values of the hashmap. 
 	 * 
 	 * @param hdrProperties Hashmap with the KEY=Property Name; VALUE=Property Value
 	 */
-	public void setHeaderProperties(HashMap<String, String> hdrProperties);
-	
+	public void setHeaderProperties(HashMap<String, String> hdrProperties)
+	{
+		this.hdrProperties = createCopy(hdrProperties);
+	}
+
 	/**
 	 * Returns the value of a header property. If the property with that name does not exist then null is returned.
 	 * 
 	 * @param hdrPropertyName Header property name.
 	 * @return Header property value. Null if it doesn't exist.
 	 */
-	public String getHeaderProperty(String hdrPropertyName);
-	
+	public String getHeaderProperty(String hdrPropertyName)
+	{
+		return hdrProperties.get(hdrPropertyName);
+	}
+
 	/**
 	 * Returns the value of a header property. If the property with that name does not exist or is null then the default 
 	 * value is returned.
@@ -64,13 +95,38 @@ public interface TransportHeaderProperties
 	 * 
 	 * @return Header property value. 'hdrDefaultValue' if it doesn't exist.
 	 */
-	public String getHeaderProperty(String hdrPropertyName, String hdrDefaultValue);
-	
+	public String getHeaderProperty(String hdrPropertyName, String hdrDefaultValue)
+	{
+		String value = hdrProperties.get(hdrPropertyName);
+		return (value == null) ? hdrDefaultValue : value;
+	}
+
 	/**
 	 * Returns all header properties. A true copy of the header properties stored within this class is returned. 
 	 * 
 	 * @return Hashmap with the KEY=Property Name; VALUE=Property Value
 	 */
-	public HashMap<String, String> getHeaderProperties();
+	public HashMap<String, String> getHeaderProperties()
+	{
+		return createCopy(this.hdrProperties);
+	}
+	
+	@Override
+    public String toString()
+    {
+	    return "HeaderProperties [hdrProperties=" + this.hdrProperties + "]";
+    }
 
+	/*---------------------*/
+	/*-- Private Methods --*/
+	/*---------------------*/
+	private HashMap<String, String> createCopy(HashMap<String, String> hdrProperties)
+	{
+		HashMap<String, String> copyProps = new HashMap<String, String>();
+		if (hdrProperties != null)
+		{
+			copyProps.putAll(hdrProperties);
+		}
+		return copyProps;
+	}
 }

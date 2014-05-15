@@ -18,8 +18,10 @@
 
 package sif3.common;
 
+import sif3.common.model.SIFContext;
+
 /**
- * This file holds the values of some system wide constants.
+ * This class holds the values of some system wide constants.
  * 
  * @author Joerg Huber
  */
@@ -27,4 +29,69 @@ public class CommonConstants
 {
 	/* Name of environment property file without the file extension */
 	public static final String ENV_PROP_FILE_NAME = "environment";
+
+	/*-----------------------------------------------------------*/
+	/* Name of some standard property of adapter property files. */
+	/*-----------------------------------------------------------*/
+
+	/* Base name of event frequency property */
+	public static final String FREQ_PROPERTY = "event.frequency";
+
+	/* Base name of event event startup delay property */
+	public static final String EVENT_DELAY_PROPERTY = "event.startup.delay";
+
+	/* Base name of event max objects per event property */
+	public static final String EVENT_MAX_OBJ = "event.maxObjects";
+
+	/*-----------------------------------------------------------*/
+	/* Event related constants.                                  */
+	/*-----------------------------------------------------------*/
+
+	/* Provider Event Constants */
+	
+	/* Value to indicate no events to be sent by a provider. */
+	public static final int NO_EVENT = 0;
+		
+	/* Default startup delay for events in seconds. */
+	public static final int DEFAULT_EVENT_DELAY = 5;
+
+	/* Consumer Event Constants */
+	public static final int DEFAULT_POLL_FREQ = 60;
+	
+	public static final int DEFAULT_LONGPOLL_WAIT = 120;
+	
+	/*-----------------------------------------------------------*/
+	/* Default values and other important constants.             */
+	/*-----------------------------------------------------------*/
+
+	/* Millisecond multiplier. Ensures that we get that right everywhere :-) */
+	public static final int MILISEC = 1000;
+
+	/*-----------------------------------------------------------*/
+	/* Constants defined by SIF3 Spec.                           */
+	/*-----------------------------------------------------------*/
+	public static final String DEFAULT_CONTEXT_NAME = "DEFAULT";
+	
+	/* default context */
+	public static final SIFContext DEFAULT_CONTEXT = new SIFContext(DEFAULT_CONTEXT_NAME, true);
+
+	/*----------------------------------------------------------*/
+	/* System Wide Enum Types that are not part of any Headers */
+	/*----------------------------------------------------------*/
+	
+	/*
+	 * Commonly used to distinguish functionality between Consumer & Provider
+	 */
+	public enum AdapterType {CONSUMER, PROVIDER, ENVIRONMENT_PROVIDER};
+	
+	/*
+	 * Supported Queue Strategy for Framework. Currently only CONSUMER_LEVEL is implemented
+	 */
+	public enum QueueStrategy {ADAPTER_LEVEL, ZONE_LEVEL, OBJECT_LEVEL};
+
+	/*
+	 * Poling Type on Queues
+	 */
+	public enum QueuePollingType {IMMEDIATE, LONG};
+
 }

@@ -27,7 +27,7 @@ import java.io.Serializable;
 
 /**
  * This class is an abstract representation of an error and it is aligned with the properties of a SIF3 error message. This class
- * allows to fully abstract the low level infrastructure details fo SIF3 and instead present an error in a nice POJO to the
+ * allows to fully abstract the low level infrastructure details for SIF3 and instead present an error in a nice POJO to the
  * higher levels of the framework.
  * 
  * @author Joerg Huber

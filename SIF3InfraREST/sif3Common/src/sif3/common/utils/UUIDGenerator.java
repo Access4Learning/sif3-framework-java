@@ -29,26 +29,52 @@ package sif3.common.utils;
 public class UUIDGenerator
 {
 
+  /**
+   * This method returns a UUID as defined in SIF3.
+   * 
+   * @return See desc.
+   */
 	public static final String getUUID()
 	{
 		return java.util.UUID.randomUUID().toString();
 	}
 	
+	/**
+	 * This method returns a UUID as defined in SIF3 but has the dashes removed.
+	 * 
+   * @return See desc.
+	 */
 	public static final String getUUIDWithoutDashes()
 	{
 		return java.util.UUID.randomUUID().toString().replace("-", "");
 	}
 
+	/**
+	 * This method returns a GUID as defined in SIF2.x but the alpha characters can be of mixed case.
+	 *  
+	 * @return See desc.
+	 */
 	public static final String getSIF2GUIDMixedCase()
 	{
 		return java.util.UUID.randomUUID().toString().replace("-", "");
 	}
 	
+  /**
+   * This method returns a GUID as defined in SIF2.x.
+   *  
+   * @return See desc.
+   */
 	public static final String getSIF2GUIDUpperCase()
 	{
 		return java.util.UUID.randomUUID().toString().replace("-", "").toUpperCase();
 	}
 
+	 /**
+   * This method converts a SIF2.x GUID into a SIF3 UUID. This is done my means of adding dashes ('-') at the correct positions. It will not
+   * alter the case of any characters, though.
+   *  
+   * @return See desc.
+   */
 	public static final String sif2GUIDToSIF3UUID(String sif2GUID)
 	{
 		StringBuffer sif3UUID = new StringBuffer("");
@@ -57,10 +83,15 @@ public class UUIDGenerator
 		
 	}
 	
+  /**
+   * This method converts a SIF3UUID into a SIF2.x GUID. This is done my means of removing dashes ('-') from the UUID. It will not
+   * alter the case of any characters, though.
+   *  
+   * @return See desc.
+   */
 	public static final String sif3UUIDToSIF2GUID(String sif3UUID)
 	{
 		return sif3UUID.replace("-", "");
-		
 	}
 	
 	/*
