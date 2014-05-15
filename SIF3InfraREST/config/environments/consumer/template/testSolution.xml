@@ -1,12 +1,11 @@
 <environment>
     <solutionId>testSolution</solutionId>
     <authenticationMethod>Basic</authenticationMethod>
-    <consumerName>SAMPLE AU Subscriber</consumerName>
+    <consumerName></consumerName>
     <applicationInfo>
-        <applicationKey>TEST_CODE</applicationKey>
-        <supportedInfrastructureVersion>3.0</supportedInfrastructureVersion>
-        <supportedDataModel>SIF-US</supportedDataModel>
-        <supportedDataModelVersion>3.0</supportedDataModelVersion>
+        <applicationKey></applicationKey>
+        <supportedInfrastructureVersion>3.0.1</supportedInfrastructureVersion>
+        <dataModelNamespace>http://www.SIFinfo.org/au/datamodel/1.3</dataModelNamespace>
         <transport>REST</transport>
         <applicationProduct>
             <vendorName>Systemic Pty Ltd</vendorName>

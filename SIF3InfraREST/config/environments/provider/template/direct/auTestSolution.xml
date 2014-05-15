@@ -1,4 +1,4 @@
-<environment xmlns="http://www.sifassociation.org/infrastructure/3.0">
+<environment xmlns="http://www.sifassociation.org/infrastructure/3.0" type="DIRECT">
     <sessionToken></sessionToken>
     <solutionId>auTestSolution</solutionId>
     <defaultZone id="auSchoolTestingZone">
@@ -27,7 +27,7 @@
                     <right type="ADMIN">APPROVED</right>
                   </rights>
                 </service>
-                <service name="StudentPesonals" contextId="DEFAULT">
+                <service name="StudentPersonals" contextId="DEFAULT">
                   <rights>
                     <right type="QUERY">APPROVED</right>
                     <right type="CREATE">REJECTED</right>

@@ -1,12 +1,11 @@
 <environment type="DIRECT" xmlns="http://www.sifassociation.org/infrastructure/3.0">
-    <solutionId>devLocal</solutionId>
+    <solutionId>auTestSolution</solutionId>
     <authenticationMethod>Basic</authenticationMethod>
-    <consumerName>StudentConsumer</consumerName>
+    <consumerName></consumerName>
     <applicationInfo>
-        <applicationKey>My MOBI APP</applicationKey>
-        <supportedInfrastructureVersion>3.0</supportedInfrastructureVersion>
-        <supportedDataModel>SIF-AU</supportedDataModel>
-        <supportedDataModelVersion>3.0</supportedDataModelVersion>
+        <applicationKey></applicationKey>
+        <supportedInfrastructureVersion>3.0.1</supportedInfrastructureVersion>
+        <dataModelNamespace>http://www.SIFinfo.org/au/datamodel/1.3</dataModelNamespace>
         <transport>REST</transport>
         <applicationProduct>
             <vendorName>Systemic Pty Ltd</vendorName>

@@ -1,12 +1,13 @@
-<environment type="DIRECT" xmlns="http://www.sifassociation.org/infrastructure/3.0">
-    <solutionId>auTestSolution</solutionId>
+<environment xmlns="http://www.sifassociation.org/infrastructure/3.0.1">
+    <solutionId>test</solutionId>
     <authenticationMethod>Basic</authenticationMethod>
+    <instanceId/>
+    <userToken/>
     <consumerName></consumerName>
     <applicationInfo>
-        <applicationKey>TEST_CODE</applicationKey>
-        <supportedInfrastructureVersion>3.0</supportedInfrastructureVersion>
-        <supportedDataModel>SIF-AU</supportedDataModel>
-        <supportedDataModelVersion>3.0</supportedDataModelVersion>
+        <applicationKey></applicationKey>
+        <supportedInfrastructureVersion>3.0.1</supportedInfrastructureVersion>
+        <dataModelNamespace>http://www.sifassociation.org/au/datamodel/1.3</dataModelNamespace>
         <transport>REST</transport>
         <applicationProduct>
             <vendorName>Systemic Pty Ltd</vendorName>
