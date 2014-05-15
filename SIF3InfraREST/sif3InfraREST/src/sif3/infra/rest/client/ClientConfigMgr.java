@@ -34,6 +34,9 @@ import au.com.systemic.framework.utils.PropertyManager;
 import au.com.systemic.framework.utils.StringUtils;
 import au.com.systemic.framework.utils.Timer;
 
+//TODO: JH - Here we do have some jersey specific classes => Investigate how to replace them with generic classes! 
+//Note: These are "client" classes only and the only jar that might be required could be jersey-client-1.17.1.jar which
+//would not conflict with any other JAX-RS implementation.
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.client.urlconnection.HTTPSProperties;

@@ -37,21 +37,28 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import sif3.common.CommonConstants;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderValues;
 import sif3.common.header.HeaderValues.ResponseAction;
+import sif3.common.header.RequestHeaderConstants;
+import sif3.common.interfaces.Provider;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryMetadata;
-import sif3.common.provider.Provider;
-import sif3.common.provider.ProviderFactory;
+import sif3.common.model.SIFContext;
+import sif3.common.model.SIFZone;
+import sif3.common.model.ServiceRights.AccessRight;
+import sif3.common.model.ServiceRights.AccessType;
+import sif3.common.persist.model.SIF3Session;
+import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
-import sif3.infra.common.env.types.ServiceRights.AccessRight;
-import sif3.infra.common.env.types.ServiceRights.AccessType;
-import sif3.infra.rest.header.RequestHeaderConstants;
+import sif3.infra.common.env.mgr.ProviderManagerFactory;
+import sif3.infra.common.interfaces.EnvironmentManager;
+import sif3.infra.rest.provider.ProviderFactory;
 
 /**
  * This is the generic implementation of all Object resources. It implements all the functions required by the SIF3 specification
@@ -74,11 +81,10 @@ import sif3.infra.rest.header.RequestHeaderConstants;
 public class DataModelResource extends BaseResource
 {
 	private String dmObjectNamePlural = null; // This is also expected to be the key into the provider factory.
-	private static ProviderFactory factory = null;
 	private Provider provider = null;
 
 	/**
-	 * Initailises an Object Provider Resource. All the parameters are automatically injected by the Jersey Framework.
+	 * Initialises an Object Provider Resource. All the parameters are automatically injected by the Jersey Framework.
 	 * 
 	 * @param uriInfo Extracted from the request.
 	 * @param requestHeaders Extracted from the request.
@@ -97,16 +103,24 @@ public class DataModelResource extends BaseResource
 	    super(uriInfo, requestHeaders, request, "requests", zoneID, contextID);
 	    this.dmObjectNamePlural = dmObjectNamePlural;
 	    
-	    // Initialise Factory if it is accessed for the first time.
-	    if (factory == null)
-	    {
-	    	factory = ProviderFactory.getFactory(getServiceProperties());
-	    }
-	    
-	    provider = factory.getProvider(new ModelObjectInfo(dmObjectNamePlural, null));
+	    // Provider Factory should already be initialised. If not it will be done now...
+	    provider = ProviderFactory.getInstance().getProvider(new ModelObjectInfo(dmObjectNamePlural, null));
     }
     
-	// -------------------------------------------------//
+	/*----------------------*/
+	/*-- Abstract Methods --*/
+	/*----------------------*/
+
+    /* (non-Javadoc)
+     * @see sif3.infra.rest.resource.BaseResource#getEnvironmentManager()
+     */
+    @Override
+    public EnvironmentManager getEnvironmentManager()
+    {
+    	return ProviderManagerFactory.getEnvironmentManager();
+    }
+     
+    // -------------------------------------------------//
 	// -- POST Section: This is the C(reate) in CRUD. --//
 	// -------------------------------------------------//
 	@POST
@@ -171,7 +185,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			List<OperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarschal(payload, provider.getMultiObjectClassInfo().getObjectType(), getMediaType()), getAdvisory(), getSifZone(), getSifContext());
+			List<CreateOperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarschal(payload, provider.getMultiObjectClassInfo().getObjectType(), getMediaType()), getAdvisory(), getSifZone(), getSifContext());
 			
 			if (statusList != null)
 			{
@@ -428,7 +442,7 @@ public class DataModelResource extends BaseResource
 	/*
 	 * NOTE: 
 	 * This method is not really implemented as DELETE is not supported with a payload. See PUT method for details about the way
-	 * a Bulk-DELETE is implmented according to SIF3 Spec. 
+	 * a Bulk-DELETE is implemented according to SIF3 Spec. 
 	 */
 	public Response removeMany(String payload)
 	{
@@ -440,6 +454,37 @@ public class DataModelResource extends BaseResource
 		return makeErrorResponse(error, ResponseAction.DELETE);
 	}
 	
+	/*------------------------*/
+	/*-- Overridden Methods --*/
+	/*------------------------*/
+	@Override
+	public SIFZone getSifZone()
+	{
+		SIFZone sifZone = super.getSifZone();
+		if (sifZone == null) // default zone => Get default zone from session
+		{
+			SIF3Session session = getSIF3SessionForRequest();
+			if (session != null)
+			{
+				sifZone = session.getDefaultZone();
+			}
+		}
+		
+		return sifZone;	
+	}
+
+	@Override
+	public SIFContext getSifContext()
+	{
+		SIFContext sifContext = super.getSifContext();
+		if (sifContext == null) // Default Context
+		{
+			sifContext = CommonConstants.DEFAULT_CONTEXT;
+		}
+		
+		return sifContext;
+	}	
+
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
@@ -505,7 +550,6 @@ public class DataModelResource extends BaseResource
     {
       return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to DeleteRequestType. Problem reported: "+ex.getMessage()), ResponseAction.DELETE);     
     }
-    
   }
 
 }

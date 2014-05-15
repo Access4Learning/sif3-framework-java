@@ -17,161 +17,86 @@ package sif3.infra.rest.client;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
-
-import org.apache.log4j.Logger;
 
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.exception.UnmarshalException;
+import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
-import sif3.common.header.TransportHeaderProperties;
+import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
-import sif3.common.utils.UUIDGenerator;
-import sif3.common.ws.BaseResponse;
 import sif3.common.ws.BulkOperationResponse;
+import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.common.ws.Response;
-import sif3.infra.common.conversion.InfraMarshalFactory;
-import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.model.CreateResponseType;
 import sif3.infra.common.model.CreateType;
 import sif3.infra.common.model.DeleteIdType;
 import sif3.infra.common.model.DeleteRequestType;
 import sif3.infra.common.model.DeleteResponseType;
 import sif3.infra.common.model.DeleteStatus;
-import sif3.infra.common.model.ErrorType;
-import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.UpdateResponseType;
 import sif3.infra.common.model.UpdateType;
-import sif3.infra.rest.header.RESTHeaderProperties;
-import sif3.infra.rest.header.RequestHeaderConstants;
-import sif3.infra.rest.header.ResponseHeaderConstants;
-import au.com.systemic.framework.utils.StringUtils;
 
-import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.WebResource.Builder;
-import com.sun.jersey.api.client.config.ClientConfig;
 
 /**
- * This class is a core client class to deal with REST clients for SIF3. It takes care of all the little things that define the
- * SIF3 REST transport for all the operations stated in the SIF3 spec. It abstracts the finer details on how a URL is constructed,
- * what header fields are required on the request as well as the response. It takes all of this internal processing and SIF3 
- * infrastructure management away from the higher levels of this framework.<br/><br/>
+ * This class is a core client class to deal with the CRUD interface (request connector)for SIF3. It takes care of all the little things 
+ * that define the SIF3 REST transport for all the operations stated in the SIF3 spec for CRUD Clients. It abstracts the finer details on 
+ * how a URL is constructed, what header fields are required on the request as well as the response. It takes all of this internal processing 
+ * and SIF3 infrastructure management away from the higher levels of this framework.<br/><br/>
  * 
  * Each client call must use this class to ensure that all the things that make a SIF3 REST call valid are guaranteed.<br/><br/>
  * 
  * Note:<br/>
- * This class is the REST Client Implementation. Even though it is called 'Interface' it is not a proper interface. There is a
- * possibility that later versions of this framework will rename this class but since it is fully abstracted in the lower levels of
- * this framework and not exposed to the higher levels such a change will most likely not impact the services written by developers.
+ * This class is the REST Client Implementation for a standard CRUD Consumer of SIF OBJECT services. Even though it is called 'Interface' 
+ * it is not a proper interface. There is a possibility that later versions of this framework will rename this class but since it is fully 
+ * abstracted in the lower levels of this framework and not exposed to the higher levels such a change will most likely not impact the 
+ * services written by developers.
  * 
  * @author Joerg Huber
  */
-public class ClientInterface
+public class ClientInterface extends BaseClient
 {
-	protected final Logger logger = Logger.getLogger(getClass());
-
-	private URI baseURI = null;
-	private ClientConfig config = null;
-	private Client client = null;
-	private WebResource service = null;
-	private MediaType mediaType = MediaType.APPLICATION_XML_TYPE;
-	private MarshalFactory marshaller = null;
-	private UnmarshalFactory unmarshaller = null;
-	
-	// This marshaller/unmarshaller are used in a number of operations where the response/request deals with Infrastructure Model Object: ErrorType, CreateResponseType etc.
-	private InfraUnmarshalFactory infraUnmarshaller = new InfraUnmarshalFactory();
-	private InfraMarshalFactory infraMarshaller = new InfraMarshalFactory();
-	private ObjectFactory infraObjectFactory = new ObjectFactory();
-
 	/**
 	 * Constructor<br/>
 	 * 
 	 * @param baseURI The base URI of this client. All URIs are for all other calls are relative to this base URL.
-	 * @param mediaType XML or JSOn are the expected media types. They must be supported by the given marshaller and unmarshaller.
-	 * @param marshaller Marshaller to marshal the payload of this client to appropriate representations. This marshaller must be valid
+	 * @param mediaType XML or JSON are the expected media types. They must be supported by the given marshaller and unmarshaller.
+	 * @param dmMarshaller Marshaller to marshal the payload of this client to appropriate representations. This marshaller must be valid
 	 *                   for the data model used with this client.
-	 * @param unmarshaller Unmarshaller to unmarshal the payload of this client to appropriate representations. This unmarshaller 
+	 * @param dmUnmarshaller Unmarshaller to unmarshal the payload of this client to appropriate representations. This unmarshaller 
 	 *                     must be valid for the data model used with this client.
 	 * @param secureConnection TRUE: Use HTTPS, FALSE use HTTP.
 	 */
-	public ClientInterface(URI baseURI, MediaType mediaType, MarshalFactory marshaller, UnmarshalFactory unmarshaller, boolean secureConnection)
+	public ClientInterface(URI baseURI, MediaType mediaType, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection)
 	{
-		super();
-
-		this.baseURI = baseURI;
-		this.mediaType = mediaType;
-		this.marshaller = marshaller;
-		this.unmarshaller = unmarshaller;
-		
-		ClientConfigMgr cltCfgMgr = new ClientConfigMgr();		
-		this.config = cltCfgMgr.getClientConfig(secureConnection);
-
-		// Create the Client Service
-		this.client = Client.create(config);
-
-		// Retrieve connector to resource
-		this.service = client.resource(getBaseURI());
-		
-		logger.debug("Base URI for Call is: "+getBaseURI().toASCIIString());
+		super(baseURI, mediaType, dmMarshaller, dmUnmarshaller, secureConnection);
 	}
 
 	/**
 	 * This constructor will default to XML as media type and default service type of OBJECT
 	 * 
 	 * @param baseURI The base URI of this client. All URIs are for all other calls are relative to this base URL.
-	 * @param marshaller Marshaller to marshal the payloads of this client to appropriate representations. This marshaller must be valid
+	 * @param dmMarshaller Marshaller to marshal the payload of this client to appropriate representations. This marshaller must be valid
 	 *                   for the data model used with this client.
-	 * @param unmarshaller Unarshaller to unmarshal the payloads of this client to appropriate representations. This unmarshaller 
+	 * @param dmUnmarshaller Unmarshaller to unmarshal the payload of this client to appropriate representations. This unmarshaller 
 	 *                     must be valid for the data model used with this client.
+	 * @param secureConnection TRUE: Use HTTPS, FALSE use HTTP.
 	 */
-	public ClientInterface(URI baseURI, MarshalFactory marshaller, UnmarshalFactory unmarshaller, boolean secureConnection)
+	public ClientInterface(URI baseURI, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection)
 	{
-		this(baseURI, MediaType.APPLICATION_XML_TYPE, marshaller, unmarshaller, secureConnection);
-	}
-
-	public URI getBaseURI()
-	{
-		return baseURI;
-	}
-
-	public void setBaseURI(URI baseURI)
-	{
-		this.baseURI = baseURI;
-	}
-
-	public Client getClient()
-	{
-		return client;
-	}
-
-	public WebResource getService()
-	{
-		return service;
-	}
-
-	public MediaType getMediaType()
-	{
-		return mediaType;
-	}
-
-	public void setMediaType(MediaType mediaType)
-	{
-		this.mediaType = mediaType;
+		super(baseURI, dmMarshaller, dmUnmarshaller, secureConnection);
 	}
 
 	/*----------------------------------*/
@@ -196,14 +121,15 @@ public class ClientInterface
 	 * 
 	 * @throws ServiceInvokationException An internal error occurred. An error is logged.
 	 */
-	public Response getSingle(String relURI, String resourceID, TransportHeaderProperties hdrProperties, Class<?> returnObjectClass, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public Response getSingle(String relURI, String resourceID, HeaderProperties hdrProperties, Class<?> returnObjectClass, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
+		WebResource service = getService();
 		try
 		{
 			service = buildURI(service, relURI, resourceID, zone, context);
-			ClientResponse response = setRequestHeaderAndMediaTypes(hdrProperties).get(ClientResponse.class);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
 
-			return setResponse(response, returnObjectClass, Status.OK, Status.NOT_MODIFIED);
+			return setResponse(service, response, returnObjectClass, Status.OK, Status.NOT_MODIFIED);
 		}
 		catch (Exception ex)
 		{
@@ -229,21 +155,24 @@ public class ClientInterface
 	 * 
 	 * @return Response Object holding appropriate values and results of the call. 
 	 * 
-	 * @throws ServiceInvokationException Any underlying errors occurred such as unable to marshal the object into its mediatype, 
-	 *                                    failure to invoke actual web-service etc. 
+	 * @throws ServiceInvokationException Any underlying errors occurred such as unable to marshal the object into its media
+	 *                                    type, failure to invoke actual web-service etc. 
 	 */
-	public Response createSingle(String relURI, Object payload, TransportHeaderProperties hdrProperties, Class<?> returnObjectClass, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public Response createSingle(String relURI, Object payload, HeaderProperties hdrProperties, Class<?> returnObjectClass, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
+		WebResource service = getService();
 		try
 		{
 			service = buildURI(service, relURI, null, zone, context);
-			String payloadStr = marshaller.marschal(payload, mediaType);
+			String payloadStr = getDataModelMarshaller().marschal(payload, getMediaType());
 
-			// TODO: JH - Temporary fix to get Sandbox to work. Remove namespace from string. Remove line below once Sandbox is updated
-			payloadStr = payloadStr.replace(" xmlns=\"http://www.sifassociation.org/infrastructure/3.0\"", "");
-			ClientResponse response = setRequestHeaderAndMediaTypes(hdrProperties).post(ClientResponse.class, payloadStr);
+			if (logger.isDebugEnabled())
+			{
+				logger.debug("createSingle: Payload to send:\n"+payloadStr);
+			}
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).post(ClientResponse.class, payloadStr);
 
-			return setResponse(response, returnObjectClass, Status.CREATED, Status.CONFLICT);
+			return setResponse(service, response, returnObjectClass, Status.CREATED, Status.CONFLICT);
 		}
 		catch (Exception ex)
 		{
@@ -272,18 +201,21 @@ public class ClientInterface
 	 * @throws ServiceInvokationException Any underlying errors occurred such as unable to marshal the object into its media type, 
 	 *                                    failure to invoke actual web-service etc. 
 	 */
-	public Response updateSingle(String relURI, String resourceID, Object payload, TransportHeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public Response updateSingle(String relURI, String resourceID, Object payload, HeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
+		WebResource service = getService();
 		try
 		{
 			service = buildURI(service, relURI, resourceID, zone, context);
-			String payloadStr = marshaller.marschal(payload, mediaType);
+			String payloadStr = getDataModelMarshaller().marschal(payload, getMediaType());
 
-			// TODO: JH - Temporary fix to get Sandbox to work. Remove namespace from string. Remove line below once Sandbox is updated
-			payloadStr = payloadStr.replace(" xmlns=\"http://www.sifassociation.org/infrastructure/3.0\"", "");
-			ClientResponse response = setRequestHeaderAndMediaTypes(hdrProperties).put(ClientResponse.class, payloadStr);
+			if (logger.isDebugEnabled())
+			{
+				logger.debug("updateSingle: Payload to send:\n"+payloadStr);
+			}
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).put(ClientResponse.class, payloadStr);
 
-			return setResponse(response, null, Status.NO_CONTENT);
+			return setResponse(service, response, null, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -309,14 +241,15 @@ public class ClientInterface
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
 	 */
-	public Response removeSingle(String relURI, String resourceID, TransportHeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public Response removeSingle(String relURI, String resourceID, HeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
+		WebResource service = getService();
 		try
 		{
 			service = buildURI(service, relURI, resourceID, zone, context);
-		    ClientResponse response = setRequestHeaderAndMediaTypes(hdrProperties).delete(ClientResponse.class);
+		    ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).delete(ClientResponse.class);
 
-			return setResponse(response, null, Status.NO_CONTENT);
+			return setResponse(service, response, null, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -346,8 +279,9 @@ public class ClientInterface
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
 	 */
-	public Response getMany(String relURI, PagingInfo pagingInfo, TransportHeaderProperties hdrProperties, Class<?> returnObjectClass, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public Response getMany(String relURI, PagingInfo pagingInfo, HeaderProperties hdrProperties, Class<?> returnObjectClass, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
+		WebResource service = getService();
 		try
 		{
 			service = buildURI(service, relURI, null, zone, context);
@@ -358,9 +292,9 @@ public class ClientInterface
 				service = service.queryParams(query.getQueryParametersAsMultivaluedMap());
 			}
 			
-			ClientResponse response = setRequestHeaderAndMediaTypes(hdrProperties).get(ClientResponse.class);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
 
-			return setResponse(response, returnObjectClass, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
+			return setResponse(service, response, returnObjectClass, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -387,16 +321,19 @@ public class ClientInterface
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
 	 */
-	public BulkOperationResponse createMany(String relURI, Object payload, TransportHeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public BulkOperationResponse<CreateOperationStatus> createMany(String relURI, Object payload, HeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
+		WebResource service = getService();
 		try
 		{
 			service = buildURI(service, relURI, null, zone, context);
-		    String payloadStr = marshaller.marschal(payload, mediaType);
+		    String payloadStr = getDataModelMarshaller().marschal(payload, getMediaType());
 
-			// TODO: JH - Temporary fix to get Sandbox to work. Remove namespace from string. Remove line below once Sandbox is updated
-			payloadStr = payloadStr.replace(" xmlns=\"http://www.sifassociation.org/infrastructure/3.0\"", "");
-			ClientResponse response = setRequestHeaderAndMediaTypes(hdrProperties).post(ClientResponse.class, payloadStr);
+			if (logger.isDebugEnabled())
+			{
+				logger.debug("createMany: Payload to send:\n"+payloadStr);
+			}
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).post(ClientResponse.class, payloadStr);
 
 			return setCreateBulkResponse(response);
 		}
@@ -425,21 +362,22 @@ public class ClientInterface
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
 	 */
-	public BulkOperationResponse updateMany(String relURI, Object payload, TransportHeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public BulkOperationResponse<OperationStatus> updateMany(String relURI, Object payload, HeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
+		WebResource service = getService();
 		try
 		{
 			service = buildURI(service, relURI, null, zone, context);
 
-			String payloadStr = marshaller.marschal(payload, mediaType);
-
-			// TODO: JH - Temporary fix to get Sandbox to work. Remove namespace from string. Remove line below once Sandbox is updated
-			payloadStr = payloadStr.replace(" xmlns=\"http://www.sifassociation.org/infrastructure/3.0\"", "");
+			String payloadStr = getDataModelMarshaller().marschal(payload, getMediaType());
+			if (logger.isDebugEnabled())
+			{
+				logger.debug("updateMany: Payload to send:\n"+payloadStr);
+			}
 
 			// Set specific header so that PUT method knows that an UPDATE and not a DELETE is required! 
-			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.UPDATE.name());
-
-																																					ClientResponse response = setRequestHeaderAndMediaTypes(hdrProperties).put(ClientResponse.class, payloadStr);
+			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.UPDATE.name());																																			
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).put(ClientResponse.class, payloadStr);
 
 			return setUpdateBulkResponse(response);
 		}
@@ -471,7 +409,7 @@ public class ClientInterface
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
 	 */
-	public BulkOperationResponse removeMany(String relURI, List<String> resourceIDs, TransportHeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public BulkOperationResponse<OperationStatus> removeMany(String relURI, List<String> resourceIDs, HeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
     /*-----------------------------------------------------------------------------------------------------------------------------
      * Below is the dummy implementation (now commented out). It is what would be done if delete is called one by one because
@@ -509,33 +447,34 @@ public class ClientInterface
     /*-----------------------------------------------------------------------------------------------------------------------------
      * End original code (now commented out).
      -----------------------------------------------------------------------------------------------------------------------------*/
+		WebResource service = getService();
 		try
 		{
-      service = buildURI(service, relURI, null, zone, context);
+			service = buildURI(service, relURI, null, zone, context);
 			
 			//Convert List of resources to DeletesTypes
-			DeleteRequestType deleteRequest = infraObjectFactory.createDeleteRequestType();
-			deleteRequest.setDeletes(infraObjectFactory.createDeleteIdCollection());
+			DeleteRequestType deleteRequest = getInfraObjectFactory().createDeleteRequestType();
+			deleteRequest.setDeletes(getInfraObjectFactory().createDeleteIdCollection());
 			
 			if (resourceIDs != null)
 			{
 			  for (String resourceID : resourceIDs)
 			  {
-			    DeleteIdType id = infraObjectFactory.createDeleteIdType();
+			    DeleteIdType id = getInfraObjectFactory().createDeleteIdType();
 			    id.setId(resourceID);
 			    deleteRequest.getDeletes().getDelete().add(id);
 			  }
 			}
-			String payloadStr = infraMarshaller.marschal(deleteRequest, mediaType);
+			String payloadStr = getInfraMarshaller().marschal(deleteRequest, getMediaType());
 			
-			// TODO: JH - Temporary fix to get Sandbox to work. Remove namespace from string. Remove line below once Sandbox is updated
-			payloadStr = payloadStr.replace(" xmlns=\"http://www.sifassociation.org/infrastructure/3.0\"", "");
-			//System.out.println("Delete Payload: "+payloadStr);
-			
-	    // Set specific header so that PUT method knows that a DELETE and not an UPDATE is required! 
+			// Set specific header so that PUT method knows that a DELETE and not an UPDATE is required! 
 			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.DELETE.name());
 			
-			ClientResponse cltResponse = setRequestHeaderAndMediaTypes(hdrProperties).put(ClientResponse.class, payloadStr);
+			if (logger.isDebugEnabled())
+			{
+				logger.debug("removeMany: Payload to send:\n"+payloadStr);
+			}
+			ClientResponse cltResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).put(ClientResponse.class, payloadStr);
 			
 			return setDeleteBulkResponse(cltResponse);
 		}
@@ -550,56 +489,10 @@ public class ClientInterface
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-	private WebResource buildURI(WebResource svc, String relURI, String resourceID, SIFZone zone, SIFContext ctx)
-	{
-		UriBuilder uriBuilder = svc.getUriBuilder();
-		if (StringUtils.notEmpty(relURI))
-		{
-			uriBuilder.path(relURI);
-		}
-		if (StringUtils.notEmpty(resourceID))
-		{
-			uriBuilder.path(resourceID);
-		}
-		if ((zone != null) && (StringUtils.notEmpty(zone.getId())))
-		{
-			uriBuilder.matrixParam("zoneId", zone.getId());
-		}
-		if ((ctx != null) && (StringUtils.notEmpty(ctx.getId())))
-		{
-			uriBuilder.matrixParam("contextId", ctx.getId());
-		}
 
-		return svc.uri(uriBuilder.build());
-	}
-		
-	private Builder setRequestHeaderAndMediaTypes(TransportHeaderProperties hdrProperties)
+	private BulkOperationResponse<CreateOperationStatus> setCreateBulkResponse(ClientResponse clientResponse)
 	{
-		//System.out.println("MediaType: "+getMediaType());
-		Builder builder = getService().type(getMediaType()).accept(getMediaType());
-		
-		// Always set the requestId.
-		builder = builder.header(RequestHeaderConstants.HDR_REQUEST_ID, UUIDGenerator.getUUID());
-
-		if ((hdrProperties != null) && (hdrProperties.getHeaderProperties() != null) && (!hdrProperties.getHeaderProperties().isEmpty()))
-		{
-			HashMap<String, String> hdrMap = hdrProperties.getHeaderProperties();
-			for (String hdrPropertyName : hdrMap.keySet())
-			{
-				String hdrPropertyValue = hdrMap.get(hdrPropertyName);
-				if (StringUtils.notEmpty(hdrPropertyValue))
-				{
-					builder = builder.header(hdrPropertyName, hdrPropertyValue);
-				}
-			}
-		}
-
-		return builder;
-	}
-	
-	private BulkOperationResponse setCreateBulkResponse(ClientResponse clientResponse)
-	{
-		BulkOperationResponse response = new BulkOperationResponse();
+		BulkOperationResponse<CreateOperationStatus> response = new BulkOperationResponse<CreateOperationStatus>();
 		setBaseResponseData(response, clientResponse);
 		if (clientResponse.getClientResponseStatus().getStatusCode() == Status.CREATED.getStatusCode())
 		{
@@ -609,18 +502,19 @@ public class ClientInterface
 				try
 				{						
 					//Because CreateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-					CreateResponseType createManyResponse = (CreateResponseType)infraUnmarshaller.unmarschal(payload, CreateResponseType.class, getMediaType());
+					CreateResponseType createManyResponse = (CreateResponseType)getInfraUnmarshaller().unmarschal(payload, CreateResponseType.class, getMediaType());
 					if (createManyResponse == null)// this is strange. So set the unmarshalled value.
 					{
 						response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));							
 					}
 					else
 					{
-						response.setOperationStatuses(new ArrayList<OperationStatus>());
+						response.setOperationStatuses(new ArrayList<CreateOperationStatus>());
 						for (CreateType createStatus : createManyResponse.getCreates().getCreate())
 						{
-							OperationStatus opStatus = new OperationStatus();
+							CreateOperationStatus opStatus = new CreateOperationStatus();
 							opStatus.setResourceID(createStatus.getId());
+							opStatus.setAdvisoryID(createStatus.getAdvisoryId());
 							opStatus.setStatus(toInt(createStatus.getStatusCode()));
 							opStatus.setError(convertFromErrorType(createStatus.getError()));
 							response.getOperationStatuses().add(opStatus);
@@ -645,9 +539,9 @@ public class ClientInterface
 		return response;
 	}
 
-  private BulkOperationResponse setDeleteBulkResponse(ClientResponse clientResponse)
+  private BulkOperationResponse<OperationStatus> setDeleteBulkResponse(ClientResponse clientResponse)
 	{
-		BulkOperationResponse response = new BulkOperationResponse();
+	  BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
 		setBaseResponseData(response, clientResponse);
 		if (clientResponse.getClientResponseStatus().getStatusCode() == Status.OK.getStatusCode())
 		{
@@ -657,7 +551,7 @@ public class ClientInterface
 				try
 				{						
 					//Because DeleteResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-					DeleteResponseType deleteManyResponse = (DeleteResponseType)infraUnmarshaller.unmarschal(payload, DeleteResponseType.class, getMediaType());
+					DeleteResponseType deleteManyResponse = (DeleteResponseType)getInfraUnmarshaller().unmarschal(payload, DeleteResponseType.class, getMediaType());
 					if (deleteManyResponse == null)// this is strange. So set the unmarshalled value.
 					{
 						response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));							
@@ -693,9 +587,9 @@ public class ClientInterface
 		return response;
 	}
 
-	private BulkOperationResponse setUpdateBulkResponse(ClientResponse clientResponse)
+	private BulkOperationResponse<OperationStatus> setUpdateBulkResponse(ClientResponse clientResponse)
 	{
-		BulkOperationResponse response = new BulkOperationResponse();
+		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
 		setBaseResponseData(response, clientResponse);
 		if (clientResponse.getClientResponseStatus().getStatusCode() == Status.OK.getStatusCode())
 		{
@@ -705,7 +599,7 @@ public class ClientInterface
 				try
 				{						
 					//Because UpdateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-					UpdateResponseType updateManyResponse = (UpdateResponseType)infraUnmarshaller.unmarschal(payload, UpdateResponseType.class, getMediaType());
+					UpdateResponseType updateManyResponse = (UpdateResponseType)getInfraUnmarshaller().unmarschal(payload, UpdateResponseType.class, getMediaType());
 					if (updateManyResponse == null)// this is strange. So set the unmarshalled value.
 					{
 						response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));							
@@ -741,146 +635,4 @@ public class ClientInterface
 		return response;
 	}
 
-	private Response setResponse(ClientResponse clientResponse, Class<?> returnObjectClass, Status... successStatusCodes)
-	{
-		Response response = new Response();
-		setBaseResponseData(response, clientResponse);
-		response.setResourceURI(getService().getURI());
-		response.setDataObjectType(returnObjectClass);
-
-		if (isSuccessStatusCode(clientResponse.getClientResponseStatus().getStatusCode(), successStatusCodes))
-		{
-			if (response.getHasEntity())
-			{
-				String payload = clientResponse.getEntity(String.class);
-				if (returnObjectClass != null)
-				{
-					try
-					{
-						response.setDataObject(unmarshaller.unmarschal(payload, returnObjectClass, getMediaType()));
-						if (response.getDataObject() == null)// this is strange. So set the unmarshalled value.
-						{
-							response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));
-						}
-					}
-					catch (UnmarshalException ex)
-					{
-						response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
-					}
-				}
-				else // Strange. We have an entity but we returnObjectClass is null.
-				{
-					String errorMsg = "The response has data but the caller did not provide a 'returnObjectClass' type to unmarshal it. Consider this an error. Value stored in 'description' of error response.";
-					logger.error(errorMsg);
-					response.setError(new ErrorDetails(response.getStatus(), errorMsg, payload));
-				}
-			}
-		}
-		else // We are dealing with an error case.
-		{
-			setErrorResponse(response, clientResponse);
-		}
-		
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("Response from REST Call:\n"+response);
-		}
-		return response;
-	}
-
-	private TransportHeaderProperties extractHeaderInfo(ClientResponse clientResponse)
-	{
-		TransportHeaderProperties hdrProps = new RESTHeaderProperties();
-		MultivaluedMap<String, String> respHdrProps = clientResponse.getHeaders();
-		if ((respHdrProps != null))
-		{
-			for (String propName : ResponseHeaderConstants.HEADER_NAME_ARRAY)
-			{
-				String hdrValue = respHdrProps.getFirst(propName); // there should only be one value for each of these properties
-				if (hdrValue != null)
-				{
-					hdrProps.setHeaderProperty(propName, hdrValue);
-				}
-			}
-		}
-		return hdrProps;
-	}
-	
-	private ErrorDetails convertFromErrorType(ErrorType errorType)
-	{
-		if (errorType == null)
-		{
-			return null;
-		}
-		return new ErrorDetails((int)errorType.getCode(), errorType.getMessage(), errorType.getDescription(), errorType.getScope());
-	}
-	
-	private void setBaseResponseData(BaseResponse response, ClientResponse clientResponse)
-	{
-		response.setStatus(clientResponse.getClientResponseStatus().getStatusCode());
-		response.setStatusMessage(clientResponse.getClientResponseStatus().getReasonPhrase());
-		response.setMediaType(clientResponse.getType());
-		response.setContentLength(clientResponse.getLength());
-
-		// Extract header properties.
-		response.setHdrProperties(extractHeaderInfo(clientResponse));
-		response.setHasEntity(clientResponse.hasEntity() && (clientResponse.getClientResponseStatus().getStatusCode() != Status.NO_CONTENT.getStatusCode()));		
-	}
-	
-	private void setErrorResponse(BaseResponse response, ClientResponse clientResponse)
-	{
-		if (response.getHasEntity()) // Attempt to unmarshal the error
-		{
-			String errorStr = clientResponse.getEntity(String.class);
-			try
-			{
-				//Because ErrorType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-				ErrorType error = (ErrorType) infraUnmarshaller.unmarschal(errorStr, ErrorType.class, getMediaType());
-				if (error == null) // this is strange. So set the unmarshalled value.
-				{
-					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload into ErrorType object. See error description for payload details.", errorStr));
-				}
-				else
-				{
-					response.setError(convertFromErrorType(error));
-				}
-			}
-			catch (UnmarshalException ex)
-			{
-				response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload into ErrorType object: "+ex.getMessage()+". See error description for payload details.", errorStr));
-			}
-		}
-		else // It appears we have an error but no content. So create an error object with custom message.
-		{
-			response.setError(new ErrorDetails(response.getStatus(), "Error occured: " + response.getStatusMessage(), "No Content in web-service response."));
-		}
-	}
-	
-	private boolean isSuccessStatusCode(int statusCode, Status... successStatusCodes)
-	{
-	  if (successStatusCodes != null)
-	  {
-	    for (Status validStatus : successStatusCodes)
-	    {
-	      if (statusCode == validStatus.getStatusCode())
-	      {
-	        return true;
-	      }
-	    }
-	  }
-	  
-	  return false;
-	}
-	
-	private int toInt(String intStr)
-	{
-		try
-		{
-			return Integer.valueOf(intStr);
-		}
-		catch (Exception ex)
-		{
-			return 0;
-		}
-	}
 }

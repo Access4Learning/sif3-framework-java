@@ -36,13 +36,13 @@ import javax.ws.rs.core.UriInfo;
 
 import sif3.common.exception.UnmarshalException;
 import sif3.common.header.HeaderValues.ResponseAction;
-import sif3.common.utils.AuthenticationUtils;
+import sif3.common.model.EnvironmentKey;
 import sif3.common.ws.ErrorDetails;
-import sif3.infra.common.env.EnvironmentStore;
-import sif3.infra.common.env.types.ConsumerEnvironment;
+import sif3.infra.common.env.mgr.DirectProviderEnvironmentManager;
+import sif3.infra.common.env.mgr.ProviderManagerFactory;
 import sif3.infra.common.env.types.ProviderEnvironment;
+import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.common.model.EnvironmentType;
-import sif3.infra.rest.env.ProviderEnvironmentManager;
 import au.com.systemic.framework.utils.StringUtils;
 
 /*
@@ -60,18 +60,28 @@ import au.com.systemic.framework.utils.StringUtils;
 @Path("/environments")
 public class EnvironmentResource extends InfraResource
 {
-	private ProviderEnvironmentManager envMgr = null;
-	
-//	private static final String SERVICE_NAME = "environments";
-
 	public EnvironmentResource(@Context UriInfo uriInfo,
 			                   @Context HttpHeaders requestHeaders,
 			                   @Context Request request)
 	{
 		super(uriInfo, requestHeaders, request, "", null, null);
-	    envMgr = ProviderEnvironmentManager.getInstance(EnvironmentStore.getInstance(getServicePropFileName()));
 	}
 
+
+	/*----------------------*/
+	/*-- Abstract Methods --*/
+	/*----------------------*/
+
+	/* (non-Javadoc)
+     * @see sif3.infra.rest.resource.BaseResource#getEnvironmentManager()
+     */
+    @Override
+    public EnvironmentManager getEnvironmentManager()
+    {
+    	return ProviderManagerFactory.getEnvironmentManager();
+//	    return DirectProviderEnvironmentManager.getInstance();
+    }
+		
     // -------------------------------------------------//
 	// -- POST Section: This is the C(reate) in CRUD. --//
 	// -------------------------------------------------//
@@ -88,7 +98,7 @@ public class EnvironmentResource extends InfraResource
 		
 		try
 		{
-			EnvironmentType inputEnv = (EnvironmentType) getUnmarshaller().unmarschal(payload, EnvironmentType.class, getMediaType());
+			EnvironmentType inputEnv = (EnvironmentType) getInfraUnmarshaller().unmarschal(payload, EnvironmentType.class, getMediaType());
 
 			ArrayList<String> envError = envDataValid(inputEnv); 
 			if (envError != null)
@@ -96,70 +106,35 @@ public class EnvironmentResource extends InfraResource
 				return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Cannot create Consumer Environment.", "Missing or invalid data: "+envError), ResponseAction.CREATE);
 			}
 
-			String envName = inputEnv.getSolutionId();			
-			String consumerID = inputEnv.getConsumerName();
-
-			String userName = null;
-			String password = null;
+			ProviderEnvironment envInfo = getEnvironment();
 			
-			ProviderEnvironment providerEnv = (ProviderEnvironment)envMgr.getEnvironmentStore().getEnvironments().getEnvironment(envName);
-			if (providerEnv == null)
+			// check if initial Authentication Token is valid for this environment.
+			ErrorDetails errors = validateAuthToken(envInfo, envInfo.getEnvironmentKey().getApplicationKey(), envInfo.getPassword());
+			if (errors != null) // we had an issue with the authentication => return error.
 			{
-				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Environment with solutionId = '"+envName+"' not supported. Ensure that you provide a valid solutionId."), ResponseAction.CREATE);
+				return makeErrorResponse(errors, ResponseAction.CREATE);       
 			}
 			
-			ConsumerEnvironment consumerEnv = providerEnv.getConsumer(consumerID);
-			if (consumerEnv == null)
+			// Here we are ok with authentication. Check if there is an environment for this application already.
+			EnvironmentKey envKey = new EnvironmentKey(inputEnv.getSolutionId(), inputEnv.getApplicationInfo().getApplicationKey(), inputEnv.getUserToken(), inputEnv.getInstanceId());
+			EnvironmentType environment = getDirectEnvironmentManager().getEnvironmentFromWorkstore(envKey, isSecure());
+			if (environment != null) // we have an environment already
 			{
-				// is 'any allowed'
-				if (providerEnv.getAllowAny())
-				{
-					userName = providerEnv.getAllowAnyUserName();
-					password = providerEnv.getAllowAnyPassword();
-
-				}
-				else // Report an error because it is an invalid consumer for this environment
-				{
-					return makeErrorResponse(new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Consumer '"+consumerID+"' is not authorised to access this environment."), ResponseAction.CREATE);
-				}
-			}
-			else // valid consumer found
-			{
-				userName = consumerEnv.getUserName();
-				password = consumerEnv.getPassword();
-			}
-
-			//check Auth Token if it is a valid client. At this stage we only have the initial auth token.
-			if (!AuthenticationUtils.getBasicAuthToken(userName, password).equals(getAuthToken())) // not allowed credentials
-			{
-				return makeErrorResponse(new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Invalid authorisation token provided."), ResponseAction.CREATE);
+		        //TODO: JH - Confirm if we shall return it
+		        return createEnvResponse(environment, Status.CONFLICT.getStatusCode(), ResponseAction.CREATE);
 			}
 			
-			// If we get here then all the credentials are fine.
-			// Check if the environment is valid for this provider and consumer
-			if (!envMgr.isEnvironmentSupportedForConsumer(envName, consumerID, false))
-			{
-				return makeErrorResponse(new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Consumer '"+consumerID+"' is not authorised to access this environment with solutionId = '"+envName+"'."), ResponseAction.CREATE);
-			}
-			
-			// Check if an environment does already exist. if so we need to see if we return an error or if we shall just return the environment
-			EnvironmentType environment = envMgr.getEnvironmentForConsumer(envName, consumerID, isSecure());
-			if (environment != null)
-			{		  
-				//TODO: JH - Confirm if we shall return it
-				return createEnvResponse(environment, Status.CONFLICT.getStatusCode(), ResponseAction.CREATE);
-			}
-			
-			// if it doesn't exist then create it the environment store and also add it to the EnvironmentManager.
-			environment = envMgr.createEnvironment(inputEnv, userName, password, providerEnv.getMediaType(), isSecure());
-			
-			if (environment == null) // We had a problem. Error logged
-			{
-				return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create environment with solutionId = '"+envName+"' for consumer '"+consumerID+"'.", "Internal System error. Please contact your system administrator."), ResponseAction.CREATE);
-			}
-			
-			//if we get here then all is fine and we can return the environment.
-			return createEnvResponse(environment, Status.CREATED.getStatusCode(), ResponseAction.CREATE);
+			// If we get to this point then we don't have an environment/session yet. Create it the environment store and also add it to 
+			// the ClientEnvironmentManager.
+		    environment = getDirectEnvironmentManager().createOrUpdateEnvironment(inputEnv, isSecure());
+		      
+		    if (environment == null) // We had a problem. Error logged
+		    {
+		        return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create environment for '"+envInfo.getEnvironmentName()+"' for consumer '"+inputEnv.getConsumerName()+"'.", "Internal System error. Please contact your system administrator."), ResponseAction.CREATE);
+		    }
+		      
+		    //if we get here then all is fine and we can return the environment.
+		    return createEnvResponse(environment, Status.CREATED.getStatusCode(), ResponseAction.CREATE);
 		}
 		catch (UnmarshalException ex)
 		{
@@ -167,6 +142,12 @@ public class EnvironmentResource extends InfraResource
 			logger.error("Environment Payload: "+ payload);
 			return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal environment payload: "+ ex.getMessage()), ResponseAction.CREATE);
 		}
+	    catch (Exception ex)
+	    {
+	      logger.error("Failed to create/retrieve environment session: "+ ex.getMessage(), ex);
+	      logger.error("Environment Payload: "+ payload);
+	      return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal environment payload: "+ ex.getMessage()), ResponseAction.CREATE);
+	    }
 	}
 
 	// -----------------------------------------------------------------//
@@ -178,28 +159,38 @@ public class EnvironmentResource extends InfraResource
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getEnvironment(@PathParam("id") String id)
 	{
-		logger.debug("Retrieve Environment with id = " + id);
-		
-		//check if the caller is valid, i.e. has provided a authentication token.
-		ErrorDetails error = validEnvironmentForConsumer();
-		if (error == null)
+		logger.debug("Retrieve Environment with id = " + id);	
+				
+		// Ok there is a session for this environment. Validate if the user is the one that owns the environment	
+		ErrorDetails errors = validSession();
+		if (errors == null)
 		{
-			// If I get here then the client has an environment. Load and return it.
-			EnvironmentType environment = envMgr.loadEnvironmentByAuthToken(getAuthToken(), isSecure());
+			// Ok. All good. There is a session for the given session token. It has been loaded if it wasn't. Now get the actual
+			// Environment from the store.
+			try
+		    {
+				EnvironmentType environment = getDirectEnvironmentManager().reloadEnvironmentBySessionToken(getSessionToken(), isSecure());
+
+				// Also ensure that the id matches the ID of the environment otherwise we have a bit of a mixup
+	  			if (!id.equals(environment.getId()))
+	  			{
+	  				errors = new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Environment with id "+id+" does not exist.");
+	  				return makeErrorResponse(errors, ResponseAction.QUERY);
+	  			}
+	  			
+	  			return createEnvResponse(environment, Status.OK.getStatusCode(), ResponseAction.QUERY);
+		    }
+		    catch (Exception ex)
+		    {
+		    	logger.error("Failed to retrieve environment with ID = "+id+": "+ ex.getMessage(), ex);
+		    	return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Error accessing environment store: "+ ex.getMessage()), ResponseAction.QUERY);
+		    }
 			
-			// Also ensure that the id matches the ID of the environment otherwise we have a bit of a mixup
-			if (!id.equals(environment.getId()))
-			{
-				error = new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Environment with id "+id+" does not exist.");
-				return makeErrorResponse(error, ResponseAction.QUERY);
-			}
-			
-			return createEnvResponse(environment, Status.OK.getStatusCode(), ResponseAction.QUERY);
 		}
 		else
 		{
-			logger.debug("Error Found: "+error);
-			return makeErrorResponse(error, ResponseAction.QUERY);
+			logger.debug("Error Found: "+errors);
+			return makeErrorResponse(errors, ResponseAction.QUERY);
 		}
 	}
 
@@ -213,82 +204,106 @@ public class EnvironmentResource extends InfraResource
 	public Response deleteEnvironment(@PathParam("id") String id)
 	{
 		logger.debug("Delete Environment with id = " + id);
-		
-		//check if the caller is valid, i.e. has provided a authentication token.
-		ErrorDetails error = validEnvironmentForConsumer();
-		if (error == null)
+    
+		// check if authentication token is valid for this environment. This time round we should have a proper authentication 
+		// token based on sessionToken
+		ErrorDetails errors = validSession();
+		if (errors == null)
 		{
-			// If I get here then the client has an environment. Load and return it.
-			EnvironmentType environment = envMgr.loadEnvironmentByAuthToken(getAuthToken(), isSecure());
-			
-			// Also ensure that the id matches the ID of the environment otherwise we have a bit of a mixup
-			if (!id.equals(environment.getId()))
-			{
-				error = new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Environment with id "+id+" does not exist. No action taken.");
-				return makeErrorResponse(error, ResponseAction.DELETE);
-			}
-			
-			if (envMgr.removeEnvironmentByAuthToken(getAuthToken()))
-			{
-				return makeResopnseWithNoContent(false, ResponseAction.DELETE);
-			}
-			else
-			{
-				logger.error("Environment with id "+id+" couldn't be deleted. See error log for details/");
-				error = new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Environment with id "+id+" couldn't be deleted.");
-				return makeErrorResponse(error, ResponseAction.DELETE);
-			}
+		    try
+		    {
+	  			// If I get here then the client has an environment. Load and return it.
+	  		  	String sessionToken = getSessionToken();
+	  		  
+	  		  	// Ensure we reload and return the latest. Access the session store for this.
+	  			EnvironmentType environment = getDirectEnvironmentManager().reloadEnvironmentBySessionToken(sessionToken, isSecure());
+	  			
+	  			// Also ensure that the id matches the ID of the environment otherwise we have a bit of a mixup
+	  			if (!id.equals(environment.getId()))
+	  			{
+					errors = new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Environment with id "+id+" does not exist. No action taken.");
+					return makeErrorResponse(errors, ResponseAction.DELETE);
+	  			}
+	  			
+				if (getDirectEnvironmentManager().removeEnvironmentBySessionToken(sessionToken))
+				{
+					return makeResopnseWithNoContent(false, ResponseAction.DELETE);
+				}
+				else
+				{
+					logger.error("Environment with id "+id+" couldn't be deleted. See error log for details.");
+					errors = new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Environment with id "+id+" couldn't be deleted.");
+					return makeErrorResponse(errors, ResponseAction.DELETE);
+				}
+		    }
+		    catch (Exception ex)
+		    {
+		    	logger.error("Failed to retrieve & remove environment with ID = "+id+": "+ ex.getMessage(), ex);
+		    	return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Error accessing environment store: "+ ex.getMessage()), ResponseAction.DELETE);
+		    }			
 		}
 		else
 		{
-			logger.debug("Error Found: "+error);
-			return makeErrorResponse(error, ResponseAction.DELETE);
+			logger.debug("Error Found: "+errors);
+			return makeErrorResponse(errors, ResponseAction.DELETE);
 		}
 	}
 
 	/*---------------------*/
 	/*-- Private Methods --*/
-  /*---------------------*/
-  private ArrayList<String> envDataValid(EnvironmentType environment)
-  {
-	  ArrayList<String> errors = new ArrayList<String>();
-	  if (environment == null)
-	  {
-		  errors.add("No environment data provided.");
-	  }
-	  else
-	  {
-		  checkValue(environment.getType(),"type", errors);
-		  checkValue(environment.getSolutionId(),"solutionId", errors);
-		  checkValue(environment.getAuthenticationMethod(),"authenticationMethod", errors);
-		  checkValue(environment.getConsumerName(),"consumerName", errors);
-		  
-		  if (environment.getApplicationInfo() != null)
-		  {
-			  checkValue(environment.getApplicationInfo().getApplicationKey(),"applicationInfo/applicationKey", errors);
-			  checkValue(environment.getApplicationInfo().getSupportedInfrastructureVersion(),"applicationInfo/supportedInfrastructureVersion", errors);
-			  checkValue(environment.getApplicationInfo().getSupportedDataModel(),"applicationInfo/supportedDataModel", errors);
-			  checkValue(environment.getApplicationInfo().getSupportedDataModelVersion(),"applicationInfo/supportedDataModelVersion", errors);
-			  checkValue(environment.getApplicationInfo().getTransport(),"applicationInfo/transport", errors);			  
-		  }
-		  else
-		  {
-			  errors.add("applicationInfo");
-		  }
-	  }
-	  if (errors.size() == 0)
-	  {
-		  return null;
-	  }
-	  else
-	  {
-		  return errors;
-	  }
-  }
+	/*---------------------*/
+	
+	private ProviderEnvironment getEnvironment()
+	{
+		return (ProviderEnvironment)getEnvironmentManager().getEnvironmentInfo();
+	}
+	
+	/*
+	 * Convenience Method.
+	 */
+	private DirectProviderEnvironmentManager getDirectEnvironmentManager()
+	{
+		return (DirectProviderEnvironmentManager)getEnvironmentManager();
+	}
+
+	private ArrayList<String> envDataValid(EnvironmentType environment)
+	{
+		ArrayList<String> errors = new ArrayList<String>();
+		if (environment == null)
+		{
+			errors.add("No environment data provided.");
+		}
+		else
+		{
+			checkValue(environment.getSolutionId(), "solutionId", errors);
+			checkValue(environment.getAuthenticationMethod(), "authenticationMethod", errors);
+			checkValue(environment.getConsumerName(), "consumerName", errors);
+
+			if (environment.getApplicationInfo() != null)
+			{
+				checkValue(environment.getApplicationInfo().getApplicationKey(), "applicationInfo/applicationKey", errors);
+				checkValue(environment.getApplicationInfo().getSupportedInfrastructureVersion(), "applicationInfo/supportedInfrastructureVersion", errors);
+				checkValue(environment.getApplicationInfo().getDataModelNamespace(), "applicationInfo/dataModelNamespace", errors);
+				checkValue(environment.getApplicationInfo().getTransport(), "applicationInfo/transport", errors);
+			}
+			else
+			{
+				errors.add("applicationInfo");
+			}
+		}
+		if (errors.size() == 0)
+		{
+			return null;
+		}
+		else
+		{
+			return errors;
+		}
+	}
 
 	private Response createEnvResponse(EnvironmentType environment, int statusCode, ResponseAction responseAction)
 	{
-		return makeResponse(environment, statusCode, false, responseAction, getMarshaller());
+		return makeResponse(environment, statusCode, false, responseAction, getInfraMarshaller());
 	}
 	
 	private void checkValue(String value, String elementName, ArrayList<String> errors)

@@ -23,6 +23,7 @@ import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
+import au.com.systemic.framework.utils.AdvancedProperties;
 
 /**
  * This is the class to be used (extended) by all infrastructure resources. It holds some infrastructure specific knowledge and 
@@ -32,6 +33,10 @@ import sif3.infra.common.conversion.InfraUnmarshalFactory;
  */
 public abstract class InfraResource extends BaseResource
 {
+	/* Below variables are for testing purposes only */
+	private static Boolean testMode = null;
+	/* End Testing variables */
+	
 	private MarshalFactory marshaller = new InfraMarshalFactory();
 	private UnmarshalFactory unmarshaller = new InfraUnmarshalFactory();
 
@@ -40,14 +45,24 @@ public abstract class InfraResource extends BaseResource
 		super(uriInfo, requestHeaders, request, servicePrefixPath, zoneID, contextID);
 	}
 
-	public MarshalFactory getMarshaller()
+	public MarshalFactory getInfraMarshaller()
 	{
 		return this.marshaller;
 	}
 
-	public UnmarshalFactory getUnmarshaller()
+	public UnmarshalFactory getInfraUnmarshaller()
 	{
 		return this.unmarshaller;
+	}
+
+	protected boolean isTestMode()
+	{
+		if (testMode == null)
+		{
+			AdvancedProperties props = getEnvironmentManager().getServiceProperties();
+			testMode = props.getPropertyAsBool("resource.testmode", false);
+		}
+		return testMode;
 	}
 
 }
