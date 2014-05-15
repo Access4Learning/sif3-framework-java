@@ -17,56 +17,86 @@
  */
 package sif.dd.au30.conversion;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
+
 import javax.ws.rs.core.MediaType;
+import javax.xml.bind.JAXBElement;
 
 import org.apache.log4j.Logger;
 
-import sif.dd.au30.conversion.DataModelObjectEnum.DataModel;
 import sif.dd.au30.model.ObjectFactory;
-import sif.dd.au30.model.StudentCollectionType;
-import sif.dd.au30.model.StudentPersonalType;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.exception.MarshalException;
 import sif3.common.utils.JAXBUtils;
 
-//TODO: JH - Need to complete this factory
 public class DataModelMarshalFactory implements MarshalFactory
 {
 	protected final Logger logger = Logger.getLogger(getClass());
 
+	private static final HashMap<Class<?>, Method> CREATE_METHODS = new HashMap<Class<?>, Method>();
+	
+	/**
+	 * Pre-populate Create Method Cache for faster marshaling of objects.
+	 */
+	static
+	{
+		Method[] methods = ObjectFactory.class.getMethods();
+		for (int i = 0; methods != null && i < methods.length; i++)
+		{
+			Method method = methods[i];
+			if ((method != null) && (method.getParameterTypes() != null) && (method.getParameterTypes().length == 1) && (method.getReturnType().equals(JAXBElement.class)))
+			{
+				CREATE_METHODS.put(method.getParameterTypes()[0], method);
+			}
+		}
+	}
+	
 	private ObjectFactory objFactory = new ObjectFactory();
 	
 	@Override
 	public String marshalToXML(Object obj) throws MarshalException
 	{
-		DataModel dataModel = DataModelObjectEnum.getDataModelEnum(obj);
-		if (dataModel != null)
+		String result = null;
+		try
 		{
-			switch (dataModel)
+			Method method = findCreateMethod(obj);
+			if (method != null)
 			{
-			case StudentCollectionType:
-			{
-				return JAXBUtils.marshalToXML(objFactory.createStudentPersonals((StudentCollectionType) obj));
-			}
-			case StudentPersonalType:
-			{
-				return JAXBUtils.marshalToXML(objFactory.createStudentPersonal((StudentPersonalType) obj));
-			}
+				JAXBElement<?> element = (JAXBElement<?>) method.invoke(objFactory, obj);
+				if (element != null)
+				{
+					result = JAXBUtils.marshalToXML(element);
+				}
 			}
 		}
-
-		// If we get here then we could not marshal because the object type is invalid or null.
-		return null;
+		catch (Exception e)
+		{
+			logger.error("An error occurred marshalling object to XML", e);
+		}
+		return result;
 	}
+	
+	/**
+	 * Finds the method that has one parameter of the type provided.
+	 * 
+	 * @param obj object that needs to be marshaled.
+	 * @return method - method to invoke to convert object into a jaxb element.
+	 */
+	private Method findCreateMethod(Object obj)
+	{
+		Method result = null;
+		if (obj != null && obj.getClass() != null)
+		{
+			result = CREATE_METHODS.get(obj.getClass());
+		}
+		return result;
+  }
 
 	@Override
 	public String marshalToJSON(Object obj) throws MarshalException
 	{
-		DataModel dataModel = DataModelObjectEnum.getDataModelEnum(obj);
-		if (dataModel != null)
-		{
-			// TODO: JH - Implement from JSON marshaller
-		}
+		// TODO: JH - Implement from JSON marshaller
 		logger.warn("Marshal to JSON not supported, yet");
 		throw new MarshalException("Marshal Object to JSON not implemented, yet");
 	}
@@ -77,6 +107,10 @@ public class DataModelMarshalFactory implements MarshalFactory
 		if (mediaType != null)
 		{
 			if (mediaType.equals(MediaType.APPLICATION_XML_TYPE))
+			{
+				return marshalToXML(obj);
+			}
+			if (mediaType.equals(MediaType.TEXT_XML_TYPE))
 			{
 				return marshalToXML(obj);
 			}

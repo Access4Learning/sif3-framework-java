@@ -19,14 +19,10 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 
-import sif.dd.au30.conversion.DataModelObjectEnum.DataModel;
-import sif.dd.au30.model.StudentCollectionType;
-import sif.dd.au30.model.StudentPersonalType;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.utils.JAXBUtils;
 
-// TODO: JH - Need to complete this factory
 public class DataModelUnmarshalFactory implements UnmarshalFactory
 {
 	protected final Logger logger = Logger.getLogger(getClass());
@@ -34,34 +30,22 @@ public class DataModelUnmarshalFactory implements UnmarshalFactory
 	@Override
 	public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException
 	{
-		DataModel dataModel = DataModelObjectEnum.getDataModelEnum(clazz.getSimpleName());
-		if (dataModel != null)
+		Object result = null;
+		try
 		{
-			switch (dataModel)
-			{
-			case StudentCollectionType:
-			{
-				return (StudentCollectionType) JAXBUtils.unmarshalFromXMLIntoObject(payload, StudentCollectionType.class);
-			}
-			case StudentPersonalType:
-			{
-				return (StudentPersonalType) JAXBUtils.unmarshalFromXMLIntoObject(payload, StudentPersonalType.class);
-			}
-			}
+			result = JAXBUtils.unmarshalFromXMLIntoObject(payload, clazz);
 		}
-
-		// If we get here then we could not unmarshal because the object type is invalid or null.
-		return null;
+		catch (Exception e)
+		{
+			logger.error("An error occurred unmarshalling object from XML", e);
+		}
+		return result;
 	}
 
 	@Override
 	public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException
 	{
-		DataModel dataModel = DataModelObjectEnum.getDataModelEnum(clazz.getSimpleName());
-		if (dataModel != null)
-		{
-			// TODO: JH - Implement from JSON unmarshaller
-		}
+		// TODO: JH - Implement from JSON unmarshaller
 		logger.warn("Unmarshal from JSON not supported, yet");
 		throw new UnmarshalException("Unmarshal Object from JSON not implemented, yet");
 	}
@@ -75,9 +59,21 @@ public class DataModelUnmarshalFactory implements UnmarshalFactory
 			{
 				return unmarshalFromXML(payload, clazz);
 			}
+			else if (mediaType.equals(MediaType.TEXT_XML_TYPE)) //assume XML
+			{
+				return unmarshalFromXML(payload, clazz);
+			}
 			else if (mediaType.equals(MediaType.APPLICATION_JSON_TYPE))
 			{
 				return unmarshalFromJSON(payload, clazz);
+			}
+			else if (mediaType.equals(MediaType.TEXT_PLAIN_TYPE)) // assume XML
+			{
+				return unmarshalFromXML(payload, clazz);
+			}
+			else //TODO: JH - Temporary bit to resolve issue with Broker's Event Media Type. Remove this later
+			{
+				return unmarshalFromXML(payload, clazz);
 			}
 		}
 
