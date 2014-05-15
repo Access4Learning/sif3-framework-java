@@ -31,8 +31,7 @@ public class TestInfraUnmarshalFactory
       System.out.println("   AppInfo: ");
       System.out.println("      App Key      : " + env.getApplicationInfo().getApplicationKey());
       System.out.println("      Infra Version: " + env.getApplicationInfo().getSupportedInfrastructureVersion());
-      System.out.println("      Data Model   : " + env.getApplicationInfo().getSupportedDataModel());
-      System.out.println("      DM Version   : " + env.getApplicationInfo().getSupportedDataModelVersion());
+      System.out.println("      Data Model   : " + env.getApplicationInfo().getDataModelNamespace());
       System.out.println("      Transport    : " + env.getApplicationInfo().getTransport());
       if (env.getApplicationInfo().getApplicationProduct() != null)
       {

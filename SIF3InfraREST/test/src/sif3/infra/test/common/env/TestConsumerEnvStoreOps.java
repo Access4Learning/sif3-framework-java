@@ -18,10 +18,12 @@
 
 package sif3.infra.test.common.env;
 
+import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.MarshalException;
+import sif3.common.model.EnvironmentKey;
+import sif3.common.persist.model.SIF3Session;
 import sif3.infra.common.conversion.InfraMarshalFactory;
-import sif3.infra.common.env.EnvironmentStore;
-import sif3.infra.common.env.ConsumerEnvironmentStoreOperations;
+import sif3.infra.common.env.ops.ConsumerEnvironmentStoreOperations;
 import sif3.infra.common.model.EnvironmentType;
 
 
@@ -31,16 +33,25 @@ import sif3.infra.common.model.EnvironmentType;
  */
 public class TestConsumerEnvStoreOps
 {
-	private EnvironmentStore envStore = null;
+	private static final AdapterType CONSUMER = AdapterType.CONSUMER;
+	private static final sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType DIRECT = sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType.DIRECT;
+	
 	private ConsumerEnvironmentStoreOperations envOps = null;
 	
-	private static final String SOLUTION_NAME="auTestSolution";
-  private static final String SERVICE_NAME="StudentConsumer";
+	private static final String TEMPLATE_FILE_NAME="devLocal.xml";
+	private static final String SESSION_TOKEN="12341234-5678-4123-1234-123412345678";
+	//private static final String SESSION_TOKEN="e88da655-9ca6-41c3-aa21-ec467ed84437";
+	//private static final String SESSION_TOKEN="98154bc3-d4b3-427d-bf40-58ed9705f6de";
+	
+	private static final String ENV_ID="ABCD1234-5678-4ABC-ABCD-ABCD12345678";
+	//private static final String ENV_ID="cdefe8d2-875f-4948-887b-32be15d541a7";
+	//private static final String ENV_ID="c97da483-a0c4-4c2d-81db-1855e8eff518";
+	
+	private static final String SERVICE_NAME="StudentConsumer";
 	
 	public TestConsumerEnvStoreOps()
 	{
-		envStore = EnvironmentStore.getInstance(SERVICE_NAME);
-		envOps = new ConsumerEnvironmentStoreOperations(envStore);
+		envOps = new ConsumerEnvironmentStoreOperations(SERVICE_NAME);
 	}
 	
 	private void printEnvironment(EnvironmentType env)
@@ -63,49 +74,85 @@ public class TestConsumerEnvStoreOps
 		}
 	}
 	
-	private void testExistInputEnvironment()
+	private void testExistTemplateEnvironment()
 	{
-		System.out.println("Input XML for "+SOLUTION_NAME+" exists: "+envOps.existInputEnvironment(SOLUTION_NAME));
+		System.out.println("Template XML for "+TEMPLATE_FILE_NAME+" exists: "+envOps.existEnvironmentTemplate(TEMPLATE_FILE_NAME, CONSUMER, DIRECT));
 	}
 	
-	private void testExistOutputEnvironment()
+//	private void testExistWorkstoreEnvBySessionTK() throws IllegalArgumentException, PersistenceException
+//	{
+//		System.out.println("Workstore XML for Session Token "+SESSION_TOKEN+" exists: "+envOps.existEnvInWorkstoreBySessionToken(SESSION_TOKEN));
+//	}
+	
+//	private void testExistWorkstoreEnvByEnvID() throws IllegalArgumentException, PersistenceException
+//	{
+//		System.out.println("Workstore XML for Env ID "+ENV_ID+" exists: "+envOps.existEnvInWorkstoreByEnvID(ENV_ID));
+//	}
+
+	private void testLoadTemplateEnvironment()
 	{
-		System.out.println("Output XML for "+SOLUTION_NAME+" exists: "+envOps.existOutputEnvironment(SOLUTION_NAME));
+		printEnvironment(envOps.loadTemplateEnvironmentData(TEMPLATE_FILE_NAME, CONSUMER, DIRECT));
 	}
 	
-	private void testLoadInputEnvironment()
+//	private void testLoadWorkstoreEnvBySessionTK()
+//	{
+//		printEnvironment(envOps.loadWorkstoreEnvBySessionToken(SESSION_TOKEN));
+//	}
+
+//	private void testLoadWorkstoreEnvByEnvID()
+//	{
+//		printEnvironment(envOps.loadWorkstoreEnvByEnvID(ENV_ID));
+//	}
+
+	private void testStoreEnvironmentToWorkstore()
 	{
-		printEnvironment(envOps.loadInputEnvironmentData(SOLUTION_NAME));
+		EnvironmentType env = envOps.loadTemplateEnvironmentData(TEMPLATE_FILE_NAME, CONSUMER, DIRECT);
+		env.setConsumerName("TestConsumer");
+		env.setSolutionId("test");
+		env.getApplicationInfo().setApplicationKey("MY_APP");
+		env.setAuthenticationMethod("Basic");
+		env.setId(ENV_ID);
+		env.setSessionToken(SESSION_TOKEN);
+//		SIF3Session session = new SIF3Session(new EnvironmentKey("test", "MY_APP"));
+//		session.setAdapterName(SERVICE_NAME);
+//		session.setSessionToken(SESSION_TOKEN);
+//		session.setEnvironmentID(ENV_ID);
+//		session.setAdapterType(AdapterType.CONSUMER.name());
+		System.out.println("Environment Stored: "+envOps.createOrUpdateSession(env));
 	}
 	
-	private void testLoadOutputEnvironment()
+	private void testRemoveEnvFromWorkstoreBySessionTK()
 	{
-		printEnvironment(envOps.loadOutputEnvironmentData(SOLUTION_NAME));
+		System.out.println("Environment Removed: "+envOps.removeEnvFromWorkstoreBySessionToken(SESSION_TOKEN));
 	}
 
-	private void testStoreOutputEnvironment()
-	{
-		System.out.println("Environment Stored: "+envOps.storeOutputEnvironmentData("joergSolution", envOps.loadInputEnvironmentData(SOLUTION_NAME)));
-	}
-	
-	private void testRemoveOutputEnvironment()
-	{
-		System.out.println("Environment Removed: "+envOps.removeOutputEnvironmentData("joergSolution"));
-	}
+//	private void testRemoveEnvFromWorkstoreByEnvID()
+//	{
+//		System.out.println("Environment Removed: "+envOps.removeEnvFromWorkstoreByEnvID(ENV_ID));
+//	}
 
 	public static void main(String[] args)
 	{
 		TestConsumerEnvStoreOps tester = new TestConsumerEnvStoreOps();
 		
-		System.out.println("Start Testing ConsumerEnvironmentStoreOperations...");
-		
-//		tester.testExistInputEnvironment();
-//		tester.testExistOutputEnvironment();
-//		tester.testLoadInputEnvironment();
-//		tester.testLoadOutputEnvironment();
-//		tester.testStoreOutputEnvironment();
-		tester.testRemoveOutputEnvironment();
-		
+		try
+		{
+			System.out.println("Start Testing ConsumerEnvironmentStoreOperations...");
+			
+//			tester.testExistTemplateEnvironment();
+//			tester.testExistWorkstoreEnvByEnvID();
+//			tester.testExistWorkstoreEnvBySessionTK();
+//			tester.testLoadTemplateEnvironment();
+//			tester.testLoadWorkstoreEnvByEnvID();
+//			tester.testLoadWorkstoreEnvBySessionTK();
+			tester.testStoreEnvironmentToWorkstore();
+//			tester.testRemoveEnvFromWorkstoreByEnvID();
+//			tester.testRemoveEnvFromWorkstoreBySessionTK();
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
 		System.out.println("End Testing ConsumerEnvironmentStoreOperations.");
 	}
 }

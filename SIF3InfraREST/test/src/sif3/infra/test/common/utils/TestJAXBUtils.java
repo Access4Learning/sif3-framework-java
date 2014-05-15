@@ -27,6 +27,7 @@ import sif3.infra.common.model.AlertCollectionType;
 import sif3.infra.common.model.AlertType;
 import sif3.infra.common.model.ApplicationInfoType;
 import sif3.infra.common.model.EnvironmentType;
+import sif3.infra.common.model.EnvironmentTypeType;
 import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.ProductIdentityType;
 import au.com.systemic.framework.utils.FileReaderWriter;
@@ -58,8 +59,8 @@ public class TestJAXBUtils
     System.out.println("   AppInfo: ");
     System.out.println("      App Key      : " + env.getApplicationInfo().getApplicationKey());
     System.out.println("      Infra Version: " + env.getApplicationInfo().getSupportedInfrastructureVersion());
-    System.out.println("      Data Model   : " + env.getApplicationInfo().getSupportedDataModel());
-    System.out.println("      DM Version   : " + env.getApplicationInfo().getSupportedDataModelVersion());
+    System.out.println("      Data Model   : " + env.getApplicationInfo().getDataModelNamespace());
+//    System.out.println("      DM Version   : " + env.getApplicationInfo().getSupportedDataModelVersion());
     System.out.println("      Transport    : " + env.getApplicationInfo().getTransport());
     if (env.getApplicationInfo().getApplicationProduct() != null)
     {
@@ -82,7 +83,7 @@ public class TestJAXBUtils
 	private EnvironmentType getEnvironment()
 	{
 		EnvironmentType env = objFactory.createEnvironmentType();
-		env.setType("DIRECT");
+		env.setType(EnvironmentTypeType.DIRECT);
 		env.setSolutionId("testSolution");
 		env.setAuthenticationMethod("Basic");
 		env.setConsumerName("SAMPLE AU Subscriber");
@@ -90,8 +91,8 @@ public class TestJAXBUtils
 		ApplicationInfoType appInfo = new ApplicationInfoType();
 		appInfo.setApplicationKey("TEST_CODE");
 		appInfo.setSupportedInfrastructureVersion("3.0");
-		appInfo.setSupportedDataModel("SIF-AU");
-		appInfo.setSupportedDataModelVersion("3.0");
+		appInfo.setDataModelNamespace("http://www.SIFinfo.org/au/datamodel/1.3");
+//		appInfo.setSupportedDataModelVersion("3.0");
 		appInfo.setTransport("REST");
 		
 		ProductIdentityType appProd = new ProductIdentityType();

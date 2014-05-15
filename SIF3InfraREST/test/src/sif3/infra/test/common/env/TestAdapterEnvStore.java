@@ -25,12 +25,12 @@ import sif3.infra.common.env.types.AdapterEnvironmentStore;
  * @author Joerg Huber
  *
  */
-public class TestEnvStore
+public class TestAdapterEnvStore
 {
 	private AdapterEnvironmentStore testGetEnvironmentStore(String propFileName)
 	{
 		AdapterEnvironmentStore envStore = new AdapterEnvironmentStore(propFileName);
-		System.out.println("Environment Store for "+propFileName+":\n"+envStore);
+		System.out.println("Adapter Environment Store for "+propFileName+":\n"+envStore);
 		return envStore;
 	}
 	
@@ -38,13 +38,13 @@ public class TestEnvStore
 	
 	public static void main(String[] args)
 	{
-		TestEnvStore tester = new TestEnvStore();
+		TestAdapterEnvStore tester = new TestAdapterEnvStore();
 		
-		System.out.println("Start Testing EnvironmentStore...");
+		System.out.println("Start Testing AdapterEnvironmentStore...");
 		
-		tester.testGetEnvironmentStore("StudentProvider");
-    //tester.testGetEnvironmentStore("StudentConsumer");
+		//tester.testGetEnvironmentStore("StudentProvider");
+    	tester.testGetEnvironmentStore("StudentConsumer");
 		
-		System.out.println("End Testing EnvironmentStore.");
+		System.out.println("End Testing AdapterEnvironmentStore.");
 	}
 }
