@@ -19,18 +19,21 @@ package sif3.infra.test.rest.consumer;
 import java.util.ArrayList;
 import java.util.List;
 
-import sif.dd.au30.conversion.DataModelMarshalFactory;
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
 import sif.dd.au30.model.StudentCollectionType;
 import sif.dd.au30.model.StudentPersonalType;
 import sif3.common.exception.UnmarshalException;
-import sif3.common.model.EnvironmentZoneContextInfo;
+import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.ZoneContextInfo;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.BulkOperationResponse;
+import sif3.common.ws.CreateOperationStatus;
+import sif3.common.ws.OperationStatus;
 import sif3.common.ws.Response;
+import sif3.infra.rest.consumer.ConsumerLoader;
 import systemic.sif3.demo.rest.consumer.StudentPersonalConsumer;
 import au.com.systemic.framework.utils.FileReaderWriter;
 
@@ -46,10 +49,9 @@ public class TestStudentPersonalConsumer
 	private final static String MULTI_STUDENT_FILE_NAME = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
 	private static final String CONSUMER_ID = "StudentConsumer";
 	
-	private DataModelUnmarshalFactory unmarshaller = new DataModelUnmarshalFactory();
-	private DataModelMarshalFactory marshaller = new DataModelMarshalFactory();
+	private static final RequestType REQUEST_TYPE = RequestType.IMMEDIATE;
 	
-	private void printResponses(List<Response> responses)
+	private void printResponses(List<Response> responses, StudentPersonalConsumer consumer)
 	{
 		try
 		{
@@ -67,7 +69,7 @@ public class TestStudentPersonalConsumer
 					{
 						if (response.getHasEntity())
 						{
-							System.out.println("Data Object Response "+i+": "+marshaller.marshalToXML(response.getDataObject()));
+							System.out.println("Data Object Response "+i+": "+consumer.getMarshaller().marshalToXML(response.getDataObject()));
 						}
 						else
 						{
@@ -88,7 +90,7 @@ public class TestStudentPersonalConsumer
 		}
 	}
 	
-	private StudentPersonalType getStudent()
+	private StudentPersonalType getStudent(DataModelUnmarshalFactory unmarshaller)
 	{
 		String inputEnvXML = FileReaderWriter.getFileContent(SINGLE_STUDENT_FILE_NAME);
 		//System.out.println("File content:\n" + inputEnvXML);
@@ -103,7 +105,7 @@ public class TestStudentPersonalConsumer
 		}
 	}
 
-	private StudentCollectionType getStudents()
+	private StudentCollectionType getStudents(DataModelUnmarshalFactory unmarshaller)
 	{
 		String inputEnvXML = FileReaderWriter.getFileContent(MULTI_STUDENT_FILE_NAME);
 		//System.out.println("File content:\n" + inputEnvXML);
@@ -120,21 +122,21 @@ public class TestStudentPersonalConsumer
 
 	private StudentPersonalConsumer getConsumer()
 	{
-		return new StudentPersonalConsumer(CONSUMER_ID, marshaller,  unmarshaller);
+		return new StudentPersonalConsumer();
 	}
 
 	private void createStudent(StudentPersonalConsumer consumer)
 	{
 		System.out.println("Start 'Create Student' in all connected environments...");
-		StudentPersonalType student = getStudent();
+		StudentPersonalType student = getStudent((DataModelUnmarshalFactory)consumer.getUnmarshaller());
 		try
 		{
-			List<EnvironmentZoneContextInfo> envZoneCtxList = new ArrayList<EnvironmentZoneContextInfo>();
-			envZoneCtxList.add(new EnvironmentZoneContextInfo("devLocal", new SIFZone("auRolloverTestingZone"), null));
+			List<ZoneContextInfo> zoneCtxList = new ArrayList<ZoneContextInfo>();
+			zoneCtxList.add(new ZoneContextInfo(new SIFZone("auRolloverTestingZone"), null));
 //			List<Response> responses = consumer.createSingle(student, envZoneCtxList);
 			List<Response> responses = consumer.createSingle(student, null);
 			System.out.println("Responses from attempt to Create Student:");
-			printResponses(responses);
+			printResponses(responses, consumer);
 		}
 		catch (Exception ex)
 		{
@@ -146,14 +148,14 @@ public class TestStudentPersonalConsumer
 	private void createStudents(StudentPersonalConsumer consumer)
 	{
 		System.out.println("Start 'Create Students (Multi)' in all connected environments...");
-		StudentCollectionType students = getStudents();
+		StudentCollectionType students = getStudents((DataModelUnmarshalFactory)consumer.getUnmarshaller());
 		try
 		{
-			List<BulkOperationResponse> responses = consumer.createMany(students, null);
+			List<BulkOperationResponse<CreateOperationStatus>> responses = consumer.createMany(students, null, REQUEST_TYPE);
 			if (responses != null)
 			{
 				int i = 1;
-				for (BulkOperationResponse response : responses)
+				for (BulkOperationResponse<CreateOperationStatus> response : responses)
 				{
 					System.out.println("Response "+i+":\n"+response);
 					if (response.hasError())
@@ -191,11 +193,11 @@ public class TestStudentPersonalConsumer
 	    
 	    try
 	    {
-	      List<BulkOperationResponse> responses = consumer.deleteMany(resourceIDs, null);
+	      List<BulkOperationResponse<OperationStatus>> responses = consumer.deleteMany(resourceIDs, null, REQUEST_TYPE);
 	      if (responses != null)
 	      {
 	        int i = 1;
-	        for (BulkOperationResponse response : responses)
+	        for (BulkOperationResponse<OperationStatus> response : responses)
 	        {
 	          System.out.println("Response "+i+":\n"+response);
 	          i++;
@@ -217,7 +219,7 @@ public class TestStudentPersonalConsumer
 	private void updateStudent(StudentPersonalConsumer consumer)
 	{
 		System.out.println("Start 'Update Student' in all connected environments...");
-		StudentPersonalType student = getStudent();
+		StudentPersonalType student = getStudent((DataModelUnmarshalFactory)consumer.getUnmarshaller());
 		student.setRefId(UUIDGenerator.getSIF2GUIDUpperCase());
 		try
 		{
@@ -235,14 +237,14 @@ public class TestStudentPersonalConsumer
 	 private void updateStudents(StudentPersonalConsumer consumer)
 	  {
 	    System.out.println("Start 'Update Students - Bulk Operation' in all connected environments...");
-	    StudentCollectionType students = getStudents();
+	    StudentCollectionType students = getStudents((DataModelUnmarshalFactory)consumer.getUnmarshaller());
 	    try
 	    {
-	      List<BulkOperationResponse> responses = consumer.updateMany(students, null);
+	      List<BulkOperationResponse<OperationStatus>> responses = consumer.updateMany(students, null, REQUEST_TYPE);
 	      if (responses != null)
 	      {
 	        int i = 1;
-	        for (BulkOperationResponse response : responses)
+	        for (BulkOperationResponse<OperationStatus> response : responses)
 	        {
 	          System.out.println("Response "+i+":\n"+response);
 	          if (response.hasError())
@@ -275,9 +277,9 @@ public class TestStudentPersonalConsumer
 		System.out.println("Start 'Get All Students' in all connected environments...");
 		try
 		{
-			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), null);
+			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), null, REQUEST_TYPE);
 			System.out.println("Responses from attempt to Get All Students:");
-			printResponses(responses);
+			printResponses(responses, consumer);
 		}
 		catch (Exception ex)
 		{
@@ -291,14 +293,14 @@ public class TestStudentPersonalConsumer
 		System.out.println("Start 'Get Student' in all connected environments...");
 		try
 		{
-			List<EnvironmentZoneContextInfo> envZoneCtxList = new ArrayList<EnvironmentZoneContextInfo>();
-			envZoneCtxList.add(new EnvironmentZoneContextInfo("devLocal", new SIFZone("auRolloverTestingZone"), null));
-			envZoneCtxList.add(new EnvironmentZoneContextInfo("devLocal", new SIFZone("zone123"),  new SIFContext("abc")));
-			envZoneCtxList.add(new EnvironmentZoneContextInfo("devLocal", (SIFZone)null, (SIFContext)null));
+			List<ZoneContextInfo> envZoneCtxList = new ArrayList<ZoneContextInfo>();
+			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auRolloverTestingZone"), null));
+			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("zone123"),  new SIFContext("abc")));
+			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
 			List<Response> responses = consumer.retrievByPrimaryKey("24ed508e1ed04bba82198233efa55859", envZoneCtxList);
 //			List<Response> responses = consumer.retrievByPrimaryKey("24ed508e1ed04bba82198233efa55859", null);
 			System.out.println("Responses from attempt to Get Student:");
-			printResponses(responses);
+			printResponses(responses, consumer);
 		}
 		catch (Exception ex)
 		{
@@ -327,20 +329,25 @@ public class TestStudentPersonalConsumer
 		TestStudentPersonalConsumer tester = new TestStudentPersonalConsumer();
 		System.out.println("Start Testing StudentPersonalConsumer...");
 
-		StudentPersonalConsumer consumer = tester.getConsumer();
+		if (ConsumerLoader.initialise(CONSUMER_ID))
+		{
 		
-//		tester.getStudents(consumer);
-//		tester.createStudent(consumer);
-//		tester.removeStudent(consumer);
-		tester.getStudent(consumer);
-//		tester.updateStudent(consumer);
-//		tester.updateStudents(consumer);
-//		tester.createStudents(consumer);
-//		tester.deleteStudents(consumer);
-
-		System.out.println("Finalise Consumer (i.e. disconnect and remove environment).");
-		consumer.finalise();
-
+  		StudentPersonalConsumer consumer = tester.getConsumer();
+  		
+  //		tester.getStudents(consumer);
+  //		tester.createStudent(consumer);
+  //		tester.removeStudent(consumer);
+  		tester.getStudent(consumer);
+  //		tester.updateStudent(consumer);
+  //		tester.updateStudents(consumer);
+  //		tester.createStudents(consumer);
+  //		tester.deleteStudents(consumer);
+  
+  		System.out.println("Finalise Consumer (i.e. disconnect and remove environment).");
+  		consumer.finalise();
+		}
+		
+		ConsumerLoader.shutdown();
 		System.out.println("End Testing StudentPersonalConsumer.");
 	}
 

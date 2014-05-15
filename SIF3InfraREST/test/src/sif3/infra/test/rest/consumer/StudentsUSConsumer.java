@@ -20,10 +20,10 @@ package sif3.infra.test.rest.consumer;
 
 import java.util.List;
 
-import sif.dd.us30.conversion.DataModelMarshalFactoryUS;
-import sif.dd.us30.conversion.DataModelUnmarshalFactoryUS;
+import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.model.PagingInfo;
 import sif3.common.ws.Response;
+import sif3.infra.rest.consumer.ConsumerLoader;
 import systemic.sif3.demo.rest.consumer.StudentsConsumer;
 
 /**
@@ -32,12 +32,9 @@ import systemic.sif3.demo.rest.consumer.StudentsConsumer;
  */
 public class StudentsUSConsumer
 {
-	private DataModelUnmarshalFactoryUS unmarshaller = new DataModelUnmarshalFactoryUS();
-	private DataModelMarshalFactoryUS marshaller = new DataModelMarshalFactoryUS();
-
 	private static final String CONSUMER_ID = "StudentConsumer";
 
-	private void printResponses(List<Response> responses)
+	private void printResponses(List<Response> responses, StudentsConsumer consumer)
 	{
 		try
 		{
@@ -55,7 +52,7 @@ public class StudentsUSConsumer
 					{
 						if (response.getHasEntity())
 						{
-							System.out.println("Data Object Response "+i+": "+marshaller.marshalToXML(response.getDataObject()));
+							System.out.println("Data Object Response "+i+": "+consumer.getMarshaller().marshalToXML(response.getDataObject()));
 						}
 						else
 						{
@@ -78,7 +75,7 @@ public class StudentsUSConsumer
 
 	private StudentsConsumer getConsumer()
 	{
-		return new StudentsConsumer(CONSUMER_ID, marshaller,  unmarshaller);
+		return new StudentsConsumer();
 	}
 
 	private void getStudents(StudentsConsumer consumer)
@@ -86,9 +83,9 @@ public class StudentsUSConsumer
 		System.out.println("Start 'Get All Students' in all connected environments...");
 		try
 		{
-			List<Response> responses = consumer.retrieve(new PagingInfo(5, 0), null);
+			List<Response> responses = consumer.retrieve(new PagingInfo(5, 0), null, RequestType.IMMEDIATE);
 			System.out.println("Responses from attempt to Get All Students:");
-			printResponses(responses);
+			printResponses(responses, consumer);
 		}
 		catch (Exception ex)
 		{
@@ -102,19 +99,22 @@ public class StudentsUSConsumer
 		StudentsUSConsumer tester = new StudentsUSConsumer();
 		System.out.println("Start Testing StudentsConsumer...");
 
-		StudentsConsumer consumer = tester.getConsumer();
-		
-		tester.getStudents(consumer);
-//		tester.createStudent(consumer);
-//		tester.removeStudent(consumer);
-//		tester.getStudent(consumer);
-//		tester.updateStudent(consumer);
-//		tester.createStudents(consumer);
-//		tester.deleteStudents(consumer);
-
-		System.out.println("Finalise Consumer (i.e. disconnect and remove environment).");
-		consumer.finalise();
-
+    if (ConsumerLoader.initialise(CONSUMER_ID))
+    {
+  		StudentsConsumer consumer = tester.getConsumer();
+  		
+  		tester.getStudents(consumer);
+  //		tester.createStudent(consumer);
+  //		tester.removeStudent(consumer);
+  //		tester.getStudent(consumer);
+  //		tester.updateStudent(consumer);
+  //		tester.createStudents(consumer);
+  //		tester.deleteStudents(consumer);
+  
+  		System.out.println("Finalise Consumer (i.e. disconnect and remove environment).");
+  		consumer.finalise();
+    }
+    ConsumerLoader.shutdown();
 		System.out.println("End Testing StudentsConsumer.");
 	}
 
