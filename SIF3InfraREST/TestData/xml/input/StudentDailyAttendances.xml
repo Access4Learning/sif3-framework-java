@@ -1,0 +1,59 @@
+<StudentDailyAttendances>
+  <StudentDailyAttendance RefId="2FFB63B4CFEF48208501E7D1E54555CB">
+    <StudentPersonalRefId>D3E34B359D75101A8C3D00AA001A1652
+    </StudentPersonalRefId>
+    <SchoolInfoRefId>CA285746359D75101A8C36432A901A16</SchoolInfoRefId>
+    <Date>2014-05-01</Date>
+    <SchoolYear>2014</SchoolYear>
+    <DayValue>AM</DayValue>
+    <AttendanceCode>
+      <Code>200</Code>
+      <OtherCodeList>
+        <OtherCode Codeset="Local">S</OtherCode>
+        <OtherCode Codeset="Text">C</OtherCode>
+      </OtherCodeList>
+    </AttendanceCode>
+    <AttendanceStatus>01</AttendanceStatus>
+    <TimeIn>10:30:00</TimeIn>
+    <TimeOut>12:00:00</TimeOut>
+    <AttendanceNote>Left for Orthodontist appt. and returned to school afterward
+    </AttendanceNote>
+  </StudentDailyAttendance>
+  <StudentDailyAttendance RefId="56EE63B4CFEF00CD8501E7D1E545A34F">
+    <StudentPersonalRefId>D3E34B359D75101A8C3D00AA001A1652
+    </StudentPersonalRefId>
+    <SchoolInfoRefId>CA285746359D75101A8C36432A901A16</SchoolInfoRefId>
+    <Date>2014-05-01</Date>
+    <SchoolYear>2014</SchoolYear>
+    <DayValue>PM</DayValue>
+    <AttendanceCode>
+      <Code>100</Code>
+      <OtherCodeList>
+        <OtherCode Codeset="Local">P</OtherCode>
+      </OtherCodeList>
+    </AttendanceCode>
+    <AttendanceStatus>NA</AttendanceStatus>
+    <TimeIn>13:30:00</TimeIn>
+    <TimeOut>15:00:00</TimeOut>
+  </StudentDailyAttendance>
+  <StudentDailyAttendance RefId="0AFD63B4CFEF4820698EE7D1E54500AA">
+    <StudentPersonalRefId>D3E34B359D75101A8C3D00AA001A1652
+    </StudentPersonalRefId>
+    <SchoolInfoRefId>CA285746359D75101A8C36432A901A16</SchoolInfoRefId>
+    <Date>2014-05-01</Date>
+    <SchoolYear>2014</SchoolYear>
+    <DayValue>PM</DayValue>
+    <AttendanceCode>
+      <Code>200</Code>
+      <OtherCodeList>
+        <OtherCode Codeset="Local">S</OtherCode>
+        <OtherCode Codeset="Text">C</OtherCode>
+      </OtherCodeList>
+    </AttendanceCode>
+    <AttendanceStatus>01</AttendanceStatus>
+    <TimeIn>13:30:00</TimeIn>
+    <TimeOut>12:00:00</TimeOut>
+    <AttendanceNote>Left for Dentist and returned to school afterward
+    </AttendanceNote>
+  </StudentDailyAttendance>
+</StudentDailyAttendances>
