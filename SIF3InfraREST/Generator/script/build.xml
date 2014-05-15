@@ -87,7 +87,7 @@
     <!-- ************************************** -->
 	
 	 <target name="generate-infra30" depends="02-clean,init" description="Create all Infrastructure POJOs based on XSD Directory">
-	        <echo message="Generate Pojos using JAXB for SIF 3.0 Infra for all XSDs in one go..."/>
+	        <echo message="Generate Pojos using JAXB for SIF 3.0.1 Infra for all XSDs in one go..."/>
 	          <mkdir dir="${output.base.name}/infra30"/>
 	          <xjc destdir="${output.base.name}/infra30" 
 	             package="sif3.infra.common.model" 
@@ -96,7 +96,7 @@
 	             source="2.0">
 	            <!-- must exclude the infrastructurecommontypes.xsd so that it all works. It will still create the classes of that -->
 	            <!-- XSD because it is used as an include rather than import.                                                      --> 
-	          <schema  dir="${input.base.dir}/infra30" includes="*.xsd" excludes="infrastructurecommontypes.xsd infra30_noInclude.xsd"/>
+	          <schema  dir="${input.base.dir}/infra301" includes="*.xsd" excludes="infrastructurecommontypes.xsd infra30_noInclude.xsd"/>
 	          <binding dir="${basedir}" includes="infra30.xjb"/>
 	          <arg value="-npa"/>
 	        </xjc>
