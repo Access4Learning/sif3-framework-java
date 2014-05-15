@@ -45,7 +45,7 @@
 		<fileset dir="${servlet.lib.dir}">
 			<include name="${servlet.lib}" />
 		</fileset>
-        <pathelement path="${class.dir}" />
+		<pathelement path="${class.dir}" />
 	</path>
 
 	<!-- Comma separated list of Source directories -->
@@ -62,7 +62,7 @@
 		<echo message="src.dir: ${src.dir}"/>
 		<echo message="class.dir: ${class.dir}"/>
 		<echo message="lib.root.dir: ${lib.root.dir}"/>
-        <echo message="web.lib.root.dir: ${web.lib.root.dir}"/>
+		<echo message="web.lib.root.dir: ${web.lib.root.dir}"/>
 		<echo message="config.dir: ${config.dir}"/>
 		<echo message="servlet.lib.dir: ${servlet.lib.dir}"/>
 		<echo message="servlet.lib: ${servlet.lib}"/>
@@ -105,11 +105,18 @@
 			<src path="${project.basedir}/sif3Common/${src.dir}" />
 		</javac>
 
+		<!-- copy all non-java files across -->
+		<copy todir="${class.dir}">
+			<fileset dir="${project.basedir}/sif3Common/src">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+
 		<!-- Compile Data dictionary -->
 		<antcall target="compile-dd" />
 
-        <!-- Compile Inrastructure components and demo stuff -->
-        <foreach list="${srcs}" target="compile-src" param="elem" trim="true" />
+		<!-- Compile Inrastructure components and demo stuff -->
+		<foreach list="${srcs}" target="compile-src" param="elem" trim="true" />
 
 		<!-- Demo Stuff -->
 		<echo message="Compile: SIF3 Demo Classes"/>
@@ -187,7 +194,7 @@
 
 	<target name="jar-config">
 		<echo message="Jar: ${dist.dir}/config.jar"/>
-<!--		
+		<!--		
 		<mkdir dir="${dist.dir}"/>
 		<jar destfile="${dist.dir}/config.jar">
             <fileset dir="${config.dir}">
@@ -219,9 +226,9 @@
 
 		<!-- remove project jars from WEB-INF/lib again -->
 		<foreach list="${infra-jars}" target="del-project-jar" param="elem" trim="true"/>
-	    <delete file="${web.lib.root.dir}/${jarprefix}DataModel_${locale}${sifddversion}.jar"/>
-	    <delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar"/>
-	    <delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar"/>
+		<delete file="${web.lib.root.dir}/${jarprefix}DataModel_${locale}${sifddversion}.jar"/>
+		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar"/>
+		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar"/>
 		<delete file="${web.lib.root.dir}/config.jar"/>
 	</target>
 

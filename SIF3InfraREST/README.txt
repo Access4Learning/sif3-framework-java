@@ -100,6 +100,19 @@ Please note that with this latest download the Provider Interface has an additio
 Your code may break! Add the parameter 'boolean useAdvisory' to your provider classes were you may get a compile error.
 Please refer to the latest SIF3 Specification for details what this value means.
 
+=====================================
+Version from 15/05/2014: MAJOR UPDATE
+=====================================
+NOTE: 
+THIS IS A MAJOR UPDATE TO THE FRAMEWORK. 
+
+You should read through the installation instructions in theDeveloper's Guide in the directory 
+documentation/UserGuide(SIF3Framework_DevelopersGuide_v0.2.docx). If you have developed some consumer and/or provider 
+classes in the past and you want to use them you may have to change some of the method signatures to fix them up. Also 
+neither the consumer nor the provider constructor take any arguments anymore. The management of environments and their
+templates has changed significantly and may need some re-configuring. Please refer to the Developer's Guide for 
+details (section 5.3).
+
 #########################################################################################################
 # Download Instructions
 #########################################################################################################
