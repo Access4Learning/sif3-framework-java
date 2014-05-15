@@ -52,7 +52,7 @@ import sif3.infra.common.model.ZoneType;
 
 /**
  * Implementation of an unmarshal Factory for all Infrastructure Model Objects. JAXB has been used to create Infrastructure POJOs and 
- * this Factory uses JAXB's methods to unmarshal POJOs from XML. At this point in time (October 2013) JSON is not yet supported.
+ * this Factory uses JAXB's methods to unmarshal POJOs from XML. At this point in time (May 2014) JSON is not yet supported.
  * 
  * @author Joerg Huber
  *
