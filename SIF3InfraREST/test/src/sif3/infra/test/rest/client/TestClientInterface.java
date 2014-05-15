@@ -22,14 +22,14 @@ import java.net.URI;
 
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
+import sif3.common.header.HeaderProperties;
+import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.SIFZone;
 import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.rest.client.ClientInterface;
-import sif3.infra.rest.header.RESTHeaderProperties;
-import sif3.infra.rest.header.RequestHeaderConstants;
 
 
 /**
@@ -58,7 +58,7 @@ public class TestClientInterface
 			System.out.println("Connect to: "+BASE_URL);
 			ClientInterface client = new ClientInterface(new URI(BASE_URL), marshaller, unmarshaller, false);
 
-			RESTHeaderProperties hdrProps = new RESTHeaderProperties();
+			HeaderProperties hdrProps = new HeaderProperties();
 			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AUTH_TOKEN);
 			
 			Response response = client.getSingle("environments", ENV_ID, hdrProps, EnvironmentType.class, null, null);
