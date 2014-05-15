@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="Email" maxOccurs="unbounded" minOccurs="0">
  *           &lt;complexType>
  *             &lt;simpleContent>
- *               &lt;extension base="&lt;http://www.SIFinfo.org/au/datamodel/1.3>EmailType">
+ *               &lt;extension base="&lt;http://www.sifassociation.org/au/datamodel/1.3>EmailType">
  *                 &lt;attribute name="SIF_Action">
  *                   &lt;simpleType>
  *                     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -48,12 +48,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "EmailListType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "EmailListType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "email"
 })
 public class EmailListType {
 
-    @XmlElement(name = "Email", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "Email", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected List<EmailListType.Email> email;
 
     /**
@@ -94,7 +94,7 @@ public class EmailListType {
      * <pre>
      * &lt;complexType>
      *   &lt;simpleContent>
-     *     &lt;extension base="&lt;http://www.SIFinfo.org/au/datamodel/1.3>EmailType">
+     *     &lt;extension base="&lt;http://www.sifassociation.org/au/datamodel/1.3>EmailType">
      *       &lt;attribute name="SIF_Action">
      *         &lt;simpleType>
      *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">

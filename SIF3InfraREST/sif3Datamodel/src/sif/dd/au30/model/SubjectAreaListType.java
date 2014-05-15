@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element ref="{http://www.SIFinfo.org/au/datamodel/1.3}SubjectArea" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element ref="{http://www.sifassociation.org/au/datamodel/1.3}SubjectArea" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -31,12 +31,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SubjectAreaListType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "SubjectAreaListType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "subjectArea"
 })
 public class SubjectAreaListType {
 
-    @XmlElement(name = "SubjectArea", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SubjectArea", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected List<SubjectAreaType> subjectArea;
 
     /**

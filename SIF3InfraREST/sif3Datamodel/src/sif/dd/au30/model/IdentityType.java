@@ -34,7 +34,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="SIF_RefId" minOccurs="0">
  *           &lt;complexType>
  *             &lt;simpleContent>
- *               &lt;extension base="&lt;http://www.SIFinfo.org/au/datamodel/1.3>IdRefTypeOrEmpty">
+ *               &lt;extension base="&lt;http://www.sifassociation.org/au/datamodel/1.3>IdRefTypeOrEmpty">
  *                 &lt;attribute name="SIF_RefObject" use="required">
  *                   &lt;simpleType>
  *                     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -87,7 +87,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *                   &lt;element name="Password" maxOccurs="unbounded" minOccurs="0">
  *                     &lt;complexType>
  *                       &lt;simpleContent>
- *                         &lt;extension base="&lt;http://www.SIFinfo.org/au/datamodel/1.3>XSBase64BinaryOrEmpty">
+ *                         &lt;extension base="&lt;http://www.sifassociation.org/au/datamodel/1.3>XSBase64BinaryOrEmpty">
  *                           &lt;attribute name="Algorithm" use="required">
  *                             &lt;simpleType>
  *                               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -111,11 +111,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *         &lt;element name="AuthenticationSourceGlobalUID" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
- *         &lt;element name="SIF_Metadata" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
- *         &lt;element name="SIF_ExtendedElements" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
+ *         &lt;element name="AuthenticationSourceGlobalUID" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+ *         &lt;element name="SIF_Metadata" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
+ *         &lt;element name="SIF_ExtendedElements" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="RefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}RefIdType" />
+ *       &lt;attribute name="RefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}RefIdType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -124,7 +124,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "IdentityType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "IdentityType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "sifRefId",
     "authenticationSource",
     "identityAssertions",
@@ -135,20 +135,20 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class IdentityType {
 
-    @XmlElement(name = "SIF_RefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SIF_RefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected IdentityType.SIFRefId sifRefId;
-    @XmlElement(name = "AuthenticationSource", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "AuthenticationSource", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String authenticationSource;
-    @XmlElementRef(name = "IdentityAssertions", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "IdentityAssertions", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<IdentityType.IdentityAssertions> identityAssertions;
-    @XmlElementRef(name = "PasswordList", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "PasswordList", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<IdentityType.PasswordList> passwordList;
-    @XmlElementRef(name = "AuthenticationSourceGlobalUID", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AuthenticationSourceGlobalUID", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> authenticationSourceGlobalUID;
-    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFMetadataType> sifMetadata;
-    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedElementsType> sifExtendedElements;
     @XmlAttribute(name = "RefId", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -380,7 +380,7 @@ public class IdentityType {
     })
     public static class IdentityAssertions {
 
-        @XmlElement(name = "IdentityAssertion", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "IdentityAssertion", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected List<IdentityType.IdentityAssertions.IdentityAssertion> identityAssertion;
 
         /**
@@ -511,7 +511,7 @@ public class IdentityType {
      *         &lt;element name="Password" maxOccurs="unbounded" minOccurs="0">
      *           &lt;complexType>
      *             &lt;simpleContent>
-     *               &lt;extension base="&lt;http://www.SIFinfo.org/au/datamodel/1.3>XSBase64BinaryOrEmpty">
+     *               &lt;extension base="&lt;http://www.sifassociation.org/au/datamodel/1.3>XSBase64BinaryOrEmpty">
      *                 &lt;attribute name="Algorithm" use="required">
      *                   &lt;simpleType>
      *                     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -544,7 +544,7 @@ public class IdentityType {
     })
     public static class PasswordList {
 
-        @XmlElement(name = "Password", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "Password", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected List<IdentityType.PasswordList.Password> password;
 
         /**
@@ -585,7 +585,7 @@ public class IdentityType {
          * <pre>
          * &lt;complexType>
          *   &lt;simpleContent>
-         *     &lt;extension base="&lt;http://www.SIFinfo.org/au/datamodel/1.3>XSBase64BinaryOrEmpty">
+         *     &lt;extension base="&lt;http://www.sifassociation.org/au/datamodel/1.3>XSBase64BinaryOrEmpty">
          *       &lt;attribute name="Algorithm" use="required">
          *         &lt;simpleType>
          *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -712,7 +712,7 @@ public class IdentityType {
      * <pre>
      * &lt;complexType>
      *   &lt;simpleContent>
-     *     &lt;extension base="&lt;http://www.SIFinfo.org/au/datamodel/1.3>IdRefTypeOrEmpty">
+     *     &lt;extension base="&lt;http://www.sifassociation.org/au/datamodel/1.3>IdRefTypeOrEmpty">
      *       &lt;attribute name="SIF_RefObject" use="required">
      *         &lt;simpleType>
      *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">

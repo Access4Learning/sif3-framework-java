@@ -28,12 +28,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         subtests of an assessment are math total, reading composite, total test, and English composition.
  *       
  * 
- * <p>Java class for SIF3AssessmentSubTestType complex type.
+ * <p>Java class for Sif3AssessmentSubTestType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="SIF3AssessmentSubTestType">
+ * &lt;complexType name="Sif3AssessmentSubTestType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
@@ -75,21 +75,21 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *                 &lt;sequence>
  *                   &lt;element name="Minimum" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
  *                   &lt;element name="Maximum" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
- *                   &lt;element name="ScoreTableRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+ *                   &lt;element name="ScoreTableRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
  *                 &lt;/sequence>
- *                 &lt;attribute name="ScoreMetric" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
+ *                 &lt;attribute name="ScoreMetric" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
  *               &lt;/restriction>
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *         &lt;element name="SubTestSubjectAreas" type="{http://www.SIFinfo.org/au/datamodel/1.3}SubjectAreaListType" minOccurs="0"/>
- *         &lt;element name="SubTestGradeLevels" type="{http://www.SIFinfo.org/au/datamodel/1.3}YearLevelsType" minOccurs="0"/>
+ *         &lt;element name="SubTestSubjectAreas" type="{http://www.sifassociation.org/au/datamodel/1.3}SubjectAreaListType" minOccurs="0"/>
+ *         &lt;element name="SubTestGradeLevels" type="{http://www.sifassociation.org/au/datamodel/1.3}YearLevelsType" minOccurs="0"/>
  *         &lt;element name="AssessmentSubTestRefIds" minOccurs="0">
  *           &lt;complexType>
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element name="AssessmentSubTestRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
+ *                   &lt;element name="AssessmentSubTestRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
  *             &lt;/complexContent>
@@ -102,7 +102,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element name="LearningStandardItemRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
+ *                   &lt;element name="LearningStandardItemRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
  *             &lt;/complexContent>
@@ -121,7 +121,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *                       &lt;complexContent>
  *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                           &lt;sequence>
- *                             &lt;element name="AssessmentItemRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+ *                             &lt;element name="AssessmentItemRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
  *                             &lt;element name="ItemWeightCorrect" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
  *                             &lt;element name="ItemWeightIncorrect" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
  *                             &lt;element name="ItemWeightNotAttempted" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
@@ -135,10 +135,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *         &lt;element name="SIF_Metadata" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
- *         &lt;element name="SIF_ExtendedElements" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
+ *         &lt;element name="SIF_Metadata" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
+ *         &lt;element name="SIF_ExtendedElements" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="RefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}RefIdType" />
+ *       &lt;attribute name="RefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}RefIdType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -147,7 +147,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SIF3AssessmentSubTestType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "Sif3AssessmentSubTestType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "subTestVersion",
     "subTestPublishDate",
     "subTestIdentifiers",
@@ -166,43 +166,43 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "sifMetadata",
     "sifExtendedElements"
 })
-public class SIF3AssessmentSubTestType {
+public class Sif3AssessmentSubTestType {
 
-    @XmlElementRef(name = "SubTestVersion", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SubTestVersion", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> subTestVersion;
-    @XmlElementRef(name = "SubTestPublishDate", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SubTestPublishDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<XMLGregorianCalendar> subTestPublishDate;
-    @XmlElementRef(name = "SubTestIdentifiers", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentSubTestType.SubTestIdentifiers> subTestIdentifiers;
-    @XmlElement(name = "SubTestName", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElementRef(name = "SubTestIdentifiers", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentSubTestType.SubTestIdentifiers> subTestIdentifiers;
+    @XmlElement(name = "SubTestName", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String subTestName;
-    @XmlElementRef(name = "ScoreReporting", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentSubTestType.ScoreReporting> scoreReporting;
-    @XmlElementRef(name = "SubTestSubjectAreas", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ScoreReporting", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentSubTestType.ScoreReporting> scoreReporting;
+    @XmlElementRef(name = "SubTestSubjectAreas", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SubjectAreaListType> subTestSubjectAreas;
-    @XmlElementRef(name = "SubTestGradeLevels", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SubTestGradeLevels", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<YearLevelsType> subTestGradeLevels;
-    @XmlElementRef(name = "AssessmentSubTestRefIds", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentSubTestType.AssessmentSubTestRefIds> assessmentSubTestRefIds;
-    @XmlElementRef(name = "ContainerOnly", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AssessmentSubTestRefIds", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentSubTestType.AssessmentSubTestRefIds> assessmentSubTestRefIds;
+    @XmlElementRef(name = "ContainerOnly", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<Boolean> containerOnly;
-    @XmlElementRef(name = "SubTestTier", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SubTestTier", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<Long> subTestTier;
-    @XmlElementRef(name = "LearningStandardItemRefIds", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentSubTestType.LearningStandardItemRefIds> learningStandardItemRefIds;
-    @XmlElementRef(name = "Abbreviation", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "LearningStandardItemRefIds", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentSubTestType.LearningStandardItemRefIds> learningStandardItemRefIds;
+    @XmlElementRef(name = "Abbreviation", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> abbreviation;
-    @XmlElementRef(name = "Description", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "Description", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> description;
-    @XmlElementRef(name = "NumberOfItems", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "NumberOfItems", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<Long> numberOfItems;
-    @XmlElementRef(name = "AssessmentItems", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentSubTestType.AssessmentItems> assessmentItems;
-    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AssessmentItems", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentSubTestType.AssessmentItems> assessmentItems;
+    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFMetadataType> sifMetadata;
-    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedElementsType> sifExtendedElements;
     @XmlAttribute(name = "RefId", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -261,10 +261,10 @@ public class SIF3AssessmentSubTestType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentSubTestType.SubTestIdentifiers }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentSubTestType.SubTestIdentifiers }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentSubTestType.SubTestIdentifiers> getSubTestIdentifiers() {
+    public JAXBElement<Sif3AssessmentSubTestType.SubTestIdentifiers> getSubTestIdentifiers() {
         return subTestIdentifiers;
     }
 
@@ -273,10 +273,10 @@ public class SIF3AssessmentSubTestType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentSubTestType.SubTestIdentifiers }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentSubTestType.SubTestIdentifiers }{@code >}
      *     
      */
-    public void setSubTestIdentifiers(JAXBElement<SIF3AssessmentSubTestType.SubTestIdentifiers> value) {
+    public void setSubTestIdentifiers(JAXBElement<Sif3AssessmentSubTestType.SubTestIdentifiers> value) {
         this.subTestIdentifiers = value;
     }
 
@@ -309,10 +309,10 @@ public class SIF3AssessmentSubTestType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentSubTestType.ScoreReporting }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentSubTestType.ScoreReporting }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentSubTestType.ScoreReporting> getScoreReporting() {
+    public JAXBElement<Sif3AssessmentSubTestType.ScoreReporting> getScoreReporting() {
         return scoreReporting;
     }
 
@@ -321,10 +321,10 @@ public class SIF3AssessmentSubTestType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentSubTestType.ScoreReporting }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentSubTestType.ScoreReporting }{@code >}
      *     
      */
-    public void setScoreReporting(JAXBElement<SIF3AssessmentSubTestType.ScoreReporting> value) {
+    public void setScoreReporting(JAXBElement<Sif3AssessmentSubTestType.ScoreReporting> value) {
         this.scoreReporting = value;
     }
 
@@ -381,10 +381,10 @@ public class SIF3AssessmentSubTestType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentSubTestType.AssessmentSubTestRefIds }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentSubTestType.AssessmentSubTestRefIds }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentSubTestType.AssessmentSubTestRefIds> getAssessmentSubTestRefIds() {
+    public JAXBElement<Sif3AssessmentSubTestType.AssessmentSubTestRefIds> getAssessmentSubTestRefIds() {
         return assessmentSubTestRefIds;
     }
 
@@ -393,10 +393,10 @@ public class SIF3AssessmentSubTestType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentSubTestType.AssessmentSubTestRefIds }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentSubTestType.AssessmentSubTestRefIds }{@code >}
      *     
      */
-    public void setAssessmentSubTestRefIds(JAXBElement<SIF3AssessmentSubTestType.AssessmentSubTestRefIds> value) {
+    public void setAssessmentSubTestRefIds(JAXBElement<Sif3AssessmentSubTestType.AssessmentSubTestRefIds> value) {
         this.assessmentSubTestRefIds = value;
     }
 
@@ -453,10 +453,10 @@ public class SIF3AssessmentSubTestType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentSubTestType.LearningStandardItemRefIds }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentSubTestType.LearningStandardItemRefIds }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentSubTestType.LearningStandardItemRefIds> getLearningStandardItemRefIds() {
+    public JAXBElement<Sif3AssessmentSubTestType.LearningStandardItemRefIds> getLearningStandardItemRefIds() {
         return learningStandardItemRefIds;
     }
 
@@ -465,10 +465,10 @@ public class SIF3AssessmentSubTestType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentSubTestType.LearningStandardItemRefIds }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentSubTestType.LearningStandardItemRefIds }{@code >}
      *     
      */
-    public void setLearningStandardItemRefIds(JAXBElement<SIF3AssessmentSubTestType.LearningStandardItemRefIds> value) {
+    public void setLearningStandardItemRefIds(JAXBElement<Sif3AssessmentSubTestType.LearningStandardItemRefIds> value) {
         this.learningStandardItemRefIds = value;
     }
 
@@ -549,10 +549,10 @@ public class SIF3AssessmentSubTestType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentSubTestType.AssessmentItems }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentSubTestType.AssessmentItems }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentSubTestType.AssessmentItems> getAssessmentItems() {
+    public JAXBElement<Sif3AssessmentSubTestType.AssessmentItems> getAssessmentItems() {
         return assessmentItems;
     }
 
@@ -561,10 +561,10 @@ public class SIF3AssessmentSubTestType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentSubTestType.AssessmentItems }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentSubTestType.AssessmentItems }{@code >}
      *     
      */
-    public void setAssessmentItems(JAXBElement<SIF3AssessmentSubTestType.AssessmentItems> value) {
+    public void setAssessmentItems(JAXBElement<Sif3AssessmentSubTestType.AssessmentItems> value) {
         this.assessmentItems = value;
     }
 
@@ -656,7 +656,7 @@ public class SIF3AssessmentSubTestType {
      *             &lt;complexContent>
      *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *                 &lt;sequence>
-     *                   &lt;element name="AssessmentItemRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+     *                   &lt;element name="AssessmentItemRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
      *                   &lt;element name="ItemWeightCorrect" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
      *                   &lt;element name="ItemWeightIncorrect" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
      *                   &lt;element name="ItemWeightNotAttempted" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
@@ -679,8 +679,8 @@ public class SIF3AssessmentSubTestType {
     })
     public static class AssessmentItems {
 
-        @XmlElement(name = "AssessmentItem", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
-        protected List<SIF3AssessmentSubTestType.AssessmentItems.AssessmentItem> assessmentItem;
+        @XmlElement(name = "AssessmentItem", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+        protected List<Sif3AssessmentSubTestType.AssessmentItems.AssessmentItem> assessmentItem;
 
         /**
          * Gets the value of the assessmentItem property.
@@ -700,13 +700,13 @@ public class SIF3AssessmentSubTestType {
          * 
          * <p>
          * Objects of the following type(s) are allowed in the list
-         * {@link SIF3AssessmentSubTestType.AssessmentItems.AssessmentItem }
+         * {@link Sif3AssessmentSubTestType.AssessmentItems.AssessmentItem }
          * 
          * 
          */
-        public List<SIF3AssessmentSubTestType.AssessmentItems.AssessmentItem> getAssessmentItem() {
+        public List<Sif3AssessmentSubTestType.AssessmentItems.AssessmentItem> getAssessmentItem() {
             if (assessmentItem == null) {
-                assessmentItem = new ArrayList<SIF3AssessmentSubTestType.AssessmentItems.AssessmentItem>();
+                assessmentItem = new ArrayList<Sif3AssessmentSubTestType.AssessmentItems.AssessmentItem>();
             }
             return this.assessmentItem;
         }
@@ -722,7 +722,7 @@ public class SIF3AssessmentSubTestType {
          *   &lt;complexContent>
          *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
          *       &lt;sequence>
-         *         &lt;element name="AssessmentItemRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+         *         &lt;element name="AssessmentItemRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
          *         &lt;element name="ItemWeightCorrect" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
          *         &lt;element name="ItemWeightIncorrect" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
          *         &lt;element name="ItemWeightNotAttempted" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
@@ -743,14 +743,14 @@ public class SIF3AssessmentSubTestType {
         })
         public static class AssessmentItem {
 
-            @XmlElement(name = "AssessmentItemRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "AssessmentItemRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
             protected String assessmentItemRefId;
-            @XmlElement(name = "ItemWeightCorrect", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "ItemWeightCorrect", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             protected BigDecimal itemWeightCorrect;
-            @XmlElement(name = "ItemWeightIncorrect", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "ItemWeightIncorrect", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             protected BigDecimal itemWeightIncorrect;
-            @XmlElement(name = "ItemWeightNotAttempted", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "ItemWeightNotAttempted", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             protected BigDecimal itemWeightNotAttempted;
 
             /**
@@ -864,7 +864,7 @@ public class SIF3AssessmentSubTestType {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element name="AssessmentSubTestRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
+     *         &lt;element name="AssessmentSubTestRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>
@@ -879,7 +879,7 @@ public class SIF3AssessmentSubTestType {
     })
     public static class AssessmentSubTestRefIds {
 
-        @XmlElement(name = "AssessmentSubTestRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "AssessmentSubTestRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
         protected List<String> assessmentSubTestRefId;
 
@@ -925,7 +925,7 @@ public class SIF3AssessmentSubTestType {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element name="LearningStandardItemRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
+     *         &lt;element name="LearningStandardItemRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>
@@ -940,7 +940,7 @@ public class SIF3AssessmentSubTestType {
     })
     public static class LearningStandardItemRefIds {
 
-        @XmlElement(name = "LearningStandardItemRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "LearningStandardItemRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
         protected List<String> learningStandardItemRefId;
 
@@ -988,9 +988,9 @@ public class SIF3AssessmentSubTestType {
      *       &lt;sequence>
      *         &lt;element name="Minimum" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
      *         &lt;element name="Maximum" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
-     *         &lt;element name="ScoreTableRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+     *         &lt;element name="ScoreTableRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
      *       &lt;/sequence>
-     *       &lt;attribute name="ScoreMetric" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
+     *       &lt;attribute name="ScoreMetric" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
      *     &lt;/restriction>
      *   &lt;/complexContent>
      * &lt;/complexType>
@@ -1006,11 +1006,11 @@ public class SIF3AssessmentSubTestType {
     })
     public static class ScoreReporting {
 
-        @XmlElementRef(name = "Minimum", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "Minimum", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<String> minimum;
-        @XmlElementRef(name = "Maximum", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "Maximum", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<String> maximum;
-        @XmlElementRef(name = "ScoreTableRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "ScoreTableRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<String> scoreTableRefId;
         @XmlAttribute(name = "ScoreMetric", required = true)
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -1157,8 +1157,8 @@ public class SIF3AssessmentSubTestType {
     })
     public static class SubTestIdentifiers {
 
-        @XmlElement(name = "SubTestIdentifier", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
-        protected List<SIF3AssessmentSubTestType.SubTestIdentifiers.SubTestIdentifier> subTestIdentifier;
+        @XmlElement(name = "SubTestIdentifier", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+        protected List<Sif3AssessmentSubTestType.SubTestIdentifiers.SubTestIdentifier> subTestIdentifier;
 
         /**
          * Gets the value of the subTestIdentifier property.
@@ -1178,13 +1178,13 @@ public class SIF3AssessmentSubTestType {
          * 
          * <p>
          * Objects of the following type(s) are allowed in the list
-         * {@link SIF3AssessmentSubTestType.SubTestIdentifiers.SubTestIdentifier }
+         * {@link Sif3AssessmentSubTestType.SubTestIdentifiers.SubTestIdentifier }
          * 
          * 
          */
-        public List<SIF3AssessmentSubTestType.SubTestIdentifiers.SubTestIdentifier> getSubTestIdentifier() {
+        public List<Sif3AssessmentSubTestType.SubTestIdentifiers.SubTestIdentifier> getSubTestIdentifier() {
             if (subTestIdentifier == null) {
-                subTestIdentifier = new ArrayList<SIF3AssessmentSubTestType.SubTestIdentifiers.SubTestIdentifier>();
+                subTestIdentifier = new ArrayList<Sif3AssessmentSubTestType.SubTestIdentifiers.SubTestIdentifier>();
             }
             return this.subTestIdentifier;
         }

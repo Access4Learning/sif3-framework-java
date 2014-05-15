@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="StaffPersonal" type="{http://www.SIFinfo.org/au/datamodel/1.3}StaffPersonalType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="StaffPersonal" type="{http://www.sifassociation.org/au/datamodel/1.3}StaffPersonalType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +29,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "StaffCollectionType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "StaffCollectionType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "staffPersonal"
 })
 public class StaffCollectionType {
 
-    @XmlElement(name = "StaffPersonal", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "StaffPersonal", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected List<StaffPersonalType> staffPersonal;
 
     /**

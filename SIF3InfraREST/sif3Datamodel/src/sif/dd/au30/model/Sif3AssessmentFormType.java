@@ -21,12 +21,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
 /**
  * Represents the unique set of questions or stimuli that can be given to a set of test takers. A physical correlate of the assessment form is the test booklet given to students during an assessment.  For an adaptive test, the form would become a container for the structure and pool of items that are available to be selected by the adaptive algorithm.  However, this object does not contain the questions, it only contains elements that describe the form for use in scoring the questions.
  * 
- * <p>Java class for SIF3AssessmentFormType complex type.
+ * <p>Java class for Sif3AssessmentFormType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="SIF3AssessmentFormType">
+ * &lt;complexType name="Sif3AssessmentFormType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
@@ -94,15 +94,15 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;/element>
  *         &lt;element name="Level" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
  *         &lt;element name="Period" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
- *         &lt;element name="GradeLevels" type="{http://www.SIFinfo.org/au/datamodel/1.3}YearLevelsType" minOccurs="0"/>
- *         &lt;element name="AssessmentFormSubjects" type="{http://www.SIFinfo.org/au/datamodel/1.3}SubjectAreaListType" minOccurs="0"/>
- *         &lt;element name="AssessmentFormLanguages" type="{http://www.SIFinfo.org/au/datamodel/1.3}LanguageListType" minOccurs="0"/>
+ *         &lt;element name="GradeLevels" type="{http://www.sifassociation.org/au/datamodel/1.3}YearLevelsType" minOccurs="0"/>
+ *         &lt;element name="AssessmentFormSubjects" type="{http://www.sifassociation.org/au/datamodel/1.3}SubjectAreaListType" minOccurs="0"/>
+ *         &lt;element name="AssessmentFormLanguages" type="{http://www.sifassociation.org/au/datamodel/1.3}LanguageListType" minOccurs="0"/>
  *         &lt;element name="AssessmentSubTestRefIds" minOccurs="0">
  *           &lt;complexType>
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element name="AssessmentSubTestRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
+ *                   &lt;element name="AssessmentSubTestRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
  *             &lt;/complexContent>
@@ -118,7 +118,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *                       &lt;complexContent>
  *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                           &lt;sequence>
- *                             &lt;element name="AssessmentSectionRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+ *                             &lt;element name="AssessmentSectionRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
  *                             &lt;element name="AssessmentSectionSequence" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
  *                           &lt;/sequence>
  *                         &lt;/restriction>
@@ -156,17 +156,17 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element name="AssessmentAssetRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
+ *                   &lt;element name="AssessmentAssetRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *         &lt;element name="SIF_Metadata" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
- *         &lt;element name="SIF_ExtendedElements" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
+ *         &lt;element name="SIF_Metadata" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
+ *         &lt;element name="SIF_ExtendedElements" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="RefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}RefIdType" />
- *       &lt;attribute name="AssessmentRefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" />
+ *       &lt;attribute name="RefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}RefIdType" />
+ *       &lt;attribute name="AssessmentRefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -175,7 +175,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SIF3AssessmentFormType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "Sif3AssessmentFormType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "formVersion",
     "formPublishDate",
     "assessmentType",
@@ -194,43 +194,43 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "sifMetadata",
     "sifExtendedElements"
 })
-public class SIF3AssessmentFormType {
+public class Sif3AssessmentFormType {
 
-    @XmlElementRef(name = "FormVersion", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "FormVersion", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> formVersion;
-    @XmlElementRef(name = "FormPublishDate", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "FormPublishDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<XMLGregorianCalendar> formPublishDate;
-    @XmlElementRef(name = "AssessmentType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AssessmentType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> assessmentType;
-    @XmlElement(name = "FormName", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "FormName", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String formName;
-    @XmlElementRef(name = "FormIdentifiers", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentFormType.FormIdentifiers> formIdentifiers;
-    @XmlElementRef(name = "FormAccommodations", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentFormType.FormAccommodations> formAccommodations;
-    @XmlElementRef(name = "Level", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "FormIdentifiers", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentFormType.FormIdentifiers> formIdentifiers;
+    @XmlElementRef(name = "FormAccommodations", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentFormType.FormAccommodations> formAccommodations;
+    @XmlElementRef(name = "Level", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> level;
-    @XmlElementRef(name = "Period", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "Period", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> period;
-    @XmlElementRef(name = "GradeLevels", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "GradeLevels", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<YearLevelsType> gradeLevels;
-    @XmlElementRef(name = "AssessmentFormSubjects", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AssessmentFormSubjects", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SubjectAreaListType> assessmentFormSubjects;
-    @XmlElementRef(name = "AssessmentFormLanguages", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AssessmentFormLanguages", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<LanguageListType> assessmentFormLanguages;
-    @XmlElementRef(name = "AssessmentSubTestRefIds", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentFormType.AssessmentSubTestRefIds> assessmentSubTestRefIds;
-    @XmlElementRef(name = "AssessmentSections", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentFormType.AssessmentSections> assessmentSections;
-    @XmlElementRef(name = "AssessmentPlatforms", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentFormType.AssessmentPlatforms> assessmentPlatforms;
-    @XmlElementRef(name = "AssessmentAssetRefIds", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentFormType.AssessmentAssetRefIds> assessmentAssetRefIds;
-    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AssessmentSubTestRefIds", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentFormType.AssessmentSubTestRefIds> assessmentSubTestRefIds;
+    @XmlElementRef(name = "AssessmentSections", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentFormType.AssessmentSections> assessmentSections;
+    @XmlElementRef(name = "AssessmentPlatforms", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentFormType.AssessmentPlatforms> assessmentPlatforms;
+    @XmlElementRef(name = "AssessmentAssetRefIds", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentFormType.AssessmentAssetRefIds> assessmentAssetRefIds;
+    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFMetadataType> sifMetadata;
-    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedElementsType> sifExtendedElements;
     @XmlAttribute(name = "RefId", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -340,10 +340,10 @@ public class SIF3AssessmentFormType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentFormType.FormIdentifiers }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentFormType.FormIdentifiers }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentFormType.FormIdentifiers> getFormIdentifiers() {
+    public JAXBElement<Sif3AssessmentFormType.FormIdentifiers> getFormIdentifiers() {
         return formIdentifiers;
     }
 
@@ -352,10 +352,10 @@ public class SIF3AssessmentFormType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentFormType.FormIdentifiers }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentFormType.FormIdentifiers }{@code >}
      *     
      */
-    public void setFormIdentifiers(JAXBElement<SIF3AssessmentFormType.FormIdentifiers> value) {
+    public void setFormIdentifiers(JAXBElement<Sif3AssessmentFormType.FormIdentifiers> value) {
         this.formIdentifiers = value;
     }
 
@@ -364,10 +364,10 @@ public class SIF3AssessmentFormType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentFormType.FormAccommodations }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentFormType.FormAccommodations }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentFormType.FormAccommodations> getFormAccommodations() {
+    public JAXBElement<Sif3AssessmentFormType.FormAccommodations> getFormAccommodations() {
         return formAccommodations;
     }
 
@@ -376,10 +376,10 @@ public class SIF3AssessmentFormType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentFormType.FormAccommodations }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentFormType.FormAccommodations }{@code >}
      *     
      */
-    public void setFormAccommodations(JAXBElement<SIF3AssessmentFormType.FormAccommodations> value) {
+    public void setFormAccommodations(JAXBElement<Sif3AssessmentFormType.FormAccommodations> value) {
         this.formAccommodations = value;
     }
 
@@ -508,10 +508,10 @@ public class SIF3AssessmentFormType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentFormType.AssessmentSubTestRefIds }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentFormType.AssessmentSubTestRefIds }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentFormType.AssessmentSubTestRefIds> getAssessmentSubTestRefIds() {
+    public JAXBElement<Sif3AssessmentFormType.AssessmentSubTestRefIds> getAssessmentSubTestRefIds() {
         return assessmentSubTestRefIds;
     }
 
@@ -520,10 +520,10 @@ public class SIF3AssessmentFormType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentFormType.AssessmentSubTestRefIds }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentFormType.AssessmentSubTestRefIds }{@code >}
      *     
      */
-    public void setAssessmentSubTestRefIds(JAXBElement<SIF3AssessmentFormType.AssessmentSubTestRefIds> value) {
+    public void setAssessmentSubTestRefIds(JAXBElement<Sif3AssessmentFormType.AssessmentSubTestRefIds> value) {
         this.assessmentSubTestRefIds = value;
     }
 
@@ -532,10 +532,10 @@ public class SIF3AssessmentFormType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentFormType.AssessmentSections }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentFormType.AssessmentSections }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentFormType.AssessmentSections> getAssessmentSections() {
+    public JAXBElement<Sif3AssessmentFormType.AssessmentSections> getAssessmentSections() {
         return assessmentSections;
     }
 
@@ -544,10 +544,10 @@ public class SIF3AssessmentFormType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentFormType.AssessmentSections }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentFormType.AssessmentSections }{@code >}
      *     
      */
-    public void setAssessmentSections(JAXBElement<SIF3AssessmentFormType.AssessmentSections> value) {
+    public void setAssessmentSections(JAXBElement<Sif3AssessmentFormType.AssessmentSections> value) {
         this.assessmentSections = value;
     }
 
@@ -556,10 +556,10 @@ public class SIF3AssessmentFormType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentFormType.AssessmentPlatforms }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentFormType.AssessmentPlatforms }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentFormType.AssessmentPlatforms> getAssessmentPlatforms() {
+    public JAXBElement<Sif3AssessmentFormType.AssessmentPlatforms> getAssessmentPlatforms() {
         return assessmentPlatforms;
     }
 
@@ -568,10 +568,10 @@ public class SIF3AssessmentFormType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentFormType.AssessmentPlatforms }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentFormType.AssessmentPlatforms }{@code >}
      *     
      */
-    public void setAssessmentPlatforms(JAXBElement<SIF3AssessmentFormType.AssessmentPlatforms> value) {
+    public void setAssessmentPlatforms(JAXBElement<Sif3AssessmentFormType.AssessmentPlatforms> value) {
         this.assessmentPlatforms = value;
     }
 
@@ -580,10 +580,10 @@ public class SIF3AssessmentFormType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentFormType.AssessmentAssetRefIds }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentFormType.AssessmentAssetRefIds }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentFormType.AssessmentAssetRefIds> getAssessmentAssetRefIds() {
+    public JAXBElement<Sif3AssessmentFormType.AssessmentAssetRefIds> getAssessmentAssetRefIds() {
         return assessmentAssetRefIds;
     }
 
@@ -592,10 +592,10 @@ public class SIF3AssessmentFormType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentFormType.AssessmentAssetRefIds }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentFormType.AssessmentAssetRefIds }{@code >}
      *     
      */
-    public void setAssessmentAssetRefIds(JAXBElement<SIF3AssessmentFormType.AssessmentAssetRefIds> value) {
+    public void setAssessmentAssetRefIds(JAXBElement<Sif3AssessmentFormType.AssessmentAssetRefIds> value) {
         this.assessmentAssetRefIds = value;
     }
 
@@ -706,7 +706,7 @@ public class SIF3AssessmentFormType {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element name="AssessmentAssetRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
+     *         &lt;element name="AssessmentAssetRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>
@@ -721,7 +721,7 @@ public class SIF3AssessmentFormType {
     })
     public static class AssessmentAssetRefIds {
 
-        @XmlElement(name = "AssessmentAssetRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "AssessmentAssetRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
         protected List<String> assessmentAssetRefId;
 
@@ -792,7 +792,7 @@ public class SIF3AssessmentFormType {
     })
     public static class AssessmentPlatforms {
 
-        @XmlElement(name = "AssessmentPlatform", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "AssessmentPlatform", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
         protected List<String> assessmentPlatform;
 
@@ -843,7 +843,7 @@ public class SIF3AssessmentFormType {
      *             &lt;complexContent>
      *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *                 &lt;sequence>
-     *                   &lt;element name="AssessmentSectionRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+     *                   &lt;element name="AssessmentSectionRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
      *                   &lt;element name="AssessmentSectionSequence" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
      *                 &lt;/sequence>
      *               &lt;/restriction>
@@ -864,8 +864,8 @@ public class SIF3AssessmentFormType {
     })
     public static class AssessmentSections {
 
-        @XmlElement(name = "AssessmentSection", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
-        protected List<SIF3AssessmentFormType.AssessmentSections.AssessmentSection> assessmentSection;
+        @XmlElement(name = "AssessmentSection", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+        protected List<Sif3AssessmentFormType.AssessmentSections.AssessmentSection> assessmentSection;
 
         /**
          * Gets the value of the assessmentSection property.
@@ -885,13 +885,13 @@ public class SIF3AssessmentFormType {
          * 
          * <p>
          * Objects of the following type(s) are allowed in the list
-         * {@link SIF3AssessmentFormType.AssessmentSections.AssessmentSection }
+         * {@link Sif3AssessmentFormType.AssessmentSections.AssessmentSection }
          * 
          * 
          */
-        public List<SIF3AssessmentFormType.AssessmentSections.AssessmentSection> getAssessmentSection() {
+        public List<Sif3AssessmentFormType.AssessmentSections.AssessmentSection> getAssessmentSection() {
             if (assessmentSection == null) {
-                assessmentSection = new ArrayList<SIF3AssessmentFormType.AssessmentSections.AssessmentSection>();
+                assessmentSection = new ArrayList<Sif3AssessmentFormType.AssessmentSections.AssessmentSection>();
             }
             return this.assessmentSection;
         }
@@ -907,7 +907,7 @@ public class SIF3AssessmentFormType {
          *   &lt;complexContent>
          *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
          *       &lt;sequence>
-         *         &lt;element name="AssessmentSectionRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+         *         &lt;element name="AssessmentSectionRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
          *         &lt;element name="AssessmentSectionSequence" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
          *       &lt;/sequence>
          *     &lt;/restriction>
@@ -924,10 +924,10 @@ public class SIF3AssessmentFormType {
         })
         public static class AssessmentSection {
 
-            @XmlElement(name = "AssessmentSectionRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "AssessmentSectionRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
             protected String assessmentSectionRefId;
-            @XmlElement(name = "AssessmentSectionSequence", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "AssessmentSectionSequence", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
             @XmlSchemaType(name = "token")
             protected String assessmentSectionSequence;
@@ -995,7 +995,7 @@ public class SIF3AssessmentFormType {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element name="AssessmentSubTestRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
+     *         &lt;element name="AssessmentSubTestRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>
@@ -1010,7 +1010,7 @@ public class SIF3AssessmentFormType {
     })
     public static class AssessmentSubTestRefIds {
 
-        @XmlElement(name = "AssessmentSubTestRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "AssessmentSubTestRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
         protected List<String> assessmentSubTestRefId;
 
@@ -1082,7 +1082,7 @@ public class SIF3AssessmentFormType {
     })
     public static class FormAccommodations {
 
-        @XmlElement(name = "FormAccommodation", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "FormAccommodation", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
         protected List<String> formAccommodation;
 
@@ -1161,8 +1161,8 @@ public class SIF3AssessmentFormType {
     })
     public static class FormIdentifiers {
 
-        @XmlElement(name = "FormIdentifier", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
-        protected List<SIF3AssessmentFormType.FormIdentifiers.FormIdentifier> formIdentifier;
+        @XmlElement(name = "FormIdentifier", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+        protected List<Sif3AssessmentFormType.FormIdentifiers.FormIdentifier> formIdentifier;
 
         /**
          * Gets the value of the formIdentifier property.
@@ -1182,13 +1182,13 @@ public class SIF3AssessmentFormType {
          * 
          * <p>
          * Objects of the following type(s) are allowed in the list
-         * {@link SIF3AssessmentFormType.FormIdentifiers.FormIdentifier }
+         * {@link Sif3AssessmentFormType.FormIdentifiers.FormIdentifier }
          * 
          * 
          */
-        public List<SIF3AssessmentFormType.FormIdentifiers.FormIdentifier> getFormIdentifier() {
+        public List<Sif3AssessmentFormType.FormIdentifiers.FormIdentifier> getFormIdentifier() {
             if (formIdentifier == null) {
-                formIdentifier = new ArrayList<SIF3AssessmentFormType.FormIdentifiers.FormIdentifier>();
+                formIdentifier = new ArrayList<Sif3AssessmentFormType.FormIdentifiers.FormIdentifier>();
             }
             return this.formIdentifier;
         }

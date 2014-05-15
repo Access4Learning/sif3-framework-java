@@ -12,6 +12,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * 
+ *             A list of SIF contexts that applies to a message or operation.  Typically where used as an optional element,
+ *             the omission of this element implies the SIF_Default context applies.
+ *           
+ * 
  * <p>Java class for SIF_ContextsType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -21,7 +26,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element ref="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_Context" maxOccurs="unbounded"/>
+ *         &lt;element ref="{http://www.sifassociation.org/au/datamodel/1.3}SIF_Context" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -31,12 +36,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SIF_ContextsType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "SIF_ContextsType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "sifContext"
 })
 public class SIFContextsType {
 
-    @XmlElement(name = "SIF_Context", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", required = true)
+    @XmlElement(name = "SIF_Context", namespace = "http://www.sifassociation.org/au/datamodel/1.3", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected List<String> sifContext;
 

@@ -19,12 +19,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
- * <p>Java class for SIF3AssessmentSectionType complex type.
+ * <p>Java class for Sif3AssessmentSectionType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="SIF3AssessmentSectionType">
+ * &lt;complexType name="Sif3AssessmentSectionType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
@@ -93,7 +93,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element name="SectionAsset" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
+ *                   &lt;element name="SectionAsset" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
  *             &lt;/complexContent>
@@ -109,7 +109,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *                       &lt;complexContent>
  *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                           &lt;sequence>
- *                             &lt;element name="AssessmentItemRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+ *                             &lt;element name="AssessmentItemRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
  *                             &lt;element name="ItemSequence" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
  *                           &lt;/sequence>
  *                         &lt;/restriction>
@@ -121,10 +121,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *         &lt;element name="SIF_Metadata" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
- *         &lt;element name="SIF_ExtendedElements" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
+ *         &lt;element name="SIF_Metadata" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
+ *         &lt;element name="SIF_ExtendedElements" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="RefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}RefIdType" />
+ *       &lt;attribute name="RefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}RefIdType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -133,7 +133,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SIF3AssessmentSectionType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "Sif3AssessmentSectionType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "sectionVersion",
     "sectionPublishDate",
     "sectionIdentifiers",
@@ -149,36 +149,36 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "sifMetadata",
     "sifExtendedElements"
 })
-public class SIF3AssessmentSectionType {
+public class Sif3AssessmentSectionType {
 
-    @XmlElementRef(name = "SectionVersion", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SectionVersion", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> sectionVersion;
-    @XmlElementRef(name = "SectionPublishDate", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SectionPublishDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<XMLGregorianCalendar> sectionPublishDate;
-    @XmlElementRef(name = "SectionIdentifiers", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentSectionType.SectionIdentifiers> sectionIdentifiers;
-    @XmlElementRef(name = "SectionName", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SectionIdentifiers", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentSectionType.SectionIdentifiers> sectionIdentifiers;
+    @XmlElementRef(name = "SectionName", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> sectionName;
-    @XmlElement(name = "SectionItemSequenceType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SectionItemSequenceType", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String sectionItemSequenceType;
-    @XmlElementRef(name = "ItemSelectionAlgorithmName", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ItemSelectionAlgorithmName", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> itemSelectionAlgorithmName;
-    @XmlElementRef(name = "ItemSelectionAlgorithm", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ItemSelectionAlgorithm", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> itemSelectionAlgorithm;
-    @XmlElementRef(name = "SectionTimeLimit", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SectionTimeLimit", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<Duration> sectionTimeLimit;
-    @XmlElementRef(name = "SectionSealed", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SectionSealed", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> sectionSealed;
-    @XmlElementRef(name = "SectionReentry", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SectionReentry", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> sectionReentry;
-    @XmlElementRef(name = "SectionAssets", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentSectionType.SectionAssets> sectionAssets;
-    @XmlElementRef(name = "SectionItems", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentSectionType.SectionItems> sectionItems;
-    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SectionAssets", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentSectionType.SectionAssets> sectionAssets;
+    @XmlElementRef(name = "SectionItems", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentSectionType.SectionItems> sectionItems;
+    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFMetadataType> sifMetadata;
-    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedElementsType> sifExtendedElements;
     @XmlAttribute(name = "RefId", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -237,10 +237,10 @@ public class SIF3AssessmentSectionType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentSectionType.SectionIdentifiers }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentSectionType.SectionIdentifiers }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentSectionType.SectionIdentifiers> getSectionIdentifiers() {
+    public JAXBElement<Sif3AssessmentSectionType.SectionIdentifiers> getSectionIdentifiers() {
         return sectionIdentifiers;
     }
 
@@ -249,10 +249,10 @@ public class SIF3AssessmentSectionType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentSectionType.SectionIdentifiers }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentSectionType.SectionIdentifiers }{@code >}
      *     
      */
-    public void setSectionIdentifiers(JAXBElement<SIF3AssessmentSectionType.SectionIdentifiers> value) {
+    public void setSectionIdentifiers(JAXBElement<Sif3AssessmentSectionType.SectionIdentifiers> value) {
         this.sectionIdentifiers = value;
     }
 
@@ -429,10 +429,10 @@ public class SIF3AssessmentSectionType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentSectionType.SectionAssets }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentSectionType.SectionAssets }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentSectionType.SectionAssets> getSectionAssets() {
+    public JAXBElement<Sif3AssessmentSectionType.SectionAssets> getSectionAssets() {
         return sectionAssets;
     }
 
@@ -441,10 +441,10 @@ public class SIF3AssessmentSectionType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentSectionType.SectionAssets }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentSectionType.SectionAssets }{@code >}
      *     
      */
-    public void setSectionAssets(JAXBElement<SIF3AssessmentSectionType.SectionAssets> value) {
+    public void setSectionAssets(JAXBElement<Sif3AssessmentSectionType.SectionAssets> value) {
         this.sectionAssets = value;
     }
 
@@ -453,10 +453,10 @@ public class SIF3AssessmentSectionType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentSectionType.SectionItems }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentSectionType.SectionItems }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentSectionType.SectionItems> getSectionItems() {
+    public JAXBElement<Sif3AssessmentSectionType.SectionItems> getSectionItems() {
         return sectionItems;
     }
 
@@ -465,10 +465,10 @@ public class SIF3AssessmentSectionType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentSectionType.SectionItems }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentSectionType.SectionItems }{@code >}
      *     
      */
-    public void setSectionItems(JAXBElement<SIF3AssessmentSectionType.SectionItems> value) {
+    public void setSectionItems(JAXBElement<Sif3AssessmentSectionType.SectionItems> value) {
         this.sectionItems = value;
     }
 
@@ -555,7 +555,7 @@ public class SIF3AssessmentSectionType {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element name="SectionAsset" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
+     *         &lt;element name="SectionAsset" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>
@@ -570,7 +570,7 @@ public class SIF3AssessmentSectionType {
     })
     public static class SectionAssets {
 
-        @XmlElement(name = "SectionAsset", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "SectionAsset", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
         protected List<String> sectionAsset;
 
@@ -648,8 +648,8 @@ public class SIF3AssessmentSectionType {
     })
     public static class SectionIdentifiers {
 
-        @XmlElement(name = "SectionIdentifier", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
-        protected List<SIF3AssessmentSectionType.SectionIdentifiers.SectionIdentifier> sectionIdentifier;
+        @XmlElement(name = "SectionIdentifier", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+        protected List<Sif3AssessmentSectionType.SectionIdentifiers.SectionIdentifier> sectionIdentifier;
 
         /**
          * Gets the value of the sectionIdentifier property.
@@ -669,13 +669,13 @@ public class SIF3AssessmentSectionType {
          * 
          * <p>
          * Objects of the following type(s) are allowed in the list
-         * {@link SIF3AssessmentSectionType.SectionIdentifiers.SectionIdentifier }
+         * {@link Sif3AssessmentSectionType.SectionIdentifiers.SectionIdentifier }
          * 
          * 
          */
-        public List<SIF3AssessmentSectionType.SectionIdentifiers.SectionIdentifier> getSectionIdentifier() {
+        public List<Sif3AssessmentSectionType.SectionIdentifiers.SectionIdentifier> getSectionIdentifier() {
             if (sectionIdentifier == null) {
-                sectionIdentifier = new ArrayList<SIF3AssessmentSectionType.SectionIdentifiers.SectionIdentifier>();
+                sectionIdentifier = new ArrayList<Sif3AssessmentSectionType.SectionIdentifiers.SectionIdentifier>();
             }
             return this.sectionIdentifier;
         }
@@ -789,7 +789,7 @@ public class SIF3AssessmentSectionType {
      *             &lt;complexContent>
      *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *                 &lt;sequence>
-     *                   &lt;element name="AssessmentItemRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+     *                   &lt;element name="AssessmentItemRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
      *                   &lt;element name="ItemSequence" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
      *                 &lt;/sequence>
      *               &lt;/restriction>
@@ -810,8 +810,8 @@ public class SIF3AssessmentSectionType {
     })
     public static class SectionItems {
 
-        @XmlElement(name = "SectionItem", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
-        protected List<SIF3AssessmentSectionType.SectionItems.SectionItem> sectionItem;
+        @XmlElement(name = "SectionItem", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+        protected List<Sif3AssessmentSectionType.SectionItems.SectionItem> sectionItem;
 
         /**
          * Gets the value of the sectionItem property.
@@ -831,13 +831,13 @@ public class SIF3AssessmentSectionType {
          * 
          * <p>
          * Objects of the following type(s) are allowed in the list
-         * {@link SIF3AssessmentSectionType.SectionItems.SectionItem }
+         * {@link Sif3AssessmentSectionType.SectionItems.SectionItem }
          * 
          * 
          */
-        public List<SIF3AssessmentSectionType.SectionItems.SectionItem> getSectionItem() {
+        public List<Sif3AssessmentSectionType.SectionItems.SectionItem> getSectionItem() {
             if (sectionItem == null) {
-                sectionItem = new ArrayList<SIF3AssessmentSectionType.SectionItems.SectionItem>();
+                sectionItem = new ArrayList<Sif3AssessmentSectionType.SectionItems.SectionItem>();
             }
             return this.sectionItem;
         }
@@ -853,7 +853,7 @@ public class SIF3AssessmentSectionType {
          *   &lt;complexContent>
          *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
          *       &lt;sequence>
-         *         &lt;element name="AssessmentItemRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+         *         &lt;element name="AssessmentItemRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
          *         &lt;element name="ItemSequence" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
          *       &lt;/sequence>
          *     &lt;/restriction>
@@ -870,10 +870,10 @@ public class SIF3AssessmentSectionType {
         })
         public static class SectionItem {
 
-            @XmlElement(name = "AssessmentItemRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "AssessmentItemRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
             protected String assessmentItemRefId;
-            @XmlElementRef(name = "ItemSequence", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            @XmlElementRef(name = "ItemSequence", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<String> itemSequence;
 
             /**

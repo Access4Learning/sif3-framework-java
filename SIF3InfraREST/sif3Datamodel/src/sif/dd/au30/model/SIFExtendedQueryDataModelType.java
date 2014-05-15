@@ -54,7 +54,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *                               &lt;/restriction>
  *                             &lt;/simpleType>
  *                           &lt;/attribute>
- *                           &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+ *                           &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
  *                         &lt;/extension>
  *                       &lt;/simpleContent>
  *                     &lt;/complexType>
@@ -95,7 +95,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *                                         &lt;complexType>
  *                                           &lt;simpleContent>
  *                                             &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
- *                                               &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+ *                                               &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
  *                                             &lt;/extension>
  *                                           &lt;/simpleContent>
  *                                         &lt;/complexType>
@@ -104,7 +104,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *                                         &lt;complexType>
  *                                           &lt;simpleContent>
  *                                             &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
- *                                               &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+ *                                               &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
  *                                             &lt;/extension>
  *                                           &lt;/simpleContent>
  *                                         &lt;/complexType>
@@ -130,7 +130,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *                     &lt;/complexType>
  *                   &lt;/element>
  *                 &lt;/sequence>
- *                 &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+ *                 &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
  *               &lt;/restriction>
  *             &lt;/complexContent>
  *           &lt;/complexType>
@@ -159,7 +159,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *                                                   &lt;complexType>
  *                                                     &lt;simpleContent>
  *                                                       &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
- *                                                         &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+ *                                                         &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
  *                                                       &lt;/extension>
  *                                                     &lt;/simpleContent>
  *                                                   &lt;/complexType>
@@ -224,7 +224,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *                     &lt;complexType>
  *                       &lt;simpleContent>
  *                         &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
- *                           &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+ *                           &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
  *                           &lt;attribute name="Ordering" use="required">
  *                             &lt;simpleType>
  *                               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -251,7 +251,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SIF_ExtendedQueryDataModelType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "SIF_ExtendedQueryDataModelType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "sifDestinationProvider",
     "sifSelect",
     "sifFrom",
@@ -260,15 +260,15 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class SIFExtendedQueryDataModelType {
 
-    @XmlElementRef(name = "SIF_DestinationProvider", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_DestinationProvider", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> sifDestinationProvider;
-    @XmlElement(name = "SIF_Select", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SIF_Select", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected SIFExtendedQueryDataModelType.SIFSelect sifSelect;
-    @XmlElement(name = "SIF_From", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SIF_From", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected SIFExtendedQueryDataModelType.SIFFrom sifFrom;
-    @XmlElementRef(name = "SIF_Where", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_Where", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedQueryDataModelType.SIFWhere> sifWhere;
-    @XmlElementRef(name = "SIF_OrderBy", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_OrderBy", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedQueryDataModelType.SIFOrderBy> sifOrderBy;
 
     /**
@@ -416,7 +416,7 @@ public class SIFExtendedQueryDataModelType {
      *                               &lt;complexType>
      *                                 &lt;simpleContent>
      *                                   &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
-     *                                     &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+     *                                     &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
      *                                   &lt;/extension>
      *                                 &lt;/simpleContent>
      *                               &lt;/complexType>
@@ -425,7 +425,7 @@ public class SIFExtendedQueryDataModelType {
      *                               &lt;complexType>
      *                                 &lt;simpleContent>
      *                                   &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
-     *                                     &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+     *                                     &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
      *                                   &lt;/extension>
      *                                 &lt;/simpleContent>
      *                               &lt;/complexType>
@@ -451,7 +451,7 @@ public class SIFExtendedQueryDataModelType {
      *           &lt;/complexType>
      *         &lt;/element>
      *       &lt;/sequence>
-     *       &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+     *       &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
      *     &lt;/restriction>
      *   &lt;/complexContent>
      * &lt;/complexType>
@@ -465,7 +465,7 @@ public class SIFExtendedQueryDataModelType {
     })
     public static class SIFFrom {
 
-        @XmlElement(name = "SIF_Join", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "SIF_Join", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected List<SIFExtendedQueryDataModelType.SIFFrom.SIFJoin> sifJoin;
         @XmlAttribute(name = "ObjectName", required = true)
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -544,7 +544,7 @@ public class SIFExtendedQueryDataModelType {
          *                     &lt;complexType>
          *                       &lt;simpleContent>
          *                         &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
-         *                           &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+         *                           &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
          *                         &lt;/extension>
          *                       &lt;/simpleContent>
          *                     &lt;/complexType>
@@ -553,7 +553,7 @@ public class SIFExtendedQueryDataModelType {
          *                     &lt;complexType>
          *                       &lt;simpleContent>
          *                         &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
-         *                           &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+         *                           &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
          *                         &lt;/extension>
          *                       &lt;/simpleContent>
          *                     &lt;/complexType>
@@ -587,7 +587,7 @@ public class SIFExtendedQueryDataModelType {
         })
         public static class SIFJoin {
 
-            @XmlElement(name = "SIF_JoinOn", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "SIF_JoinOn", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             protected List<SIFExtendedQueryDataModelType.SIFFrom.SIFJoin.SIFJoinOn> sifJoinOn;
             @XmlAttribute(name = "Type", required = true)
             @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -661,7 +661,7 @@ public class SIFExtendedQueryDataModelType {
              *           &lt;complexType>
              *             &lt;simpleContent>
              *               &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
-             *                 &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+             *                 &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
              *               &lt;/extension>
              *             &lt;/simpleContent>
              *           &lt;/complexType>
@@ -670,7 +670,7 @@ public class SIFExtendedQueryDataModelType {
              *           &lt;complexType>
              *             &lt;simpleContent>
              *               &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
-             *                 &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+             *                 &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
              *               &lt;/extension>
              *             &lt;/simpleContent>
              *           &lt;/complexType>
@@ -690,9 +690,9 @@ public class SIFExtendedQueryDataModelType {
             })
             public static class SIFJoinOn {
 
-                @XmlElement(name = "SIF_LeftElement", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+                @XmlElement(name = "SIF_LeftElement", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
                 protected SIFExtendedQueryDataModelType.SIFFrom.SIFJoin.SIFJoinOn.SIFLeftElement sifLeftElement;
-                @XmlElement(name = "SIF_RightElement", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+                @XmlElement(name = "SIF_RightElement", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
                 protected SIFExtendedQueryDataModelType.SIFFrom.SIFJoin.SIFJoinOn.SIFRightElement sifRightElement;
 
                 /**
@@ -753,7 +753,7 @@ public class SIFExtendedQueryDataModelType {
                  * &lt;complexType>
                  *   &lt;simpleContent>
                  *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
-                 *       &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+                 *       &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
                  *     &lt;/extension>
                  *   &lt;/simpleContent>
                  * &lt;/complexType>
@@ -835,7 +835,7 @@ public class SIFExtendedQueryDataModelType {
                  * &lt;complexType>
                  *   &lt;simpleContent>
                  *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
-                 *       &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+                 *       &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
                  *     &lt;/extension>
                  *   &lt;/simpleContent>
                  * &lt;/complexType>
@@ -928,7 +928,7 @@ public class SIFExtendedQueryDataModelType {
      *           &lt;complexType>
      *             &lt;simpleContent>
      *               &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
-     *                 &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+     *                 &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
      *                 &lt;attribute name="Ordering" use="required">
      *                   &lt;simpleType>
      *                     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -955,7 +955,7 @@ public class SIFExtendedQueryDataModelType {
     })
     public static class SIFOrderBy {
 
-        @XmlElement(name = "SIF_Element", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "SIF_Element", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected List<SIFExtendedQueryDataModelType.SIFOrderBy.SIFElement> sifElement;
 
         /**
@@ -997,7 +997,7 @@ public class SIFExtendedQueryDataModelType {
          * &lt;complexType>
          *   &lt;simpleContent>
          *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
-         *       &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+         *       &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
          *       &lt;attribute name="Ordering" use="required">
          *         &lt;simpleType>
          *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -1128,7 +1128,7 @@ public class SIFExtendedQueryDataModelType {
      *                     &lt;/restriction>
      *                   &lt;/simpleType>
      *                 &lt;/attribute>
-     *                 &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+     *                 &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
      *               &lt;/extension>
      *             &lt;/simpleContent>
      *           &lt;/complexType>
@@ -1159,7 +1159,7 @@ public class SIFExtendedQueryDataModelType {
     })
     public static class SIFSelect {
 
-        @XmlElement(name = "SIF_Element", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "SIF_Element", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected List<SIFExtendedQueryDataModelType.SIFSelect.SIFElement> sifElement;
         @XmlAttribute(name = "Distinct", required = true)
         protected boolean distinct;
@@ -1252,7 +1252,7 @@ public class SIFExtendedQueryDataModelType {
          *           &lt;/restriction>
          *         &lt;/simpleType>
          *       &lt;/attribute>
-         *       &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+         *       &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
          *     &lt;/extension>
          *   &lt;/simpleContent>
          * &lt;/complexType>
@@ -1383,7 +1383,7 @@ public class SIFExtendedQueryDataModelType {
      *                                         &lt;complexType>
      *                                           &lt;simpleContent>
      *                                             &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
-     *                                               &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+     *                                               &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
      *                                             &lt;/extension>
      *                                           &lt;/simpleContent>
      *                                         &lt;/complexType>
@@ -1448,7 +1448,7 @@ public class SIFExtendedQueryDataModelType {
     })
     public static class SIFWhere {
 
-        @XmlElement(name = "SIF_ConditionGroup", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "SIF_ConditionGroup", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected SIFExtendedQueryDataModelType.SIFWhere.SIFConditionGroup sifConditionGroup;
 
         /**
@@ -1500,7 +1500,7 @@ public class SIFExtendedQueryDataModelType {
          *                               &lt;complexType>
          *                                 &lt;simpleContent>
          *                                   &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
-         *                                     &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+         *                                     &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
          *                                   &lt;/extension>
          *                                 &lt;/simpleContent>
          *                               &lt;/complexType>
@@ -1560,7 +1560,7 @@ public class SIFExtendedQueryDataModelType {
         })
         public static class SIFConditionGroup {
 
-            @XmlElement(name = "SIF_Conditions", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "SIF_Conditions", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             protected List<SIFExtendedQueryDataModelType.SIFWhere.SIFConditionGroup.SIFConditions> sifConditions;
             @XmlAttribute(name = "Type", required = true)
             @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -1639,7 +1639,7 @@ public class SIFExtendedQueryDataModelType {
              *                     &lt;complexType>
              *                       &lt;simpleContent>
              *                         &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
-             *                           &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+             *                           &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
              *                         &lt;/extension>
              *                       &lt;/simpleContent>
              *                     &lt;/complexType>
@@ -1685,7 +1685,7 @@ public class SIFExtendedQueryDataModelType {
             })
             public static class SIFConditions {
 
-                @XmlElement(name = "SIF_Condition", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+                @XmlElement(name = "SIF_Condition", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
                 protected List<SIFExtendedQueryDataModelType.SIFWhere.SIFConditionGroup.SIFConditions.SIFCondition> sifCondition;
                 @XmlAttribute(name = "Type", required = true)
                 @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -1759,7 +1759,7 @@ public class SIFExtendedQueryDataModelType {
                  *           &lt;complexType>
                  *             &lt;simpleContent>
                  *               &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
-                 *                 &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+                 *                 &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
                  *               &lt;/extension>
                  *             &lt;/simpleContent>
                  *           &lt;/complexType>
@@ -1793,12 +1793,12 @@ public class SIFExtendedQueryDataModelType {
                 })
                 public static class SIFCondition {
 
-                    @XmlElement(name = "SIF_Element", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+                    @XmlElement(name = "SIF_Element", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
                     protected SIFExtendedQueryDataModelType.SIFWhere.SIFConditionGroup.SIFConditions.SIFCondition.SIFElement sifElement;
-                    @XmlElement(name = "SIF_Operator", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+                    @XmlElement(name = "SIF_Operator", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
                     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
                     protected String sifOperator;
-                    @XmlElement(name = "SIF_Value", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+                    @XmlElement(name = "SIF_Value", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
                     protected String sifValue;
 
                     /**
@@ -1883,7 +1883,7 @@ public class SIFExtendedQueryDataModelType {
                      * &lt;complexType>
                      *   &lt;simpleContent>
                      *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
-                     *       &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+                     *       &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
                      *     &lt;/extension>
                      *   &lt;/simpleContent>
                      * &lt;/complexType>

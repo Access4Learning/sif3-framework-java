@@ -54,7 +54,7 @@ import org.w3c.dom.Element;
  *           &lt;element name="BinaryData">
  *             &lt;complexType>
  *               &lt;simpleContent>
- *                 &lt;extension base="&lt;http://www.SIFinfo.org/au/datamodel/1.3>XSBase64BinaryOrEmpty">
+ *                 &lt;extension base="&lt;http://www.sifassociation.org/au/datamodel/1.3>XSBase64BinaryOrEmpty">
  *                   &lt;attribute name="MIMEType" use="required" type="{http://www.w3.org/2001/XMLSchema}token" />
  *                   &lt;attribute name="FileName" type="{http://www.w3.org/2001/XMLSchema}token" />
  *                   &lt;attribute name="Description" type="{http://www.w3.org/2001/XMLSchema}token" />
@@ -85,7 +85,7 @@ import org.w3c.dom.Element;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "AbstractContentElementType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "AbstractContentElementType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "xmlData",
     "textData",
     "binaryData",
@@ -93,13 +93,13 @@ import org.w3c.dom.Element;
 })
 public class AbstractContentElementType {
 
-    @XmlElement(name = "XMLData", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "XMLData", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected AbstractContentElementType.XMLData xmlData;
-    @XmlElement(name = "TextData", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "TextData", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected AbstractContentElementType.TextData textData;
-    @XmlElement(name = "BinaryData", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "BinaryData", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected AbstractContentElementType.BinaryData binaryData;
-    @XmlElement(name = "Reference", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "Reference", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected AbstractContentElementType.Reference reference;
 
     /**
@@ -207,7 +207,7 @@ public class AbstractContentElementType {
      * <pre>
      * &lt;complexType>
      *   &lt;simpleContent>
-     *     &lt;extension base="&lt;http://www.SIFinfo.org/au/datamodel/1.3>XSBase64BinaryOrEmpty">
+     *     &lt;extension base="&lt;http://www.sifassociation.org/au/datamodel/1.3>XSBase64BinaryOrEmpty">
      *       &lt;attribute name="MIMEType" use="required" type="{http://www.w3.org/2001/XMLSchema}token" />
      *       &lt;attribute name="FileName" type="{http://www.w3.org/2001/XMLSchema}token" />
      *       &lt;attribute name="Description" type="{http://www.w3.org/2001/XMLSchema}token" />
@@ -365,7 +365,7 @@ public class AbstractContentElementType {
     })
     public static class Reference {
 
-        @XmlElement(name = "URL", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "URL", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlSchemaType(name = "anyURI")
         protected String url;
         @XmlAttribute(name = "MIMEType", required = true)

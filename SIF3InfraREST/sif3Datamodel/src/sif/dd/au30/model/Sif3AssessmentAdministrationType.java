@@ -18,12 +18,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
 /**
  * This object represents an assessment event. It includes information related to the time of administration, place of administration, and unusual events related to the administration.
  * 
- * <p>Java class for SIF3AssessmentAdministrationType complex type.
+ * <p>Java class for Sif3AssessmentAdministrationType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="SIF3AssessmentAdministrationType">
+ * &lt;complexType name="Sif3AssessmentAdministrationType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
@@ -36,7 +36,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element name="AdministrationAssessment" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
+ *                   &lt;element name="AdministrationAssessment" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
  *             &lt;/complexContent>
@@ -52,8 +52,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *                       &lt;complexContent>
  *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                           &lt;sequence>
- *                             &lt;element name="LEAInfoRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
- *                             &lt;element name="SchoolInfoRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+ *                             &lt;element name="LEAInfoRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+ *                             &lt;element name="SchoolInfoRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
  *                           &lt;/sequence>
  *                         &lt;/restriction>
  *                       &lt;/complexContent>
@@ -64,10 +64,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *         &lt;element name="SIF_Metadata" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
- *         &lt;element name="SIF_ExtendedElements" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
+ *         &lt;element name="SIF_Metadata" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
+ *         &lt;element name="SIF_ExtendedElements" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="RefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}RefIdType" />
+ *       &lt;attribute name="RefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}RefIdType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -76,7 +76,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SIF3AssessmentAdministrationType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "Sif3AssessmentAdministrationType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "administrationName",
     "administrationCode",
     "startDateTime",
@@ -86,23 +86,23 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "sifMetadata",
     "sifExtendedElements"
 })
-public class SIF3AssessmentAdministrationType {
+public class Sif3AssessmentAdministrationType {
 
-    @XmlElementRef(name = "AdministrationName", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AdministrationName", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> administrationName;
-    @XmlElementRef(name = "AdministrationCode", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AdministrationCode", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> administrationCode;
-    @XmlElementRef(name = "StartDateTime", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "StartDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<XMLGregorianCalendar> startDateTime;
-    @XmlElementRef(name = "FinishDateTime", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "FinishDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<XMLGregorianCalendar> finishDateTime;
-    @XmlElementRef(name = "AdministrationAssessments", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentAdministrationType.AdministrationAssessments> administrationAssessments;
-    @XmlElementRef(name = "Organizations", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentAdministrationType.Organizations> organizations;
-    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AdministrationAssessments", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentAdministrationType.AdministrationAssessments> administrationAssessments;
+    @XmlElementRef(name = "Organizations", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentAdministrationType.Organizations> organizations;
+    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFMetadataType> sifMetadata;
-    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedElementsType> sifExtendedElements;
     @XmlAttribute(name = "RefId", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -209,10 +209,10 @@ public class SIF3AssessmentAdministrationType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentAdministrationType.AdministrationAssessments }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentAdministrationType.AdministrationAssessments }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentAdministrationType.AdministrationAssessments> getAdministrationAssessments() {
+    public JAXBElement<Sif3AssessmentAdministrationType.AdministrationAssessments> getAdministrationAssessments() {
         return administrationAssessments;
     }
 
@@ -221,10 +221,10 @@ public class SIF3AssessmentAdministrationType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentAdministrationType.AdministrationAssessments }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentAdministrationType.AdministrationAssessments }{@code >}
      *     
      */
-    public void setAdministrationAssessments(JAXBElement<SIF3AssessmentAdministrationType.AdministrationAssessments> value) {
+    public void setAdministrationAssessments(JAXBElement<Sif3AssessmentAdministrationType.AdministrationAssessments> value) {
         this.administrationAssessments = value;
     }
 
@@ -233,10 +233,10 @@ public class SIF3AssessmentAdministrationType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentAdministrationType.Organizations }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentAdministrationType.Organizations }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentAdministrationType.Organizations> getOrganizations() {
+    public JAXBElement<Sif3AssessmentAdministrationType.Organizations> getOrganizations() {
         return organizations;
     }
 
@@ -245,10 +245,10 @@ public class SIF3AssessmentAdministrationType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentAdministrationType.Organizations }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentAdministrationType.Organizations }{@code >}
      *     
      */
-    public void setOrganizations(JAXBElement<SIF3AssessmentAdministrationType.Organizations> value) {
+    public void setOrganizations(JAXBElement<Sif3AssessmentAdministrationType.Organizations> value) {
         this.organizations = value;
     }
 
@@ -335,7 +335,7 @@ public class SIF3AssessmentAdministrationType {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element name="AdministrationAssessment" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
+     *         &lt;element name="AdministrationAssessment" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" maxOccurs="unbounded" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>
@@ -350,7 +350,7 @@ public class SIF3AssessmentAdministrationType {
     })
     public static class AdministrationAssessments {
 
-        @XmlElement(name = "AdministrationAssessment", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "AdministrationAssessment", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
         protected List<String> administrationAssessment;
 
@@ -401,8 +401,8 @@ public class SIF3AssessmentAdministrationType {
      *             &lt;complexContent>
      *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *                 &lt;sequence>
-     *                   &lt;element name="LEAInfoRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
-     *                   &lt;element name="SchoolInfoRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+     *                   &lt;element name="LEAInfoRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+     *                   &lt;element name="SchoolInfoRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
      *                 &lt;/sequence>
      *               &lt;/restriction>
      *             &lt;/complexContent>
@@ -422,8 +422,8 @@ public class SIF3AssessmentAdministrationType {
     })
     public static class Organizations {
 
-        @XmlElement(name = "Organization", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
-        protected List<SIF3AssessmentAdministrationType.Organizations.Organization> organization;
+        @XmlElement(name = "Organization", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+        protected List<Sif3AssessmentAdministrationType.Organizations.Organization> organization;
 
         /**
          * Gets the value of the organization property.
@@ -443,13 +443,13 @@ public class SIF3AssessmentAdministrationType {
          * 
          * <p>
          * Objects of the following type(s) are allowed in the list
-         * {@link SIF3AssessmentAdministrationType.Organizations.Organization }
+         * {@link Sif3AssessmentAdministrationType.Organizations.Organization }
          * 
          * 
          */
-        public List<SIF3AssessmentAdministrationType.Organizations.Organization> getOrganization() {
+        public List<Sif3AssessmentAdministrationType.Organizations.Organization> getOrganization() {
             if (organization == null) {
-                organization = new ArrayList<SIF3AssessmentAdministrationType.Organizations.Organization>();
+                organization = new ArrayList<Sif3AssessmentAdministrationType.Organizations.Organization>();
             }
             return this.organization;
         }
@@ -465,8 +465,8 @@ public class SIF3AssessmentAdministrationType {
          *   &lt;complexContent>
          *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
          *       &lt;sequence>
-         *         &lt;element name="LEAInfoRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
-         *         &lt;element name="SchoolInfoRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+         *         &lt;element name="LEAInfoRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+         *         &lt;element name="SchoolInfoRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
          *       &lt;/sequence>
          *     &lt;/restriction>
          *   &lt;/complexContent>
@@ -482,9 +482,9 @@ public class SIF3AssessmentAdministrationType {
         })
         public static class Organization {
 
-            @XmlElementRef(name = "LEAInfoRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            @XmlElementRef(name = "LEAInfoRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<String> leaInfoRefId;
-            @XmlElementRef(name = "SchoolInfoRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            @XmlElementRef(name = "SchoolInfoRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<String> schoolInfoRefId;
 
             /**

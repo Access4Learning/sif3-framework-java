@@ -28,9 +28,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element name="Code" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAustralianStandardClasSIFicationOfLanguagesASCLType" minOccurs="0"/>
- *                   &lt;element name="OtherCodeList" type="{http://www.SIFinfo.org/au/datamodel/1.3}OtherCodeListType" minOccurs="0"/>
- *                   &lt;element name="LanguageType" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsLanguageTypeType" minOccurs="0"/>
+ *                   &lt;element name="Code" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAustralianStandardClassificationOfLanguagesASCLType" minOccurs="0"/>
+ *                   &lt;element name="OtherCodeList" type="{http://www.sifassociation.org/au/datamodel/1.3}OtherCodeListType" minOccurs="0"/>
+ *                   &lt;element name="LanguageType" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsLanguageTypeType" minOccurs="0"/>
  *                   &lt;element name="Dialect" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
@@ -46,12 +46,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "LanguageListType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "LanguageListType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "language"
 })
 public class LanguageListType {
 
-    @XmlElement(name = "Language", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "Language", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected List<LanguageListType.Language> language;
 
     /**
@@ -94,9 +94,9 @@ public class LanguageListType {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element name="Code" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAustralianStandardClasSIFicationOfLanguagesASCLType" minOccurs="0"/>
-     *         &lt;element name="OtherCodeList" type="{http://www.SIFinfo.org/au/datamodel/1.3}OtherCodeListType" minOccurs="0"/>
-     *         &lt;element name="LanguageType" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsLanguageTypeType" minOccurs="0"/>
+     *         &lt;element name="Code" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAustralianStandardClassificationOfLanguagesASCLType" minOccurs="0"/>
+     *         &lt;element name="OtherCodeList" type="{http://www.sifassociation.org/au/datamodel/1.3}OtherCodeListType" minOccurs="0"/>
+     *         &lt;element name="LanguageType" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsLanguageTypeType" minOccurs="0"/>
      *         &lt;element name="Dialect" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
@@ -115,14 +115,14 @@ public class LanguageListType {
     })
     public static class Language {
 
-        @XmlElement(name = "Code", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "Code", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
         protected String code;
-        @XmlElementRef(name = "OtherCodeList", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "OtherCodeList", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<OtherCodeListType> otherCodeList;
-        @XmlElementRef(name = "LanguageType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "LanguageType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<String> languageType;
-        @XmlElementRef(name = "Dialect", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "Dialect", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<String> dialect;
 
         /**

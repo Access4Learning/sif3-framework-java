@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element ref="{http://www.SIFinfo.org/au/datamodel/1.3}ElectronicId" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element ref="{http://www.sifassociation.org/au/datamodel/1.3}ElectronicId" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -31,12 +31,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ElectronicIdListType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "ElectronicIdListType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "electronicId"
 })
 public class ElectronicIdListType {
 
-    @XmlElement(name = "ElectronicId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "ElectronicId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected List<ElectronicIdType> electronicId;
 
     /**

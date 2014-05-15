@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="TeachingGroup" type="{http://www.SIFinfo.org/au/datamodel/1.3}TeachingGroupType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="TeachingGroup" type="{http://www.sifassociation.org/au/datamodel/1.3}TeachingGroupType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +29,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "TeachingGroupCollectionType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "TeachingGroupCollectionType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "teachingGroup"
 })
 public class TeachingGroupCollectionType {
 
-    @XmlElement(name = "TeachingGroup", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "TeachingGroup", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected List<TeachingGroupType> teachingGroup;
 
     /**

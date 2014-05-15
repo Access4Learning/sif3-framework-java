@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *       &lt;sequence>
  *         &lt;element name="Name" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
  *         &lt;element name="AssessmentId" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
- *         &lt;element name="AssessmentPackageRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+ *         &lt;element name="AssessmentPackageRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
  *         &lt;element name="AssessmentDescriptors" minOccurs="0">
  *           &lt;complexType>
  *             &lt;complexContent>
@@ -36,7 +36,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *                 &lt;sequence>
  *                   &lt;element name="AssessmentDescriptor" maxOccurs="unbounded" minOccurs="0">
  *                     &lt;simpleType>
- *                       &lt;union memberTypes=" {http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAssessmentTypeType">
+ *                       &lt;union memberTypes=" {http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAssessmentTypeType">
  *                         &lt;simpleType>
  *                           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
  *                             &lt;enumeration value="Statewide"/>
@@ -54,10 +54,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *         &lt;element name="SIF_Metadata" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
- *         &lt;element name="SIF_ExtendedElements" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
+ *         &lt;element name="SIF_Metadata" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
+ *         &lt;element name="SIF_ExtendedElements" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="RefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}RefIdType" />
+ *       &lt;attribute name="RefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}RefIdType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -66,7 +66,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "AssessmentType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "AssessmentType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "name",
     "assessmentId",
     "assessmentPackageRefId",
@@ -76,19 +76,19 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class AssessmentType {
 
-    @XmlElement(name = "Name", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "Name", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String name;
-    @XmlElementRef(name = "AssessmentId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AssessmentId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> assessmentId;
-    @XmlElementRef(name = "AssessmentPackageRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AssessmentPackageRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> assessmentPackageRefId;
-    @XmlElementRef(name = "AssessmentDescriptors", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AssessmentDescriptors", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<AssessmentType.AssessmentDescriptors> assessmentDescriptors;
-    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFMetadataType> sifMetadata;
-    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedElementsType> sifExtendedElements;
     @XmlAttribute(name = "RefId", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -275,7 +275,7 @@ public class AssessmentType {
      *       &lt;sequence>
      *         &lt;element name="AssessmentDescriptor" maxOccurs="unbounded" minOccurs="0">
      *           &lt;simpleType>
-     *             &lt;union memberTypes=" {http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAssessmentTypeType">
+     *             &lt;union memberTypes=" {http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAssessmentTypeType">
      *               &lt;simpleType>
      *                 &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
      *                   &lt;enumeration value="Statewide"/>
@@ -302,7 +302,7 @@ public class AssessmentType {
     })
     public static class AssessmentDescriptors {
 
-        @XmlElement(name = "AssessmentDescriptor", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "AssessmentDescriptor", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected List<String> assessmentDescriptor;
 
         /**

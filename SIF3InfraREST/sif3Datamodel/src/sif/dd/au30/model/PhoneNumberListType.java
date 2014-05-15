@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="PhoneNumber" maxOccurs="unbounded" minOccurs="0">
  *           &lt;complexType>
  *             &lt;complexContent>
- *               &lt;extension base="{http://www.SIFinfo.org/au/datamodel/1.3}PhoneNumberType">
+ *               &lt;extension base="{http://www.sifassociation.org/au/datamodel/1.3}PhoneNumberType">
  *                 &lt;attribute name="SIF_Action">
  *                   &lt;simpleType>
  *                     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -48,12 +48,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "PhoneNumberListType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "PhoneNumberListType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "phoneNumber"
 })
 public class PhoneNumberListType {
 
-    @XmlElement(name = "PhoneNumber", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "PhoneNumber", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected List<PhoneNumberListType.PhoneNumber> phoneNumber;
 
     /**
@@ -94,7 +94,7 @@ public class PhoneNumberListType {
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
-     *     &lt;extension base="{http://www.SIFinfo.org/au/datamodel/1.3}PhoneNumberType">
+     *     &lt;extension base="{http://www.sifassociation.org/au/datamodel/1.3}PhoneNumberType">
      *       &lt;attribute name="SIF_Action">
      *         &lt;simpleType>
      *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">

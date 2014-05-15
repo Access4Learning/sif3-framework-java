@@ -21,12 +21,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
 /**
  * This object represents the score conversion tables to be used by the scoring system to derive alternate values. 
  * 
- * <p>Java class for SIF3AssessmentScoreTableType complex type.
+ * <p>Java class for Sif3AssessmentScoreTableType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="SIF3AssessmentScoreTableType">
+ * &lt;complexType name="Sif3AssessmentScoreTableType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
@@ -77,7 +77,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *                               &lt;complexType>
  *                                 &lt;simpleContent>
  *                                   &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>token">
- *                                     &lt;attribute name="ToScoreMetric" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
+ *                                     &lt;attribute name="ToScoreMetric" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
  *                                   &lt;/extension>
  *                                 &lt;/simpleContent>
  *                               &lt;/complexType>
@@ -107,7 +107,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *                               &lt;/complexType>
  *                             &lt;/element>
  *                           &lt;/sequence>
- *                           &lt;attribute name="FromScoreMetric" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
+ *                           &lt;attribute name="FromScoreMetric" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
  *                         &lt;/restriction>
  *                       &lt;/complexContent>
  *                     &lt;/complexType>
@@ -117,10 +117,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *         &lt;element name="SIF_Metadata" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
- *         &lt;element name="SIF_ExtendedElements" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
+ *         &lt;element name="SIF_Metadata" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
+ *         &lt;element name="SIF_ExtendedElements" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="RefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}RefIdType" />
+ *       &lt;attribute name="RefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}RefIdType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -129,7 +129,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SIF3AssessmentScoreTableType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "Sif3AssessmentScoreTableType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "scoreTableVersion",
     "scoreTablePublishDate",
     "scoreTableIdentifiers",
@@ -138,23 +138,23 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "sifMetadata",
     "sifExtendedElements"
 })
-public class SIF3AssessmentScoreTableType {
+public class Sif3AssessmentScoreTableType {
 
-    @XmlElementRef(name = "ScoreTableVersion", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ScoreTableVersion", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> scoreTableVersion;
-    @XmlElementRef(name = "ScoreTablePublishDate", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ScoreTablePublishDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<XMLGregorianCalendar> scoreTablePublishDate;
-    @XmlElementRef(name = "ScoreTableIdentifiers", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentScoreTableType.ScoreTableIdentifiers> scoreTableIdentifiers;
-    @XmlElement(name = "ScoreTableName", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElementRef(name = "ScoreTableIdentifiers", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentScoreTableType.ScoreTableIdentifiers> scoreTableIdentifiers;
+    @XmlElement(name = "ScoreTableName", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String scoreTableName;
-    @XmlElementRef(name = "ScoreValues", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentScoreTableType.ScoreValues> scoreValues;
-    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ScoreValues", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentScoreTableType.ScoreValues> scoreValues;
+    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFMetadataType> sifMetadata;
-    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedElementsType> sifExtendedElements;
     @XmlAttribute(name = "RefId", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -213,10 +213,10 @@ public class SIF3AssessmentScoreTableType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentScoreTableType.ScoreTableIdentifiers }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentScoreTableType.ScoreTableIdentifiers }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentScoreTableType.ScoreTableIdentifiers> getScoreTableIdentifiers() {
+    public JAXBElement<Sif3AssessmentScoreTableType.ScoreTableIdentifiers> getScoreTableIdentifiers() {
         return scoreTableIdentifiers;
     }
 
@@ -225,10 +225,10 @@ public class SIF3AssessmentScoreTableType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentScoreTableType.ScoreTableIdentifiers }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentScoreTableType.ScoreTableIdentifiers }{@code >}
      *     
      */
-    public void setScoreTableIdentifiers(JAXBElement<SIF3AssessmentScoreTableType.ScoreTableIdentifiers> value) {
+    public void setScoreTableIdentifiers(JAXBElement<Sif3AssessmentScoreTableType.ScoreTableIdentifiers> value) {
         this.scoreTableIdentifiers = value;
     }
 
@@ -261,10 +261,10 @@ public class SIF3AssessmentScoreTableType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentScoreTableType.ScoreValues }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentScoreTableType.ScoreValues }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentScoreTableType.ScoreValues> getScoreValues() {
+    public JAXBElement<Sif3AssessmentScoreTableType.ScoreValues> getScoreValues() {
         return scoreValues;
     }
 
@@ -273,10 +273,10 @@ public class SIF3AssessmentScoreTableType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentScoreTableType.ScoreValues }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentScoreTableType.ScoreValues }{@code >}
      *     
      */
-    public void setScoreValues(JAXBElement<SIF3AssessmentScoreTableType.ScoreValues> value) {
+    public void setScoreValues(JAXBElement<Sif3AssessmentScoreTableType.ScoreValues> value) {
         this.scoreValues = value;
     }
 
@@ -395,8 +395,8 @@ public class SIF3AssessmentScoreTableType {
     })
     public static class ScoreTableIdentifiers {
 
-        @XmlElement(name = "ScoreTableIdentifier", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
-        protected List<SIF3AssessmentScoreTableType.ScoreTableIdentifiers.ScoreTableIdentifier> scoreTableIdentifier;
+        @XmlElement(name = "ScoreTableIdentifier", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+        protected List<Sif3AssessmentScoreTableType.ScoreTableIdentifiers.ScoreTableIdentifier> scoreTableIdentifier;
 
         /**
          * Gets the value of the scoreTableIdentifier property.
@@ -416,13 +416,13 @@ public class SIF3AssessmentScoreTableType {
          * 
          * <p>
          * Objects of the following type(s) are allowed in the list
-         * {@link SIF3AssessmentScoreTableType.ScoreTableIdentifiers.ScoreTableIdentifier }
+         * {@link Sif3AssessmentScoreTableType.ScoreTableIdentifiers.ScoreTableIdentifier }
          * 
          * 
          */
-        public List<SIF3AssessmentScoreTableType.ScoreTableIdentifiers.ScoreTableIdentifier> getScoreTableIdentifier() {
+        public List<Sif3AssessmentScoreTableType.ScoreTableIdentifiers.ScoreTableIdentifier> getScoreTableIdentifier() {
             if (scoreTableIdentifier == null) {
-                scoreTableIdentifier = new ArrayList<SIF3AssessmentScoreTableType.ScoreTableIdentifiers.ScoreTableIdentifier>();
+                scoreTableIdentifier = new ArrayList<Sif3AssessmentScoreTableType.ScoreTableIdentifiers.ScoreTableIdentifier>();
             }
             return this.scoreTableIdentifier;
         }
@@ -542,7 +542,7 @@ public class SIF3AssessmentScoreTableType {
      *                     &lt;complexType>
      *                       &lt;simpleContent>
      *                         &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>token">
-     *                           &lt;attribute name="ToScoreMetric" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
+     *                           &lt;attribute name="ToScoreMetric" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
      *                         &lt;/extension>
      *                       &lt;/simpleContent>
      *                     &lt;/complexType>
@@ -572,7 +572,7 @@ public class SIF3AssessmentScoreTableType {
      *                     &lt;/complexType>
      *                   &lt;/element>
      *                 &lt;/sequence>
-     *                 &lt;attribute name="FromScoreMetric" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
+     *                 &lt;attribute name="FromScoreMetric" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
      *               &lt;/restriction>
      *             &lt;/complexContent>
      *           &lt;/complexType>
@@ -591,8 +591,8 @@ public class SIF3AssessmentScoreTableType {
     })
     public static class ScoreValues {
 
-        @XmlElement(name = "ScoreValue", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
-        protected List<SIF3AssessmentScoreTableType.ScoreValues.ScoreValue> scoreValue;
+        @XmlElement(name = "ScoreValue", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+        protected List<Sif3AssessmentScoreTableType.ScoreValues.ScoreValue> scoreValue;
 
         /**
          * Gets the value of the scoreValue property.
@@ -612,13 +612,13 @@ public class SIF3AssessmentScoreTableType {
          * 
          * <p>
          * Objects of the following type(s) are allowed in the list
-         * {@link SIF3AssessmentScoreTableType.ScoreValues.ScoreValue }
+         * {@link Sif3AssessmentScoreTableType.ScoreValues.ScoreValue }
          * 
          * 
          */
-        public List<SIF3AssessmentScoreTableType.ScoreValues.ScoreValue> getScoreValue() {
+        public List<Sif3AssessmentScoreTableType.ScoreValues.ScoreValue> getScoreValue() {
             if (scoreValue == null) {
-                scoreValue = new ArrayList<SIF3AssessmentScoreTableType.ScoreValues.ScoreValue>();
+                scoreValue = new ArrayList<Sif3AssessmentScoreTableType.ScoreValues.ScoreValue>();
             }
             return this.scoreValue;
         }
@@ -640,7 +640,7 @@ public class SIF3AssessmentScoreTableType {
          *           &lt;complexType>
          *             &lt;simpleContent>
          *               &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>token">
-         *                 &lt;attribute name="ToScoreMetric" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
+         *                 &lt;attribute name="ToScoreMetric" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
          *               &lt;/extension>
          *             &lt;/simpleContent>
          *           &lt;/complexType>
@@ -670,7 +670,7 @@ public class SIF3AssessmentScoreTableType {
          *           &lt;/complexType>
          *         &lt;/element>
          *       &lt;/sequence>
-         *       &lt;attribute name="FromScoreMetric" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
+         *       &lt;attribute name="FromScoreMetric" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
          *     &lt;/restriction>
          *   &lt;/complexContent>
          * &lt;/complexType>
@@ -688,20 +688,20 @@ public class SIF3AssessmentScoreTableType {
         })
         public static class ScoreValue {
 
-            @XmlElement(name = "LowerCut", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "LowerCut", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
             @XmlSchemaType(name = "token")
             protected String lowerCut;
-            @XmlElement(name = "UpperCut", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "UpperCut", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
             @XmlSchemaType(name = "token")
             protected String upperCut;
-            @XmlElement(name = "DerivedValue", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
-            protected SIF3AssessmentScoreTableType.ScoreValues.ScoreValue.DerivedValue derivedValue;
-            @XmlElementRef(name = "PassFailIndicator", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            @XmlElement(name = "DerivedValue", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+            protected Sif3AssessmentScoreTableType.ScoreValues.ScoreValue.DerivedValue derivedValue;
+            @XmlElementRef(name = "PassFailIndicator", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<String> passFailIndicator;
-            @XmlElementRef(name = "FeedbackList", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-            protected JAXBElement<SIF3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList> feedbackList;
+            @XmlElementRef(name = "FeedbackList", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            protected JAXBElement<Sif3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList> feedbackList;
             @XmlAttribute(name = "FromScoreMetric", required = true)
             @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
             protected String fromScoreMetric;
@@ -759,10 +759,10 @@ public class SIF3AssessmentScoreTableType {
              * 
              * @return
              *     possible object is
-             *     {@link SIF3AssessmentScoreTableType.ScoreValues.ScoreValue.DerivedValue }
+             *     {@link Sif3AssessmentScoreTableType.ScoreValues.ScoreValue.DerivedValue }
              *     
              */
-            public SIF3AssessmentScoreTableType.ScoreValues.ScoreValue.DerivedValue getDerivedValue() {
+            public Sif3AssessmentScoreTableType.ScoreValues.ScoreValue.DerivedValue getDerivedValue() {
                 return derivedValue;
             }
 
@@ -771,10 +771,10 @@ public class SIF3AssessmentScoreTableType {
              * 
              * @param value
              *     allowed object is
-             *     {@link SIF3AssessmentScoreTableType.ScoreValues.ScoreValue.DerivedValue }
+             *     {@link Sif3AssessmentScoreTableType.ScoreValues.ScoreValue.DerivedValue }
              *     
              */
-            public void setDerivedValue(SIF3AssessmentScoreTableType.ScoreValues.ScoreValue.DerivedValue value) {
+            public void setDerivedValue(Sif3AssessmentScoreTableType.ScoreValues.ScoreValue.DerivedValue value) {
                 this.derivedValue = value;
             }
 
@@ -807,10 +807,10 @@ public class SIF3AssessmentScoreTableType {
              * 
              * @return
              *     possible object is
-             *     {@link JAXBElement }{@code <}{@link SIF3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList }{@code >}
+             *     {@link JAXBElement }{@code <}{@link Sif3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList }{@code >}
              *     
              */
-            public JAXBElement<SIF3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList> getFeedbackList() {
+            public JAXBElement<Sif3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList> getFeedbackList() {
                 return feedbackList;
             }
 
@@ -819,10 +819,10 @@ public class SIF3AssessmentScoreTableType {
              * 
              * @param value
              *     allowed object is
-             *     {@link JAXBElement }{@code <}{@link SIF3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList }{@code >}
+             *     {@link JAXBElement }{@code <}{@link Sif3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList }{@code >}
              *     
              */
-            public void setFeedbackList(JAXBElement<SIF3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList> value) {
+            public void setFeedbackList(JAXBElement<Sif3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList> value) {
                 this.feedbackList = value;
             }
 
@@ -860,7 +860,7 @@ public class SIF3AssessmentScoreTableType {
              * &lt;complexType>
              *   &lt;simpleContent>
              *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>token">
-             *       &lt;attribute name="ToScoreMetric" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
+             *       &lt;attribute name="ToScoreMetric" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" />
              *     &lt;/extension>
              *   &lt;/simpleContent>
              * &lt;/complexType>
@@ -970,8 +970,8 @@ public class SIF3AssessmentScoreTableType {
             })
             public static class FeedbackList {
 
-                @XmlElement(name = "Feedback", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
-                protected List<SIF3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList.Feedback> feedback;
+                @XmlElement(name = "Feedback", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+                protected List<Sif3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList.Feedback> feedback;
 
                 /**
                  * Gets the value of the feedback property.
@@ -991,13 +991,13 @@ public class SIF3AssessmentScoreTableType {
                  * 
                  * <p>
                  * Objects of the following type(s) are allowed in the list
-                 * {@link SIF3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList.Feedback }
+                 * {@link Sif3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList.Feedback }
                  * 
                  * 
                  */
-                public List<SIF3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList.Feedback> getFeedback() {
+                public List<Sif3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList.Feedback> getFeedback() {
                     if (feedback == null) {
-                        feedback = new ArrayList<SIF3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList.Feedback>();
+                        feedback = new ArrayList<Sif3AssessmentScoreTableType.ScoreValues.ScoreValue.FeedbackList.Feedback>();
                     }
                     return this.feedback;
                 }
@@ -1032,11 +1032,11 @@ public class SIF3AssessmentScoreTableType {
                 })
                 public static class Feedback {
 
-                    @XmlElement(name = "DiagnosticStatement", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+                    @XmlElement(name = "DiagnosticStatement", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
                     protected String diagnosticStatement;
-                    @XmlElementRef(name = "Description", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+                    @XmlElementRef(name = "Description", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
                     protected JAXBElement<String> description;
-                    @XmlElementRef(name = "Source", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+                    @XmlElementRef(name = "Source", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
                     protected JAXBElement<String> source;
 
                     /**

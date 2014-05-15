@@ -90,7 +90,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element ref="{http://www.SIFinfo.org/au/datamodel/1.3}TimeElement" maxOccurs="unbounded" minOccurs="0"/>
+ *                   &lt;element ref="{http://www.sifassociation.org/au/datamodel/1.3}TimeElement" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
  *             &lt;/complexContent>
@@ -105,18 +105,18 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "LifeCycleType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "LifeCycleType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "created",
     "modificationHistory",
     "timeElements"
 })
 public class LifeCycleType {
 
-    @XmlElementRef(name = "Created", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "Created", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<LifeCycleType.Created> created;
-    @XmlElementRef(name = "ModificationHistory", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ModificationHistory", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<LifeCycleType.ModificationHistory> modificationHistory;
-    @XmlElementRef(name = "TimeElements", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "TimeElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<LifeCycleType.TimeElements> timeElements;
 
     /**
@@ -240,10 +240,10 @@ public class LifeCycleType {
     })
     public static class Created {
 
-        @XmlElement(name = "DateTime", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "DateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlSchemaType(name = "dateTime")
         protected XMLGregorianCalendar dateTime;
-        @XmlElementRef(name = "Creators", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "Creators", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<LifeCycleType.Created.Creators> creators;
 
         /**
@@ -331,7 +331,7 @@ public class LifeCycleType {
         })
         public static class Creators {
 
-            @XmlElement(name = "Creator", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "Creator", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             protected List<LifeCycleType.Created.Creators.Creator> creator;
 
             /**
@@ -391,11 +391,11 @@ public class LifeCycleType {
             })
             public static class Creator {
 
-                @XmlElement(name = "Name", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+                @XmlElement(name = "Name", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
                 @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
                 @XmlSchemaType(name = "normalizedString")
                 protected String name;
-                @XmlElement(name = "ID", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+                @XmlElement(name = "ID", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
                 @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
                 @XmlSchemaType(name = "normalizedString")
                 protected String id;
@@ -492,7 +492,7 @@ public class LifeCycleType {
     })
     public static class ModificationHistory {
 
-        @XmlElement(name = "Modified", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "Modified", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected List<LifeCycleType.ModificationHistory.Modified> modified;
 
         /**
@@ -554,14 +554,14 @@ public class LifeCycleType {
         })
         public static class Modified {
 
-            @XmlElement(name = "By", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "By", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
             @XmlSchemaType(name = "normalizedString")
             protected String by;
-            @XmlElement(name = "DateTime", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "DateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             @XmlSchemaType(name = "dateTime")
             protected XMLGregorianCalendar dateTime;
-            @XmlElementRef(name = "Description", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            @XmlElementRef(name = "Description", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<String> description;
 
             /**
@@ -651,7 +651,7 @@ public class LifeCycleType {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element ref="{http://www.SIFinfo.org/au/datamodel/1.3}TimeElement" maxOccurs="unbounded" minOccurs="0"/>
+     *         &lt;element ref="{http://www.sifassociation.org/au/datamodel/1.3}TimeElement" maxOccurs="unbounded" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>
@@ -666,7 +666,7 @@ public class LifeCycleType {
     })
     public static class TimeElements {
 
-        @XmlElement(name = "TimeElement", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "TimeElement", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected List<TimeElementType> timeElement;
 
         /**

@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element ref="{http://www.SIFinfo.org/au/datamodel/1.3}YearLevel" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element ref="{http://www.sifassociation.org/au/datamodel/1.3}YearLevel" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -33,12 +33,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "YearLevelsType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "YearLevelsType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "yearLevel"
 })
 public class YearLevelsType {
 
-    @XmlElement(name = "YearLevel", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "YearLevel", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected List<YearLevelType> yearLevel;
 
     /**

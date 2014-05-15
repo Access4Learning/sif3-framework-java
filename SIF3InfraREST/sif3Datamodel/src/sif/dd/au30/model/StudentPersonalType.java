@@ -87,9 +87,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *         &lt;element ref="{http://www.SIFinfo.org/au/datamodel/1.3}LocalId" minOccurs="0"/>
- *         &lt;element name="StateProvinceId" type="{http://www.SIFinfo.org/au/datamodel/1.3}StateProvinceIdType" minOccurs="0"/>
- *         &lt;element name="ElectronicIdList" type="{http://www.SIFinfo.org/au/datamodel/1.3}ElectronicIdListType" minOccurs="0"/>
+ *         &lt;element ref="{http://www.sifassociation.org/au/datamodel/1.3}LocalId" minOccurs="0"/>
+ *         &lt;element name="StateProvinceId" type="{http://www.sifassociation.org/au/datamodel/1.3}StateProvinceIdType" minOccurs="0"/>
+ *         &lt;element name="ElectronicIdList" type="{http://www.sifassociation.org/au/datamodel/1.3}ElectronicIdListType" minOccurs="0"/>
  *         &lt;element name="OtherIdList" minOccurs="0">
  *           &lt;complexType>
  *             &lt;complexContent>
@@ -109,44 +109,44 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *         &lt;element ref="{http://www.SIFinfo.org/au/datamodel/1.3}PersonInfo" minOccurs="0"/>
- *         &lt;element name="ProjectedGraduationYear" type="{http://www.SIFinfo.org/au/datamodel/1.3}ProjectedGraduationYearType" minOccurs="0"/>
- *         &lt;element name="OnTimeGraduationYear" type="{http://www.SIFinfo.org/au/datamodel/1.3}OnTimeGraduationYearType" minOccurs="0"/>
- *         &lt;element name="GraduationDate" type="{http://www.SIFinfo.org/au/datamodel/1.3}GraduationDateType" minOccurs="0"/>
+ *         &lt;element ref="{http://www.sifassociation.org/au/datamodel/1.3}PersonInfo" minOccurs="0"/>
+ *         &lt;element name="ProjectedGraduationYear" type="{http://www.sifassociation.org/au/datamodel/1.3}ProjectedGraduationYearType" minOccurs="0"/>
+ *         &lt;element name="OnTimeGraduationYear" type="{http://www.sifassociation.org/au/datamodel/1.3}OnTimeGraduationYearType" minOccurs="0"/>
+ *         &lt;element name="GraduationDate" type="{http://www.sifassociation.org/au/datamodel/1.3}GraduationDateType" minOccurs="0"/>
  *         &lt;element name="MostRecent" minOccurs="0">
  *           &lt;complexType>
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element name="SchoolLocalId" type="{http://www.SIFinfo.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
- *                   &lt;element name="HomeroomLocalId" type="{http://www.SIFinfo.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
- *                   &lt;element name="YearLevel" type="{http://www.SIFinfo.org/au/datamodel/1.3}YearLevelType" minOccurs="0"/>
- *                   &lt;element name="Parent1Language" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAustralianStandardClasSIFicationOfLanguagesASCLType" minOccurs="0"/>
- *                   &lt;element name="Parent2Language" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAustralianStandardClasSIFicationOfLanguagesASCLType" minOccurs="0"/>
- *                   &lt;element name="Parent1EmploymentType" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsEmploymentTypeType" minOccurs="0"/>
- *                   &lt;element name="Parent2EmploymentType" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsEmploymentTypeType" minOccurs="0"/>
- *                   &lt;element name="Parent1SchoolEducationLevel" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsSchoolEducationLevelTypeType" minOccurs="0"/>
- *                   &lt;element name="Parent2SchoolEducationLevel" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsSchoolEducationLevelTypeType" minOccurs="0"/>
- *                   &lt;element name="Parent1NonSchoolEducation" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsNonSchoolEducationType" minOccurs="0"/>
- *                   &lt;element name="Parent2NonSchoolEducation" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsNonSchoolEducationType" minOccurs="0"/>
+ *                   &lt;element name="SchoolLocalId" type="{http://www.sifassociation.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
+ *                   &lt;element name="HomeroomLocalId" type="{http://www.sifassociation.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
+ *                   &lt;element name="YearLevel" type="{http://www.sifassociation.org/au/datamodel/1.3}YearLevelType" minOccurs="0"/>
+ *                   &lt;element name="Parent1Language" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAustralianStandardClassificationOfLanguagesASCLType" minOccurs="0"/>
+ *                   &lt;element name="Parent2Language" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAustralianStandardClassificationOfLanguagesASCLType" minOccurs="0"/>
+ *                   &lt;element name="Parent1EmploymentType" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsEmploymentTypeType" minOccurs="0"/>
+ *                   &lt;element name="Parent2EmploymentType" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsEmploymentTypeType" minOccurs="0"/>
+ *                   &lt;element name="Parent1SchoolEducationLevel" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsSchoolEducationLevelTypeType" minOccurs="0"/>
+ *                   &lt;element name="Parent2SchoolEducationLevel" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsSchoolEducationLevelTypeType" minOccurs="0"/>
+ *                   &lt;element name="Parent1NonSchoolEducation" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsNonSchoolEducationType" minOccurs="0"/>
+ *                   &lt;element name="Parent2NonSchoolEducation" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsNonSchoolEducationType" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *         &lt;element name="AcceptableUsePolicy" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsYesOrNoCategoryType" minOccurs="0"/>
- *         &lt;element name="GiftedTalented" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsYesOrNoCategoryType" minOccurs="0"/>
- *         &lt;element name="EconomicDisadvantage" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsYesOrNoCategoryType" minOccurs="0"/>
- *         &lt;element name="ESL" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsYesOrNoCategoryType" minOccurs="0"/>
- *         &lt;element name="YoungCarersRole" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsYesOrNoCategoryType" minOccurs="0"/>
- *         &lt;element name="Disability" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsYesOrNoCategoryType" minOccurs="0"/>
- *         &lt;element name="IntegrationAide" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsYesOrNoCategoryType" minOccurs="0"/>
+ *         &lt;element name="AcceptableUsePolicy" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsYesOrNoCategoryType" minOccurs="0"/>
+ *         &lt;element name="GiftedTalented" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsYesOrNoCategoryType" minOccurs="0"/>
+ *         &lt;element name="EconomicDisadvantage" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsYesOrNoCategoryType" minOccurs="0"/>
+ *         &lt;element name="ESL" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsYesOrNoCategoryType" minOccurs="0"/>
+ *         &lt;element name="YoungCarersRole" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsYesOrNoCategoryType" minOccurs="0"/>
+ *         &lt;element name="Disability" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsYesOrNoCategoryType" minOccurs="0"/>
+ *         &lt;element name="IntegrationAide" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsYesOrNoCategoryType" minOccurs="0"/>
  *         &lt;element name="PrePrimaryEducation" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
  *         &lt;element name="FirstAUSchoolEnrollment" type="{http://www.w3.org/2001/XMLSchema}date" minOccurs="0"/>
- *         &lt;element name="SIF_Metadata" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
- *         &lt;element name="SIF_ExtendedElements" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
+ *         &lt;element name="SIF_Metadata" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
+ *         &lt;element name="SIF_ExtendedElements" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="RefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}RefIdType" />
+ *       &lt;attribute name="RefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}RefIdType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -155,7 +155,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "StudentPersonalType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "StudentPersonalType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "alertMessages",
     "medicalAlertMessages",
     "localId",
@@ -181,50 +181,50 @@ import javax.xml.datatype.XMLGregorianCalendar;
 })
 public class StudentPersonalType {
 
-    @XmlElementRef(name = "AlertMessages", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AlertMessages", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<StudentPersonalType.AlertMessages> alertMessages;
-    @XmlElementRef(name = "MedicalAlertMessages", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "MedicalAlertMessages", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<StudentPersonalType.MedicalAlertMessages> medicalAlertMessages;
-    @XmlElement(name = "LocalId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "LocalId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String localId;
-    @XmlElementRef(name = "StateProvinceId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "StateProvinceId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> stateProvinceId;
-    @XmlElementRef(name = "ElectronicIdList", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ElectronicIdList", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<ElectronicIdListType> electronicIdList;
-    @XmlElementRef(name = "OtherIdList", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "OtherIdList", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<StudentPersonalType.OtherIdList> otherIdList;
-    @XmlElement(name = "PersonInfo", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "PersonInfo", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected PersonInfoType personInfo;
-    @XmlElementRef(name = "ProjectedGraduationYear", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ProjectedGraduationYear", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<XMLGregorianCalendar> projectedGraduationYear;
-    @XmlElementRef(name = "OnTimeGraduationYear", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "OnTimeGraduationYear", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<XMLGregorianCalendar> onTimeGraduationYear;
-    @XmlElementRef(name = "GraduationDate", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "GraduationDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> graduationDate;
-    @XmlElementRef(name = "MostRecent", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "MostRecent", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<StudentPersonalType.MostRecent> mostRecent;
-    @XmlElementRef(name = "AcceptableUsePolicy", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AcceptableUsePolicy", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<AUCodeSetsYesOrNoCategoryType> acceptableUsePolicy;
-    @XmlElementRef(name = "GiftedTalented", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "GiftedTalented", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<AUCodeSetsYesOrNoCategoryType> giftedTalented;
-    @XmlElementRef(name = "EconomicDisadvantage", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "EconomicDisadvantage", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<AUCodeSetsYesOrNoCategoryType> economicDisadvantage;
-    @XmlElementRef(name = "ESL", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ESL", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<AUCodeSetsYesOrNoCategoryType> esl;
-    @XmlElementRef(name = "YoungCarersRole", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "YoungCarersRole", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<AUCodeSetsYesOrNoCategoryType> youngCarersRole;
-    @XmlElementRef(name = "Disability", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "Disability", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<AUCodeSetsYesOrNoCategoryType> disability;
-    @XmlElementRef(name = "IntegrationAide", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "IntegrationAide", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<AUCodeSetsYesOrNoCategoryType> integrationAide;
-    @XmlElementRef(name = "PrePrimaryEducation", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "PrePrimaryEducation", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> prePrimaryEducation;
-    @XmlElementRef(name = "FirstAUSchoolEnrollment", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "FirstAUSchoolEnrollment", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<XMLGregorianCalendar> firstAUSchoolEnrollment;
-    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFMetadataType> sifMetadata;
-    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedElementsType> sifExtendedElements;
     @XmlAttribute(name = "RefId", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -825,7 +825,7 @@ public class StudentPersonalType {
     })
     public static class AlertMessages {
 
-        @XmlElement(name = "AlertMessage", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "AlertMessage", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected List<StudentPersonalType.AlertMessages.AlertMessage> alertMessage;
 
         /**
@@ -992,7 +992,7 @@ public class StudentPersonalType {
     })
     public static class MedicalAlertMessages {
 
-        @XmlElement(name = "MedicalAlertMessage", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "MedicalAlertMessage", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected List<StudentPersonalType.MedicalAlertMessages.MedicalAlertMessage> medicalAlertMessage;
 
         /**
@@ -1127,17 +1127,17 @@ public class StudentPersonalType {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element name="SchoolLocalId" type="{http://www.SIFinfo.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
-     *         &lt;element name="HomeroomLocalId" type="{http://www.SIFinfo.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
-     *         &lt;element name="YearLevel" type="{http://www.SIFinfo.org/au/datamodel/1.3}YearLevelType" minOccurs="0"/>
-     *         &lt;element name="Parent1Language" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAustralianStandardClasSIFicationOfLanguagesASCLType" minOccurs="0"/>
-     *         &lt;element name="Parent2Language" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAustralianStandardClasSIFicationOfLanguagesASCLType" minOccurs="0"/>
-     *         &lt;element name="Parent1EmploymentType" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsEmploymentTypeType" minOccurs="0"/>
-     *         &lt;element name="Parent2EmploymentType" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsEmploymentTypeType" minOccurs="0"/>
-     *         &lt;element name="Parent1SchoolEducationLevel" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsSchoolEducationLevelTypeType" minOccurs="0"/>
-     *         &lt;element name="Parent2SchoolEducationLevel" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsSchoolEducationLevelTypeType" minOccurs="0"/>
-     *         &lt;element name="Parent1NonSchoolEducation" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsNonSchoolEducationType" minOccurs="0"/>
-     *         &lt;element name="Parent2NonSchoolEducation" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsNonSchoolEducationType" minOccurs="0"/>
+     *         &lt;element name="SchoolLocalId" type="{http://www.sifassociation.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
+     *         &lt;element name="HomeroomLocalId" type="{http://www.sifassociation.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
+     *         &lt;element name="YearLevel" type="{http://www.sifassociation.org/au/datamodel/1.3}YearLevelType" minOccurs="0"/>
+     *         &lt;element name="Parent1Language" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAustralianStandardClassificationOfLanguagesASCLType" minOccurs="0"/>
+     *         &lt;element name="Parent2Language" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAustralianStandardClassificationOfLanguagesASCLType" minOccurs="0"/>
+     *         &lt;element name="Parent1EmploymentType" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsEmploymentTypeType" minOccurs="0"/>
+     *         &lt;element name="Parent2EmploymentType" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsEmploymentTypeType" minOccurs="0"/>
+     *         &lt;element name="Parent1SchoolEducationLevel" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsSchoolEducationLevelTypeType" minOccurs="0"/>
+     *         &lt;element name="Parent2SchoolEducationLevel" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsSchoolEducationLevelTypeType" minOccurs="0"/>
+     *         &lt;element name="Parent1NonSchoolEducation" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsNonSchoolEducationType" minOccurs="0"/>
+     *         &lt;element name="Parent2NonSchoolEducation" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsNonSchoolEducationType" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>
@@ -1162,27 +1162,27 @@ public class StudentPersonalType {
     })
     public static class MostRecent {
 
-        @XmlElementRef(name = "SchoolLocalId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "SchoolLocalId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<String> schoolLocalId;
-        @XmlElementRef(name = "HomeroomLocalId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "HomeroomLocalId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<String> homeroomLocalId;
-        @XmlElementRef(name = "YearLevel", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "YearLevel", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<YearLevelType> yearLevel;
-        @XmlElementRef(name = "Parent1Language", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "Parent1Language", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<String> parent1Language;
-        @XmlElementRef(name = "Parent2Language", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "Parent2Language", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<String> parent2Language;
-        @XmlElementRef(name = "Parent1EmploymentType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "Parent1EmploymentType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<String> parent1EmploymentType;
-        @XmlElementRef(name = "Parent2EmploymentType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "Parent2EmploymentType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<String> parent2EmploymentType;
-        @XmlElementRef(name = "Parent1SchoolEducationLevel", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "Parent1SchoolEducationLevel", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<String> parent1SchoolEducationLevel;
-        @XmlElementRef(name = "Parent2SchoolEducationLevel", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "Parent2SchoolEducationLevel", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<String> parent2SchoolEducationLevel;
-        @XmlElementRef(name = "Parent1NonSchoolEducation", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "Parent1NonSchoolEducation", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<String> parent1NonSchoolEducation;
-        @XmlElementRef(name = "Parent2NonSchoolEducation", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "Parent2NonSchoolEducation", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<String> parent2NonSchoolEducation;
 
         /**
@@ -1485,7 +1485,7 @@ public class StudentPersonalType {
     })
     public static class OtherIdList {
 
-        @XmlElement(name = "OtherId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "OtherId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected List<StudentPersonalType.OtherIdList.OtherId> otherId;
 
         /**

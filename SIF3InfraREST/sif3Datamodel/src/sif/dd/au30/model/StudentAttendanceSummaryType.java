@@ -27,7 +27,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="StudentAttendanceSummaryRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+ *         &lt;element name="StudentAttendanceSummaryRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
  *         &lt;element name="StartDay" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *         &lt;element name="EndDay" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *         &lt;element name="FTE" minOccurs="0">
@@ -44,12 +44,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="UnexcusedAbsences" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
  *         &lt;element name="DaysTardy" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
  *         &lt;element name="DaysInMembership" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
- *         &lt;element name="SIF_Metadata" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
- *         &lt;element name="SIF_ExtendedElements" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
+ *         &lt;element name="SIF_Metadata" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
+ *         &lt;element name="SIF_ExtendedElements" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="StudentPersonalRefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" />
- *       &lt;attribute name="SchoolInfoRefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" />
- *       &lt;attribute name="SchoolYear" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}SchoolYearType" />
+ *       &lt;attribute name="StudentPersonalRefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" />
+ *       &lt;attribute name="SchoolInfoRefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" />
+ *       &lt;attribute name="SchoolYear" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}SchoolYearType" />
  *       &lt;attribute name="StartDate" use="required" type="{http://www.w3.org/2001/XMLSchema}date" />
  *       &lt;attribute name="EndDate" use="required" type="{http://www.w3.org/2001/XMLSchema}date" />
  *     &lt;/restriction>
@@ -60,7 +60,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "StudentAttendanceSummaryType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "StudentAttendanceSummaryType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "studentAttendanceSummaryRefId",
     "startDay",
     "endDay",
@@ -75,27 +75,27 @@ import javax.xml.datatype.XMLGregorianCalendar;
 })
 public class StudentAttendanceSummaryType {
 
-    @XmlElementRef(name = "StudentAttendanceSummaryRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "StudentAttendanceSummaryRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> studentAttendanceSummaryRefId;
-    @XmlElementRef(name = "StartDay", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "StartDay", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<Long> startDay;
-    @XmlElementRef(name = "EndDay", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "EndDay", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<Long> endDay;
-    @XmlElementRef(name = "FTE", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "FTE", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<BigDecimal> fte;
-    @XmlElement(name = "DaysAttended", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "DaysAttended", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected BigDecimal daysAttended;
-    @XmlElement(name = "ExcusedAbsences", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "ExcusedAbsences", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected BigDecimal excusedAbsences;
-    @XmlElement(name = "UnexcusedAbsences", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "UnexcusedAbsences", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected BigDecimal unexcusedAbsences;
-    @XmlElementRef(name = "DaysTardy", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "DaysTardy", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<BigDecimal> daysTardy;
-    @XmlElement(name = "DaysInMembership", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "DaysInMembership", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected BigDecimal daysInMembership;
-    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFMetadataType> sifMetadata;
-    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedElementsType> sifExtendedElements;
     @XmlAttribute(name = "StudentPersonalRefId", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)

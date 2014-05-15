@@ -27,16 +27,16 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="CalendarDateRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
- *         &lt;element name="SchoolInfoRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
- *         &lt;element ref="{http://www.SIFinfo.org/au/datamodel/1.3}SchoolYear" minOccurs="0"/>
+ *         &lt;element name="CalendarDateRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+ *         &lt;element name="SchoolInfoRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+ *         &lt;element ref="{http://www.sifassociation.org/au/datamodel/1.3}SchoolYear" minOccurs="0"/>
  *         &lt;element name="CalendarDateType" minOccurs="0">
  *           &lt;complexType>
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element name="Code" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsCalendarEventType" minOccurs="0"/>
- *                   &lt;element name="OtherCodeList" type="{http://www.SIFinfo.org/au/datamodel/1.3}OtherCodeListType" minOccurs="0"/>
+ *                   &lt;element name="Code" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsCalendarEventType" minOccurs="0"/>
+ *                   &lt;element name="OtherCodeList" type="{http://www.sifassociation.org/au/datamodel/1.3}OtherCodeListType" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
  *             &lt;/complexContent>
@@ -124,11 +124,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *         &lt;element name="SIF_Metadata" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
- *         &lt;element name="SIF_ExtendedElements" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
+ *         &lt;element name="SIF_Metadata" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
+ *         &lt;element name="SIF_ExtendedElements" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="Date" use="required" type="{http://www.w3.org/2001/XMLSchema}date" />
- *       &lt;attribute name="CalendarSummaryRefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" />
+ *       &lt;attribute name="CalendarSummaryRefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -137,7 +137,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "CalendarDateType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "CalendarDateType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "calendarDateRefId",
     "schoolInfoRefId",
     "schoolYear",
@@ -151,26 +151,26 @@ import javax.xml.datatype.XMLGregorianCalendar;
 })
 public class CalendarDate {
 
-    @XmlElementRef(name = "CalendarDateRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "CalendarDateRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> calendarDateRefId;
-    @XmlElement(name = "SchoolInfoRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SchoolInfoRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String schoolInfoRefId;
-    @XmlElement(name = "SchoolYear", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SchoolYear", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected XMLGregorianCalendar schoolYear;
-    @XmlElement(name = "CalendarDateType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "CalendarDateType", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected CalendarDate.CalendarDateType calendarDateType;
-    @XmlElementRef(name = "CalendarDateNumber", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "CalendarDateNumber", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<Long> calendarDateNumber;
-    @XmlElementRef(name = "StudentAttendance", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "StudentAttendance", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<CalendarDate.StudentAttendance> studentAttendance;
-    @XmlElementRef(name = "TeacherAttendance", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "TeacherAttendance", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<CalendarDate.TeacherAttendance> teacherAttendance;
-    @XmlElementRef(name = "AdministratorAttendance", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AdministratorAttendance", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<CalendarDate.AdministratorAttendance> administratorAttendance;
-    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFMetadataType> sifMetadata;
-    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedElementsType> sifExtendedElements;
     @XmlAttribute(name = "Date", required = true)
     @XmlSchemaType(name = "date")
@@ -510,10 +510,10 @@ public class CalendarDate {
     })
     public static class AdministratorAttendance {
 
-        @XmlElement(name = "CountsTowardAttendance", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "CountsTowardAttendance", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
         protected String countsTowardAttendance;
-        @XmlElement(name = "AttendanceValue", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "AttendanceValue", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected BigDecimal attendanceValue;
 
         /**
@@ -577,8 +577,8 @@ public class CalendarDate {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element name="Code" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsCalendarEventType" minOccurs="0"/>
-     *         &lt;element name="OtherCodeList" type="{http://www.SIFinfo.org/au/datamodel/1.3}OtherCodeListType" minOccurs="0"/>
+     *         &lt;element name="Code" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsCalendarEventType" minOccurs="0"/>
+     *         &lt;element name="OtherCodeList" type="{http://www.sifassociation.org/au/datamodel/1.3}OtherCodeListType" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>
@@ -594,10 +594,10 @@ public class CalendarDate {
     })
     public static class CalendarDateType {
 
-        @XmlElement(name = "Code", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "Code", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
         protected String code;
-        @XmlElementRef(name = "OtherCodeList", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "OtherCodeList", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<OtherCodeListType> otherCodeList;
 
         /**
@@ -693,10 +693,10 @@ public class CalendarDate {
     })
     public static class StudentAttendance {
 
-        @XmlElement(name = "CountsTowardAttendance", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "CountsTowardAttendance", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
         protected String countsTowardAttendance;
-        @XmlElement(name = "AttendanceValue", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "AttendanceValue", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected BigDecimal attendanceValue;
 
         /**
@@ -792,10 +792,10 @@ public class CalendarDate {
     })
     public static class TeacherAttendance {
 
-        @XmlElement(name = "CountsTowardAttendance", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "CountsTowardAttendance", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
         protected String countsTowardAttendance;
-        @XmlElement(name = "AttendanceValue", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "AttendanceValue", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected BigDecimal attendanceValue;
 
         /**

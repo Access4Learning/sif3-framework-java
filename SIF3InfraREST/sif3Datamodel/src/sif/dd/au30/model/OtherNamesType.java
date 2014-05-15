@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="Name" maxOccurs="unbounded" minOccurs="0">
  *           &lt;complexType>
  *             &lt;complexContent>
- *               &lt;extension base="{http://www.SIFinfo.org/au/datamodel/1.3}OtherNameType">
+ *               &lt;extension base="{http://www.sifassociation.org/au/datamodel/1.3}OtherNameType">
  *                 &lt;attribute name="SIF_Action">
  *                   &lt;simpleType>
  *                     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -48,12 +48,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "OtherNamesType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "OtherNamesType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "name"
 })
 public class OtherNamesType {
 
-    @XmlElement(name = "Name", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "Name", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected List<OtherNamesType.Name> name;
 
     /**
@@ -98,7 +98,7 @@ public class OtherNamesType {
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
-     *     &lt;extension base="{http://www.SIFinfo.org/au/datamodel/1.3}OtherNameType">
+     *     &lt;extension base="{http://www.sifassociation.org/au/datamodel/1.3}OtherNameType">
      *       &lt;attribute name="SIF_Action">
      *         &lt;simpleType>
      *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">

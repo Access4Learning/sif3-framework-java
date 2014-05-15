@@ -21,8 +21,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="ACStrand" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsACStrandType" minOccurs="0"/>
- *         &lt;element name="SubjectArea" type="{http://www.SIFinfo.org/au/datamodel/1.3}SubjectAreaType" minOccurs="0"/>
+ *         &lt;element name="ACStrand" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsACStrandType" minOccurs="0"/>
+ *         &lt;element name="SubjectArea" type="{http://www.sifassociation.org/au/datamodel/1.3}SubjectAreaType" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -32,15 +32,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ACStrandSubjectAreaType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "ACStrandSubjectAreaType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "acStrand",
     "subjectArea"
 })
 public class ACStrandSubjectAreaType {
 
-    @XmlElement(name = "ACStrand", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "ACStrand", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected AUCodeSetsACStrandType acStrand;
-    @XmlElementRef(name = "SubjectArea", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SubjectArea", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SubjectAreaType> subjectArea;
 
     /**

@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlType;
  * <pre>
  * &lt;complexType name="LearningResourcePackageType">
  *   &lt;complexContent>
- *     &lt;extension base="{http://www.SIFinfo.org/au/datamodel/1.3}AbstractContentPackageType">
+ *     &lt;extension base="{http://www.sifassociation.org/au/datamodel/1.3}AbstractContentPackageType">
  *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "LearningResourcePackageType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+@XmlType(name = "LearningResourcePackageType", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
 public class LearningResourcePackageType
     extends AbstractContentPackageType
 {

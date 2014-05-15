@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlType;
  * <pre>
  * &lt;complexType name="ReportPackageType">
  *   &lt;complexContent>
- *     &lt;extension base="{http://www.SIFinfo.org/au/datamodel/1.3}AbstractContentPackageType">
+ *     &lt;extension base="{http://www.sifassociation.org/au/datamodel/1.3}AbstractContentPackageType">
  *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ReportPackageType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+@XmlType(name = "ReportPackageType", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
 public class ReportPackageType
     extends AbstractContentPackageType
 {

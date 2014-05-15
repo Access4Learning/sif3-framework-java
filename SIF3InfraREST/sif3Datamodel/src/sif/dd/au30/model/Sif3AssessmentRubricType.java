@@ -23,12 +23,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * This object represents the scoring rubric used to evaluate responses to open-ended items. Rubrics will define how a student response is to be evaluated and what score values should be applied based on that evaluation. Rubrics can be used by human scorers (teachers or professional scorers) or are used to train artificial intelligence engines. An individual item may have multiple rubrics that are used to evaluate different 'traits' of the response.      
  *       
  * 
- * <p>Java class for SIF3AssessmentRubricType complex type.
+ * <p>Java class for Sif3AssessmentRubricType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="SIF3AssessmentRubricType">
+ * &lt;complexType name="Sif3AssessmentRubricType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
@@ -75,14 +75,14 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                           &lt;sequence>
  *                             &lt;element name="ScoreCode" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
- *                             &lt;element name="ScoreCodeDefinition" type="{http://www.SIFinfo.org/au/datamodel/1.3}AbstractContentElementType" minOccurs="0"/>
+ *                             &lt;element name="ScoreCodeDefinition" type="{http://www.sifassociation.org/au/datamodel/1.3}AbstractContentElementType" minOccurs="0"/>
  *                             &lt;element name="ScoreValue" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
  *                             &lt;element name="ScoreDescriptions" minOccurs="0">
  *                               &lt;complexType>
  *                                 &lt;complexContent>
  *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                                     &lt;sequence>
- *                                       &lt;element name="ScoreDescription" type="{http://www.SIFinfo.org/au/datamodel/1.3}AbstractContentElementType" maxOccurs="unbounded" minOccurs="0"/>
+ *                                       &lt;element name="ScoreDescription" type="{http://www.sifassociation.org/au/datamodel/1.3}AbstractContentElementType" maxOccurs="unbounded" minOccurs="0"/>
  *                                     &lt;/sequence>
  *                                   &lt;/restriction>
  *                                 &lt;/complexContent>
@@ -99,7 +99,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *                                             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                                               &lt;sequence>
  *                                                 &lt;element name="CommentCode" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
- *                                                 &lt;element name="Comment" type="{http://www.SIFinfo.org/au/datamodel/1.3}AbstractContentElementType" minOccurs="0"/>
+ *                                                 &lt;element name="Comment" type="{http://www.sifassociation.org/au/datamodel/1.3}AbstractContentElementType" minOccurs="0"/>
  *                                               &lt;/sequence>
  *                                             &lt;/restriction>
  *                                           &lt;/complexContent>
@@ -120,10 +120,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *         &lt;element name="SIF_Metadata" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
- *         &lt;element name="SIF_ExtendedElements" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
+ *         &lt;element name="SIF_Metadata" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
+ *         &lt;element name="SIF_ExtendedElements" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="RefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}RefIdType" />
+ *       &lt;attribute name="RefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}RefIdType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -132,7 +132,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SIF3AssessmentRubricType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "Sif3AssessmentRubricType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "rubricVersion",
     "rubricPublishDate",
     "rubricIdentifiers",
@@ -142,25 +142,25 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "sifMetadata",
     "sifExtendedElements"
 })
-public class SIF3AssessmentRubricType {
+public class Sif3AssessmentRubricType {
 
-    @XmlElementRef(name = "RubricVersion", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "RubricVersion", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> rubricVersion;
-    @XmlElementRef(name = "RubricPublishDate", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "RubricPublishDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<XMLGregorianCalendar> rubricPublishDate;
-    @XmlElementRef(name = "RubricIdentifiers", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentRubricType.RubricIdentifiers> rubricIdentifiers;
-    @XmlElement(name = "RubricName", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElementRef(name = "RubricIdentifiers", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentRubricType.RubricIdentifiers> rubricIdentifiers;
+    @XmlElement(name = "RubricName", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String rubricName;
-    @XmlElementRef(name = "ScoringGuideReference", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ScoringGuideReference", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> scoringGuideReference;
-    @XmlElementRef(name = "Scores", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<SIF3AssessmentRubricType.Scores> scores;
-    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "Scores", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<Sif3AssessmentRubricType.Scores> scores;
+    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFMetadataType> sifMetadata;
-    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedElementsType> sifExtendedElements;
     @XmlAttribute(name = "RefId", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -219,10 +219,10 @@ public class SIF3AssessmentRubricType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentRubricType.RubricIdentifiers }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentRubricType.RubricIdentifiers }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentRubricType.RubricIdentifiers> getRubricIdentifiers() {
+    public JAXBElement<Sif3AssessmentRubricType.RubricIdentifiers> getRubricIdentifiers() {
         return rubricIdentifiers;
     }
 
@@ -231,10 +231,10 @@ public class SIF3AssessmentRubricType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentRubricType.RubricIdentifiers }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentRubricType.RubricIdentifiers }{@code >}
      *     
      */
-    public void setRubricIdentifiers(JAXBElement<SIF3AssessmentRubricType.RubricIdentifiers> value) {
+    public void setRubricIdentifiers(JAXBElement<Sif3AssessmentRubricType.RubricIdentifiers> value) {
         this.rubricIdentifiers = value;
     }
 
@@ -291,10 +291,10 @@ public class SIF3AssessmentRubricType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentRubricType.Scores }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentRubricType.Scores }{@code >}
      *     
      */
-    public JAXBElement<SIF3AssessmentRubricType.Scores> getScores() {
+    public JAXBElement<Sif3AssessmentRubricType.Scores> getScores() {
         return scores;
     }
 
@@ -303,10 +303,10 @@ public class SIF3AssessmentRubricType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link SIF3AssessmentRubricType.Scores }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Sif3AssessmentRubricType.Scores }{@code >}
      *     
      */
-    public void setScores(JAXBElement<SIF3AssessmentRubricType.Scores> value) {
+    public void setScores(JAXBElement<Sif3AssessmentRubricType.Scores> value) {
         this.scores = value;
     }
 
@@ -425,8 +425,8 @@ public class SIF3AssessmentRubricType {
     })
     public static class RubricIdentifiers {
 
-        @XmlElement(name = "RubricIdentifier", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
-        protected List<SIF3AssessmentRubricType.RubricIdentifiers.RubricIdentifier> rubricIdentifier;
+        @XmlElement(name = "RubricIdentifier", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+        protected List<Sif3AssessmentRubricType.RubricIdentifiers.RubricIdentifier> rubricIdentifier;
 
         /**
          * Gets the value of the rubricIdentifier property.
@@ -446,13 +446,13 @@ public class SIF3AssessmentRubricType {
          * 
          * <p>
          * Objects of the following type(s) are allowed in the list
-         * {@link SIF3AssessmentRubricType.RubricIdentifiers.RubricIdentifier }
+         * {@link Sif3AssessmentRubricType.RubricIdentifiers.RubricIdentifier }
          * 
          * 
          */
-        public List<SIF3AssessmentRubricType.RubricIdentifiers.RubricIdentifier> getRubricIdentifier() {
+        public List<Sif3AssessmentRubricType.RubricIdentifiers.RubricIdentifier> getRubricIdentifier() {
             if (rubricIdentifier == null) {
-                rubricIdentifier = new ArrayList<SIF3AssessmentRubricType.RubricIdentifiers.RubricIdentifier>();
+                rubricIdentifier = new ArrayList<Sif3AssessmentRubricType.RubricIdentifiers.RubricIdentifier>();
             }
             return this.rubricIdentifier;
         }
@@ -567,14 +567,14 @@ public class SIF3AssessmentRubricType {
      *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *                 &lt;sequence>
      *                   &lt;element name="ScoreCode" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
-     *                   &lt;element name="ScoreCodeDefinition" type="{http://www.SIFinfo.org/au/datamodel/1.3}AbstractContentElementType" minOccurs="0"/>
+     *                   &lt;element name="ScoreCodeDefinition" type="{http://www.sifassociation.org/au/datamodel/1.3}AbstractContentElementType" minOccurs="0"/>
      *                   &lt;element name="ScoreValue" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
      *                   &lt;element name="ScoreDescriptions" minOccurs="0">
      *                     &lt;complexType>
      *                       &lt;complexContent>
      *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *                           &lt;sequence>
-     *                             &lt;element name="ScoreDescription" type="{http://www.SIFinfo.org/au/datamodel/1.3}AbstractContentElementType" maxOccurs="unbounded" minOccurs="0"/>
+     *                             &lt;element name="ScoreDescription" type="{http://www.sifassociation.org/au/datamodel/1.3}AbstractContentElementType" maxOccurs="unbounded" minOccurs="0"/>
      *                           &lt;/sequence>
      *                         &lt;/restriction>
      *                       &lt;/complexContent>
@@ -591,7 +591,7 @@ public class SIF3AssessmentRubricType {
      *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *                                     &lt;sequence>
      *                                       &lt;element name="CommentCode" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
-     *                                       &lt;element name="Comment" type="{http://www.SIFinfo.org/au/datamodel/1.3}AbstractContentElementType" minOccurs="0"/>
+     *                                       &lt;element name="Comment" type="{http://www.sifassociation.org/au/datamodel/1.3}AbstractContentElementType" minOccurs="0"/>
      *                                     &lt;/sequence>
      *                                   &lt;/restriction>
      *                                 &lt;/complexContent>
@@ -621,8 +621,8 @@ public class SIF3AssessmentRubricType {
     })
     public static class Scores {
 
-        @XmlElement(name = "Score", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
-        protected List<SIF3AssessmentRubricType.Scores.Score> score;
+        @XmlElement(name = "Score", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+        protected List<Sif3AssessmentRubricType.Scores.Score> score;
 
         /**
          * Gets the value of the score property.
@@ -642,13 +642,13 @@ public class SIF3AssessmentRubricType {
          * 
          * <p>
          * Objects of the following type(s) are allowed in the list
-         * {@link SIF3AssessmentRubricType.Scores.Score }
+         * {@link Sif3AssessmentRubricType.Scores.Score }
          * 
          * 
          */
-        public List<SIF3AssessmentRubricType.Scores.Score> getScore() {
+        public List<Sif3AssessmentRubricType.Scores.Score> getScore() {
             if (score == null) {
-                score = new ArrayList<SIF3AssessmentRubricType.Scores.Score>();
+                score = new ArrayList<Sif3AssessmentRubricType.Scores.Score>();
             }
             return this.score;
         }
@@ -665,14 +665,14 @@ public class SIF3AssessmentRubricType {
          *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
          *       &lt;sequence>
          *         &lt;element name="ScoreCode" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
-         *         &lt;element name="ScoreCodeDefinition" type="{http://www.SIFinfo.org/au/datamodel/1.3}AbstractContentElementType" minOccurs="0"/>
+         *         &lt;element name="ScoreCodeDefinition" type="{http://www.sifassociation.org/au/datamodel/1.3}AbstractContentElementType" minOccurs="0"/>
          *         &lt;element name="ScoreValue" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
          *         &lt;element name="ScoreDescriptions" minOccurs="0">
          *           &lt;complexType>
          *             &lt;complexContent>
          *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
          *                 &lt;sequence>
-         *                   &lt;element name="ScoreDescription" type="{http://www.SIFinfo.org/au/datamodel/1.3}AbstractContentElementType" maxOccurs="unbounded" minOccurs="0"/>
+         *                   &lt;element name="ScoreDescription" type="{http://www.sifassociation.org/au/datamodel/1.3}AbstractContentElementType" maxOccurs="unbounded" minOccurs="0"/>
          *                 &lt;/sequence>
          *               &lt;/restriction>
          *             &lt;/complexContent>
@@ -689,7 +689,7 @@ public class SIF3AssessmentRubricType {
          *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
          *                           &lt;sequence>
          *                             &lt;element name="CommentCode" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
-         *                             &lt;element name="Comment" type="{http://www.SIFinfo.org/au/datamodel/1.3}AbstractContentElementType" minOccurs="0"/>
+         *                             &lt;element name="Comment" type="{http://www.sifassociation.org/au/datamodel/1.3}AbstractContentElementType" minOccurs="0"/>
          *                           &lt;/sequence>
          *                         &lt;/restriction>
          *                       &lt;/complexContent>
@@ -718,16 +718,16 @@ public class SIF3AssessmentRubricType {
         })
         public static class Score {
 
-            @XmlElementRef(name = "ScoreCode", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            @XmlElementRef(name = "ScoreCode", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<String> scoreCode;
-            @XmlElementRef(name = "ScoreCodeDefinition", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            @XmlElementRef(name = "ScoreCodeDefinition", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<AbstractContentElementType> scoreCodeDefinition;
-            @XmlElement(name = "ScoreValue", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "ScoreValue", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             protected BigDecimal scoreValue;
-            @XmlElementRef(name = "ScoreDescriptions", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-            protected JAXBElement<SIF3AssessmentRubricType.Scores.Score.ScoreDescriptions> scoreDescriptions;
-            @XmlElementRef(name = "ScoreComments", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-            protected JAXBElement<SIF3AssessmentRubricType.Scores.Score.ScoreComments> scoreComments;
+            @XmlElementRef(name = "ScoreDescriptions", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            protected JAXBElement<Sif3AssessmentRubricType.Scores.Score.ScoreDescriptions> scoreDescriptions;
+            @XmlElementRef(name = "ScoreComments", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            protected JAXBElement<Sif3AssessmentRubricType.Scores.Score.ScoreComments> scoreComments;
 
             /**
              * Gets the value of the scoreCode property.
@@ -806,10 +806,10 @@ public class SIF3AssessmentRubricType {
              * 
              * @return
              *     possible object is
-             *     {@link JAXBElement }{@code <}{@link SIF3AssessmentRubricType.Scores.Score.ScoreDescriptions }{@code >}
+             *     {@link JAXBElement }{@code <}{@link Sif3AssessmentRubricType.Scores.Score.ScoreDescriptions }{@code >}
              *     
              */
-            public JAXBElement<SIF3AssessmentRubricType.Scores.Score.ScoreDescriptions> getScoreDescriptions() {
+            public JAXBElement<Sif3AssessmentRubricType.Scores.Score.ScoreDescriptions> getScoreDescriptions() {
                 return scoreDescriptions;
             }
 
@@ -818,10 +818,10 @@ public class SIF3AssessmentRubricType {
              * 
              * @param value
              *     allowed object is
-             *     {@link JAXBElement }{@code <}{@link SIF3AssessmentRubricType.Scores.Score.ScoreDescriptions }{@code >}
+             *     {@link JAXBElement }{@code <}{@link Sif3AssessmentRubricType.Scores.Score.ScoreDescriptions }{@code >}
              *     
              */
-            public void setScoreDescriptions(JAXBElement<SIF3AssessmentRubricType.Scores.Score.ScoreDescriptions> value) {
+            public void setScoreDescriptions(JAXBElement<Sif3AssessmentRubricType.Scores.Score.ScoreDescriptions> value) {
                 this.scoreDescriptions = value;
             }
 
@@ -830,10 +830,10 @@ public class SIF3AssessmentRubricType {
              * 
              * @return
              *     possible object is
-             *     {@link JAXBElement }{@code <}{@link SIF3AssessmentRubricType.Scores.Score.ScoreComments }{@code >}
+             *     {@link JAXBElement }{@code <}{@link Sif3AssessmentRubricType.Scores.Score.ScoreComments }{@code >}
              *     
              */
-            public JAXBElement<SIF3AssessmentRubricType.Scores.Score.ScoreComments> getScoreComments() {
+            public JAXBElement<Sif3AssessmentRubricType.Scores.Score.ScoreComments> getScoreComments() {
                 return scoreComments;
             }
 
@@ -842,10 +842,10 @@ public class SIF3AssessmentRubricType {
              * 
              * @param value
              *     allowed object is
-             *     {@link JAXBElement }{@code <}{@link SIF3AssessmentRubricType.Scores.Score.ScoreComments }{@code >}
+             *     {@link JAXBElement }{@code <}{@link Sif3AssessmentRubricType.Scores.Score.ScoreComments }{@code >}
              *     
              */
-            public void setScoreComments(JAXBElement<SIF3AssessmentRubricType.Scores.Score.ScoreComments> value) {
+            public void setScoreComments(JAXBElement<Sif3AssessmentRubricType.Scores.Score.ScoreComments> value) {
                 this.scoreComments = value;
             }
 
@@ -866,7 +866,7 @@ public class SIF3AssessmentRubricType {
              *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
              *                 &lt;sequence>
              *                   &lt;element name="CommentCode" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
-             *                   &lt;element name="Comment" type="{http://www.SIFinfo.org/au/datamodel/1.3}AbstractContentElementType" minOccurs="0"/>
+             *                   &lt;element name="Comment" type="{http://www.sifassociation.org/au/datamodel/1.3}AbstractContentElementType" minOccurs="0"/>
              *                 &lt;/sequence>
              *               &lt;/restriction>
              *             &lt;/complexContent>
@@ -886,8 +886,8 @@ public class SIF3AssessmentRubricType {
             })
             public static class ScoreComments {
 
-                @XmlElement(name = "ScoreComment", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
-                protected List<SIF3AssessmentRubricType.Scores.Score.ScoreComments.ScoreComment> scoreComment;
+                @XmlElement(name = "ScoreComment", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+                protected List<Sif3AssessmentRubricType.Scores.Score.ScoreComments.ScoreComment> scoreComment;
 
                 /**
                  * Gets the value of the scoreComment property.
@@ -907,13 +907,13 @@ public class SIF3AssessmentRubricType {
                  * 
                  * <p>
                  * Objects of the following type(s) are allowed in the list
-                 * {@link SIF3AssessmentRubricType.Scores.Score.ScoreComments.ScoreComment }
+                 * {@link Sif3AssessmentRubricType.Scores.Score.ScoreComments.ScoreComment }
                  * 
                  * 
                  */
-                public List<SIF3AssessmentRubricType.Scores.Score.ScoreComments.ScoreComment> getScoreComment() {
+                public List<Sif3AssessmentRubricType.Scores.Score.ScoreComments.ScoreComment> getScoreComment() {
                     if (scoreComment == null) {
-                        scoreComment = new ArrayList<SIF3AssessmentRubricType.Scores.Score.ScoreComments.ScoreComment>();
+                        scoreComment = new ArrayList<Sif3AssessmentRubricType.Scores.Score.ScoreComments.ScoreComment>();
                     }
                     return this.scoreComment;
                 }
@@ -930,7 +930,7 @@ public class SIF3AssessmentRubricType {
                  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
                  *       &lt;sequence>
                  *         &lt;element name="CommentCode" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
-                 *         &lt;element name="Comment" type="{http://www.SIFinfo.org/au/datamodel/1.3}AbstractContentElementType" minOccurs="0"/>
+                 *         &lt;element name="Comment" type="{http://www.sifassociation.org/au/datamodel/1.3}AbstractContentElementType" minOccurs="0"/>
                  *       &lt;/sequence>
                  *     &lt;/restriction>
                  *   &lt;/complexContent>
@@ -946,11 +946,11 @@ public class SIF3AssessmentRubricType {
                 })
                 public static class ScoreComment {
 
-                    @XmlElement(name = "CommentCode", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+                    @XmlElement(name = "CommentCode", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
                     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
                     @XmlSchemaType(name = "token")
                     protected String commentCode;
-                    @XmlElement(name = "Comment", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+                    @XmlElement(name = "Comment", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
                     protected AbstractContentElementType comment;
 
                     /**
@@ -1016,7 +1016,7 @@ public class SIF3AssessmentRubricType {
              *   &lt;complexContent>
              *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
              *       &lt;sequence>
-             *         &lt;element name="ScoreDescription" type="{http://www.SIFinfo.org/au/datamodel/1.3}AbstractContentElementType" maxOccurs="unbounded" minOccurs="0"/>
+             *         &lt;element name="ScoreDescription" type="{http://www.sifassociation.org/au/datamodel/1.3}AbstractContentElementType" maxOccurs="unbounded" minOccurs="0"/>
              *       &lt;/sequence>
              *     &lt;/restriction>
              *   &lt;/complexContent>
@@ -1031,7 +1031,7 @@ public class SIF3AssessmentRubricType {
             })
             public static class ScoreDescriptions {
 
-                @XmlElement(name = "ScoreDescription", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+                @XmlElement(name = "ScoreDescription", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
                 protected List<AbstractContentElementType> scoreDescription;
 
                 /**

@@ -23,10 +23,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="SIF_Category" type="{http://www.SIFinfo.org/au/datamodel/1.3}InfrastructureErrorCategoryType" minOccurs="0"/>
+ *         &lt;element name="SIF_Category" type="{http://www.sifassociation.org/au/datamodel/1.3}InfrastructureErrorCategoryType" minOccurs="0"/>
  *         &lt;element name="SIF_Code" minOccurs="0">
  *           &lt;simpleType>
- *             &lt;union memberTypes=" {http://www.SIFinfo.org/au/datamodel/1.3}InfrastructureXMLValidationErrorType {http://www.SIFinfo.org/au/datamodel/1.3}InfrastructureEncryptionErrorType {http://www.SIFinfo.org/au/datamodel/1.3}InfrastructureAuthenticationErrorType {http://www.SIFinfo.org/au/datamodel/1.3}InfrastructureAccessAndPermissionErrorType {http://www.SIFinfo.org/au/datamodel/1.3}InfrastructureRegistrationErrorType {http://www.SIFinfo.org/au/datamodel/1.3}InfrastructureProvisionErrorType {http://www.SIFinfo.org/au/datamodel/1.3}InfrastructureSubscriptionErrorType {http://www.SIFinfo.org/au/datamodel/1.3}InfrastructureRequestAndResponseErrorType {http://www.SIFinfo.org/au/datamodel/1.3}InfrastructureEventReportingAndProcessingErrorType {http://www.SIFinfo.org/au/datamodel/1.3}InfrastructureTransportErrorType {http://www.SIFinfo.org/au/datamodel/1.3}InfrastructureSystemErrorType {http://www.SIFinfo.org/au/datamodel/1.3}InfrastructureGenericMessageHandlingErrorType {http://www.w3.org/2001/XMLSchema}token">
+ *             &lt;union memberTypes=" {http://www.sifassociation.org/au/datamodel/1.3}InfrastructureXMLValidationErrorType {http://www.sifassociation.org/au/datamodel/1.3}InfrastructureEncryptionErrorType {http://www.sifassociation.org/au/datamodel/1.3}InfrastructureAuthenticationErrorType {http://www.sifassociation.org/au/datamodel/1.3}InfrastructureAccessAndPermissionErrorType {http://www.sifassociation.org/au/datamodel/1.3}InfrastructureRegistrationErrorType {http://www.sifassociation.org/au/datamodel/1.3}InfrastructureProvisionErrorType {http://www.sifassociation.org/au/datamodel/1.3}InfrastructureSubscriptionErrorType {http://www.sifassociation.org/au/datamodel/1.3}InfrastructureRequestAndResponseErrorType {http://www.sifassociation.org/au/datamodel/1.3}InfrastructureEventReportingAndProcessingErrorType {http://www.sifassociation.org/au/datamodel/1.3}InfrastructureTransportErrorType {http://www.sifassociation.org/au/datamodel/1.3}InfrastructureSystemErrorType {http://www.sifassociation.org/au/datamodel/1.3}InfrastructureGenericMessageHandlingErrorType {http://www.w3.org/2001/XMLSchema}token">
  *             &lt;/union>
  *           &lt;/simpleType>
  *         &lt;/element>
@@ -47,7 +47,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SIF_ErrorDataModelType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "SIF_ErrorDataModelType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "sifCategory",
     "sifCode",
     "sifDesc",
@@ -55,14 +55,14 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class SIFErrorDataModelType {
 
-    @XmlElement(name = "SIF_Category", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SIF_Category", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String sifCategory;
-    @XmlElement(name = "SIF_Code", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SIF_Code", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected String sifCode;
-    @XmlElement(name = "SIF_Desc", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SIF_Desc", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected String sifDesc;
-    @XmlElementRef(name = "SIF_ExtendedDesc", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedDesc", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> sifExtendedDesc;
 
     /**

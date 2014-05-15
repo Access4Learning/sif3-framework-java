@@ -28,8 +28,8 @@ import javax.xml.bind.annotation.XmlType;
  *             &lt;complexContent>
  *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                 &lt;sequence>
- *                   &lt;element name="PublishInDirectory" type="{http://www.SIFinfo.org/au/datamodel/1.3}PublishInDirectoryType" minOccurs="0"/>
- *                   &lt;element ref="{http://www.SIFinfo.org/au/datamodel/1.3}ContactInfo" minOccurs="0"/>
+ *                   &lt;element name="PublishInDirectory" type="{http://www.sifassociation.org/au/datamodel/1.3}PublishInDirectoryType" minOccurs="0"/>
+ *                   &lt;element ref="{http://www.sifassociation.org/au/datamodel/1.3}ContactInfo" minOccurs="0"/>
  *                 &lt;/sequence>
  *               &lt;/restriction>
  *             &lt;/complexContent>
@@ -44,12 +44,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SchoolContactListType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "SchoolContactListType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "schoolContact"
 })
 public class SchoolContactListType {
 
-    @XmlElement(name = "SchoolContact", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SchoolContact", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected List<SchoolContactListType.SchoolContact> schoolContact;
 
     /**
@@ -92,8 +92,8 @@ public class SchoolContactListType {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element name="PublishInDirectory" type="{http://www.SIFinfo.org/au/datamodel/1.3}PublishInDirectoryType" minOccurs="0"/>
-     *         &lt;element ref="{http://www.SIFinfo.org/au/datamodel/1.3}ContactInfo" minOccurs="0"/>
+     *         &lt;element name="PublishInDirectory" type="{http://www.sifassociation.org/au/datamodel/1.3}PublishInDirectoryType" minOccurs="0"/>
+     *         &lt;element ref="{http://www.sifassociation.org/au/datamodel/1.3}ContactInfo" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>
@@ -109,9 +109,9 @@ public class SchoolContactListType {
     })
     public static class SchoolContact {
 
-        @XmlElementRef(name = "PublishInDirectory", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "PublishInDirectory", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<AUCodeSetsYesOrNoCategoryType> publishInDirectory;
-        @XmlElement(name = "ContactInfo", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "ContactInfo", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected ContactInfoType contactInfo;
 
         /**

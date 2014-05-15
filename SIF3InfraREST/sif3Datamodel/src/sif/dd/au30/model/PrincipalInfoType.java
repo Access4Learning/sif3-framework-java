@@ -21,10 +21,10 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="ContactName" type="{http://www.SIFinfo.org/au/datamodel/1.3}NameOfRecordType" minOccurs="0"/>
+ *         &lt;element name="ContactName" type="{http://www.sifassociation.org/au/datamodel/1.3}NameOfRecordType" minOccurs="0"/>
  *         &lt;element name="ContactTitle" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
- *         &lt;element name="PhoneNumberList" type="{http://www.SIFinfo.org/au/datamodel/1.3}PhoneNumberListType" minOccurs="0"/>
- *         &lt;element name="EmailList" type="{http://www.SIFinfo.org/au/datamodel/1.3}EmailListType" minOccurs="0"/>
+ *         &lt;element name="PhoneNumberList" type="{http://www.sifassociation.org/au/datamodel/1.3}PhoneNumberListType" minOccurs="0"/>
+ *         &lt;element name="EmailList" type="{http://www.sifassociation.org/au/datamodel/1.3}EmailListType" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -34,7 +34,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "PrincipalInfoType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "PrincipalInfoType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "contactName",
     "contactTitle",
     "phoneNumberList",
@@ -42,13 +42,13 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class PrincipalInfoType {
 
-    @XmlElement(name = "ContactName", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "ContactName", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected NameOfRecordType contactName;
-    @XmlElementRef(name = "ContactTitle", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ContactTitle", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> contactTitle;
-    @XmlElementRef(name = "PhoneNumberList", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "PhoneNumberList", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<PhoneNumberListType> phoneNumberList;
-    @XmlElementRef(name = "EmailList", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "EmailList", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<EmailListType> emailList;
 
     /**

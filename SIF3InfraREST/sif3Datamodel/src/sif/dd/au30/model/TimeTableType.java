@@ -31,14 +31,14 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="SchoolInfoRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
- *         &lt;element ref="{http://www.SIFinfo.org/au/datamodel/1.3}SchoolYear" minOccurs="0"/>
- *         &lt;element name="LocalId" type="{http://www.SIFinfo.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
+ *         &lt;element name="SchoolInfoRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+ *         &lt;element ref="{http://www.sifassociation.org/au/datamodel/1.3}SchoolYear" minOccurs="0"/>
+ *         &lt;element name="LocalId" type="{http://www.sifassociation.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
  *         &lt;element name="Title" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
  *         &lt;element name="DaysPerCycle" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *         &lt;element name="PeriodsPerDay" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *         &lt;element name="TeachingPeriodsPerDay" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
- *         &lt;element name="SchoolLocalId" type="{http://www.SIFinfo.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
+ *         &lt;element name="SchoolLocalId" type="{http://www.sifassociation.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
  *         &lt;element name="SchoolName" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
  *         &lt;element name="TimeTableCreationDate" type="{http://www.w3.org/2001/XMLSchema}date" minOccurs="0"/>
  *         &lt;element name="StartDate" type="{http://www.w3.org/2001/XMLSchema}date" minOccurs="0"/>
@@ -53,7 +53,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *                       &lt;complexContent>
  *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                           &lt;sequence>
- *                             &lt;element name="DayId" type="{http://www.SIFinfo.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
+ *                             &lt;element name="DayId" type="{http://www.sifassociation.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
  *                             &lt;element name="DayTitle" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
  *                             &lt;element name="TimeTablePeriodList" minOccurs="0">
  *                               &lt;complexType>
@@ -65,8 +65,35 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *                                           &lt;complexContent>
  *                                             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                                               &lt;sequence>
- *                                                 &lt;element name="PeriodId" type="{http://www.SIFinfo.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
+ *                                                 &lt;element name="PeriodId" type="{http://www.sifassociation.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
  *                                                 &lt;element name="PeriodTitle" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
+ *                                                 &lt;element name="BellPeriod" minOccurs="0">
+ *                                                   &lt;simpleType>
+ *                                                     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
+ *                                                       &lt;enumeration value="Yes"/>
+ *                                                       &lt;enumeration value="No"/>
+ *                                                     &lt;/restriction>
+ *                                                   &lt;/simpleType>
+ *                                                 &lt;/element>
+ *                                                 &lt;element name="StartTime" type="{http://www.w3.org/2001/XMLSchema}time" minOccurs="0"/>
+ *                                                 &lt;element name="EndTime" type="{http://www.w3.org/2001/XMLSchema}time" minOccurs="0"/>
+ *                                                 &lt;element name="RegularSchoolPeriod" minOccurs="0">
+ *                                                   &lt;simpleType>
+ *                                                     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
+ *                                                       &lt;enumeration value="Yes"/>
+ *                                                       &lt;enumeration value="No"/>
+ *                                                     &lt;/restriction>
+ *                                                   &lt;/simpleType>
+ *                                                 &lt;/element>
+ *                                                 &lt;element name="InstructionalMinutes" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
+ *                                                 &lt;element name="UseInAttendanceCalculations" minOccurs="0">
+ *                                                   &lt;simpleType>
+ *                                                     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
+ *                                                       &lt;enumeration value="Yes"/>
+ *                                                       &lt;enumeration value="No"/>
+ *                                                     &lt;/restriction>
+ *                                                   &lt;/simpleType>
+ *                                                 &lt;/element>
  *                                               &lt;/sequence>
  *                                             &lt;/restriction>
  *                                           &lt;/complexContent>
@@ -87,10 +114,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
- *         &lt;element name="SIF_Metadata" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
- *         &lt;element name="SIF_ExtendedElements" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
+ *         &lt;element name="SIF_Metadata" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
+ *         &lt;element name="SIF_ExtendedElements" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="RefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}RefIdType" />
+ *       &lt;attribute name="RefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}RefIdType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -99,7 +126,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "TimeTableType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "TimeTableType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "schoolInfoRefId",
     "schoolYear",
     "localId",
@@ -118,39 +145,39 @@ import javax.xml.datatype.XMLGregorianCalendar;
 })
 public class TimeTableType {
 
-    @XmlElementRef(name = "SchoolInfoRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SchoolInfoRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> schoolInfoRefId;
-    @XmlElement(name = "SchoolYear", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SchoolYear", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected XMLGregorianCalendar schoolYear;
-    @XmlElementRef(name = "LocalId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "LocalId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> localId;
-    @XmlElement(name = "Title", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "Title", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String title;
-    @XmlElement(name = "DaysPerCycle", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "DaysPerCycle", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlSchemaType(name = "unsignedInt")
     protected Long daysPerCycle;
-    @XmlElement(name = "PeriodsPerDay", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "PeriodsPerDay", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlSchemaType(name = "unsignedInt")
     protected Long periodsPerDay;
-    @XmlElementRef(name = "TeachingPeriodsPerDay", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "TeachingPeriodsPerDay", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<Long> teachingPeriodsPerDay;
-    @XmlElementRef(name = "SchoolLocalId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SchoolLocalId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> schoolLocalId;
-    @XmlElementRef(name = "SchoolName", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SchoolName", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> schoolName;
-    @XmlElementRef(name = "TimeTableCreationDate", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "TimeTableCreationDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<XMLGregorianCalendar> timeTableCreationDate;
-    @XmlElementRef(name = "StartDate", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "StartDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<XMLGregorianCalendar> startDate;
-    @XmlElementRef(name = "EndDate", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "EndDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<XMLGregorianCalendar> endDate;
-    @XmlElement(name = "TimeTableDayList", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "TimeTableDayList", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected TimeTableType.TimeTableDayList timeTableDayList;
-    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFMetadataType> sifMetadata;
-    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedElementsType> sifExtendedElements;
     @XmlAttribute(name = "RefId", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -556,7 +583,7 @@ public class TimeTableType {
      *             &lt;complexContent>
      *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *                 &lt;sequence>
-     *                   &lt;element name="DayId" type="{http://www.SIFinfo.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
+     *                   &lt;element name="DayId" type="{http://www.sifassociation.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
      *                   &lt;element name="DayTitle" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
      *                   &lt;element name="TimeTablePeriodList" minOccurs="0">
      *                     &lt;complexType>
@@ -568,8 +595,35 @@ public class TimeTableType {
      *                                 &lt;complexContent>
      *                                   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *                                     &lt;sequence>
-     *                                       &lt;element name="PeriodId" type="{http://www.SIFinfo.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
+     *                                       &lt;element name="PeriodId" type="{http://www.sifassociation.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
      *                                       &lt;element name="PeriodTitle" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
+     *                                       &lt;element name="BellPeriod" minOccurs="0">
+     *                                         &lt;simpleType>
+     *                                           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
+     *                                             &lt;enumeration value="Yes"/>
+     *                                             &lt;enumeration value="No"/>
+     *                                           &lt;/restriction>
+     *                                         &lt;/simpleType>
+     *                                       &lt;/element>
+     *                                       &lt;element name="StartTime" type="{http://www.w3.org/2001/XMLSchema}time" minOccurs="0"/>
+     *                                       &lt;element name="EndTime" type="{http://www.w3.org/2001/XMLSchema}time" minOccurs="0"/>
+     *                                       &lt;element name="RegularSchoolPeriod" minOccurs="0">
+     *                                         &lt;simpleType>
+     *                                           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
+     *                                             &lt;enumeration value="Yes"/>
+     *                                             &lt;enumeration value="No"/>
+     *                                           &lt;/restriction>
+     *                                         &lt;/simpleType>
+     *                                       &lt;/element>
+     *                                       &lt;element name="InstructionalMinutes" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
+     *                                       &lt;element name="UseInAttendanceCalculations" minOccurs="0">
+     *                                         &lt;simpleType>
+     *                                           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
+     *                                             &lt;enumeration value="Yes"/>
+     *                                             &lt;enumeration value="No"/>
+     *                                           &lt;/restriction>
+     *                                         &lt;/simpleType>
+     *                                       &lt;/element>
      *                                     &lt;/sequence>
      *                                   &lt;/restriction>
      *                                 &lt;/complexContent>
@@ -599,7 +653,7 @@ public class TimeTableType {
     })
     public static class TimeTableDayList {
 
-        @XmlElement(name = "TimeTableDay", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "TimeTableDay", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected List<TimeTableType.TimeTableDayList.TimeTableDay> timeTableDay;
 
         /**
@@ -642,7 +696,7 @@ public class TimeTableType {
          *   &lt;complexContent>
          *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
          *       &lt;sequence>
-         *         &lt;element name="DayId" type="{http://www.SIFinfo.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
+         *         &lt;element name="DayId" type="{http://www.sifassociation.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
          *         &lt;element name="DayTitle" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
          *         &lt;element name="TimeTablePeriodList" minOccurs="0">
          *           &lt;complexType>
@@ -654,8 +708,35 @@ public class TimeTableType {
          *                       &lt;complexContent>
          *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
          *                           &lt;sequence>
-         *                             &lt;element name="PeriodId" type="{http://www.SIFinfo.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
+         *                             &lt;element name="PeriodId" type="{http://www.sifassociation.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
          *                             &lt;element name="PeriodTitle" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
+         *                             &lt;element name="BellPeriod" minOccurs="0">
+         *                               &lt;simpleType>
+         *                                 &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
+         *                                   &lt;enumeration value="Yes"/>
+         *                                   &lt;enumeration value="No"/>
+         *                                 &lt;/restriction>
+         *                               &lt;/simpleType>
+         *                             &lt;/element>
+         *                             &lt;element name="StartTime" type="{http://www.w3.org/2001/XMLSchema}time" minOccurs="0"/>
+         *                             &lt;element name="EndTime" type="{http://www.w3.org/2001/XMLSchema}time" minOccurs="0"/>
+         *                             &lt;element name="RegularSchoolPeriod" minOccurs="0">
+         *                               &lt;simpleType>
+         *                                 &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
+         *                                   &lt;enumeration value="Yes"/>
+         *                                   &lt;enumeration value="No"/>
+         *                                 &lt;/restriction>
+         *                               &lt;/simpleType>
+         *                             &lt;/element>
+         *                             &lt;element name="InstructionalMinutes" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
+         *                             &lt;element name="UseInAttendanceCalculations" minOccurs="0">
+         *                               &lt;simpleType>
+         *                                 &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
+         *                                   &lt;enumeration value="Yes"/>
+         *                                   &lt;enumeration value="No"/>
+         *                                 &lt;/restriction>
+         *                               &lt;/simpleType>
+         *                             &lt;/element>
          *                           &lt;/sequence>
          *                         &lt;/restriction>
          *                       &lt;/complexContent>
@@ -682,14 +763,14 @@ public class TimeTableType {
         })
         public static class TimeTableDay {
 
-            @XmlElement(name = "DayId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "DayId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
             protected String dayId;
-            @XmlElement(name = "DayTitle", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "DayTitle", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
             @XmlSchemaType(name = "normalizedString")
             protected String dayTitle;
-            @XmlElement(name = "TimeTablePeriodList", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "TimeTablePeriodList", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             protected TimeTableType.TimeTableDayList.TimeTableDay.TimeTablePeriodList timeTablePeriodList;
 
             /**
@@ -780,8 +861,35 @@ public class TimeTableType {
              *             &lt;complexContent>
              *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
              *                 &lt;sequence>
-             *                   &lt;element name="PeriodId" type="{http://www.SIFinfo.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
+             *                   &lt;element name="PeriodId" type="{http://www.sifassociation.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
              *                   &lt;element name="PeriodTitle" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
+             *                   &lt;element name="BellPeriod" minOccurs="0">
+             *                     &lt;simpleType>
+             *                       &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
+             *                         &lt;enumeration value="Yes"/>
+             *                         &lt;enumeration value="No"/>
+             *                       &lt;/restriction>
+             *                     &lt;/simpleType>
+             *                   &lt;/element>
+             *                   &lt;element name="StartTime" type="{http://www.w3.org/2001/XMLSchema}time" minOccurs="0"/>
+             *                   &lt;element name="EndTime" type="{http://www.w3.org/2001/XMLSchema}time" minOccurs="0"/>
+             *                   &lt;element name="RegularSchoolPeriod" minOccurs="0">
+             *                     &lt;simpleType>
+             *                       &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
+             *                         &lt;enumeration value="Yes"/>
+             *                         &lt;enumeration value="No"/>
+             *                       &lt;/restriction>
+             *                     &lt;/simpleType>
+             *                   &lt;/element>
+             *                   &lt;element name="InstructionalMinutes" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
+             *                   &lt;element name="UseInAttendanceCalculations" minOccurs="0">
+             *                     &lt;simpleType>
+             *                       &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
+             *                         &lt;enumeration value="Yes"/>
+             *                         &lt;enumeration value="No"/>
+             *                       &lt;/restriction>
+             *                     &lt;/simpleType>
+             *                   &lt;/element>
              *                 &lt;/sequence>
              *               &lt;/restriction>
              *             &lt;/complexContent>
@@ -801,7 +909,7 @@ public class TimeTableType {
             })
             public static class TimeTablePeriodList {
 
-                @XmlElement(name = "TimeTablePeriod", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+                @XmlElement(name = "TimeTablePeriod", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
                 protected List<TimeTableType.TimeTableDayList.TimeTableDay.TimeTablePeriodList.TimeTablePeriod> timeTablePeriod;
 
                 /**
@@ -844,8 +952,35 @@ public class TimeTableType {
                  *   &lt;complexContent>
                  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
                  *       &lt;sequence>
-                 *         &lt;element name="PeriodId" type="{http://www.SIFinfo.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
+                 *         &lt;element name="PeriodId" type="{http://www.sifassociation.org/au/datamodel/1.3}LocalIdType" minOccurs="0"/>
                  *         &lt;element name="PeriodTitle" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
+                 *         &lt;element name="BellPeriod" minOccurs="0">
+                 *           &lt;simpleType>
+                 *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
+                 *               &lt;enumeration value="Yes"/>
+                 *               &lt;enumeration value="No"/>
+                 *             &lt;/restriction>
+                 *           &lt;/simpleType>
+                 *         &lt;/element>
+                 *         &lt;element name="StartTime" type="{http://www.w3.org/2001/XMLSchema}time" minOccurs="0"/>
+                 *         &lt;element name="EndTime" type="{http://www.w3.org/2001/XMLSchema}time" minOccurs="0"/>
+                 *         &lt;element name="RegularSchoolPeriod" minOccurs="0">
+                 *           &lt;simpleType>
+                 *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
+                 *               &lt;enumeration value="Yes"/>
+                 *               &lt;enumeration value="No"/>
+                 *             &lt;/restriction>
+                 *           &lt;/simpleType>
+                 *         &lt;/element>
+                 *         &lt;element name="InstructionalMinutes" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
+                 *         &lt;element name="UseInAttendanceCalculations" minOccurs="0">
+                 *           &lt;simpleType>
+                 *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
+                 *               &lt;enumeration value="Yes"/>
+                 *               &lt;enumeration value="No"/>
+                 *             &lt;/restriction>
+                 *           &lt;/simpleType>
+                 *         &lt;/element>
                  *       &lt;/sequence>
                  *     &lt;/restriction>
                  *   &lt;/complexContent>
@@ -857,17 +992,35 @@ public class TimeTableType {
                 @XmlAccessorType(XmlAccessType.FIELD)
                 @XmlType(name = "", propOrder = {
                     "periodId",
-                    "periodTitle"
+                    "periodTitle",
+                    "bellPeriod",
+                    "startTime",
+                    "endTime",
+                    "regularSchoolPeriod",
+                    "instructionalMinutes",
+                    "useInAttendanceCalculations"
                 })
                 public static class TimeTablePeriod {
 
-                    @XmlElement(name = "PeriodId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+                    @XmlElement(name = "PeriodId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
                     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
                     protected String periodId;
-                    @XmlElement(name = "PeriodTitle", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+                    @XmlElement(name = "PeriodTitle", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
                     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
                     @XmlSchemaType(name = "normalizedString")
                     protected String periodTitle;
+                    @XmlElementRef(name = "BellPeriod", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+                    protected JAXBElement<String> bellPeriod;
+                    @XmlElementRef(name = "StartTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+                    protected JAXBElement<XMLGregorianCalendar> startTime;
+                    @XmlElementRef(name = "EndTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+                    protected JAXBElement<XMLGregorianCalendar> endTime;
+                    @XmlElementRef(name = "RegularSchoolPeriod", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+                    protected JAXBElement<String> regularSchoolPeriod;
+                    @XmlElementRef(name = "InstructionalMinutes", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+                    protected JAXBElement<Long> instructionalMinutes;
+                    @XmlElementRef(name = "UseInAttendanceCalculations", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+                    protected JAXBElement<String> useInAttendanceCalculations;
 
                     /**
                      * Gets the value of the periodId property.
@@ -915,6 +1068,150 @@ public class TimeTableType {
                      */
                     public void setPeriodTitle(String value) {
                         this.periodTitle = value;
+                    }
+
+                    /**
+                     * Gets the value of the bellPeriod property.
+                     * 
+                     * @return
+                     *     possible object is
+                     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+                     *     
+                     */
+                    public JAXBElement<String> getBellPeriod() {
+                        return bellPeriod;
+                    }
+
+                    /**
+                     * Sets the value of the bellPeriod property.
+                     * 
+                     * @param value
+                     *     allowed object is
+                     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+                     *     
+                     */
+                    public void setBellPeriod(JAXBElement<String> value) {
+                        this.bellPeriod = value;
+                    }
+
+                    /**
+                     * Gets the value of the startTime property.
+                     * 
+                     * @return
+                     *     possible object is
+                     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+                     *     
+                     */
+                    public JAXBElement<XMLGregorianCalendar> getStartTime() {
+                        return startTime;
+                    }
+
+                    /**
+                     * Sets the value of the startTime property.
+                     * 
+                     * @param value
+                     *     allowed object is
+                     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+                     *     
+                     */
+                    public void setStartTime(JAXBElement<XMLGregorianCalendar> value) {
+                        this.startTime = value;
+                    }
+
+                    /**
+                     * Gets the value of the endTime property.
+                     * 
+                     * @return
+                     *     possible object is
+                     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+                     *     
+                     */
+                    public JAXBElement<XMLGregorianCalendar> getEndTime() {
+                        return endTime;
+                    }
+
+                    /**
+                     * Sets the value of the endTime property.
+                     * 
+                     * @param value
+                     *     allowed object is
+                     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+                     *     
+                     */
+                    public void setEndTime(JAXBElement<XMLGregorianCalendar> value) {
+                        this.endTime = value;
+                    }
+
+                    /**
+                     * Gets the value of the regularSchoolPeriod property.
+                     * 
+                     * @return
+                     *     possible object is
+                     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+                     *     
+                     */
+                    public JAXBElement<String> getRegularSchoolPeriod() {
+                        return regularSchoolPeriod;
+                    }
+
+                    /**
+                     * Sets the value of the regularSchoolPeriod property.
+                     * 
+                     * @param value
+                     *     allowed object is
+                     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+                     *     
+                     */
+                    public void setRegularSchoolPeriod(JAXBElement<String> value) {
+                        this.regularSchoolPeriod = value;
+                    }
+
+                    /**
+                     * Gets the value of the instructionalMinutes property.
+                     * 
+                     * @return
+                     *     possible object is
+                     *     {@link JAXBElement }{@code <}{@link Long }{@code >}
+                     *     
+                     */
+                    public JAXBElement<Long> getInstructionalMinutes() {
+                        return instructionalMinutes;
+                    }
+
+                    /**
+                     * Sets the value of the instructionalMinutes property.
+                     * 
+                     * @param value
+                     *     allowed object is
+                     *     {@link JAXBElement }{@code <}{@link Long }{@code >}
+                     *     
+                     */
+                    public void setInstructionalMinutes(JAXBElement<Long> value) {
+                        this.instructionalMinutes = value;
+                    }
+
+                    /**
+                     * Gets the value of the useInAttendanceCalculations property.
+                     * 
+                     * @return
+                     *     possible object is
+                     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+                     *     
+                     */
+                    public JAXBElement<String> getUseInAttendanceCalculations() {
+                        return useInAttendanceCalculations;
+                    }
+
+                    /**
+                     * Sets the value of the useInAttendanceCalculations property.
+                     * 
+                     * @param value
+                     *     allowed object is
+                     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+                     *     
+                     */
+                    public void setUseInAttendanceCalculations(JAXBElement<String> value) {
+                        this.useInAttendanceCalculations = value;
                     }
 
                 }

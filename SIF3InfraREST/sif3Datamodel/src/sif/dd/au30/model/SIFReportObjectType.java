@@ -61,7 +61,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *                               &lt;element name="SIF_RefId" minOccurs="0">
  *                                 &lt;complexType>
  *                                   &lt;simpleContent>
- *                                     &lt;extension base="&lt;http://www.SIFinfo.org/au/datamodel/1.3>IdRefTypeOrEmpty">
+ *                                     &lt;extension base="&lt;http://www.sifassociation.org/au/datamodel/1.3>IdRefTypeOrEmpty">
  *                                       &lt;attribute name="SIF_RefObject" use="required">
  *                                         &lt;simpleType>
  *                                           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -76,9 +76,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *                               &lt;/element>
  *                               &lt;element name="SubmitterName" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
  *                               &lt;element name="SubmitterDepartment" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
- *                               &lt;element name="ContactInfo" type="{http://www.SIFinfo.org/au/datamodel/1.3}ContactInfoType" minOccurs="0"/>
- *                               &lt;element name="Address" type="{http://www.SIFinfo.org/au/datamodel/1.3}AddressType" minOccurs="0"/>
- *                               &lt;element name="PhoneNumber" type="{http://www.SIFinfo.org/au/datamodel/1.3}PhoneNumberType" minOccurs="0"/>
+ *                               &lt;element name="ContactInfo" type="{http://www.sifassociation.org/au/datamodel/1.3}ContactInfoType" minOccurs="0"/>
+ *                               &lt;element name="Address" type="{http://www.sifassociation.org/au/datamodel/1.3}AddressType" minOccurs="0"/>
+ *                               &lt;element name="PhoneNumber" type="{http://www.sifassociation.org/au/datamodel/1.3}PhoneNumberType" minOccurs="0"/>
  *                               &lt;element name="SubmitterNotes" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *                             &lt;/sequence>
  *                           &lt;/restriction>
@@ -87,18 +87,18 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *                     &lt;/element>
  *                     &lt;element name="Description" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *                   &lt;/sequence>
- *                   &lt;attribute name="ReportManifestRefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" />
+ *                   &lt;attribute name="ReportManifestRefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" />
  *                 &lt;/restriction>
  *               &lt;/complexContent>
  *             &lt;/complexType>
  *           &lt;/element>
- *           &lt;element name="ReportData" type="{http://www.SIFinfo.org/au/datamodel/1.3}ReportDataObjectType" minOccurs="0"/>
- *           &lt;element name="SIF_ExtendedQueryResults" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedQueryResultsDataModelType" minOccurs="0"/>
+ *           &lt;element name="ReportData" type="{http://www.sifassociation.org/au/datamodel/1.3}ReportDataObjectType" minOccurs="0"/>
+ *           &lt;element name="SIF_ExtendedQueryResults" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedQueryResultsDataModelType" minOccurs="0"/>
  *         &lt;/choice>
- *         &lt;element name="SIF_Metadata" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
- *         &lt;element name="SIF_ExtendedElements" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
+ *         &lt;element name="SIF_Metadata" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
+ *         &lt;element name="SIF_ExtendedElements" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="RefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}RefIdType" />
+ *       &lt;attribute name="RefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}RefIdType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -107,7 +107,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SIF_ReportObjectType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "SIF_ReportObjectType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "reportInfo",
     "reportData",
     "sifExtendedQueryResults",
@@ -116,15 +116,15 @@ import javax.xml.datatype.XMLGregorianCalendar;
 })
 public class SIFReportObjectType {
 
-    @XmlElementRef(name = "ReportInfo", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ReportInfo", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFReportObjectType.ReportInfo> reportInfo;
-    @XmlElementRef(name = "ReportData", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ReportData", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<ReportDataObjectType> reportData;
-    @XmlElementRef(name = "SIF_ExtendedQueryResults", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedQueryResults", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedQueryResultsDataModelType> sifExtendedQueryResults;
-    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFMetadataType> sifMetadata;
-    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedElementsType> sifExtendedElements;
     @XmlAttribute(name = "RefId", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -305,7 +305,7 @@ public class SIFReportObjectType {
      *                   &lt;element name="SIF_RefId" minOccurs="0">
      *                     &lt;complexType>
      *                       &lt;simpleContent>
-     *                         &lt;extension base="&lt;http://www.SIFinfo.org/au/datamodel/1.3>IdRefTypeOrEmpty">
+     *                         &lt;extension base="&lt;http://www.sifassociation.org/au/datamodel/1.3>IdRefTypeOrEmpty">
      *                           &lt;attribute name="SIF_RefObject" use="required">
      *                             &lt;simpleType>
      *                               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -320,9 +320,9 @@ public class SIFReportObjectType {
      *                   &lt;/element>
      *                   &lt;element name="SubmitterName" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
      *                   &lt;element name="SubmitterDepartment" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
-     *                   &lt;element name="ContactInfo" type="{http://www.SIFinfo.org/au/datamodel/1.3}ContactInfoType" minOccurs="0"/>
-     *                   &lt;element name="Address" type="{http://www.SIFinfo.org/au/datamodel/1.3}AddressType" minOccurs="0"/>
-     *                   &lt;element name="PhoneNumber" type="{http://www.SIFinfo.org/au/datamodel/1.3}PhoneNumberType" minOccurs="0"/>
+     *                   &lt;element name="ContactInfo" type="{http://www.sifassociation.org/au/datamodel/1.3}ContactInfoType" minOccurs="0"/>
+     *                   &lt;element name="Address" type="{http://www.sifassociation.org/au/datamodel/1.3}AddressType" minOccurs="0"/>
+     *                   &lt;element name="PhoneNumber" type="{http://www.sifassociation.org/au/datamodel/1.3}PhoneNumberType" minOccurs="0"/>
      *                   &lt;element name="SubmitterNotes" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
      *                 &lt;/sequence>
      *               &lt;/restriction>
@@ -331,7 +331,7 @@ public class SIFReportObjectType {
      *         &lt;/element>
      *         &lt;element name="Description" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
      *       &lt;/sequence>
-     *       &lt;attribute name="ReportManifestRefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" />
+     *       &lt;attribute name="ReportManifestRefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" />
      *     &lt;/restriction>
      *   &lt;/complexContent>
      * &lt;/complexType>
@@ -349,18 +349,18 @@ public class SIFReportObjectType {
     })
     public static class ReportInfo {
 
-        @XmlElement(name = "CalculationDate", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "CalculationDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlSchemaType(name = "date")
         protected XMLGregorianCalendar calculationDate;
-        @XmlElement(name = "SubmissionNumber", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "SubmissionNumber", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlSchemaType(name = "positiveInteger")
         protected BigInteger submissionNumber;
-        @XmlElement(name = "SubmissionReason", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "SubmissionReason", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
         protected String submissionReason;
-        @XmlElementRef(name = "ReportSubmitterInfo", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "ReportSubmitterInfo", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<SIFReportObjectType.ReportInfo.ReportSubmitterInfo> reportSubmitterInfo;
-        @XmlElementRef(name = "Description", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "Description", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<String> description;
         @XmlAttribute(name = "ReportManifestRefId", required = true)
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -524,7 +524,7 @@ public class SIFReportObjectType {
          *         &lt;element name="SIF_RefId" minOccurs="0">
          *           &lt;complexType>
          *             &lt;simpleContent>
-         *               &lt;extension base="&lt;http://www.SIFinfo.org/au/datamodel/1.3>IdRefTypeOrEmpty">
+         *               &lt;extension base="&lt;http://www.sifassociation.org/au/datamodel/1.3>IdRefTypeOrEmpty">
          *                 &lt;attribute name="SIF_RefObject" use="required">
          *                   &lt;simpleType>
          *                     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -539,9 +539,9 @@ public class SIFReportObjectType {
          *         &lt;/element>
          *         &lt;element name="SubmitterName" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
          *         &lt;element name="SubmitterDepartment" type="{http://www.w3.org/2001/XMLSchema}normalizedString" minOccurs="0"/>
-         *         &lt;element name="ContactInfo" type="{http://www.SIFinfo.org/au/datamodel/1.3}ContactInfoType" minOccurs="0"/>
-         *         &lt;element name="Address" type="{http://www.SIFinfo.org/au/datamodel/1.3}AddressType" minOccurs="0"/>
-         *         &lt;element name="PhoneNumber" type="{http://www.SIFinfo.org/au/datamodel/1.3}PhoneNumberType" minOccurs="0"/>
+         *         &lt;element name="ContactInfo" type="{http://www.sifassociation.org/au/datamodel/1.3}ContactInfoType" minOccurs="0"/>
+         *         &lt;element name="Address" type="{http://www.sifassociation.org/au/datamodel/1.3}AddressType" minOccurs="0"/>
+         *         &lt;element name="PhoneNumber" type="{http://www.sifassociation.org/au/datamodel/1.3}PhoneNumberType" minOccurs="0"/>
          *         &lt;element name="SubmitterNotes" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
          *       &lt;/sequence>
          *     &lt;/restriction>
@@ -563,21 +563,21 @@ public class SIFReportObjectType {
         })
         public static class ReportSubmitterInfo {
 
-            @XmlElementRef(name = "SIF_RefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            @XmlElementRef(name = "SIF_RefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<SIFReportObjectType.ReportInfo.ReportSubmitterInfo.SIFRefId> sifRefId;
-            @XmlElement(name = "SubmitterName", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "SubmitterName", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
             @XmlSchemaType(name = "normalizedString")
             protected String submitterName;
-            @XmlElementRef(name = "SubmitterDepartment", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            @XmlElementRef(name = "SubmitterDepartment", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<String> submitterDepartment;
-            @XmlElementRef(name = "ContactInfo", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            @XmlElementRef(name = "ContactInfo", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<ContactInfoType> contactInfo;
-            @XmlElementRef(name = "Address", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            @XmlElementRef(name = "Address", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<AddressType> address;
-            @XmlElementRef(name = "PhoneNumber", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            @XmlElementRef(name = "PhoneNumber", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<PhoneNumberType> phoneNumber;
-            @XmlElementRef(name = "SubmitterNotes", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            @XmlElementRef(name = "SubmitterNotes", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<String> submitterNotes;
 
             /**
@@ -759,7 +759,7 @@ public class SIFReportObjectType {
              * <pre>
              * &lt;complexType>
              *   &lt;simpleContent>
-             *     &lt;extension base="&lt;http://www.SIFinfo.org/au/datamodel/1.3>IdRefTypeOrEmpty">
+             *     &lt;extension base="&lt;http://www.sifassociation.org/au/datamodel/1.3>IdRefTypeOrEmpty">
              *       &lt;attribute name="SIF_RefObject" use="required">
              *         &lt;simpleType>
              *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">

@@ -29,10 +29,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="ScoreMetric" type="{http://www.SIFinfo.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" minOccurs="0"/>
- *         &lt;element name="AssessmentAdministrationRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
- *         &lt;element name="StudentPersonalRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
- *         &lt;element name="AssessmentRegistrationRefId" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+ *         &lt;element name="ScoreMetric" type="{http://www.sifassociation.org/au/datamodel/1.3}AUCodeSetsAssessmentReportingMethodType" minOccurs="0"/>
+ *         &lt;element name="AssessmentAdministrationRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+ *         &lt;element name="StudentPersonalRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
+ *         &lt;element name="AssessmentRegistrationRefId" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" minOccurs="0"/>
  *         &lt;element name="Scores" minOccurs="0">
  *           &lt;complexType>
  *             &lt;complexContent>
@@ -48,7 +48,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *                             &lt;element name="Description" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *                             &lt;element name="NumberOfResponses" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *                           &lt;/sequence>
- *                           &lt;attribute name="AssessmentSubTestRefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" />
+ *                           &lt;attribute name="AssessmentSubTestRefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" />
  *                         &lt;/restriction>
  *                       &lt;/complexContent>
  *                     &lt;/complexType>
@@ -60,10 +60,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;/element>
  *         &lt;element name="StartDateTime" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
  *         &lt;element name="FinishDateTime" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
- *         &lt;element name="SIF_Metadata" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
- *         &lt;element name="SIF_ExtendedElements" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
+ *         &lt;element name="SIF_Metadata" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
+ *         &lt;element name="SIF_ExtendedElements" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="RefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}RefIdType" />
+ *       &lt;attribute name="RefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}RefIdType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -72,7 +72,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "StudentScoreSetType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "StudentScoreSetType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "scoreMetric",
     "assessmentAdministrationRefId",
     "studentPersonalRefId",
@@ -85,26 +85,26 @@ import javax.xml.datatype.XMLGregorianCalendar;
 })
 public class StudentScoreSetType {
 
-    @XmlElement(name = "ScoreMetric", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "ScoreMetric", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String scoreMetric;
-    @XmlElement(name = "AssessmentAdministrationRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "AssessmentAdministrationRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String assessmentAdministrationRefId;
-    @XmlElement(name = "StudentPersonalRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "StudentPersonalRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String studentPersonalRefId;
-    @XmlElementRef(name = "AssessmentRegistrationRefId", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "AssessmentRegistrationRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> assessmentRegistrationRefId;
-    @XmlElement(name = "Scores", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "Scores", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected StudentScoreSetType.Scores scores;
-    @XmlElementRef(name = "StartDateTime", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "StartDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<XMLGregorianCalendar> startDateTime;
-    @XmlElementRef(name = "FinishDateTime", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "FinishDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<XMLGregorianCalendar> finishDateTime;
-    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFMetadataType> sifMetadata;
-    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedElementsType> sifExtendedElements;
     @XmlAttribute(name = "RefId", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -371,7 +371,7 @@ public class StudentScoreSetType {
      *                   &lt;element name="Description" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
      *                   &lt;element name="NumberOfResponses" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
      *                 &lt;/sequence>
-     *                 &lt;attribute name="AssessmentSubTestRefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" />
+     *                 &lt;attribute name="AssessmentSubTestRefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" />
      *               &lt;/restriction>
      *             &lt;/complexContent>
      *           &lt;/complexType>
@@ -390,7 +390,7 @@ public class StudentScoreSetType {
     })
     public static class Scores {
 
-        @XmlElement(name = "Score", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "Score", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected List<StudentScoreSetType.Scores.Score> score;
 
         /**
@@ -438,7 +438,7 @@ public class StudentScoreSetType {
          *         &lt;element name="Description" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
          *         &lt;element name="NumberOfResponses" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
          *       &lt;/sequence>
-         *       &lt;attribute name="AssessmentSubTestRefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" />
+         *       &lt;attribute name="AssessmentSubTestRefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" />
          *     &lt;/restriction>
          *   &lt;/complexContent>
          * &lt;/complexType>
@@ -455,15 +455,15 @@ public class StudentScoreSetType {
         })
         public static class Score {
 
-            @XmlElement(name = "ScoreValue", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+            @XmlElement(name = "ScoreValue", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
             @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
             @XmlSchemaType(name = "normalizedString")
             protected String scoreValue;
-            @XmlElementRef(name = "DiagnosticStatement", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            @XmlElementRef(name = "DiagnosticStatement", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<String> diagnosticStatement;
-            @XmlElementRef(name = "Description", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            @XmlElementRef(name = "Description", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<String> description;
-            @XmlElementRef(name = "NumberOfResponses", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+            @XmlElementRef(name = "NumberOfResponses", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<Long> numberOfResponses;
             @XmlAttribute(name = "AssessmentSubTestRefId", required = true)
             @XmlJavaTypeAdapter(CollapsedStringAdapter.class)

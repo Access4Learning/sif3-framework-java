@@ -15,6 +15,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * Allows an agent to include data not yet defined within a SIF data object as name/value pairs.
+ * 
  * <p>Java class for SIF_ExtendedElementsType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -27,7 +29,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="SIF_ExtendedElement" maxOccurs="unbounded" minOccurs="0">
  *           &lt;complexType>
  *             &lt;complexContent>
- *               &lt;extension base="{http://www.SIFinfo.org/au/datamodel/1.3}ExtendedContentType">
+ *               &lt;extension base="{http://www.sifassociation.org/au/datamodel/1.3}ExtendedContentType">
  *                 &lt;attribute name="Name" use="required" type="{http://www.w3.org/2001/XMLSchema}normalizedString" />
  *                 &lt;attribute name="SIF_Action">
  *                   &lt;simpleType>
@@ -49,12 +51,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SIF_ExtendedElementsType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "SIF_ExtendedElementsType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "sifExtendedElement"
 })
 public class SIFExtendedElementsType {
 
-    @XmlElement(name = "SIF_ExtendedElement", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SIF_ExtendedElement", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected List<SIFExtendedElementsType.SIFExtendedElement> sifExtendedElement;
 
     /**
@@ -88,6 +90,8 @@ public class SIFExtendedElementsType {
 
 
     /**
+     * A name/value pair, the name being contained in the Name attribute, the value being the element content.
+     * 
      * <p>Java class for anonymous complex type.
      * 
      * <p>The following schema fragment specifies the expected content contained within this class.
@@ -95,7 +99,7 @@ public class SIFExtendedElementsType {
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
-     *     &lt;extension base="{http://www.SIFinfo.org/au/datamodel/1.3}ExtendedContentType">
+     *     &lt;extension base="{http://www.sifassociation.org/au/datamodel/1.3}ExtendedContentType">
      *       &lt;attribute name="Name" use="required" type="{http://www.w3.org/2001/XMLSchema}normalizedString" />
      *       &lt;attribute name="SIF_Action">
      *         &lt;simpleType>

@@ -15,6 +15,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * 
+ * 				SIF's default query mechanism.
+ * 			
+ * 
  * <p>Java class for SIF_QueryType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -31,7 +35,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *                 &lt;sequence>
  *                   &lt;element name="SIF_Element" type="{http://www.w3.org/2001/XMLSchema}normalizedString" maxOccurs="unbounded" minOccurs="0"/>
  *                 &lt;/sequence>
- *                 &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+ *                 &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
  *               &lt;/restriction>
  *             &lt;/complexContent>
  *           &lt;/complexType>
@@ -99,7 +103,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *               &lt;/complexContent>
  *             &lt;/complexType>
  *           &lt;/element>
- *           &lt;element name="SIF_Example" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectType"/>
+ *           &lt;element name="SIF_Example" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectType"/>
  *         &lt;/choice>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -110,18 +114,18 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SIF_QueryType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "SIF_QueryType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "sifQueryObject",
     "sifConditionGroup",
     "sifExample"
 })
 public class SIFQueryType {
 
-    @XmlElement(name = "SIF_QueryObject", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", required = true)
+    @XmlElement(name = "SIF_QueryObject", namespace = "http://www.sifassociation.org/au/datamodel/1.3", required = true)
     protected SIFQueryType.SIFQueryObject sifQueryObject;
-    @XmlElement(name = "SIF_ConditionGroup", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SIF_ConditionGroup", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected SIFQueryType.SIFConditionGroup sifConditionGroup;
-    @XmlElement(name = "SIF_Example", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SIF_Example", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected ObjectType sifExample;
 
     /**
@@ -273,7 +277,7 @@ public class SIFQueryType {
     })
     public static class SIFConditionGroup {
 
-        @XmlElement(name = "SIF_Conditions", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", required = true)
+        @XmlElement(name = "SIF_Conditions", namespace = "http://www.sifassociation.org/au/datamodel/1.3", required = true)
         protected List<SIFQueryType.SIFConditionGroup.SIFConditions> sifConditions;
         @XmlAttribute(name = "Type", required = true)
         @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -390,7 +394,7 @@ public class SIFQueryType {
         })
         public static class SIFConditions {
 
-            @XmlElement(name = "SIF_Condition", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", required = true)
+            @XmlElement(name = "SIF_Condition", namespace = "http://www.sifassociation.org/au/datamodel/1.3", required = true)
             protected List<SIFQueryType.SIFConditionGroup.SIFConditions.SIFCondition> sifCondition;
             @XmlAttribute(name = "Type", required = true)
             @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -490,14 +494,14 @@ public class SIFQueryType {
             })
             public static class SIFCondition {
 
-                @XmlElement(name = "SIF_Element", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", required = true)
+                @XmlElement(name = "SIF_Element", namespace = "http://www.sifassociation.org/au/datamodel/1.3", required = true)
                 @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
                 @XmlSchemaType(name = "normalizedString")
                 protected String sifElement;
-                @XmlElement(name = "SIF_Operator", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", required = true)
+                @XmlElement(name = "SIF_Operator", namespace = "http://www.sifassociation.org/au/datamodel/1.3", required = true)
                 @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
                 protected String sifOperator;
-                @XmlElement(name = "SIF_Value", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", required = true)
+                @XmlElement(name = "SIF_Value", namespace = "http://www.sifassociation.org/au/datamodel/1.3", required = true)
                 protected String sifValue;
 
                 /**
@@ -591,7 +595,7 @@ public class SIFQueryType {
      *       &lt;sequence>
      *         &lt;element name="SIF_Element" type="{http://www.w3.org/2001/XMLSchema}normalizedString" maxOccurs="unbounded" minOccurs="0"/>
      *       &lt;/sequence>
-     *       &lt;attribute name="ObjectName" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}ObjectNameType" />
+     *       &lt;attribute name="ObjectName" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}ObjectNameType" />
      *     &lt;/restriction>
      *   &lt;/complexContent>
      * &lt;/complexType>
@@ -605,7 +609,7 @@ public class SIFQueryType {
     })
     public static class SIFQueryObject {
 
-        @XmlElement(name = "SIF_Element", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "SIF_Element", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
         @XmlSchemaType(name = "normalizedString")
         protected List<String> sifElement;

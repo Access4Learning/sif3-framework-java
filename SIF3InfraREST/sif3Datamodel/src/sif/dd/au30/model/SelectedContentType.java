@@ -31,7 +31,7 @@ import org.w3c.dom.Element;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SelectedContentType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "SelectedContentType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "content"
 })
 public class SelectedContentType {

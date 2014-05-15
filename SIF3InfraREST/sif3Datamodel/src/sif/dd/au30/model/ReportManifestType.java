@@ -33,12 +33,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="SIF_Version" type="{http://www.SIFinfo.org/au/datamodel/1.3}VersionWithWildcardsType" minOccurs="0"/>
+ *         &lt;element name="SIF_Version" type="{http://www.sifassociation.org/au/datamodel/1.3}VersionWithWildcardsType" minOccurs="0"/>
  *         &lt;element name="SIF_MaxBufferSize" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *         &lt;element name="ReceivingAuthority" minOccurs="0">
  *           &lt;complexType>
  *             &lt;simpleContent>
- *               &lt;extension base="&lt;http://www.SIFinfo.org/au/datamodel/1.3>IdRefTypeOrEmpty">
+ *               &lt;extension base="&lt;http://www.sifassociation.org/au/datamodel/1.3>IdRefTypeOrEmpty">
  *                 &lt;attribute name="SIF_RefObject" use="required">
  *                   &lt;simpleType>
  *                     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -121,19 +121,19 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *               &lt;complexContent>
  *                 &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *                   &lt;sequence>
- *                     &lt;element ref="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_Query" maxOccurs="unbounded" minOccurs="0"/>
+ *                     &lt;element ref="{http://www.sifassociation.org/au/datamodel/1.3}SIF_Query" maxOccurs="unbounded" minOccurs="0"/>
  *                   &lt;/sequence>
  *                 &lt;/restriction>
  *               &lt;/complexContent>
  *             &lt;/complexType>
  *           &lt;/element>
- *           &lt;element name="SIF_ExtendedQuery" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedQueryDataModelType" minOccurs="0"/>
+ *           &lt;element name="SIF_ExtendedQuery" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedQueryDataModelType" minOccurs="0"/>
  *         &lt;/choice>
- *         &lt;element name="SIF_Metadata" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
- *         &lt;element name="SIF_ExtendedElements" type="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
+ *         &lt;element name="SIF_Metadata" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
+ *         &lt;element name="SIF_ExtendedElements" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="RefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}RefIdType" />
- *       &lt;attribute name="ReportAuthorityInfoRefId" use="required" type="{http://www.SIFinfo.org/au/datamodel/1.3}IdRefType" />
+ *       &lt;attribute name="RefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}RefIdType" />
+ *       &lt;attribute name="ReportAuthorityInfoRefId" use="required" type="{http://www.sifassociation.org/au/datamodel/1.3}IdRefType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -142,7 +142,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ReportManifestType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", propOrder = {
+@XmlType(name = "ReportManifestType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", propOrder = {
     "sifVersion",
     "sifMaxBufferSize",
     "receivingAuthority",
@@ -158,33 +158,33 @@ import javax.xml.datatype.XMLGregorianCalendar;
 })
 public class ReportManifestType {
 
-    @XmlElement(name = "SIF_Version", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SIF_Version", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String sifVersion;
-    @XmlElement(name = "SIF_MaxBufferSize", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "SIF_MaxBufferSize", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlSchemaType(name = "unsignedInt")
     protected Long sifMaxBufferSize;
-    @XmlElementRef(name = "ReceivingAuthority", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ReceivingAuthority", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<ReportManifestType.ReceivingAuthority> receivingAuthority;
-    @XmlElement(name = "ReportName", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "ReportName", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String reportName;
-    @XmlElementRef(name = "Description", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "Description", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> description;
-    @XmlElementRef(name = "ReportingPeriod", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ReportingPeriod", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<ReportManifestType.ReportingPeriod> reportingPeriod;
-    @XmlElement(name = "ReportDefinitionSource", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+    @XmlElement(name = "ReportDefinitionSource", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     protected ReportManifestType.ReportDefinitionSource reportDefinitionSource;
-    @XmlElementRef(name = "ReportFormatList", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "ReportFormatList", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<ReportManifestType.ReportFormatList> reportFormatList;
-    @XmlElementRef(name = "SIF_QueryGroup", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_QueryGroup", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<ReportManifestType.SIFQueryGroup> sifQueryGroup;
-    @XmlElementRef(name = "SIF_ExtendedQuery", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedQuery", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedQueryDataModelType> sifExtendedQuery;
-    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFMetadataType> sifMetadata;
-    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFExtendedElementsType> sifExtendedElements;
     @XmlAttribute(name = "RefId", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -540,7 +540,7 @@ public class ReportManifestType {
      * <pre>
      * &lt;complexType>
      *   &lt;simpleContent>
-     *     &lt;extension base="&lt;http://www.SIFinfo.org/au/datamodel/1.3>IdRefTypeOrEmpty">
+     *     &lt;extension base="&lt;http://www.sifassociation.org/au/datamodel/1.3>IdRefTypeOrEmpty">
      *       &lt;attribute name="SIF_RefObject" use="required">
      *         &lt;simpleType>
      *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -779,7 +779,7 @@ public class ReportManifestType {
     })
     public static class ReportFormatList {
 
-        @XmlElement(name = "ReportFormat", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "ReportFormat", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected List<ReportManifestType.ReportFormatList.ReportFormat> reportFormat;
 
         /**
@@ -964,15 +964,15 @@ public class ReportManifestType {
     })
     public static class ReportingPeriod {
 
-        @XmlElementRef(name = "BeginReportDate", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "BeginReportDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<XMLGregorianCalendar> beginReportDate;
-        @XmlElementRef(name = "EndReportDate", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "EndReportDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<XMLGregorianCalendar> endReportDate;
-        @XmlElementRef(name = "BeginSubmitDate", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "BeginSubmitDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<XMLGregorianCalendar> beginSubmitDate;
-        @XmlElementRef(name = "EndSubmitDate", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "EndSubmitDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<XMLGregorianCalendar> endSubmitDate;
-        @XmlElementRef(name = "DueDate", namespace = "http://www.SIFinfo.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+        @XmlElementRef(name = "DueDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<XMLGregorianCalendar> dueDate;
 
         /**
@@ -1108,7 +1108,7 @@ public class ReportManifestType {
      *   &lt;complexContent>
      *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
      *       &lt;sequence>
-     *         &lt;element ref="{http://www.SIFinfo.org/au/datamodel/1.3}SIF_Query" maxOccurs="unbounded" minOccurs="0"/>
+     *         &lt;element ref="{http://www.sifassociation.org/au/datamodel/1.3}SIF_Query" maxOccurs="unbounded" minOccurs="0"/>
      *       &lt;/sequence>
      *     &lt;/restriction>
      *   &lt;/complexContent>
@@ -1123,7 +1123,7 @@ public class ReportManifestType {
     })
     public static class SIFQueryGroup {
 
-        @XmlElement(name = "SIF_Query", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+        @XmlElement(name = "SIF_Query", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected List<SIFQueryType> sifQuery;
 
         /**

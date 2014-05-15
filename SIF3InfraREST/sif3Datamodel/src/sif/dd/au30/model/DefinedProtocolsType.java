@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  * 
  */
-@XmlType(name = "DefinedProtocolsType", namespace = "http://www.SIFinfo.org/au/datamodel/1.3")
+@XmlType(name = "DefinedProtocolsType", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
 @XmlEnum
 public enum DefinedProtocolsType {
 
