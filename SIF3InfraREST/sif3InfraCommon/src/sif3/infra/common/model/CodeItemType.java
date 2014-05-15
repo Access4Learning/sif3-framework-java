@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.util.Calendar;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -9,7 +10,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
@@ -30,8 +30,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.0}uriType"/>
- *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.0}uriType"/>
+ *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.0.1}uriType"/>
+ *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.0.1}uriType"/>
  *         &lt;element name="value">
  *           &lt;simpleType>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -56,7 +56,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="aliases" type="{http://www.sifassociation.org/infrastructure/3.0}aliasesType" minOccurs="0"/>
+ *         &lt;element name="aliases" type="{http://www.sifassociation.org/infrastructure/3.0.1}aliasesType" minOccurs="0"/>
  *         &lt;element name="action">
  *           &lt;simpleType>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
@@ -77,7 +77,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "codeItemType", namespace = "http://www.sifassociation.org/infrastructure/3.0", propOrder = {
+@XmlType(name = "codeItemType", namespace = "http://www.sifassociation.org/infrastructure/3.0.1", propOrder = {
     "code",
     "source",
     "namespace",
@@ -107,9 +107,10 @@ public class CodeItemType {
     protected AliasesType aliases;
     @XmlElement(required = true)
     protected String action;
-    @XmlElement(required = true)
+    @XmlElement(required = true, type = String.class)
+    @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar timestamp;
+    protected Calendar timestamp;
 
     /**
      * Gets the value of the code property.
@@ -308,10 +309,10 @@ public class CodeItemType {
      * 
      * @return
      *     possible object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public XMLGregorianCalendar getTimestamp() {
+    public Calendar getTimestamp() {
         return timestamp;
     }
 
@@ -320,10 +321,10 @@ public class CodeItemType {
      * 
      * @param value
      *     allowed object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public void setTimestamp(XMLGregorianCalendar value) {
+    public void setTimestamp(Calendar value) {
         this.timestamp = value;
     }
 

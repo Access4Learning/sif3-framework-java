@@ -18,12 +18,12 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="singular" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="formula" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
+ *         &lt;element name="dynamicQuery" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
  *         &lt;element name="paged" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="maxPageSize" type="{http://www.w3.org/2001/XMLSchema}unsignedInt"/>
+ *         &lt;element name="maxPageSize" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
+ *         &lt;element name="totalCount" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="applicationProduct" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="adapterProduct" type="{http://www.sifassociation.org/infrastructure/3.0}productIdentityType" minOccurs="0"/>
+ *         &lt;element name="adapterProduct" type="{http://www.sifassociation.org/infrastructure/3.0.1}productIdentityType" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -33,60 +33,44 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "querySupportType", namespace = "http://www.sifassociation.org/infrastructure/3.0", propOrder = {
-    "singular",
-    "formula",
+@XmlType(name = "querySupportType", namespace = "http://www.sifassociation.org/infrastructure/3.0.1", propOrder = {
+    "dynamicQuery",
     "paged",
     "maxPageSize",
+    "totalCount",
     "applicationProduct",
     "adapterProduct"
 })
 public class QuerySupportType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
-    protected boolean singular;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
-    protected boolean formula;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
+    protected boolean dynamicQuery;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     protected boolean paged;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     @XmlSchemaType(name = "unsignedInt")
-    protected long maxPageSize;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    protected Long maxPageSize;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
+    protected Boolean totalCount;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     protected String applicationProduct;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     protected ProductIdentityType adapterProduct;
 
     /**
-     * Gets the value of the singular property.
+     * Gets the value of the dynamicQuery property.
      * 
      */
-    public boolean isSingular() {
-        return singular;
+    public boolean isDynamicQuery() {
+        return dynamicQuery;
     }
 
     /**
-     * Sets the value of the singular property.
+     * Sets the value of the dynamicQuery property.
      * 
      */
-    public void setSingular(boolean value) {
-        this.singular = value;
-    }
-
-    /**
-     * Gets the value of the formula property.
-     * 
-     */
-    public boolean isFormula() {
-        return formula;
-    }
-
-    /**
-     * Sets the value of the formula property.
-     * 
-     */
-    public void setFormula(boolean value) {
-        this.formula = value;
+    public void setDynamicQuery(boolean value) {
+        this.dynamicQuery = value;
     }
 
     /**
@@ -108,17 +92,49 @@ public class QuerySupportType {
     /**
      * Gets the value of the maxPageSize property.
      * 
+     * @return
+     *     possible object is
+     *     {@link Long }
+     *     
      */
-    public long getMaxPageSize() {
+    public Long getMaxPageSize() {
         return maxPageSize;
     }
 
     /**
      * Sets the value of the maxPageSize property.
      * 
+     * @param value
+     *     allowed object is
+     *     {@link Long }
+     *     
      */
-    public void setMaxPageSize(long value) {
+    public void setMaxPageSize(Long value) {
         this.maxPageSize = value;
+    }
+
+    /**
+     * Gets the value of the totalCount property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isTotalCount() {
+        return totalCount;
+    }
+
+    /**
+     * Sets the value of the totalCount property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setTotalCount(Boolean value) {
+        this.totalCount = value;
     }
 
     /**

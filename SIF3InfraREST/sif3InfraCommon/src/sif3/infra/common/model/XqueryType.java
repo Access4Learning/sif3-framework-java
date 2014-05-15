@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="type">
  *           &lt;simpleType>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
+ *               &lt;enumeration value="SINGULAR"/>
  *               &lt;enumeration value="FORMULA"/>
  *               &lt;enumeration value="EXTENDED"/>
  *             &lt;/restriction>
@@ -58,11 +59,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="script">
  *           &lt;simpleType>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *               &lt;maxLength value="1024"/>
+ *               &lt;minLength value="0"/>
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="include" type="{http://www.sifassociation.org/infrastructure/3.0}includeType" minOccurs="0"/>
+ *         &lt;element name="returnType" type="{http://www.w3.org/2001/XMLSchema}anyURI"/>
  *       &lt;/sequence>
  *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}token" />
  *     &lt;/restriction>
@@ -73,31 +74,32 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "xqueryType", namespace = "http://www.sifassociation.org/infrastructure/3.0", propOrder = {
+@XmlType(name = "xqueryType", namespace = "http://www.sifassociation.org/infrastructure/3.0.1", propOrder = {
     "type",
     "status",
     "qualifier",
     "description",
     "script",
-    "include"
+    "returnType"
 })
 public class XqueryType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String type;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
     protected String status;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String qualifier;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String description;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
     protected String script;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
-    protected IncludeType include;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true, nillable = true)
+    @XmlSchemaType(name = "anyURI")
+    protected String returnType;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -224,27 +226,27 @@ public class XqueryType {
     }
 
     /**
-     * Gets the value of the include property.
+     * Gets the value of the returnType property.
      * 
      * @return
      *     possible object is
-     *     {@link IncludeType }
+     *     {@link String }
      *     
      */
-    public IncludeType getInclude() {
-        return include;
+    public String getReturnType() {
+        return returnType;
     }
 
     /**
-     * Sets the value of the include property.
+     * Sets the value of the returnType property.
      * 
      * @param value
      *     allowed object is
-     *     {@link IncludeType }
+     *     {@link String }
      *     
      */
-    public void setInclude(IncludeType value) {
-        this.include = value;
+    public void setReturnType(String value) {
+        this.returnType = value;
     }
 
     /**

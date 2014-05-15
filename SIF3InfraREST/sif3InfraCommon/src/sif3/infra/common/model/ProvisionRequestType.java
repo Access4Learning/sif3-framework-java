@@ -20,8 +20,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="provisionedZones" type="{http://www.sifassociation.org/infrastructure/3.0}provisionedZonesType"/>
+ *         &lt;element name="provisionedZones" type="{http://www.sifassociation.org/infrastructure/3.0.1}provisionedZonesType"/>
  *       &lt;/sequence>
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.0.1}uuidType" />
  *       &lt;attribute name="completionStatus">
  *         &lt;simpleType>
  *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -39,13 +40,16 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "provisionRequestType", namespace = "http://www.sifassociation.org/infrastructure/3.0", propOrder = {
+@XmlType(name = "provisionRequestType", namespace = "http://www.sifassociation.org/infrastructure/3.0.1", propOrder = {
     "provisionedZones"
 })
 public class ProvisionRequestType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
     protected ProvisionedZonesType provisionedZones;
+    @XmlAttribute(name = "id")
+    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    protected String id;
     @XmlAttribute(name = "completionStatus")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String completionStatus;
@@ -72,6 +76,30 @@ public class ProvisionRequestType {
      */
     public void setProvisionedZones(ProvisionedZonesType value) {
         this.provisionedZones = value;
+    }
+
+    /**
+     * Gets the value of the id property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Sets the value of the id property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setId(String value) {
+        this.id = value;
     }
 
     /**

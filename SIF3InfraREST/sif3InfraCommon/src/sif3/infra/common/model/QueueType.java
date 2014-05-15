@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.util.Calendar;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -9,7 +10,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
@@ -30,10 +30,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="ownerId" type="{http://www.sifassociation.org/infrastructure/3.0}uuidType" minOccurs="0"/>
+ *         &lt;element name="ownerId" type="{http://www.sifassociation.org/infrastructure/3.0.1}uuidType" minOccurs="0"/>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
- *         &lt;element name="queueURI" type="{http://www.w3.org/2001/XMLSchema}anyURI"/>
- *         &lt;element name="idleTimeout" type="{http://www.w3.org/2001/XMLSchema}unsignedInt"/>
+ *         &lt;element name="queueUri" type="{http://www.w3.org/2001/XMLSchema}anyURI" minOccurs="0"/>
+ *         &lt;element name="ownerUri" type="{http://www.w3.org/2001/XMLSchema}anyURI" minOccurs="0"/>
+ *         &lt;element name="idleTimeout" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *         &lt;element name="minWaitTime" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *         &lt;element name="maxConcurrentConnections" minOccurs="0">
  *           &lt;simpleType>
@@ -42,12 +43,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="created" type="{http://www.w3.org/2001/XMLSchema}dateTime"/>
- *         &lt;element name="lastAccessed" type="{http://www.w3.org/2001/XMLSchema}dateTime"/>
- *         &lt;element name="lastModified" type="{http://www.w3.org/2001/XMLSchema}dateTime"/>
- *         &lt;element name="messageCount" type="{http://www.w3.org/2001/XMLSchema}unsignedInt"/>
+ *         &lt;element name="created" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
+ *         &lt;element name="lastAccessed" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
+ *         &lt;element name="lastModified" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
+ *         &lt;element name="messageCount" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.0}uuidType" />
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.0.1}uuidType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -56,11 +57,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "queueType", namespace = "http://www.sifassociation.org/infrastructure/3.0", propOrder = {
+@XmlType(name = "queueType", namespace = "http://www.sifassociation.org/infrastructure/3.0.1", propOrder = {
     "polling",
     "ownerId",
     "name",
-    "queueURI",
+    "queueUri",
+    "ownerUri",
     "idleTimeout",
     "minWaitTime",
     "maxConcurrentConnections",
@@ -71,38 +73,44 @@ import javax.xml.datatype.XMLGregorianCalendar;
 })
 public class QueueType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     protected String polling;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String ownerId;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String name;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     @XmlSchemaType(name = "anyURI")
-    protected String queueURI;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    protected String queueUri;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
+    @XmlSchemaType(name = "anyURI")
+    protected String ownerUri;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     @XmlSchemaType(name = "unsignedInt")
-    protected long idleTimeout;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    protected Long idleTimeout;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     @XmlSchemaType(name = "unsignedInt")
     protected Long minWaitTime;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     protected Long maxConcurrentConnections;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", type = String.class)
+    @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar created;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    protected Calendar created;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", type = String.class)
+    @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar lastAccessed;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    protected Calendar lastAccessed;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", type = String.class)
+    @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar lastModified;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    protected Calendar lastModified;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     @XmlSchemaType(name = "unsignedInt")
-    protected long messageCount;
+    protected Long messageCount;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String id;
@@ -180,42 +188,74 @@ public class QueueType {
     }
 
     /**
-     * Gets the value of the queueURI property.
+     * Gets the value of the queueUri property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getQueueURI() {
-        return queueURI;
+    public String getQueueUri() {
+        return queueUri;
     }
 
     /**
-     * Sets the value of the queueURI property.
+     * Sets the value of the queueUri property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setQueueURI(String value) {
-        this.queueURI = value;
+    public void setQueueUri(String value) {
+        this.queueUri = value;
+    }
+
+    /**
+     * Gets the value of the ownerUri property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getOwnerUri() {
+        return ownerUri;
+    }
+
+    /**
+     * Sets the value of the ownerUri property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setOwnerUri(String value) {
+        this.ownerUri = value;
     }
 
     /**
      * Gets the value of the idleTimeout property.
      * 
+     * @return
+     *     possible object is
+     *     {@link Long }
+     *     
      */
-    public long getIdleTimeout() {
+    public Long getIdleTimeout() {
         return idleTimeout;
     }
 
     /**
      * Sets the value of the idleTimeout property.
      * 
+     * @param value
+     *     allowed object is
+     *     {@link Long }
+     *     
      */
-    public void setIdleTimeout(long value) {
+    public void setIdleTimeout(Long value) {
         this.idleTimeout = value;
     }
 
@@ -272,10 +312,10 @@ public class QueueType {
      * 
      * @return
      *     possible object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public XMLGregorianCalendar getCreated() {
+    public Calendar getCreated() {
         return created;
     }
 
@@ -284,10 +324,10 @@ public class QueueType {
      * 
      * @param value
      *     allowed object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public void setCreated(XMLGregorianCalendar value) {
+    public void setCreated(Calendar value) {
         this.created = value;
     }
 
@@ -296,10 +336,10 @@ public class QueueType {
      * 
      * @return
      *     possible object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public XMLGregorianCalendar getLastAccessed() {
+    public Calendar getLastAccessed() {
         return lastAccessed;
     }
 
@@ -308,10 +348,10 @@ public class QueueType {
      * 
      * @param value
      *     allowed object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public void setLastAccessed(XMLGregorianCalendar value) {
+    public void setLastAccessed(Calendar value) {
         this.lastAccessed = value;
     }
 
@@ -320,10 +360,10 @@ public class QueueType {
      * 
      * @return
      *     possible object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public XMLGregorianCalendar getLastModified() {
+    public Calendar getLastModified() {
         return lastModified;
     }
 
@@ -332,26 +372,34 @@ public class QueueType {
      * 
      * @param value
      *     allowed object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public void setLastModified(XMLGregorianCalendar value) {
+    public void setLastModified(Calendar value) {
         this.lastModified = value;
     }
 
     /**
      * Gets the value of the messageCount property.
      * 
+     * @return
+     *     possible object is
+     *     {@link Long }
+     *     
      */
-    public long getMessageCount() {
+    public Long getMessageCount() {
         return messageCount;
     }
 
     /**
      * Sets the value of the messageCount property.
      * 
+     * @param value
+     *     allowed object is
+     *     {@link Long }
+     *     
      */
-    public void setMessageCount(long value) {
+    public void setMessageCount(Long value) {
         this.messageCount = value;
     }
 

@@ -51,7 +51,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "productIdentityType", namespace = "http://www.sifassociation.org/infrastructure/3.0", propOrder = {
+@XmlType(name = "productIdentityType", namespace = "http://www.sifassociation.org/infrastructure/3.0.1", propOrder = {
     "vendorName",
     "productName",
     "productVersion",
@@ -59,16 +59,16 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class ProductIdentityType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String vendorName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String productName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String productVersion;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     @XmlSchemaType(name = "anyURI")
     protected String iconURI;
 

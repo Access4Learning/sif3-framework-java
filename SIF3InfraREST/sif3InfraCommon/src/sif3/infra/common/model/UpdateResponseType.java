@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="updates" type="{http://www.sifassociation.org/infrastructure/3.0}updatesType"/>
+ *         &lt;element name="updates" type="{http://www.sifassociation.org/infrastructure/3.0.1}updatesType"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -27,12 +27,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "updateResponseType", namespace = "http://www.sifassociation.org/infrastructure/3.0", propOrder = {
+@XmlType(name = "updateResponseType", namespace = "http://www.sifassociation.org/infrastructure/3.0.1", propOrder = {
     "updates"
 })
 public class UpdateResponseType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
     protected UpdatesType updates;
 
     /**

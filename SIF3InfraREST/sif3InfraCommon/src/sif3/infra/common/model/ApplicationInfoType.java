@@ -4,6 +4,7 @@ package sif3.infra.common.model;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -19,11 +20,10 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;sequence>
  *         &lt;element name="applicationKey" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="supportedInfrastructureVersion" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="supportedDataModel" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="supportedDataModelVersion" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="dataModelNamespace" type="{http://www.w3.org/2001/XMLSchema}anyURI"/>
  *         &lt;element name="transport" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="applicationProduct" type="{http://www.sifassociation.org/infrastructure/3.0}productIdentityType"/>
- *         &lt;element name="adapterProduct" type="{http://www.sifassociation.org/infrastructure/3.0}productIdentityType"/>
+ *         &lt;element name="applicationProduct" type="{http://www.sifassociation.org/infrastructure/3.0.1}productIdentityType"/>
+ *         &lt;element name="adapterProduct" type="{http://www.sifassociation.org/infrastructure/3.0.1}productIdentityType" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -33,30 +33,28 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "applicationInfoType", namespace = "http://www.sifassociation.org/infrastructure/3.0", propOrder = {
+@XmlType(name = "applicationInfoType", namespace = "http://www.sifassociation.org/infrastructure/3.0.1", propOrder = {
     "applicationKey",
     "supportedInfrastructureVersion",
-    "supportedDataModel",
-    "supportedDataModelVersion",
+    "dataModelNamespace",
     "transport",
     "applicationProduct",
     "adapterProduct"
 })
 public class ApplicationInfoType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
     protected String applicationKey;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
     protected String supportedInfrastructureVersion;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
-    protected String supportedDataModel;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
-    protected String supportedDataModelVersion;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
+    @XmlSchemaType(name = "anyURI")
+    protected String dataModelNamespace;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     protected String transport;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
     protected ProductIdentityType applicationProduct;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     protected ProductIdentityType adapterProduct;
 
     /**
@@ -108,51 +106,27 @@ public class ApplicationInfoType {
     }
 
     /**
-     * Gets the value of the supportedDataModel property.
+     * Gets the value of the dataModelNamespace property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getSupportedDataModel() {
-        return supportedDataModel;
+    public String getDataModelNamespace() {
+        return dataModelNamespace;
     }
 
     /**
-     * Sets the value of the supportedDataModel property.
+     * Sets the value of the dataModelNamespace property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setSupportedDataModel(String value) {
-        this.supportedDataModel = value;
-    }
-
-    /**
-     * Gets the value of the supportedDataModelVersion property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getSupportedDataModelVersion() {
-        return supportedDataModelVersion;
-    }
-
-    /**
-     * Sets the value of the supportedDataModelVersion property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setSupportedDataModelVersion(String value) {
-        this.supportedDataModelVersion = value;
+    public void setDataModelNamespace(String value) {
+        this.dataModelNamespace = value;
     }
 
     /**

@@ -23,24 +23,17 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *       &lt;sequence>
  *         &lt;element name="sessionToken" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
  *         &lt;element name="solutionId" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
- *         &lt;element name="defaultZone" type="{http://www.sifassociation.org/infrastructure/3.0}zoneType" minOccurs="0"/>
+ *         &lt;element name="defaultZone" type="{http://www.sifassociation.org/infrastructure/3.0.1}zoneType" minOccurs="0"/>
  *         &lt;element name="authenticationMethod" type="{http://www.w3.org/2001/XMLSchema}token"/>
  *         &lt;element name="instanceId" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
  *         &lt;element name="userToken" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="consumerName" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="applicationInfo" type="{http://www.sifassociation.org/infrastructure/3.0}applicationInfoType"/>
- *         &lt;element name="infrastructureServices" type="{http://www.sifassociation.org/infrastructure/3.0}infrastructureServicesType" minOccurs="0"/>
- *         &lt;element name="provisionedZones" type="{http://www.sifassociation.org/infrastructure/3.0}provisionedZonesType" minOccurs="0"/>
+ *         &lt;element name="applicationInfo" type="{http://www.sifassociation.org/infrastructure/3.0.1}applicationInfoType"/>
+ *         &lt;element name="infrastructureServices" type="{http://www.sifassociation.org/infrastructure/3.0.1}infrastructureServicesType" minOccurs="0"/>
+ *         &lt;element name="provisionedZones" type="{http://www.sifassociation.org/infrastructure/3.0.1}provisionedZonesType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="type" use="required">
- *         &lt;simpleType>
- *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
- *             &lt;enumeration value="DIRECT"/>
- *             &lt;enumeration value="BROKERED"/>
- *           &lt;/restriction>
- *         &lt;/simpleType>
- *       &lt;/attribute>
- *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.0}uuidType" />
+ *       &lt;attribute name="type" type="{http://www.sifassociation.org/infrastructure/3.0.1}environmentTypeType" />
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.0.1}uuidType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -49,7 +42,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "environmentType", namespace = "http://www.sifassociation.org/infrastructure/3.0", propOrder = {
+@XmlType(name = "environmentType", namespace = "http://www.sifassociation.org/infrastructure/3.0.1", propOrder = {
     "sessionToken",
     "solutionId",
     "defaultZone",
@@ -63,37 +56,36 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class EnvironmentType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String sessionToken;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String solutionId;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     protected ZoneType defaultZone;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String authenticationMethod;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String instanceId;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     protected String userToken;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
     protected String consumerName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
     protected ApplicationInfoType applicationInfo;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     protected InfrastructureServicesType infrastructureServices;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     protected ProvisionedZonesType provisionedZones;
-    @XmlAttribute(name = "type", required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-    protected String type;
+    @XmlAttribute(name = "type")
+    protected EnvironmentTypeType type;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String id;
@@ -343,10 +335,10 @@ public class EnvironmentType {
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link EnvironmentTypeType }
      *     
      */
-    public String getType() {
+    public EnvironmentTypeType getType() {
         return type;
     }
 
@@ -355,10 +347,10 @@ public class EnvironmentType {
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link EnvironmentTypeType }
      *     
      */
-    public void setType(String value) {
+    public void setType(EnvironmentTypeType value) {
         this.type = value;
     }
 

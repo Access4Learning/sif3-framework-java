@@ -17,9 +17,9 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="code" type="{http://www.sifassociation.org/infrastructure/3.0}codeType"/>
- *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.0}uriType"/>
- *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.0}uriType"/>
+ *         &lt;element name="code" type="{http://www.sifassociation.org/infrastructure/3.0.1}codeType"/>
+ *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.0.1}uriType"/>
+ *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.0.1}uriType"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,7 +29,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "aliasType", namespace = "http://www.sifassociation.org/infrastructure/3.0", propOrder = {
+@XmlType(name = "aliasType", namespace = "http://www.sifassociation.org/infrastructure/3.0.1", propOrder = {
     "code",
     "source",
     "namespace"

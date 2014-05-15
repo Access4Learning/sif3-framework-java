@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="infrastructureService" type="{http://www.sifassociation.org/infrastructure/3.0}propertyType" maxOccurs="unbounded"/>
+ *         &lt;element name="infrastructureService" type="{http://www.sifassociation.org/infrastructure/3.0.1}infrastructureServiceType" maxOccurs="unbounded" minOccurs="2"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,13 +29,13 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "infrastructureServicesType", namespace = "http://www.sifassociation.org/infrastructure/3.0", propOrder = {
+@XmlType(name = "infrastructureServicesType", namespace = "http://www.sifassociation.org/infrastructure/3.0.1", propOrder = {
     "infrastructureService"
 })
 public class InfrastructureServicesType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
-    protected List<PropertyType> infrastructureService;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
+    protected List<InfrastructureServiceType> infrastructureService;
 
     /**
      * Gets the value of the infrastructureService property.
@@ -55,13 +55,13 @@ public class InfrastructureServicesType {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link PropertyType }
+     * {@link InfrastructureServiceType }
      * 
      * 
      */
-    public List<PropertyType> getInfrastructureService() {
+    public List<InfrastructureServiceType> getInfrastructureService() {
         if (infrastructureService == null) {
-            infrastructureService = new ArrayList<PropertyType>();
+            infrastructureService = new ArrayList<InfrastructureServiceType>();
         }
         return this.infrastructureService;
     }

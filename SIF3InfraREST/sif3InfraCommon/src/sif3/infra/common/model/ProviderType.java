@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -20,13 +21,15 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="serviceType" type="{http://www.sifassociation.org/infrastructure/3.0}serviceTypeType"/>
- *         &lt;element name="serviceName" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="context" type="{http://www.sifassociation.org/infrastructure/3.0}contextType"/>
- *         &lt;element name="querySupport" type="{http://www.sifassociation.org/infrastructure/3.0}querySupportType"/>
- *         &lt;element name="endPoint" type="{http://www.sifassociation.org/infrastructure/3.0}protocolType" minOccurs="0"/>
+ *         &lt;element name="serviceType" type="{http://www.sifassociation.org/infrastructure/3.0.1}serviceTypeType"/>
+ *         &lt;element name="serviceName" type="{http://www.w3.org/2001/XMLSchema}token"/>
+ *         &lt;element name="contextId" type="{http://www.w3.org/2001/XMLSchema}token"/>
+ *         &lt;element name="zoneId" type="{http://www.w3.org/2001/XMLSchema}token"/>
+ *         &lt;element name="providerName" type="{http://www.w3.org/2001/XMLSchema}token"/>
+ *         &lt;element name="querySupport" type="{http://www.sifassociation.org/infrastructure/3.0.1}querySupportType"/>
+ *         &lt;element name="endPoint" type="{http://www.sifassociation.org/infrastructure/3.0.1}protocolType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.0}uuidType" />
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.0.1}uuidType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -35,25 +38,39 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "providerType", namespace = "http://www.sifassociation.org/infrastructure/3.0", propOrder = {
+@XmlType(name = "providerType", namespace = "http://www.sifassociation.org/infrastructure/3.0.1", propOrder = {
     "serviceType",
     "serviceName",
-    "context",
+    "contextId",
+    "zoneId",
+    "providerName",
     "querySupport",
     "endPoint"
 })
 public class ProviderType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String serviceType;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
+    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlSchemaType(name = "token")
     protected String serviceName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
-    protected ContextType context;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
+    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlSchemaType(name = "token")
+    protected String contextId;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
+    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlSchemaType(name = "token")
+    protected String zoneId;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
+    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlSchemaType(name = "token")
+    protected String providerName;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
     protected QuerySupportType querySupport;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
     protected ProtocolType endPoint;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -108,27 +125,75 @@ public class ProviderType {
     }
 
     /**
-     * Gets the value of the context property.
+     * Gets the value of the contextId property.
      * 
      * @return
      *     possible object is
-     *     {@link ContextType }
+     *     {@link String }
      *     
      */
-    public ContextType getContext() {
-        return context;
+    public String getContextId() {
+        return contextId;
     }
 
     /**
-     * Sets the value of the context property.
+     * Sets the value of the contextId property.
      * 
      * @param value
      *     allowed object is
-     *     {@link ContextType }
+     *     {@link String }
      *     
      */
-    public void setContext(ContextType value) {
-        this.context = value;
+    public void setContextId(String value) {
+        this.contextId = value;
+    }
+
+    /**
+     * Gets the value of the zoneId property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getZoneId() {
+        return zoneId;
+    }
+
+    /**
+     * Sets the value of the zoneId property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setZoneId(String value) {
+        this.zoneId = value;
+    }
+
+    /**
+     * Gets the value of the providerName property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getProviderName() {
+        return providerName;
+    }
+
+    /**
+     * Sets the value of the providerName property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setProviderName(String value) {
+        this.providerName = value;
     }
 
     /**

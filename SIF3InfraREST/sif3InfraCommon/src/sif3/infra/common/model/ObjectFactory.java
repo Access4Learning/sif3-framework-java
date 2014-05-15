@@ -24,29 +24,30 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Queues_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "queues");
-    private final static QName _CreateResponse_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "createResponse");
-    private final static QName _Zone_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "zone");
-    private final static QName _Environment_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "environment");
-    private final static QName _DeleteResponse_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "deleteResponse");
-    private final static QName _Alerts_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "alerts");
-    private final static QName _UpdateResponse_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "updateResponse");
-    private final static QName _Subscription_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "subscription");
-    private final static QName _Providers_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "providers");
-    private final static QName _Provider_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "provider");
-    private final static QName _CodeSet_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "codeSet");
-    private final static QName _Namespace_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "namespace");
-    private final static QName _Namespaces_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "namespaces");
-    private final static QName _CodeSets_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "codeSets");
-    private final static QName _Zones_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "zones");
-    private final static QName _Xquerys_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "xquerys");
-    private final static QName _Queue_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "queue");
-    private final static QName _Xquery_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "xquery");
-    private final static QName _DeleteRequest_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "deleteRequest");
-    private final static QName _Alert_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "alert");
-    private final static QName _ProvisionRequest_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "provisionRequest");
-    private final static QName _Subscriptions_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "subscriptions");
-    private final static QName _Error_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0", "error");
+    private final static QName _UpdateResponse_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "updateResponse");
+    private final static QName _Alerts_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "alerts");
+    private final static QName _Subscription_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "subscription");
+    private final static QName _Providers_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "providers");
+    private final static QName _Environment_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "environment");
+    private final static QName _DeleteResponse_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "deleteResponse");
+    private final static QName _Zone_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "zone");
+    private final static QName _Queues_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "queues");
+    private final static QName _CreateResponse_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "createResponse");
+    private final static QName _Alert_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "alert");
+    private final static QName _Subscriptions_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "subscriptions");
+    private final static QName _ProvisionRequest_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "provisionRequest");
+    private final static QName _Error_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "error");
+    private final static QName _Xquerys_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "xquerys");
+    private final static QName _Queue_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "queue");
+    private final static QName _Xquery_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "xquery");
+    private final static QName _DeleteRequest_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "deleteRequest");
+    private final static QName _Namespace_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "namespace");
+    private final static QName _CodeSets_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "codeSets");
+    private final static QName _Namespaces_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "namespaces");
+    private final static QName _Zones_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "zones");
+    private final static QName _Provider_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "provider");
+    private final static QName _CodeSet_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "codeSet");
+    private final static QName _Environments_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.0.1", "environments");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: sif3.infra.common.model
@@ -96,14 +97,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link ProvisionRequestType }
-     * 
-     */
-    public ProvisionRequestType createProvisionRequestType() {
-        return new ProvisionRequestType();
-    }
-
-    /**
      * Create an instance of {@link SubscriptionCollectionType }
      * 
      */
@@ -112,11 +105,27 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link ProvisionRequestType }
+     * 
+     */
+    public ProvisionRequestType createProvisionRequestType() {
+        return new ProvisionRequestType();
+    }
+
+    /**
      * Create an instance of {@link AlertType }
      * 
      */
     public AlertType createAlertType() {
         return new AlertType();
+    }
+
+    /**
+     * Create an instance of {@link EnvironmentCollectionType }
+     * 
+     */
+    public EnvironmentCollectionType createEnvironmentCollectionType() {
+        return new EnvironmentCollectionType();
     }
 
     /**
@@ -200,19 +209,19 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link UpdateResponseType }
-     * 
-     */
-    public UpdateResponseType createUpdateResponseType() {
-        return new UpdateResponseType();
-    }
-
-    /**
      * Create an instance of {@link AlertCollectionType }
      * 
      */
     public AlertCollectionType createAlertCollectionType() {
         return new AlertCollectionType();
+    }
+
+    /**
+     * Create an instance of {@link UpdateResponseType }
+     * 
+     */
+    public UpdateResponseType createUpdateResponseType() {
+        return new UpdateResponseType();
     }
 
     /**
@@ -384,19 +393,19 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link UpdateType }
-     * 
-     */
-    public UpdateType createUpdateType() {
-        return new UpdateType();
-    }
-
-    /**
      * Create an instance of {@link NamespaceQualifierType }
      * 
      */
     public NamespaceQualifierType createNamespaceQualifierType() {
         return new NamespaceQualifierType();
+    }
+
+    /**
+     * Create an instance of {@link UpdateType }
+     * 
+     */
+    public UpdateType createUpdateType() {
+        return new UpdateType();
     }
 
     /**
@@ -413,6 +422,14 @@ public class ObjectFactory {
      */
     public DeleteStatusCollection createDeleteStatusCollection() {
         return new DeleteStatusCollection();
+    }
+
+    /**
+     * Create an instance of {@link InfrastructureServiceType }
+     * 
+     */
+    public InfrastructureServiceType createInfrastructureServiceType() {
+        return new InfrastructureServiceType();
     }
 
     /**
@@ -448,14 +465,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link ContextType }
-     * 
-     */
-    public ContextType createContextType() {
-        return new ContextType();
-    }
-
-    /**
      * Create an instance of {@link CreatesType }
      * 
      */
@@ -488,73 +497,28 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link QueueCollectionType }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link UpdateResponseType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "queues")
-    public JAXBElement<QueueCollectionType> createQueues(QueueCollectionType value) {
-        return new JAXBElement<QueueCollectionType>(_Queues_QNAME, QueueCollectionType.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link CreateResponseType }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "createResponse")
-    public JAXBElement<CreateResponseType> createCreateResponse(CreateResponseType value) {
-        return new JAXBElement<CreateResponseType>(_CreateResponse_QNAME, CreateResponseType.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link ZoneType }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "zone")
-    public JAXBElement<ZoneType> createZone(ZoneType value) {
-        return new JAXBElement<ZoneType>(_Zone_QNAME, ZoneType.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link EnvironmentType }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "environment")
-    public JAXBElement<EnvironmentType> createEnvironment(EnvironmentType value) {
-        return new JAXBElement<EnvironmentType>(_Environment_QNAME, EnvironmentType.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link DeleteResponseType }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "deleteResponse")
-    public JAXBElement<DeleteResponseType> createDeleteResponse(DeleteResponseType value) {
-        return new JAXBElement<DeleteResponseType>(_DeleteResponse_QNAME, DeleteResponseType.class, null, value);
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "updateResponse")
+    public JAXBElement<UpdateResponseType> createUpdateResponse(UpdateResponseType value) {
+        return new JAXBElement<UpdateResponseType>(_UpdateResponse_QNAME, UpdateResponseType.class, null, value);
     }
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link AlertCollectionType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "alerts")
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "alerts")
     public JAXBElement<AlertCollectionType> createAlerts(AlertCollectionType value) {
         return new JAXBElement<AlertCollectionType>(_Alerts_QNAME, AlertCollectionType.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link UpdateResponseType }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "updateResponse")
-    public JAXBElement<UpdateResponseType> createUpdateResponse(UpdateResponseType value) {
-        return new JAXBElement<UpdateResponseType>(_UpdateResponse_QNAME, UpdateResponseType.class, null, value);
     }
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link SubscriptionType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "subscription")
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "subscription")
     public JAXBElement<SubscriptionType> createSubscription(SubscriptionType value) {
         return new JAXBElement<SubscriptionType>(_Subscription_QNAME, SubscriptionType.class, null, value);
     }
@@ -563,70 +527,97 @@ public class ObjectFactory {
      * Create an instance of {@link JAXBElement }{@code <}{@link ProviderCollectionType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "providers")
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "providers")
     public JAXBElement<ProviderCollectionType> createProviders(ProviderCollectionType value) {
         return new JAXBElement<ProviderCollectionType>(_Providers_QNAME, ProviderCollectionType.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link ProviderType }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link EnvironmentType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "provider")
-    public JAXBElement<ProviderType> createProvider(ProviderType value) {
-        return new JAXBElement<ProviderType>(_Provider_QNAME, ProviderType.class, null, value);
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "environment")
+    public JAXBElement<EnvironmentType> createEnvironment(EnvironmentType value) {
+        return new JAXBElement<EnvironmentType>(_Environment_QNAME, EnvironmentType.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link CodeSetType }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link DeleteResponseType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "codeSet")
-    public JAXBElement<CodeSetType> createCodeSet(CodeSetType value) {
-        return new JAXBElement<CodeSetType>(_CodeSet_QNAME, CodeSetType.class, null, value);
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "deleteResponse")
+    public JAXBElement<DeleteResponseType> createDeleteResponse(DeleteResponseType value) {
+        return new JAXBElement<DeleteResponseType>(_DeleteResponse_QNAME, DeleteResponseType.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link NamespaceType }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link ZoneType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "namespace")
-    public JAXBElement<NamespaceType> createNamespace(NamespaceType value) {
-        return new JAXBElement<NamespaceType>(_Namespace_QNAME, NamespaceType.class, null, value);
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "zone")
+    public JAXBElement<ZoneType> createZone(ZoneType value) {
+        return new JAXBElement<ZoneType>(_Zone_QNAME, ZoneType.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link NamespaceCollectionType }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link QueueCollectionType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "namespaces")
-    public JAXBElement<NamespaceCollectionType> createNamespaces(NamespaceCollectionType value) {
-        return new JAXBElement<NamespaceCollectionType>(_Namespaces_QNAME, NamespaceCollectionType.class, null, value);
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "queues")
+    public JAXBElement<QueueCollectionType> createQueues(QueueCollectionType value) {
+        return new JAXBElement<QueueCollectionType>(_Queues_QNAME, QueueCollectionType.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link CodeSetCollectionType }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link CreateResponseType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "codeSets")
-    public JAXBElement<CodeSetCollectionType> createCodeSets(CodeSetCollectionType value) {
-        return new JAXBElement<CodeSetCollectionType>(_CodeSets_QNAME, CodeSetCollectionType.class, null, value);
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "createResponse")
+    public JAXBElement<CreateResponseType> createCreateResponse(CreateResponseType value) {
+        return new JAXBElement<CreateResponseType>(_CreateResponse_QNAME, CreateResponseType.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link ZoneCollectionType }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link AlertType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "zones")
-    public JAXBElement<ZoneCollectionType> createZones(ZoneCollectionType value) {
-        return new JAXBElement<ZoneCollectionType>(_Zones_QNAME, ZoneCollectionType.class, null, value);
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "alert")
+    public JAXBElement<AlertType> createAlert(AlertType value) {
+        return new JAXBElement<AlertType>(_Alert_QNAME, AlertType.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link SubscriptionCollectionType }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "subscriptions")
+    public JAXBElement<SubscriptionCollectionType> createSubscriptions(SubscriptionCollectionType value) {
+        return new JAXBElement<SubscriptionCollectionType>(_Subscriptions_QNAME, SubscriptionCollectionType.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link ProvisionRequestType }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "provisionRequest")
+    public JAXBElement<ProvisionRequestType> createProvisionRequest(ProvisionRequestType value) {
+        return new JAXBElement<ProvisionRequestType>(_ProvisionRequest_QNAME, ProvisionRequestType.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link ErrorType }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "error")
+    public JAXBElement<ErrorType> createError(ErrorType value) {
+        return new JAXBElement<ErrorType>(_Error_QNAME, ErrorType.class, null, value);
     }
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link XqueryCollectionType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "xquerys")
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "xquerys")
     public JAXBElement<XqueryCollectionType> createXquerys(XqueryCollectionType value) {
         return new JAXBElement<XqueryCollectionType>(_Xquerys_QNAME, XqueryCollectionType.class, null, value);
     }
@@ -635,7 +626,7 @@ public class ObjectFactory {
      * Create an instance of {@link JAXBElement }{@code <}{@link QueueType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "queue")
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "queue")
     public JAXBElement<QueueType> createQueue(QueueType value) {
         return new JAXBElement<QueueType>(_Queue_QNAME, QueueType.class, null, value);
     }
@@ -644,7 +635,7 @@ public class ObjectFactory {
      * Create an instance of {@link JAXBElement }{@code <}{@link XqueryType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "xquery")
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "xquery")
     public JAXBElement<XqueryType> createXquery(XqueryType value) {
         return new JAXBElement<XqueryType>(_Xquery_QNAME, XqueryType.class, null, value);
     }
@@ -653,45 +644,72 @@ public class ObjectFactory {
      * Create an instance of {@link JAXBElement }{@code <}{@link DeleteRequestType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "deleteRequest")
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "deleteRequest")
     public JAXBElement<DeleteRequestType> createDeleteRequest(DeleteRequestType value) {
         return new JAXBElement<DeleteRequestType>(_DeleteRequest_QNAME, DeleteRequestType.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link AlertType }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link NamespaceType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "alert")
-    public JAXBElement<AlertType> createAlert(AlertType value) {
-        return new JAXBElement<AlertType>(_Alert_QNAME, AlertType.class, null, value);
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "namespace")
+    public JAXBElement<NamespaceType> createNamespace(NamespaceType value) {
+        return new JAXBElement<NamespaceType>(_Namespace_QNAME, NamespaceType.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link ProvisionRequestType }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link CodeSetCollectionType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "provisionRequest")
-    public JAXBElement<ProvisionRequestType> createProvisionRequest(ProvisionRequestType value) {
-        return new JAXBElement<ProvisionRequestType>(_ProvisionRequest_QNAME, ProvisionRequestType.class, null, value);
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "codeSets")
+    public JAXBElement<CodeSetCollectionType> createCodeSets(CodeSetCollectionType value) {
+        return new JAXBElement<CodeSetCollectionType>(_CodeSets_QNAME, CodeSetCollectionType.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link SubscriptionCollectionType }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link NamespaceCollectionType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "subscriptions")
-    public JAXBElement<SubscriptionCollectionType> createSubscriptions(SubscriptionCollectionType value) {
-        return new JAXBElement<SubscriptionCollectionType>(_Subscriptions_QNAME, SubscriptionCollectionType.class, null, value);
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "namespaces")
+    public JAXBElement<NamespaceCollectionType> createNamespaces(NamespaceCollectionType value) {
+        return new JAXBElement<NamespaceCollectionType>(_Namespaces_QNAME, NamespaceCollectionType.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link ErrorType }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link ZoneCollectionType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0", name = "error")
-    public JAXBElement<ErrorType> createError(ErrorType value) {
-        return new JAXBElement<ErrorType>(_Error_QNAME, ErrorType.class, null, value);
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "zones")
+    public JAXBElement<ZoneCollectionType> createZones(ZoneCollectionType value) {
+        return new JAXBElement<ZoneCollectionType>(_Zones_QNAME, ZoneCollectionType.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link ProviderType }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "provider")
+    public JAXBElement<ProviderType> createProvider(ProviderType value) {
+        return new JAXBElement<ProviderType>(_Provider_QNAME, ProviderType.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link CodeSetType }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "codeSet")
+    public JAXBElement<CodeSetType> createCodeSet(CodeSetType value) {
+        return new JAXBElement<CodeSetType>(_CodeSet_QNAME, CodeSetType.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link EnvironmentCollectionType }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", name = "environments")
+    public JAXBElement<EnvironmentCollectionType> createEnvironments(EnvironmentCollectionType value) {
+        return new JAXBElement<EnvironmentCollectionType>(_Environments_QNAME, EnvironmentCollectionType.class, null, value);
     }
 
 }

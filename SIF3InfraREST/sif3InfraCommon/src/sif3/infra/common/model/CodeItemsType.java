@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="codeItem" type="{http://www.sifassociation.org/infrastructure/3.0}codeItemType"/>
+ *         &lt;element name="codeItem" type="{http://www.sifassociation.org/infrastructure/3.0.1}codeItemType"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "codeItemsType", namespace = "http://www.sifassociation.org/infrastructure/3.0", propOrder = {
+@XmlType(name = "codeItemsType", namespace = "http://www.sifassociation.org/infrastructure/3.0.1", propOrder = {
     "codeItem"
 })
 public class CodeItemsType {
