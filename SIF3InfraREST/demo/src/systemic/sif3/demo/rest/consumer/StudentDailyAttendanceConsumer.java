@@ -1,8 +1,8 @@
 /*
- * StudentPersonalConsumer.java
- * Created: 03/09/2013
+ * StudentDailyAttendanceConsumer.java
+ * Created: 08/05/2014
  *
- * Copyright 2013 Systemic Pty Ltd
+ * Copyright 2014 Systemic Pty Ltd
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package systemic.sif3.demo.rest.consumer;
 
-import sif.dd.au30.model.StudentCollectionType;
+import sif.dd.au30.model.StudentDailyAttendanceCollectionType;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.UpdateType;
@@ -29,26 +29,25 @@ import systemic.sif3.demo.rest.ModelObjectConstants;
  * @author Joerg Huber
  *
  */
-public class StudentPersonalConsumer extends AUDataModelEventConsumer<StudentCollectionType>
+public class StudentDailyAttendanceConsumer extends AUDataModelEventConsumer<StudentDailyAttendanceCollectionType>
 {	
-    public StudentPersonalConsumer()
+    public StudentDailyAttendanceConsumer()
     {
 	    super();
     }
-	
 
 	/* (non-Javadoc)
      * @see sif3.common.interfaces.EventConsumer#createEventObject(java.lang.Object, sif3.common.header.HeaderValues.EventAction, sif3.common.header.HeaderValues.UpdateType)
      */
     @Override
-    public SIFEvent<StudentCollectionType> createEventObject(Object sifObjectList, EventAction eventAction, UpdateType updateType)
+    public SIFEvent<StudentDailyAttendanceCollectionType> createEventObject(Object sifObjectList, EventAction eventAction, UpdateType updateType)
     {
     	if (sifObjectList != null)
     	{
-	    	if (sifObjectList instanceof StudentCollectionType)
+	    	if (sifObjectList instanceof StudentDailyAttendanceCollectionType)
 	    	{
-	    		int size = ((StudentCollectionType)sifObjectList).getStudentPersonal().size();
-	    		return new SIFEvent<StudentCollectionType>((StudentCollectionType)sifObjectList, eventAction, updateType, size);
+	    		int size = ((StudentDailyAttendanceCollectionType)sifObjectList).getStudentDailyAttendance().size();
+	    		return new SIFEvent<StudentDailyAttendanceCollectionType>((StudentDailyAttendanceCollectionType)sifObjectList, eventAction, updateType, size);
 	    	}
 	    	else
 	    	{
@@ -62,25 +61,25 @@ public class StudentPersonalConsumer extends AUDataModelEventConsumer<StudentCol
 	    return null; // if something is wrong then we get here.
     }
     
-	/* (non-Javadoc)
-     * @see sif3.common.interfaces.DataModelLink#getSingleObjectClassInfo()
-     */
-    @Override
+	/*
+	 * (non-Javadoc)
+	 * @see sif3.common.interfaces.DataModelLink#getSingleObjectClassInfo()
+	 */
     public ModelObjectInfo getSingleObjectClassInfo()
     {
-	    return ModelObjectConstants.STUDENT_PERSONAL;
+	    return ModelObjectConstants.STUDENT_DAILY_ATTENDANCE;
     }
 
-	/* (non-Javadoc)
-     * @see sif3.common.interfaces.DataModelLink#getMultiObjectClassInfo()
-     */
-    @Override
+	/*
+	 * (non-Javadoc)
+	 * @see sif3.common.interfaces.DataModelLink#getMultiObjectClassInfo()
+	 */
     public ModelObjectInfo getMultiObjectClassInfo()
     {
-	    return ModelObjectConstants.STUDENT_PERSONALS;
+	    return ModelObjectConstants.STUDENT_DAILY_ATTENDANCES;
     }
-
-    /*
+	
+	/*
 	 * (non-Javadoc)
 	 * @see sif3.infra.rest.consumer.AbstractConsumer#shutdown()
 	 */

@@ -1,8 +1,8 @@
 /*
- * AUDataModelProvider.java
- * Created: 01/10/2013
+ * AUDataModelProviderWithEvents.java
+ * Created: 19/03/2014
  *
- * Copyright 2013 Systemic Pty Ltd
+ * Copyright 2014 Systemic Pty Ltd
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ import sif.dd.au30.conversion.DataModelMarshalFactory;
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
-import sif3.infra.rest.provider.BaseProvider;
+import sif3.infra.rest.provider.BaseEventProvider;
 
 /**
  * @author Joerg Huber
  *
  */
-public abstract class AUDataModelProvider extends BaseProvider
+public abstract class AUDataModelProviderWithEvents<L> extends BaseEventProvider<L>
 {
 	protected final Logger logger = Logger.getLogger(getClass());
 
@@ -38,8 +38,9 @@ public abstract class AUDataModelProvider extends BaseProvider
 	private static DataModelMarshalFactory marshaller = new DataModelMarshalFactory();
 
 	/**
+     * @param serviceID
      */
-    public AUDataModelProvider()
+    public AUDataModelProviderWithEvents()
     {
 	    super();
     }

@@ -18,6 +18,8 @@
 
 package systemic.sif3.demo.rest.consumer;
 
+import sif.dd.us30.conversion.DataModelMarshalFactoryUS;
+import sif.dd.us30.conversion.DataModelUnmarshalFactoryUS;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.conversion.UnmarshalFactory;
@@ -30,15 +32,9 @@ import systemic.sif3.demo.rest.ModelObjectConstantsUS;
  */
 public class StudentsConsumer extends AbstractConsumer
 {
-
-	/**
-     * @param serviceID
-     * @param marshaller
-     * @param unmarshaller
-     */
-    public StudentsConsumer(String serviceID, MarshalFactory marshaller, UnmarshalFactory unmarshaller)
+    public StudentsConsumer()
     {
-	    super(serviceID, marshaller, unmarshaller);
+	    super();
     }
 
 	/* (non-Javadoc)
@@ -68,12 +64,21 @@ public class StudentsConsumer extends AbstractConsumer
     }
 
 	/* (non-Javadoc)
-     * @see sif3.infra.rest.consumer.AbstractConsumer#removeEnvironments()
+     * @see sif3.common.interfaces.DataModelLink#getMarshaller()
      */
     @Override
-    public boolean removeEnvironments()
+    public MarshalFactory getMarshaller()
     {
-	    return false;
+	    return new DataModelMarshalFactoryUS();
+    }
+
+	/* (non-Javadoc)
+     * @see sif3.common.interfaces.DataModelLink#getUnmarshaller()
+     */
+    @Override
+    public UnmarshalFactory getUnmarshaller()
+    {
+	    return new DataModelUnmarshalFactoryUS();
     }
 
 }

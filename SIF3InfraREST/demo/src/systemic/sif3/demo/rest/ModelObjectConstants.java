@@ -18,7 +18,11 @@
 
 package systemic.sif3.demo.rest;
 
+import sif.dd.au30.model.SchoolCollectionType;
+import sif.dd.au30.model.SchoolInfoType;
 import sif.dd.au30.model.StudentCollectionType;
+import sif.dd.au30.model.StudentDailyAttendanceCollectionType;
+import sif.dd.au30.model.StudentDailyAttendanceType;
 import sif.dd.au30.model.StudentPersonalType;
 import sif3.common.conversion.ModelObjectInfo;
 
@@ -28,7 +32,10 @@ import sif3.common.conversion.ModelObjectInfo;
  */
 public class ModelObjectConstants
 {
-	public static final ModelObjectInfo STUDENT_PERSONALS = new ModelObjectInfo("StudentPesonals", StudentCollectionType.class);
-	public static final ModelObjectInfo STUDENT_PERSONAL = new ModelObjectInfo("StudentPersonal", StudentPersonalType.class);
-
+	public static final ModelObjectInfo STUDENT_PERSONALS         = new ModelObjectInfo("StudentPersonals", StudentCollectionType.class);
+	public static final ModelObjectInfo STUDENT_PERSONAL          = new ModelObjectInfo("StudentPersonal", StudentPersonalType.class);
+	public static final ModelObjectInfo SCHOOL_INFOS              = new ModelObjectInfo("SchoolInfos", SchoolCollectionType.class);
+	public static final ModelObjectInfo SCHOOL_INFO               = new ModelObjectInfo("SchoolInfo", SchoolInfoType.class);
+	public static final ModelObjectInfo STUDENT_DAILY_ATTENDANCES = new ModelObjectInfo("StudentDailyAttendances", StudentDailyAttendanceCollectionType.class);
+	public static final ModelObjectInfo STUDENT_DAILY_ATTENDANCE  = new ModelObjectInfo("StudentDailyAttendance", StudentDailyAttendanceType.class);
 }
