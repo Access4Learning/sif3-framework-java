@@ -67,7 +67,7 @@
 		<echo message="servlet.lib.dir: ${servlet.lib.dir}"/>
 		<echo message="servlet.lib: ${servlet.lib}"/>
 		<echo message="systemic.path: ${systemic.path}"/>
-		<echo message="tomcat.install.dir: ${tomcat.install.dir}"/>
+		<echo message="deploy.install.dir: ${deploy.install.dir}"/>
 		<echo message="frameworkversion: ${frameworkversion}"/>
 		<echo message="javaversion: ${javaversion}"/>
 		<echo message="jarprefix: ${jarprefix}"/>
@@ -237,11 +237,12 @@
 		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Infra-${elem}-${frameworkversion}.jar"/>
 	</target>
 
-	<!-- ********************** -->
-	<!-- Deploy to local Tomcat -->
-	<!-- ********************** -->
-	<target name="85-deploy-to-Local-Tomcat" depends="80-build-war" description="Deploy War to Local Tomcat">
-		<copy file="${dist.dir}/${app.name}.war" todir="${tomcat.install.dir}/webapps"/>
+	<!-- ************************************ -->
+	<!-- Deploy to local web or app container -->
+	<!-- ************************************ -->
+	<target name="85-deploy-to-Local-WebContainer" depends="80-build-war" description="Deploy War to Local Web Container">
+		<echo message="Copy ${dist.dir}/${app.name}.war to ${deploy.install.dir}"/>
+		<copy file="${dist.dir}/${app.name}.war" todir="${deploy.install.dir}"/>
 	</target>
 
 </project>
