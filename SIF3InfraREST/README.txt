@@ -24,9 +24,12 @@ provides a basic environment provider which is core to SIF3.
 The framework has some basic demo classes that illustrate how to use the framework. It also has a
 developer's guide that can be found in the "documentation/UserGuide" directory.
 
+There is a set of pre-built framework libraries in the "release" directory. Please refer to the developer's
+guide for more details an the libraries.
+
 NOTE:
-As of January 2014 the framework works for SIF3 with a DIRECT environment and IMMEDIATE responses. It
-doesn't support brokered or delayed response solutions, yet.
+As of May 17, 2014 the framework works for SIF3 with a DIRECT & BROKERED environment and IMMEDIATE responses. It
+doesn't support DELAYED responses, yet. It supports events in a BROKERED environment, though.
 
 #########################################################################################################
 # Version History and Update
@@ -101,12 +104,12 @@ Your code may break! Add the parameter 'boolean useAdvisory' to your provider cl
 Please refer to the latest SIF3 Specification for details what this value means.
 
 =====================================
-Version from 15/05/2014: MAJOR UPDATE
+Version from 17/05/2014: MAJOR UPDATE
 =====================================
 NOTE: 
-THIS IS A MAJOR UPDATE TO THE FRAMEWORK. 
+THIS IS A MAJOR UPDATE TO THE FRAMEWORK. THE JAR FILES IN THE RELEASE DIRECTORY SHOULD HAVE A VERSION OF v0.2-alpha.
 
-You should read through the installation instructions in theDeveloper's Guide in the directory 
+You should read through the installation instructions in the Developer's Guide in the directory 
 documentation/UserGuide(SIF3Framework_DevelopersGuide_v0.2.docx). If you have developed some consumer and/or provider 
 classes in the past and you want to use them you may have to change some of the method signatures to fix them up. Also 
 neither the consumer nor the provider constructor take any arguments anymore. The management of environments and their
