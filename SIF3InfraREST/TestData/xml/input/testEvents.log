@@ -1,0 +1,168 @@
+###
+StudentPersonals
+###
+<StudentPersonals xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+    <StudentPersonal RefId="2bc9ff83dbbe44e596da64b7271ec25e"
+        xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        <LocalId>879</LocalId>
+        <PersonInfo>
+            <Name Type="LGL">
+                <FamilyName>Barker</FamilyName>
+                <GivenName>Bob</GivenName>
+            </Name>
+        </PersonInfo>
+        <MostRecent>
+            <SchoolLocalId></SchoolLocalId>
+            <YearLevel></YearLevel>
+        </MostRecent>
+    </StudentPersonal>
+    <StudentPersonal RefId="399f1200f6034d8fbeda72a81b634639"
+        xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        <LocalId></LocalId>
+        <PersonInfo>
+            <Name Type="LGL">
+                <FamilyName></FamilyName>
+                <GivenName></GivenName>
+            </Name>
+        </PersonInfo>
+        <MostRecent>
+            <SchoolLocalId></SchoolLocalId>
+            <YearLevel></YearLevel>
+        </MostRecent>
+    </StudentPersonal>
+</StudentPersonals>
+###
+StudentPersonals
+###
+<StudentPersonals xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+    <StudentPersonal RefId="164da5d9bcbf4cf8a058ba0b0efde9ba"
+        xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        <LocalId>98765</LocalId>
+        <PersonInfo>
+            <Name Type="LGL">
+                <FamilyName>DAVEY</FamilyName>
+                <GivenName>Tim</GivenName>
+            </Name>
+        </PersonInfo>
+        <MostRecent>
+            <SchoolLocalId></SchoolLocalId>
+            <YearLevel></YearLevel>
+        </MostRecent>
+    </StudentPersonal>
+    <StudentPersonal RefId="24ed508e1ed04bba82198233efa55859"
+        xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        <LocalId>98765</LocalId>
+        <PersonInfo>
+            <Name Type="LGL">
+                <FamilyName>DAVEY</FamilyName>
+                <GivenName>Tim</GivenName>
+            </Name>
+        </PersonInfo>
+        <MostRecent>
+            <SchoolLocalId></SchoolLocalId>
+            <YearLevel></YearLevel>
+        </MostRecent>
+    </StudentPersonal>
+</StudentPersonals>
+###
+StudentDailyAttendances
+###
+<StudentDailyAttendances>
+  <StudentDailyAttendance RefId="2FFB63B4CFEF48208501E7D1E54555CB">
+    <StudentPersonalRefId>D3E34B359D75101A8C3D00AA001A1652
+    </StudentPersonalRefId>
+    <SchoolInfoRefId>CA285746359D75101A8C36432A901A16</SchoolInfoRefId>
+    <Date>2014-05-01</Date>
+    <SchoolYear>2014</SchoolYear>
+    <DayValue>AM</DayValue>
+    <AttendanceCode>
+      <Code>200</Code>
+      <OtherCodeList>
+        <OtherCode Codeset="Local">S</OtherCode>
+        <OtherCode Codeset="Text">C</OtherCode>
+      </OtherCodeList>
+    </AttendanceCode>
+    <AttendanceStatus>01</AttendanceStatus>
+    <TimeIn>10:30:00</TimeIn>
+    <TimeOut>12:00:00</TimeOut>
+    <AttendanceNote>Left for Orthodontist appt. and returned to school afterward
+    </AttendanceNote>
+  </StudentDailyAttendance>
+  <StudentDailyAttendance RefId="56EE63B4CFEF00CD8501E7D1E545A34F">
+    <StudentPersonalRefId>D3E34B359D75101A8C3D00AA001A1652
+    </StudentPersonalRefId>
+    <SchoolInfoRefId>CA285746359D75101A8C36432A901A16</SchoolInfoRefId>
+    <Date>2014-05-01</Date>
+    <SchoolYear>2014</SchoolYear>
+    <DayValue>PM</DayValue>
+    <AttendanceCode>
+      <Code>100</Code>
+      <OtherCodeList>
+        <OtherCode Codeset="Local">P</OtherCode>
+      </OtherCodeList>
+    </AttendanceCode>
+    <AttendanceStatus>NA</AttendanceStatus>
+    <TimeIn>13:30:00</TimeIn>
+    <TimeOut>15:00:00</TimeOut>
+  </StudentDailyAttendance>
+</StudentDailyAttendances>
+###
+StudentPersonals
+###
+<StudentPersonals xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+    <StudentPersonal RefId="2ae2d4a3a3c04d77ad843b73adac7747"
+        xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        <LocalId>98765</LocalId>
+        <PersonInfo>
+            <Name Type="LGL">
+                <FamilyName>DAVEY</FamilyName>
+                <GivenName>Tim</GivenName>
+            </Name>
+        </PersonInfo>
+        <MostRecent>
+            <SchoolLocalId></SchoolLocalId>
+            <YearLevel></YearLevel>
+        </MostRecent>
+    </StudentPersonal>
+</StudentPersonals>
+###
+SchoolInfos
+###
+<SchoolInfos xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+    <SchoolInfo RefId="D3E34B359D75101A8C3D00AA001A1651" xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        <LocalId>E1013</LocalId>
+        <StateProvinceId>01011234</StateProvinceId>
+        <SchoolType>Pri/Sec</SchoolType>
+        <ARIA>1.0</ARIA>
+        <SchoolSector>NG</SchoolSector>
+        <IndependentSchool>Y</IndependentSchool>
+        <NonGovSystemicStatus>S</NonGovSystemicStatus>
+        <System>0003</System>
+        <ReligiousAffiliation>2171</ReligiousAffiliation>
+    </SchoolInfo>
+</SchoolInfos>
+###
+StudentDailyAttendances
+###
+<StudentDailyAttendances>
+  <StudentDailyAttendance RefId="0AFD63B4CFEF4820698EE7D1E54500AA">
+    <StudentPersonalRefId>D3E34B359D75101A8C3D00AA001A1652
+    </StudentPersonalRefId>
+    <SchoolInfoRefId>CA285746359D75101A8C36432A901A16</SchoolInfoRefId>
+    <Date>2014-05-01</Date>
+    <SchoolYear>2014</SchoolYear>
+    <DayValue>PM</DayValue>
+    <AttendanceCode>
+      <Code>200</Code>
+      <OtherCodeList>
+        <OtherCode Codeset="Local">S</OtherCode>
+        <OtherCode Codeset="Text">C</OtherCode>
+      </OtherCodeList>
+    </AttendanceCode>
+    <AttendanceStatus>01</AttendanceStatus>
+    <TimeIn>13:30:00</TimeIn>
+    <TimeOut>12:00:00</TimeOut>
+    <AttendanceNote>Left for Dentist and returned to school afterward
+    </AttendanceNote>
+  </StudentDailyAttendance>
+</StudentDailyAttendances>
