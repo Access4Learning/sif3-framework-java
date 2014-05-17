@@ -1,7 +1,15 @@
 @echo off
 set LIB_PATH=..\..\lib
 set CONFIG_PATH=..\..\config
-set EXE_JAR_PATH=..\..\build\dist
+
+rem If you want to use the latest build then comment out the 
+set EXE_JAR_PATH=..\..\release
+
+rem ###############################################################################################################
+rem # If you want to use the latest build jar files then comment out the line above and un-comment the line below #
+rem ###############################################################################################################
+
+rem set EXE_JAR_PATH=..\build\dist
 
 set JVM_SETTINGS=
 
