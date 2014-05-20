@@ -197,6 +197,11 @@ public class AdapterEnvironmentStore implements Serializable
 			  		// Authentication Method
 			  		environment.setAuthMethod(adapterProperties.getPropertyAsString("env.authentication.method", AuthenticationMethod.Basic.name()));
 
+			  		if (!loadExistingEnvInfo(adapterProperties))
+			  		{
+			  			errors = true;
+			  		}
+			  		
 			  		if (!errors) // Read specific info
 					{
 						if (getEnvironment().getAdapterType() == AdapterType.CONSUMER)
@@ -348,6 +353,50 @@ public class AdapterEnvironmentStore implements Serializable
 		return true;
 	}
     
+    /*
+     * This method load information in relation to existing environments. If bits are missing or don't make sense then
+     * an error is logged and false is returned.
+     */
+	private boolean loadExistingEnvInfo(AdvancedProperties adapterProperties)
+  	{
+		environment.setUseExistingEnv(adapterProperties.getPropertyAsBool("env.use.existing", false));
+		environment.setExistingSessionToken(adapterProperties.getPropertyAsString("env.existing.sessionToken", null));
+		String envURI = adapterProperties.getPropertyAsString("env.existing.environmentURI", null);
+		
+		boolean allOK = true;
+		if (environment.getUseExistingEnv())
+		{
+			if (StringUtils.isEmpty(environment.getExistingSessionToken()))
+			{
+				logger.error("env.use.existing is set to true but no sessionToken has been provided. This is an invalid configuration in "+adapterProperties.getPropFileNameFull());
+				allOK = false;
+			}
+			if (StringUtils.isEmpty(envURI))
+			{
+				logger.error("env.use.existing is set to true but no existing environment URI has been provided. This is an invalid configuration in "+adapterProperties.getPropFileNameFull());
+				allOK = false;
+			}
+			if (allOK)
+			{
+				environment.setExistingEnvURI(envURI);
+				if (environment.getExistingEnvURI() == null)
+				{
+					logger.error("The URI given in the property env.existing.environmentURI appears to be invalid in "+adapterProperties.getPropFileNameFull());
+					allOK = false;
+				}
+			}
+		}
+		else
+		{
+			if (StringUtils.notEmpty(envURI))
+			{
+				environment.setExistingEnvURI(envURI);
+			}
+		}
+		return allOK;
+  	}
+
+		
     /*
      * This method read the following Consumer Adapter specific properties:
      * adapter.mustUseAdvisoryIDs=true

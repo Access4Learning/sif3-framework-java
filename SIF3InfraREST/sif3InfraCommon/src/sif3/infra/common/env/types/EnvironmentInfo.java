@@ -59,6 +59,11 @@ public class EnvironmentInfo implements Serializable
     private String    password              = null;
     private boolean eventsSupported = false;
     
+    // Properties for using an existing environment.
+    private boolean useExistingEnv = false;
+	private String existingSessionToken = null;
+    private URI existingEnvURI = null;
+    
 	/* 
      * This is a runtime value only. But it is stored here rather than in the session because it is valid for ALL sessions of that
      * environment.
@@ -242,6 +247,47 @@ public class EnvironmentInfo implements Serializable
 	  }
 	}
 
+    public boolean getUseExistingEnv()
+    {
+    	return this.useExistingEnv;
+    }
+
+	public void setUseExistingEnv(boolean useExistingEnv)
+    {
+    	this.useExistingEnv = useExistingEnv;
+    }
+
+	public String getExistingSessionToken()
+    {
+    	return this.existingSessionToken;
+    }
+
+	public void setExistingSessionToken(String existingSessionToken)
+    {
+    	this.existingSessionToken = existingSessionToken;
+    }
+
+	public URI getExistingEnvURI()
+    {
+    	return this.existingEnvURI;
+    }
+
+	public void setExistingEnvURI(URI existingEnvURI)
+    {
+    	this.existingEnvURI = existingEnvURI;
+    }
+
+	public void setExistingEnvURI(String existingEnvURI)
+    {
+		try
+		{
+			this.existingEnvURI = new URI(existingEnvURI);
+		}
+		catch (Exception ex)
+		{
+			this.existingEnvURI = null;
+		}
+    }
 
 	@Override
     public String toString()
@@ -252,7 +298,9 @@ public class EnvironmentInfo implements Serializable
 	            + this.environmentType + ", authMethod=" + this.authMethod
 	            + ", removeEnvOnShutdown=" + this.removeEnvOnShutdown + ", adapterName="
 	            + this.adapterName + ", environmentKey=" + this.environmentKey + ", password="
-	            + this.password + ", eventsSupported=" + this.eventsSupported
-	            + ", connectorBaseURIs=" + this.connectorBaseURIs + "]";
+	            + this.password + ", eventsSupported=" + this.eventsSupported + ", useExistingEnv="
+	            + this.useExistingEnv + ", existingSessionToken=" + this.existingSessionToken
+	            + ", existingEnvURI=" + this.existingEnvURI + ", connectorBaseURIs="
+	            + this.connectorBaseURIs + "]";
     }
 }
