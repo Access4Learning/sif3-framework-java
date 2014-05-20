@@ -18,11 +18,14 @@
 
 package systemic.sif3.demo.rest.consumer;
 
+import java.util.List;
+
 import sif.dd.au30.model.StudentDailyAttendanceCollectionType;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.model.SIFEvent;
+import sif3.common.model.ServiceInfo;
 import systemic.sif3.demo.rest.ModelObjectConstants;
 
 /**
@@ -34,6 +37,19 @@ public class StudentDailyAttendanceConsumer extends AUDataModelEventConsumer<Stu
     public StudentDailyAttendanceConsumer()
     {
 	    super();
+    }
+    
+    /*
+     * Here I could override/filter the event services I am interested in. Right now I do nothing and return them as they
+     * are. Note this overriding is optional.
+     * 
+     * (non-Javadoc)
+     * @see sif3.infra.rest.consumer.AbstractEventConsumer#filterEventServices(java.util.List)
+     */
+    @Override
+    public List<ServiceInfo> filterEventServices(List<ServiceInfo> envEventServices)
+    {
+    	return envEventServices;
     }
 
 	/* (non-Javadoc)
