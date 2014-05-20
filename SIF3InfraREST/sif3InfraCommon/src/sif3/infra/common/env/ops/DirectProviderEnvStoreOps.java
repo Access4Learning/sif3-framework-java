@@ -326,8 +326,13 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 				EnvironmentType templateEnv = loadEnvironmentFromTemplate(envInfo.getTemplateXMLFileName());
 				if (templateEnv != null)
 				{
+					// Ensure that all ACLs are updated.
+					reloadServiceInfo(environment, templateEnv);
+					
+					// Update infrastructure service URIs in case they have changed.
 					environment.setInfrastructureServices(templateEnv.getInfrastructureServices());
 					updateConnectorURLs(environment, envInfo, useSecured);
+					
 					
 					// Store the updated values. Note even if this fails it is no drama as it will be recreated the next
 					// time a consumer connects.
@@ -378,5 +383,10 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 		{
 			logger.error("Infrastructure Services not defined in environment template "+envInfo.getTemplateXMLFileName()+". This must be set.");
 		}
+	}
+	
+	private void reloadServiceInfo(EnvironmentType environment, EnvironmentType templEnv)
+	{
+		environment.setProvisionedZones(templEnv.getProvisionedZones());
 	}
 }
