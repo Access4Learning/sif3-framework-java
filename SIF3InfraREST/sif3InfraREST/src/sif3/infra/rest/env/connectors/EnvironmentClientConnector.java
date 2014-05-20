@@ -110,7 +110,7 @@ public class EnvironmentClientConnector
 
       // If we get here then environment is loaded from store. Attempt to connect => Get Environment from remote location.
       // This is needed because some things may have changed (i.e end-points) since the last time we were connected.
-      EnvironmentType remoteEnv = retrieveRemoteEnvironment(envInfo, sif3Session);
+      EnvironmentType remoteEnv = retrieveRemoteEnvironment(envInfo, sif3Session, false);
 
       if (remoteEnv != null) // All good. Store the latest version in the Environment Store.
       {
@@ -134,29 +134,63 @@ public class EnvironmentClientConnector
     }
     else // We have no session in workstore => create new environment with environment provider
     {
-      logger.debug("No Environment for " + envInfo.getEnvironmentName() + " exists. Attempt to create and connect ...");
-      EnvironmentType remoteEnv = createRemoteEnvironment(envInfo, template);
-      if (remoteEnv != null) // successfully created
-      {
-        localEnvironment = getEnvironmentManager().createOrUpdateEnvironment(remoteEnv);
+    	// Check if we shall use pre-existing environment or create a new one from scratch
+    	if (envInfo.getUseExistingEnv())
+    	{
+    		logger.debug("No Environment for " + envInfo.getEnvironmentName() + " exists. Attempt to connect to existing environment without creating it (use pre-existing) ...");
 
-        if (localEnvironment == null) // oops something is not good. => remove it again from remote location
-        {
-          logger.error("Environment has been created on remote location but not updated in Environment Store. Environment is deleted on remote location again");
-          removeRemoteEnvironment(envInfo, sif3Session); // error or info already logged
-          disconnect();
-          return false;       
-        }
+    		// Create a temporary SIF3 Session
+    		sif3Session = new SIF3Session();
+    		sif3Session.setSessionToken(envInfo.getExistingSessionToken());
+    		sif3Session.setPassword(envInfo.getPassword());
+    		
+    		// And try to retrieve environment from remote location.
+    		EnvironmentType remoteEnv = retrieveRemoteEnvironment(envInfo, sif3Session, true);
+			if (remoteEnv != null) // successfully retrieved
+			{
+				localEnvironment = getEnvironmentManager().createOrUpdateEnvironment(remoteEnv);
 
-        logger.debug("Successfully connected to environment: " + envInfo);
-        return true;
-      }
-      else
-      // not created. Error already logged.
-      {
-        disconnect();
-        return false;
-      }
+				if (localEnvironment == null) // oops something is not good. => disconnect
+				{
+					logger.error("Environment has been retrieved from remote location but not updated in Environment Store.");
+					disconnect();
+					return false;
+				}
+
+				logger.debug("Successfully connected to environment: " + envInfo);
+				return true;
+			}
+			else // not retrieved. Error already logged.
+			{
+				disconnect();
+				return false;
+			}	
+    	}
+    	else // create one from scratch. This is standard behaviour.
+    	{
+	      logger.debug("No Environment for " + envInfo.getEnvironmentName() + " exists. Attempt to create and connect ...");
+	      EnvironmentType remoteEnv = createRemoteEnvironment(envInfo, template);
+	      if (remoteEnv != null) // successfully created
+	      {
+	        localEnvironment = getEnvironmentManager().createOrUpdateEnvironment(remoteEnv);
+	
+	        if (localEnvironment == null) // oops something is not good. => remove it again from remote location
+	        {
+	          logger.error("Environment has been created on remote location but not updated in Environment Store. Environment is deleted on remote location again");
+	          removeRemoteEnvironment(envInfo, sif3Session); // error or info already logged
+	          disconnect();
+	          return false;       
+	        }
+	
+	        logger.debug("Successfully connected to environment: " + envInfo);
+	        return true;
+	      }
+	      else // not created. Error already logged.
+	      {
+	        disconnect();
+	        return false;
+	      }
+    	}
     }
   }
   
@@ -178,12 +212,20 @@ public class EnvironmentClientConnector
   /*---------------------*/
 
   // sif3Session cannot be null! Check before call. 
-  private EnvironmentType retrieveRemoteEnvironment(EnvironmentInfo envInfo, SIF3Session sif3Session)
+  private EnvironmentType retrieveRemoteEnvironment(EnvironmentInfo envInfo, SIF3Session sif3Session, boolean useExistingEnvURI)
   {
     Response response = null;
     try
     {
-    	EnvironmentClient client = new EnvironmentClient(envInfo.getConnectorBaseURI(ConnectorName.environment), envInfo, sif3Session);
+    	EnvironmentClient client = null;
+    	if (useExistingEnvURI)
+    	{
+    		client = new EnvironmentClient(envInfo.getExistingEnvURI(), envInfo, sif3Session);
+    	}
+    	else
+    	{
+    		client = new EnvironmentClient(envInfo.getConnectorBaseURI(ConnectorName.environment), envInfo, sif3Session);
+    	}
     	response = client.getEnvironment();
     }
     catch (ServiceInvokationException ex)
