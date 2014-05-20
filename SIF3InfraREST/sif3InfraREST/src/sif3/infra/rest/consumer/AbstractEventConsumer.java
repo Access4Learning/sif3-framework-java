@@ -135,15 +135,34 @@ public abstract class AbstractEventConsumer<L> extends AbstractConsumer implemen
     /*----------------------------*/
     /*-- Other required methods --*/
     /*----------------------------*/
+    /**
+     * This method is is called when the event processor is initialised. It passes all subscription services for the
+     * given OBJECT service across all zones for the connected environment to this method. It allows the specific OBJECT
+     * event consumer implementation to remove some of the subscription services it is not interested in. Basically it allows
+     * the implementor to filter out un-needed subscriptions before the event processor subscribes to the queues. Only
+     * events for the returned list of service info will then be received by the particular OBJECT service. Most standard
+     * implementations would not require any overriding of this method. If a specific implementation wishes to filter out
+     * some of the environment provided subscriptions then the sub-class of this class should override this method.
+     * 
+     * @param envEventServices A list of services for this OBJECT that is allowed to subscribe to events in across the 
+     *                         environment of this consumer.
+     * 
+     * @return The final list of event services for which this consumer class shall subscribe to.
+     */
+    public List<ServiceInfo> filterEventServices(List<ServiceInfo> envEventServices)
+    {
+    	return envEventServices;
+    }
+    
 	public final int getNumOfConsumerThreads()
 	{
 		return getServiceProperties().getPropertyAsInt("consumer.local.workerThread", getClass().getSimpleName(), 1);
 	}
 
-	public List<ServiceInfo> getEventServices()
+	protected final List<ServiceInfo> getEventServices()
 	{
 		SIF3Session sif3Session = ConsumerEnvironmentManager.getInstance().getSIF3Session();
-		return sif3Session.getServiceInfoForService(getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, AccessRight.SUBSCRIBE, ServiceRights.AccessType.APPROVED);
+		return filterEventServices(sif3Session.getServiceInfoForService(getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, AccessRight.SUBSCRIBE, ServiceRights.AccessType.APPROVED));
 	}
 
 	/**
