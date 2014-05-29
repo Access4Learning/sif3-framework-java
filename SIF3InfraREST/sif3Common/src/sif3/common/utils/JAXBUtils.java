@@ -123,6 +123,25 @@ public class JAXBUtils
 		return sw.toString();
     }
 
+    /**
+     * This is a convenience method so that JAXB Contexts can be initialised at any time. This proves to be
+     * particular useful to avoid lengthy startup times for some classes when they hit the marshaller and
+     * unmarshaller methods for the first time.
+     * 
+     * @param clazz The class for which the JAXBContext shall be configured.
+     */
+    public static synchronized void initCtx(Class<?> clazz)
+    {
+    	try
+    	{
+    		getContext(clazz);
+    	}
+    	catch (Exception ex)
+    	{
+    		logger.error("Failed to initialise JAXBContext for "+clazz.getSimpleName()+": "+ex.getLocalizedMessage());
+    	}
+    }
+    
 	/*---------------------*/
     /*-- Private Methods --*/
     /*---------------------*/	
