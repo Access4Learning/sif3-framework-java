@@ -201,13 +201,13 @@ public class InfraMarshalFactory implements MarshalFactory
 	@Override
 	public String marshalToJSON(Object obj) throws MarshalException
 	{
-    InfraModel infraModel = InfraObjectEnum.getInfraModelEnum(obj);
-    if (infraModel != null)
-    {
-      // TODO: JH - Implement from JSON marshaller
-    }
+	    InfraModel infraModel = InfraObjectEnum.getInfraModelEnum(obj);
+	    if (infraModel != null)
+	    {
+	      // TODO: JH - Implement from JSON marshaller
+	    }
 		logger.warn("Marshal to JSON not supported, yet");
-    throw new MarshalException("Marshal Object to JSON not implemented, yet");
+	    throw new MarshalException("Marshal Object to JSON not implemented, yet");
 	}
 
 	/* (non-Javadoc)
@@ -218,17 +218,17 @@ public class InfraMarshalFactory implements MarshalFactory
 	{
 		if (mediaType != null)
 		{
-			if (mediaType.equals(MediaType.APPLICATION_XML_TYPE))
+			if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) || 
+				MediaType.TEXT_XML_TYPE.isCompatible(mediaType))
 			{
 				return marshalToXML(obj);
 			}
-			else if (mediaType.equals(MediaType.APPLICATION_JSON_TYPE))
+			else if (MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType))
 			{
 				return marshalToJSON(obj);
-			} 
+			}
 		}
-		
 		// If we get here then we deal with an unknown media type
-		throw new MarshalException("Unsupported media type: "+mediaType+". Cannot marshal the given input to this media type.");
+		throw new MarshalException("Unsupported media type: " + mediaType + ". Cannot marshal the given input to this media type.");
 	}
 }

@@ -198,13 +198,13 @@ public class InfraUnmarshalFactory implements UnmarshalFactory
 	@Override
 	public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException
 	{
-    InfraModel infraModel = InfraObjectEnum.getInfraModelEnum(clazz.getSimpleName());
-    if (infraModel != null)
-    {
-      // TODO: JH - Implement from JSON unmarshaller
-    }
-    logger.warn("Unmarshal from JSON not supported, yet");
-    throw new UnmarshalException("Unmarshal Object from JSON not implemented, yet");
+	    InfraModel infraModel = InfraObjectEnum.getInfraModelEnum(clazz.getSimpleName());
+	    if (infraModel != null)
+	    {
+	      // TODO: JH - Implement from JSON unmarshaller
+	    }
+	    logger.warn("Unmarshal from JSON not supported, yet");
+	    throw new UnmarshalException("Unmarshal Object from JSON not implemented, yet");
 	}
 
 	/* (non-Javadoc)
@@ -215,17 +215,19 @@ public class InfraUnmarshalFactory implements UnmarshalFactory
 	{
 		if (mediaType != null)
 		{
-			if (mediaType.equals(MediaType.APPLICATION_XML_TYPE))
+			if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) || 
+				MediaType.TEXT_XML_TYPE.isCompatible(mediaType)  || 
+				MediaType.TEXT_PLAIN_TYPE.isCompatible(mediaType))
 			{
 				return unmarshalFromXML(payload, clazz);
 			}
-			else if (mediaType.equals(MediaType.APPLICATION_JSON_TYPE))
+			else if (MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType))
 			{
 				return unmarshalFromJSON(payload, clazz);
-			} 
+			}
 		}
-		
+
 		// If we get here then we deal with an unknown media type
-		throw new UnmarshalException("Unsupported media type: "+mediaType+". Cannot unmarshal the given input from this media type.");
+		throw new UnmarshalException("Unsupported media type: " + mediaType + ". Cannot unmarshal the given input from this media type.");
 	}
 }
