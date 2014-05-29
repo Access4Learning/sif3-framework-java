@@ -34,6 +34,7 @@ import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
+import sif3.common.utils.JAXBUtils;
 import sif3.infra.rest.consumer.AbstractEventConsumer;
 import au.com.systemic.framework.utils.DateUtils;
 
@@ -65,6 +66,10 @@ public abstract class AUDataModelEventConsumer<L> extends AbstractEventConsumer<
 		{
 			writePayload = getServiceProperties().getPropertyAsBool("test.consumer.write.payload", true);
 		}
+		
+		//Initialise JAXB context for these classes. Make data processor behave better against race conditions.
+		JAXBUtils.initCtx(getMultiObjectClassInfo().getObjectType());
+		JAXBUtils.initCtx(getSingleObjectClassInfo().getObjectType());
 	}
 
 	/* (non-Javadoc)
@@ -73,10 +78,10 @@ public abstract class AUDataModelEventConsumer<L> extends AbstractEventConsumer<
     @Override
     public void processEvent(SIFEvent<L> sifEvent, SIFZone zone, SIFContext context, String msgReadID, String consumerID)
     {
-    	String consumerName = getPrettyName()+"(QueueID:"+msgReadID+"; ConsumerID:"+consumerID+")";
+    	String consumerName = getPrettyName()+"(QueueID:"+msgReadID+"; ConsumerID: "+consumerID+")";
     	
     	// We know from the framework that zone and context is never null. For the time being we just log the event.
-    	logger.debug(consumerName +" received an event from Zone =  "+zone.getId()+" and Context = "+context.getId());
+    	logger.debug(consumerName +" received an event from Zone = "+zone.getId()+" and Context = "+context.getId());
     	dumpObject(sifEvent, zone, context, msgReadID, consumerID);
     	
     	// Pretend to be busy for a long time to test threading
@@ -115,6 +120,7 @@ public abstract class AUDataModelEventConsumer<L> extends AbstractEventConsumer<
 	
     private void dumpObject(SIFEvent<L> sifEvent, SIFZone zone, SIFContext context, String msgReadID, String consumerID)
     {
+//    	logger.debug(consumerID +" write data to file...");
         String filename = getFileNameOnly(consumerID);
     	String fullFileName= getFullFileName(consumerID);
         Integer recordNum = recordCounters.get(filename);
@@ -131,7 +137,7 @@ public abstract class AUDataModelEventConsumer<L> extends AbstractEventConsumer<
             FileWriter fstream = new FileWriter(fullFileName, true);
             out = new BufferedWriter(fstream);
             out.write(RECORD_MARKER);
-            out.write("Record " + recordNum + " - processed by Thread ID = "+Thread.currentThread().getId()+"\n"+sifEvent.getEventAction().name()+" Event from Queue Reader "+ msgReadID+"\nReceived at "+timestamp+" from Zone = "+zone.getId()+" and Context = "+context.getId());
+            out.write("Record " + recordNum + " - processed by Thread ID = "+Thread.currentThread().getId()+"\n"+sifEvent.getListSize()+" "+sifEvent.getEventAction().name()+" Events from Queue Reader "+ msgReadID+"\nReceived at "+timestamp+" from Zone = "+zone.getId()+" and Context = "+context.getId());
             out.write(RECORD_MARKER);
             if (writePayload)
             {
@@ -154,6 +160,7 @@ public abstract class AUDataModelEventConsumer<L> extends AbstractEventConsumer<
                 }
                 catch (Exception ex) {} // nothing we can do
             }
+//        	logger.debug(consumerID +" data written.");
         }
     }
     
