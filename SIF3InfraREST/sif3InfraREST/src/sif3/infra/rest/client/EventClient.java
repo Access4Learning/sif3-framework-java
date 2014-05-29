@@ -197,8 +197,7 @@ public class EventClient extends BaseClient
 			{
 				hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_UPDATE_TYPE, updateType.name());
 			}
-		}
-	
+		}	
 		
 		if ((zone == null) || (zone.getIsDefault()) || StringUtils.isEmpty(zone.getId())) // Assume default zone!
 		{
