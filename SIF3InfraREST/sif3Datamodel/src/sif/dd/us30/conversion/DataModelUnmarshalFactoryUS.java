@@ -115,11 +115,13 @@ public class DataModelUnmarshalFactoryUS  implements UnmarshalFactory
     {
 		if (mediaType != null)
 		{
-			if (mediaType.equals(MediaType.APPLICATION_XML_TYPE))
+			if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) || 
+				MediaType.TEXT_XML_TYPE.isCompatible(mediaType)  || 
+				MediaType.TEXT_PLAIN_TYPE.isCompatible(mediaType))
 			{
 				return unmarshalFromXML(payload, clazz);
 			}
-			else if (mediaType.equals(MediaType.APPLICATION_JSON_TYPE))
+			else if (MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType))
 			{
 				return unmarshalFromJSON(payload, clazz);
 			}

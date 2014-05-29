@@ -106,20 +106,16 @@ public class DataModelMarshalFactory implements MarshalFactory
 	{
 		if (mediaType != null)
 		{
-			if (mediaType.equals(MediaType.APPLICATION_XML_TYPE))
+			if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) || 
+				MediaType.TEXT_XML_TYPE.isCompatible(mediaType))
 			{
 				return marshalToXML(obj);
 			}
-			if (mediaType.equals(MediaType.TEXT_XML_TYPE))
-			{
-				return marshalToXML(obj);
-			}
-			else if (mediaType.equals(MediaType.APPLICATION_JSON_TYPE))
+			else if (MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType))
 			{
 				return marshalToJSON(obj);
 			}
 		}
-
 		// If we get here then we deal with an unknown media type
 		throw new MarshalException("Unsupported media type: " + mediaType + ". Cannot marshal the given input to this media type.");
 	}
