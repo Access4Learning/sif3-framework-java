@@ -2,6 +2,7 @@
 package sif.dd.au30.model;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,7 +16,6 @@ import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
@@ -199,7 +199,7 @@ public class Sif3AssessmentFormType {
     @XmlElementRef(name = "FormVersion", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> formVersion;
     @XmlElementRef(name = "FormPublishDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> formPublishDate;
+    protected JAXBElement<Calendar> formPublishDate;
     @XmlElementRef(name = "AssessmentType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> assessmentType;
     @XmlElement(name = "FormName", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
@@ -268,10 +268,10 @@ public class Sif3AssessmentFormType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getFormPublishDate() {
+    public JAXBElement<Calendar> getFormPublishDate() {
         return formPublishDate;
     }
 
@@ -280,10 +280,10 @@ public class Sif3AssessmentFormType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setFormPublishDate(JAXBElement<XMLGregorianCalendar> value) {
+    public void setFormPublishDate(JAXBElement<Calendar> value) {
         this.formPublishDate = value;
     }
 

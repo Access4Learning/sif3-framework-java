@@ -2,6 +2,7 @@
 package sif.dd.au30.model;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -12,7 +13,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
@@ -240,9 +240,10 @@ public class LifeCycleType {
     })
     public static class Created {
 
-        @XmlElement(name = "DateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+        @XmlElement(name = "DateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = String.class)
+        @XmlJavaTypeAdapter(Adapter1 .class)
         @XmlSchemaType(name = "dateTime")
-        protected XMLGregorianCalendar dateTime;
+        protected Calendar dateTime;
         @XmlElementRef(name = "Creators", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
         protected JAXBElement<LifeCycleType.Created.Creators> creators;
 
@@ -251,10 +252,10 @@ public class LifeCycleType {
          * 
          * @return
          *     possible object is
-         *     {@link XMLGregorianCalendar }
+         *     {@link String }
          *     
          */
-        public XMLGregorianCalendar getDateTime() {
+        public Calendar getDateTime() {
             return dateTime;
         }
 
@@ -263,10 +264,10 @@ public class LifeCycleType {
          * 
          * @param value
          *     allowed object is
-         *     {@link XMLGregorianCalendar }
+         *     {@link String }
          *     
          */
-        public void setDateTime(XMLGregorianCalendar value) {
+        public void setDateTime(Calendar value) {
             this.dateTime = value;
         }
 
@@ -558,9 +559,10 @@ public class LifeCycleType {
             @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
             @XmlSchemaType(name = "normalizedString")
             protected String by;
-            @XmlElement(name = "DateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+            @XmlElement(name = "DateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = String.class)
+            @XmlJavaTypeAdapter(Adapter1 .class)
             @XmlSchemaType(name = "dateTime")
-            protected XMLGregorianCalendar dateTime;
+            protected Calendar dateTime;
             @XmlElementRef(name = "Description", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
             protected JAXBElement<String> description;
 
@@ -593,10 +595,10 @@ public class LifeCycleType {
              * 
              * @return
              *     possible object is
-             *     {@link XMLGregorianCalendar }
+             *     {@link String }
              *     
              */
-            public XMLGregorianCalendar getDateTime() {
+            public Calendar getDateTime() {
                 return dateTime;
             }
 
@@ -605,10 +607,10 @@ public class LifeCycleType {
              * 
              * @param value
              *     allowed object is
-             *     {@link XMLGregorianCalendar }
+             *     {@link String }
              *     
              */
-            public void setDateTime(XMLGregorianCalendar value) {
+            public void setDateTime(Calendar value) {
                 this.dateTime = value;
             }
 

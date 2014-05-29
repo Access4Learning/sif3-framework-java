@@ -2,6 +2,7 @@
 package sif.dd.au30.model;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,7 +16,6 @@ import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
@@ -141,7 +141,7 @@ public class Sif3AssessmentAssetType {
     @XmlElementRef(name = "AssetVersion", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> assetVersion;
     @XmlElementRef(name = "AssetPublishDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> assetPublishDate;
+    protected JAXBElement<Calendar> assetPublishDate;
     @XmlElementRef(name = "AssetIdentifiers", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<Sif3AssessmentAssetType.AssetIdentifiers> assetIdentifiers;
     @XmlElementRef(name = "AssetName", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
@@ -198,10 +198,10 @@ public class Sif3AssessmentAssetType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getAssetPublishDate() {
+    public JAXBElement<Calendar> getAssetPublishDate() {
         return assetPublishDate;
     }
 
@@ -210,10 +210,10 @@ public class Sif3AssessmentAssetType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setAssetPublishDate(JAXBElement<XMLGregorianCalendar> value) {
+    public void setAssetPublishDate(JAXBElement<Calendar> value) {
         this.assetPublishDate = value;
     }
 

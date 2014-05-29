@@ -2,6 +2,7 @@
 package sif.dd.au30.model;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -13,7 +14,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
@@ -99,9 +99,9 @@ public class TimeElementType {
     @XmlSchemaType(name = "normalizedString")
     protected String value;
     @XmlElementRef(name = "StartDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> startDateTime;
+    protected JAXBElement<Calendar> startDateTime;
     @XmlElementRef(name = "EndDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> endDateTime;
+    protected JAXBElement<Calendar> endDateTime;
     @XmlElementRef(name = "SpanGaps", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<TimeElementType.SpanGaps> spanGaps;
     @XmlElement(name = "IsCurrent", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
@@ -208,10 +208,10 @@ public class TimeElementType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getStartDateTime() {
+    public JAXBElement<Calendar> getStartDateTime() {
         return startDateTime;
     }
 
@@ -220,10 +220,10 @@ public class TimeElementType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setStartDateTime(JAXBElement<XMLGregorianCalendar> value) {
+    public void setStartDateTime(JAXBElement<Calendar> value) {
         this.startDateTime = value;
     }
 
@@ -232,10 +232,10 @@ public class TimeElementType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getEndDateTime() {
+    public JAXBElement<Calendar> getEndDateTime() {
         return endDateTime;
     }
 
@@ -244,10 +244,10 @@ public class TimeElementType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setEndDateTime(JAXBElement<XMLGregorianCalendar> value) {
+    public void setEndDateTime(JAXBElement<Calendar> value) {
         this.endDateTime = value;
     }
 
@@ -425,9 +425,9 @@ public class TimeElementType {
             @XmlSchemaType(name = "normalizedString")
             protected String value;
             @XmlElementRef(name = "StartDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-            protected JAXBElement<XMLGregorianCalendar> startDateTime;
+            protected JAXBElement<Calendar> startDateTime;
             @XmlElementRef(name = "EndDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-            protected JAXBElement<XMLGregorianCalendar> endDateTime;
+            protected JAXBElement<Calendar> endDateTime;
 
             /**
              * Gets the value of the type property.
@@ -530,10 +530,10 @@ public class TimeElementType {
              * 
              * @return
              *     possible object is
-             *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+             *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
              *     
              */
-            public JAXBElement<XMLGregorianCalendar> getStartDateTime() {
+            public JAXBElement<Calendar> getStartDateTime() {
                 return startDateTime;
             }
 
@@ -542,10 +542,10 @@ public class TimeElementType {
              * 
              * @param value
              *     allowed object is
-             *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+             *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
              *     
              */
-            public void setStartDateTime(JAXBElement<XMLGregorianCalendar> value) {
+            public void setStartDateTime(JAXBElement<Calendar> value) {
                 this.startDateTime = value;
             }
 
@@ -554,10 +554,10 @@ public class TimeElementType {
              * 
              * @return
              *     possible object is
-             *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+             *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
              *     
              */
-            public JAXBElement<XMLGregorianCalendar> getEndDateTime() {
+            public JAXBElement<Calendar> getEndDateTime() {
                 return endDateTime;
             }
 
@@ -566,10 +566,10 @@ public class TimeElementType {
              * 
              * @param value
              *     allowed object is
-             *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+             *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
              *     
              */
-            public void setEndDateTime(JAXBElement<XMLGregorianCalendar> value) {
+            public void setEndDateTime(JAXBElement<Calendar> value) {
                 this.endDateTime = value;
             }
 

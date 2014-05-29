@@ -2,6 +2,7 @@
 package sif.dd.au30.model;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -14,7 +15,6 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
@@ -101,15 +101,16 @@ public class AssessmentAdministrationType {
     protected JAXBElement<String> administrationName;
     @XmlElementRef(name = "SpecialConditions", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<AssessmentAdministrationType.SpecialConditions> specialConditions;
-    @XmlElement(name = "AdministrationDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+    @XmlElement(name = "AdministrationDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = String.class)
+    @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar administrationDateTime;
+    protected Calendar administrationDateTime;
     @XmlElementRef(name = "StartDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> startDateTime;
+    protected JAXBElement<Calendar> startDateTime;
     @XmlElementRef(name = "FinishDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> finishDateTime;
+    protected JAXBElement<Calendar> finishDateTime;
     @XmlElementRef(name = "DueDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> dueDateTime;
+    protected JAXBElement<Calendar> dueDateTime;
     @XmlElementRef(name = "Address", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<AddressType> address;
     @XmlElementRef(name = "StaffPersonalRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
@@ -203,10 +204,10 @@ public class AssessmentAdministrationType {
      * 
      * @return
      *     possible object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public XMLGregorianCalendar getAdministrationDateTime() {
+    public Calendar getAdministrationDateTime() {
         return administrationDateTime;
     }
 
@@ -215,10 +216,10 @@ public class AssessmentAdministrationType {
      * 
      * @param value
      *     allowed object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public void setAdministrationDateTime(XMLGregorianCalendar value) {
+    public void setAdministrationDateTime(Calendar value) {
         this.administrationDateTime = value;
     }
 
@@ -227,10 +228,10 @@ public class AssessmentAdministrationType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getStartDateTime() {
+    public JAXBElement<Calendar> getStartDateTime() {
         return startDateTime;
     }
 
@@ -239,10 +240,10 @@ public class AssessmentAdministrationType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setStartDateTime(JAXBElement<XMLGregorianCalendar> value) {
+    public void setStartDateTime(JAXBElement<Calendar> value) {
         this.startDateTime = value;
     }
 
@@ -251,10 +252,10 @@ public class AssessmentAdministrationType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getFinishDateTime() {
+    public JAXBElement<Calendar> getFinishDateTime() {
         return finishDateTime;
     }
 
@@ -263,10 +264,10 @@ public class AssessmentAdministrationType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setFinishDateTime(JAXBElement<XMLGregorianCalendar> value) {
+    public void setFinishDateTime(JAXBElement<Calendar> value) {
         this.finishDateTime = value;
     }
 
@@ -275,10 +276,10 @@ public class AssessmentAdministrationType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getDueDateTime() {
+    public JAXBElement<Calendar> getDueDateTime() {
         return dueDateTime;
     }
 
@@ -287,10 +288,10 @@ public class AssessmentAdministrationType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setDueDateTime(JAXBElement<XMLGregorianCalendar> value) {
+    public void setDueDateTime(JAXBElement<Calendar> value) {
         this.dueDateTime = value;
     }
 

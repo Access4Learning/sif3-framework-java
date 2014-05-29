@@ -2,6 +2,7 @@
 package sif.dd.au30.model;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,7 +16,6 @@ import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
@@ -143,7 +143,7 @@ public class Sif3AssessmentScoreTableType {
     @XmlElementRef(name = "ScoreTableVersion", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> scoreTableVersion;
     @XmlElementRef(name = "ScoreTablePublishDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> scoreTablePublishDate;
+    protected JAXBElement<Calendar> scoreTablePublishDate;
     @XmlElementRef(name = "ScoreTableIdentifiers", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<Sif3AssessmentScoreTableType.ScoreTableIdentifiers> scoreTableIdentifiers;
     @XmlElement(name = "ScoreTableName", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
@@ -189,10 +189,10 @@ public class Sif3AssessmentScoreTableType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getScoreTablePublishDate() {
+    public JAXBElement<Calendar> getScoreTablePublishDate() {
         return scoreTablePublishDate;
     }
 
@@ -201,10 +201,10 @@ public class Sif3AssessmentScoreTableType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setScoreTablePublishDate(JAXBElement<XMLGregorianCalendar> value) {
+    public void setScoreTablePublishDate(JAXBElement<Calendar> value) {
         this.scoreTablePublishDate = value;
     }
 

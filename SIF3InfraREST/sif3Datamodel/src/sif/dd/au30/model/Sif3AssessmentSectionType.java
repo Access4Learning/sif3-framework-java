@@ -2,6 +2,7 @@
 package sif.dd.au30.model;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,7 +16,6 @@ import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
@@ -154,7 +154,7 @@ public class Sif3AssessmentSectionType {
     @XmlElementRef(name = "SectionVersion", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> sectionVersion;
     @XmlElementRef(name = "SectionPublishDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> sectionPublishDate;
+    protected JAXBElement<Calendar> sectionPublishDate;
     @XmlElementRef(name = "SectionIdentifiers", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<Sif3AssessmentSectionType.SectionIdentifiers> sectionIdentifiers;
     @XmlElementRef(name = "SectionName", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
@@ -213,10 +213,10 @@ public class Sif3AssessmentSectionType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getSectionPublishDate() {
+    public JAXBElement<Calendar> getSectionPublishDate() {
         return sectionPublishDate;
     }
 
@@ -225,10 +225,10 @@ public class Sif3AssessmentSectionType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setSectionPublishDate(JAXBElement<XMLGregorianCalendar> value) {
+    public void setSectionPublishDate(JAXBElement<Calendar> value) {
         this.sectionPublishDate = value;
     }
 

@@ -2,6 +2,7 @@
 package sif.dd.au30.model;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -226,13 +227,14 @@ public class Sif3AssessmentRegistrationType {
     protected JAXBElement<String> assessmentSessionRefId;
     @XmlElementRef(name = "AssessmentFormRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> assessmentFormRefId;
-    @XmlElement(name = "CreationDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+    @XmlElement(name = "CreationDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = String.class)
+    @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar creationDateTime;
+    protected Calendar creationDateTime;
     @XmlElementRef(name = "StartDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> startDateTime;
+    protected JAXBElement<Calendar> startDateTime;
     @XmlElementRef(name = "EndDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> endDateTime;
+    protected JAXBElement<Calendar> endDateTime;
     @XmlElementRef(name = "AssessmentPlatform", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> assessmentPlatform;
     @XmlElementRef(name = "DaysOfInstruction", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
@@ -246,7 +248,7 @@ public class Sif3AssessmentRegistrationType {
     @XmlElementRef(name = "TestingStatuses", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<Sif3AssessmentRegistrationType.TestingStatuses> testingStatuses;
     @XmlElementRef(name = "ScorePublishDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> scorePublishDate;
+    protected JAXBElement<Calendar> scorePublishDate;
     @XmlElementRef(name = "StudentGradeLevel", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<YearLevelType> studentGradeLevel;
     @XmlElementRef(name = "AssessmentGradeLevel", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
@@ -352,10 +354,10 @@ public class Sif3AssessmentRegistrationType {
      * 
      * @return
      *     possible object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public XMLGregorianCalendar getCreationDateTime() {
+    public Calendar getCreationDateTime() {
         return creationDateTime;
     }
 
@@ -364,10 +366,10 @@ public class Sif3AssessmentRegistrationType {
      * 
      * @param value
      *     allowed object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public void setCreationDateTime(XMLGregorianCalendar value) {
+    public void setCreationDateTime(Calendar value) {
         this.creationDateTime = value;
     }
 
@@ -376,10 +378,10 @@ public class Sif3AssessmentRegistrationType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getStartDateTime() {
+    public JAXBElement<Calendar> getStartDateTime() {
         return startDateTime;
     }
 
@@ -388,10 +390,10 @@ public class Sif3AssessmentRegistrationType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setStartDateTime(JAXBElement<XMLGregorianCalendar> value) {
+    public void setStartDateTime(JAXBElement<Calendar> value) {
         this.startDateTime = value;
     }
 
@@ -400,10 +402,10 @@ public class Sif3AssessmentRegistrationType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getEndDateTime() {
+    public JAXBElement<Calendar> getEndDateTime() {
         return endDateTime;
     }
 
@@ -412,10 +414,10 @@ public class Sif3AssessmentRegistrationType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setEndDateTime(JAXBElement<XMLGregorianCalendar> value) {
+    public void setEndDateTime(JAXBElement<Calendar> value) {
         this.endDateTime = value;
     }
 
@@ -568,10 +570,10 @@ public class Sif3AssessmentRegistrationType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getScorePublishDate() {
+    public JAXBElement<Calendar> getScorePublishDate() {
         return scorePublishDate;
     }
 
@@ -580,10 +582,10 @@ public class Sif3AssessmentRegistrationType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setScorePublishDate(JAXBElement<XMLGregorianCalendar> value) {
+    public void setScorePublishDate(JAXBElement<Calendar> value) {
         this.scorePublishDate = value;
     }
 

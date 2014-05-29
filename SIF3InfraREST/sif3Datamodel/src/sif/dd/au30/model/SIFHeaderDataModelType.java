@@ -1,6 +1,7 @@
 
 package sif.dd.au30.model;
 
+import java.util.Calendar;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -10,7 +11,6 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
@@ -86,9 +86,10 @@ public class SIFHeaderDataModelType {
     @XmlElement(name = "SIF_MsgId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String sifMsgId;
-    @XmlElement(name = "SIF_Timestamp", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+    @XmlElement(name = "SIF_Timestamp", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = String.class)
+    @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar sifTimestamp;
+    protected Calendar sifTimestamp;
     @XmlElementRef(name = "SIF_Security", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFHeaderDataModelType.SIFSecurity> sifSecurity;
     @XmlElement(name = "SIF_SourceId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
@@ -128,10 +129,10 @@ public class SIFHeaderDataModelType {
      * 
      * @return
      *     possible object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public XMLGregorianCalendar getSIFTimestamp() {
+    public Calendar getSIFTimestamp() {
         return sifTimestamp;
     }
 
@@ -140,10 +141,10 @@ public class SIFHeaderDataModelType {
      * 
      * @param value
      *     allowed object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public void setSIFTimestamp(XMLGregorianCalendar value) {
+    public void setSIFTimestamp(Calendar value) {
         this.sifTimestamp = value;
     }
 

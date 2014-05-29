@@ -3,6 +3,7 @@ package sif.dd.au30.model;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -16,7 +17,6 @@ import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
@@ -147,7 +147,7 @@ public class Sif3AssessmentRubricType {
     @XmlElementRef(name = "RubricVersion", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> rubricVersion;
     @XmlElementRef(name = "RubricPublishDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> rubricPublishDate;
+    protected JAXBElement<Calendar> rubricPublishDate;
     @XmlElementRef(name = "RubricIdentifiers", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<Sif3AssessmentRubricType.RubricIdentifiers> rubricIdentifiers;
     @XmlElement(name = "RubricName", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
@@ -195,10 +195,10 @@ public class Sif3AssessmentRubricType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getRubricPublishDate() {
+    public JAXBElement<Calendar> getRubricPublishDate() {
         return rubricPublishDate;
     }
 
@@ -207,10 +207,10 @@ public class Sif3AssessmentRubricType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setRubricPublishDate(JAXBElement<XMLGregorianCalendar> value) {
+    public void setRubricPublishDate(JAXBElement<Calendar> value) {
         this.rubricPublishDate = value;
     }
 

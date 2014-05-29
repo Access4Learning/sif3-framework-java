@@ -2,6 +2,7 @@
 package sif.dd.au30.model;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,7 +16,6 @@ import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
@@ -128,13 +128,13 @@ public class Sif3AssessmentSessionType {
     @XmlElementRef(name = "UnusualEvents", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<Sif3AssessmentSessionType.UnusualEvents> unusualEvents;
     @XmlElementRef(name = "ScheduledStartDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> scheduledStartDateTime;
+    protected JAXBElement<Calendar> scheduledStartDateTime;
     @XmlElementRef(name = "ScheduledEndDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> scheduledEndDateTime;
+    protected JAXBElement<Calendar> scheduledEndDateTime;
     @XmlElementRef(name = "ActualStartDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> actualStartDateTime;
+    protected JAXBElement<Calendar> actualStartDateTime;
     @XmlElementRef(name = "ActualEndDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> actualEndDateTime;
+    protected JAXBElement<Calendar> actualEndDateTime;
     @XmlElementRef(name = "Address", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<AddressType> address;
     @XmlElementRef(name = "AssessmentAdministrationRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
@@ -235,10 +235,10 @@ public class Sif3AssessmentSessionType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getScheduledStartDateTime() {
+    public JAXBElement<Calendar> getScheduledStartDateTime() {
         return scheduledStartDateTime;
     }
 
@@ -247,10 +247,10 @@ public class Sif3AssessmentSessionType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setScheduledStartDateTime(JAXBElement<XMLGregorianCalendar> value) {
+    public void setScheduledStartDateTime(JAXBElement<Calendar> value) {
         this.scheduledStartDateTime = value;
     }
 
@@ -259,10 +259,10 @@ public class Sif3AssessmentSessionType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getScheduledEndDateTime() {
+    public JAXBElement<Calendar> getScheduledEndDateTime() {
         return scheduledEndDateTime;
     }
 
@@ -271,10 +271,10 @@ public class Sif3AssessmentSessionType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setScheduledEndDateTime(JAXBElement<XMLGregorianCalendar> value) {
+    public void setScheduledEndDateTime(JAXBElement<Calendar> value) {
         this.scheduledEndDateTime = value;
     }
 
@@ -283,10 +283,10 @@ public class Sif3AssessmentSessionType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getActualStartDateTime() {
+    public JAXBElement<Calendar> getActualStartDateTime() {
         return actualStartDateTime;
     }
 
@@ -295,10 +295,10 @@ public class Sif3AssessmentSessionType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setActualStartDateTime(JAXBElement<XMLGregorianCalendar> value) {
+    public void setActualStartDateTime(JAXBElement<Calendar> value) {
         this.actualStartDateTime = value;
     }
 
@@ -307,10 +307,10 @@ public class Sif3AssessmentSessionType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getActualEndDateTime() {
+    public JAXBElement<Calendar> getActualEndDateTime() {
         return actualEndDateTime;
     }
 
@@ -319,10 +319,10 @@ public class Sif3AssessmentSessionType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setActualEndDateTime(JAXBElement<XMLGregorianCalendar> value) {
+    public void setActualEndDateTime(JAXBElement<Calendar> value) {
         this.actualEndDateTime = value;
     }
 

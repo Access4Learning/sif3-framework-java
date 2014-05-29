@@ -2,6 +2,7 @@
 package sif.dd.au30.model;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -103,9 +104,10 @@ public class AssessmentRegistrationType {
     @XmlElement(name = "AssessmentAdministrationRefId", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String assessmentAdministrationRefId;
-    @XmlElement(name = "CreationDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+    @XmlElement(name = "CreationDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = String.class)
+    @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar creationDateTime;
+    protected Calendar creationDateTime;
     @XmlElementRef(name = "StudentSpecialConditions", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<AssessmentRegistrationType.StudentSpecialConditions> studentSpecialConditions;
     @XmlElementRef(name = "StudentYearLevel", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
@@ -181,10 +183,10 @@ public class AssessmentRegistrationType {
      * 
      * @return
      *     possible object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public XMLGregorianCalendar getCreationDateTime() {
+    public Calendar getCreationDateTime() {
         return creationDateTime;
     }
 
@@ -193,10 +195,10 @@ public class AssessmentRegistrationType {
      * 
      * @param value
      *     allowed object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public void setCreationDateTime(XMLGregorianCalendar value) {
+    public void setCreationDateTime(Calendar value) {
         this.creationDateTime = value;
     }
 

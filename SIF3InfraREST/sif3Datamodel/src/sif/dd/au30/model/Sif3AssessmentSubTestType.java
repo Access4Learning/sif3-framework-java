@@ -3,6 +3,7 @@ package sif.dd.au30.model;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -16,7 +17,6 @@ import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
@@ -171,7 +171,7 @@ public class Sif3AssessmentSubTestType {
     @XmlElementRef(name = "SubTestVersion", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<String> subTestVersion;
     @XmlElementRef(name = "SubTestPublishDate", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
-    protected JAXBElement<XMLGregorianCalendar> subTestPublishDate;
+    protected JAXBElement<Calendar> subTestPublishDate;
     @XmlElementRef(name = "SubTestIdentifiers", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<Sif3AssessmentSubTestType.SubTestIdentifiers> subTestIdentifiers;
     @XmlElement(name = "SubTestName", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
@@ -237,10 +237,10 @@ public class Sif3AssessmentSubTestType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public JAXBElement<XMLGregorianCalendar> getSubTestPublishDate() {
+    public JAXBElement<Calendar> getSubTestPublishDate() {
         return subTestPublishDate;
     }
 
@@ -249,10 +249,10 @@ public class Sif3AssessmentSubTestType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link XMLGregorianCalendar }{@code >}
+     *     {@link JAXBElement }{@code <}{@link Calendar }{@code >}
      *     
      */
-    public void setSubTestPublishDate(JAXBElement<XMLGregorianCalendar> value) {
+    public void setSubTestPublishDate(JAXBElement<Calendar> value) {
         this.subTestPublishDate = value;
     }
 

@@ -1,6 +1,7 @@
 
 package sif.dd.au30.model;
 
+import java.util.Calendar;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -554,9 +555,10 @@ public class StudentPeriodAttendanceType {
 
         @XmlElement(name = "CreationUser", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
         protected StudentPeriodAttendanceType.AuditInfo.CreationUser creationUser;
-        @XmlElement(name = "CreationDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3")
+        @XmlElement(name = "CreationDateTime", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = String.class)
+        @XmlJavaTypeAdapter(Adapter1 .class)
         @XmlSchemaType(name = "dateTime")
-        protected XMLGregorianCalendar creationDateTime;
+        protected Calendar creationDateTime;
 
         /**
          * Gets the value of the creationUser property.
@@ -587,10 +589,10 @@ public class StudentPeriodAttendanceType {
          * 
          * @return
          *     possible object is
-         *     {@link XMLGregorianCalendar }
+         *     {@link String }
          *     
          */
-        public XMLGregorianCalendar getCreationDateTime() {
+        public Calendar getCreationDateTime() {
             return creationDateTime;
         }
 
@@ -599,10 +601,10 @@ public class StudentPeriodAttendanceType {
          * 
          * @param value
          *     allowed object is
-         *     {@link XMLGregorianCalendar }
+         *     {@link String }
          *     
          */
-        public void setCreationDateTime(XMLGregorianCalendar value) {
+        public void setCreationDateTime(Calendar value) {
             this.creationDateTime = value;
         }
 
