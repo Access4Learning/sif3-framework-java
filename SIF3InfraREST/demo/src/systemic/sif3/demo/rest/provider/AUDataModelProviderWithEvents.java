@@ -24,6 +24,7 @@ import sif.dd.au30.conversion.DataModelMarshalFactory;
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
+import sif3.common.utils.JAXBUtils;
 import sif3.infra.rest.provider.BaseEventProvider;
 
 /**
@@ -43,6 +44,10 @@ public abstract class AUDataModelProviderWithEvents<L> extends BaseEventProvider
     public AUDataModelProviderWithEvents()
     {
 	    super();
+	    
+		//Initialise JAXB context for these classes. Make provider behave better against race conditions.
+		JAXBUtils.initCtx(getMultiObjectClassInfo().getObjectType());
+		JAXBUtils.initCtx(getSingleObjectClassInfo().getObjectType());
     }
 
 	/*
