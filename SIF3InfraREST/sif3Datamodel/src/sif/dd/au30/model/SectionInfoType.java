@@ -15,7 +15,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
- * This object provides information about the section—
+ * This object provides information about the section
  * 
  * <p>Java class for SectionInfoType complex type.
  * 

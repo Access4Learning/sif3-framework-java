@@ -18,7 +18,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * 
- *         This purpose of this object is to define and communicate the subject or distinct piece of curriculum that needs to be scheduled by the time table generator.  This is a new object proposed to meet SIF-AU needs.  Reviews of the existing specifications identified two relevant objects – SchoolCourseInfo, defined in SIF US 2.2 specification and SchoolGroup, defined within the SIF UK 1.1 specification.  These objects appear to have some similar context but seem overly complex considering that Australian requirements, which are limited to the Student Administration System or Curriculum Delivery System providing base information to the Time Tabling application about what curriculum offerings are being proposed.
+ *         This purpose of this object is to define and communicate the subject or distinct piece of curriculum that needs to be scheduled by the time table generator.  This is a new object proposed to meet SIF-AU needs.  Reviews of the existing specifications identified two relevant objects - SchoolCourseInfo, defined in SIF US 2.2 specification and SchoolGroup, defined within the SIF UK 1.1 specification.  These objects appear to have some similar context but seem overly complex considering that Australian requirements, which are limited to the Student Administration System or Curriculum Delivery System providing base information to the Time Tabling application about what curriculum offerings are being proposed.
  * 
  *         When this data is sent in a Request/Response only those subjects that are relevant to be scheduled (or active), should be sent to the TimeTabling application.
  *       
