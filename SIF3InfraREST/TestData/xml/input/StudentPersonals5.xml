@@ -1,6 +1,6 @@
-<StudentPersonals xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+<StudentPersonals xmlns="http://www.sifassociation.org/au/datamodel/1.3">
     <StudentPersonal RefId="164da5d9bcbf4cf8a058ba0b0efde9ba"
-        xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        xmlns="http://www.sifassociation.org/au/datamodel/1.3">
         <LocalId>98765</LocalId>
         <PersonInfo>
             <Name Type="LGL">
@@ -14,7 +14,7 @@
         </MostRecent>
     </StudentPersonal>
     <StudentPersonal RefId="24ed508e1ed04bba82198233efa55859"
-        xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        xmlns="http://www.sifassociation.org/au/datamodel/1.3">
         <LocalId>98765</LocalId>
         <PersonInfo>
             <Name Type="LGL">
@@ -28,7 +28,7 @@
         </MostRecent>
     </StudentPersonal>
     <StudentPersonal RefId="2ae2d4a3a3c04d77ad843b73adac7747"
-        xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        xmlns="http://www.sifassociation.org/au/datamodel/1.3">
         <LocalId>98765</LocalId>
         <PersonInfo>
             <Name Type="LGL">
@@ -42,7 +42,7 @@
         </MostRecent>
     </StudentPersonal>
     <StudentPersonal RefId="2bc9ff83dbbe44e596da64b7271ec25e"
-        xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        xmlns="http://www.sifassociation.org/au/datamodel/1.3">
         <LocalId>879</LocalId>
         <PersonInfo>
             <Name Type="LGL">
@@ -56,7 +56,7 @@
         </MostRecent>
     </StudentPersonal>
     <StudentPersonal RefId="399f1200f6034d8fbeda72a81b634639"
-        xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        xmlns="http://www.sifassociation.org/au/datamodel/1.3">
         <LocalId></LocalId>
         <PersonInfo>
             <Name Type="LGL">
