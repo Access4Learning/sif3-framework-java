@@ -27,8 +27,8 @@ import sif3.common.CommonConstants;
 import sif3.common.interfaces.EventProvider;
 import sif3.common.interfaces.Provider;
 import sif3.infra.common.env.mgr.ProviderManagerFactory;
-import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
+import sif3.infra.common.env.types.ProviderEnvironment;
 import au.com.systemic.framework.utils.AdvancedProperties;
 
 /**
