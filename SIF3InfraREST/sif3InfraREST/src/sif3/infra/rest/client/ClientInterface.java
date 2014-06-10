@@ -18,6 +18,7 @@ package sif3.infra.rest.client;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
@@ -289,7 +290,13 @@ public class ClientInterface extends BaseClient
 			{
 				QueryMetadata query = new QueryMetadata();
 				query.setPagingInfo(pagingInfo);
-				service = service.queryParams(query.getQueryParametersAsMultivaluedMap());
+				Map<String, String> queryParameters = query.getQueryParameters();
+				for (String key : queryParameters.keySet())
+				{
+				  service = service.queryParam(key, queryParameters.get(key));
+				}
+				
+				//service = service.queryParams(query.getQueryParametersAsMultivaluedMap());
 			}
 			
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
