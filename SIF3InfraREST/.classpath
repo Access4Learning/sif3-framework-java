@@ -23,8 +23,6 @@
 	<classpathentry kind="lib" path="lib/log4j/log4j.jar"/>
 	<classpathentry kind="lib" path="lib/log4j/slf4j-api-1.5.8.jar"/>
 	<classpathentry kind="lib" path="lib/log4j/slf4j-log4j12-1.5.8.jar"/>
-	<classpathentry kind="lib" path="lib/jersey/jersey-core-1.17.1.jar"/>
-	<classpathentry kind="lib" path="lib/jersey/jersey-client-1.17.1.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/hibernate3.jar"/>
 	<classpathentry kind="lib" path="lib/xml/dom4j-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/jdbc/mysql.jar"/>
@@ -34,5 +32,8 @@
 	<classpathentry kind="lib" path="lib/hibernate/hibernate-jpa-2.0-api-1.0.1.Final.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/jta-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/systemic/systemic-framework-20140410.jar"/>
+	<classpathentry kind="lib" path="lib/jersey/jersey-client-1.17.1.jar"/>
+	<classpathentry kind="lib" path="lib/jersey/jersey-core-1.17.1.jar"/>
+	<classpathentry kind="lib" path="lib/common/commons-codec-1.9.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
