@@ -23,10 +23,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.core.MultivaluedMap;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
+
 
 /**
- * Utility class used by the provider to extract URL parameters relating to paging information, query informatione etc. In essence this 
+ * Utility class used by the provider to extract URL parameters relating to paging information, query information etc. In essence this 
  * class helps extracting and adding URL query parameters (everything after the '?' in a URL).
  * @author Joerg Huber
  *
@@ -154,25 +154,6 @@ public class QueryMetadata implements Serializable
 		return params;
 	}
 
-	/**
-	 * This method behaves the same as getQueryParameters() but instead of a Map it returns a  MultivaluedMap that is more user-friendly 
-	 * when it comes to REST URIs and parameters. All other assumptions and constraints are the same as in getQueryParameters().<p><p>
-	 * 
-	 * This is a pure convenience method.<p><p>
-	 * 
-	 * @return See desc of getQueryParameters().
-	 */
-	public MultivaluedMap<String, String> getQueryParametersAsMultivaluedMap()
-	{
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		Map<String, String> queryParams = getQueryParameters();
-		for (String attr : queryParams.keySet())
-		{
-			params.putSingle(attr, queryParams.get(attr));
-		}
-
-		return params;
-	}
 
 	@Override
 	public String toString()
