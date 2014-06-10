@@ -23,11 +23,11 @@ import java.nio.charset.Charset;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.codec.binary.Base64;
+
 import sif3.common.model.AuthenticationInfo;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import au.com.systemic.framework.utils.StringUtils;
-
-import com.sun.jersey.core.util.Base64;
 
 /**
  * This calls provides a few useful methods for SIF3 specific authentication functions.
@@ -65,7 +65,9 @@ public class AuthenticationUtils
 	 */
 	public static String base64Encode(String username, String password)
 	{
-		return new String(Base64.encode(username+":"+password), Charset.forName("ASCII"));
+//		return new String(Base64.encode(username+":"+password), Charset.forName("ASCII"));
+		String token = username+":"+password;
+		return new String(Base64.encodeBase64(token.getBytes()), Charset.forName("ASCII"));
 	}
 	
 	/**
@@ -82,7 +84,9 @@ public class AuthenticationUtils
 	 */
 	public static String getSIFHMACSHA256Token(String username, String password, String dateAsISO8601)
 	{
-		return AuthenticationMethod.SIF_HMACSHA256.toString()+" "+new String(Base64.encode(username+":"+hmacsha256Base64(username+":"+dateAsISO8601, password)), Charset.forName("ASCII"));
+//		return AuthenticationMethod.SIF_HMACSHA256.toString()+" "+new String(Base64.encode(username+":"+hmacsha256Base64(username+":"+dateAsISO8601, password)), Charset.forName("ASCII"));
+		String token = username+":"+hmacsha256Base64(username+":"+dateAsISO8601, password);
+		return AuthenticationMethod.SIF_HMACSHA256.toString()+" "+new String(Base64.encodeBase64(token.getBytes()), Charset.forName("ASCII"));
 	}
 	
 	/**
@@ -96,7 +100,8 @@ public class AuthenticationUtils
 	 */
 	public static String hmacsha256Base64(String message, String key)
 	{
-		return new String(Base64.encode(hmacsha256AsBytes(message, key)), Charset.forName("ASCII"));
+//		return new String(Base64.encode(hmacsha256AsBytes(message, key)), Charset.forName("ASCII"));
+		return new String(Base64.encodeBase64(hmacsha256AsBytes(message, key)), Charset.forName("ASCII"));
 	}
 	
 	/**
@@ -209,7 +214,8 @@ public class AuthenticationUtils
 	{
 		if (token != null)
 		{
-			String decodedStr = new String(Base64.decode(token), Charset.forName("ASCII"));
+//			String decodedStr = new String(Base64.decode(token), Charset.forName("ASCII"));
+			String decodedStr = new String(Base64.decodeBase64(token), Charset.forName("ASCII"));
 			int splitPos = decodedStr.indexOf(":");
 			
 			return ((splitPos>0) ? new String[]{decodedStr.substring(0, splitPos), decodedStr.substring(splitPos+1)} : new String[]{decodedStr});			
