@@ -22,8 +22,8 @@ import java.io.Serializable;
 import au.com.systemic.framework.utils.StringUtils;
 
 /**
- * This class is a basic POJO to tncapsulates the components of an environment key. In SIF3 an environment is uniquely identified by a maximum 
- * of 4 componenst. Not all 4 components are required, though. SolutionID and applicationKey are the mandatory elements of an environment key as 
+ * This class is a basic POJO to encapsulate the components of an environment key. In SIF3 an environment is uniquely identified by a maximum 
+ * of 4 components. Not all 4 components are required, though. SolutionID and applicationKey are the mandatory elements of an environment key as 
  * per SIF3 specification, but the userToken and instanceId can be provided to further identify an environment for certain cases. Please refer 
  * to the SIF3 Specification on details about environments. 
  * 
