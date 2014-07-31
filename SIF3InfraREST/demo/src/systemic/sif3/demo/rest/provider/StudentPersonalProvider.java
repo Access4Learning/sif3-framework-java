@@ -30,6 +30,7 @@ import sif.dd.au30.model.StudentPersonalType;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
+import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.PagingInfo;
@@ -82,6 +83,10 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 			{
 				ex.printStackTrace();
 			}
+      catch (UnsupportedMediaTypeExcpetion ex)
+      {
+        ex.printStackTrace();
+      }
 	    }
     }
 
