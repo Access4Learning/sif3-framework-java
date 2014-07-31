@@ -141,7 +141,7 @@ public abstract class AUDataModelEventConsumer<L> extends AbstractEventConsumer<
             out.write(RECORD_MARKER);
             if (writePayload)
             {
-            	out.write(getMarshaller().marschal(sifEvent.getSIFObjectList(), MediaType.APPLICATION_XML_TYPE));
+            	out.write(getMarshaller().marshal(sifEvent.getSIFObjectList(), MediaType.APPLICATION_XML_TYPE));
             }
             recordNum++;
             recordCounters.put(filename, recordNum);
