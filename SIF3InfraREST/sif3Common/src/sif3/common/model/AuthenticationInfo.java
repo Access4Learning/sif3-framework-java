@@ -31,7 +31,7 @@ public class AuthenticationInfo implements Serializable
   private static final long serialVersionUID = -8736784141972585133L;
 
   /* Defines valid authentication methods for SIF 3.0 */
-  public enum AuthenticationMethod {Basic, SIF_HMACSHA256};
+  public enum AuthenticationMethod {Basic, SIF_HMACSHA256, Bearer};
 
   private AuthenticationMethod authMethod = AuthenticationMethod.Basic;
   private String userToken = null;
