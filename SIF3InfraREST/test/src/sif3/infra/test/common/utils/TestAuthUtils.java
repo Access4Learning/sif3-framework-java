@@ -30,6 +30,18 @@ import au.com.systemic.framework.utils.DateUtils;
  */
 public class TestAuthUtils
 {
+	private void testGetBasicAuthToken()
+	{
+//		System.out.println("Basic Auth String: "+AuthenticationUtils.getBasicAuthToken("new", "guest"));	
+    System.out.println("Basic Auth String: "+AuthenticationUtils.getBasicAuthToken("2f47fd0c-fbc5-4a6e-a779-de7633624a67", "Password1"));  
+	}
+
+	 private void testGetBearerAuthToken()
+	  {
+	    System.out.println("Basic Auth String: "+AuthenticationUtils.getBearerAuthToken("2f47fd0c-fbc5-4a6e-a779-de7633624a67", "Password1"));  
+	  }
+
+	
 	private void testHMACSHA256()
 	{
 //		String message = "Message";
@@ -124,6 +136,15 @@ public class TestAuthUtils
 		System.out.println("Auth Method: '"+AuthenticationUtils.extractAuthenticationMethod(authToken)+"' Token: '"+token+"'");	
 		splitValues = AuthenticationUtils.splitValuesFromBase64(token);
 		System.out.println("Left Side: '"+splitValues[0]+"'   Right Side: '"+splitValues[1]+"'");
+
+	   System.out.println("");
+	   authToken = AuthenticationUtils.getBearerAuthToken(username, password);
+	   System.out.println("Bearer Auth Token for username/password: "+username+"/"+password+": " + authToken);
+	   token = AuthenticationUtils.extractAuthToken(authToken);    
+	   System.out.println("Auth Method: '"+AuthenticationUtils.extractAuthenticationMethod(authToken)+"' Token: '"+token+"'"); 
+	   splitValues = AuthenticationUtils.splitValuesFromBase64(token);
+	   System.out.println("Left Side: '"+splitValues[0]+"'   Right Side: '"+splitValues[1]+"'");
+	   System.out.println("All parts of Auth Token: "+AuthenticationUtils.getPartsFromAuthToken(authToken));
 	}
 	
 	private void testGetPartsFromAuthToken()
@@ -145,12 +166,14 @@ public class TestAuthUtils
 		System.out.println("Start Testing TestAuthUtils...");
 		try
 		{
+			tester.testGetBasicAuthToken();
+			tester.testGetBearerAuthToken();
 			//tester.testHMACSHA256();
 			//tester.testHMACSHA256Stress();
 			//tester.testHMACSHA256Token();
 			//tester.testHMACSHA256TokenStress();
-			//tester.testExtractMethods();
-			tester.testGetPartsFromAuthToken();
+			tester.testExtractMethods();
+			//tester.testGetPartsFromAuthToken();
 		}
 		catch (Exception ex)
 		{
