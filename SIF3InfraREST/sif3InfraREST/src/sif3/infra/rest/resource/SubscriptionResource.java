@@ -20,7 +20,6 @@ package sif3.infra.rest.resource;
 
 import java.util.HashMap;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -32,10 +31,11 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.Status;
 
 import sif3.common.exception.UnmarshalException;
+import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.ErrorDetails;
@@ -56,7 +56,7 @@ import sif3.infra.common.model.SubscriptionType;
  * 
  * @author Joerg Huber
  */
-@Path("/subscriptions")
+@Path("/subscriptions{mimeType:(\\.[^/]*?)?}")
 public class SubscriptionResource extends InfraResource
 {
 	/* Below variables are for testing purposes only */
@@ -67,9 +67,12 @@ public class SubscriptionResource extends InfraResource
 
 	public SubscriptionResource(@Context UriInfo uriInfo,
             			 		@Context HttpHeaders requestHeaders,
-            			 		@Context Request request)
+            			 		@Context Request request,
+       			                @PathParam("mimeType") String mimeType)
 	{
 		super(uriInfo, requestHeaders, request, "", null, null);
+	    setURLPostfixMediaType(mimeType);
+	    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
 	}
 
 	/*----------------------*/
@@ -93,7 +96,8 @@ public class SubscriptionResource extends InfraResource
      * Get all Subscriptions for this environment.
      */
 	@GET
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//Let everything through and then deal with it when needed. 
+//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getAllSubscriptions()
 	{
@@ -125,14 +129,17 @@ public class SubscriptionResource extends InfraResource
      * Get a specific subscription for this environment.
      */
 	@GET
-	@Path("{subscriptionID}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("{subscriptionID}{mimeType:(\\.[^/]*?)?}")
+//  Let everything through and then deal with it when needed. 
+//  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getSubscription(@PathParam("subscriptionID") String subscriptionID)
+	public Response getSubscription(@PathParam("subscriptionID") String subscriptionID,
+                                    @PathParam("mimeType") String mimeType)
 	{
+	    setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Get Subscription by subscription ID (REST GET - Single): "+subscriptionID);
+			logger.debug("Get Subscription by subscription ID (REST GET - Single): "+subscriptionID+" and URL Postfix mimeType = '" + mimeType + "'");
 		}
 		if (isTestMode())
 		{
@@ -161,7 +168,8 @@ public class SubscriptionResource extends InfraResource
      * Create a Subscription for this environment.
      */
 	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//Let everything through and then deal with it when needed. 
+//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response createSubscription(String payload)
 	{
@@ -178,7 +186,7 @@ public class SubscriptionResource extends InfraResource
 			}
 			try
 			{
-				SubscriptionType inputSubscription = (SubscriptionType)getInfraUnmarshaller().unmarschal(payload, SubscriptionType.class, getMediaType());
+				SubscriptionType inputSubscription = (SubscriptionType)getInfraUnmarshaller().unmarshal(payload, SubscriptionType.class, getRequestMediaType());
 				inputSubscription.setId(UUIDGenerator.getUUID());
 				subscriptionsSet.put(inputSubscription.getId(), inputSubscription);
 				
@@ -190,6 +198,12 @@ public class SubscriptionResource extends InfraResource
 				logger.error("Subscription Payload: "+ payload);
 				return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal subscription payload: "+ ex.getMessage()), ResponseAction.CREATE);
 			}
+      catch (UnsupportedMediaTypeExcpetion ex)
+      {
+        logger.error("Failed to unmarshal payload into an SubscriptionType: "+ ex.getMessage(), ex);
+        logger.error("Subscription Payload: "+ payload);
+        return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal subscription payload: "+ ex.getMessage()), ResponseAction.CREATE);
+      }
 		}
 		else
 		{
@@ -201,14 +215,17 @@ public class SubscriptionResource extends InfraResource
 	 * Delete a specific queue.
 	 */
 	@DELETE
-	@Path("{subscriptionID}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("{subscriptionID}{mimeType:(\\.[^/]*?)?}")
+//  Let everything through and then deal with it when needed. 
+//  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response removeSubscription(@PathParam("subscriptionID") String subscriptionID)
+	public Response removeSubscription(@PathParam("subscriptionID") String subscriptionID,
+                                       @PathParam("mimeType") String mimeType)
 	{
+	    setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Remove Subscription (REST DELETE - Single) with subscriptionID = "+subscriptionID);
+			logger.debug("Remove Subscription (REST DELETE - Single) with subscriptionID = "+subscriptionID+" and URL Postfix mimeType = '" + mimeType + "'");
 		}
 		if (isTestMode())
 		{

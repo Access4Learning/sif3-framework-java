@@ -23,7 +23,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.MatrixParam;
@@ -41,6 +40,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import sif3.common.exception.UnmarshalException;
+import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.header.HeaderValues;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.ResponseHeaderConstants;
@@ -71,7 +71,7 @@ import au.com.systemic.framework.utils.StringUtils;
  * 
  * @author Joerg Huber
  */
-@Path("/queues")
+@Path("/queues{mimeType:(\\.[^/]*?)?}")
 public class QueueResource extends InfraResource
 {
 	private String deleteMessageId = null;
@@ -90,10 +90,13 @@ public class QueueResource extends InfraResource
 	public QueueResource(@Context UriInfo uriInfo,
             			 @Context HttpHeaders requestHeaders,
             			 @Context Request request,
-            			 @MatrixParam("deleteMessageId") String deleteMessageId)
+            			 @MatrixParam("deleteMessageId") String deleteMessageId,
+			             @PathParam("mimeType") String mimeType)
 	{
 		super(uriInfo, requestHeaders, request, "", null, null);
 		this.deleteMessageId = deleteMessageId;
+	    setURLPostfixMediaType(mimeType);
+	    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
 	}
 
 	/*----------------------*/
@@ -117,7 +120,8 @@ public class QueueResource extends InfraResource
      * Get all Queues for this environment.
      */
 	@GET
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//Let everything through and then deal with it when needed. 
+//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getAllQueues()
 	{
@@ -150,14 +154,17 @@ public class QueueResource extends InfraResource
      * Get a specific Queues for this environment.
      */
 	@GET
-	@Path("{queueID}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("{queueID}{mimeType:(\\.[^/]*?)?}")
+//  Let everything through and then deal with it when needed. 
+//  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getQueue(@PathParam("queueID") String queueID)
+	public Response getQueue(@PathParam("queueID") String queueID,
+							 @PathParam("mimeType") String mimeType)
 	{
+	    setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Get Queue by Queue ID (REST GET - Single): "+queueID);
+			logger.debug("Get Queue by Queue ID (REST GET - Single): "+queueID+" and URL Postfix mime type = '"+mimeType+"'");
 		}
 		if (isTestMode())
 		{
@@ -185,7 +192,8 @@ public class QueueResource extends InfraResource
      * Create a Queues for this environment.
      */
 	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//Let everything through and then deal with it when needed. 
+//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response createQueue(String payload)
 	{
@@ -202,7 +210,7 @@ public class QueueResource extends InfraResource
 			}
 			try
 			{
-				QueueType inputQueue = (QueueType)getInfraUnmarshaller().unmarschal(payload, QueueType.class, getMediaType());
+				QueueType inputQueue = (QueueType)getInfraUnmarshaller().unmarshal(payload, QueueType.class, getRequestMediaType());
 				QueueType outputQueue = createQueue(inputQueue);
 				
 				return makeResponse(outputQueue, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, getInfraMarshaller());
@@ -213,6 +221,12 @@ public class QueueResource extends InfraResource
 				logger.error("Queue Payload: "+ payload);
 				return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal queue payload: "+ ex.getMessage()), ResponseAction.CREATE);
 			}
+      catch (UnsupportedMediaTypeExcpetion ex)
+      {
+        logger.error("Failed to unmarshal payload into an QueueType: "+ ex.getMessage(), ex);
+        logger.error("Queue Payload: "+ payload);
+        return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal queue payload: "+ ex.getMessage()), ResponseAction.CREATE);
+      }
 		}
 		else
 		{
@@ -224,14 +238,17 @@ public class QueueResource extends InfraResource
 	 * Delete a specific queue.
 	 */
 	@DELETE
-	@Path("{queueID}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("{queueID}{mimeType:(\\.[^/]*?)?}")
+//  Let everything through and then deal with it when needed. 
+//  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response removeQueue(@PathParam("queueID") String queueID)
+	public Response removeQueue(@PathParam("queueID") String queueID,
+			 				    @PathParam("mimeType") String mimeType)
 	{
+	    setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Remove Queue (REST DELETE - Single) with queueID = "+queueID);
+			logger.debug("Remove Queue (REST DELETE - Single) with queueID = "+queueID+" and URL Postfix mime type = '"+mimeType+"'");
 		}
 		if (isTestMode())
 		{
@@ -262,14 +279,17 @@ public class QueueResource extends InfraResource
      * Get next available message from the given queue and remove the one indicated by the matrix parameter.
      */
 	@GET
-	@Path("{queueID}/messages")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("{queueID}/messages{mimeType:(\\.[^/]*?)?}")
+//  Let everything through and then deal with it when needed. 
+//  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getNextMessage(@PathParam("queueID") String queueID)
+	public Response getNextMessage(@PathParam("queueID") String queueID,
+			    				   @PathParam("mimeType") String mimeType)
 	{
+	    setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Get Message from Queue (REST GET - Single): "+queueID +" and Remove message with ID = "+getDeleteMessageId());
+			logger.debug("Get Message from Queue (REST GET - Single): "+queueID +", URL Postfix mime type = '"+mimeType+"' and Remove message with ID = "+getDeleteMessageId());
 		}
 		if (isTestMode())
 		{
@@ -298,8 +318,8 @@ public class QueueResource extends InfraResource
 					  }
 					  else
 					  {
-              messageIDMap.put(consumerID, null);
-              return makeResopnseWithNoContent(false, ResponseAction.QUERY);
+			              messageIDMap.put(consumerID, null);
+			              return makeResopnseWithNoContent(false, ResponseAction.QUERY);
 					    
 					  }
 					}
@@ -328,16 +348,20 @@ public class QueueResource extends InfraResource
 	 * Delete a specific queue.
 	 */
 	@DELETE
-	@Path("{queueID}/messages/{deleteMessageId}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("{queueID}/messages/{deleteMessageId}{mimeType:(\\.[^/]*?)?}")
+//  Let everything through and then deal with it when needed. 
+//  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response removeMessageFromQueue(@PathParam("queueID") String queueID, @PathParam("deleteMessageId") String deleteMessageId)
+	public Response removeMessageFromQueue(@PathParam("queueID") String queueID, 
+			                               @PathParam("deleteMessageId") String deleteMessageId,
+						 				   @PathParam("mimeType") String mimeType)
 	{
+	    setURLPostfixMediaType(mimeType);
 		setDeleteMessageId(deleteMessageId);
 		if (logger.isDebugEnabled())
 		{
 			String consumerID = getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_CONSUMER_ID);
-			logger.debug("Remove Message from Queue (REST DELETE - Single) with queueID = "+queueID+" and message with ID = "+getDeleteMessageId()+" requested by consumer = "+consumerID);
+			logger.debug("Remove Message from Queue (REST DELETE - Single) with queueID = "+queueID+", URL Postfix mime type = '"+mimeType+"' and message with ID = "+getDeleteMessageId()+" requested by consumer = "+consumerID);
 		}
 		return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Queues not supported.", "This DIRECT Environment implementation does not support queues, yet."), ResponseAction.DELETE);
 	} 

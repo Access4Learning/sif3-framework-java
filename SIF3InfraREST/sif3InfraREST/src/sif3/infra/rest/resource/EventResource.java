@@ -18,17 +18,17 @@
 
 package sif3.infra.rest.resource;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.Status;
 
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.ws.ErrorDetails;
@@ -43,14 +43,17 @@ import sif3.infra.common.interfaces.EnvironmentManager;
  * @author Joerg Huber
  *
  */
-@Path("/eventsConnector")
+@Path("/eventsConnector{mimeType:(\\.[^/]*?)?}")
 public class EventResource extends BaseResource
 {
 	public EventResource(@Context UriInfo uriInfo,
 			             @Context HttpHeaders requestHeaders,
-			             @Context Request request)
+			             @Context Request request,
+			             @PathParam("mimeType") String mimeType)
 	{
 		super(uriInfo, requestHeaders, request, "", null, null);
+	    setURLPostfixMediaType(mimeType);
+	    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
 	}
 
 	/*----------------------*/
@@ -70,7 +73,8 @@ public class EventResource extends BaseResource
 	// -- POST Section: This is the C(reate) in CRUD. --//
 	// -------------------------------------------------//
 	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//Let everything through and then deal with it when needed. 
+//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response createEvent(String eventPayload)
 	{
