@@ -27,6 +27,7 @@ import sif.dd.us30.model.Student;
 import sif.dd.us30.model.Students;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.UnmarshalException;
+import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.utils.JAXBUtils;
 import au.com.systemic.framework.utils.Timer;
 
@@ -42,7 +43,7 @@ public class DataModelUnmarshalFactoryUS  implements UnmarshalFactory
      * @see sif3.common.conversion.UnmarshalFactory#unmarshalFromXML(java.lang.String, java.lang.Class)
      */
     @Override
-    public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException
+    public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
     {
 		Timer timer = new Timer();
 		timer.start();
@@ -82,7 +83,7 @@ public class DataModelUnmarshalFactoryUS  implements UnmarshalFactory
      * @see sif3.common.conversion.UnmarshalFactory#unmarshalFromJSON(java.lang.String, java.lang.Class)
      */
     @Override
-    public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException
+    public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
     {
 		Timer timer = new Timer();
 		timer.start();
@@ -94,7 +95,7 @@ public class DataModelUnmarshalFactoryUS  implements UnmarshalFactory
 				// TODO: JH - Implement from JSON unmarshaller
 			}
 			logger.warn("Unmarshal from JSON not supported, yet");
-			throw new UnmarshalException("Unmarshal Object from JSON not implemented, yet");
+			throw new UnsupportedMediaTypeExcpetion("Unmarshal Object from JSON not implemented, yet");
 		}
 		finally
 		{
@@ -110,8 +111,7 @@ public class DataModelUnmarshalFactoryUS  implements UnmarshalFactory
      * @see sif3.common.conversion.UnmarshalFactory#unmarschal(java.lang.String, java.lang.Class, javax.ws.rs.core.MediaType)
      */
     @Override
-    public Object unmarschal(String payload, Class<?> clazz, MediaType mediaType)
-            throws UnmarshalException
+    public Object unmarshal(String payload, Class<?> clazz, MediaType mediaType) throws UnmarshalException, UnsupportedMediaTypeExcpetion
     {
 		if (mediaType != null)
 		{
@@ -128,7 +128,7 @@ public class DataModelUnmarshalFactoryUS  implements UnmarshalFactory
 		}
 
 		// If we get here then we deal with an unknown media type
-		throw new UnmarshalException("Unsupported media type: " + mediaType + ". Cannot unmarshal the given input from this media type.");
+		throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot unmarshal the given input from this media type.");
     }
 
 }

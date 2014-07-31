@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 import sif.dd.au30.model.ObjectFactory;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.exception.MarshalException;
+import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.utils.JAXBUtils;
 
 public class DataModelMarshalFactory implements MarshalFactory
@@ -55,7 +56,7 @@ public class DataModelMarshalFactory implements MarshalFactory
 	private ObjectFactory objFactory = new ObjectFactory();
 	
 	@Override
-	public String marshalToXML(Object obj) throws MarshalException
+	public String marshalToXML(Object obj) throws MarshalException, UnsupportedMediaTypeExcpetion
 	{
 		String result = null;
 		try
@@ -94,15 +95,15 @@ public class DataModelMarshalFactory implements MarshalFactory
   }
 
 	@Override
-	public String marshalToJSON(Object obj) throws MarshalException
+	public String marshalToJSON(Object obj) throws MarshalException, UnsupportedMediaTypeExcpetion
 	{
 		// TODO: JH - Implement from JSON marshaller
 		logger.warn("Marshal to JSON not supported, yet");
-		throw new MarshalException("Marshal Object to JSON not implemented, yet");
+		throw new UnsupportedMediaTypeExcpetion("Marshal Object to JSON not implemented, yet");
 	}
 
 	@Override
-	public String marschal(Object obj, MediaType mediaType) throws MarshalException
+	public String marshal(Object obj, MediaType mediaType) throws MarshalException, UnsupportedMediaTypeExcpetion
 	{
 		if (mediaType != null)
 		{
@@ -117,6 +118,6 @@ public class DataModelMarshalFactory implements MarshalFactory
 			}
 		}
 		// If we get here then we deal with an unknown media type
-		throw new MarshalException("Unsupported media type: " + mediaType + ". Cannot marshal the given input to this media type.");
+		throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot marshal the given input to this media type.");
 	}
 }

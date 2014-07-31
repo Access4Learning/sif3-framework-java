@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.UnmarshalException;
+import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.utils.JAXBUtils;
 
 public class DataModelUnmarshalFactory implements UnmarshalFactory
@@ -28,7 +29,7 @@ public class DataModelUnmarshalFactory implements UnmarshalFactory
 	protected final Logger logger = Logger.getLogger(getClass());
 
 	@Override
-	public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException
+	public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
 	{
 		Object result = null;
 		try
@@ -43,15 +44,15 @@ public class DataModelUnmarshalFactory implements UnmarshalFactory
 	}
 
 	@Override
-	public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException
+	public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
 	{
 		// TODO: JH - Implement from JSON unmarshaller
 		logger.warn("Unmarshal from JSON not supported, yet");
-		throw new UnmarshalException("Unmarshal Object from JSON not implemented, yet");
+		throw new UnsupportedMediaTypeExcpetion("Unmarshal Object from JSON not implemented, yet");
 	}
 
 	@Override
-	public Object unmarschal(String payload, Class<?> clazz, MediaType mediaType) throws UnmarshalException
+	public Object unmarshal(String payload, Class<?> clazz, MediaType mediaType) throws UnmarshalException, UnsupportedMediaTypeExcpetion
 	{
 		if (mediaType != null)
 		{
@@ -68,7 +69,7 @@ public class DataModelUnmarshalFactory implements UnmarshalFactory
 		}
 
 		// If we get here then we deal with an unknown media type
-		throw new UnmarshalException("Unsupported media type: " + mediaType + ". Cannot unmarshal the given input from this media type.");
+		throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot unmarshal the given input from this media type.");
 	}
 
 }
