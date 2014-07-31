@@ -205,7 +205,7 @@ public class QueueClient extends BaseClient
 		{
 			service = buildURI(service, null);
 			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
-			String payloadStr = getInfraMarshaller().marschal(inputQueue, getMediaType());
+			String payloadStr = getInfraMarshaller().marshal(inputQueue, getMediaType());
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("createQueue: Payload to send:\n"+payloadStr);

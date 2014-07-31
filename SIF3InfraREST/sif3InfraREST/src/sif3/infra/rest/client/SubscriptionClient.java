@@ -136,7 +136,7 @@ public class SubscriptionClient extends BaseClient
 		
 			service = buildURI(service, null);
 			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
-			String payloadStr = getInfraMarshaller().marschal(subscriptionInfo, getMediaType());
+			String payloadStr = getInfraMarshaller().marshal(subscriptionInfo, getMediaType());
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("subscribe: Payload to send:\n"+payloadStr);

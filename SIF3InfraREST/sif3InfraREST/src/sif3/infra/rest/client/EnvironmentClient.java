@@ -83,7 +83,7 @@ public class EnvironmentClient extends BaseClient
 		try
 		{
 			service = buildURI(service, null);
-			String payloadStr = getDataModelMarshaller().marschal(template, getMediaType());
+			String payloadStr = getDataModelMarshaller().marshal(template, getMediaType());
 
 			if (logger.isDebugEnabled())
 			{
@@ -115,7 +115,8 @@ public class EnvironmentClient extends BaseClient
 		try
 		{
 			service = buildURI(service, null);
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(envInfo.getAuthMethod(), sif3Session.getSessionToken(), sif3Session.getPassword()), true).get(ClientResponse.class);
+//      ClientResponse response = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(envInfo.getAuthMethod(), sif3Session.getSessionToken(), sif3Session.getPassword()), true).get(ClientResponse.class);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(envInfo.getAuthMethod(), sif3Session.getSessionToken(), envInfo.getPassword()), true).get(ClientResponse.class);
 
 			return setResponse(service, response, EnvironmentType.class, Status.OK, Status.NOT_MODIFIED);
 		}

@@ -135,7 +135,7 @@ public class EventClient extends BaseClient
 			try
 			{
 				// Don't set zone & context here. They are header parameters in the case of events.
-			    String payloadStr = getDataModelMarshaller().marschal(event.getSIFObjectList(), getMediaType());
+			    String payloadStr = getDataModelMarshaller().marshal(event.getSIFObjectList(), getMediaType());
 	
 //				if (logger.isDebugEnabled())
 //				{
@@ -152,7 +152,7 @@ public class EventClient extends BaseClient
 			}
 			catch (Exception ex)
 			{
-				String errorMsg = "Failed to invoke 'createMany' service (REST POST) on URI " + service.getURI() + ": " + ex.getMessage();
+				String errorMsg = "Failed to invoke 'sendEvents' service (REST POST) on URI " + service.getURI() + ": " + ex.getMessage();
 				logger.error(errorMsg);
 				throw new ServiceInvokationException(errorMsg, ex);
 			}

@@ -23,14 +23,15 @@ import java.util.HashMap;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
 
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.UnmarshalException;
+import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.ResponseHeaderConstants;
@@ -327,7 +328,7 @@ public abstract class BaseClient
 					{
 						try
 						{
-							response.setDataObject(getDataModelUnmarshaller().unmarschal(payload, returnObjectClass, getMediaType()));
+							response.setDataObject(getDataModelUnmarshaller().unmarshal(payload, returnObjectClass, getMediaType()));
 							if (response.getDataObject() == null)// this is strange. So set the unmarshalled value.
 							{
 								response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));
@@ -337,6 +338,10 @@ public abstract class BaseClient
 						{
 							response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
 						}
+            catch (UnsupportedMediaTypeExcpetion ex)
+            {
+              response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
+            }
 					}
 				}
 				else // Strange. We have an entity but we returnObjectClass is null.
@@ -384,7 +389,7 @@ public abstract class BaseClient
 			try
 			{
 				//Because ErrorType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-				ErrorType error = (ErrorType) infraUnmarshaller.unmarschal(errorStr, ErrorType.class, getMediaType());
+				ErrorType error = (ErrorType) infraUnmarshaller.unmarshal(errorStr, ErrorType.class, getMediaType());
 				if (error == null) // this is strange. So set the unmarshalled value.
 				{
 					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload into ErrorType object. See error description for payload details.", errorStr));
@@ -398,6 +403,10 @@ public abstract class BaseClient
 			{
 				response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload into ErrorType object: "+ex.getMessage()+". See error description for payload details.", errorStr));
 			}
+      catch (UnsupportedMediaTypeExcpetion ex)
+      {
+        response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload into ErrorType object (unsupported media type): "+ex.getMessage()+". See error description for payload details.", errorStr));
+      }
 		}
 		else // It appears we have an error but no content. So create an error object with custom message.
 		{
