@@ -83,7 +83,7 @@ public class LocalMessageConsumer implements Runnable
 				logger.debug(consumerID + " has receive an event from its local consumer queue ID: "  + eventInfo.getMessageQueueReaderID());
 				try
 				{
-					Object eventPayload = eventConsumer.getUnmarshaller().unmarschal(eventInfo.getEventPayload(), eventConsumer.getMultiObjectClassInfo().getObjectType(), eventInfo.getMediaType());
+					Object eventPayload = eventConsumer.getUnmarshaller().unmarshal(eventInfo.getEventPayload(), eventConsumer.getMultiObjectClassInfo().getObjectType(), eventInfo.getMediaType());
 
 					// Create actual event Object
 					SIFEvent event = eventConsumer.createEventObject(eventPayload, eventInfo.getEventAction(), eventInfo.getUpdateType());
