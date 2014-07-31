@@ -22,7 +22,6 @@ import java.util.List;
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
 import sif.dd.au30.model.StudentCollectionType;
 import sif.dd.au30.model.StudentPersonalType;
-import sif3.common.exception.UnmarshalException;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.SIFContext;
@@ -43,10 +42,11 @@ import au.com.systemic.framework.utils.FileReaderWriter;
  */
 public class TestStudentPersonalConsumer
 {
-//	private final static String SINGLE_STUDENT_FILE_NAME = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
-//	private final static String MULTI_STUDENT_FILE_NAME = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
-	private final static String SINGLE_STUDENT_FILE_NAME = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
-	private final static String MULTI_STUDENT_FILE_NAME = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
+	private final static String SINGLE_STUDENT_FILE_NAME = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
+	private final static String MULTI_STUDENT_FILE_NAME = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
+//	private final static String SINGLE_STUDENT_FILE_NAME = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
+//	private final static String MULTI_STUDENT_FILE_NAME = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
+//	private static final String CONSUMER_ID = "SecureStudentConsumer";
 	private static final String CONSUMER_ID = "StudentConsumer";
 	
 	private static final RequestType REQUEST_TYPE = RequestType.IMMEDIATE;
@@ -98,7 +98,7 @@ public class TestStudentPersonalConsumer
 		{
 			return (StudentPersonalType)unmarshaller.unmarshalFromXML(inputEnvXML, StudentPersonalType.class);
 		}
-		catch (UnmarshalException ex)
+		catch (Exception ex)
 		{
 			ex.printStackTrace();
 			return null;
@@ -113,7 +113,7 @@ public class TestStudentPersonalConsumer
 		{
 			return (StudentCollectionType)unmarshaller.unmarshalFromXML(inputEnvXML, StudentCollectionType.class);
 		}
-		catch (UnmarshalException ex)
+		catch (Exception ex)
 		{
 			ex.printStackTrace();
 			return null;
@@ -294,9 +294,11 @@ public class TestStudentPersonalConsumer
 		try
 		{
 			List<ZoneContextInfo> envZoneCtxList = new ArrayList<ZoneContextInfo>();
-			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auRolloverTestingZone"), null));
-			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("zone123"),  new SIFContext("abc")));
-			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
+//			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auRolloverTestingZone"), null));
+//			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("zone123"),  new SIFContext("abc")));
+//			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
+//      	envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
+			
 			List<Response> responses = consumer.retrievByPrimaryKey("24ed508e1ed04bba82198233efa55859", envZoneCtxList);
 //			List<Response> responses = consumer.retrievByPrimaryKey("24ed508e1ed04bba82198233efa55859", null);
 			System.out.println("Responses from attempt to Get Student:");
@@ -334,10 +336,10 @@ public class TestStudentPersonalConsumer
 		
   		StudentPersonalConsumer consumer = tester.getConsumer();
   		
-  //		tester.getStudents(consumer);
+  		tester.getStudents(consumer);
   //		tester.createStudent(consumer);
   //		tester.removeStudent(consumer);
-  		tester.getStudent(consumer);
+//  		tester.getStudent(consumer);
   //		tester.updateStudent(consumer);
   //		tester.updateStudents(consumer);
   //		tester.createStudents(consumer);

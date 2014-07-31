@@ -27,10 +27,10 @@ import sif3.infra.rest.consumer.ConsumerLoader;
 public class TestConsumerLoader
 {
 	// Local
-	private static final String CONSUMER_ID = "StudentConsumer";
+//	private static final String CONSUMER_ID = "StudentConsumer";
 
 	// Broker
-//	private static final String CONSUMER_ID = "QueueTestConsumer";
+	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
 
 	public static void main(String[] args)
 	{
