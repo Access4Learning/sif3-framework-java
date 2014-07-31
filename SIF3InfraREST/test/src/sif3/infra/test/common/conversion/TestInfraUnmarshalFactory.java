@@ -51,7 +51,7 @@ public class TestInfraUnmarshalFactory
       String inputEnvXML = FileReaderWriter.getFileContent(INPUT_ENV_FILE_NAME);
       System.out.println("File content:\n"+inputEnvXML);
            
-      EnvironmentType env = (EnvironmentType) unmarshaller.unmarschal(inputEnvXML, EnvironmentType.class, MediaType.APPLICATION_XML_TYPE);
+      EnvironmentType env = (EnvironmentType) unmarshaller.unmarshal(inputEnvXML, EnvironmentType.class, MediaType.APPLICATION_XML_TYPE);
       printEnvironment(env);
     }
     catch (Exception ex)
