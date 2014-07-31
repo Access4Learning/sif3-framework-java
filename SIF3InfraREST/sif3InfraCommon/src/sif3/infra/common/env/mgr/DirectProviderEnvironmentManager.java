@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 
 import sif3.common.exception.PersistenceException;
 import sif3.common.model.EnvironmentKey;
+import sif3.common.persist.model.AppEnvironmentTemplate;
 import sif3.common.persist.model.SIF3Session;
 import sif3.infra.common.env.ops.DirectProviderEnvStoreOps;
 import sif3.infra.common.env.types.EnvironmentInfo;
@@ -165,6 +166,11 @@ public class DirectProviderEnvironmentManager implements EnvironmentManager
 	public boolean existsEnvironmentForSessionToken(String sessionToken)
 	{
 		return (getSessionBySessionToken(sessionToken) != null);
+	}
+	
+	public AppEnvironmentTemplate getTemplateInfo(EnvironmentKey envKey)
+	{
+		return envOps.getTemplateInfo(envKey);
 	}
 
 	/**
