@@ -203,7 +203,7 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	 */
 	public String getEnvironmentName()
 	{
-		return getAdapterName() + "/" + super.getEnvironmentName();
+		return getAdapterName();
 	}
   
 	/**
