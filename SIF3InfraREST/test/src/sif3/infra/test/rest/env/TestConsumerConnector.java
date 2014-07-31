@@ -7,7 +7,8 @@ public class TestConsumerConnector
 {
 //	private static final String CONSUMER_PROP_FILE_NAME = "StudentConsumer";
 //	private static final String CONSUMER_PROP_FILE_NAME = "BrokeredAttTrackerConsumer";
-	private static final String CONSUMER_PROP_FILE_NAME = "QueueTestConsumer";
+//	private static final String CONSUMER_PROP_FILE_NAME = "QueueTestConsumer";
+    private static final String CONSUMER_PROP_FILE_NAME = "SecureStudentConsumer";
 	
 	private ConsumerEnvironmentConnector connector = null;
 	private ConsumerEnvironmentManager envMgr = null;
