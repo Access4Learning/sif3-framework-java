@@ -54,6 +54,30 @@ public class AuthenticationUtils
 	{
 		return AuthenticationMethod.Basic.toString()+" "+base64Encode(username, password);
 	}
+
+	// Experimental for OAuth work. At the moment we treat it as the basic.
+  public static String getBearerAuthToken(String username, String password)
+  {
+    return AuthenticationMethod.Bearer.toString() + " " + base64Encode(username, password);
+  }
+
+  /**
+   * This method create the full authentication token of the format: <AuthMethod>" "base64Encode(<username>:<password>) and returns it.
+   * If the authInfo is null then null is returned.
+   * 
+   * @param authInfo The values to use to create the full authentication token based on the components in this parameter
+   * 
+   * @return See desc
+   */
+  public static String getFullBase64Token(AuthenticationInfo authInfo)
+  {
+    if (authInfo == null)
+    {
+      return null;
+    }
+    
+    return authInfo.getAuthMethod().name()+" "+base64Encode(authInfo.getUserToken(), authInfo.getPassword());
+  }
 	
 	/**
 	 * Performs a base64 encoding on the following string: username:password. The encoded string is then returned.
@@ -171,13 +195,14 @@ public class AuthenticationUtils
 	
 	/**
 	 * This method extracts the authentication method from the full authentication token. The full authentication token
-	 * is the base64 encoded token with the prefix of Basic or SIF_HMACSHA256 separated by a blank. If the fullToken
+	 * is the base64 encoded token with the prefix of Basic, SIF_HMACSHA256 etc. separated by a blank. If the fullToken
 	 * is null or empty then null is returned. Also if there is no " " found (which separates the method from the token)
 	 * then null is returned.
 	 * 
-	 * @param fullToken The full token including the prefix of 'Basic' or 'SIF_HMACSHA256'
+	 * @param fullToken The full token including the prefix of 'Basic', 'SIF_HMACSHA256' etc. (See AuthenticationMethod enum)
 	 * 
-	 * @return The prefix of the fullToken. Will be either 'Basic' or 'SIF_HMACSHA256'
+	 * @return The prefix of the fullToken. Will be one of the values of the AuthenticationMethod enum. If an invalid auth method
+	 *         is used then null is retrned.
 	 */
 	public static AuthenticationMethod extractAuthenticationMethod(String fullToken)
 	{
@@ -228,9 +253,11 @@ public class AuthenticationUtils
 	 * This method takes the full authentication token. This is the token that has the form:
 	 *   ("Basic"|"SIF_HMACSHA256")" "<base64EncodedString> where the <base64EncodedString> must be of the format:
 	 *   <usreToken>:<some_string>.
-	 * The returned AuthenticationInfo has the following Structure:
+	 * If the token does not follow that structure, i.e. cannot be split into these three components then
+	 * it is invalid and null is returned. If the token can be split successfully then the returned 
+	 * AuthenticationInfo has the following Structure:
 	 * 
-	 * AuthenticationInfo.authMethod="Basic"|"SIF_HMACSHA256"
+	 * AuthenticationInfo.authMethod="Basic"|"SIF_HMACSHA256"|"Bearer"
 	 * AuthenticationInfo.userToken=<userToken>
 	 * AuthenticationInfo.password=<some_string>
 	 * 
@@ -249,6 +276,15 @@ public class AuthenticationUtils
 		String encodedToken = (splitPos>0) ? fullBase64Token.substring(splitPos+1) : fullBase64Token;
 		String[] splitValues = splitValuesFromBase64(encodedToken);
 		
-		return new AuthenticationInfo(authMethodStr, splitValues[0], splitValues[1]);
+		if (splitValues.length == 2) // all good
+		{
+			return new AuthenticationInfo(authMethodStr, splitValues[0], splitValues[1]);
+		}
+		else // we could not split the token into userToken and password
+		{
+			return null;
+		}
 	}
+	
+
 }
