@@ -34,16 +34,15 @@ public class TestAdapterEnvStore
 		return envStore;
 	}
 	
-	
-	
 	public static void main(String[] args)
 	{
 		TestAdapterEnvStore tester = new TestAdapterEnvStore();
 		
 		System.out.println("Start Testing AdapterEnvironmentStore...");
 		
-		//tester.testGetEnvironmentStore("StudentProvider");
-    	tester.testGetEnvironmentStore("StudentConsumer");
+		tester.testGetEnvironmentStore("BrokeredSISProvider");
+//		tester.testGetEnvironmentStore("StudentProvider");
+//    	tester.testGetEnvironmentStore("StudentConsumer");
 		
 		System.out.println("End Testing AdapterEnvironmentStore.");
 	}
