@@ -175,27 +175,28 @@ public class AdapterEnvironmentStore implements Serializable
 						}
 					}
 					
-					// Application Key
-			  		environment.getEnvironmentKey().setApplicationKey(adapterProperties.getPropertyAsString("env.application.key", null));
-			  		if (StringUtils.isEmpty(environment.getEnvironmentKey().getApplicationKey()))
-			  		{
-			  			logger.error("Property 'env.application.key' is null or empty in "+getAdapterFileNameWithoutExt()+".properties. Application Key must be set!");
-			  			errors = true;    			
-			  		}
-			  		
-			  		// Password
-			  		environment.setPassword(adapterProperties.getPropertyAsString("env.pwd", null));
-			  		if (StringUtils.isEmpty(environment.getPassword()))
-			  		{
-			  			logger.error("Property 'env.pwd' is null or empty in "+getAdapterFileNameWithoutExt()+".properties. Password for this application must be set!");
-			  			errors = true;    			
-			  		}
-		              
+//					// Application Key
+//			  		environment.getEnvironmentKey().setApplicationKey(adapterProperties.getPropertyAsString("env.application.key", null));
+//			  		if (StringUtils.isEmpty(environment.getEnvironmentKey().getApplicationKey()))
+//			  		{
+//			  			logger.error("Property 'env.application.key' is null or empty in "+getAdapterFileNameWithoutExt()+".properties. Application Key must be set!");
+//			  			errors = true;    			
+//			  		}
+//			  		
+//			  		// Password
+//			  		environment.setPassword(adapterProperties.getPropertyAsString("env.pwd", null));
+//			  		if (StringUtils.isEmpty(environment.getPassword()))
+//			  		{
+//			  			logger.error("Property 'env.pwd' is null or empty in "+getAdapterFileNameWithoutExt()+".properties. Password for this application must be set!");
+//			  			errors = true;    			
+//			  		}
+//		              
+//
+//			  		// Authentication Method
+//			  		environment.setAuthMethod(adapterProperties.getPropertyAsString("env.authentication.method", AuthenticationMethod.Basic.name()));
+
 			  		// Media Type
 			  		environment.setMediaType(convertMediaType(adapterProperties.getPropertyAsString("env.mediaType", null)));
-
-			  		// Authentication Method
-			  		environment.setAuthMethod(adapterProperties.getPropertyAsString("env.authentication.method", AuthenticationMethod.Basic.name()));
 
 			  		if (!loadExistingEnvInfo(adapterProperties))
 			  		{
@@ -416,6 +417,25 @@ public class AdapterEnvironmentStore implements Serializable
     {
   		boolean errorsFound = false;
   		
+  		// Application Key
+  		envInfo.getEnvironmentKey().setApplicationKey(adapterProperties.getPropertyAsString("env.application.key", null));
+  		if (StringUtils.isEmpty(envInfo.getEnvironmentKey().getApplicationKey()))
+  		{
+  			logger.error("Property 'env.application.key' is null or empty in "+getAdapterFileNameWithoutExt()+".properties. Application Key must be set!");
+  			errorsFound = true;    			
+  		}
+  		
+  		// Password
+  		envInfo.setPassword(adapterProperties.getPropertyAsString("env.pwd", null));
+  		if (StringUtils.isEmpty(envInfo.getPassword()))
+  		{
+  			logger.error("Property 'env.pwd' is null or empty in "+getAdapterFileNameWithoutExt()+".properties. Password for this application must be set!");
+  			errorsFound = true;    			
+  		}
+          
+  		// Authentication Method
+  		envInfo.setAuthMethod(adapterProperties.getPropertyAsString("env.authentication.method", AuthenticationMethod.Basic.name()));
+ 		
 		envInfo.getEnvironmentKey().setUserToken(props.getPropertyAsString("env.userToken", null));
 		envInfo.getEnvironmentKey().setInstanceID(props.getPropertyAsString("env.instanceID", null));
 
@@ -459,12 +479,36 @@ public class AdapterEnvironmentStore implements Serializable
     {
     	boolean errorsFound = false;
 
-  		envInfo.setTemplateXMLFileName(props.getPropertyAsString("env.xml.file.name", null));
-  		if (StringUtils.isEmpty(envInfo.getTemplateXMLFileName()))
-  		{
-  			logger.error("Property 'env.xml.file.name' is null or empty in "+getAdapterFileNameWithoutExt()+".properties. File name for environment XML template must be set!");
-  			errorsFound = true;    			
-  		}
+    	// The following properties are required if it is a BROKERED environment. For DIRECT environments these values
+    	// are read from the SIF_APP_TEMPLATE table!
+		if (envInfo.getEnvironmentType() == EnvironmentType.BROKERED)
+		{
+	  		// Application Key
+	  		envInfo.getEnvironmentKey().setApplicationKey(adapterProperties.getPropertyAsString("env.application.key", null));
+	  		if (StringUtils.isEmpty(envInfo.getEnvironmentKey().getApplicationKey()))
+	  		{
+	  			logger.error("Property 'env.application.key' is null or empty in "+getAdapterFileNameWithoutExt()+".properties. Application Key must be set!");
+	  			errorsFound = true;    			
+	  		}
+	  		
+	  		// Password
+	  		envInfo.setPassword(adapterProperties.getPropertyAsString("env.pwd", null));
+	  		if (StringUtils.isEmpty(envInfo.getPassword()))
+	  		{
+	  			logger.error("Property 'env.pwd' is null or empty in "+getAdapterFileNameWithoutExt()+".properties. Password for this application must be set!");
+	  			errorsFound = true;    			
+	  		}
+	          
+	  		// Authentication Method
+	  		envInfo.setAuthMethod(adapterProperties.getPropertyAsString("env.authentication.method", AuthenticationMethod.Basic.name()));
+
+	  		envInfo.setTemplateXMLFileName(props.getPropertyAsString("env.xml.file.name", null));
+	  		if (StringUtils.isEmpty(envInfo.getTemplateXMLFileName()))
+	  		{
+	  			logger.error("Property 'env.xml.file.name' is null or empty in "+getAdapterFileNameWithoutExt()+".properties. File name for environment XML template must be set!");
+	  			errorsFound = true;    			
+	  		}
+		}
 
 		// Base URL for connectors
 		String connectorBaseURLStr = props.getPropertyAsString("env.connector.url", null);
