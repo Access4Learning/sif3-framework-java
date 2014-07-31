@@ -24,7 +24,6 @@ import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.RequestHeaderConstants;
-import sif3.common.model.SIFZone;
 import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;

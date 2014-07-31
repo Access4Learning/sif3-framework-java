@@ -20,8 +20,6 @@ package sif3.infra.test.rest.client;
 
 import java.net.URI;
 
-import au.com.systemic.framework.utils.StringUtils;
-
 import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.model.SIFZone;
 import sif3.common.persist.model.SIF3Session;
@@ -33,6 +31,7 @@ import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.common.model.QueueType;
 import sif3.infra.rest.client.MessageClient;
 import sif3.infra.rest.client.QueueClient;
+import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * @author Joerg Huber
@@ -44,17 +43,17 @@ public class TestQueueClient
 	private AdapterEnvironmentStore store = new AdapterEnvironmentStore(PROP_FILE_NAME);
 
 	// Brokered
-//	private static final String QUEUE_CONNECTOR_URI = "https://australia.hostedzone.com/svcs/systemicDemo/queues";
-//	private static final String SESSION_TOKEN = "1a47dae9-579b-4aa5-8048-608b06c611cb";
-//	private static final String ZONE="demo";
-//	private static final String PWD="DemoSIS1";
+	private static final String QUEUE_CONNECTOR_URI = "https://australia.hostedzone.com/svcs/systemicDemo/queues";
+	private static final String SESSION_TOKEN = "1a47dae9-579b-4aa5-8048-608b06c611cb";
+	private static final String ZONE="demo";
+	private static final String PWD="DemoSIS1";
 //	private static final String QUEUE_ID="f8dccdcb-f496-469b-bf2a-626e9f7afffb";
 
 	// Direct
-	private static final String QUEUE_CONNECTOR_URI = "http://localhost:9080/SIF3InfraREST/sif3/queues";
-	private static final String SESSION_TOKEN = "f8dccdcb-f496-469b-bf2a-626e9f7afffb";
-	private static final String ZONE="auSchoolTestingZone";
-	private static final String PWD="Password1";
+//	private static final String QUEUE_CONNECTOR_URI = "http://localhost:9080/SIF3InfraREST/sif3/queues";
+//	private static final String SESSION_TOKEN = "f8dccdcb-f496-469b-bf2a-626e9f7afffb";
+//	private static final String ZONE="auSchoolTestingZone";
+//	private static final String PWD="Password1";
 //	private static final String QUEUE_ID="f8dccdcb-f496-469b-bf2a-626e9f7afffb";
 
 	private void printResponse(Response response) throws Exception
