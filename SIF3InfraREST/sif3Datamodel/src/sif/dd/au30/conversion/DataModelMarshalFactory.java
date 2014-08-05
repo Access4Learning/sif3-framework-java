@@ -74,6 +74,7 @@ public class DataModelMarshalFactory implements MarshalFactory
 		catch (Exception e)
 		{
 			logger.error("An error occurred marshalling object to XML", e);
+			throw new MarshalException("An error occurred marshalling object to XML", e);
 		}
 		return result;
 	}

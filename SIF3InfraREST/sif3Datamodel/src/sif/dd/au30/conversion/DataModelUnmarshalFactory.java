@@ -39,6 +39,7 @@ public class DataModelUnmarshalFactory implements UnmarshalFactory
 		catch (Exception e)
 		{
 			logger.error("An error occurred unmarshalling object from XML", e);
+			throw new UnmarshalException("An error occurred unmarshalling object from XML", e);
 		}
 		return result;
 	}
