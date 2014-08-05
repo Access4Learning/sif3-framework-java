@@ -51,7 +51,7 @@ public class SIF3SessionDAO extends BaseDAO
           throw new IllegalArgumentException("environmentKey and/or null.");          
         }
         
-        if (StringUtils.isEmpty(environmentKey.getSolutionID()) || StringUtils.isEmpty(environmentKey.getApplicationKey()) || (adapterType == null))
+        if (StringUtils.isEmpty(environmentKey.getApplicationKey()) || (adapterType == null))
         {
             throw new IllegalArgumentException("solutionID, applicationKey and/or adapterType is empty or null.");
         }
@@ -59,10 +59,15 @@ public class SIF3SessionDAO extends BaseDAO
         try
         {
             Criteria criteria = tx.getSession().createCriteria(SIF3Session.class)
-               .add(Restrictions.eq("solutionID", environmentKey.getSolutionID()))
                .add(Restrictions.eq("applicationKey", environmentKey.getApplicationKey()))
                .add(Restrictions.eq("adapterType", adapterType.name()));
             
+            // SolutionID is optional. Don't set it to null as a criteria as it might be retrieved.
+            if (StringUtils.notEmpty(environmentKey.getSolutionID()))
+            {
+              criteria = criteria.add(Restrictions.eq("solutionID", environmentKey.getSolutionID()));
+            }
+
             if (StringUtils.notEmpty(environmentKey.getUserToken()))
             {
             	criteria = criteria.add(Restrictions.eq("userToken", environmentKey.getUserToken()));
@@ -119,10 +124,10 @@ public class SIF3SessionDAO extends BaseDAO
             throw new IllegalArgumentException("sif3Session is null.");
         }
 
-        // solutionID, applicationKey & envrionmentType are mandatory. Check if the are available.
-        if (StringUtils.isEmpty(sif3Session.getSolutionID()) || StringUtils.isEmpty(sif3Session.getApplicationKey()) || (sif3Session.getAdapterType() == null))
+        // applicationKey & envrionmentType are mandatory. Check if the are available.
+        if (StringUtils.isEmpty(sif3Session.getApplicationKey()) || (sif3Session.getAdapterType() == null))
         {
-            throw new IllegalArgumentException("solutionID, applicationKey and/or adapterType is empty or null.");
+            throw new IllegalArgumentException("applicationKey and/or adapterType is empty or null.");
         }
         
         try
