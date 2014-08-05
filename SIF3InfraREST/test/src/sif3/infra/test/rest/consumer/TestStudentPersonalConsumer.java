@@ -42,10 +42,10 @@ import au.com.systemic.framework.utils.FileReaderWriter;
  */
 public class TestStudentPersonalConsumer
 {
-	private final static String SINGLE_STUDENT_FILE_NAME = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
-	private final static String MULTI_STUDENT_FILE_NAME = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
-//	private final static String SINGLE_STUDENT_FILE_NAME = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
-//	private final static String MULTI_STUDENT_FILE_NAME = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
+//	private final static String SINGLE_STUDENT_FILE_NAME = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
+//	private final static String MULTI_STUDENT_FILE_NAME = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
+	private final static String SINGLE_STUDENT_FILE_NAME = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
+	private final static String MULTI_STUDENT_FILE_NAME = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
 //	private static final String CONSUMER_ID = "SecureStudentConsumer";
 	private static final String CONSUMER_ID = "StudentConsumer";
 	
