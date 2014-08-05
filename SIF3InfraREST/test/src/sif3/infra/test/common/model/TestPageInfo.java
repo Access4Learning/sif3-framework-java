@@ -18,7 +18,10 @@
 
 package sif3.infra.test.common.model;
 
+import sif3.common.CommonConstants;
+import sif3.common.header.HeaderProperties;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.URLQueryParameter;
 
 
 /**
@@ -32,6 +35,7 @@ public class TestPageInfo
 		PagingInfo p = new PagingInfo();
 		System.out.println("Total pages: "+p.getMaxPages());
 		
+		p.setPageSize(PagingInfo.DEFAULT_PAGE_SIZE);
 		p.setTotalObjects(17);
 		System.out.println("Total pages: "+p.getMaxPages());
 		
@@ -40,5 +44,19 @@ public class TestPageInfo
 
 		p.setTotalObjects(30);
 		System.out.println("Total pages: "+p.getMaxPages());
+		
+		URLQueryParameter queryParams = new URLQueryParameter();
+		//queryParams.setQueryParam(PagingInfo.PagingRequestProperty.navigationPageSize.name(), "20");
+    queryParams.setQueryParam(CommonConstants.PagingRequestProperty.navigationPage.name(), "3");
+		
+    HeaderProperties reqHdrProps = new HeaderProperties();
+    reqHdrProps.setHeaderProperty(CommonConstants.PagingRequestProperty.navigationPage.name(), "1");
+    
+    p = new PagingInfo(reqHdrProps, queryParams);
+    p.setTotalObjects(102);
+    System.out.println("Paging Info: "+p);
+    
+    System.out.println("Request Params: "+p.getRequestValues());
+    System.out.println("Response Params: "+p.getResponseValues());
 	}
 }
