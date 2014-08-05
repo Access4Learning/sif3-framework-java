@@ -22,7 +22,6 @@ import org.apache.log4j.Logger;
 
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.PersistenceException;
-import sif3.common.exception.UnmarshalException;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.persist.service.SIF3SessionService;
@@ -173,9 +172,11 @@ public class AdapterBaseEnvStoreOperations
 			logger.error("The environment provider environment is null or does not have the Application Info set. Environment/SIF3 Session cannot be created.");
 			return null;
 		}
-		if (StringUtils.isEmpty(inputEnv.getSolutionId()) || StringUtils.isEmpty(inputEnv.getApplicationInfo().getApplicationKey()))
+//		if (StringUtils.isEmpty(inputEnv.getSolutionId()) || StringUtils.isEmpty(inputEnv.getApplicationInfo().getApplicationKey()))
+    if (StringUtils.isEmpty(inputEnv.getApplicationInfo().getApplicationKey()))
 		{
-			logger.error("The application key and/or the solution id in the environment provider environment is null or empty. Environment/SIF3 Session cannot be created.");
+//			logger.error("The application key and/or the solution id in the environment provider environment is null or empty. Environment/SIF3 Session cannot be created.");
+      logger.error("The application key  in the environment provider environment is null or empty. Environment/SIF3 Session cannot be created.");
 			return null;
 		}
 
@@ -238,7 +239,7 @@ public class AdapterBaseEnvStoreOperations
 			{
 				return (EnvironmentType) unmarshaller.unmarshalFromXML(envrionmentData, EnvironmentType.class);
 			}
-			catch (UnmarshalException ex)
+			catch (Exception ex)
 			{
 				logger.error("Failed to successfully parse the XML content:\n"+envrionmentData);
 				return null;

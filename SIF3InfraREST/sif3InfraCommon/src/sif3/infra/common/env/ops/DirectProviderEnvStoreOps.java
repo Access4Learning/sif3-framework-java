@@ -24,7 +24,10 @@ import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.PersistenceException;
 import sif3.common.model.EnvironmentKey;
+import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
+import sif3.common.persist.model.AppEnvironmentTemplate;
 import sif3.common.persist.model.SIF3Session;
+import sif3.common.persist.service.AppEnvironmentService;
 import sif3.common.persist.service.SIF3SessionService;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.env.types.ProviderEnvironment;
@@ -44,6 +47,7 @@ import au.com.systemic.framework.utils.StringUtils;
 public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 {
 	private SIF3SessionService service = new SIF3SessionService();
+	private AppEnvironmentService appEnvService = new AppEnvironmentService();
 
 	/**
      * @param adapterFileNameWithoutExt The property file name for Store Operation class.
@@ -93,11 +97,34 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
     {
 		return service.getSessionBySolutionAppkeyUserInst(environmentKey, CommonConstants.AdapterType.ENVIRONMENT_PROVIDER) != null;
     }
+    
+    /**
+     * This method will attempt to load the environment template record from the underlying template info store. Note that 
+     * this method won't load the actual template rather it returns some meta information around the environment template.
+     * This functionality is only applicable for the DIRECT environment provider of this framework. If there is no entry in
+     * the environment template store for the given environment key or an error occurs accessing the store then null is 
+     * returned.
+     *  
+     * @param envKey The environment key for which the environment template information shall be retrieved.
+     * 
+     * @return See desc.
+     */
+	public AppEnvironmentTemplate getTemplateInfo(EnvironmentKey envKey)
+	{
+		try
+        {
+	        return appEnvService.getEnvironmentTemplate(envKey);
+        }
+        catch (Exception ex) // error is already logged.
+        {
+	        return null;
+        }
+	}
 
 	/**
-	 * This method loads the environment for a the workstore. Before it is loaded it checks if it does already exist. If it 
+	 * This method loads the environment from the workstore. Before it is loaded it checks if it does already exist. If it 
 	 * doesn't then null is returned, otherwise the environment is returned. Note if it doesn't exist it WON'T create it. 
-	 * To create the environment from a template then the 'createAndStoreEnvIronment(...)' method in this class must be called.
+	 * To create the environment from a template then the 'createEnvironmentAndSession(...)' method in this class must be called.
 	 * 
 	 * @param environmentKey solutionID Mandatory, applicationKey Mandatory, userToken Optional, instanceID Optional 
 	 * @param useSecured TRUE => Indicates that HTTPS end-points shall be returned. FALSE => Return HTTP end-points if available
@@ -149,7 +176,7 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 	/**
 	 * This method takes the inputEnv and uses its data to create a new full environment and associated session. The reminder of the 
 	 * environment data is read from the template directory (environment services and permissions). A SessionToken and Environment ID 
-	 * is also  created before the final environment created and stored. The input environment is modified before the final 
+	 * is also created before the final environment is stored. The input environment is modified before the final 
 	 * environment is returned. It is expected that the final returned environment is a full environment with all applicable 
 	 * infrastructure end-points, ACLs, environmentID, sessionToken etc that is applicable for the context (brokered vs direct).
 	 * If the environment cannot be created in the environment store then the error is logged and null is returned.<br/><br/>
@@ -194,9 +221,11 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 			logger.error("The consumer input environment is null or does not have the Application Info set. Environment cannot be created.");
 			return null;
 		}
-	    if (StringUtils.isEmpty(inputEnv.getSolutionId()) || StringUtils.isEmpty(inputEnv.getApplicationInfo().getApplicationKey()))
+//	    if (StringUtils.isEmpty(inputEnv.getSolutionId()) || StringUtils.isEmpty(inputEnv.getApplicationInfo().getApplicationKey()))
+	    if (StringUtils.isEmpty(inputEnv.getApplicationInfo().getApplicationKey()))
 	    {
-	      logger.error("The application key and/or the solution id in the consumer input environment is null or empty. Environment cannot be created.");
+//	      logger.error("The application key and/or the solution id in the consumer input environment is null or empty. Environment cannot be created.");
+        logger.error("The application key in the consumer input environment is null or empty. Environment cannot be created.");
 	      return null;
 	    }
 		ProviderEnvironment envInfo = (ProviderEnvironment)getEnvironmentStore().getEnvironment();
@@ -212,16 +241,20 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 			}
 			
 			// If we get here then we don't have an environment, yet => create and store it
-			EnvironmentType environment = loadEnvironmentFromTemplate(envInfo.getTemplateXMLFileName());
+			// Get the template name to use
+			AppEnvironmentTemplate appEnvTemplate = getTemplateInfo(envKey);
+			if (appEnvTemplate == null) // error already logged.
+			{
+				return null;
+			}
+			
+			EnvironmentType environment = loadEnvironmentFromTemplate(appEnvTemplate.getEnvironmentTemplate().getTemplateFileName());
 			
 			if (environment == null) // does not exist in template directory. we cannot create it.
 			{
 				return null; // error already logged.
 			}
 
-			//TODO: JH - Check if inputEnv parameters match the environment and environment Template parameter! 
-			// SolutionID from Template must match inputEnv.SolutionId; env.ApplicationKey must match inputEnv.ApplKey etc
-			
 			// Create a session the environment in the store.
 			sif3Session = service.createNewSession(envKey, CommonConstants.AdapterType.ENVIRONMENT_PROVIDER);
 			
@@ -231,18 +264,67 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 				environment.setSessionToken(sif3Session.getSessionToken());
 				environment.setId(sif3Session.getEnvironmentID());
 				
-				// Other important values can be taken from the input environment. SolutionId should be in the template, so no need to 
-				// use it from the inputEnv. But the following values need to be used	
-				environment.setApplicationInfo(inputEnv.getApplicationInfo());  // this has the application key
-				environment.setConsumerName(inputEnv.getConsumerName());
-				environment.setType(EnvironmentTypeType.DIRECT); // IT is a direct environment, so set it accordingly	
+				// Other important values can be taken from the input environment or if not provided (payload free creation)
+				// some of the values should remain as in the template others can be taken from the template lookup tabble
+
+				// Check what we have from Application Info: Note AppKey and Transport are always there
+			    if (environment.getApplicationInfo() == null) // nothing in template, so use what is in inputEnv.
+			    {
+			    	environment.setApplicationInfo(inputEnv.getApplicationInfo());
+			    }
+			    else //environment Template has some info. use it and update with input environment
+			    {
+  					environment.getApplicationInfo().setApplicationKey(inputEnv.getApplicationInfo().getApplicationKey());
+  					environment.getApplicationInfo().setTransport(inputEnv.getApplicationInfo().getTransport());
+  					if (StringUtils.notEmpty(inputEnv.getApplicationInfo().getDataModelNamespace()))
+  					{
+  						environment.getApplicationInfo().setDataModelNamespace(inputEnv.getApplicationInfo().getDataModelNamespace());
+  					}
+  					if (StringUtils.notEmpty(inputEnv.getApplicationInfo().getSupportedInfrastructureVersion()))
+  					{
+  						environment.getApplicationInfo().setSupportedInfrastructureVersion(inputEnv.getApplicationInfo().getSupportedInfrastructureVersion());
+  					}
+  					if (inputEnv.getApplicationInfo().getApplicationProduct() != null)
+  					{
+  						environment.getApplicationInfo().setApplicationProduct(inputEnv.getApplicationInfo().getApplicationProduct());
+  					}
+  					if (inputEnv.getApplicationInfo().getAdapterProduct() != null)
+  					{
+  						environment.getApplicationInfo().setAdapterProduct(inputEnv.getApplicationInfo().getAdapterProduct());
+  					}
+			    }
+				
+			  // If the input has a consumer name, use this otherwise leave what is in the template xml.
+				if (StringUtils.notEmpty(inputEnv.getConsumerName()))
+				{
+					environment.setConsumerName(inputEnv.getConsumerName());
+				}
+				
+				// Solution ID must be taken firstly from template lookup and secondly from environment template xml.
+				if (StringUtils.notEmpty(appEnvTemplate.getSolutionID())) // there is a SolutionID. Take it, otherwise leave as in template xml.
+				{
+				  environment.setSolutionId(appEnvTemplate.getSolutionID());
+				}
+
+        // Maybe the authentication method has changed, too.
+        if (StringUtils.notEmpty(appEnvTemplate.getAuthMethod()))
+        {
+          environment.setAuthenticationMethod(appEnvTemplate.getAuthMethod());
+        }
+        else if (StringUtils.isEmpty(environment.getAuthenticationMethod())) // if empty in env.xml set to Basic
+        {
+          environment.setAuthenticationMethod(AuthenticationMethod.Basic.name());
+        }
+
+				environment.setType(EnvironmentTypeType.DIRECT); // It is a direct environment, so set it accordingly	
 				environment.setUserToken(inputEnv.getUserToken());
 				environment.setInstanceId(inputEnv.getInstanceId());
 				updateConnectorURLs(environment, envInfo, useSecured); //update URLs for infrastructure services.
 				
 				// All is set now. We can update the session in the session store with the final values.
-				sif3Session.setPassword(envInfo.getPassword());
-				sif3Session.setAdapterName(inputEnv.getConsumerName());
+				sif3Session.setPassword(appEnvTemplate.getPassword());
+				sif3Session.setAdapterName(environment.getConsumerName());
+				sif3Session.setSolutionID(environment.getSolutionId());
 				
 				if (storeEnvDataToWorkstore(sif3Session, environment, service))
 				{
@@ -323,25 +405,68 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 			{
 				// We may need to replace infrastructure URLs depending on how the environment is used (http, https).
 				// Lookup the template this provider supports and replace things as required.
-				EnvironmentType templateEnv = loadEnvironmentFromTemplate(envInfo.getTemplateXMLFileName());
-				if (templateEnv != null)
+				// Get name of the template
+				AppEnvironmentTemplate appEnvTemplate = getTemplateInfo(sif3Session);
+				if (appEnvTemplate != null)
 				{
-					// Ensure that all ACLs are updated.
-					reloadServiceInfo(environment, templateEnv);
-					
-					// Update infrastructure service URIs in case they have changed.
-					environment.setInfrastructureServices(templateEnv.getInfrastructureServices());
-					updateConnectorURLs(environment, envInfo, useSecured);
-					
-					
-					// Store the updated values. Note even if this fails it is no drama as it will be recreated the next
-					// time a consumer connects.
-					storeEnvDataToWorkstore(sif3Session, environment, service);
+//					EnvironmentType templateEnv = loadEnvironmentFromTemplate(envInfo.getTemplateXMLFileName());
+					EnvironmentType templateEnv = loadEnvironmentFromTemplate(appEnvTemplate.getEnvironmentTemplate().getTemplateFileName());
+					if (templateEnv != null)
+					{
+						// Ensure that all ACLs are updated.
+						reloadServiceInfo(environment, templateEnv);
+						
+						// Update infrastructure service URIs in case they have changed.
+						environment.setInfrastructureServices(templateEnv.getInfrastructureServices());
+						updateConnectorURLs(environment, envInfo, useSecured);
+						
+						// Maybe the authentication method has changed, too.
+						if (StringUtils.notEmpty(appEnvTemplate.getAuthMethod()))
+						{
+							environment.setAuthenticationMethod(appEnvTemplate.getAuthMethod());
+						}
+						else // assume Basic
+						{
+							environment.setAuthenticationMethod(AuthenticationMethod.Basic.name());
+						}
+						
+						// Maybe the password has changed, too.
+						if (StringUtils.notEmpty(appEnvTemplate.getPassword()))
+						{
+							sif3Session.setPassword(appEnvTemplate.getPassword());
+						}
+						
+						// The SolutionID might not have been set by the input environment but is given by the environment template lookup or
+						// the environment template.
+						if (StringUtils.notEmpty(appEnvTemplate.getSolutionID())) // use env template lookup as first priority
+						{
+						  sif3Session.setSolutionID(appEnvTemplate.getSolutionID()); 
+						}
+						else // use what is in the template xml.
+						{
+						  sif3Session.setSolutionID(templateEnv.getSolutionId()); // either given in template xml or not used.
+						}
+
+						// ensure that other values that are of importance match the values in the template, especially since most value of the environment
+						// createion are optional and might be set in the template instead.
+						if (StringUtils.isEmpty(sif3Session.getAdapterName())) // only override consumer if it doesn't exist
+						{
+						  sif3Session.setAdapterName(templateEnv.getConsumerName());
+						}
+						
+						//Note some values may have been changed in the applciationInfo node but we don't really know how to deal with them
+						//right now so we ignore them as they are of no importance for operational purposes.
+						
+						// Store the updated values. Note even if this fails it is no drama as it will be recreated the next
+						// time a consumer connects.
+						storeEnvDataToWorkstore(sif3Session, environment, service);
+					}
+					else
+					{
+						logger.error("No environment template found for "+appEnvTemplate.getEnvironmentTemplate().getTemplateFileName()+". Cannot update connector URLs.");
+					}
 				}
-				else
-				{
-					logger.error("No environment template found for "+envInfo.getTemplateXMLFileName()+". Cannot update connector URLs.");
-				}	
+				// else: No template found in DB. Error already logged.
 			}
 			// else (no XML with session) error already logged. This would be a strange setup. Should not really happen!
 		}
