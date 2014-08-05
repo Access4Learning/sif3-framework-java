@@ -19,31 +19,36 @@ package sif3.infra.rest.resource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 
 import org.apache.log4j.Logger;
 
+import sif3.common.CommonConstants;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.exception.MarshalException;
 import sif3.common.exception.UnmarshalException;
+import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
-import sif3.common.header.HeaderValues.RequestType;
-import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.ResponseHeaderConstants;
+import sif3.common.header.HeaderValues.RequestType;
+import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.model.AuthenticationInfo;
 import sif3.common.model.PagingInfo;
-import sif3.common.model.QueryMetadata;
+//import sif3.common.model.QueryMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.URLQueryParameter;
+import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
 import sif3.common.persist.model.SIF3Session;
@@ -88,13 +93,14 @@ public abstract class BaseResource
 {
 	protected final Logger logger = Logger.getLogger(getClass());
 	
+	private enum PostFixMimeType {XML, JSON};
+	
 	private static final String HTTPS_SCHEMA = "https";
 
 	private boolean allOK = true;
 
 	private UriInfo uriInfo;
 	private Request request;
-	private MediaType mediaType = MediaType.APPLICATION_XML_TYPE;
 	private HttpHeaders requestHeaders;
 	private ObjectFactory infraObjectFactory = new ObjectFactory();
 	private InfraMarshalFactory infraMarshaller = new InfraMarshalFactory();
@@ -105,9 +111,13 @@ public abstract class BaseResource
 	private boolean isSecure = false;
 	private String relativeServicePath = null; 
 	private AuthenticationInfo authInfo = null;
+	private URLQueryParameter queryParameters= null;
+	private MediaType requestMediaType = null;
+	private MediaType responseMediaType = null;
+	private MediaType urlPostfixMimeType = null;
 
-	/* Metadata extracted from URI relating to query */ 
-	private QueryMetadata queryMetadata;
+  /* Metadata extracted from URI relating to query */ 
+//	private QueryMetadata queryMetadata;
 	
 	public abstract EnvironmentManager getEnvironmentManager();
 		
@@ -126,6 +136,7 @@ public abstract class BaseResource
 		this.request = request;
 		this.requestHeaders = requestHeaders;
 		extractHeaderProperties(requestHeaders);
+		extractQueryParameters(uriInfo);
 		setSecure(HTTPS_SCHEMA.equalsIgnoreCase(getUriInfo().getBaseUri().getScheme()));
 		setRelativeServicePath(getUriInfo().getPath(), servicePrefixPath);
 		extractAuthTokenInfo();
@@ -143,16 +154,18 @@ public abstract class BaseResource
 		// Some debug output
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Full URI          : " + getUriInfo().getRequestUri().toString());
-			logger.debug("Base URI          : " + getUriInfo().getBaseUri().toString());
-			logger.debug("Relative URI      : " + getUriInfo().getPath());
-			logger.debug("Rel. Service Path : " + getRelativeServicePath());
-			logger.debug("Protocol          : " + getUriInfo().getBaseUri().getScheme());
-			logger.debug("SIF3 Req. Headers : " + getHeaderProperties());
-			logger.debug("Request Media Type: " + getMediaType());
-			logger.debug("Zone ID           : " + getSifZone());
-			logger.debug("ContextID         : " + getSifContext());
-			logger.debug("Resource Init ok  : " + allOK);
+			logger.debug("Full URI           : " + getUriInfo().getRequestUri().toString());
+			logger.debug("Base URI           : " + getUriInfo().getBaseUri().toString());
+			logger.debug("Relative URI       : " + getUriInfo().getPath());
+			logger.debug("Rel. Service Path  : " + getRelativeServicePath());
+			logger.debug("Protocol           : " + getUriInfo().getBaseUri().getScheme());
+			logger.debug("SIF3 Req. Headers  : " + getHeaderProperties());
+			logger.debug("URL Query Params   : " + getQueryParameters());
+			logger.debug("Hdr Req Media Type : " + getRequestMediaType());
+			logger.debug("Hdr Resp Media Type: " + getResponseMediaType());
+			logger.debug("Zone ID            : " + getSifZone());
+			logger.debug("ContextID          : " + getSifContext());
+			logger.debug("Resource Init ok   : " + allOK);
 		}
 	}
 
@@ -199,9 +212,20 @@ public abstract class BaseResource
     	return this.hdrProperties;
     }
 
-	public MediaType getMediaType()
+	/*
+	 * If the request media type is not set it will try to get the media type from the URL Postfix. If thait is not set either then XML is returned
+	 */
+	public MediaType getRequestMediaType()
     {
-    	return this.mediaType;
+    	return ((this.requestMediaType != null) ? this.requestMediaType : (this.urlPostfixMimeType != null ? this.urlPostfixMimeType : MediaType.APPLICATION_XML_TYPE));
+    }
+
+  /*
+   * If the response media type is not set it will try to get the media type from the URL Postfix. If thait is not set either then XML is returned
+   */
+	public MediaType getResponseMediaType()
+    {
+    	return ((this.responseMediaType != null) ? this.responseMediaType : (this.urlPostfixMimeType != null ? this.urlPostfixMimeType : MediaType.APPLICATION_XML_TYPE));
     }
 
 	public HttpHeaders getRequestHeaders()
@@ -209,15 +233,15 @@ public abstract class BaseResource
     	return this.requestHeaders;
     }
 	
-	public QueryMetadata getQueryMetadata()
-    {
-    	return this.queryMetadata;
-    }
-
-	public void setQueryMetadata(QueryMetadata queryMetadata)
-    {
-    	this.queryMetadata = queryMetadata;
-    }
+//	public QueryMetadata getQueryMetadata()
+//    {
+//    	return this.queryMetadata;
+//    }
+//
+//	public void setQueryMetadata(QueryMetadata queryMetadata)
+//    {
+//    	this.queryMetadata = queryMetadata;
+//    }
 
 	public SIFZone getSifZone()
 	{
@@ -249,7 +273,17 @@ public abstract class BaseResource
     	this.isSecure = isSecure;
     }
 
-	/*--------------------------------*/
+  public URLQueryParameter getQueryParameters()
+  {
+    return queryParameters;
+  }
+
+  public void setQueryParameters(URLQueryParameter queryParameters)
+  {
+    this.queryParameters = queryParameters;
+  }
+
+  /*--------------------------------*/
 	/*-- Some handy Utility Methods --*/
 	/*--------------------------------*/
 	/**
@@ -309,13 +343,13 @@ public abstract class BaseResource
 	 * checks pass successfully then null is returned otherwise and ErrorDetails record is returned that holds appropriate error information
 	 * to be sent back to the client. 
 	 * 
-	 * @param envInfo The environment with all the information to be used to validate the userToken & password against.
+//	 * @param envInfo The environment with all the information to be used to validate the userToken & password against.
 	 * @param userToken The userToken to compare against. This might be used to compare against an expected user. 
 	 * @param password The password to compare against. This might be used to compare against an expected password.
 	 * 
 	 * @return See desc.
 	 */
-	public ErrorDetails validateAuthToken(ProviderEnvironment envInfo, String userToken, String password)
+	public ErrorDetails validateAuthToken(String userToken, String password)
 	{
 		// Check if authentication method matches the authentication method of the environment for which it is.
 		if (getAuthInfo().getAuthMethod() == null)
@@ -323,10 +357,10 @@ public abstract class BaseResource
 			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not authorized. No Authentication Method set.", "Choose between Basic & SIF_HMACSHA256 as Authentication Method. Refer to SIF3 Specification for details.");
 		}
 
-		if (envInfo.getAuthMethod() != getAuthInfo().getAuthMethod())
-		{
-			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not authorized. Authentication Method in Request doesn't match Authentication Method of environment.");
-		}
+//		if (envInfo.getAuthMethod() != getAuthInfo().getAuthMethod())
+//		{
+//			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not authorized. Authentication Method in Request doesn't match Authentication Method of environment.");
+//		}
 
 		if (StringUtils.isEmpty(getAuthInfo().getPassword()))
 		{
@@ -334,13 +368,19 @@ public abstract class BaseResource
 		}
 
 		// Ok we have an session for that session Token. Now we need to check if it is a properly authenticated token.
-		String authToken = getAuthTokenFromHeader();
+		//String authToken = getAuthTokenFromHeader();
+		String authToken = AuthenticationUtils.getFullBase64Token(getAuthInfo());
 		String newAuthToken = null;
 		if (getAuthInfo().getAuthMethod() == AuthenticationInfo.AuthenticationMethod.Basic)
 		{
 			// Create authentication token and compare if it matches
 			newAuthToken = AuthenticationUtils.getBasicAuthToken(userToken, password);			
 		}
+	    if (getAuthInfo().getAuthMethod() == AuthenticationInfo.AuthenticationMethod.Bearer) // Experimental to get SIF Basic to work
+	    {
+	      // Create authentication token and compare if it matches
+	      newAuthToken = AuthenticationUtils.getBearerAuthToken(userToken, password);      
+	    }
 		else if (getAuthInfo().getAuthMethod() == AuthenticationInfo.AuthenticationMethod.SIF_HMACSHA256)
 		{
 			// Get the timestamp which is required for the hashing.
@@ -354,6 +394,9 @@ public abstract class BaseResource
 				return new ErrorDetails( Status.UNAUTHORIZED.getStatusCode(), "Not authorized. Timestamp missing in request.", "For SIF_HMACSHA256 authentication the HTTP request must have a timestamp. Refer to SIF3 Specification for details.");
 			}
 		}
+	    //System.out.println("Auth Token from Header/Query Parameter: "+authToken);
+	    //System.out.println("Auth Token To Compare with: "+newAuthToken);
+	    
 		if (!authToken.equals(newAuthToken))
 		{
 			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not authorized. authorization token in request doesn't match expected authorization token in session.");
@@ -371,7 +414,7 @@ public abstract class BaseResource
 	 */
 	public ErrorDetails validSession()
 	{
-		ProviderEnvironment envInfo = getProviderEnvironment();
+//		ProviderEnvironment envInfo = getProviderEnvironment();
 		
 		// we must have a authentication token and there must be an environment with that authentication token
 		String sessionToken = getSessionToken();
@@ -418,11 +461,12 @@ public abstract class BaseResource
 			}
 			
 			// Do the full validation of Auth Token.
-			return validateAuthToken(envInfo, sessionToken, sif3Session.getPassword());
+//			return validateAuthToken(envInfo, sessionToken, sif3Session.getPassword());
+			return validateAuthToken(sessionToken, sif3Session.getPassword());
 		}
-		else
+		else // we have no or an invalid authorisation token
 		{
-			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Authorization Token must be provided");				
+			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "No or invalid Authorization Token provided");				
 		}
 	}
 		
@@ -451,13 +495,14 @@ public abstract class BaseResource
 	 * @return A list of ID that are requested to be deleted.
 	 * 
 	 * @throws UnmarshalException If the payload is invalid and cannot be marshalled into its predefined structure.
+	 * @throws UnsupportedMediaTypeExcpetion 
 	 */
-	public List<String> getResourceIDsFromDeleteRequest(String deletePayload) throws UnmarshalException
+	public List<String> getResourceIDsFromDeleteRequest(String deletePayload) throws UnmarshalException, UnsupportedMediaTypeExcpetion
 	{
     List<String> resourceIDs = new ArrayList<String>();
     if (deletePayload != null)
     {
-      DeleteRequestType deletes = (DeleteRequestType)infraUnmarshaller.unmarschal(deletePayload, DeleteRequestType.class, getMediaType());
+      DeleteRequestType deletes = (DeleteRequestType)infraUnmarshaller.unmarshal(deletePayload, DeleteRequestType.class, getRequestMediaType());
       if ((deletes.getDeletes() != null) && (deletes.getDeletes().getDelete() != null))
       {
         for (DeleteIdType id : deletes.getDeletes().getDelete())
@@ -649,10 +694,10 @@ public abstract class BaseResource
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-	private String getAuthTokenFromHeader()
-	{
-		return getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN);
-	}
+//	private String getAuthTokenFromHeader()
+//	{
+//		return getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN);
+//	}
 
 	private void extractHeaderProperties(HttpHeaders requestHeaders)
 	{
@@ -666,18 +711,106 @@ public abstract class BaseResource
 			}
 		}
 		
-		// Also try to get the media type
-		String mediaTypeStr = requestHeaders.getRequestHeaders().getFirst("Content-Type");
+		// Try to get the request and response media type
+		requestMediaType  = getMediaTypeFromStr(requestHeaders.getRequestHeaders().getFirst(HttpHeaders.CONTENT_TYPE), HttpHeaders.CONTENT_TYPE);
+		if (requestMediaType != null)
+		{
+		  // If it is not one of the accpted types then set it to null
+		  if (!(requestMediaType.isCompatible(MediaType.APPLICATION_XML_TYPE) ||
+		       requestMediaType.isCompatible(MediaType.TEXT_XML_TYPE) ||
+		       requestMediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)))
+		  {
+		    requestMediaType = null;
+		  }
+		}
+		
+		responseMediaType = getMediaTypeFromStr(requestHeaders.getRequestHeaders().getFirst(HttpHeaders.ACCEPT), HttpHeaders.ACCEPT);
+		if ((responseMediaType == null) || responseMediaType.isWildcardSubtype()) // not really specified, so we assume the same as request
+		{
+		  responseMediaType = requestMediaType;
+		}
+		// If it is not one of the accpted types then set it to value of request
+		else if (!(responseMediaType.isCompatible(MediaType.APPLICATION_XML_TYPE) ||
+		           responseMediaType.isCompatible(MediaType.TEXT_XML_TYPE) ||
+		           responseMediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)))
+    {
+		  responseMediaType = requestMediaType;
+    }
+	}
+
+	private MediaType getMediaTypeFromStr(String mediaTypeStr, String headerName)
+	{
+		if (StringUtils.isEmpty(mediaTypeStr))
+		{
+			return null;
+		}
 		try
 		{
-			mediaType = MediaType.valueOf(mediaTypeStr);
+			return MediaType.valueOf(mediaTypeStr);
 		}
-		catch (Exception ex)
+		catch (Exception ex) // invalid mime type. Return null.
 		{
-			logger.error("Failed to convert media type '"+mediaTypeStr+"' from request header (Content-Type) to MediaType class. Default to APPLICATION_XML");
-			mediaType = MediaType.APPLICATION_XML_TYPE;
-		}		
+			logger.info("Failed to convert media type '" + mediaTypeStr + "' from request header '" + headerName + "' to MediaType class.");
+			return null;
+		}
 	}
+	
+	/*
+	 * The URL postfix mime type can be of the form '.xml', 'xml', '.json' etc. all case insensitive. If null or an empty value is given then
+	 * a default of XML is returned.
+	 */
+	protected void setURLPostfixMediaType(String urlPostfixMimeTypeStr)
+	{
+	  if (StringUtils.isEmpty(urlPostfixMimeTypeStr))
+	  {
+		  urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
+	  }
+	  else
+	  {
+		  // get the position of the last '.'.
+		  int pos = urlPostfixMimeTypeStr.lastIndexOf(".");
+		  if ((pos > -1) && (pos + 1 < urlPostfixMimeTypeStr.length())) // "." found. Get everything after the "."
+		  {
+			  urlPostfixMimeTypeStr = urlPostfixMimeTypeStr.substring(pos+1);
+		  }
+		  
+		  // Start comparing for valid types
+		  PostFixMimeType mimeType = PostFixMimeType.XML;
+		  try
+		  {
+		    mimeType = PostFixMimeType.valueOf(urlPostfixMimeTypeStr.trim().toUpperCase());
+		  }
+		  catch (Exception ex)
+		  {
+		    logger.error("Failed to convert URL Postfix Mime Type '"+urlPostfixMimeTypeStr+"' to XML or JSON. Default to Media Type will be APPLICATION_XML");
+		    mimeType = PostFixMimeType.XML;
+		  }
+		  
+		  switch (mimeType)
+		  {
+		    case XML: 
+		    	{
+		    		urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE; 
+		    		break;
+		    	}
+		    case JSON: 
+		    	{
+		    		urlPostfixMimeType = MediaType.APPLICATION_JSON_TYPE;
+		    		break;
+		    	}
+		    default:
+		    {
+		    	urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE; 
+	    		break;
+		    }
+		  }
+	  }
+	}
+	
+  private void extractQueryParameters(UriInfo uriInfo)
+  {
+    setQueryParameters(new URLQueryParameter(getUriInfo().getQueryParameters()));
+  }
 
 	private ErrorType makeError(ErrorDetails error)
 	{
@@ -696,16 +829,27 @@ public abstract class BaseResource
 		ResponseBuilder response = null;
 		try
 		{
-			if (data != null)
-			{
-				String payload = marshaller.marschal(data, getMediaType());
-				response = Response.status(status).entity(payload);
-				response = response.header(ResponseHeaderConstants.HDR_CONTENT_LENGTH, payload.length());
-			}
-			else
-			{
-				response = Response.status(Status.NO_CONTENT);
-			}
+		  // Special case to avoid infinite loop: We deal with an error and the Status Code is of UNSUPPORTED_MEDIA_TYPE. This means we attempted
+		  // to response with a media type that is not suppored, so we cannot return an Error Message Object because the marshalling will fail due
+		  // to the fact that the media type is not supported. All we can do is return a status code only.
+		  if (isError && (status == Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode()))
+		  {
+		    response = Response.status(Status.UNSUPPORTED_MEDIA_TYPE);
+		  }
+		  else // ok we do not deal with a unsupported media type.
+		  {
+  			if (data != null)
+  			{
+  				String payload = marshaller.marshal(data, getResponseMediaType());
+  				response = Response.status(status).entity(payload);
+  				response = response.header(ResponseHeaderConstants.HDR_CONTENT_LENGTH, payload.length());
+  				response = response.header(HttpHeaders.CONTENT_TYPE,  getResponseMediaType());
+  			}
+  			else
+  			{
+  				response = Response.status(Status.NO_CONTENT);
+  			}
+		  }
 			
 			// Date & Time format must be: YYYY-MM-DDTHH:mm:ssZ (i.e. 2013-08-12T12:13:14Z)
 			response = response.header(ResponseHeaderConstants.HDR_DATE_TIME, DateUtils.nowAsISO8601());
@@ -716,10 +860,15 @@ public abstract class BaseResource
 			response = response.header(ResponseHeaderConstants.HDR_SERVICE_TYPE, hdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE));
 			if (pagingInfo != null)
 			{
-				response = response.header(ResponseHeaderConstants.HDR_LAST_PAGE_NO, pagingInfo.getMaxPages());
-				response = response.header(ResponseHeaderConstants.HDR_PAGE_NO, pagingInfo.getCurrentPageNo());
-				response = response.header(ResponseHeaderConstants.HDR_PAGE_SIZE, pagingInfo.getPageSize());
-				response = response.header(ResponseHeaderConstants.HDR_TOTAL_ITEMS, pagingInfo.getTotalObjects());
+        Map<String, String> responseParameters = pagingInfo.getResponseValues();
+        for (String key : responseParameters.keySet())
+        {
+          response = response.header(key, responseParameters.get(key));
+        }
+//				response = response.header(ResponseHeaderConstants.HDR_LAST_PAGE_NO, pagingInfo.getMaxPages());
+//				response = response.header(ResponseHeaderConstants.HDR_PAGE_NO, pagingInfo.getCurrentPageNo());
+//				response = response.header(ResponseHeaderConstants.HDR_PAGE_SIZE, pagingInfo.getPageSize());
+//				response = response.header(ResponseHeaderConstants.HDR_TOTAL_ITEMS, pagingInfo.getTotalObjects());
 			}
 
 			// Mirror requestId if available
@@ -735,9 +884,13 @@ public abstract class BaseResource
 		{
 			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+": "+ex.getMessage()), responseAction);
 		}
+    catch (UnsupportedMediaTypeExcpetion ex)
+    {
+      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+" into unsupported media type '"+getResponseMediaType()+"'."), responseAction);
+    }
 	}
 		
-	private AuthenticationInfo getAuthInfo()
+	protected AuthenticationInfo getAuthInfo()
 	{
 		return authInfo;
 	}
@@ -754,6 +907,11 @@ public abstract class BaseResource
 		{
 			setAuthInfo(AuthenticationUtils.getPartsFromAuthToken(authToken));
 		}
+		else 	// Ok no header info. Do we have something on the query parameters
+		{
+		  setAuthInfo(getAccessToken());
+		}
+		
 	}
 
 	private RequestType extractRequestType()
@@ -773,11 +931,22 @@ public abstract class BaseResource
 		}
 		else
 		{
-			logger.error("Missing request header '"+RequestHeaderConstants.HDR_REQUEST_TYPE+". Should be set to either DELAYED or IMMEDIATE. Assume IMMEDIATE!");
+			logger.info("Missing request header '"+RequestHeaderConstants.HDR_REQUEST_TYPE+" not set. Assume IMMEDIATE");
 			return RequestType.IMMEDIATE;
 		}
 	}
 
+  private AuthenticationInfo getAccessToken()
+  {
+    String accessTokenStr = getQueryParameters().getQueryParam(CommonConstants.ACCESS_TOKEN);
+    if (StringUtils.notEmpty(accessTokenStr))
+    {
+      // Add "Bearer " in front of the accessToken and then treat it just like it would have been in the header
+      return AuthenticationUtils.getPartsFromAuthToken(AuthenticationMethod.Bearer.name()+" "+accessTokenStr.trim());
+    }
+    return null;
+  }
+	
 	private String extractTimestampFromHeader()
 	{
 		return getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME);

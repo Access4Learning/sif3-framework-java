@@ -20,7 +20,6 @@ package sif3.infra.rest.resource;
 
 import java.util.List;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.MatrixParam;
@@ -34,20 +33,21 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.Status;
 
 import sif3.common.CommonConstants;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
+import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderValues;
-import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.RequestHeaderConstants;
+import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.interfaces.Provider;
 import sif3.common.model.PagingInfo;
-import sif3.common.model.QueryMetadata;
+//import sif3.common.model.QueryMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceRights.AccessRight;
@@ -77,7 +77,7 @@ import sif3.infra.rest.provider.ProviderFactory;
  * 
  * @author Joerg Huber
  */
-@Path("/requests/{dmObjectNamePlural}")
+@Path("/requests/{dmObjectNamePlural}{mimeType:(\\.[^/]*?)?}")
 public class DataModelResource extends BaseResource
 {
 	private String dmObjectNamePlural = null; // This is also expected to be the key into the provider factory.
@@ -97,11 +97,15 @@ public class DataModelResource extends BaseResource
 			                 @Context HttpHeaders requestHeaders,
 			                 @Context Request request,
 			                 @PathParam("dmObjectNamePlural") String dmObjectNamePlural,
+			                 @PathParam("mimeType") String mimeType,
 			                 @MatrixParam("zoneId") String zoneID,
 			                 @MatrixParam("contextId") String contextID)
     {
 	    super(uriInfo, requestHeaders, request, "requests", zoneID, contextID);
 	    this.dmObjectNamePlural = dmObjectNamePlural;
+	    setURLPostfixMediaType(mimeType);
+	    
+	    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
 	    
 	    // Provider Factory should already be initialised. If not it will be done now...
 	    provider = ProviderFactory.getInstance().getProvider(new ModelObjectInfo(dmObjectNamePlural, null));
@@ -124,14 +128,17 @@ public class DataModelResource extends BaseResource
 	// -- POST Section: This is the C(reate) in CRUD. --//
 	// -------------------------------------------------//
 	@POST
-	@Path("{dmObjectNameSingle}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response createSingle(String payload, @PathParam("dmObjectNameSingle") String dmObjectNameSingle)
+//	@Path("{dmObjectNameSingle}")
+	@Path("{dmObjectNameSingle}{mimeType:(\\.[^/]*?)?}")
+//  Let everything through and then deal with it when needed.	
+//	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML }) // only these are possible returns.
+	public Response createSingle(String payload, @PathParam("dmObjectNameSingle") String dmObjectNameSingle, @PathParam("mimeType") String mimeType)
 	{
+		setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Create Single "+dmObjectNameSingle+" (REST POST) with input data: " + payload);
+			logger.debug("Create Single "+dmObjectNameSingle+" (REST POST) with URL Postfix mimeType = '" + mimeType + "' and input data: " + payload);
 		}
 		
 		ErrorDetails error = validClient(dmObjectNamePlural, AccessRight.CREATE, AccessType.APPROVED);
@@ -148,7 +155,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			Object returnObj = provider.createSingle(provider.getUnmarshaller().unmarschal(payload, provider.getSingleObjectClassInfo().getObjectType(), getMediaType()), getAdvisory(), getSifZone(), getSifContext());
+			Object returnObj = provider.createSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext());
 
 			return makeResponse(returnObj, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, provider.getMarshaller());
 		}
@@ -160,10 +167,15 @@ public class DataModelResource extends BaseResource
 		{
 			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE);			
 		}
+    catch (UnsupportedMediaTypeExcpetion ex)
+    {
+      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE);     
+    }
 	}
 
 	@POST
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//Let everything through and then deal with it when needed. 
+//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response createMany(String payload)
 	{
@@ -185,7 +197,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			List<CreateOperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarschal(payload, provider.getMultiObjectClassInfo().getObjectType(), getMediaType()), getAdvisory(), getSifZone(), getSifContext());
+			List<CreateOperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext());
 			
 			if (statusList != null)
 			{
@@ -204,20 +216,27 @@ public class DataModelResource extends BaseResource
 		{
 			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getMultiObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE);			
 		}
+    catch (UnsupportedMediaTypeExcpetion ex)
+    {
+      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE);     
+    }
 	}
 
 	// --------------------------------------------------------//
 	// -- GET Section: This is the R(ead) in CRUD for Lists. --//
 	// --------------------------------------------------------//
 	@GET
-	@Path("{resourceID}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//	@Path("{resourceID}")
+  @Path("{resourceID}{mimeType:(\\.[^/]*?)?}")
+//  Let everything through and then deal with it when needed. 
+//  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getSingle(@PathParam("resourceID") String resourceID)
+	public Response getSingle(@PathParam("resourceID") String resourceID, @PathParam("mimeType") String mimeType)
 	{
+		setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Get Resource by Resoucre ID (REST GET - Single): "+resourceID);
+			logger.debug("Get Resource by Resoucre ID (REST GET - Single): "+resourceID+" and URL Postfix mimeType = '"+mimeType+"'");
 		}
 		
 		ErrorDetails error = validClient(dmObjectNamePlural, AccessRight.QUERY, AccessType.APPROVED);
@@ -256,7 +275,8 @@ public class DataModelResource extends BaseResource
 	}
 
 	@GET
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//Let everything through and then deal with it when needed. 
+//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getMany()
 	{
@@ -271,8 +291,8 @@ public class DataModelResource extends BaseResource
 			return makeErrorResponse(error, ResponseAction.QUERY);
 		}
 		
-		setQueryMetadata(new QueryMetadata(getUriInfo().getQueryParameters()));
-		logger.debug(getQueryMetadata());
+//		setQueryMetadata(new QueryMetadata(getUriInfo().getQueryParameters()));
+//		logger.debug(getQueryMetadata());
 
 		Provider provider = getProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
@@ -280,7 +300,18 @@ public class DataModelResource extends BaseResource
 			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.QUERY);			
 		}
 	
-		PagingInfo pagingInfo = (getQueryMetadata().getPagingInfo() == null) ? null : getQueryMetadata().getPagingInfo().clone();
+//		PagingInfo pagingInfo = (getQueryMetadata().getPagingInfo() == null) ? null : getQueryMetadata().getPagingInfo().clone();
+
+    PagingInfo pagingInfo = new PagingInfo(getHeaderProperties(), getQueryParameters());
+    if (pagingInfo.getPageSize() <= PagingInfo.NOT_DEFINED) // page size not defined. Pass null to provider. 
+    {
+      pagingInfo = null;
+    }
+    else
+    {
+      pagingInfo = pagingInfo.clone(); // ensure that initial values are not overriden in case we need them later,
+    }
+		
 		try
 		{
 			Object returnObj = provider.retrieve(getSifZone(), getSifContext(), pagingInfo);
@@ -305,14 +336,17 @@ public class DataModelResource extends BaseResource
 	// -- PUT Section: This is the U(pdate) in CRUD for Lists. --//
 	// ----------------------------------------------------------//
 	@PUT
-	@Path("{resourceID}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//	@Path("{resourceID}")
+	@Path("{resourceID}{mimeType:(\\.[^/]*?)?}")
+//  Let everything through and then deal with it when needed. 
+//  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response updateSingle(String payload, @PathParam("resourceID") String resourceID)
+	public Response updateSingle(String payload, @PathParam("resourceID") String resourceID, @PathParam("mimeType") String mimeType)
 	{
+		setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Update Single "+dmObjectNamePlural+" (REST PUT) with resourceID = "+resourceID+" and input data: " + payload);
+			logger.debug("Update Single "+dmObjectNamePlural+" (REST PUT) with resourceID = "+resourceID+", URL Postfix mimeType = "+mimeType+"' and input data: " + payload);
 		}
 		
 		ErrorDetails error = validClient(dmObjectNamePlural, AccessRight.UPDATE, AccessType.APPROVED);
@@ -329,7 +363,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			if (provider.updateSingle(provider.getUnmarshaller().unmarschal(payload, provider.getSingleObjectClassInfo().getObjectType(), getMediaType()), resourceID, getSifZone(), getSifContext()))
+			if (provider.updateSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), resourceID, getSifZone(), getSifContext()))
 			{
 				return makeResopnseWithNoContent(false, ResponseAction.UPDATE);
 			}
@@ -350,10 +384,15 @@ public class DataModelResource extends BaseResource
 		{
 			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);			
 		}
+    catch (UnsupportedMediaTypeExcpetion ex)
+    {
+      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);     
+    }
 	}
 
 	@PUT
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//Let everything through and then deal with it when needed. 
+//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response updateMany(String payload)
 	{
@@ -392,14 +431,17 @@ public class DataModelResource extends BaseResource
 	// -- DELETE Section: This is the D(elete) in CRUD for Lists. --//
 	// -------------------------------------------------------------//
 	@DELETE
-	@Path("{resourceID}")
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//	@Path("{resourceID}")
+	@Path("{resourceID}{mimeType:(\\.[^/]*?)?}")
+//  Let everything through and then deal with it when needed. 
+//  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response removeSingle(@PathParam("resourceID") String resourceID)
+	public Response removeSingle(@PathParam("resourceID") String resourceID, @PathParam("mimeType") String mimeType)
 	{
+		setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Remove Single "+dmObjectNamePlural+" (REST DELETE) with resourceID = "+resourceID);
+			logger.debug("Remove Single "+dmObjectNamePlural+" (REST DELETE) with resourceID = "+resourceID + " and URL Postfix mimeType = '" + mimeType + "'.");
 		}
 		
 		ErrorDetails error = validClient(dmObjectNamePlural, AccessRight.DELETE, AccessType.APPROVED);
@@ -437,7 +479,8 @@ public class DataModelResource extends BaseResource
 	}
 	
 	@DELETE
-	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//Let everything through and then deal with it when needed. 
+//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	/*
 	 * NOTE: 
@@ -506,7 +549,7 @@ public class DataModelResource extends BaseResource
 	{
     try
     {
-      List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarschal(payload, provider.getMultiObjectClassInfo().getObjectType(), getMediaType()), getSifZone(), getSifContext());
+      List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext());
       
       if (statusList != null)
       {
@@ -524,6 +567,10 @@ public class DataModelResource extends BaseResource
     catch (UnmarshalException ex)
     {
       return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getMultiObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);      
+    }
+    catch (UnsupportedMediaTypeExcpetion ex)
+    {
+      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);     
     }
 	}
 
@@ -549,6 +596,10 @@ public class DataModelResource extends BaseResource
     catch (UnmarshalException ex)
     {
       return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to DeleteRequestType. Problem reported: "+ex.getMessage()), ResponseAction.DELETE);     
+    }
+    catch (UnsupportedMediaTypeExcpetion ex)
+    {
+      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to DeleteRequestType. Problem reported: "+ex.getMessage()), ResponseAction.DELETE);     
     }
   }
 
