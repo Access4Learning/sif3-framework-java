@@ -229,11 +229,11 @@ public class PagingInfo implements Serializable
   }
 
   /**
-   * This method returns the total number of pages based on the page size and the total numer objects. If either if these two values is negative
+   * This method returns the total number of pages based on the page size and the total number objects. If either if these two values is negative
    * then it indicates that they are not defined and NOT_DEFINED (-1) is returned. If both of these values are given then the appropriate max
    * number of pages value is returned.
    * 
-   * @return
+   * @return Number of pages. Can be NOT_DEFINED (-1). For details see description above. 
    */
 	public int getMaxPages()
 	{
