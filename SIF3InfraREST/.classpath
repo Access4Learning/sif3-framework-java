@@ -20,13 +20,9 @@
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/log4j/log4j.jar"/>
-	<classpathentry kind="lib" path="lib/log4j/slf4j-api-1.5.8.jar"/>
-	<classpathentry kind="lib" path="lib/log4j/slf4j-log4j12-1.5.8.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/hibernate3.jar"/>
 	<classpathentry kind="lib" path="lib/xml/dom4j-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/jdbc/mysql.jar"/>
-	<classpathentry kind="lib" path="lib/common/commons-collections-3.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/javassist-3.12.0.GA.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/c3p0-0.9.1.jar"/>
 	<classpathentry kind="lib" path="lib/hibernate/hibernate-jpa-2.0-api-1.0.1.Final.jar"/>
@@ -34,6 +30,5 @@
 	<classpathentry kind="lib" path="lib/systemic/systemic-framework-20140410.jar"/>
 	<classpathentry kind="lib" path="lib/jersey/jersey-client-1.17.1.jar"/>
 	<classpathentry kind="lib" path="lib/jersey/jersey-core-1.17.1.jar"/>
-	<classpathentry kind="lib" path="lib/common/commons-codec-1.9.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
