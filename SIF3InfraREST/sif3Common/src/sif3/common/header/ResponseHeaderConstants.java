@@ -20,6 +20,8 @@ package sif3.common.header;
 
 import javax.ws.rs.core.HttpHeaders;
 
+import sif3.common.CommonConstants;
+
 /**
  * @author Joerg Huber
  *
@@ -33,21 +35,24 @@ public class ResponseHeaderConstants
 	public static final String HDR_AUTH_TOKEN = HttpHeaders.AUTHORIZATION;
 	public static final String HDR_GENERATOR_ID = "generatorId";
 	public static final String HDR_IF_NOT_MATCH = HttpHeaders.IF_NONE_MATCH;
-	public static final String HDR_NAVIGATION_ID = "navigationId";	
 	public static final String HDR_ETAG = HttpHeaders.ETAG;
 	public static final String HDR_CONTENT_LENGTH = HttpHeaders.CONTENT_LENGTH;
 	public static final String HDR_LOCATION = HttpHeaders.LOCATION;
 	public static final String HDR_PROVIDER_ID = "providerId";
-	public static final String HDR_PAGE_SIZE = "navigationPageSize";
-	public static final String HDR_PAGE_NO = "navigationPage";
-	public static final String HDR_TOTAL_ITEMS = "navigationCount";
-	public static final String HDR_LAST_PAGE_NO = "navigationLastPage";
 	public static final String HDR_DATE_TIME = "timestamp";
 	public static final String HDR_MESSAGE_TYPE = "messageType"; // RESPONSE, EVENT, ERROR
 	public static final String HDR_REQUEST_ID = "requestId";
 	public static final String HDR_RESPONSE_ACTION = "responseAction";
 	public static final String HDR_REL_SERVICE_PATH = "relativeServicePath";
 	public static final String HDR_SERVICE_TYPE = "serviceType"; // OBJECT, FUNCTION, UTILITY, SERVICEPATH, XQUERYTEMPLATE
+
+	/* Paging and navigation related properties */
+  public static final String HDR_NAVIGATION_ID = CommonConstants.PagingResponseProperty.navigationId.name(); //"navigationId"; 
+  public static final String HDR_PAGE_SIZE = CommonConstants.PagingResponseProperty.navigationPageSize.name(); //"navigationPageSize";
+  public static final String HDR_PAGE_NO = CommonConstants.PagingResponseProperty.navigationPage.name(); //"navigationPage";
+  public static final String HDR_TOTAL_ITEMS = CommonConstants.PagingResponseProperty.navigationCount.name(); //"navigationCount";
+  public static final String HDR_LAST_PAGE_NO = CommonConstants.PagingResponseProperty.navigationLastPage.name(); //"navigationLastPage";
+
 	
 	/*---------------------------------------------------------*/
 	/*-- Name of fields that are specific for Event Requests --*/

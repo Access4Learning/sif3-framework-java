@@ -20,6 +20,8 @@ package sif3.common.header;
 
 import javax.ws.rs.core.HttpHeaders;
 
+import sif3.common.CommonConstants;
+
 /**
  * @author Joerg Huber
  *
@@ -42,7 +44,9 @@ public class RequestHeaderConstants
 	/*-- Name of fields that are specific for CRUD Requests --*/
 	/*--------------------------------------------------------*/
 	public static final String HDR_IF_NOT_MATCH = HttpHeaders.IF_NONE_MATCH;
-	public static final String HDR_NAVIGATION_ID = "navigationId";
+	public static final String HDR_NAVIGATION_ID = CommonConstants.PagingRequestProperty.navigationId.name(); //"navigationId";
+  public static final String HDR_PAGE_SIZE = CommonConstants.PagingRequestProperty.navigationPageSize.name(); //"navigationPageSize";
+	public static final String HDR_PAGE_NO = CommonConstants.PagingRequestProperty.navigationPage.name(); //"navigationPage";
 	public static final String HDR_REQUEST_ID = "requestId";
 	public static final String HDR_QUEUE_ID = "queueId";
 	public static final String HDR_ADVISORY = "mustUseAdvisory"; //true, false
@@ -73,7 +77,9 @@ public class RequestHeaderConstants
 		
 		// CRUD Request Fields
 		HDR_IF_NOT_MATCH, 
-		HDR_NAVIGATION_ID, 
+		HDR_NAVIGATION_ID,
+		HDR_PAGE_SIZE,
+		HDR_PAGE_NO,
 		HDR_REQUEST_ID,
 		HDR_QUEUE_ID,
 		HDR_ADVISORY,
