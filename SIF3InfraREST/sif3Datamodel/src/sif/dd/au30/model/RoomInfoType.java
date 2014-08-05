@@ -50,6 +50,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="Size" type="{http://www.w3.org/2001/XMLSchema}decimal" minOccurs="0"/>
  *         &lt;element name="Capacity" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *         &lt;element name="PhoneNumber" type="{http://www.sifassociation.org/au/datamodel/1.3}PhoneNumberType" minOccurs="0"/>
+ *         &lt;element name="RoomType" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
  *         &lt;element name="SIF_Metadata" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_MetadataType" minOccurs="0"/>
  *         &lt;element name="SIF_ExtendedElements" type="{http://www.sifassociation.org/au/datamodel/1.3}SIF_ExtendedElementsType" minOccurs="0"/>
  *       &lt;/sequence>
@@ -72,6 +73,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "size",
     "capacity",
     "phoneNumber",
+    "roomType",
     "sifMetadata",
     "sifExtendedElements"
 })
@@ -98,6 +100,8 @@ public class RoomInfoType {
     protected JAXBElement<Long> capacity;
     @XmlElementRef(name = "PhoneNumber", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<PhoneNumberType> phoneNumber;
+    @XmlElementRef(name = "RoomType", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
+    protected JAXBElement<String> roomType;
     @XmlElementRef(name = "SIF_Metadata", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
     protected JAXBElement<SIFMetadataType> sifMetadata;
     @XmlElementRef(name = "SIF_ExtendedElements", namespace = "http://www.sifassociation.org/au/datamodel/1.3", type = JAXBElement.class, required = false)
@@ -320,6 +324,30 @@ public class RoomInfoType {
      */
     public void setPhoneNumber(JAXBElement<PhoneNumberType> value) {
         this.phoneNumber = value;
+    }
+
+    /**
+     * Gets the value of the roomType property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     
+     */
+    public JAXBElement<String> getRoomType() {
+        return roomType;
+    }
+
+    /**
+     * Sets the value of the roomType property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     
+     */
+    public void setRoomType(JAXBElement<String> value) {
+        this.roomType = value;
     }
 
     /**
