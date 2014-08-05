@@ -66,6 +66,12 @@ public class CommonConstants
 
 	/* Millisecond multiplier. Ensures that we get that right everywhere :-) */
 	public static final int MILISEC = 1000;
+	
+	/* REST transport String */
+	public static final String REST_TRANSPORT_STR = "REST";
+
+	 /* SOAP transport String: Future Use */
+  public static final String SOAP_TRANSPORT_STR = "SOAP";
 
 	/*-----------------------------------------------------------*/
 	/* Constants defined by SIF3 Spec.                           */
@@ -75,6 +81,15 @@ public class CommonConstants
 	/* default context */
 	public static final SIFContext DEFAULT_CONTEXT = new SIFContext(DEFAULT_CONTEXT_NAME, true);
 
+  /*----------------------------------------------------------------------*/
+  /* Paging related Enum Types that can be either header or query params. */
+  /*----------------------------------------------------------------------*/
+  /* Valid properties that can be set on the HTTP request as header or url parameters for paging */
+  public static enum PagingRequestProperty {navigationPageSize, navigationPage, navigationId}; //, queryIntention};
+
+  /* Valid properties that can be set on the HTTP response: Header properties only! */
+  public static enum PagingResponseProperty {navigationPageSize, navigationPage, navigationCount, navigationLastPage, navigationId};
+	
 	/*----------------------------------------------------------*/
 	/* System Wide Enum Types that are not part of any Headers */
 	/*----------------------------------------------------------*/
@@ -93,5 +108,11 @@ public class CommonConstants
 	 * Poling Type on Queues
 	 */
 	public enum QueuePollingType {IMMEDIATE, LONG};
+	
+	/*-----------------------------------------------------------*/
+  /* URL Query Parameter names                                 */
+  /*-----------------------------------------------------------*/
+	public static final String ACCESS_TOKEN = "accessToken";
+
 
 }
