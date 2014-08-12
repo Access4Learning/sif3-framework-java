@@ -117,12 +117,10 @@ templates has changed significantly and may need some re-configuring. Please ref
 details (section 5.3).
 
 =====================================
-Version from 07/08/2014: v0.3
+Version from 12/08/2014: v0.3
 =====================================
 This version updates the framework from version 0.2 to version 0.3. The latest jar files can be found in the 
-"release" directory. To upgrade to version 0.3 you must run the appropriate DB datafix script in the directory
-"DB/DDL/Datafix/current/v0.2-v0.3/Datafix20140626_<dbprod>.sql" in the database schema where you have installed
-the SIF3 Framework tables.
+"release" directory. Also upgrade instructions can be found in the directory "release/v0.3".
 Major Changes in this version include:
 - Bug Fixes (i.e. use header fields for paging information rather than query parameters)
 - Ability for a DIRECT provider to deal with multiple environment templates. For details refer to section 5.3.1.4
