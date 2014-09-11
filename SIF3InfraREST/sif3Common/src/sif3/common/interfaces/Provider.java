@@ -23,6 +23,7 @@ import java.util.List;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.RequestMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.ws.CreateOperationStatus;
@@ -30,7 +31,13 @@ import sif3.common.ws.OperationStatus;
 
 /**
  * This class defines the methods a provider must implement to fit with this framework. The interface is independent from the 
- * Data Model and underlying infrastructure components. It defines the core function SIF3 specifies for a provider.<br/><br/>
+ * Data Model and underlying infrastructure components. It defines the core function SIF3 specifies for a provider.<br/>
+ * Note that each method has a number of parameters but they all have the following three given parameters. The zone, 
+ * the context and metadata. The first two relate to the standard SIF concept of zone and context. The metadata parameter
+ * however is additional info that may be provided by a consumer with each request. This can be typical HTTP header 
+ * fields such as generatorId, queryIntention etc. Please refer to the SIF 3 Infrastructure Service documentation what 
+ * these fields mean as well as where they might be used. It is important to note that most of the properties in the 
+ * metadata could be null and therefore implementations must take care how they are used.<br/><br/>
  * 
  * Note:<br/>
  * Because this framework allows to be run under Java 6 some of the types in various methods use "Object" instead of the  template 
@@ -52,6 +59,7 @@ public interface Provider extends DataModelLink
 	 * @param resourceID The resourceID of the object that shall be returned.
 	 * @param zone Can be Null (default Zone)
 	 * @param context Can be Null (default Context)
+	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
 	 * 
 	 * @return The entity for this resourceID. Null if entity with given resourceID does not exist.
 	 * 
@@ -59,7 +67,7 @@ public interface Provider extends DataModelLink
 	 * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
 	 *                              message of the exceptions holds some info.
 	 */
-	public Object retrievByPrimaryKey(String resourceID, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException;
+	public Object retrievByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
 
 	/**
 	 * This method creates the given object with the data provided in the given zone and context. If the object cannot be created then either
@@ -70,6 +78,7 @@ public interface Provider extends DataModelLink
 	 * @param useAdvisory TRUE: RefId/UUID of object should be set and should be used by provider. FALSE: Provider must allocate RefId/UUID
 	 * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
 	 * @param context The Context for which the object shall be created. Can be Null (default Zone)
+	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
 	 * 
 	 * @return The object that is created. It may hold additional data than the one provided.
 	 * 
@@ -77,7 +86,7 @@ public interface Provider extends DataModelLink
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
 	 */
-	public Object createSingle(Object data, boolean useAdvisory, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException;
+	public Object createSingle(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
 
 	/**
      * This method updates the object given by its resourceID in the given zone for the given context.
@@ -87,6 +96,7 @@ public interface Provider extends DataModelLink
      * @param resourceID The Id of the object to be updated.
      * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
      * @param context The Context for which the object shall be updated. Can be Null (default Zone)
+	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
 	 * 
 	 * @return TRUE: Entity is updated. FALSE: Entity does not exist.
 	 * 
@@ -94,7 +104,7 @@ public interface Provider extends DataModelLink
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
 	 */
-	public boolean updateSingle(Object data, String resourceID, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException;
+	public boolean updateSingle(Object data, String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
 
 	/**
      * Removed the object with the given resourceId in the given zone for the given context.
@@ -102,6 +112,7 @@ public interface Provider extends DataModelLink
      * @param resourceID The Id of the object to be removed.
      * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
      * @param context The Context for which the object shall be removed. Can be Null (default Zone)
+	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
 	 * 
 	 * @return TRUE: Entity is removed. FALSE: Entity does not exist.
 	 * 
@@ -109,7 +120,7 @@ public interface Provider extends DataModelLink
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
 	 */
-	public boolean deleteSingle(String resourceID, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException;
+	public boolean deleteSingle(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
 
 	/*----------------------------*/
 	/*-- Bulk Object Operations --*/
@@ -123,12 +134,13 @@ public interface Provider extends DataModelLink
      * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
      * @param context The Context for which the objects shall be returned. Can be Null (default Zone)
      * @param pagingInfo Page information to determine which results to return. Null = Return all (NOT RECOMMENDED!).
+	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
      * 
      * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
 	 */
-	public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo) throws PersistenceException, UnsupportedQueryException;
+	public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException;
 	
 	/**
      * This method will create many objects in one call. The 'data' parameter is a collection-style object that is defined in the data
@@ -138,6 +150,7 @@ public interface Provider extends DataModelLink
      * @param useAdvisory TRUE: RefId/UUID of object should be set and should be used by provider. FALSE: Provider must allocate RefId/UUID
      * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
      * @param context The Context for which the objects shall be created. Can be Null (default Zone)
+	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
 	 * 
 	 * @return List with Status and IDs for each created object, or Status and Error for each object. Null if there was an unknown error. 
 	 * 
@@ -145,7 +158,7 @@ public interface Provider extends DataModelLink
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
 	 */
-	public List<CreateOperationStatus> createMany(Object data, boolean useAdvisory, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException;
+	public List<CreateOperationStatus> createMany(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
 
 	/**
      * This method will update many objects in one call. The 'data' parameter is a collection-style object that is defined in the data
@@ -155,6 +168,7 @@ public interface Provider extends DataModelLink
      * @param data The 'collection' object. Each object in that collection will be updated.
      * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
      * @param context The Context for which the objects shall be updated. Can be Null (default Zone)
+	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
 	 * 
      * @return List with Status and IDs for each updated object, or Status and Error for each object. Null if there was an unknown error. 
 	 * 
@@ -162,7 +176,7 @@ public interface Provider extends DataModelLink
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
 	 */
-	public List<OperationStatus> updateMany(Object data, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException;
+	public List<OperationStatus> updateMany(Object data, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
 
 	/**
      * This method removes all objects in the resourceIDs list in one hit.
@@ -170,6 +184,7 @@ public interface Provider extends DataModelLink
      * @param resourceIDs A list of resourceId for the objects to be removed.
      * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
      * @param context The Context for which the objects shall be removed. Can be Null (default Zone)
+	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
 	 * 
      * @return List with Status and IDs for each removed object, or Status and Error for each object. Null if there was an unknown error. 
 	 * 
@@ -177,7 +192,7 @@ public interface Provider extends DataModelLink
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
 	 */
-	public List<OperationStatus> deleteMany(List<String> resourceIDs, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException;
+	public List<OperationStatus> deleteMany(List<String> resourceIDs, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
 
 	/*-------------------------------*/
 	/*-- Other required Operations --*/

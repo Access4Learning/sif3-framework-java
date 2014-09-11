@@ -20,6 +20,7 @@ package sif3.common.interfaces;
 
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.UpdateType;
+import sif3.common.model.EventMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
@@ -39,12 +40,13 @@ public interface EventConsumer<L> extends DataModelLink
 	 * @param sifEvent The event data that has been received and shall be processed by the consumer.
 	 * @param zone The zone from which the event has been received.
 	 * @param context The context for which the event is applicable for.
+	 * @param metadata Metadata provided by the originator of the event.
 	 * @param msgReadID The ID of the SIF queue reader. It is informative only and is only of use where there are multiple concurrent 
 	 *                  subscribers on a message queue.
 	 * @param consumerID The consumer ID that has been used to receive the event from the event queue. It is informative
 	 *                   only and is only of use where there are multiple event subscribers enabled.
 	 */
-	public void onEvent(SIFEvent<L> sifEvent, SIFZone zone, SIFContext context, String msgReadID, String consumerID);
+	public void onEvent(SIFEvent<L> sifEvent, SIFZone zone, SIFContext context, EventMetadata metadata, String msgReadID, String consumerID);
 	
 	/**
 	 * This method creates an event object with the given sifObject data. This method is required by the event consumers
