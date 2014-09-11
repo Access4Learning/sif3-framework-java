@@ -25,10 +25,11 @@ import org.apache.log4j.Logger;
 
 import sif3.common.CommonConstants;
 import sif3.common.exception.ServiceInvokationException;
-import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.MessageType;
 import sif3.common.header.HeaderValues.UpdateType;
+import sif3.common.header.ResponseHeaderConstants;
+import sif3.common.model.EventMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.persist.model.SIF3Session;
@@ -270,8 +271,11 @@ public class RemoteMessageQueueReader implements Runnable
 				{
 					updateType = getUpdateType(response);
 				}
+				
+				EventMetadata metadata = new EventMetadata();
+				metadata.setGeneratorID(response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_GENERATOR_ID));
 
-				EventInfo eventInfo = new EventInfo(eventPayload, response.getMediaType(), eventAction, updateType, zone, context, getReaderID());
+				EventInfo eventInfo = new EventInfo(eventPayload, response.getMediaType(), eventAction, updateType, zone, context, metadata, getReaderID());
 				logger.debug(getReaderID()+": Attempts to push Event to local queue...");
 				localQueue.blockingPush(eventInfo);
 				logger.debug(getReaderID()+": Event successfully pushed to local queue");

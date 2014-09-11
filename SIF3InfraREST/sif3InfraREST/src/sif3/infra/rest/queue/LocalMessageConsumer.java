@@ -90,7 +90,7 @@ public class LocalMessageConsumer implements Runnable
 					event.setMetadata(eventInfo.getMetadata());
 
 					// Send event to actual event consumer.
-					eventConsumer.onEvent(event, eventInfo.getZone(), eventInfo.getContext(), eventInfo.getMessageQueueReaderID(), consumerID);
+					eventConsumer.onEvent(event, eventInfo.getZone(), eventInfo.getContext(), eventInfo.getEventMetadata(), eventInfo.getMessageQueueReaderID(), consumerID);
 				}
 				catch (Exception ex)
 				{
