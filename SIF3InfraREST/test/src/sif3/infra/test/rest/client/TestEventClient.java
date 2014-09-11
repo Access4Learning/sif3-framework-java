@@ -43,24 +43,25 @@ import au.com.systemic.framework.utils.FileReaderWriter;
 public class TestEventClient
 {
 	private final static String MULTI_STUDENT_FILE_NAME = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
-	private static final String PROP_FILE_NAME="BrokeredSISProvider";
+//	private static final String PROP_FILE_NAME="BrokeredSISProvider";
+	private static final String PROP_FILE_NAME="StudentProvider";
 
 	// Broker
-	private static final String EVENT_CONNECTOR_URI = "https://australia.hostedzone.com/svcs/systemicDemo/events";
-	private static final String SESSION_TOKEN = "1a47dae9-579b-4aa5-8048-608b06c611cb";
-	private static final String PWD="DemoSIS1";
-	private static final String ZONE="demo";
+//	private static final String EVENT_CONNECTOR_URI = "https://australia.hostedzone.com/svcs/systemicDemo/events";
+//	private static final String SESSION_TOKEN = "1a47dae9-579b-4aa5-8048-608b06c611cb";
+//	private static final String PWD="---";
+//	private static final String ZONE="demo";
 	
 //	private static final String EVENT_CONNECTOR_URI = "https://australia.hostedzone.com/svcs/systemicDemo/events";
 //	private static final String SESSION_TOKEN = "be06a10e-1771-47c3-99bc-52a30b34711b";
-//	private static final String PWD="ljk32sdfFlks328as";
+//	private static final String PWD="---";
 //	private static final String ZONE="loadZone";
 	
 	// Local host setup
-//	private static final String EVENT_CONNECTOR_URI = "http://localhost:9080/SIF3InfraREST/sif3/eventsConnector";
-//	private static final String SESSION_TOKEN = "2f47fd0c-fbc5-4a6e-a779-de7633624a67";
-//	private static final String PWD="Password1";
-//	private static final String ZONE="auSchoolTestingZone";
+	private static final String EVENT_CONNECTOR_URI = "http://localhost:9080/SIF3InfraREST/sif3/eventsConnector";
+	private static final String SESSION_TOKEN = "25745c93-07d3-4ca8-a28a-389084719cba";
+	private static final String PWD="Password1";
+	private static final String ZONE="auSchoolTestingZone";
 
 	
 	private MarshalFactory marshaller = new DataModelMarshalFactory();
