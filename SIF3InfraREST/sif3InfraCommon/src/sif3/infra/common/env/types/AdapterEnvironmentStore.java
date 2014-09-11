@@ -159,6 +159,7 @@ public class AdapterEnvironmentStore implements Serializable
 					environment.setCheckACL(adapterProperties.getPropertyAsBool("adapter.checkACL", true));
 					environment.setEventsSupported(adapterProperties.getPropertyAsBool("env.events.supported", false));
 					environment.setRemoveEnvOnShutdown(adapterProperties.getPropertyAsBool("adapter.deleteEnvironment.onShutdown", false));
+					environment.setGeneratorID(adapterProperties.getPropertyAsString("adapter.generator.id", null));
 					
 					//This is also set for providers in brokered environment
 					environment.setSecureConnection(getSecureConnectionInfo(adapterProperties));

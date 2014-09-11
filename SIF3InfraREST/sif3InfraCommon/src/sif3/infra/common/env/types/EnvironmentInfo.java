@@ -58,8 +58,9 @@ public class EnvironmentInfo implements Serializable
     private EnvironmentKey environmentKey = new EnvironmentKey();
     private String    password              = null;
     private boolean eventsSupported = false;
+    private String generatorID  = null; // Value to be used for the generatorId HTTP Header field. 
     
-    // Properties for using an existing environment.
+	// Properties for using an existing environment.
     private boolean useExistingEnv = false;
 	private String existingSessionToken = null;
     private URI existingEnvURI = null;
@@ -128,6 +129,15 @@ public class EnvironmentInfo implements Serializable
 	public void setSecureConnection(boolean secureConnection)
     {
     	this.secureConnection = secureConnection;
+    }
+    public String getGeneratorID()
+    {
+    	return this.generatorID;
+    }
+
+	public void setGeneratorID(String generatorID)
+    {
+    	this.generatorID = generatorID;
     }
 
 	public URI getBaseURI()
@@ -298,9 +308,9 @@ public class EnvironmentInfo implements Serializable
 	            + this.environmentType + ", authMethod=" + this.authMethod
 	            + ", removeEnvOnShutdown=" + this.removeEnvOnShutdown + ", adapterName="
 	            + this.adapterName + ", environmentKey=" + this.environmentKey + ", password="
-	            + this.password + ", eventsSupported=" + this.eventsSupported + ", useExistingEnv="
-	            + this.useExistingEnv + ", existingSessionToken=" + this.existingSessionToken
-	            + ", existingEnvURI=" + this.existingEnvURI + ", connectorBaseURIs="
-	            + this.connectorBaseURIs + "]";
+	            + this.password + ", eventsSupported=" + this.eventsSupported + ", generatorID="
+	            + this.generatorID + ", useExistingEnv=" + this.useExistingEnv
+	            + ", existingSessionToken=" + this.existingSessionToken + ", existingEnvURI="
+	            + this.existingEnvURI + ", connectorBaseURIs=" + this.connectorBaseURIs + "]";
     }
 }
