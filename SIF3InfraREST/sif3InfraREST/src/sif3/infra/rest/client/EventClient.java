@@ -187,6 +187,12 @@ public class EventClient extends BaseClient
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, HeaderValues.ServiceType.OBJECT.name());
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_NAME, serviceName);
 		
+		String generatorID = providerEnvironment.getGeneratorID();
+		if (StringUtils.notEmpty(generatorID))
+		{
+			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, generatorID);
+		}
+		
 		if (eventAction == EventAction.UPDATE)
 		{
 			if (updateType == null)

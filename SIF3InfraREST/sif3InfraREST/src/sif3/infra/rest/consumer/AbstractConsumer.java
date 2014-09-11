@@ -49,6 +49,7 @@ import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.rest.client.ClientInterface;
 import sif3.infra.rest.client.ClientUtils;
 import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.StringUtils;
 import au.com.systemic.framework.utils.Timer;
 
 /**
@@ -106,6 +107,17 @@ public abstract class AbstractConsumer implements Consumer
 	public AdvancedProperties getServiceProperties()
 	{
 	  return ConsumerEnvironmentManager.getInstance().getServiceProperties();
+	}
+	
+	/**
+	 * This method returns the value of the adapter.generator.id property from the consumer's property file. If that
+	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The adapter.generator.id property from the consumer's property file
+	 */
+	public String getGeneratorID()
+	{
+		return getConsumerEnvironment().getGeneratorID();
 	}
 
 	/**
@@ -647,6 +659,12 @@ public abstract class AbstractConsumer implements Consumer
 		}
 		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, HeaderValues.ServiceType.OBJECT.name());
 		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE, requestType.name());
+		
+		String generatorID = getGeneratorID();
+		if (StringUtils.notEmpty(generatorID))
+		{
+			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, generatorID);
+		}
 		
 		return hdrProps;
 	}

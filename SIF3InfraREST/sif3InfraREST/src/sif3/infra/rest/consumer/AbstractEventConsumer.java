@@ -24,6 +24,7 @@ import java.util.concurrent.Executors;
 
 import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.interfaces.EventConsumer;
+import sif3.common.model.EventMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
@@ -63,7 +64,7 @@ public abstract class AbstractEventConsumer<L> extends AbstractConsumer implemen
    * @param consumerID The consumer ID that has been used to receive the event from the event queue. It is informative
    *                   only and is only of use where there are multiple event subscribers enabled.
    */
-  public abstract void processEvent(SIFEvent<L> sifEvent, SIFZone zone, SIFContext context, String msgReadID, String consumerID);
+  public abstract void processEvent(SIFEvent<L> sifEvent, SIFZone zone, SIFContext context, EventMetadata metadata, String msgReadID, String consumerID);
   
 	public AbstractEventConsumer()
 	{
@@ -81,10 +82,10 @@ public abstract class AbstractEventConsumer<L> extends AbstractConsumer implemen
 	 * @see sif3.common.interfaces.EventConsumer#onEvent(sif3.common.model.SIFEvent, sif3.common.model.SIFZone, sif3.common.model.SIFContext, java.lang.String)
 	 */
 	@Override
-	public void onEvent(SIFEvent<L> sifEvent, SIFZone zone, SIFContext context, String msgReadID, String consumerID)
+	public void onEvent(SIFEvent<L> sifEvent, SIFZone zone, SIFContext context, EventMetadata metadata, String msgReadID, String consumerID)
 	{
 		// Right now all that is required is to call the abstract processEvent() method.
-		processEvent(sifEvent, zone, context, msgReadID, consumerID);
+		processEvent(sifEvent, zone, context, metadata, msgReadID, consumerID);
 	}
 
 	/*
