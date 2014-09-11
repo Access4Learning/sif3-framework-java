@@ -127,6 +127,15 @@ Major Changes in this version include:
   in the Developer's Guide.
 - Updated AU 1.3 SIF data model to cater for latest changes to time table objects.
 
+=======================================================
+Version from 11/09/2014: v0.3.1 - Minor update to above
+=======================================================
+The provider interface class has changed which enforces an additional parameter on all methods. All object provider
+classes that extend the BaseProvider or BaseEventProvider must add the parameter "RequestMetadata metadata" to all
+methods. This new parameter allows the object provider to get access to some additional metadata relating to each 
+request. For details about the new parameter as well Provider Interface class please refer to the javadoc.
+Details about the changes and how to incorporate them into your code can be found in the directory "release/v0.3.1".
+
 #########################################################################################################
 # Download Instructions
 #########################################################################################################
