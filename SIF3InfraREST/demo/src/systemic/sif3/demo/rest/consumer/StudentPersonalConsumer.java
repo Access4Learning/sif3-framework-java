@@ -35,8 +35,18 @@ public class StudentPersonalConsumer extends AUDataModelEventConsumer<StudentCol
     {
 	    super();
     }
-	
 
+    /* 
+     * If the generator.id property from the consumer property file shall be overridden or set specifically for a 
+     * consumer then the method below can be un-commented and the generator ID can be assigned. This value, if not 
+     * empty, will go into the HTTP Header of each request to the object provider.
+     */
+//    @Override
+//    public String getGeneratorID()
+//    {
+//		return "Overridden Generator ID";
+//    }
+    
 	/* (non-Javadoc)
      * @see sif3.common.interfaces.EventConsumer#createEventObject(java.lang.Object, sif3.common.header.HeaderValues.EventAction, sif3.common.header.HeaderValues.UpdateType)
      */
