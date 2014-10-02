@@ -42,8 +42,8 @@
 			<include name="**/*.jar" />
 			<include name="**/*.zip" />
 		</fileset>
-		<fileset dir="${servlet.lib.dir}">
-			<include name="${servlet.lib}" />
+		<fileset dir="${lib.root.dir}/j2ee">
+			<include name="servlet-api.jar" />
 		</fileset>
 		<pathelement path="${class.dir}" />
 	</path>
@@ -64,8 +64,6 @@
 		<echo message="lib.root.dir: ${lib.root.dir}"/>
 		<echo message="web.lib.root.dir: ${web.lib.root.dir}"/>
 		<echo message="config.dir: ${config.dir}"/>
-		<echo message="servlet.lib.dir: ${servlet.lib.dir}"/>
-		<echo message="servlet.lib: ${servlet.lib}"/>
 		<echo message="systemic.path: ${systemic.path}"/>
 		<echo message="deploy.install.dir: ${deploy.install.dir}"/>
 		<echo message="frameworkversion: ${frameworkversion}"/>
