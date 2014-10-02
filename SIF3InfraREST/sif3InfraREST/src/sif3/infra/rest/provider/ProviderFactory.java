@@ -18,7 +18,6 @@
 
 package sif3.infra.rest.provider;
 
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -48,8 +47,15 @@ public class ProviderFactory
 	private static final Logger logger = Logger.getLogger(ProviderFactory.class);
 
 	private static ProviderFactory factory = null;
-	private HashMap<ModelObjectInfo, BaseProvider> providers = new HashMap<ModelObjectInfo, BaseProvider>();
-
+	
+	// Active Providers for event publishing. These providers run in the background as an independent thread.
+	private HashMap<ModelObjectInfo, BaseProvider> eventProviders = new HashMap<ModelObjectInfo, BaseProvider>();
+	
+	// Known providers that can be instantiated for standard request/response
+	private HashMap<ModelObjectInfo, ProviderClassInfo> providerClasses = new HashMap<ModelObjectInfo, ProviderClassInfo>();
+	
+	private static Object locked = new Object();
+  
 	private ScheduledExecutorService providerService = null;
 
 	/**
@@ -61,21 +67,24 @@ public class ProviderFactory
 	 */
 	public static synchronized ProviderFactory createFactory(AdvancedProperties adapterProps)
 	{
+	  synchronized (locked)
+	  {
         logger.debug("Total Threads running before initialising provider Factory: " +Thread.activeCount()+" threads.");
-	    if (factory == null)
-	    {
-	    	try
-	    	{
-	    		factory = new ProviderFactory(adapterProps);
-	    	}
-			catch (Exception ex)
-			{
-				logger.error("Failed to initialise provider factory. Provider won't run.", ex);
-				factory = null;
-			}
-	    }
-        logger.debug("Total Threads running after initialising Provider Factory: " +Thread.activeCount()+" threads.");
-	    return factory;
+  	    if (factory == null)
+  	    {
+  	    	try
+  	    	{
+  	    		factory = new ProviderFactory(adapterProps);
+  	    	}
+  			catch (Exception ex)
+  			{
+  				logger.error("Failed to initialise provider factory. Provider won't run.", ex);
+  				factory = null;
+  			}
+  	    }
+          logger.debug("Total Threads running after initialising Provider Factory: " +Thread.activeCount()+" threads.");
+  	    return factory;
+	  }
 	}
 	
 	/**
@@ -83,13 +92,15 @@ public class ProviderFactory
 	 */
 	public static synchronized void shutdown()
 	{
+	  synchronized (locked)
+	  {
 	    if (factory != null)
 	    {
-    		for (BaseProvider provider : factory.providers.values())
+    		for (BaseProvider provider : factory.eventProviders.values())
     		{
     	    	try
     	    	{
-    				logger.debug("Finalise provider "+provider.getMultiObjectClassInfo().getObjectName()+"...");
+    	    	  logger.debug("Finalise provider "+provider.getMultiObjectClassInfo().getObjectName()+"...");
     	    		provider.finalise();
     	    	}
     	    	catch (Exception ex)
@@ -103,7 +114,8 @@ public class ProviderFactory
     		factory.providerService.shutdownNow();
     		logger.debug("Shut Down Provider Thread Pool: Done");
 	    }
-        logger.info("All providers are shut down.");
+      logger.info("All providers are shut down.");
+	  }
 	}
 	
 	/**
@@ -117,6 +129,7 @@ public class ProviderFactory
 	}
 	
 	/**
+	 * This method is intended to be used to get a new instance of an object provider class to be used for request/response methods.
 	 * If provider doesn't exist for the given objectInfo then null is returned.
 	 * 
 	 * @param objectInfo must have at least the ObjectName property set otherwise null is returned and an error is logged.
@@ -127,7 +140,23 @@ public class ProviderFactory
 	{
 		if ((objectInfo != null) && (StringUtils.notEmpty(objectInfo.getObjectName())))
 		{
-			return providers.get(objectInfo);
+		  ProviderClassInfo providerClassInfo = providerClasses.get(objectInfo);
+		  if (providerClassInfo != null)
+		  {
+		    try
+		    {
+		      return (BaseProvider)providerClassInfo.getClassInstance(null);
+		    }
+		    catch (Exception ex)
+		    {
+		      logger.error("Failed to instantiate a provider for "+objectInfo.getObjectName()+": "+ex.getMessage(), ex);
+		      return null;
+		    }
+		  }
+		  else // no known provider for the given Object Type
+		  {
+		    return null;
+		  }
 		}
 		else
 		{
@@ -157,24 +186,33 @@ public class ProviderFactory
 	        logger.debug("Provider class to initialse: " + className);
 	        try
 	        {
-	            Class<?> clazz = Class.forName(basePackageName + className);
-	            
-	            // Set info for Constructor parameters
-              Constructor<?> ct = clazz.getConstructor(new Class[] {});
-	            
-	            // Instantiate class.
-              Object classObj = ct.newInstance();
-	            
-	            // Set properties and add it to correct structure
-	            if (classObj instanceof BaseProvider)
-	            {
-	            	BaseProvider provider = (BaseProvider)classObj;
-	            	joinFactory(provider.getMultiObjectClassInfo(), provider);
-	            }
-	            else
-	            {
-	                logger.error("Provider class " + className + " doesn't extend BaseProvider. Cannot initialse the Provider.");
-	            }
+            Class<?> clazz = Class.forName(basePackageName + className);
+	          ProviderClassInfo providerClassInfo = new ProviderClassInfo(clazz, new Class[] {});
+	          
+	          Object classObj = providerClassInfo.getClassInstance(null);
+	          
+	          // Set properties and add it to correct structure
+            if (classObj instanceof BaseProvider)
+            {
+              BaseProvider provider = (BaseProvider)classObj;
+              ModelObjectInfo objectInfo = provider.getMultiObjectClassInfo();
+              if ((objectInfo != null) && (StringUtils.notEmpty(objectInfo.getObjectName())))
+              {
+                // First add it to the standard request/response hashmap
+                providerClasses.put(objectInfo, providerClassInfo);
+                
+                // Add it to hasmap for background threads
+                eventProviders.put(objectInfo, provider);
+              }
+              else
+              {
+                logger.error("The ModelObjectInfo parameter is either null or does not have the ObjectName property set. This is required! Provider '"+provider.getClass().getSimpleName()+" not added to provider factory.");
+              }
+            }
+            else
+            {
+                logger.error("Provider class " + className + " doesn't extend BaseProvider. Cannot initialse the Provider.");
+            }
 	        }
 	        catch (Exception ex)
 	        {
@@ -188,36 +226,13 @@ public class ProviderFactory
     	return (StringUtils.isEmpty(packageName)) ? "" : packageName.trim() + ".";
     }
 
-	/*
-	 * Add a provider to the provider Factory. TRUE: Provider successfully added. FALSE: Provider not added. See error log for details.
-	 * 
-	 * @param objectInfo This information is used within the factory to know what the provider deals with. The ObjectName property must be set
-	 *                   otherwise the provider won't be added to the factory and an error woll be logged.
-	 * @param provider
-	 * @return
-	 */
-	private synchronized boolean joinFactory(ModelObjectInfo objectInfo, BaseProvider provider)
-	{
-		if ((objectInfo != null) && (StringUtils.notEmpty(objectInfo.getObjectName())))
-		{
-			providers.put(objectInfo, provider);
-			return true;
-		}
-		else
-		{
-			logger.error("The ModelObjectInfo parameter is either null or does not have the ObjectName property set. This is required! Provider '"+provider.getClass().getSimpleName()+" not added to provider factory.");
-			return false;
-		}
-	}
-
-	
 	private void startProviders(AdvancedProperties adapterProps) throws Exception
 	{
 		int delay = adapterProps.getPropertyAsInt(DELAY_PROPERTY, DEFAULT_DELAY);  //delay between threads in seconds
 		logger.debug("Start up delay between providers is: "+delay+" seconds");
 
 		int i = 0;
-		for (BaseProvider provider : providers.values())
+		for (BaseProvider provider : eventProviders.values())
 		{	
 			// Create thread in thread pool
 			providerService = Executors.newSingleThreadScheduledExecutor();
@@ -225,7 +240,7 @@ public class ProviderFactory
 			// Ensure there is 10 seconds between the start of each publisher so that they don't hammer
 			// the system at the same time during startup. Startup thread on thread pool.
 			providerService.schedule(provider, i*delay, TimeUnit.SECONDS);
-	        i++;
+	    i++;
 		}	
 	}
 }
