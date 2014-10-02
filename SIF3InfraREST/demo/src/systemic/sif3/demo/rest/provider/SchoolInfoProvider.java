@@ -50,39 +50,48 @@ import au.com.systemic.framework.utils.StringUtils;
 public class SchoolInfoProvider extends AUDataModelProvider
 {
 	private static int numDeletes = 0;
-	private HashMap<String, SchoolInfoType> schools = new HashMap<String, SchoolInfoType>();
+	private static HashMap<String, SchoolInfoType> schools = null; //new HashMap<String, SchoolInfoType>();
 	private ObjectFactory dmObjectFactory = new ObjectFactory();
 	
-	/**
-     */
     public SchoolInfoProvider()
     {
-	    super();
-	    
-	    // Load all students so that we can do some real stuff here.
-	    String schoolFile = getServiceProperties().getPropertyAsString("provider.school.file.location", null);
-	    if (schoolFile != null)
-	    {
-			try
+	    super();    
+		logger.debug("Constructor for SchoolInfoProvider has been called.");
+		if (schools == null)
+		{
+			logger.debug("Constructor for SchoolInfoProvider called for the first time. Try to load students from XML file...");
+			// Load all students so that we can do some real stuff here.
+			String schoolFile = getServiceProperties().getPropertyAsString("provider.school.file.location", null);
+			if (schoolFile != null)
 			{
-				String inputXML = FileReaderWriter.getFileContent(schoolFile);
-				SchoolCollectionType schoolList = (SchoolCollectionType)getUnmarshaller().unmarshalFromXML(inputXML, getMultiObjectClassInfo().getObjectType());
-				if ((schoolList != null) && (schoolList.getSchoolInfo() != null))
+				try
 				{
-					for (SchoolInfoType schoolInfo : schoolList.getSchoolInfo())
+					String inputXML = FileReaderWriter.getFileContent(schoolFile);
+					SchoolCollectionType schoolList = (SchoolCollectionType) getUnmarshaller().unmarshalFromXML(inputXML, getMultiObjectClassInfo().getObjectType());
+					if ((schoolList != null) && (schoolList.getSchoolInfo() != null))
 					{
-						schools.put(schoolInfo.getRefId(), schoolInfo);
+						schools = new HashMap<String, SchoolInfoType>();
+						for (SchoolInfoType schoolInfo : schoolList.getSchoolInfo())
+						{
+							schools.put(schoolInfo.getRefId(), schoolInfo);
+						}
+						logger.debug("Loaded " + schools.size() + " schools into memory.");
 					}
-					logger.debug("Loaded "+schools.size()+" schools into memory.");
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+					logger.debug("Loaded " + schools.size() + " schools into memory.");
 				}
 			}
-			catch (Exception ex)
-			{
-				ex.printStackTrace();
-				logger.debug("Loaded "+schools.size()+" schools into memory.");
-			}
-	    }
-    }
+		}
+		// If schools are still null then something must have failed and would have been logged. For
+		// the purpose of making things work ok we initialise the students hashmap now. It will avoid null pointer errors.
+		if (schools == null)
+		{
+			schools = new HashMap<String, SchoolInfoType>();
+		}
+   }
 
 	/* (non-Javadoc)
      * @see sif3.common.interfaces.Provider#retrievByPrimaryKey(java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
@@ -95,7 +104,7 @@ public class SchoolInfoProvider extends AUDataModelProvider
     		throw new IllegalArgumentException("Resource ID is null or empty. It must be provided to retrieve an entity.");
     	}
     	
-    	logger.debug("Retrieve student with Resoucre ID = "+resourceID);
+      	logger.debug("Retrieve student with Resoucre ID = "+resourceID+", "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	
     	return schools.get(resourceID);
     }
@@ -106,6 +115,8 @@ public class SchoolInfoProvider extends AUDataModelProvider
     @Override
     public Object createSingle(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
     {
+    	logger.debug("Create Single School for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
+
     	// Must be of type StudentPersonalType
     	if (data instanceof SchoolInfoType)
     	{
@@ -144,7 +155,7 @@ public class SchoolInfoProvider extends AUDataModelProvider
     	// Must be of type StudentPersonalType
     	if (data instanceof SchoolInfoType)
     	{
-    		logger.debug("Update school with Resoucre ID = "+resourceID);
+    		logger.debug("Update school with Resoucre ID = "+resourceID+", "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
 
     		//In the real implementation we would call a BL method here to modify the Student.
     		return true;
@@ -166,7 +177,7 @@ public class SchoolInfoProvider extends AUDataModelProvider
     		throw new IllegalArgumentException("Resource ID is null or empty. It must be provided to delete an entity.");
     	}
     	
-    	logger.debug("Remove SchoolInfo with Resoucre ID = "+resourceID);
+    	logger.debug("Remove SchoolInfo with Resoucre ID = "+resourceID+", "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
 
     	//In the real implementation we would call a BL method here to remove the Student.
     	return ((numDeletes++ % 3) != 0);  // every third tome of the call I return false.
@@ -179,6 +190,7 @@ public class SchoolInfoProvider extends AUDataModelProvider
     @Override
     public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException
     {
+    	logger.debug("Retrieve schools for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	ArrayList<SchoolInfoType> schoolList = new ArrayList<SchoolInfoType>();
     	if (pagingInfo == null) //return all
     	{
@@ -222,33 +234,32 @@ public class SchoolInfoProvider extends AUDataModelProvider
     	// Must be of type StudentPersonalType
     	if (data instanceof SchoolCollectionType)
     	{
-    		logger.debug("Create schools (Bulk Operation)");
+			logger.debug("Create schools (Bulk Operation) for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     		SchoolCollectionType schools = (SchoolCollectionType)data;
-        ArrayList<CreateOperationStatus> opStatus = new ArrayList<CreateOperationStatus>();
-        int i=0;
-        for (SchoolInfoType school : schools.getSchoolInfo())
-        {
-          if ((i % 3) == 0)
-          {
-				// Set advisoryID the same as resourceID.
-            opStatus.add(new CreateOperationStatus(school.getRefId(), school.getRefId(), 404, new ErrorDetails(400, "Data not good.")));
-          }
-          else
-          {
-            if (useAdvisory)
-            {
-				// Advisory refId was used. Set resourceId and advisoryId to the same
-              opStatus.add(new CreateOperationStatus(school.getRefId(), school.getRefId(), 201));
-            }
-            else
-            {
-				// Create a new refId (resourceID) but we must also report back the original RefId as the advisory if it was available.
-              opStatus.add(new CreateOperationStatus(UUIDGenerator.getSIF2GUIDUpperCase(), school.getRefId(), 201));
-            }
-          }
-          i++;
-        }
-
+	        ArrayList<CreateOperationStatus> opStatus = new ArrayList<CreateOperationStatus>();
+	        int i=0;
+	        for (SchoolInfoType school : schools.getSchoolInfo())
+	        {
+	          if ((i % 3) == 0)
+	          {
+					// Set advisoryID the same as resourceID.
+	            opStatus.add(new CreateOperationStatus(school.getRefId(), school.getRefId(), 404, new ErrorDetails(400, "Data not good.")));
+	          }
+	          else
+	          {
+	            if (useAdvisory)
+	            {
+					// Advisory refId was used. Set resourceId and advisoryId to the same
+	              opStatus.add(new CreateOperationStatus(school.getRefId(), school.getRefId(), 201));
+	            }
+	            else
+	            {
+					// Create a new refId (resourceID) but we must also report back the original RefId as the advisory if it was available.
+	              opStatus.add(new CreateOperationStatus(UUIDGenerator.getSIF2GUIDUpperCase(), school.getRefId(), 201));
+	            }
+	          }
+	          i++;
+	        }
     		return opStatus;
     	}
     	else
@@ -266,21 +277,21 @@ public class SchoolInfoProvider extends AUDataModelProvider
     	// Must be of type StudentPersonalType
     	if (data instanceof StudentCollectionType)
     	{
-    		logger.debug("Update schools (Bulk Operation)");
+    		logger.debug("Update schools (Bulk Operation) for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     		SchoolCollectionType schools = (SchoolCollectionType)data;
-        ArrayList<OperationStatus> opStatus = new ArrayList<OperationStatus>();
+    		ArrayList<OperationStatus> opStatus = new ArrayList<OperationStatus>();
     		int i=0;
     		for (SchoolInfoType school : schools.getSchoolInfo())
     		{
-          if ((i % 3) == 0)
-          {
-            opStatus.add(new OperationStatus(school.getRefId(), 404, new ErrorDetails(404, "School with GUID = "+school.getRefId()+" does not exist.")));
-          }
-          else
-          {
-            opStatus.add(new OperationStatus(school.getRefId(), 200));
-          }
-          i++;
+	          if ((i % 3) == 0)
+	          {
+	            opStatus.add(new OperationStatus(school.getRefId(), 404, new ErrorDetails(404, "School with GUID = "+school.getRefId()+" does not exist.")));
+	          }
+	          else
+	          {
+	            opStatus.add(new OperationStatus(school.getRefId(), 200));
+	          }
+	          i++;
     		}
     		
     		return opStatus;
@@ -297,21 +308,23 @@ public class SchoolInfoProvider extends AUDataModelProvider
     @Override
     public List<OperationStatus> deleteMany(List<String> resourceIDs, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
     {
-      //In the real implementation we would call a BL method here to modify the Student.
-      ArrayList<OperationStatus> opStatus = new ArrayList<OperationStatus>();
-      int i=0;
-      for (String resourceID : resourceIDs)
-      {
-        if ((i % 3) == 0)
-        {
-          opStatus.add(new OperationStatus(resourceID, 404, new ErrorDetails(404, "School with GUID = "+resourceID+" does not exist.")));
-        }
-        else
-        {
-          opStatus.add(new OperationStatus(resourceID, 200));
-        }
-        i++;
-      }
+    	logger.debug("Delete Students (Bulk Operation) for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
+
+    	//In the real implementation we would call a BL method here to modify the Student.
+		ArrayList<OperationStatus> opStatus = new ArrayList<OperationStatus>();
+		int i = 0;
+		for (String resourceID : resourceIDs)
+		{
+			if ((i % 3) == 0)
+			{
+				opStatus.add(new OperationStatus(resourceID, 404, new ErrorDetails(404, "School with GUID = " + resourceID + " does not exist.")));
+			}
+			else
+			{
+				opStatus.add(new OperationStatus(resourceID, 200));
+			}
+			i++;
+		}
 	    return opStatus;
     }
 
@@ -337,4 +350,16 @@ public class SchoolInfoProvider extends AUDataModelProvider
     {
 	    return ModelObjectConstants.SCHOOL_INFOS;
     }
+    
+    /*---------------------*/
+    /*-- Private Methods --*/
+    /*---------------------*/
+	private String getZoneAndContext(SIFZone zone, SIFContext context)
+	{
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("Zone = ").append((zone==null) ? "null" : zone.getId()+(zone.getIsDefault()?" (dafault)":"")).append(" ");
+		buffer.append("- Context = ").append((context == null) ? "null" : context.getId());
+		
+		return buffer.toString();
+	}
 }

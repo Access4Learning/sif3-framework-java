@@ -54,41 +54,53 @@ import au.com.systemic.framework.utils.StringUtils;
 public class StudentPersonalProvider extends AUDataModelProviderWithEvents<StudentCollectionType>
 {
 	private static int numDeletes = 0;
-	private HashMap<String, StudentPersonalType> students = new HashMap<String, StudentPersonalType>();
+	private static HashMap<String, StudentPersonalType> students = null; //new HashMap<String, StudentPersonalType>();
 	private ObjectFactory dmObjectFactory = new ObjectFactory();
 	
-	/**
-     */
-    public StudentPersonalProvider()
-    {
-	    super();
-	    
-	    // Load all students so that we can do some real stuff here.
-	    String studentFile = getServiceProperties().getPropertyAsString("provider.student.file.location", null);
-	    if (studentFile != null)
-	    {
-			String inputXML = FileReaderWriter.getFileContent(studentFile);
-			try
+	public StudentPersonalProvider()
+	{
+		super();
+
+		logger.debug("Constructor for StudentPersonalProvider has been called.");
+		if (students == null)
+		{
+			logger.debug("Constructor for StudentPersonalProvider called for the first time. Try to load students from XML file...");
+
+			// Load all students so that we can do some real stuff here.
+			String studentFile = getServiceProperties().getPropertyAsString("provider.student.file.location", null);
+			if (studentFile != null)
 			{
-				StudentCollectionType studentList = (StudentCollectionType)getUnmarshaller().unmarshalFromXML(inputXML, getMultiObjectClassInfo().getObjectType());
-				if ((studentList != null) && (studentList.getStudentPersonal() != null))
+				String inputXML = FileReaderWriter.getFileContent(studentFile);
+				try
 				{
-					for (StudentPersonalType studentPersonal : studentList.getStudentPersonal())
+					StudentCollectionType studentList = (StudentCollectionType) getUnmarshaller().unmarshalFromXML(inputXML, getMultiObjectClassInfo().getObjectType());
+					if ((studentList != null) && (studentList.getStudentPersonal() != null))
 					{
-						students.put(studentPersonal.getRefId(), studentPersonal);
+						students = new HashMap<String, StudentPersonalType>();
+						for (StudentPersonalType studentPersonal : studentList.getStudentPersonal())
+						{
+							students.put(studentPersonal.getRefId(), studentPersonal);
+						}
+						logger.debug("Loaded " + students.size() + " s into memory.");
 					}
-					logger.debug("Loaded "+students.size()+" students into memory.");
+				}
+				catch (UnmarshalException ex)
+				{
+					ex.printStackTrace();
+				}
+				catch (UnsupportedMediaTypeExcpetion ex)
+				{
+					ex.printStackTrace();
 				}
 			}
-			catch (UnmarshalException ex)
-			{
-				ex.printStackTrace();
-			}
-      catch (UnsupportedMediaTypeExcpetion ex)
-      {
-        ex.printStackTrace();
-      }
-	    }
+		}
+
+		// If students are still null then something must have failed and would have been logged.
+		// For the purpose of making things work ok we initialise the students hashmap now. It will avoid null pointer errors.
+		if (students == null)
+		{
+			students = new HashMap<String, StudentPersonalType>();
+		}
     }
 
     /*-------------------------------------*/
@@ -103,7 +115,6 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     {
  	    return new StudentPersonalIterator(getServiceName(), getServiceProperties(), students);
     }
-    
     
     /*
      * (non-Javadoc)
