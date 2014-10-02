@@ -57,6 +57,7 @@ import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.infra.common.env.mgr.ProviderManagerFactory;
+import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
 import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.rest.provider.ProviderFactory;
 
@@ -141,7 +142,7 @@ public class DataModelResource extends BaseResource
 			logger.debug("Create Single "+dmObjectNameSingle+" (REST POST) with URL Postfix mimeType = '" + mimeType + "' and input data: " + payload);
 		}
 		
-		ErrorDetails error = validClient(dmObjectNamePlural, AccessRight.CREATE, AccessType.APPROVED);
+		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.CREATE), AccessType.APPROVED);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.CREATE);
@@ -184,7 +185,7 @@ public class DataModelResource extends BaseResource
 			logger.debug("Create Many "+dmObjectNamePlural+" (REST POST) with input data: " + payload);
 		}
 		
-		ErrorDetails error = validClient(dmObjectNamePlural, AccessRight.CREATE, AccessType.APPROVED);
+		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.CREATE), AccessType.APPROVED);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.CREATE);
@@ -239,7 +240,7 @@ public class DataModelResource extends BaseResource
 			logger.debug("Get Resource by Resoucre ID (REST GET - Single): "+resourceID+" and URL Postfix mimeType = '"+mimeType+"'");
 		}
 		
-		ErrorDetails error = validClient(dmObjectNamePlural, AccessRight.QUERY, AccessType.APPROVED);
+		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.QUERY);
@@ -285,7 +286,7 @@ public class DataModelResource extends BaseResource
 			logger.debug("Get List (REST GET - Plural)");
 		}
 		
-		ErrorDetails error = validClient(dmObjectNamePlural, AccessRight.QUERY, AccessType.APPROVED);
+		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.QUERY);
@@ -349,7 +350,7 @@ public class DataModelResource extends BaseResource
 			logger.debug("Update Single "+dmObjectNamePlural+" (REST PUT) with resourceID = "+resourceID+", URL Postfix mimeType = "+mimeType+"' and input data: " + payload);
 		}
 		
-		ErrorDetails error = validClient(dmObjectNamePlural, AccessRight.UPDATE, AccessType.APPROVED);
+		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.UPDATE), AccessType.APPROVED);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.UPDATE);
@@ -411,7 +412,7 @@ public class DataModelResource extends BaseResource
 		  }
 		}
 		
-		ErrorDetails error = validClient(dmObjectNamePlural, ((doDelete) ? AccessRight.DELETE : AccessRight.UPDATE), AccessType.APPROVED);
+		ErrorDetails error = validClient(dmObjectNamePlural, ((doDelete) ? getRight(AccessRight.DELETE) : getRight(AccessRight.UPDATE)), AccessType.APPROVED);
 		if (error != null) // Not allowed to access!
 		{
 			logger.debug("Error Found: "+error);
@@ -444,7 +445,7 @@ public class DataModelResource extends BaseResource
 			logger.debug("Remove Single "+dmObjectNamePlural+" (REST DELETE) with resourceID = "+resourceID + " and URL Postfix mimeType = '" + mimeType + "'.");
 		}
 		
-		ErrorDetails error = validClient(dmObjectNamePlural, AccessRight.DELETE, AccessType.APPROVED);
+		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.DELETE), AccessType.APPROVED);
 		if (error != null) // Not allowed to access!
 		{
 			logger.debug("Error Found: "+error);
@@ -545,33 +546,44 @@ public class DataModelResource extends BaseResource
 	    return Boolean.valueOf(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, "false"));
 	}
 	
+	/*
+	 * This method is a helper to determine what the actual access right is. If a provider is a direct provider an access right is the actual
+	 * right of the consumer as set in the environment ACL. If the provider is in a brokered environment its right is the ACL in relation
+	 * to the broker. In such a case the right is simply 'PROVIDE'.
+	 */
+	private AccessRight getRight(AccessRight directEnvRight)
+	{
+	  // If we are in a brokered environment then the access right must be PROVIDE. In a DIRECT environment the access right must be QUERY.
+	  return getProviderEnvironment().getEnvironmentType() == EnvironmentType.DIRECT ? directEnvRight : AccessRight.PROVIDE;
+	}
+	
 	private Response updateMany(Provider provider, String payload)
 	{
-    try
-    {
-      List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata());
-      
-      if (statusList != null)
-      {
-        return makeUpdateMultipleResponse(statusList, Status.OK);
-      }
-      else
-      {
-        return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.UPDATE);
-      }     
-    }
-    catch (PersistenceException ex)
-    {
-      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);      
-    }
-    catch (UnmarshalException ex)
-    {
-      return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getMultiObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);      
-    }
-    catch (UnsupportedMediaTypeExcpetion ex)
-    {
-      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);     
-    }
+	    try
+	    {
+	      List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata());
+	      
+	      if (statusList != null)
+	      {
+	        return makeUpdateMultipleResponse(statusList, Status.OK);
+	      }
+	      else
+	      {
+	        return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.UPDATE);
+	      }     
+	    }
+	    catch (PersistenceException ex)
+	    {
+	      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);      
+	    }
+	    catch (UnmarshalException ex)
+	    {
+	      return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getMultiObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);      
+	    }
+	    catch (UnsupportedMediaTypeExcpetion ex)
+	    {
+	      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);     
+	    }
 	}
 
   private Response deleteMany(Provider provider, String payload)
