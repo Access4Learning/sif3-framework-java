@@ -136,6 +136,14 @@ methods. This new parameter allows the object provider to get access to some add
 request. For details about the new parameter as well Provider Interface class please refer to the javadoc.
 Details about the changes and how to incorporate them into your code can be found in the directory "release/v0.3.1".
 
+=============================================================
+Version from 14/10/2014: v0.3.2 - Minor Changes (Bug Fixes)
+=============================================================
+This minor version update includes a couple of minor bug fixes and a couple of improvements to the
+framework. The changes will not affect the developer's code base. Simply drop the new libraries into
+your project to get the changes and bug fixes.
+Details of this release can be found in the directory "release/v0.3.2".
+
 #########################################################################################################
 # Download Instructions
 #########################################################################################################
