@@ -31740,7 +31740,7 @@
       <xs:element name="ScheduledActivity" type="sif:ScheduledActivityType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
-  <xs:element name="ScheduledActivities" type="sif:ScheduledActivityCollectionType"/>
+  <xs:element name="ScheduledActivitys" type="sif:ScheduledActivityCollectionType"/>
   <xs:simpleType name="AUCodeSetsACStrandType">
 		<xs:restriction base="xs:token">
 			<xs:enumeration value="A">
