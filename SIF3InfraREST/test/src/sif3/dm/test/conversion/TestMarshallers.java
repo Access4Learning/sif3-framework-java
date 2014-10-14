@@ -21,9 +21,6 @@ package sif3.dm.test.conversion;
 import sif.dd.au30.conversion.DataModelMarshalFactory;
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
 import sif.dd.au30.model.StudentPersonalType;
-import sif3.common.utils.JAXBUtils;
-import sif3.infra.common.model.ObjectFactory;
-import sif3.infra.test.common.utils.TestJAXBUtils;
 import au.com.systemic.framework.utils.FileReaderWriter;
 import au.com.systemic.framework.utils.Timer;
 
