@@ -34,7 +34,6 @@
 	<property name="web.lib.root.dir" value="${project.basedir}/${web.dir.name}/WEB-INF/lib" />
 	<property name="lib.root.dir" value="${project.basedir}/lib" />
 	<property name="config.dir" value="${project.basedir}/config" />
-	<property name="systemic.path" value="systemic" />
 	<property name="verbose" value="true" />
 
 	<path id="classpath">
@@ -42,14 +41,11 @@
 			<include name="**/*.jar" />
 			<include name="**/*.zip" />
 		</fileset>
-		<fileset dir="${lib.root.dir}/j2ee">
-			<include name="servlet-api.jar" />
-		</fileset>
 		<pathelement path="${class.dir}" />
 	</path>
 
 	<!-- Comma separated list of Source directories -->
-	<property name="srcs" value="sif3InfraCommon,sif3InfraREST"/>
+	<property name="srcs" value="sif3Common,sif3InfraCommon,sif3InfraREST"/>
 	<property name="infra-jars" value="common,rest"/>
 
 	<!-- print some varaibles -->
@@ -64,7 +60,6 @@
 		<echo message="lib.root.dir: ${lib.root.dir}"/>
 		<echo message="web.lib.root.dir: ${web.lib.root.dir}"/>
 		<echo message="config.dir: ${config.dir}"/>
-		<echo message="systemic.path: ${systemic.path}"/>
 		<echo message="deploy.install.dir: ${deploy.install.dir}"/>
 		<echo message="frameworkversion: ${frameworkversion}"/>
 		<echo message="javaversion: ${javaversion}"/>
@@ -96,42 +91,16 @@
 	<!-- Main Compile Target -->
 	<target name="compile-all" depends="init" description="Compile all sources">
 
-		<!-- Must have sif3Common first -->
-		<echo message="Compile: sif3Common Classes"/>
-		<javac destdir="${class.dir}" debug="on" verbose="false">
-			<compilerarg value="-Xbootclasspath/p:${toString:classpath}"/>
-			<src path="${project.basedir}/sif3Common/${src.dir}" />
-		</javac>
-
-		<!-- copy all non-java files across -->
-		<copy todir="${class.dir}">
-			<fileset dir="${project.basedir}/sif3Common/src">
-				<exclude name="**/*.java" />
-			</fileset>
-		</copy>
-
-		<!-- Compile Data dictionary -->
-		<antcall target="compile-dd" />
-
-		<!-- Compile Inrastructure components and demo stuff -->
+		<!-- Compile Inrastructure components -->
 		<foreach list="${srcs}" target="compile-src" param="elem" trim="true" />
 
-		<!-- Demo Stuff -->
+		<!-- Compile Demo Stuff -->
 		<echo message="Compile: SIF3 Demo Classes"/>
 		<javac destdir="${class.dir}" debug="on" verbose="false">
 			<compilerarg value="-Xbootclasspath/p:${toString:classpath}"/>
 			<src path="${project.basedir}/demo/${src.dir}" />
 		</javac>
 
-	</target>
-
-	<target name="compile-dd" depends="init" description="Compile Data Dictionary">
-		<echo message="Compile: Compile Data dictionary"/>
-		<javac destdir="${class.dir}" debug="on" verbose="false">
-			<!-- Ensure project jars are first. -->
-			<compilerarg value="-Xbootclasspath/p:${toString:classpath}"/>
-			<src path="${project.basedir}/sif3Datamodel/${src.dir}" />
-		</javac>
 	</target>
 
 	<target name="compile-src">
@@ -154,9 +123,7 @@
 
 	<!-- Main Jar Target -->
 	<target name="03-jar-components" depends="compile-all" description="Create JAR files for all components">
-		<!-- jar Datamodel -->
-		<antcall target="jar-dd"/>
-
+		
 		<!-- Common Classes and resources -->
 		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar"/>
 		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar">
@@ -181,15 +148,6 @@
 		</jar>
 	</target>
 
-	<target name="jar-dd">
-		<echo message="Create Jar: ${jarprefix}DataModel_${locale}${sifddversion}.jar"/>
-		<jar destfile="${dist.dir}/${jarprefix}DataModel_${locale}${sifddversion}.jar">
-			<!-- Classes and resources -->
-			<fileset dir="${class.dir}" includes="**/sif/dd/**" excludes="**/readme.txt"/>
-		</jar>
-	</target>
-
-
 	<target name="jar-config">
 		<echo message="Jar: ${dist.dir}/config.jar"/>
 		<!--		
@@ -199,7 +157,7 @@
             	<include name="basicsis/spring/*"/>
             </fileset>
 		</jar>
--->
+  -->
 	</target>
 
 	<!-- *************** -->
@@ -224,7 +182,6 @@
 
 		<!-- remove project jars from WEB-INF/lib again -->
 		<foreach list="${infra-jars}" target="del-project-jar" param="elem" trim="true"/>
-		<delete file="${web.lib.root.dir}/${jarprefix}DataModel_${locale}${sifddversion}.jar"/>
 		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar"/>
 		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar"/>
 		<delete file="${web.lib.root.dir}/config.jar"/>
