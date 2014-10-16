@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="sif3Common/src"/>
-	<classpathentry kind="src" path="sif3Datamodel/src"/>
 	<classpathentry kind="src" path="sif3InfraCommon/src"/>
 	<classpathentry kind="src" path="sif3InfraREST/src"/>
 	<classpathentry kind="src" path="demo/src"/>
