@@ -275,7 +275,7 @@ public class SchoolInfoProvider extends AUDataModelProvider
     public List<OperationStatus> updateMany(Object data, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
     {
     	// Must be of type StudentPersonalType
-    	if (data instanceof StudentCollectionType)
+    	if (data instanceof SchoolCollectionType)
     	{
     		logger.debug("Update schools (Bulk Operation) for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     		SchoolCollectionType schools = (SchoolCollectionType)data;
