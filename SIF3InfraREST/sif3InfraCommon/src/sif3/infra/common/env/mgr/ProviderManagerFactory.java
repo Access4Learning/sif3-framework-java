@@ -25,10 +25,6 @@ import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
 import sif3.infra.common.interfaces.EnvironmentManager;
 
 /**
- * Within this framework there are many places where an environment manager is required. Because many of these implementations are
- * generic for consumers and providers it is essential that code of these implementations deal with interfaces rather than with
- * hard-wired concrete classes. At runtime though a concrete implemementation is required and for that this factory shall be used.
- * 
  * @author Joerg Huber
  *
  */
@@ -45,8 +41,9 @@ public class ProviderManagerFactory
 			switch (getEnvironmentType(adapterFileNameWithoutExt))
 	        {
 		        case DIRECT:
-		        	logger.debug("Environment Provider Manager (DIRECT Environment) will be used.");
-			        envMgr = DirectProviderEnvironmentManager.initialse(adapterFileNameWithoutExt);
+		        	// HITS Customisation
+		        	logger.debug("Environment Provider Manager (HITS DIRECT Environment) will be used.");
+			        envMgr = HITSDirectProviderEnvironmentManager.initialse(adapterFileNameWithoutExt);
 			        break;
 		        case BROKERED:
 		        	logger.debug("Brokered Provider Manager (BROKERED Environment) will be used.");

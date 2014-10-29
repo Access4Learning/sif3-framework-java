@@ -47,9 +47,17 @@ public class DataModelUnmarshalFactory implements UnmarshalFactory
 	@Override
 	public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
 	{
-		// TODO: JH - Implement from JSON unmarshaller
-		logger.warn("Unmarshal from JSON not supported, yet");
-		throw new UnsupportedMediaTypeExcpetion("Unmarshal Object from JSON not implemented, yet");
+		Object result = null;
+		try
+		{
+			result = JAXBUtils.unmarshalFromJSONIntoObject(payload, clazz);
+		}
+		catch (Exception e)
+		{
+			logger.error("An error occurred unmarshalling object from XML", e);
+			throw new UnmarshalException("An error occurred unmarshalling object from XML", e);
+		}
+		return result;
 	}
 
 	@Override

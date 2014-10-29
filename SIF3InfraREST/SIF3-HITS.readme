@@ -1,0 +1,10 @@
+The SIF3-HITS.zip is the SIF3InfraREST framework with a few customisations to cater for HITS. 
+
+All changes to the framework code should be surrounded by a comment block of the form:
+
+// HITS Customisation - Start
+... your code changes, additions...
+// HITS Customisation - End
+
+The only exceptions where new stuff can be added without such a comment block are consumer and provider classes in the
+Demo and/or Test source directories.

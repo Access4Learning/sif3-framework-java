@@ -26,209 +26,62 @@ import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.utils.JAXBUtils;
-import sif3.infra.common.conversion.InfraObjectEnum.InfraModel;
-import sif3.infra.common.model.AlertCollectionType;
-import sif3.infra.common.model.AlertType;
-import sif3.infra.common.model.CodeSetCollectionType;
-import sif3.infra.common.model.CodeSetType;
-import sif3.infra.common.model.CreateResponseType;
-import sif3.infra.common.model.DeleteRequestType;
-import sif3.infra.common.model.DeleteResponseType;
-import sif3.infra.common.model.EnvironmentType;
-import sif3.infra.common.model.ErrorType;
-import sif3.infra.common.model.NamespaceCollectionType;
-import sif3.infra.common.model.NamespaceType;
-import sif3.infra.common.model.ProviderCollectionType;
-import sif3.infra.common.model.ProviderType;
-import sif3.infra.common.model.ProvisionRequestType;
-import sif3.infra.common.model.QueueCollectionType;
-import sif3.infra.common.model.QueueType;
-import sif3.infra.common.model.SubscriptionCollectionType;
-import sif3.infra.common.model.SubscriptionType;
-import sif3.infra.common.model.UpdateResponseType;
-import sif3.infra.common.model.XqueryCollectionType;
-import sif3.infra.common.model.XqueryType;
-import sif3.infra.common.model.ZoneCollectionType;
-import sif3.infra.common.model.ZoneType;
 
-/**
- * Implementation of an unmarshal Factory for all Infrastructure Model Objects. JAXB has been used to create Infrastructure POJOs and 
- * this Factory uses JAXB's methods to unmarshal POJOs from XML. At this point in time (May 2014) JSON is not yet supported.
- * 
- * @author Joerg Huber
- *
- */
 public class InfraUnmarshalFactory implements UnmarshalFactory
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+  protected final Logger logger = Logger.getLogger(getClass());
 
-	/* (non-Javadoc)
-	 * @see sif3.infra.common.conversion.UnmarshalFactory#unmarshalFromXML(java.lang.String, java.lang.Class)
-	 */
-	@Override
-	public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
-	{
-		InfraModel infraModel = InfraObjectEnum.getInfraModelEnum(clazz.getSimpleName());
-		if (infraModel != null)
-		{
-			 switch (infraModel)
-			 {
-			 	case QueueCollectionType:
-			 	{
-					return (QueueCollectionType) JAXBUtils.unmarshalFromXMLIntoObject(payload, QueueCollectionType.class);
-			 	}
-			 	case CreateResponseType:
-			 	{
-					return (CreateResponseType) JAXBUtils.unmarshalFromXMLIntoObject(payload, CreateResponseType.class);
-			 	}
+  @Override
+  public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
+  {
+    Object result = null;
+    try
+    {
+      result = JAXBUtils.unmarshalFromXMLIntoObject(payload, clazz);
+    }
+    catch (Exception e)
+    {
+      logger.error("An error occurred unmarshalling object from XML", e);
+      throw new UnmarshalException("An error occurred unmarshalling object from XML", e);
+    }
+    return result;
+  }
 
-			 	case ZoneType:
-			 	{
-					return (ZoneType) JAXBUtils.unmarshalFromXMLIntoObject(payload, ZoneType.class);
-			 	}
+  @Override
+  public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
+  {
+    Object result = null;
+    try
+    {
+      result = JAXBUtils.unmarshalFromJSONIntoObject(payload, clazz);
+    }
+    catch (Exception e)
+    {
+      logger.error("An error occurred unmarshalling object from XML", e);
+      throw new UnmarshalException("An error occurred unmarshalling object from XML", e);
+    }
+    return result;
+  }
 
-			 	case EnvironmentType:
-			 	{	
-					return (EnvironmentType) JAXBUtils.unmarshalFromXMLIntoObject(payload, EnvironmentType.class);
-			 	}
+  @Override
+  public Object unmarshal(String payload, Class<?> clazz, MediaType mediaType) throws UnmarshalException, UnsupportedMediaTypeExcpetion
+  {
+    if (mediaType != null)
+    {
+      if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) || 
+        MediaType.TEXT_XML_TYPE.isCompatible(mediaType)  || 
+        MediaType.TEXT_PLAIN_TYPE.isCompatible(mediaType))
+      {
+        return unmarshalFromXML(payload, clazz);
+      }
+      else if (MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType))
+      {
+        return unmarshalFromJSON(payload, clazz);
+      }
+    }
 
-			 	case DeleteResponseType:
-			 	{
-					return (DeleteResponseType) JAXBUtils.unmarshalFromXMLIntoObject(payload, DeleteResponseType.class);
-			 	}
+    // If we get here then we deal with an unknown media type
+    throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot unmarshal the given input from this media type.");
+  }
 
-			 	case UpdateResponseType:
-			 	{
-					return (UpdateResponseType) JAXBUtils.unmarshalFromXMLIntoObject(payload, UpdateResponseType.class);
-			 	}
-
-			 	case AlertCollectionType:
-			 	{
-					return (AlertCollectionType) JAXBUtils.unmarshalFromXMLIntoObject(payload, AlertCollectionType.class);
-			 	}
-
-			 	case SubscriptionType:
-			 	{
-					return (SubscriptionType) JAXBUtils.unmarshalFromXMLIntoObject(payload, SubscriptionType.class);
-			 	}
-
-			 	case ProviderCollectionType:
-			 	{
-					return (ProviderCollectionType) JAXBUtils.unmarshalFromXMLIntoObject(payload, ProviderCollectionType.class);
-			 	}
-
-			 	case ProviderType:
-			 	{
-					return (ProviderType) JAXBUtils.unmarshalFromXMLIntoObject(payload, ProviderType.class);
-			 	}
-
-			 	case CodeSetType:
-			 	{
-					return (CodeSetType) JAXBUtils.unmarshalFromXMLIntoObject(payload, CodeSetType.class);
-			 	}
-
-			 	case NamespaceType:
-			 	{
-					return (NamespaceType) JAXBUtils.unmarshalFromXMLIntoObject(payload, NamespaceType.class);
-			 	}
-
-			 	case NamespaceCollectionType:
-			 	{
-					return (NamespaceCollectionType) JAXBUtils.unmarshalFromXMLIntoObject(payload, NamespaceCollectionType.class);
-			 	}
-
-			 	case CodeSetCollectionType:
-			 	{
-					return (CodeSetCollectionType) JAXBUtils.unmarshalFromXMLIntoObject(payload, CodeSetCollectionType.class);
-			 	}
-
-			 	case ZoneCollectionType:
-			 	{
-					return (ZoneCollectionType) JAXBUtils.unmarshalFromXMLIntoObject(payload, ZoneCollectionType.class);
-			 	}
-
-			 	case XqueryCollectionType:
-			 	{
-					return (XqueryCollectionType) JAXBUtils.unmarshalFromXMLIntoObject(payload, XqueryCollectionType.class);
-			 	}
-
-			 	case XqueryType:
-			 	{
-					return (XqueryType) JAXBUtils.unmarshalFromXMLIntoObject(payload, XqueryType.class);
-			 	}
-
-			 	case QueueType:
-			 	{
-					return (QueueType) JAXBUtils.unmarshalFromXMLIntoObject(payload, QueueType.class);
-			 	}
-
-			 	case DeleteRequestType:
-			 	{
-					return (DeleteRequestType) JAXBUtils.unmarshalFromXMLIntoObject(payload, DeleteRequestType.class);
-			 	}
-
-			 	case AlertType:
-			 	{
-					return (AlertType) JAXBUtils.unmarshalFromXMLIntoObject(payload, AlertType.class);
-			 	}
-
-			 	case ProvisionRequestType:
-			 	{
-					return (ProvisionRequestType) JAXBUtils.unmarshalFromXMLIntoObject(payload, ProvisionRequestType.class);
-			 	}
-
-			 	case ErrorType:
-			 	{
-					return (ErrorType) JAXBUtils.unmarshalFromXMLIntoObject(payload, ErrorType.class);
-			 	}
-
-			 	case SubscriptionCollectionType:
-			 	{
-					return (SubscriptionCollectionType) JAXBUtils.unmarshalFromXMLIntoObject(payload, SubscriptionCollectionType.class);
-			 	}
-			 }
-		}
-		
-		// If we get here then we could not unmarshal because the object type is invalid or null.
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see sif3.infra.common.conversion.UnmarshalFactory#unmarshalFromJSON(java.lang.String, java.lang.Class)
-	 */
-	@Override
-	public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
-	{
-	    InfraModel infraModel = InfraObjectEnum.getInfraModelEnum(clazz.getSimpleName());
-	    if (infraModel != null)
-	    {
-	      // TODO: JH - Implement from JSON unmarshaller
-	    }
-	    logger.warn("Unmarshal from JSON not supported, yet");
-	    throw new UnsupportedMediaTypeExcpetion("Unmarshal Object from JSON not implemented, yet");
-	}
-
-	/* (non-Javadoc)
-	 * @see sif3.infra.common.conversion.UnmarshalFactory#unmarschal(java.lang.String, java.lang.Class, javax.ws.rs.core.MediaType)
-	 */
-	@Override
-	public Object unmarshal(String payload, Class<?> clazz, MediaType mediaType) throws UnmarshalException, UnsupportedMediaTypeExcpetion
-	{
-		if (mediaType != null)
-		{
-			if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) || 
-				MediaType.TEXT_XML_TYPE.isCompatible(mediaType)  || 
-				MediaType.TEXT_PLAIN_TYPE.isCompatible(mediaType))
-			{
-				return unmarshalFromXML(payload, clazz);
-			}
-			else if (MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType))
-			{
-				return unmarshalFromJSON(payload, clazz);
-			}
-		}
-
-		// If we get here then we deal with an unknown media type
-		throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot unmarshal the given input from this media type.");
-	}
 }
