@@ -18,6 +18,8 @@
 
 package sif3.infra.rest.resource;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.ws.rs.DELETE;
@@ -62,567 +64,655 @@ import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.rest.provider.ProviderFactory;
 
 /**
- * This is the generic implementation of all Object resources. It implements all the functions required by the SIF3 specification
- * for a provider of Data Model Objects. It makes use of the provider property file to determine what the valid objects are.<br/><br/>
+ * This is the generic implementation of all Object resources. It implements all
+ * the functions required by the SIF3 specification for a provider of Data Model
+ * Objects. It makes use of the provider property file to determine what the
+ * valid objects are.<br/>
+ * <br/>
  * 
- * Developers are not expected to use this class to write providers. It is a full and generic implementation. The developers are
- * expected to extend the BaseProvider and then configure the rest in the provider's property file. These two bits are then utilised
- * by this generic resource to correctly invoke the final provider classes. Please refer to the developer's guide for detail on
- * which classes need to be implemented to write a provider.<br/><br/>
+ * Developers are not expected to use this class to write providers. It is a
+ * full and generic implementation. The developers are expected to extend the
+ * BaseProvider and then configure the rest in the provider's property file.
+ * These two bits are then utilised by this generic resource to correctly invoke
+ * the final provider classes. Please refer to the developer's guide for detail
+ * on which classes need to be implemented to write a provider.<br/>
+ * <br/>
  * 
- * This class makes one assumption though, and that is that the base URI for all object providers is of the form:<br/>
- * http://<baseURI>/requests/<ObjectName>...<br/><br/>
+ * This class makes one assumption though, and that is that the base URI for all
+ * object providers is of the form:<br/>
+ * http://<baseURI>/requests/<ObjectName>...<br/>
+ * <br/>
  * 
- * It must be ensured that in all the environments managed with this framework that the "request" connector URI follows this 
- * structure.
+ * It must be ensured that in all the environments managed with this framework
+ * that the "request" connector URI follows this structure.
+ * 
+ * <pre>
+ * /requests/<ObjectNamePlural> - GET - Get Many 
+ * /requests/<ObjectNamePlural> - POST - Create Many 
+ * /requests/<ObjectNamePlural> - PUT - Update/Delete Many
+ * /requests/<ObjectNamePlural>/<ResourceId> - GET - Get Single
+ * /requests/<ObjectNamePlural>/<ObjectName> - POST - Create Single
+ * /requests/<ObjectNamePlural>/<ResourceId> - PUT - Update Single
+ * /requests/<ObjectNamePlural>/<ResourceId> - DELETE - Delete Single
+ * /requests/<FilterName>/<ResourceId>/<ObjectNamePlural> - GET - Get Many With Filter
+ * </pre>
  * 
  * @author Joerg Huber
  */
-@Path("/requests/{dmObjectNamePlural}{mimeType:(\\.[^/]*?)?}")
-public class DataModelResource extends BaseResource
-{
-	private String dmObjectNamePlural = null; // This is also expected to be the key into the provider factory.
-	private Provider provider = null;
+@Path("/requests/{path:.*}")
+public class DataModelResource extends BaseResource {
+  private DataModelResourceInformation information = null;
+  private Provider provider = null;
+  private static final Class<?>[] FILTER_METHOD_SIGNATURE = { String.class, SIFZone.class, SIFContext.class,
+      PagingInfo.class, RequestMetadata.class };
 
-	/**
-	 * Initialises an Object Provider Resource. All the parameters are automatically injected by the Jersey Framework.
-	 * 
-	 * @param uriInfo Extracted from the request.
-	 * @param requestHeaders Extracted from the request.
-	 * @param request Extracted from the request.
-	 * @param dmObjectNamePlural Extracted from the request.
-	 * @param zoneID Extracted from the request (Matrix Parameter).
-	 * @param contextID Extracted from the request (Matrix Parameter).
-	 */
-    public DataModelResource(@Context UriInfo uriInfo,
-			                 @Context HttpHeaders requestHeaders,
-			                 @Context Request request,
-			                 @PathParam("dmObjectNamePlural") String dmObjectNamePlural,
-			                 @PathParam("mimeType") String mimeType,
-			                 @MatrixParam("zoneId") String zoneID,
-			                 @MatrixParam("contextId") String contextID)
-    {
-	    super(uriInfo, requestHeaders, request, "requests", zoneID, contextID);
-	    this.dmObjectNamePlural = dmObjectNamePlural;
-	    setURLPostfixMediaType(mimeType);
-	    
-	    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
-	    
-	    // Provider Factory should already be initialised. If not it will be done now...
-	    provider = ProviderFactory.getInstance().getProvider(new ModelObjectInfo(dmObjectNamePlural, null));
-    }
-    
-	/*----------------------*/
-	/*-- Abstract Methods --*/
-	/*----------------------*/
+  /**
+   * Initialises an Object Provider Resource. All the parameters are
+   * automatically injected by the Jersey Framework.
+   * 
+   * @param uriInfo
+   *          Extracted from the request.
+   * @param requestHeaders
+   *          Extracted from the request.
+   * @param request
+   *          Extracted from the request.
+   * @param path
+   *          Extracted from the request.
+   * @param zoneID
+   *          Extracted from the request (Matrix Parameter).
+   * @param contextID
+   *          Extracted from the request (Matrix Parameter).
+   */
+  public DataModelResource(@Context UriInfo uriInfo, @Context HttpHeaders requestHeaders, @Context Request request,
+      @PathParam("path") String path, @MatrixParam("zoneId") String zoneID, @MatrixParam("contextId") String contextID) {
+    super(uriInfo, requestHeaders, request, "requests", zoneID, contextID);
 
-    /* (non-Javadoc)
-     * @see sif3.infra.rest.resource.BaseResource#getEnvironmentManager()
-     */
-    @Override
-    public EnvironmentManager getEnvironmentManager()
-    {
-    	return ProviderManagerFactory.getEnvironmentManager();
-    }
-     
-    // -------------------------------------------------//
-	// -- POST Section: This is the C(reate) in CRUD. --//
-	// -------------------------------------------------//
-	@POST
-//	@Path("{dmObjectNameSingle}")
-	@Path("{dmObjectNameSingle}{mimeType:(\\.[^/]*?)?}")
-//  Let everything through and then deal with it when needed.	
-//	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML }) // only these are possible returns.
-	public Response createSingle(String payload, @PathParam("dmObjectNameSingle") String dmObjectNameSingle, @PathParam("mimeType") String mimeType)
-	{
-		setURLPostfixMediaType(mimeType);
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("Create Single "+dmObjectNameSingle+" (REST POST) with URL Postfix mimeType = '" + mimeType + "' and input data: " + payload);
-		}
-		
-		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.CREATE), AccessType.APPROVED);
-		if (error != null) // Not allowed to access!
-		{
-			return makeErrorResponse(error, ResponseAction.CREATE);
-		}
-				
-		Provider provider = getProvider();
-		if (provider == null) // error already logged but we must return an error response for the caller
-		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.CREATE);			
-		}
-	
-		try
-		{
-			Object returnObj = provider.createSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata());
+    information = new DataModelResourceInformation(path);
+    setURLPostfixMediaType(information.getMimeType());
+    logger.debug("URL Postfix mimeType: '" + information.getMimeType() + "'");
 
-			return makeResponse(returnObj, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, provider.getMarshaller());
-		}
-		catch (PersistenceException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE);			
-		}
-		catch (UnmarshalException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE);			
-		}
-    catch (UnsupportedMediaTypeExcpetion ex)
-    {
-      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE);     
-    }
-	}
+    // Provider Factory should already be initialised. If not it will be done
+    // now...
+    provider = ProviderFactory.getInstance().getProvider(new ModelObjectInfo(information.getObjectNamePlural(), null));
+  }
 
-	@POST
-//Let everything through and then deal with it when needed. 
-//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response createMany(String payload)
-	{
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("Create Many "+dmObjectNamePlural+" (REST POST) with input data: " + payload);
-		}
-		
-		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.CREATE), AccessType.APPROVED);
-		if (error != null) // Not allowed to access!
-		{
-			return makeErrorResponse(error, ResponseAction.CREATE);
-		}
-		Provider provider = getProvider();
-		if (provider == null) // error already logged but we must return an error response for the caller
-		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.CREATE);			
-		}
-	
-		try
-		{
-			List<CreateOperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata());
-			
-			if (statusList != null)
-			{
-				return makeCreateMultipleResponse(statusList, Status.CREATED);
-			}
-			else
-			{
-				return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.CREATE);
-			}			
-		}
-		catch (PersistenceException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Problem reported: "+ex.getMessage()), ResponseAction.CREATE);			
-		}
-		catch (UnmarshalException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getMultiObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE);			
-		}
-    catch (UnsupportedMediaTypeExcpetion ex)
-    {
-      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE);     
-    }
-	}
+  /*----------------------*/
+  /*-- Abstract Methods --*/
+  /*----------------------*/
 
-	// --------------------------------------------------------//
-	// -- GET Section: This is the R(ead) in CRUD for Lists. --//
-	// --------------------------------------------------------//
-	@GET
-//	@Path("{resourceID}")
-  @Path("{resourceID}{mimeType:(\\.[^/]*?)?}")
-//  Let everything through and then deal with it when needed. 
-//  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getSingle(@PathParam("resourceID") String resourceID, @PathParam("mimeType") String mimeType)
-	{
-		setURLPostfixMediaType(mimeType);
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("Get Resource by Resoucre ID (REST GET - Single): "+resourceID+" and URL Postfix mimeType = '"+mimeType+"'");
-		}
-		
-		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED);
-		if (error != null) // Not allowed to access!
-		{
-			return makeErrorResponse(error, ResponseAction.QUERY);
-		}
+  /*
+   * (non-Javadoc)
+   * 
+   * @see sif3.infra.rest.resource.BaseResource#getEnvironmentManager()
+   */
+  @Override
+  public EnvironmentManager getEnvironmentManager() {
+    return ProviderManagerFactory.getEnvironmentManager();
+  }
 
-		Provider provider = getProvider();
-		if (provider == null) // error already logged but we must return an error response for the caller
-		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.QUERY);			
-		}
-	
-		try
-		{
-			Object returnObj = provider.retrievByPrimaryKey(resourceID, getSifZone(), getSifContext(), getRequestMetadata());
-			
-			if (returnObj != null)
-			{
-				return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.QUERY, provider.getMarshaller());
-			}
-			else
-			{
-				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+resourceID+" does not exist."), ResponseAction.QUERY);
-			}
-		}
-		catch (PersistenceException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "+provider.getSingleObjectClassInfo().getObjectName()+" for resource ID = "+resourceID+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY);			
-		}
-		catch (IllegalArgumentException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "+provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+resourceID+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY);			
-		}
-	}
-
-	@GET
-//Let everything through and then deal with it when needed. 
-//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getMany()
-	{
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("Get List (REST GET - Plural)");
-		}
-		
-		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED);
-		if (error != null) // Not allowed to access!
-		{
-			return makeErrorResponse(error, ResponseAction.QUERY);
-		}
-		
-//		setQueryMetadata(new QueryMetadata(getUriInfo().getQueryParameters()));
-//		logger.debug(getQueryMetadata());
-
-		Provider provider = getProvider();
-		if (provider == null) // error already logged but we must return an error response for the caller
-		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.QUERY);			
-		}
-	
-//		PagingInfo pagingInfo = (getQueryMetadata().getPagingInfo() == null) ? null : getQueryMetadata().getPagingInfo().clone();
-
-    PagingInfo pagingInfo = new PagingInfo(getHeaderProperties(), getQueryParameters());
-    if (pagingInfo.getPageSize() <= PagingInfo.NOT_DEFINED) // page size not defined. Pass null to provider. 
-    {
-      pagingInfo = null;
-    }
-    else
-    {
-      pagingInfo = pagingInfo.clone(); // ensure that initial values are not overriden in case we need them later,
-    }
-		
-		try
-		{
-			Object returnObj = provider.retrieve(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata());
-			return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
-		}
-		catch (PersistenceException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "+provider.getMultiObjectClassInfo().getObjectName()+" with Paging Information: "+pagingInfo+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY);			
-		}
-		catch (IllegalArgumentException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "+provider.getMultiObjectClassInfo().getObjectName()+" with Paging Information: "+pagingInfo+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY);			
-		}
-		catch (UnsupportedQueryException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "+provider.getMultiObjectClassInfo().getObjectName()+" with Paging Information: "+pagingInfo+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY);			
-		}
-	}
-
-
-	// ----------------------------------------------------------//
-	// -- PUT Section: This is the U(pdate) in CRUD for Lists. --//
-	// ----------------------------------------------------------//
-	@PUT
-//	@Path("{resourceID}")
-	@Path("{resourceID}{mimeType:(\\.[^/]*?)?}")
-//  Let everything through and then deal with it when needed. 
-//  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response updateSingle(String payload, @PathParam("resourceID") String resourceID, @PathParam("mimeType") String mimeType)
-	{
-		setURLPostfixMediaType(mimeType);
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("Update Single "+dmObjectNamePlural+" (REST PUT) with resourceID = "+resourceID+", URL Postfix mimeType = "+mimeType+"' and input data: " + payload);
-		}
-		
-		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.UPDATE), AccessType.APPROVED);
-		if (error != null) // Not allowed to access!
-		{
-			return makeErrorResponse(error, ResponseAction.UPDATE);
-		}
-
-		Provider provider = getProvider();
-		if (provider == null) // error already logged but we must return an error response for the caller
-		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.UPDATE);			
-		}
-	
-		try
-		{
-			if (provider.updateSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), resourceID, getSifZone(), getSifContext(), getRequestMetadata()))
-			{
-				return makeResopnseWithNoContent(false, ResponseAction.UPDATE);
-			}
-			else
-			{
-				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+resourceID+" does not exist."), ResponseAction.UPDATE);
-			}
-		}
-		catch (PersistenceException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+resourceID+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);			
-		}
-		catch (IllegalArgumentException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+resourceID+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);			
-		}
-		catch (UnmarshalException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);			
-		}
-    catch (UnsupportedMediaTypeExcpetion ex)
-    {
-      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);     
-    }
-	}
-
-	@PUT
-//Let everything through and then deal with it when needed. 
-//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response updateMany(String payload)
-	{
-	  // Check what is really required: DELETE or UPDATE
-	  boolean doDelete = HeaderValues.MethodType.DELETE.name().equalsIgnoreCase(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE));
-	  
-		if (logger.isDebugEnabled())
-		{
-		  if (doDelete)
-		  {
-		    logger.debug("Delete Collection "+dmObjectNamePlural+" (REST PUT, method OVERRODE=DELETE) with input data: " + payload);
-		  }
-		  else
-		  {
-        logger.debug("Update Collection "+dmObjectNamePlural+" (REST PUT) with input data: " + payload);		    
-		  }
-		}
-		
-		ErrorDetails error = validClient(dmObjectNamePlural, ((doDelete) ? getRight(AccessRight.DELETE) : getRight(AccessRight.UPDATE)), AccessType.APPROVED);
-		if (error != null) // Not allowed to access!
-		{
-			logger.debug("Error Found: "+error);
-			return makeErrorResponse(error, ((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE));
-		}
-
-		Provider provider = getProvider();
-		if (provider == null) // error already logged but we must return an error response for the caller
-		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE));			
-		}
-	
-		return (doDelete) ? deleteMany(provider, payload) : updateMany(provider, payload);
-	}
-
-	// -------------------------------------------------------------//
-	// -- DELETE Section: This is the D(elete) in CRUD for Lists. --//
-	// -------------------------------------------------------------//
-	@DELETE
-//	@Path("{resourceID}")
-	@Path("{resourceID}{mimeType:(\\.[^/]*?)?}")
-//  Let everything through and then deal with it when needed. 
-//  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response removeSingle(@PathParam("resourceID") String resourceID, @PathParam("mimeType") String mimeType)
-	{
-		setURLPostfixMediaType(mimeType);
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("Remove Single "+dmObjectNamePlural+" (REST DELETE) with resourceID = "+resourceID + " and URL Postfix mimeType = '" + mimeType + "'.");
-		}
-		
-		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.DELETE), AccessType.APPROVED);
-		if (error != null) // Not allowed to access!
-		{
-			logger.debug("Error Found: "+error);
-			return makeErrorResponse(error, ResponseAction.DELETE);
-		}
-
-		Provider provider = getProvider();
-		if (provider == null) // error already logged but we must return an error response for the caller
-		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.DELETE);			
-		}
-	
-		try
-		{
-			if (provider.deleteSingle(resourceID, getSifZone(), getSifContext(), getRequestMetadata()))
-			{
-				return makeResopnseWithNoContent(false, ResponseAction.DELETE);
-			}
-			else
-			{
-				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+resourceID+" does not exist."), ResponseAction.DELETE);
-			}
-		}
-		catch (PersistenceException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete "+provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+resourceID+". Problem reported: "+ex.getMessage()), ResponseAction.DELETE);			
-		}
-		catch (IllegalArgumentException ex)
-		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete "+provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+resourceID+". Problem reported: "+ex.getMessage()), ResponseAction.DELETE);			
-		}
-	}
-	
-	@DELETE
-//Let everything through and then deal with it when needed. 
-//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	/*
-	 * NOTE: 
-	 * This method is not really implemented as DELETE is not supported with a payload. See PUT method for details about the way
-	 * a Bulk-DELETE is implemented according to SIF3 Spec. 
-	 */
-	public Response removeMany(String payload)
-	{
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("Delete Collection "+dmObjectNamePlural+" (REST DELETE) with input data: " + payload);
-		}
-		ErrorDetails error = new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Operation not supported.", "Use HTTP PUT with header field '"+RequestHeaderConstants.HDR_METHOD_OVERRIDE+"' set to "+HeaderValues.MethodType.DELETE.name()+" instead.");
-		return makeErrorResponse(error, ResponseAction.DELETE);
-	}
-	
-	/*------------------------*/
-	/*-- Overridden Methods --*/
-	/*------------------------*/
-	@Override
-	public SIFZone getSifZone()
-	{
-		SIFZone sifZone = super.getSifZone();
-		if (sifZone == null) // default zone => Get default zone from session
-		{
-			SIF3Session session = getSIF3SessionForRequest();
-			if (session != null)
-			{
-				sifZone = session.getDefaultZone();
-			}
-		}
-		
-		return sifZone;	
-	}
-
-	@Override
-	public SIFContext getSifContext()
-	{
-		SIFContext sifContext = super.getSifContext();
-		if (sifContext == null) // Default Context
-		{
-			sifContext = CommonConstants.DEFAULT_CONTEXT;
-		}
-		
-		return sifContext;
-	}	
-
-	/*---------------------*/
-	/*-- Private Methods --*/
-	/*---------------------*/
-	private Provider getProvider()
-	{
-		if (provider == null) // No provider known for this Object Type! This is an issue and needs to be logged.
-		{
-			logger.error("No Provider known for the object with the name: "+dmObjectNamePlural);
-		}
-		return provider;
-	}
-	
-	private boolean getAdvisory()
-	{
-	    return Boolean.valueOf(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, "false"));
-	}
-	
-	/*
-	 * This method is a helper to determine what the actual access right is. If a provider is a direct provider an access right is the actual
-	 * right of the consumer as set in the environment ACL. If the provider is in a brokered environment its right is the ACL in relation
-	 * to the broker. In such a case the right is simply 'PROVIDE'.
-	 */
-	private AccessRight getRight(AccessRight directEnvRight)
-	{
-	  // If we are in a brokered environment then the access right must be PROVIDE. In a DIRECT environment the access right must be QUERY.
-	  return getProviderEnvironment().getEnvironmentType() == EnvironmentType.DIRECT ? directEnvRight : AccessRight.PROVIDE;
-	}
-	
-	private Response updateMany(Provider provider, String payload)
-	{
-	    try
-	    {
-	      List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata());
-	      
-	      if (statusList != null)
-	      {
-	        return makeUpdateMultipleResponse(statusList, Status.OK);
-	      }
-	      else
-	      {
-	        return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.UPDATE);
-	      }     
-	    }
-	    catch (PersistenceException ex)
-	    {
-	      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);      
-	    }
-	    catch (UnmarshalException ex)
-	    {
-	      return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getMultiObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);      
-	    }
-	    catch (UnsupportedMediaTypeExcpetion ex)
-	    {
-	      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);     
-	    }
-	}
-
-  private Response deleteMany(Provider provider, String payload)
-  {
-    try
-    {
-      List<OperationStatus> statusList = provider.deleteMany(getResourceIDsFromDeleteRequest(payload), getSifZone(), getSifContext(), getRequestMetadata());
-      
-      if (statusList != null)
-      {
-        return makeDeleteMultipleResponse(statusList, Status.OK);
-      }
-      else
-      {
-        return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.DELETE);
-      }     
-    }
-    catch (PersistenceException ex)
-    {
-      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Problem reported: "+ex.getMessage()), ResponseAction.DELETE);      
-    }
-    catch (UnmarshalException ex)
-    {
-      return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to DeleteRequestType. Problem reported: "+ex.getMessage()), ResponseAction.DELETE);     
-    }
-    catch (UnsupportedMediaTypeExcpetion ex)
-    {
-      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to DeleteRequestType. Problem reported: "+ex.getMessage()), ResponseAction.DELETE);     
+  @POST
+  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+  public Response handlePost(String payload) {
+    if (information.isCreateSingle()) {
+      return createSingle(payload, information.getObjectName(), information.getMimeType());
+    } else {
+      return createMany(payload);
     }
   }
-  
-  private RequestMetadata getRequestMetadata()
-  {
-	  RequestMetadata metadata = new RequestMetadata();
-	  metadata.setGeneratorID(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID));
-	  metadata.setNavigationID(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_NAVIGATION_ID));
-	  metadata.setQueryIntention(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION));
-	  metadata.setSourceName(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_SOURCE_NAME));
-	  return metadata;
+
+  private Response createSingle(String payload, String dmObjectNameSingle, String mimeType) {
+    setURLPostfixMediaType(mimeType);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Create Single " + dmObjectNameSingle + " (REST POST) with URL Postfix mimeType = '" + mimeType
+          + "' and input data: " + payload);
+    }
+
+    ErrorDetails error = validClient(information.getObjectNamePlural(), getRight(AccessRight.CREATE),
+        AccessType.APPROVED);
+    if (error != null) // Not allowed to access!
+    {
+      return makeErrorResponse(error, ResponseAction.CREATE);
+    }
+
+    Provider provider = getProvider();
+    if (provider == null) // error already logged but we must return an error
+                          // response for the caller
+    {
+      return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "
+          + information.getObjectNamePlural() + " available."), ResponseAction.CREATE);
+    }
+
+    try {
+      Object returnObj = provider.createSingle(
+          provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(),
+              getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata());
+
+      return makeResponse(returnObj, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE,
+          provider.getMarshaller());
+    } catch (PersistenceException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create "
+          + provider.getSingleObjectClassInfo().getObjectName() + ". Problem reported: " + ex.getMessage()),
+          ResponseAction.CREATE);
+    } catch (UnmarshalException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+          "Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName()
+              + ". Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+    } catch (UnsupportedMediaTypeExcpetion ex) {
+      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(),
+          "Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName()
+              + ". Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+    }
+  }
+
+  public Response createMany(String payload) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Create Many " + information.getObjectNamePlural() + " (REST POST) with input data: " + payload);
+    }
+
+    ErrorDetails error = validClient(information.getObjectNamePlural(), getRight(AccessRight.CREATE),
+        AccessType.APPROVED);
+    if (error != null) // Not allowed to access!
+    {
+      return makeErrorResponse(error, ResponseAction.CREATE);
+    }
+    Provider provider = getProvider();
+    if (provider == null) // error already logged but we must return an error
+                          // response for the caller
+    {
+      return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "
+          + information.getObjectNamePlural() + " available."), ResponseAction.CREATE);
+    }
+
+    try {
+      List<CreateOperationStatus> statusList = provider.createMany(
+          provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(),
+              getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata());
+
+      if (statusList != null) {
+        return makeCreateMultipleResponse(statusList, Status.CREATED);
+      } else {
+        return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create "
+            + provider.getMultiObjectClassInfo().getObjectName()
+            + " (Bulk Operation). Contact your System Administrator."), ResponseAction.CREATE);
+      }
+    } catch (PersistenceException ex) {
+      return makeErrorResponse(
+          new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create "
+              + provider.getMultiObjectClassInfo().getObjectName() + " (Bulk Operation). Problem reported: "
+              + ex.getMessage()), ResponseAction.CREATE);
+    } catch (UnmarshalException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+          "Could not unmarshal the given data to " + provider.getMultiObjectClassInfo().getObjectName()
+              + ". Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+    } catch (UnsupportedMediaTypeExcpetion ex) {
+      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(),
+          "Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName()
+              + ". Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+    }
+  }
+
+  @GET
+  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+  public Response handleGet() {
+    if (information.isGetSingle()) {
+      return getSingle(information.getResourceId(), information.getMimeType());
+    } else if (information.isFiltered()) {
+      return getFiltered(information.getFilterName(), information.getFilterValue());
+    } else {
+      return getMany();
+    }
+  }
+
+  private Response getSingle(@PathParam("resourceID") String resourceID, @PathParam("mimeType") String mimeType) {
+    setURLPostfixMediaType(mimeType);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Get Resource by Resoucre ID (REST GET - Single): " + resourceID + " and URL Postfix mimeType = '"
+          + mimeType + "'");
+    }
+
+    ErrorDetails error = validClient(information.getObjectNamePlural(), getRight(AccessRight.QUERY),
+        AccessType.APPROVED);
+    if (error != null) // Not allowed to access!
+    {
+      return makeErrorResponse(error, ResponseAction.QUERY);
+    }
+
+    Provider provider = getProvider();
+    if (provider == null) // error already logged but we must return an error
+                          // response for the caller
+    {
+      return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "
+          + information.getObjectNamePlural() + " available."), ResponseAction.QUERY);
+    }
+
+    try {
+      Object returnObj = provider.retrievByPrimaryKey(resourceID, getSifZone(), getSifContext(), getRequestMetadata());
+
+      if (returnObj != null) {
+        return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.QUERY, provider.getMarshaller());
+      } else {
+        return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), provider.getSingleObjectClassInfo()
+            .getObjectName() + " with resouce ID = " + resourceID + " does not exist."), ResponseAction.QUERY);
+      }
+    } catch (PersistenceException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "
+          + provider.getSingleObjectClassInfo().getObjectName() + " for resource ID = " + resourceID
+          + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+    } catch (IllegalArgumentException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "
+          + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID
+          + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+    }
+  }
+
+  private Response getMany() {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Get List (REST GET - Plural)");
+    }
+
+    ErrorDetails error = validClient(information.getObjectNamePlural(), getRight(AccessRight.QUERY),
+        AccessType.APPROVED);
+    if (error != null) // Not allowed to access!
+    {
+      return makeErrorResponse(error, ResponseAction.QUERY);
+    }
+
+    Provider provider = getProvider();
+    if (provider == null) // error already logged but we must return an error
+                          // response for the caller
+    {
+      return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "
+          + information.getObjectNamePlural() + " available."), ResponseAction.QUERY);
+    }
+
+    // PagingInfo pagingInfo = (getQueryMetadata().getPagingInfo() == null) ?
+    // null : getQueryMetadata().getPagingInfo().clone();
+
+    PagingInfo pagingInfo = new PagingInfo(getHeaderProperties(), getQueryParameters());
+    if (pagingInfo.getPageSize() <= PagingInfo.NOT_DEFINED) // page size not
+                                                            // defined. Pass
+                                                            // null to provider.
+    {
+      pagingInfo = null;
+    } else {
+      pagingInfo = pagingInfo.clone(); // ensure that initial values are not
+                                       // overriden in case we need them later,
+    }
+
+    try {
+      Object returnObj = provider.retrieve(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata());
+      return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
+    } catch (PersistenceException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "
+          + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo
+          + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+    } catch (IllegalArgumentException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "
+          + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo
+          + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+    } catch (UnsupportedQueryException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "
+          + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo
+          + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+    }
+  }
+
+  private Response getFiltered(String filterName, String filterValue) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Get List (REST GET - " + filterName + " - " + filterValue + " - "
+          + information.getObjectNamePlural() + " Plural)");
+    }
+
+    ErrorDetails error = validClient(information.getObjectNamePlural(), getRight(AccessRight.QUERY),
+        AccessType.APPROVED);
+    if (error != null) // Not allowed to access!
+    {
+      return makeErrorResponse(error, ResponseAction.QUERY);
+    }
+
+    // setQueryMetadata(new QueryMetadata(getUriInfo().getQueryParameters()));
+    // logger.debug(getQueryMetadata());
+
+    Provider provider = getProvider();
+    if (provider == null) // error already logged but we must return an error
+                          // response for the caller
+    {
+      return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "
+          + information.getObjectNamePlural() + " available."), ResponseAction.QUERY);
+    }
+
+    Method method = null;
+    try {
+      method = provider.getClass().getMethod("findBy" + information.getFilterName(), FILTER_METHOD_SIGNATURE);
+    } catch (Exception ignore) {
+    }
+    if (method == null) {
+      return makeErrorResponse(
+          new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No " + information.getFilterName()
+              + " filter for " + information.getObjectNamePlural() + " available."), ResponseAction.QUERY);
+    }
+
+    // PagingInfo pagingInfo = (getQueryMetadata().getPagingInfo() == null) ?
+    // null : getQueryMetadata().getPagingInfo().clone();
+
+    PagingInfo pagingInfo = new PagingInfo(getHeaderProperties(), getQueryParameters());
+    if (pagingInfo.getPageSize() <= PagingInfo.NOT_DEFINED) // page size not
+                                                            // defined. Pass
+                                                            // null to provider.
+    {
+      pagingInfo = null;
+    } else {
+      pagingInfo = pagingInfo.clone(); // ensure that initial values are not
+                                       // overriden in case we need them later,
+    }
+
+    try {
+      Object returnObj = method.invoke(provider, information.getFilterValue(), getSifZone(), getSifContext(),
+          pagingInfo, getRequestMetadata());
+      return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
+    } catch (IllegalAccessException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "
+          + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo
+          + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+    } catch (InvocationTargetException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "
+          + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo
+          + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+    }
+  }
+
+  // ----------------------------------------------------------//
+  // -- PUT Section: This is the U(pdate) in CRUD for Lists. --//
+  // ----------------------------------------------------------//
+  @PUT
+  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+  public Response handlePut(String payload) {
+    if (information.isUpdateSingle()) {
+      return updateSingle(payload, information.getResourceId(), information.getMimeType());
+    } else {
+      return updateMany(payload);
+    }
+
+  }
+
+  private Response updateSingle(String payload, @PathParam("resourceID") String resourceID,
+      @PathParam("mimeType") String mimeType) {
+    setURLPostfixMediaType(mimeType);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Update Single " + information.getObjectNamePlural() + " (REST PUT) with resourceID = " + resourceID
+          + ", URL Postfix mimeType = " + mimeType + "' and input data: " + payload);
+    }
+
+    ErrorDetails error = validClient(information.getObjectNamePlural(), getRight(AccessRight.UPDATE),
+        AccessType.APPROVED);
+    if (error != null) // Not allowed to access!
+    {
+      return makeErrorResponse(error, ResponseAction.UPDATE);
+    }
+
+    Provider provider = getProvider();
+    if (provider == null) // error already logged but we must return an error
+                          // response for the caller
+    {
+      return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "
+          + information.getObjectNamePlural() + " available."), ResponseAction.UPDATE);
+    }
+
+    try {
+      if (provider.updateSingle(
+          provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(),
+              getRequestMediaType()), resourceID, getSifZone(), getSifContext(), getRequestMetadata())) {
+        return makeResopnseWithNoContent(false, ResponseAction.UPDATE);
+      } else {
+        return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), provider.getSingleObjectClassInfo()
+            .getObjectName() + " with resouce ID = " + resourceID + " does not exist."), ResponseAction.UPDATE);
+      }
+    } catch (PersistenceException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "
+          + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID
+          + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE);
+    } catch (IllegalArgumentException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "
+          + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID
+          + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE);
+    } catch (UnmarshalException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+          "Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName()
+              + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE);
+    } catch (UnsupportedMediaTypeExcpetion ex) {
+      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(),
+          "Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName()
+              + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE);
+    }
+  }
+
+  private Response updateMany(String payload) {
+    // Check what is really required: DELETE or UPDATE
+    boolean doDelete = HeaderValues.MethodType.DELETE.name().equalsIgnoreCase(
+        getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE));
+
+    if (logger.isDebugEnabled()) {
+      if (doDelete) {
+        logger.debug("Delete Collection " + information.getObjectNamePlural()
+            + " (REST PUT, method OVERRODE=DELETE) with input data: " + payload);
+      } else {
+        logger.debug("Update Collection " + information.getObjectNamePlural() + " (REST PUT) with input data: "
+            + payload);
+      }
+    }
+
+    ErrorDetails error = validClient(information.getObjectNamePlural(), ((doDelete) ? getRight(AccessRight.DELETE)
+        : getRight(AccessRight.UPDATE)), AccessType.APPROVED);
+    if (error != null) // Not allowed to access!
+    {
+      logger.debug("Error Found: " + error);
+      return makeErrorResponse(error, ((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE));
+    }
+
+    Provider provider = getProvider();
+    if (provider == null) // error already logged but we must return an error
+                          // response for the caller
+    {
+      return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "
+          + information.getObjectNamePlural() + " available."), ((doDelete) ? ResponseAction.DELETE
+          : ResponseAction.UPDATE));
+    }
+
+    return (doDelete) ? deleteMany(provider, payload) : updateMany(provider, payload);
+  }
+
+  // -------------------------------------------------------------//
+  // -- DELETE Section: This is the D(elete) in CRUD for Lists. --//
+  // -------------------------------------------------------------//
+  @DELETE
+  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+  public Response handleDelete(String payload) {
+    if (information.isRemoveMany()) {
+      return removeMany(payload);
+    } else {
+      return removeSingle(information.getResourceId(), information.getMimeType());
+    }
+  }
+
+  private Response removeSingle(@PathParam("resourceID") String resourceID, @PathParam("mimeType") String mimeType) {
+    setURLPostfixMediaType(mimeType);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Remove Single " + information.getObjectNamePlural() + " (REST DELETE) with resourceID = "
+          + resourceID + " and URL Postfix mimeType = '" + mimeType + "'.");
+    }
+
+    ErrorDetails error = validClient(information.getObjectNamePlural(), getRight(AccessRight.DELETE),
+        AccessType.APPROVED);
+    if (error != null) // Not allowed to access!
+    {
+      logger.debug("Error Found: " + error);
+      return makeErrorResponse(error, ResponseAction.DELETE);
+    }
+
+    Provider provider = getProvider();
+    if (provider == null) // error already logged but we must return an error
+                          // response for the caller
+    {
+      return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "
+          + information.getObjectNamePlural() + " available."), ResponseAction.DELETE);
+    }
+
+    try {
+      if (provider.deleteSingle(resourceID, getSifZone(), getSifContext(), getRequestMetadata())) {
+        return makeResopnseWithNoContent(false, ResponseAction.DELETE);
+      } else {
+        return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), provider.getSingleObjectClassInfo()
+            .getObjectName() + " with resouce ID = " + resourceID + " does not exist."), ResponseAction.DELETE);
+      }
+    } catch (PersistenceException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete "
+          + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID
+          + ". Problem reported: " + ex.getMessage()), ResponseAction.DELETE);
+    } catch (IllegalArgumentException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete "
+          + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID
+          + ". Problem reported: " + ex.getMessage()), ResponseAction.DELETE);
+    }
+  }
+
+  /*
+   * NOTE: This method is not really implemented as DELETE is not supported with
+   * a payload. See PUT method for details about the way a Bulk-DELETE is
+   * implemented according to SIF3 Spec.
+   */
+  private Response removeMany(String payload) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Delete Collection " + information.getObjectNamePlural() + " (REST DELETE) with input data: "
+          + payload);
+    }
+    ErrorDetails error = new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Operation not supported.",
+        "Use HTTP PUT with header field '" + RequestHeaderConstants.HDR_METHOD_OVERRIDE + "' set to "
+            + HeaderValues.MethodType.DELETE.name() + " instead.");
+    return makeErrorResponse(error, ResponseAction.DELETE);
+  }
+
+  /*------------------------*/
+  /*-- Overridden Methods --*/
+  /*------------------------*/
+  @Override
+  public SIFZone getSifZone() {
+    SIFZone sifZone = super.getSifZone();
+    if (sifZone == null) // default zone => Get default zone from session
+    {
+      SIF3Session session = getSIF3SessionForRequest();
+      if (session != null) {
+        sifZone = session.getDefaultZone();
+      }
+    }
+
+    return sifZone;
+  }
+
+  @Override
+  public SIFContext getSifContext() {
+    SIFContext sifContext = super.getSifContext();
+    if (sifContext == null) // Default Context
+    {
+      sifContext = CommonConstants.DEFAULT_CONTEXT;
+    }
+
+    return sifContext;
+  }
+
+  /*---------------------*/
+  /*-- Private Methods --*/
+  /*---------------------*/
+  private Provider getProvider() {
+    if (provider == null) // No provider known for this Object Type! This is an
+                          // issue and needs to be logged.
+    {
+      logger.error("No Provider known for the object with the name: " + information.getObjectNamePlural());
+    }
+    return provider;
+  }
+
+  private boolean getAdvisory() {
+    return Boolean.valueOf(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, "false"));
+  }
+
+  /*
+   * This method is a helper to determine what the actual access right is. If a
+   * provider is a direct provider an access right is the actual right of the
+   * consumer as set in the environment ACL. If the provider is in a brokered
+   * environment its right is the ACL in relation to the broker. In such a case
+   * the right is simply 'PROVIDE'.
+   */
+  private AccessRight getRight(AccessRight directEnvRight) {
+    // If we are in a brokered environment then the access right must be
+    // PROVIDE. In a DIRECT environment the access right must be QUERY.
+    return getProviderEnvironment().getEnvironmentType() == EnvironmentType.DIRECT ? directEnvRight
+        : AccessRight.PROVIDE;
+  }
+
+  private Response updateMany(Provider provider, String payload) {
+    try {
+      List<OperationStatus> statusList = provider.updateMany(
+          provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(),
+              getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata());
+
+      if (statusList != null) {
+        return makeUpdateMultipleResponse(statusList, Status.OK);
+      } else {
+        return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "
+            + provider.getMultiObjectClassInfo().getObjectName()
+            + " (Bulk Operation). Contact your System Administrator."), ResponseAction.UPDATE);
+      }
+    } catch (PersistenceException ex) {
+      return makeErrorResponse(
+          new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "
+              + provider.getMultiObjectClassInfo().getObjectName() + " (Bulk Operation). Problem reported: "
+              + ex.getMessage()), ResponseAction.UPDATE);
+    } catch (UnmarshalException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+          "Could not unmarshal the given data to " + provider.getMultiObjectClassInfo().getObjectName()
+              + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE);
+    } catch (UnsupportedMediaTypeExcpetion ex) {
+      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(),
+          "Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName()
+              + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE);
+    }
+  }
+
+  private Response deleteMany(Provider provider, String payload) {
+    try {
+      List<OperationStatus> statusList = provider.deleteMany(getResourceIDsFromDeleteRequest(payload), getSifZone(),
+          getSifContext(), getRequestMetadata());
+
+      if (statusList != null) {
+        return makeDeleteMultipleResponse(statusList, Status.OK);
+      } else {
+        return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete "
+            + provider.getMultiObjectClassInfo().getObjectName()
+            + " (Bulk Operation). Contact your System Administrator."), ResponseAction.DELETE);
+      }
+    } catch (PersistenceException ex) {
+      return makeErrorResponse(
+          new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete "
+              + provider.getMultiObjectClassInfo().getObjectName() + " (Bulk Operation). Problem reported: "
+              + ex.getMessage()), ResponseAction.DELETE);
+    } catch (UnmarshalException ex) {
+      return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+          "Could not unmarshal the given data to DeleteRequestType. Problem reported: " + ex.getMessage()),
+          ResponseAction.DELETE);
+    } catch (UnsupportedMediaTypeExcpetion ex) {
+      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(),
+          "Could not unmarshal the given data to DeleteRequestType. Problem reported: " + ex.getMessage()),
+          ResponseAction.DELETE);
+    }
+  }
+
+  private RequestMetadata getRequestMetadata() {
+    RequestMetadata metadata = new RequestMetadata();
+    metadata.setGeneratorID(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID));
+    metadata.setNavigationID(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_NAVIGATION_ID));
+    metadata.setQueryIntention(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION));
+    metadata.setSourceName(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_SOURCE_NAME));
+    return metadata;
   }
 
 }

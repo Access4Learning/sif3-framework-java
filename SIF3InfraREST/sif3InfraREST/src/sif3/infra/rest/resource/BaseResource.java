@@ -76,6 +76,7 @@ import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.UpdateResponseType;
 import sif3.infra.common.model.UpdateType;
 import sif3.infra.common.model.UpdatesType;
+import sif3.infra.rest.audit.AuditableResource;
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.DateUtils;
 import au.com.systemic.framework.utils.StringUtils;
@@ -166,6 +167,11 @@ public abstract class BaseResource
 			logger.debug("Zone ID            : " + getSifZone());
 			logger.debug("ContextID          : " + getSifContext());
 			logger.debug("Resource Init ok   : " + allOK);
+		}
+		
+		if (AuditableResource.isAuditing()) {
+		  validSession(); // Ensure that the session is populated for all requests when auditing.
+		  AuditableResource.setResource(this);
 		}
 	}
 
