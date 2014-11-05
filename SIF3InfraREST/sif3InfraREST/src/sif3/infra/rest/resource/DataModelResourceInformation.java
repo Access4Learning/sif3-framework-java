@@ -10,8 +10,8 @@ public class DataModelResourceInformation {
   private String objectNamePlural = null;
   private String mimeType = null;
   private String resourceId = null;
-  private String filterName = null;
-  private String filterValue = null;
+  private String servicePathName = null;
+  private String servicePathValue = null;
   
   public DataModelResourceInformation(String path) {
     Matcher matcher = INFORMATION_PATTERN.matcher(path);
@@ -31,12 +31,12 @@ public class DataModelResourceInformation {
         this.mimeType = matcher.group(8);
       } else if (matcher.group(9) != null) {
         this.objectNamePlural = matcher.group(11);
-        this.filterName = matcher.group(9);
-        this.filterValue = matcher.group(10);
+        this.servicePathName = matcher.group(9);
+        this.servicePathValue = matcher.group(10);
       } else if (matcher.group(12) != null) {
         this.objectNamePlural = matcher.group(14);
-        this.filterName = matcher.group(12);
-        this.filterValue = matcher.group(13);
+        this.servicePathName = matcher.group(12);
+        this.servicePathValue = matcher.group(13);
         this.mimeType = matcher.group(15);
       }
     }
@@ -58,16 +58,16 @@ public class DataModelResourceInformation {
     return resourceId;
   }
 
-  public String getFilterName() {
-    return filterName;
+  public String getServicePathName() {
+    return servicePathName;
   }
 
-  public String getFilterValue() {
-    return filterValue;
+  public String getServicePathValue() {
+    return servicePathValue;
   }
   
   public boolean isGetMany() {
-    return getFilterName() == null && getResourceId() == null;
+    return getServicePathName() == null && getResourceId() == null;
   }
   
   public boolean isCreateMany() {
@@ -79,7 +79,7 @@ public class DataModelResourceInformation {
   }
   
   public boolean isGetSingle() {
-    return getFilterName() == null && getResourceId() != null;
+    return getServicePathName() == null && getResourceId() != null;
   }
   
   public boolean isCreateSingle() {
@@ -90,8 +90,8 @@ public class DataModelResourceInformation {
     return getResourceId() != null;
   }
   
-  public boolean isFiltered() {
-    return getFilterName() != null;
+  public boolean isServicePath() {
+    return getServicePathName() != null;
   }
 
   public boolean isRemoveMany() {

@@ -103,8 +103,12 @@ import sif3.infra.rest.provider.ProviderFactory;
 public class DataModelResource extends BaseResource {
   private DataModelResourceInformation information = null;
   private Provider provider = null;
-  private static final Class<?>[] FILTER_METHOD_SIGNATURE = { String.class, SIFZone.class, SIFContext.class,
+  private static final Class<?>[] SERVICE_PATH_METHOD_SIGNATURE = { String.class, SIFZone.class, SIFContext.class,
       PagingInfo.class, RequestMetadata.class };
+  private static final Class<?>[] GENERIC_SERVICE_PATH_METHOD_SIGNATURE = { String.class, String.class, SIFZone.class,
+      SIFContext.class, PagingInfo.class, RequestMetadata.class };
+  private static final String SERVICE_PATH_METHOD_NAME = "retrieveBy";
+  private static final String GENERIC_SERVICE_PATH_METHOD_NAME = SERVICE_PATH_METHOD_NAME + "ServicePath";
 
   /**
    * Initialises an Object Provider Resource. All the parameters are
@@ -256,8 +260,8 @@ public class DataModelResource extends BaseResource {
   public Response handleGet() {
     if (information.isGetSingle()) {
       return getSingle(information.getResourceId(), information.getMimeType());
-    } else if (information.isFiltered()) {
-      return getFiltered(information.getFilterName(), information.getFilterValue());
+    } else if (information.isServicePath()) {
+      return getServicePathFilter(information.getServicePathName(), information.getServicePathValue());
     } else {
       return getMany();
     }
@@ -357,9 +361,9 @@ public class DataModelResource extends BaseResource {
     }
   }
 
-  private Response getFiltered(String filterName, String filterValue) {
+  private Response getServicePathFilter(String servicePathName, String servicePathValue) {
     if (logger.isDebugEnabled()) {
-      logger.debug("Get List (REST GET - " + filterName + " - " + filterValue + " - "
+      logger.debug("Get List (REST GET - " + servicePathName + " - " + servicePathValue + " - "
           + information.getObjectNamePlural() + " Plural)");
     }
 
@@ -381,20 +385,8 @@ public class DataModelResource extends BaseResource {
           + information.getObjectNamePlural() + " available."), ResponseAction.QUERY);
     }
 
-    Method method = null;
-    try {
-      method = provider.getClass().getMethod("findBy" + information.getFilterName(), FILTER_METHOD_SIGNATURE);
-    } catch (Exception ignore) {
-    }
-    if (method == null) {
-      return makeErrorResponse(
-          new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No " + information.getFilterName()
-              + " filter for " + information.getObjectNamePlural() + " available."), ResponseAction.QUERY);
-    }
-
     // PagingInfo pagingInfo = (getQueryMetadata().getPagingInfo() == null) ?
     // null : getQueryMetadata().getPagingInfo().clone();
-
     PagingInfo pagingInfo = new PagingInfo(getHeaderProperties(), getQueryParameters());
     if (pagingInfo.getPageSize() <= PagingInfo.NOT_DEFINED) // page size not
                                                             // defined. Pass
@@ -406,9 +398,31 @@ public class DataModelResource extends BaseResource {
                                        // overriden in case we need them later,
     }
 
+    Method method = null;
+    Object[] parameters = null;
     try {
-      Object returnObj = method.invoke(provider, information.getFilterValue(), getSifZone(), getSifContext(),
-          pagingInfo, getRequestMetadata());
+      method = provider.getClass().getMethod(SERVICE_PATH_METHOD_NAME + information.getServicePathName(),
+          SERVICE_PATH_METHOD_SIGNATURE);
+      parameters = new Object[] { information.getServicePathValue(), getSifZone(), getSifContext(), pagingInfo,
+          getRequestMetadata() };
+    } catch (Exception ignore) {
+    }
+    if (method == null) {
+      try {
+        method = provider.getClass().getMethod(GENERIC_SERVICE_PATH_METHOD_NAME, GENERIC_SERVICE_PATH_METHOD_SIGNATURE);
+        parameters = new Object[] { information.getServicePathName(), information.getServicePathValue(), getSifZone(),
+            getSifContext(), pagingInfo, getRequestMetadata() };
+      } catch (Exception ignore) {
+      }
+    }
+    if (method == null) {
+      return makeErrorResponse(
+          new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No " + information.getServicePathName()
+              + " filter for " + information.getObjectNamePlural() + " available."), ResponseAction.QUERY);
+    }
+
+    try {
+      Object returnObj = method.invoke(provider, parameters);
       return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
     } catch (IllegalAccessException ex) {
       return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "

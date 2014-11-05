@@ -30,8 +30,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import sif3.common.CommonConstants;
 import sif3.common.exception.UnmarshalException;
@@ -42,7 +42,7 @@ import sif3.common.model.EnvironmentKey;
 import sif3.common.model.URLQueryParameter;
 import sif3.common.persist.model.AppEnvironmentTemplate;
 import sif3.common.ws.ErrorDetails;
-import sif3.infra.common.env.mgr.DirectProviderEnvironmentManager;
+import sif3.infra.common.env.mgr.HITSDirectProviderEnvironmentManager;
 import sif3.infra.common.env.mgr.ProviderManagerFactory;
 import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.interfaces.EnvironmentManager;
@@ -323,9 +323,9 @@ public class EnvironmentResource extends InfraResource
 	/*
 	 * Convenience Method.
 	 */
-	private DirectProviderEnvironmentManager getDirectEnvironmentManager()
+	private HITSDirectProviderEnvironmentManager getDirectEnvironmentManager()
 	{
-		return (DirectProviderEnvironmentManager)getEnvironmentManager();
+		return (HITSDirectProviderEnvironmentManager)getEnvironmentManager();
 	}
 	
 	/* 

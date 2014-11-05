@@ -60,6 +60,7 @@ import sif3.common.ws.OperationStatus;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.env.mgr.DirectProviderEnvironmentManager;
+import sif3.infra.common.env.mgr.HITSDirectProviderEnvironmentManager;
 import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.common.model.CreateResponseType;
@@ -445,7 +446,7 @@ public abstract class BaseResource
 					// In this case we attempt to load it and then compare if everything is fine.
 				    try
 				    {
-				    	EnvironmentType environment = ((DirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentBySessionToken(sessionToken, isSecure());
+				    	EnvironmentType environment = ((HITSDirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentBySessionToken(sessionToken, isSecure());
 
 				    	// If we have no environment then there is no environment for that session token
 						if (environment == null)
