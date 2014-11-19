@@ -107,72 +107,10 @@ public class DataModelResource extends BaseResource
     {
 	    super(uriInfo, requestHeaders, request, "requests", zoneID, contextID);
 	    this.information = new DataModelResourceInformation(uriInfo); 
-	    logger.debug("dmObjectNamePlural:" + information.getObjectNamePlural());
-	    logger.debug("mimeType:" + mimeType);
-	    List<PathSegment> list = uriInfo.getPathSegments();
-	    for (PathSegment s : list) {
-	      logger.debug(s.getPath() + "...");
-	    }
-	    
-	    
 	    // Provider Factory should already be initialised. If not it will be done now...
 	    provider = ProviderFactory.getInstance().getProvider(new ModelObjectInfo(information.getObjectNamePlural(), null));
     }
-    
-    /*----------------------*/
-    /* HTTP Method Handlers */
-    /*----------------------*/
-//    @GET
-//    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-//    public Response handleGet(String payload) {
-//      if (information.isGetSingle()) {
-//        return getSingle(information.getResourceId());
-//      } else if (information.isGetMany()) {
-//        return getMany();
-//      } else if (information.isServicePathQuery()) {
-//        return getServicePathQuery();
-//      } else {
-//        return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Could not determine end point"), ResponseAction.CREATE);
-//      }
-//    }
-//    
-//    @POST
-//    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-//    public Response handlePost(String payload) {
-//      if (information.isCreateMany()) {
-//        return createMany(payload);
-//      } else if (information.isCreateSingle()) {
-//        return createSingle(payload);
-//      } else {
-//        return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Could not determine end point"), ResponseAction.CREATE);
-//      }
-//    }
-//    
-//    @PUT
-//    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-//    public Response handlePut(String payload) {
-//      if (information.isUpdateMany()) {
-//        return updateMany(payload);
-//      } else if (information.isUpdateSingle()){
-//        return updateSingle(payload);
-//      } else {
-//        return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Could not determine end point"), ResponseAction.CREATE);
-//      }
-//    }
-//    
-//    @DELETE
-//    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-//    public Response handleDelete(String payload) {
-//      if (information.isDeleteSingle()) {
-//        return removeSingle();
-//      } else if (information.isDeleteMany()) {
-//        return removeMany(payload);
-//      } else {
-//        return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Could not determine end point"), ResponseAction.CREATE);
-//      }
-//    }
-    
-    
+       
 	/*----------------------*/
 	/*-- Abstract Methods --*/
 	/*----------------------*/
@@ -190,7 +128,6 @@ public class DataModelResource extends BaseResource
 	// -- POST Section: This is the C(reate) in CRUD. --//
 	// -------------------------------------------------//
 	@POST
-//	@Path("{dmObjectNameSingle}")
 	@Path("{objectName:([^\\./]*)}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed.	
 //	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
@@ -291,7 +228,7 @@ public class DataModelResource extends BaseResource
   @Path("{resourceID:([^\\./]*)}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-//	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getSingle(@PathParam("resourceID") String resourceID)
 	{
 		if (logger.isDebugEnabled())

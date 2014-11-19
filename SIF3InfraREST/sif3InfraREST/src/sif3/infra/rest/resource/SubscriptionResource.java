@@ -129,7 +129,7 @@ public class SubscriptionResource extends InfraResource
      * Get a specific subscription for this environment.
      */
 	@GET
-	@Path("{subscriptionID:([^\\.])*}{mimeType:(\\.[^/]*?)?}")
+	@Path("{subscriptionID:([^\\./])*}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -215,7 +215,7 @@ public class SubscriptionResource extends InfraResource
 	 * Delete a specific queue.
 	 */
 	@DELETE
-	@Path("{subscriptionID}{mimeType:(\\.[^/]*?)?}")
+	@Path("{subscriptionID:([^\\./]*)}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
