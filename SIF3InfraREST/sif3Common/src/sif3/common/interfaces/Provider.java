@@ -96,10 +96,10 @@ public interface Provider extends DataModelLink
      * @param resourceID The Id of the object to be updated.
      * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
      * @param context The Context for which the object shall be updated. Can be Null (default Zone)
-	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
-	 * 
-	 * @return TRUE: Entity is updated. FALSE: Entity does not exist.
-	 * 
+  	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
+  	 * 
+  	 * @return TRUE: Entity is updated. FALSE: Entity does not exist.
+  	 * 
      * @throws IllegalArgumentException One of the parameters is invalid.
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
@@ -107,18 +107,18 @@ public interface Provider extends DataModelLink
 	public boolean updateSingle(Object data, String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
 
 	/**
-     * Removed the object with the given resourceId in the given zone for the given context.
-     * 
-     * @param resourceID The Id of the object to be removed.
-     * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
-     * @param context The Context for which the object shall be removed. Can be Null (default Zone)
+   * Removed the object with the given resourceId in the given zone for the given context.
+   * 
+   * @param resourceID The Id of the object to be removed.
+   * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
+   * @param context The Context for which the object shall be removed. Can be Null (default Zone)
 	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
 	 * 
 	 * @return TRUE: Entity is removed. FALSE: Entity does not exist.
 	 * 
-     * @throws IllegalArgumentException One of the parameters is invalid.
-     * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
-     *                              message of the exceptions holds some info.
+   * @throws IllegalArgumentException One of the parameters is invalid.
+   * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
+   *                              message of the exceptions holds some info.
 	 */
 	public boolean deleteSingle(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
 
@@ -126,20 +126,20 @@ public interface Provider extends DataModelLink
 	/*-- Bulk Object Operations --*/
 	/*----------------------------*/
 
-	/**
-     * This method is used to retrieve any number of objects. This is achieved in terms of 'paging' through the list of objects. The consumer
-     * is expected to provide paging information to tell the provider which objects in the list shall be returned. The first page has
-     * the number 0.
-     * 
-     * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
-     * @param context The Context for which the objects shall be returned. Can be Null (default Zone)
-     * @param pagingInfo Page information to determine which results to return. Null = Return all (NOT RECOMMENDED!).
-	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
-     * 
-     * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
-     * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
-     *                              message of the exceptions holds some info.
-	 */
+  /**
+   * This method is used to retrieve any number of objects. This is achieved in terms of 'paging' through the list of objects. The consumer
+   * is expected to provide paging information to tell the provider which objects in the list shall be returned. The first page has
+   * the number 0.
+   * 
+   * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
+   * @param context The Context for which the objects shall be returned. Can be Null (default Zone)
+   * @param pagingInfo Page information to determine which results to return. Null = Return all (NOT RECOMMENDED!).
+   * @param metadata Metadata relating to the request. Note that most of the properties might be null.
+   * 
+   * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
+   * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
+   *                              message of the exceptions holds some info.
+   */
 	public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException;
 	
 	/**

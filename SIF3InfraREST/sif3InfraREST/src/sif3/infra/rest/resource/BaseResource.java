@@ -23,11 +23,12 @@ import java.util.Map;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.log4j.Logger;
 
@@ -38,19 +39,19 @@ import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
-import sif3.common.header.RequestHeaderConstants;
-import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.HeaderValues.ResponseAction;
+import sif3.common.header.RequestHeaderConstants;
+import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.model.AuthenticationInfo;
+import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.PagingInfo;
 //import sif3.common.model.QueryMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
-import sif3.common.model.URLQueryParameter;
-import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
+import sif3.common.model.URLQueryParameter;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.utils.AuthenticationUtils;
 import sif3.common.utils.UUIDGenerator;
@@ -59,7 +60,6 @@ import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
-import sif3.infra.common.env.mgr.DirectProviderEnvironmentManager;
 import sif3.infra.common.env.mgr.HITSDirectProviderEnvironmentManager;
 import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.interfaces.EnvironmentManager;
@@ -98,7 +98,7 @@ public abstract class BaseResource
 	private enum PostFixMimeType {XML, JSON};
 	
 	private static final String HTTPS_SCHEMA = "https";
-
+	
 	private boolean allOK = true;
 
 	private UriInfo uriInfo;
@@ -137,6 +137,7 @@ public abstract class BaseResource
 		this.uriInfo = uriInfo;
 		this.request = request;
 		this.requestHeaders = requestHeaders;
+		setURLPostfixMediaType(uriInfo.getPath());
 		extractHeaderProperties(requestHeaders);
 		extractQueryParameters(uriInfo);
 		setSecure(HTTPS_SCHEMA.equalsIgnoreCase(getUriInfo().getBaseUri().getScheme()));
@@ -762,11 +763,32 @@ public abstract class BaseResource
 		}
 	}
 	
-	/*
-	 * The URL postfix mime type can be of the form '.xml', 'xml', '.json' etc. all case insensitive. If null or an empty value is given then
-	 * a default of XML is returned.
+	/**
+	 * Strip off the extension from the last path segment in uri info.
+	 * @return
 	 */
-	protected void setURLPostfixMediaType(String urlPostfixMimeTypeStr)
+	protected String getPathWithoutExtension() {
+	  String result = null;
+	  if (this.uriInfo != null && this.uriInfo.getPathSegments() != null && this.uriInfo.getPathSegments().size() > 0) {
+  	  List<PathSegment> segments = this.uriInfo.getPathSegments();
+  	  PathSegment lastSegment = segments.get(segments.size() - 1);
+  	  result = getLeftOfPeriod(lastSegment.getPath());
+	  }
+	  return result;
+	}
+	
+	private String getLeftOfPeriod(String input) {
+    String result = input;
+    if (input != null) {
+      int index = input.lastIndexOf(".");
+      if (index >= 0 && index < input.length() - 1) {
+        result = input.substring(0, index);
+      }
+    }
+    return result;
+	}
+	
+	private void setURLPostfixMediaType(String urlPostfixMimeTypeStr)
 	{
 	  if (StringUtils.isEmpty(urlPostfixMimeTypeStr))
 	  {

@@ -1,105 +1,142 @@
 package sif3.infra.rest.resource;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
+
+import javax.ws.rs.core.PathSegment;
+import javax.ws.rs.core.UriInfo;
+
+import sif3.common.model.QueryCriteria;
+import sif3.common.model.QueryJoinType;
+import sif3.common.model.QueryOperator;
+import sif3.common.model.QueryPredicate;
 
 public class DataModelResourceInformation {
-  
-  private static final Pattern INFORMATION_PATTERN = Pattern.compile("^([^/\\.]*)$|^([^/\\.]*)\\.([^/\\.]*)$|^([^/\\.]*)/([^/\\.]*)$|^([^/\\.]*)/([^/\\.]*)\\.([^/\\.]*)$|^([^/\\.]*)/([^/\\.]*)/([^/\\.]*)$|^([^/\\.]*)/([^/\\.]*)/([^/\\.]*)\\.([^/\\.]*)$");
-  
+
   private String objectNamePlural = null;
+  private String objectName = null;
   private String mimeType = null;
   private String resourceId = null;
-  private String servicePathName = null;
-  private String servicePathValue = null;
-  
-  public DataModelResourceInformation(String path) {
-    Matcher matcher = INFORMATION_PATTERN.matcher(path);
-    if (matcher.matches()) {
-      this.objectNamePlural = path;
-      if (matcher.group(1) != null) {
-        this.objectNamePlural = matcher.group(1);
-      } else if (matcher.group(2) != null) {
-        this.objectNamePlural = matcher.group(2);
-        this.mimeType = matcher.group(3);
-      } else if (matcher.group(4) != null) {
-        this.objectNamePlural = matcher.group(4);
-        this.resourceId = matcher.group(5);
-      } else if (matcher.group(6) != null) {
-        this.objectNamePlural = matcher.group(6);
-        this.resourceId = matcher.group(7);
-        this.mimeType = matcher.group(8);
-      } else if (matcher.group(9) != null) {
-        this.objectNamePlural = matcher.group(11);
-        this.servicePathName = matcher.group(9);
-        this.servicePathValue = matcher.group(10);
-      } else if (matcher.group(12) != null) {
-        this.objectNamePlural = matcher.group(14);
-        this.servicePathName = matcher.group(12);
-        this.servicePathValue = matcher.group(13);
-        this.mimeType = matcher.group(15);
+  private QueryCriteria queryCriteria = null;
+
+  public DataModelResourceInformation(UriInfo uriInfo) {
+    List<PathSegment> pathSegments = uriInfo.getPathSegments();
+
+    if (pathSegments.size() == 2) { 
+      // /requests/{ObjectNamePlural}
+      String lastSegment = pathSegments.get(1).getPath();
+      String[] parts = getNameAndExtension(lastSegment);
+      this.objectNamePlural = parts[0];
+      this.mimeType = parts[1];
+    } else if (pathSegments.size() == 3) { 
+      // /requests/{ObjectNamePlural}/{ResourceId}
+      // /requests/{ObjectNamePlural}/{ObjectName}
+      String firstSegment = pathSegments.get(1).getPath();
+      String lastSegment = pathSegments.get(2).getPath();
+      this.objectNamePlural = getNameAndExtension(firstSegment)[0];
+      String[] parts = getNameAndExtension(lastSegment);
+      this.resourceId = parts[0];
+      this.objectName = parts[0];
+      this.mimeType = parts[1];
+    } else if (pathSegments.size() > 3) {
+      // /requests/{QueryKeyPlural}/{QueryValue}/.../{ObjectNamePlural}
+      this.queryCriteria = new QueryCriteria(QueryJoinType.AND);
+      for (int i = 1; i < pathSegments.size() - 1; i += 2) {
+        String name = pathSegments.get(i).getPath();
+        String value = pathSegments.get(i + 1).getPath();
+        this.queryCriteria.addPredicate(new QueryPredicate(name, QueryOperator.EQUAL, value));
+      }
+      String lastSegment = pathSegments.get(pathSegments.size() - 1).getPath();
+      String[] parts = getNameAndExtension(lastSegment);
+      this.objectNamePlural = parts[0];
+      this.mimeType = parts[1];
+    }
+  }
+
+  private String[] getNameAndExtension(String input) {
+    String[] result = new String[] { input, null };
+    if (input != null) {
+      int index = input.lastIndexOf(".");
+      if (index >= 0 && index < input.length() - 1) {
+        result[0] = input.substring(0, index);
+        result[1] = input.substring(index + 1);
       }
     }
+    return result;
   }
 
   public String getObjectNamePlural() {
     return objectNamePlural;
   }
 
-  public String getObjectName() {
-    return resourceId;
+  public void setObjectNamePlural(String objectNamePlural) {
+    this.objectNamePlural = objectNamePlural;
   }
-  
+
+  public String getObjectName() {
+    return objectName;
+  }
+
+  public void setObjectName(String objectName) {
+    this.objectName = objectName;
+  }
+
   public String getMimeType() {
     return mimeType;
+  }
+
+  public void setMimeType(String mimeType) {
+    this.mimeType = mimeType;
   }
 
   public String getResourceId() {
     return resourceId;
   }
 
-  public String getServicePathName() {
-    return servicePathName;
+  public void setResourceId(String resourceId) {
+    this.resourceId = resourceId;
   }
 
-  public String getServicePathValue() {
-    return servicePathValue;
+  public QueryCriteria getQueryCriteria() {
+    return queryCriteria;
   }
-  
+
+  public void setQueryCriteria(QueryCriteria queryCriteria) {
+    this.queryCriteria = queryCriteria;
+  }
+
+  public boolean isGetSingle() {
+    return getQueryCriteria() == null && getResourceId() != null;
+  }
+
   public boolean isGetMany() {
-    return getServicePathName() == null && getResourceId() == null;
+    return getQueryCriteria() == null && getResourceId() == null;
   }
-  
+
+  public boolean isServicePathQuery() {
+    return getQueryCriteria() != null;
+  }
+
   public boolean isCreateMany() {
     return getObjectName() == null;
   }
-  
-  public boolean isUpdateMany() {
-    return getResourceId() == null;
-  }
-  
-  public boolean isGetSingle() {
-    return getServicePathName() == null && getResourceId() != null;
-  }
-  
+
   public boolean isCreateSingle() {
     return getObjectName() != null;
   }
-  
+
+  public boolean isUpdateMany() {
+    return getResourceId() == null;
+  }
+
   public boolean isUpdateSingle() {
     return getResourceId() != null;
   }
-  
-  public boolean isServicePath() {
-    return getServicePathName() != null;
-  }
 
-  public boolean isRemoveMany() {
+  public boolean isDeleteMany() {
     return getResourceId() == null;
   }
-  
-  public boolean isRemoveSingle() {
+
+  public boolean isDeleteSingle() {
     return getResourceId() != null;
   }
-
 }

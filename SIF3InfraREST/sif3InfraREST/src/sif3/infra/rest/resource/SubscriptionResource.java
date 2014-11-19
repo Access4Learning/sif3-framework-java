@@ -71,7 +71,7 @@ public class SubscriptionResource extends InfraResource
        			                @PathParam("mimeType") String mimeType)
 	{
 		super(uriInfo, requestHeaders, request, "", null, null);
-	    setURLPostfixMediaType(mimeType);
+//	    setURLPostfixMediaType(mimeType);
 	    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
 	}
 
@@ -129,14 +129,14 @@ public class SubscriptionResource extends InfraResource
      * Get a specific subscription for this environment.
      */
 	@GET
-	@Path("{subscriptionID}{mimeType:(\\.[^/]*?)?}")
+	@Path("{subscriptionID:([^\\.])*}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getSubscription(@PathParam("subscriptionID") String subscriptionID,
                                     @PathParam("mimeType") String mimeType)
 	{
-	    setURLPostfixMediaType(mimeType);
+//	    setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Get Subscription by subscription ID (REST GET - Single): "+subscriptionID+" and URL Postfix mimeType = '" + mimeType + "'");
@@ -222,7 +222,7 @@ public class SubscriptionResource extends InfraResource
 	public Response removeSubscription(@PathParam("subscriptionID") String subscriptionID,
                                        @PathParam("mimeType") String mimeType)
 	{
-	    setURLPostfixMediaType(mimeType);
+//	    setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Remove Subscription (REST DELETE - Single) with subscriptionID = "+subscriptionID+" and URL Postfix mimeType = '" + mimeType + "'");
