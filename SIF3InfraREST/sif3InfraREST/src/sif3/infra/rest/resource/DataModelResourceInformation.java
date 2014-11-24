@@ -17,6 +17,7 @@ public class DataModelResourceInformation {
   private String mimeType = null;
   private String resourceId = null;
   private QueryCriteria queryCriteria = null;
+  private boolean validQuery = true;
 
   public DataModelResourceInformation(UriInfo uriInfo) {
     List<PathSegment> pathSegments = uriInfo.getPathSegments();
@@ -49,6 +50,7 @@ public class DataModelResourceInformation {
       String[] parts = getNameAndExtension(lastSegment);
       this.objectNamePlural = parts[0];
       this.mimeType = parts[1];
+      this.validQuery = pathSegments.size() % 2 == 0;
     }
   }
 
@@ -114,6 +116,10 @@ public class DataModelResourceInformation {
 
   public boolean isServicePathQuery() {
     return getQueryCriteria() != null;
+  }
+  
+  public boolean isServicePathQueryValid() {
+    return validQuery;
   }
 
   public boolean isCreateMany() {

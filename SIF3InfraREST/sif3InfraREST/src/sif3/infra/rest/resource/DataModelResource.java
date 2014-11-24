@@ -31,7 +31,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -333,9 +332,13 @@ public Response getMany()
   // Let everything through and then deal with it when needed.
   // @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-  public Response getServicePathQuery() {
+  public Response getServicePathQuery() {    
     if (logger.isDebugEnabled()) {
       logger.debug("Get List (REST GET Service Path Query)");
+    }
+    
+    if (!information.isServicePathQueryValid()) {
+      return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Invalid service path"), ResponseAction.QUERY);
     }
 
     ErrorDetails error = validClient(information.getObjectNamePlural(), getRight(AccessRight.QUERY),
