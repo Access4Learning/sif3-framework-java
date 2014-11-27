@@ -78,7 +78,7 @@ import sif3.infra.rest.provider.ProviderFactory;
  * 
  * @author Joerg Huber
  */
-@Path("/requests/{dmObjectNamePlural}{mimeType:(\\.[^/]*?)?}")
+@Path("/requests/{dmObjectNamePlural:([^\\./]*)}{mimeType:(\\.[^/]*?)?}")
 public class DataModelResource extends BaseResource
 {
 	private String dmObjectNamePlural = null; // This is also expected to be the key into the provider factory.
@@ -129,8 +129,7 @@ public class DataModelResource extends BaseResource
 	// -- POST Section: This is the C(reate) in CRUD. --//
 	// -------------------------------------------------//
 	@POST
-//	@Path("{dmObjectNameSingle}")
-	@Path("{dmObjectNameSingle}{mimeType:(\\.[^/]*?)?}")
+	@Path("{dmObjectNameSingle:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed.	
 //	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML }) // only these are possible returns.
@@ -227,8 +226,7 @@ public class DataModelResource extends BaseResource
 	// -- GET Section: This is the R(ead) in CRUD for Lists. --//
 	// --------------------------------------------------------//
 	@GET
-//	@Path("{resourceID}")
-  @Path("{resourceID}{mimeType:(\\.[^/]*?)?}")
+	@Path("{resourceID:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -292,26 +290,21 @@ public class DataModelResource extends BaseResource
 			return makeErrorResponse(error, ResponseAction.QUERY);
 		}
 		
-//		setQueryMetadata(new QueryMetadata(getUriInfo().getQueryParameters()));
-//		logger.debug(getQueryMetadata());
-
 		Provider provider = getProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
 			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.QUERY);			
 		}
 	
-//		PagingInfo pagingInfo = (getQueryMetadata().getPagingInfo() == null) ? null : getQueryMetadata().getPagingInfo().clone();
-
-    PagingInfo pagingInfo = new PagingInfo(getHeaderProperties(), getQueryParameters());
-    if (pagingInfo.getPageSize() <= PagingInfo.NOT_DEFINED) // page size not defined. Pass null to provider. 
-    {
-      pagingInfo = null;
-    }
-    else
-    {
-      pagingInfo = pagingInfo.clone(); // ensure that initial values are not overriden in case we need them later,
-    }
+		PagingInfo pagingInfo = new PagingInfo(getHeaderProperties(), getQueryParameters());
+		if (pagingInfo.getPageSize() <= PagingInfo.NOT_DEFINED) // page size not defined. Pass null to provider.
+		{
+			pagingInfo = null;
+		}
+		else
+		{
+			pagingInfo = pagingInfo.clone(); // ensure that initial values are not overridden in case we need them later,
+		}
 		
 		try
 		{
@@ -337,8 +330,7 @@ public class DataModelResource extends BaseResource
 	// -- PUT Section: This is the U(pdate) in CRUD for Lists. --//
 	// ----------------------------------------------------------//
 	@PUT
-//	@Path("{resourceID}")
-	@Path("{resourceID}{mimeType:(\\.[^/]*?)?}")
+	@Path("{resourceID:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -432,8 +424,7 @@ public class DataModelResource extends BaseResource
 	// -- DELETE Section: This is the D(elete) in CRUD for Lists. --//
 	// -------------------------------------------------------------//
 	@DELETE
-//	@Path("{resourceID}")
-	@Path("{resourceID}{mimeType:(\\.[^/]*?)?}")
+	@Path("{resourceID:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })

@@ -154,7 +154,7 @@ public class QueueResource extends InfraResource
      * Get a specific Queues for this environment.
      */
 	@GET
-	@Path("{queueID}{mimeType:(\\.[^/]*?)?}")
+	@Path("{queueID:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -238,7 +238,7 @@ public class QueueResource extends InfraResource
 	 * Delete a specific queue.
 	 */
 	@DELETE
-	@Path("{queueID}{mimeType:(\\.[^/]*?)?}")
+	@Path("{queueID:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -348,7 +348,7 @@ public class QueueResource extends InfraResource
 	 * Delete a specific queue.
 	 */
 	@DELETE
-	@Path("{queueID}/messages/{deleteMessageId}{mimeType:(\\.[^/]*?)?}")
+	@Path("{queueID}/messages/{deleteMessageId:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
