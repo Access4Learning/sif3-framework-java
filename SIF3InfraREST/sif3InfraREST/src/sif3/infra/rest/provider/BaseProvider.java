@@ -56,6 +56,24 @@ public abstract class BaseProvider implements Provider, Runnable
     public BaseProvider()
     {
 	    super();
+	    
+		//Check a few things to ensure that all core methods are implemented.
+		if (getMarshaller() == null)
+		{
+			logger.error("Provider "+getProviderName()+" has not implemented the getMarshaller() method properly. It returns null which is not valid.");
+		}
+		if (getUnmarshaller() == null)
+		{
+			logger.error("Provider "+getProviderName()+" has not implemented the getUnmarshaller() method properly. It returns null which is not valid.");
+		}
+		if (getSingleObjectClassInfo() == null)
+		{
+			logger.error("Provider "+getProviderName()+" has not implemented the getSingleObjectClassInfo() method properly. It returns null which is not valid.");
+		}
+		if (getMultiObjectClassInfo() == null)
+		{
+			logger.error("Provider "+getProviderName()+" has not implemented the getMultiObjectClassInfo() method properly. It returns null which is not valid.");
+		}
     }
     
     /**
