@@ -87,6 +87,28 @@ public abstract class AbstractConsumer implements Consumer
 		
 		// Set some properties at this stage for simplicity reasons.
 		checkACL = getConsumerEnvironment().getCheckACL();
+		
+		//Check a few things to ensure that all core methods are implemented.
+		if (getMarshaller() == null)
+		{
+			logger.error("Consumer "+getConsumerName()+" has not implemented the getMarshaller() method properly. It returns null which is not valid.");
+			initOK = false;
+		}
+		if (getUnmarshaller() == null)
+		{
+			logger.error("Consumer "+getConsumerName()+" has not implemented the getUnmarshaller() method properly. It returns null which is not valid.");
+			initOK = false;
+		}
+		if (getSingleObjectClassInfo() == null)
+		{
+			logger.error("Consumer "+getConsumerName()+" has not implemented the getSingleObjectClassInfo() method properly. It returns null which is not valid.");
+			initOK = false;			
+		}
+		if (getMultiObjectClassInfo() == null)
+		{
+			logger.error("Consumer "+getConsumerName()+" has not implemented the getMultiObjectClassInfo() method properly. It returns null which is not valid.");
+			initOK = false;			
+		}
 	}
 
 	/**
@@ -158,13 +180,13 @@ public abstract class AbstractConsumer implements Consumer
 	@Override
 	public List<BulkOperationResponse<CreateOperationStatus>> createMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-	  if (!initOK)
-	  {
-	    logger.error("Consumer not initialsied properly. See previous error log entries.");
-	    return null;
-	  }
+		if (!initOK)
+	  	{
+			logger.error("Consumer not initialsied properly. See previous error log entries.");
+			return null;
+	  	}
 
-	  Timer timer = new Timer();
+		Timer timer = new Timer();
 		timer.start();
 		List<BulkOperationResponse<CreateOperationStatus>> responses = new ArrayList<BulkOperationResponse<CreateOperationStatus>>();
 		
