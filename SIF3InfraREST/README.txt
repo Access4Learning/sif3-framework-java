@@ -144,6 +144,14 @@ framework. The changes will not affect the developer's code base. Simply drop th
 your project to get the changes and bug fixes.
 Details of this release can be found in the directory "release/v0.3.2".
 
+=============================================================
+Version from December 2, 2014: v0.4.0 - Various changes
+=============================================================
+This  version update includes a few new bits of functionality, namely support for JSON as well as some restructuring
+of the data model generation. The AU 1.3 Datamodel is no longer part of this project but part of a new GitHub project
+called SIF3DMGenerator. 
+Details of this release can be found in the directory "release/v0.4.0".
+
 #########################################################################################################
 # Download Instructions
 #########################################################################################################
