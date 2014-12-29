@@ -546,7 +546,7 @@ public abstract class AbstractConsumer implements Consumer
 	      }
 	      if (error == null) //all good
 	      {
-	        responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, getHeaderProperties(getConsumerEnvironment(), false, requestType), getMultiObjectClassInfo().getObjectType(), null, null));
+	        responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, getHeaderProperties(getConsumerEnvironment(), false, requestType, HeaderValues.ServiceType.SERVICEPATH), getMultiObjectClassInfo().getObjectType(), null, null));
 	      }
 	      else  //pretend to have received a 'fake' error Response
 	      {
@@ -560,7 +560,7 @@ public abstract class AbstractConsumer implements Consumer
 	        ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 	        if (error == null) //all good
 	        {
-	          responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, getHeaderProperties(getConsumerEnvironment(), false, requestType), getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+	          responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, getHeaderProperties(getConsumerEnvironment(), false, requestType, HeaderValues.ServiceType.SERVICEPATH), getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 	        }
 	        else //pretend to have received a 'fake' error Response
 	        {
