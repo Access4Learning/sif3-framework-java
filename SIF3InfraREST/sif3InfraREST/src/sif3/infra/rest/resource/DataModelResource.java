@@ -46,6 +46,7 @@ import sif3.common.header.HeaderValues;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.Provider;
+import sif3.common.interfaces.QueryProvider;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.SIFContext;
@@ -60,6 +61,7 @@ import sif3.infra.common.env.mgr.ProviderManagerFactory;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
 import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.rest.provider.ProviderFactory;
+import sif3.infra.rest.resource.helper.ServicePathQueryParser;
 
 /**
  * This is the generic implementation of all Object resources. It implements all the functions required by the SIF3 specification
@@ -83,6 +85,7 @@ public class DataModelResource extends BaseResource
 {
 	private String dmObjectNamePlural = null; // This is also expected to be the key into the provider factory.
 	private Provider provider = null;
+	private ServicePathQueryParser parser = null;
 
 	/**
 	 * Initialises an Object Provider Resource. All the parameters are automatically injected by the Jersey Framework.
@@ -97,19 +100,23 @@ public class DataModelResource extends BaseResource
     public DataModelResource(@Context UriInfo uriInfo,
 			                 @Context HttpHeaders requestHeaders,
 			                 @Context Request request,
-			                 @PathParam("dmObjectNamePlural") String dmObjectNamePlural,
+			                 @PathParam("dmObjectNamePlural") String objectNamePlural,
 			                 @PathParam("mimeType") String mimeType,
 			                 @MatrixParam("zoneId") String zoneID,
 			                 @MatrixParam("contextId") String contextID)
     {
 	    super(uriInfo, requestHeaders, request, "requests", zoneID, contextID);
-	    this.dmObjectNamePlural = dmObjectNamePlural;
-	    setURLPostfixMediaType(mimeType);
-	    
+
+	    parser = new ServicePathQueryParser(uriInfo);
+	    if (parser.isValid()) {
+	      this.dmObjectNamePlural = parser.getObjectNamePlural();
+	    } else {
+	      this.dmObjectNamePlural = objectNamePlural;
+	    }
 	    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
 	    
 	    // Provider Factory should already be initialised. If not it will be done now...
-	    provider = ProviderFactory.getInstance().getProvider(new ModelObjectInfo(dmObjectNamePlural, null));
+	    provider = ProviderFactory.getInstance().getProvider(new ModelObjectInfo(this.dmObjectNamePlural, null));
     }
     
 	/*----------------------*/
@@ -135,7 +142,6 @@ public class DataModelResource extends BaseResource
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML }) // only these are possible returns.
 	public Response createSingle(String payload, @PathParam("dmObjectNameSingle") String dmObjectNameSingle, @PathParam("mimeType") String mimeType)
 	{
-		setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Create Single "+dmObjectNameSingle+" (REST POST) with URL Postfix mimeType = '" + mimeType + "' and input data: " + payload);
@@ -232,7 +238,6 @@ public class DataModelResource extends BaseResource
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getSingle(@PathParam("resourceID") String resourceID, @PathParam("mimeType") String mimeType)
 	{
-		setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Get Resource by Resoucre ID (REST GET - Single): "+resourceID+" and URL Postfix mimeType = '"+mimeType+"'");
@@ -272,6 +277,61 @@ public class DataModelResource extends BaseResource
 			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "+provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+resourceID+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY);			
 		}
 	}
+	
+  @GET
+  @Path("{resourceId:([^\\./]*)}/{remainingPath:.*}")
+ // Let everything through and then deal with it when needed.
+ // @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+  @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+ public Response getServicePathQuery() {    
+   if (logger.isDebugEnabled()) {
+     logger.debug("Get List (REST GET Service Path Query)");
+   }
+   if (!parser.isValid()) {
+     return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Invalid service path"), ResponseAction.QUERY);
+   }
+   
+   ErrorDetails error = validClient(parser.getServicePath(), getRight(AccessRight.QUERY), AccessType.APPROVED);
+   if (error != null) // Not allowed to access!
+   {
+     return makeErrorResponse(error, ResponseAction.QUERY);
+   }
+
+   Provider provider = getProvider();
+   if (provider == null || !QueryProvider.class.isAssignableFrom(provider.getClass())) 
+   {
+     return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "
+         + parser.getObjectNamePlural() + " available."), ResponseAction.QUERY);
+   }
+
+   PagingInfo pagingInfo = new PagingInfo(getHeaderProperties(), getQueryParameters());
+   if (pagingInfo.getPageSize() <= PagingInfo.NOT_DEFINED) // page size not
+                                                           // defined. Pass
+                                                           // null to provider.
+   {
+     pagingInfo = null;
+   } else {
+     pagingInfo = pagingInfo.clone(); // ensure that initial values are not
+                                      // overriden in case we need them later,
+   }
+
+   try {
+     Object returnObj = QueryProvider.class.cast(provider).retrieveByServicePath(parser.getQueryCriteria(), getSifZone(), getSifContext(), pagingInfo, getRequestMetadata());
+     return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
+   } catch (PersistenceException ex) {
+     return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "
+         + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo
+         + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+   } catch (IllegalArgumentException ex) {
+     return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "
+         + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo
+         + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+   } catch (UnsupportedQueryException ex) {
+     return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "
+         + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo
+         + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+   }
+ }
 
 	@GET
 //Let everything through and then deal with it when needed. 
@@ -336,7 +396,6 @@ public class DataModelResource extends BaseResource
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response updateSingle(String payload, @PathParam("resourceID") String resourceID, @PathParam("mimeType") String mimeType)
 	{
-		setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Update Single "+dmObjectNamePlural+" (REST PUT) with resourceID = "+resourceID+", URL Postfix mimeType = "+mimeType+"' and input data: " + payload);
@@ -430,7 +489,6 @@ public class DataModelResource extends BaseResource
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response removeSingle(@PathParam("resourceID") String resourceID, @PathParam("mimeType") String mimeType)
 	{
-		setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Remove Single "+dmObjectNamePlural+" (REST DELETE) with resourceID = "+resourceID + " and URL Postfix mimeType = '" + mimeType + "'.");
