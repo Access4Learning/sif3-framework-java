@@ -21,7 +21,12 @@ package sif3.common.model;
 import java.io.Serializable;
 
 /**
- * This is a simple utility class to deal with components that make up the authentication token in SIF3.
+ * This is a simple utility class to deal with components that make up the authentication token in SIF3. If the authentication method
+ * is 'Basic' or 'SIF_HMACSHA256' then the authentication token has the structure as defined in the SIF specification, meaning it is bas64
+ * encoded and can be split on the ':' that separates the applicationKey/sessionToken and the password/HMAC Hash. If the authentication token
+ * is 'Bearer' then it is assumed that the token is managed by a security mechanism outside of the SIF Specification and therefore no
+ * assumptions about the structure of the token can be made. In this case the 'password' component of this class should never be populated
+ * and the 'userToken' component should always hold the full token given by the 'Bearer'.
  * 
  * @author Joerg Huber
  *
