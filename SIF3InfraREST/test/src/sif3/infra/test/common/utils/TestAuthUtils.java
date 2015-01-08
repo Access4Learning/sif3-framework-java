@@ -36,10 +36,10 @@ public class TestAuthUtils
     System.out.println("Basic Auth String: "+AuthenticationUtils.getBasicAuthToken("2f47fd0c-fbc5-4a6e-a779-de7633624a67", "Password1"));  
 	}
 
-	 private void testGetBearerAuthToken()
-	  {
-	    System.out.println("Basic Auth String: "+AuthenticationUtils.getBearerAuthToken("2f47fd0c-fbc5-4a6e-a779-de7633624a67", "Password1"));  
-	  }
+//	 private void testGetBearerAuthToken()
+//	  {
+//	    System.out.println("Basic Auth String: "+AuthenticationUtils.getBearerAuthToken("2f47fd0c-fbc5-4a6e-a779-de7633624a67", "Password1"));  
+//	  }
 
 	
 	private void testHMACSHA256()
@@ -138,12 +138,11 @@ public class TestAuthUtils
 		System.out.println("Left Side: '"+splitValues[0]+"'   Right Side: '"+splitValues[1]+"'");
 
 	   System.out.println("");
-	   authToken = AuthenticationUtils.getBearerAuthToken(username, password);
-	   System.out.println("Bearer Auth Token for username/password: "+username+"/"+password+": " + authToken);
+	   AuthenticationInfo authInfo = new AuthenticationInfo(AuthenticationInfo.AuthenticationMethod.Bearer, "xyz-abc-123", null);
+	   authToken = AuthenticationUtils.getFullBase64Token(authInfo);
+     System.out.println("Bearer Auth Token: " + authToken);
 	   token = AuthenticationUtils.extractAuthToken(authToken);    
 	   System.out.println("Auth Method: '"+AuthenticationUtils.extractAuthenticationMethod(authToken)+"' Token: '"+token+"'"); 
-	   splitValues = AuthenticationUtils.splitValuesFromBase64(token);
-	   System.out.println("Left Side: '"+splitValues[0]+"'   Right Side: '"+splitValues[1]+"'");
 	   System.out.println("All parts of Auth Token: "+AuthenticationUtils.getPartsFromAuthToken(authToken));
 	}
 	
@@ -167,7 +166,7 @@ public class TestAuthUtils
 		try
 		{
 			tester.testGetBasicAuthToken();
-			tester.testGetBearerAuthToken();
+//			tester.testGetBearerAuthToken();
 			//tester.testHMACSHA256();
 			//tester.testHMACSHA256Stress();
 			//tester.testHMACSHA256Token();
