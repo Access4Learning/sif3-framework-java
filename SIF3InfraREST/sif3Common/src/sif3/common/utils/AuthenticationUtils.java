@@ -30,7 +30,12 @@ import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import au.com.systemic.framework.utils.StringUtils;
 
 /**
- * This calls provides a few useful methods for SIF3 specific authentication functions.
+ * This calls provides a few useful methods for SIF3 specific authentication functions. If the authentication method is 'Basic' or 
+ * 'SIF_HMACSHA256' then the authentication token has the structure as defined in the SIF specification, meaning it is base64 encoded and 
+ * can be split on the ':' that separates the applicationKey/sessionToken and the password/HMAC Hash. If the authentication token is 'Bearer' 
+ * then it is assumed that the token is managed by a security mechanism outside of the SIF Specification and therefore no assumptions about 
+ * the structure of the token can be made. In this case the methods in this class will not attempt to further split the token into any
+ * components or encode/decode it in any way. For details please refer to documentation in each method. 
  * 
  * @author Joerg Huber
  *
@@ -56,28 +61,38 @@ public class AuthenticationUtils
 	}
 
 	// Experimental for OAuth work. At the moment we treat it as the basic.
-  public static String getBearerAuthToken(String username, String password)
-  {
-    return AuthenticationMethod.Bearer.toString() + " " + base64Encode(username, password);
-  }
+//  public static String getBearerAuthToken(String username, String password)
+//  {
+//    return AuthenticationMethod.Bearer.toString() + " " + base64Encode(username, password);
+//  }
 
-  /**
-   * This method create the full authentication token of the format: <AuthMethod>" "base64Encode(<username>:<password>) and returns it.
-   * If the authInfo is null then null is returned.
-   * 
-   * @param authInfo The values to use to create the full authentication token based on the components in this parameter
-   * 
-   * @return See desc
-   */
-  public static String getFullBase64Token(AuthenticationInfo authInfo)
-  {
-    if (authInfo == null)
-    {
-      return null;
-    }
-    
-    return authInfo.getAuthMethod().name()+" "+base64Encode(authInfo.getUserToken(), authInfo.getPassword());
-  }
+	/**
+	 * This method create the full authentication token of the format:<br/>
+	 * If authentication method is Basic or SIF_HMACSHA256: <AuthMethod>" "base64Encode(<userToken>:<password>)<br/>
+	 * If authentication method is Bearer: Bearer <userToken><br/>
+	 * <br/>
+	 * If the authInfo is null then null is returned.
+	 * 
+	 * @param authInfo  The values to use to create the full authentication token based on the components
+	 *                  in this parameter
+	 * 
+	 * @return See desc
+	 */
+	public static String getFullBase64Token(AuthenticationInfo authInfo)
+	{
+		if (authInfo == null)
+		{
+			return null;
+		}
+		if (authInfo.getAuthMethod() != AuthenticationInfo.AuthenticationMethod.Bearer)
+		{
+			return authInfo.getAuthMethod().name() + " " + base64Encode(authInfo.getUserToken(), authInfo.getPassword());
+		}
+		else // It is Bearer so leave token untouched!
+		{
+			return AuthenticationInfo.AuthenticationMethod.Bearer.name() + " " + authInfo.getUserToken();
+		}
+	}
 	
 	/**
 	 * Performs a base64 encoding on the following string: username:password. The encoded string is then returned.
@@ -89,7 +104,6 @@ public class AuthenticationUtils
 	 */
 	public static String base64Encode(String username, String password)
 	{
-//		return new String(Base64.encode(username+":"+password), Charset.forName("ASCII"));
 		String token = username+":"+password;
 		return new String(Base64.encodeBase64(token.getBytes()), Charset.forName("ASCII"));
 	}
@@ -108,7 +122,6 @@ public class AuthenticationUtils
 	 */
 	public static String getSIFHMACSHA256Token(String username, String password, String dateAsISO8601)
 	{
-//		return AuthenticationMethod.SIF_HMACSHA256.toString()+" "+new String(Base64.encode(username+":"+hmacsha256Base64(username+":"+dateAsISO8601, password)), Charset.forName("ASCII"));
 		String token = username+":"+hmacsha256Base64(username+":"+dateAsISO8601, password);
 		return AuthenticationMethod.SIF_HMACSHA256.toString()+" "+new String(Base64.encodeBase64(token.getBytes()), Charset.forName("ASCII"));
 	}
@@ -124,7 +137,6 @@ public class AuthenticationUtils
 	 */
 	public static String hmacsha256Base64(String message, String key)
 	{
-//		return new String(Base64.encode(hmacsha256AsBytes(message, key)), Charset.forName("ASCII"));
 		return new String(Base64.encodeBase64(hmacsha256AsBytes(message, key)), Charset.forName("ASCII"));
 	}
 	
@@ -173,12 +185,11 @@ public class AuthenticationUtils
 	/*----------------------*/
 	
 	/**
-	 * Extracts the token from the full authentication token. The full authentication token is the
-	 * base64 encoded token with the prefix of Basic or SIF_HMACSHA256 separated by a blank. If the fullToken
-	 * is null or empty then null is returned. Also if there is no " " found (which separates the method from the token)
-	 * then the fullToken is returned.
+	 * Extracts the token from the full authentication token. The full authentication token is the security token with the prefix of 
+	 * Basic, SIF_HMACSHA256 or Bearer separated by a blank. If the fullToken is null or empty then null is returned. Also if there is 
+	 * no " " found (which separates the method from the token) then the fullToken is returned.
 	 * 
-	 * @param fullToken The full token including the prefix of 'Basic' or 'SIF_HMACSHA256'
+	 * @param fullToken The full token including the prefix of 'Basic', 'SIF_HMACSHA256' or 'Bearer'
 	 * 
 	 * @return The token without the prefix.
 	 */
@@ -194,15 +205,14 @@ public class AuthenticationUtils
 	}
 	
 	/**
-	 * This method extracts the authentication method from the full authentication token. The full authentication token
-	 * is the base64 encoded token with the prefix of Basic, SIF_HMACSHA256 etc. separated by a blank. If the fullToken
-	 * is null or empty then null is returned. Also if there is no " " found (which separates the method from the token)
-	 * then null is returned.
+	 * This method extracts the authentication method from the full authentication token. The full authentication token is the security 
+	 * token with the prefix of Basic, SIF_HMACSHA256 or Bearer separated by a blank. If the fullToken is null or empty then null is returned. 
+	 * Also if there is no " " found (which separates the method from the token) then null is returned.
 	 * 
-	 * @param fullToken The full token including the prefix of 'Basic', 'SIF_HMACSHA256' etc. (See AuthenticationMethod enum)
+	 * @param fullToken The full token including the prefix of 'Basic', 'SIF_HMACSHA256' or 'Bearer'. (See AuthenticationMethod enum)
 	 * 
 	 * @return The prefix of the fullToken. Will be one of the values of the AuthenticationMethod enum. If an invalid auth method
-	 *         is used then null is retrned.
+	 *         is used then null is returned.
 	 */
 	public static AuthenticationMethod extractAuthenticationMethod(String fullToken)
 	{
@@ -239,7 +249,6 @@ public class AuthenticationUtils
 	{
 		if (token != null)
 		{
-//			String decodedStr = new String(Base64.decode(token), Charset.forName("ASCII"));
 			String decodedStr = new String(Base64.decodeBase64(token), Charset.forName("ASCII"));
 			int splitPos = decodedStr.indexOf(":");
 			
@@ -250,41 +259,55 @@ public class AuthenticationUtils
 	}
 	
 	/**
-	 * This method takes the full authentication token. This is the token that has the form:
+	 * This method takes the full authentication token. This is the token that has one of the two forms:<br/>
 	 *   ("Basic"|"SIF_HMACSHA256")" "<base64EncodedString> where the <base64EncodedString> must be of the format:
-	 *   <usreToken>:<some_string>.
-	 * If the token does not follow that structure, i.e. cannot be split into these three components then
-	 * it is invalid and null is returned. If the token can be split successfully then the returned 
-	 * AuthenticationInfo has the following Structure:
+	 *   <usreToken>:<some_string>.<br/>
+   *   "Bearer "<securityToken><br/><br/>
+	 * <br/>
+	 * If the token does not follow one of these structures, i.e. cannot be split into these components then it is invalid and null 
+	 * is returned. If the token can be split successfully then the returned AuthenticationInfo has the following Structure:<br/><br/>
 	 * 
-	 * AuthenticationInfo.authMethod="Basic"|"SIF_HMACSHA256"|"Bearer"
-	 * AuthenticationInfo.userToken=<userToken>
-	 * AuthenticationInfo.password=<some_string>
+	 * For "Basic"|"SIF_HMACSHA256":<br/>
+	 * AuthenticationInfo.authMethod="Basic"|"SIF_HMACSHA256"<br/>
+	 * AuthenticationInfo.userToken=<userToken><br/>
+	 * AuthenticationInfo.password=<some_string><br/><br/>
+	 * 
+	 * For "Bearer":<br/>
+	 * AuthenticationInfo.authMethod=""Bearer"<br/>
+	 * AuthenticationInfo.userToken=<securityToken><br/>
+	 * AuthenticationInfo.password=null<br/><br/>
 	 * 
 	 * Note: If authMethod=SIF_HMACSHA256 then the AuthenticationInfo.password is not the clear text password rather the hashed token
 	 *       according to the SIF3 spec.
 	 * 
-	 * @param fullBase64Token See desc.
+	 * @param fullBaseToken See desc.
 	 * 
 	 * @return See Desc
 	 */
-	public static AuthenticationInfo getPartsFromAuthToken(String fullBase64Token)
+	public static AuthenticationInfo getPartsFromAuthToken(String fullBaseToken)
 	{
-		fullBase64Token = fullBase64Token.trim();
-		int splitPos = fullBase64Token.indexOf(" ");
-		String authMethodStr = (splitPos>0) ? fullBase64Token.substring(0, splitPos) : null;
-		String encodedToken = (splitPos>0) ? fullBase64Token.substring(splitPos+1) : fullBase64Token;
-		String[] splitValues = splitValuesFromBase64(encodedToken);
+		fullBaseToken = fullBaseToken.trim();
+		int splitPos = fullBaseToken.indexOf(" ");
+		String authMethodStr = (splitPos>0) ? fullBaseToken.substring(0, splitPos) : null;
+		String securityToken = (splitPos>0) ? fullBaseToken.substring(splitPos+1) : fullBaseToken;
 		
-		if (splitValues.length == 2) // all good
+		// Check if we have a Bearer authentication method.
+		if (AuthenticationInfo.AuthenticationMethod.Bearer.name().equals(authMethodStr))
 		{
-			return new AuthenticationInfo(authMethodStr, splitValues[0], splitValues[1]);
+			return new AuthenticationInfo(AuthenticationInfo.AuthenticationMethod.Bearer, securityToken, null);
 		}
-		else // we could not split the token into userToken and password
+		else // it should be Basic or SIF_HMACSHA256
 		{
-			return null;
+	  		String[] splitValues = splitValuesFromBase64(securityToken);
+	  		
+	  		if (splitValues.length == 2) // all good
+	  		{
+	  			return new AuthenticationInfo(authMethodStr, splitValues[0], splitValues[1]);
+	  		}
+	  		else // we could not split the token into userToken and password
+	  		{
+	  			return null;
+	  		}
 		}
 	}
-	
-
 }
