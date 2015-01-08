@@ -49,10 +49,14 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	private String sessionToken;
 	private String environmentID;
 	private String adapterType; //CONSUMER, PROVIDER, ENVIRONMENT_PROVIDER
+	private String securityToken;
+	private Date securityTokenExpiry;
 	private String environmentXML;
 	private String queueStrategy = CommonConstants.QueueStrategy.ADAPTER_LEVEL.name();
 	private Date created;
 	private Date lastAccessed;
+	
+	// The properties below are runtime properties. They are not read or maintained in the DB!
 	private transient SIFZone defaultZone             = null;
 	private transient ArrayList<ServiceInfo> services = new ArrayList<ServiceInfo>();
 
@@ -113,6 +117,26 @@ public class SIF3Session extends EnvironmentKey implements Serializable
     	this.environmentID = environmentID;
     }
 	
+  public String getSecurityToken()
+  {
+    return securityToken;
+  }
+
+  public void setSecurityToken(String securityToken)
+  {
+    this.securityToken = securityToken;
+  }
+
+  public Date getSecurityTokenExpiry()
+  {
+    return securityTokenExpiry;
+  }
+
+  public void setSecurityTokenExpiry(Date securityTokenExpiry)
+  {
+    this.securityTokenExpiry = securityTokenExpiry;
+  }
+
 	public String getAdapterType()
     {
     	return this.adapterType;
@@ -168,8 +192,13 @@ public class SIF3Session extends EnvironmentKey implements Serializable
     	this.lastAccessed = lastAccessed;
     }
 	
+	/*---------------------------------------------------------------------------------------------------------------------------------------*/
+	/*-- This section has utility methods that are only available at runtime and when a SIF3 Session is loaded into memory and linked with --*/
+	/*-- an environment given by the environment provider.                                                                                 --*/
+  /*---------------------------------------------------------------------------------------------------------------------------------------*/
+	
 	/**
-	 * List of services available for this environment. This are OBJECT, UTILITY and FUNCTIONal services. Each service also has an
+	 * List of services available for this environment. This are OBJECT, SERVICEPATH, UTILITY and FUNCTIONal services. Each service also has an
 	 * assigned zone and context with it, both of which can be omitted. If they are omitted then the default zone and context are assumed
 	 * as per SIF3 specification.
 	 * 
@@ -329,13 +358,15 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	}
 	
 	@Override
-    public String toString()
-    {
-	    return "SIF3Session [sessionID=" + this.sessionID + ", adapterName=" + this.adapterName
-	            + ", password=" + this.password + ", sessionToken=" + this.sessionToken
-	            + ", environmentID=" + this.environmentID + ", adapterType=" + this.adapterType
-	            + ", environmentXML=" + this.environmentXML + ", queueStrategy="
-	            + this.queueStrategy + ", created=" + this.created + ", lastAccessed="
-	            + this.lastAccessed + ", toString()=" + super.toString() + "]";
-    }	
+  public String toString()
+  {
+    return "SIF3Session [adapterName=" + adapterName + ", adapterType="
+        + adapterType + ", created=" + created + ", environmentID="
+        + environmentID + ", environmentXML=" + environmentXML
+        + ", lastAccessed=" + lastAccessed + ", password=" + password
+        + ", queueStrategy=" + queueStrategy + ", securityToken="
+        + securityToken + ", securityTokenExpiry=" + securityTokenExpiry
+        + ", sessionID=" + sessionID + ", sessionToken=" + sessionToken
+        + ", toString()=" + super.toString() + "]";
+  }	
 }
