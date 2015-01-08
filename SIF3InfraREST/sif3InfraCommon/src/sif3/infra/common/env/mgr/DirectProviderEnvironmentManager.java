@@ -16,12 +16,14 @@
 
 package sif3.infra.common.env.mgr;
 
+import java.util.Date;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
 import sif3.common.exception.PersistenceException;
 import sif3.common.model.EnvironmentKey;
+import sif3.common.model.security.TokenInfo;
 import sif3.common.persist.model.AppEnvironmentTemplate;
 import sif3.common.persist.model.SIF3Session;
 import sif3.infra.common.env.ops.DirectProviderEnvStoreOps;
@@ -30,6 +32,7 @@ import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.common.utils.SIFSessionUtils;
 import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class deals with the main functions relating to the environments that need to be managed by the environment provider. 
@@ -49,10 +52,13 @@ public class DirectProviderEnvironmentManager implements EnvironmentManager
 	/* The environment store operation class to be used with this manager. */
 	private DirectProviderEnvStoreOps envOps = null;
 	
-	/* Key=SessionToken for environment & consumer, Data: SIF3Session */
-  private HashMap<String, SIF3Session> sessions = new HashMap<String, SIF3Session>();
+	/* Key=SessionToken for environment & consumer, Data: SIF3Session. Used for BASIC and SIF_HMACSHA256 security */
+	private HashMap<String, SIF3Session> sessions = new HashMap<String, SIF3Session>();
 
-  private static DirectProviderEnvironmentManager instance = null;
+	/* Key=SecurityToken for environment & consumer, Data: SessionToken relating to securityToken. Used for Bearer security tokens*/
+	private HashMap<String, String> secTokenSession = new HashMap<String, String>();
+
+	private static DirectProviderEnvironmentManager instance = null;
 
 	/**
 	 * Initialises an instance of the Provider Environment Manager.
@@ -69,7 +75,7 @@ public class DirectProviderEnvironmentManager implements EnvironmentManager
 		return instance;
 	}
 
-  /**
+	/**
 	 * Returns an instance of the Provider Environment Manager.
 	 * 
 	 * @return See Desc.
@@ -123,7 +129,70 @@ public class DirectProviderEnvironmentManager implements EnvironmentManager
 		return null;
 	}
 
-    /*
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see  sif3.infra.common.interfaces.EnvironmentManager#getSessionBySecurityToken(java.lang.String)
+	 */
+	@Override
+	public SIF3Session getSessionBySecurityToken(String securityToken)
+	{
+		if (securityToken != null)
+		{
+			return getSessionBySessionToken(secTokenSession.get(securityToken));
+		}
+		return null; // no session or invalid securityToken
+	}
+
+	/* 
+	 * (non-Javadoc)
+	 * @see sif3.infra.common.interfaces.EnvironmentManager#updateSessionSecurityInfo(java.lang.String, java.lang.String, java.util.Date)
+	 */
+  	@Override
+  	public boolean updateSessionSecurityInfo(String sessionToken, String securityToken, Date securityExpiryDate)
+  	{
+  		// First we must update the session store (DB)
+  		if (envOps.updateSessionSecurityInfo(sessionToken, securityToken, securityExpiryDate))
+  		{
+  			//now we update the values in the session cache
+  			SIF3Session sif3Session = getSessionBySessionToken(sessionToken);
+  			if (sif3Session != null)
+  			{
+  				String oldSecurityToken = sif3Session.getSecurityToken();
+  				sif3Session.setSecurityToken(securityToken);
+  				sif3Session.setSecurityTokenExpiry(securityExpiryDate);
+  				
+  				// Refresh cache
+  				sessions.put(sessionToken, sif3Session);
+  				
+  				// Potentially we must remove old security token - session token association
+  				if (StringUtils.notEmpty(oldSecurityToken)) // should be in the security - session association cache
+  				{
+  					secTokenSession.remove(oldSecurityToken);
+  				}
+
+  				// Set new association
+				if (StringUtils.notEmpty(securityToken))
+  				{
+  					secTokenSession.put(securityToken, sessionToken);
+  				}
+
+  				return true;
+  			}
+  			else // really odd!
+  			{
+  				logger.debug("No session found in session cache despite that there is one in the workstore.");
+  				return false;
+  			}
+  		}
+  		else
+  		{
+  			return false; // error already logged.
+  		}
+  		
+  	}
+
+  	/*
      * (non-Javadoc)
      * @see sif3.infra.common.interfaces.EnvironmentManager#getEnvironmentType()
      */
@@ -140,17 +209,20 @@ public class DirectProviderEnvironmentManager implements EnvironmentManager
 	/**
 	 * This method will create an environment on the provider. The environment will be created based on the given input environment
 	 * information. If this operation fails an error is logged and null is returned. The environment will be created and all the
-	 * information according to the SIF3 spec is returned (i.e. Session Token, Environment Id etc).
+	 * information according to the SIF3 spec is returned (i.e. Session Token, Environment Id etc). The associated
+	 * sif3 session is stored in the internal session cache.
 	 * 
 	 * @param inputEnvironment The basic information required by the environment provider to create the environment for the consumer.
+	 * @param tokenInfo Information related to the security token. Can be used to store expiry date and a security token related to the
+	 *                  session to be created or updated.
 	 * @param useSecured Indicate if the environment to load should use secured (TRUE) service URIs (https://...) or
 	 *                   unsecured URIs (http://...)
 	 * 
 	 * @return See desc.
 	 */
-	public EnvironmentType createOrUpdateEnvironment(EnvironmentType inputEnvironment, boolean useSecured)
+	public EnvironmentType createOrUpdateEnvironment(EnvironmentType inputEnvironment, TokenInfo tokenInfo, boolean useSecured)
 	{
-		SIF3Session sif3Session = envOps.createSession(inputEnvironment, useSecured);
+		SIF3Session sif3Session = envOps.createSession(inputEnvironment, tokenInfo, useSecured);
 		
 		return updateSessionAndExtractEnvironment(sif3Session);
 	}
@@ -168,6 +240,19 @@ public class DirectProviderEnvironmentManager implements EnvironmentManager
 		return (getSessionBySessionToken(sessionToken) != null);
 	}
 	
+	/**
+	 * Returns TRUE if the provider knows an environment for the given security token. If no  environment is known 
+	 * for the given security token then FALSE is returned.
+	 * 
+	 * @param sessionToken The token to check for.
+	 * 
+	 * @return See desc.
+	 */
+	public boolean existsEnvironmentForSecurityToken(String securityToken)
+	{
+		return (getSessionBySecurityToken(securityToken) != null);
+	}
+
 	public AppEnvironmentTemplate getTemplateInfo(EnvironmentKey envKey)
 	{
 		return envOps.getTemplateInfo(envKey);
@@ -175,66 +260,156 @@ public class DirectProviderEnvironmentManager implements EnvironmentManager
 
 	/**
 	 * This method loads the environment from the workstore. Before it is loaded it checks if it does already exist. If it 
-	 * doesn't then null is returned, otherwise the environment is returned. Note if it doesn't exist it WON'T create it. 
-	 * To create the environment from a template then the 'createAndStoreEnvIronment(...)' method in this class must be called.
+	 * doesn't then null is returned, otherwise the environment is returned. Note if it doesn't exist it WON'T 
+	 * create it. To create the environment from a template then the 'createAndStoreEnvIronment(...)' method in 
+	 * this class must be called. Note this method will only get the environment from the work store but it won't
+	 * add it to the internal session cache.
 	 * 
 	 * @param environmentKey solutionID Mandatory, applicationKey Mandatory, userToken Optional, instanceID Optional: 
-	 * @param useSecured
+	 * @param tokenInfo Information related to the security token. Can be used to store expiry date and a security token related to the
+	 *                  session to be created or updated.
+	 * @param useSecured Indicate if the environment to load should use secured (TRUE) service URIs
+	 *                   (https://...) or unsecured URIs (http://...)
 	 * 
 	 * @return see Desc.
 	 * 
 	 * @throws IllegalArgumentException Any of the mandatory parameters is null or empty.
 	 * @throws PersistenceException Could not access the underlying workstore.
 	 */
-	public EnvironmentType getEnvironmentFromWorkstore(EnvironmentKey environmentKey, boolean useSecured) throws IllegalArgumentException, PersistenceException
+	public EnvironmentType getEnvironmentFromWorkstore(EnvironmentKey environmentKey, TokenInfo tokenInfo, boolean useSecured) throws IllegalArgumentException, PersistenceException
 	{
-		return envOps.loadEnvironmentFromWorkstore(environmentKey, useSecured);
+		return envOps.loadEnvironmentFromWorkstore(environmentKey, tokenInfo, useSecured);
 	}
 	
 
 	/**
-	 * This method will load an environment for the given session token from the environment store . This is used to get an
+	 * This method will load an environment for the given session token from the environment store. This is used to get an
 	 * environment rather than creating one. If no environment for the given session token exists in the environment store then null 
 	 * is returned.
 	 * 
 	 * @param sessionToken The session token based on which the environment shall be returned.
+	 * @param tokenInfo Information related to the security token. Can be used to store expire date and a security token related to the
+	 *                  session to be created or updated.
 	 * @param useSecured Indicate if the environment to load should use secured (TRUE) service URIs
 	 *                   (https://...) or unsecured URIs (http://...)
 	 * 
 	 * @return See desc.
+	 * 
+	 * @throws IllegalArgumentException If sessionToken is null.
+	 * @throws PersistenceException Failed to access the underlying environment store.
 	 */
-	public EnvironmentType reloadEnvironmentBySessionToken(String sessionToken, boolean useSecured) throws IllegalArgumentException, PersistenceException
+	public EnvironmentType reloadEnvironmentBySessionToken(String sessionToken, TokenInfo tokenInfo, boolean useSecured) throws IllegalArgumentException, PersistenceException
 	{
-		SIF3Session sif3Session = envOps.loadSessionFromWorkstore(sessionToken, useSecured);
+		SIF3Session sif3Session = envOps.loadSessionFromWorkstore(sessionToken, tokenInfo, useSecured);
 
-		return updateSessionAndExtractEnvironment(sif3Session);
-		
+		return updateSessionAndExtractEnvironment(sif3Session);	
 	}
-			
+
 	/**
-	 * This method will remove an environment identified by the sessioToken permanently from the environment store and 
-	 * provider.
+	 * This method will load an environment for the given Token Info from the environment store. This is used to get an
+	 * environment rather than creating one. If no environment for the given Token Info exists in the environment store 
+	 * then null is returned.
+	 * @param tokenInfo Information about the security token for which an environment shall be loaded from
+	 *                  the environment store.
+	 * @param useSecured Indicate if the environment to load should use secured (TRUE) service URIs
+	 *                   (https://...) or unsecured URIs (http://...)
+	 *                   
+	 * @return See desc.
+	 * 
+	 * @throws IllegalArgumentException If tokenInfo is null or no security token is not set.
+	 * @throws PersistenceException Failed to access the underlying environment store.
+	 */
+	public EnvironmentType reloadEnvironmentForSecurityToken(TokenInfo tokenInfo, boolean useSecured) throws IllegalArgumentException, PersistenceException
+	{
+		SIF3Session sif3Session = envOps.loadSessionFromWorkstore(tokenInfo, useSecured);
+
+		return updateSessionAndExtractEnvironment(sif3Session);	
+	}
+
+	/**
+	 * This method will load an environment for the environmentKey from the environment store. This is used to get 
+	 * an environment rather than creating one. If no environment for the given environmentKey exists then null is
+	 * returned. If an environment does exist it is loaded and with its associated sif3 session and finally added 
+	 * to the internal session cache.
+	 * 
+	 * @param environmentKey The environmentKey based on which the sif3 session shall be returned.
+	 * @param tokenInfo Information related to the security token. Can be used to store expire date and a security
+	 *                  token related to the session to be created or updated.
+	 * @param useSecured Indicate if the environment to load should use secured (TRUE) service URIs
+	 *                   (https://...) or unsecured URIs (http://...)
+	 * 
+	 * @return See desc.
+	 * 
+	 * @throws IllegalArgumentException If sessionToken is null.
+	 * @throws PersistenceException Failed to access the underlying environment store.
+	 */
+	public EnvironmentType getEnvironmentByEnvKey(EnvironmentKey environmentKey, TokenInfo tokenInfo, boolean useSecured) throws IllegalArgumentException, PersistenceException
+	{
+		SIF3Session sif3Session = envOps.loadAndUpdateSession(environmentKey, tokenInfo, useSecured);
+
+		return updateSessionAndExtractEnvironment(sif3Session);	
+	}
+
+	/**
+	 * This method will load an environment for the given environmentID from the environment store. This is used to 
+	 * get an environment rather than creating one. If no environment for the given environmentID exists then null 
+	 * is returned. If an environment does exist it is loaded and with its associated sif3 session and finally added 
+	 * to the internal session cache.
+	 * 
+	 * @param environmentID The environmentID based on which the sif3 session shall be returned.
+	 * @param tokenInfo Information related to the security token. Can be used to store expire date and a security
+	 *                  token related to the session to be created or updated.
+	 * @param useSecured Indicate if the environment to load should use secured (TRUE) service URIs
+	 *                   (https://...) or unsecured URIs (http://...)
+	 * 
+	 * @return See desc.
+	 * 
+	 * @throws IllegalArgumentException If sessionToken is null.
+	 * @throws PersistenceException Failed to access the underlying environment store.
+	 */
+	public EnvironmentType getEnvironmentByEnvironmentID(String environmentID, TokenInfo tokenInfo, boolean useSecured) throws IllegalArgumentException, PersistenceException
+	{
+		SIF3Session sif3Session = envOps.loadAndUpdateSession(environmentID, tokenInfo, useSecured);
+
+		return updateSessionAndExtractEnvironment(sif3Session);	
+	}
+
+	/**
+	 * This method will remove a sif3 session identified by the sessioToken from the session cache and
+	 * optionally from the environment store.
 	 * 
 	 * @param sessionToken The session token for which the environment shall be removed.
+	 * @param permanentRemoval TRUE: Remove environment from session cache AND session store.
+	 *                         FALSE: Only remove session from the internal session cache but leave it
+	 *                                in the session store (DB).
 	 * 
 	 * @return See desc.
 	 */
-	public boolean removeEnvironmentBySessionToken(String sessionToken)
+	public boolean removeEnvironmentBySessionToken(String sessionToken, boolean permanentRemoval)
 	{
 		SIF3Session sif3Session = getSessionBySessionToken(sessionToken);
 		if (sif3Session != null)
 		{
-			// First we remove it from the Environment store
-			if (envOps.removeEnvFromWorkstoreBySessionToken(sessionToken))
+			// Check if we need to remove session permanently
+			if (permanentRemoval)
 			{
-				// now remove it from the session store
-				sessions.remove(sessionToken);
-				return true;
+				if (!envOps.removeEnvFromWorkstoreBySessionToken(sessionToken))
+				{
+					return false; // error already logged. Don't remove session from cache
+				}
 			}
-			else
+
+			// At this point we only have to remove the session from the session cache.
+		
+			// Remove security token - session token link.
+			if (StringUtils.notEmpty(sif3Session.getSecurityToken()))
 			{
-				return false; // error already logged.
+				secTokenSession.remove(sif3Session.getSecurityToken());
 			}
+		  
+			// now remove it from the session store
+			sessions.remove(sessionToken);
+			return true;
 		}
 		else
 		{
@@ -278,6 +453,12 @@ public class DirectProviderEnvironmentManager implements EnvironmentManager
 
 			// add to session Store
 			sessions.put(sif3Session.getSessionToken(), sif3Session);
+			
+			// link session to security token if it is available
+			if (StringUtils.notEmpty(sif3Session.getSecurityToken()))
+			{
+			  secTokenSession.put(sif3Session.getSecurityToken(), sif3Session.getSessionToken());
+			}
 			
 			return newEnv;
 		}

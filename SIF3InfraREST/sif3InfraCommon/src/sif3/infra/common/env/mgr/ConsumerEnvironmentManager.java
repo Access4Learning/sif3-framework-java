@@ -19,6 +19,7 @@
 package sif3.infra.common.env.mgr;
 
 import java.net.URI;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -137,6 +138,37 @@ public class ConsumerEnvironmentManager implements ClientEnvironmentManager
 	    return null; // no session or invalid sessionToken
     }
 
+    /*
+     * (non-Javadoc)
+     * @see sif3.infra.common.interfaces.EnvironmentManager#getSessionBySecurityToken(java.lang.String)
+     */
+    @Override
+    public SIF3Session getSessionBySecurityToken(String securityToken)
+    {
+      if ((getSIF3Session() != null) && (StringUtils.notEmpty(securityToken)))
+      {
+        if (securityToken.equals(getSIF3Session().getSecurityToken()))
+        {
+          return getSIF3Session();
+        }
+        else
+        {
+          logger.error("The securityToken for the session in this Consumer Environment Manager ("+getSIF3Session().getSecurityToken()+") is different to the securityToken from the request (" + securityToken +"). User is not allowed to access this session.");
+          return null;
+        }
+      }
+      return null; // no session or invalid sessionToken
+    }
+    
+	/* (non-Javadoc)
+     * @see sif3.infra.common.interfaces.EnvironmentManager#updateSessionSecurityInfo(java.lang.String, java.lang.String, java.util.Date)
+     */
+    @Override
+    public boolean updateSessionSecurityInfo(String sessionToken, String securityToken, Date securityExpiryDate)
+    {
+	    return envOps.updateSessionSecurityInfo(sessionToken, securityToken, securityExpiryDate);
+    }
+    
     /*
      * (non-Javadoc)
      * @see sif3.infra.common.interfaces.EnvironmentManager#getEnvironmentType()
