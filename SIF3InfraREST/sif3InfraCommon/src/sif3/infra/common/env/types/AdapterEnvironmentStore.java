@@ -553,7 +553,8 @@ public class AdapterEnvironmentStore implements Serializable
 		}
             
 		envInfo.setDefaultUpdateType(getUpdateType(props));
-		
+		envInfo.setAutoCreateEnvironment(props.getPropertyAsBool("env.allow.autoCreate", false));
+
 		if (errorsFound)
 		{
 			logger.error("Errors found in reading environment information from " + getAdapterFileNameWithoutExt() + ".properties. See previous log entries for details and please correct them.");

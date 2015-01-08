@@ -37,8 +37,8 @@ public class ProviderEnvironment extends EnvironmentInfo
 	private String  templateXMLFileName    = null;
 	private URI     secureConnectorBaseURI = null; // Secure URI to connect to Provider 
 	private URI     connectorBaseURI       = null; // URI to connect to Provider
-	private UpdateType defaultUpdateType = UpdateType.FULL; // Default value for update events.
-    
+	private UpdateType defaultUpdateType   = UpdateType.FULL; // Default value for update events.
+    private boolean autoCreateEnvironment  = false;
 
 	/**
 	 * Constructor
@@ -132,13 +132,23 @@ public class ProviderEnvironment extends EnvironmentInfo
 		}
     }
 
+	public boolean getAutoCreateEnvironment()
+    {
+    	return this.autoCreateEnvironment;
+    }
+
+	public void setAutoCreateEnvironment(boolean autoCreateEnvironment)
+    {
+    	this.autoCreateEnvironment = autoCreateEnvironment;
+    }
+
 	@Override
     public String toString()
     {
 	    return "ProviderEnvironment [connected=" + this.connected + ", templateXMLFileName="
 	            + this.templateXMLFileName + ", secureConnectorBaseURI="
 	            + this.secureConnectorBaseURI + ", connectorBaseURI=" + this.connectorBaseURI
-	            + ", defaultUpdateType=" + this.defaultUpdateType + ", toString()="
-	            + super.toString() + "]";
+	            + ", defaultUpdateType=" + this.defaultUpdateType + ", autoCreateEnvironment="
+	            + this.autoCreateEnvironment + ", toString()=" + super.toString() + "]";
     }
 }
