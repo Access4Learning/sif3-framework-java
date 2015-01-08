@@ -18,6 +18,8 @@
 
 package sif3.infra.test.common.env;
 
+import sif3.common.CommonConstants;
+import sif3.common.persist.service.SIF3SessionService;
 import sif3.infra.common.env.types.AdapterEnvironmentStore;
 
 
@@ -27,11 +29,13 @@ import sif3.infra.common.env.types.AdapterEnvironmentStore;
  */
 public class TestAdapterEnvStore
 {
+	private static final String PROP_FILE_NAME = "StudentProvider";
+//	private static final String PROP_FILE_NAME = "BrokeredSISProvider";
+//	private static final String PROP_FILE_NAME = "StudentConsumer";
+	
 	private AdapterEnvironmentStore testGetEnvironmentStore(String propFileName)
 	{
-		AdapterEnvironmentStore envStore = new AdapterEnvironmentStore(propFileName);
-		System.out.println("Adapter Environment Store for "+propFileName+":\n"+envStore);
-		return envStore;
+		return new AdapterEnvironmentStore(propFileName);
 	}
 	
 	public static void main(String[] args)
@@ -40,9 +44,8 @@ public class TestAdapterEnvStore
 		
 		System.out.println("Start Testing AdapterEnvironmentStore...");
 		
-		tester.testGetEnvironmentStore("BrokeredSISProvider");
-//		tester.testGetEnvironmentStore("StudentProvider");
-//    	tester.testGetEnvironmentStore("StudentConsumer");
+		AdapterEnvironmentStore envStore = tester.testGetEnvironmentStore(PROP_FILE_NAME);
+		System.out.println("Adapter Environment Store for "+PROP_FILE_NAME+":\n"+envStore);
 		
 		System.out.println("End Testing AdapterEnvironmentStore.");
 	}
