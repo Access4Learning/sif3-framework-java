@@ -24,13 +24,14 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
 
 import sif3.common.model.AuthenticationInfo;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import au.com.systemic.framework.utils.StringUtils;
 
 /**
- * This calls provides a few useful methods for SIF3 specific authentication functions. If the authentication method is 'Basic' or 
+ * This class provides a few useful methods for SIF3 specific authentication functions. If the authentication method is 'Basic' or 
  * 'SIF_HMACSHA256' then the authentication token has the structure as defined in the SIF specification, meaning it is base64 encoded and 
  * can be split on the ':' that separates the applicationKey/sessionToken and the password/HMAC Hash. If the authentication token is 'Bearer' 
  * then it is assumed that the token is managed by a security mechanism outside of the SIF Specification and therefore no assumptions about 
@@ -42,6 +43,8 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class AuthenticationUtils
 {
+	protected static final Logger logger = Logger.getLogger(AuthenticationUtils.class);
+
 	/*----------------------*/
 	/*-- Encoding Methods --*/
 	/*----------------------*/
@@ -59,12 +62,6 @@ public class AuthenticationUtils
 	{
 		return AuthenticationMethod.Basic.toString()+" "+base64Encode(username, password);
 	}
-
-	// Experimental for OAuth work. At the moment we treat it as the basic.
-//  public static String getBearerAuthToken(String username, String password)
-//  {
-//    return AuthenticationMethod.Bearer.toString() + " " + base64Encode(username, password);
-//  }
 
 	/**
 	 * This method create the full authentication token of the format:<br/>
@@ -173,9 +170,9 @@ public class AuthenticationUtils
 
 			return sha256HMAC.doFinal(message.getBytes());
 		}
-		catch (Exception e)
+		catch (Exception ex)
 		{
-			e.printStackTrace();
+			logger.error("Generating the HMACSHA256 hash has failed: "+ex.getMessage(), ex);
 			return null;
 		}
 	}
@@ -227,7 +224,7 @@ public class AuthenticationUtils
 			}
 			catch (Exception ex)
 			{
-				ex.printStackTrace();
+				logger.error(authMethodStr+" is an invalid authentication method. Valid values are Basic, SIF_HMACSHA256 and Bearer.");
 				return null;
 			}
 		}
@@ -273,7 +270,7 @@ public class AuthenticationUtils
 	 * AuthenticationInfo.password=<some_string><br/><br/>
 	 * 
 	 * For "Bearer":<br/>
-	 * AuthenticationInfo.authMethod=""Bearer"<br/>
+	 * AuthenticationInfo.authMethod="Bearer"<br/>
 	 * AuthenticationInfo.userToken=<securityToken><br/>
 	 * AuthenticationInfo.password=null<br/><br/>
 	 * 
@@ -306,6 +303,7 @@ public class AuthenticationUtils
 	  		}
 	  		else // we could not split the token into userToken and password
 	  		{
+	  			logger.error("The token of the authenticathen method "+authMethodStr+" is not a base64 encoded string with a ':' separating two components as expected by the SIF sepcification.");
 	  			return null;
 	  		}
 		}
