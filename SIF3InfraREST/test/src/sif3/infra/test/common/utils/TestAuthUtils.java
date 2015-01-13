@@ -46,7 +46,9 @@ public class TestAuthUtils
 	{
 //		String message = "Message";
 //		String key = "secret";
-		String message = "new:2013-06-22T23:52-07";
+//		String message = "new:2013-06-22T23:52-07";
+//		String key = "guest";
+		String message = "TestSIS:2015-01-12T13:10:00.000Z";
 		String key = "guest";
 
 		long startTime = (new Date()).getTime();
@@ -75,9 +77,12 @@ public class TestAuthUtils
 	
 	private void testHMACSHA256Token()
 	{
-		String username = "new";
-		String password = "guest";
-//		String now = "2013-06-22T23:52-07";
+//		String username = "TestSIS";
+		String username = "c92bf270-2ef5-41a0-bd68-d5d29c5a8214";
+		String password = "Password1";
+//		String username = "new";
+//		String password = "guest";
+///		String now = "2013-06-22T23:52-07";
 		String now = DateUtils.getISO8601withSecFraction(new Date());
 
 		long startTime = (new Date()).getTime();
@@ -165,11 +170,11 @@ public class TestAuthUtils
 		System.out.println("Start Testing TestAuthUtils...");
 		try
 		{
-			tester.testGetBasicAuthToken();
+//			tester.testGetBasicAuthToken();
 //			tester.testGetBearerAuthToken();
-			//tester.testHMACSHA256();
+//			tester.testHMACSHA256();
 			//tester.testHMACSHA256Stress();
-			//tester.testHMACSHA256Token();
+			tester.testHMACSHA256Token();
 			//tester.testHMACSHA256TokenStress();
 			tester.testExtractMethods();
 			//tester.testGetPartsFromAuthToken();
