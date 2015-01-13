@@ -29,6 +29,7 @@ import sif3.common.model.QueryOperator;
 import sif3.common.model.QueryPredicate;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.ServicePathPredicate;
 import sif3.common.model.ZoneContextInfo;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.BulkOperationResponse;
@@ -295,7 +296,7 @@ public class TestStudentPersonalConsumer
 	
 	private void getStudentsByServicePath(String parent, String value, StudentPersonalConsumer consumer) {
 	  QueryCriteria criteria = new QueryCriteria();
-	  criteria.addPredicate(new QueryPredicate(parent, QueryOperator.EQUAL, value));
+	  criteria.addPredicate(new ServicePathPredicate(parent, value));
     System.out.println("Start 'Get All Students By Service Path' in all connected environments...");
     try
     {
@@ -358,8 +359,8 @@ public class TestStudentPersonalConsumer
 		
   		StudentPersonalConsumer consumer = tester.getConsumer();
   		
-  		tester.getStudents(consumer);
-//  		tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
+//  		tester.getStudents(consumer);
+  		tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
 //  		tester.getStudentsByServicePath("RoomInfos", "24ed508e1ed04bba82198233efa55859", consumer);
   //		tester.createStudent(consumer);
   //		tester.removeStudent(consumer);
