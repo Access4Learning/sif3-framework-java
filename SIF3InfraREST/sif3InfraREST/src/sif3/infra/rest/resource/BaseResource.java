@@ -716,7 +716,7 @@ public abstract class BaseResource
 	    else // It is SIF_HMACSHA256
 	    {
 			// Get the timestamp which is required for the hashing.
-			String timestamp = extractTimestampFromHeader();
+			String timestamp = getTimestampFromRequest();
 			if (StringUtils.notEmpty(timestamp))
 			{
 				newAuthToken = AuthenticationUtils.getSIFHMACSHA256Token(userToken, password, timestamp);
@@ -1434,17 +1434,40 @@ public abstract class BaseResource
 	}
 
 	/*
-	 * This method attempts to retrieve the URL Query Parameter called 'accessToken' which may be used for
-	 * custom security. This will enforce the authentication method to be set to Bearer. In other words one cannot
-	 * use the accessToken query parameter for Basic or SIF_HMACSHA256.
+	 * This method attempts to retrieve the URL Query Parameter called 'accessToken' which may be used for SIF Simple. It will then
+	 * attempt to also get the authentication method from the URL Query Parameters. If it is provided it will be used, assuming it has a valid
+	 * value, otherwise a lookup to the provider's config file will be performed to determine the dafault accessToken authentication method. 
+	 * If this is set then this will be used otherwise it is defaulted to 'Bearer'.
 	 */
 	private AuthenticationInfo getAccessToken()
 	{
 	    String accessTokenStr = getQueryParameters().getQueryParam(CommonConstants.ACCESS_TOKEN);
+
 	    if (StringUtils.notEmpty(accessTokenStr))
 	    {
-		    // Add "Bearer " in front of the accessToken and then treat it just like it would have been in the header
-		    return AuthenticationUtils.getPartsFromAuthToken(AuthenticationMethod.Bearer.name()+" "+accessTokenStr.trim());
+	    	// Check if we have an Authentication Method as well
+		    String authMethodStr = getQueryParameters().getQueryParam(CommonConstants.AUTH_METHOD);
+		    AuthenticationMethod authMethod = null;
+		    
+		    if (StringUtils.notEmpty(authMethodStr))
+		    {
+		        try
+		        {
+		          authMethod = AuthenticationMethod.valueOf(authMethodStr.trim());
+		        }
+		        catch (Exception ex) // invalid value is provided. Ignore it!
+		        {
+		        	authMethod = null; // this will ensure that we use what is in the provider's config file
+		        }
+	    	}
+
+	    	if (authMethod == null) // check what is in the provider's config file
+	    	{
+	    		authMethod = getProviderEnvironment().getAccessTokenAuthMethod();
+	    	}
+	    	
+		    // Create a string that looks like if it is in the Authorization HTTP Header
+		    return AuthenticationUtils.getPartsFromAuthToken(authMethod.name()+" "+accessTokenStr.trim());
 	    }
 	    return null;
 	}
@@ -1471,9 +1494,18 @@ public abstract class BaseResource
 		}
 	}
 	
-	private String extractTimestampFromHeader()
+	private String getTimestampFromRequest()
 	{
-		return getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME);
+		// Try to get it from HTTP Header (standard behaviour)
+		String timestampStr = getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME);
+		
+		// If it is null we may have it as a URL Query Parameter
+		if (timestampStr == null)
+		{
+			timestampStr = getQueryParameters().getQueryParam(CommonConstants.ISO8601_TIMESTAMP);
+		}
+		
+		return timestampStr;
 	}
 	
 	/*
