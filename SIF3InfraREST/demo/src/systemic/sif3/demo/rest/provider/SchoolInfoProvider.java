@@ -199,7 +199,7 @@ public class SchoolInfoProvider extends AUDataModelProvider
     	else
     	{
     		pagingInfo.setTotalObjects(schools.size());
-    		if ((pagingInfo.getPageSize() * (pagingInfo.getCurrentPageNo()+1)) > schools.size())
+    		if ((pagingInfo.getPageSize() * pagingInfo.getCurrentPageNo()) > schools.size())
     		{
     			return null; // Requested page outside of limits.
     		}

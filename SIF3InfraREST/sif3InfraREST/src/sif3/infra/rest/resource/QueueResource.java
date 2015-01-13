@@ -95,8 +95,7 @@ public class QueueResource extends InfraResource
 	{
 		super(uriInfo, requestHeaders, request, "", null, null);
 		this.deleteMessageId = deleteMessageId;
-	    setURLPostfixMediaType(mimeType);
-	    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
+    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
 	}
 
 	/*----------------------*/
@@ -162,7 +161,6 @@ public class QueueResource extends InfraResource
 	public Response getQueue(@PathParam("queueID") String queueID,
 							 @PathParam("mimeType") String mimeType)
 	{
-	    setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Get Queue by Queue ID (REST GET - Single): "+queueID+" and URL Postfix mime type = '"+mimeType+"'");
@@ -248,7 +246,6 @@ public class QueueResource extends InfraResource
 	public Response removeQueue(@PathParam("queueID") String queueID,
 			 				    @PathParam("mimeType") String mimeType)
 	{
-	    setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Remove Queue (REST DELETE - Single) with queueID = "+queueID+" and URL Postfix mime type = '"+mimeType+"'");
@@ -290,7 +287,6 @@ public class QueueResource extends InfraResource
 	public Response getNextMessage(@PathParam("queueID") String queueID,
 			    				   @PathParam("mimeType") String mimeType)
 	{
-	    setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Get Message from Queue (REST GET - Single): "+queueID +", URL Postfix mime type = '"+mimeType+"' and Remove message with ID = "+getDeleteMessageId());
@@ -361,7 +357,6 @@ public class QueueResource extends InfraResource
 			                               @PathParam("deleteMessageId") String deleteMessageId,
 						 				   @PathParam("mimeType") String mimeType)
 	{
-	    setURLPostfixMediaType(mimeType);
 		setDeleteMessageId(deleteMessageId);
 		if (logger.isDebugEnabled())
 		{
