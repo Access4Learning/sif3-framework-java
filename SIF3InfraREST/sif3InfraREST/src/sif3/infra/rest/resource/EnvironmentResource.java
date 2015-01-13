@@ -211,21 +211,21 @@ public class EnvironmentResource extends InfraResource
 		}
 	    catch (UnsupportedMediaTypeExcpetion ex)
 	    {
-	      logger.error("Failed to unmarshal payload into an environment: "+ ex.getMessage(), ex);
-	      logger.error("Environment Payload: "+ payload);
-	      return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal environment payload: "+ ex.getMessage()), ResponseAction.CREATE);
+	    	logger.error("Failed to unmarshal payload into an environment: "+ ex.getMessage(), ex);
+	    	logger.error("Environment Payload: "+ payload);
+	    	return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal environment payload: "+ ex.getMessage()), ResponseAction.CREATE);
 	    }
 	    catch (VerifyError ex)
 	    {
-	      logger.error("Bearer Token security issue: "+ ex.getMessage(), ex);
-	      logger.error("Environment Payload: "+ payload);
-	      return makeErrorResponse( new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not authorized.", ex.getMessage()), ResponseAction.CREATE);
+	    	logger.error("Security Token issue. See previous error log entries.", ex);
+	    	logger.error("Environment Payload: "+ payload);
+	    	return makeErrorResponse( new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not authorized.", ex.getMessage()), ResponseAction.CREATE);
 	    }	    
 	    catch (Exception ex)
 	    {
-	      logger.error("Failed to create/retrieve environment session: "+ ex.getMessage(), ex);
-	      logger.error("Environment Payload: "+ payload);
-	      return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal environment payload: "+ ex.getMessage()), ResponseAction.CREATE);
+	    	logger.error("Failed to create/retrieve environment session: "+ ex.getMessage(), ex);
+	    	logger.error("Environment Payload: "+ payload);
+	    	return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal environment payload: "+ ex.getMessage()), ResponseAction.CREATE);
 	    }
 	}
 
