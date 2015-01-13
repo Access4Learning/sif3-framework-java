@@ -74,8 +74,7 @@ public class EnvironmentResource extends InfraResource
 				               @PathParam("mimeType") String mimeType)
 	{
 		super(uriInfo, requestHeaders, request, "", null, null);
-	    setURLPostfixMediaType(mimeType);
-	    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
+    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
 	}
 	
 	/*
@@ -111,7 +110,6 @@ public class EnvironmentResource extends InfraResource
 	public Response createEnvironment(String payload,
             						@PathParam("mimeType") String mimeType)
 	{
-	    setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Create Environment (REST POST) with URL Postfix mimeType = '" + mimeType + "' and input data: " + payload);
@@ -240,7 +238,6 @@ public class EnvironmentResource extends InfraResource
 	public Response getEnvironment(@PathParam("id") String id,
 								   @PathParam("mimeType") String mimeType)
 	{
-	    setURLPostfixMediaType(mimeType);
 		logger.debug("Retrieve Environment with URL Postfix mimeType = '" + mimeType + "' and id = " + id);	
 				
 		TokenInfo tokenInfo = null;
@@ -297,7 +294,6 @@ public class EnvironmentResource extends InfraResource
 	public Response deleteEnvironment(@PathParam("id") String id,
 									  @PathParam("mimeType") String mimeType)
 	{
-	    setURLPostfixMediaType(mimeType);
 		logger.debug("Delete Environment with URL Postfix mimeType = '" + mimeType + "' and id = " + id);
     
 		TokenInfo tokenInfo = null;

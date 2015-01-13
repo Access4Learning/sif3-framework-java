@@ -142,6 +142,7 @@ public abstract class BaseResource
 		this.uriInfo = uriInfo;
 		this.request = request;
 		this.requestHeaders = requestHeaders;
+		setURLPostfixMediaType(uriInfo.getPath());
 		extractHeaderProperties(requestHeaders);
 		extractQueryParameters(uriInfo);
 		setSecure(HTTPS_SCHEMA.equalsIgnoreCase(getUriInfo().getBaseUri().getScheme()));

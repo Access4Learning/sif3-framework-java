@@ -32,8 +32,10 @@ import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.exception.UnsupportedQueryException;
+import sif3.common.interfaces.QueryProvider;
 import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.QueryCriteria;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
@@ -51,7 +53,7 @@ import au.com.systemic.framework.utils.StringUtils;
  * @author Joerg Huber
  *
  */
-public class StudentPersonalProvider extends AUDataModelProviderWithEvents<StudentCollectionType>
+public class StudentPersonalProvider extends AUDataModelProviderWithEvents<StudentCollectionType> implements QueryProvider
 {
 	private static int numDeletes = 0;
 	private static HashMap<String, StudentPersonalType> students = null; //new HashMap<String, StudentPersonalType>();
@@ -427,4 +429,17 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 		
 		return buffer.toString();
 	}
+
+  @Override
+  public Object retrieveByServicePath(QueryCriteria queryCriteria, SIFZone zone, SIFContext context,
+      PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException {
+    logger.debug("Performing query by service path.");
+    if (logger.isDebugEnabled()) {
+      String queryString = queryCriteria == null ? "null" : queryCriteria.toString();
+      logger.debug("query: " + queryString);
+    }
+    // in a real implementation you would parse the query criteria and return filtered results.
+    // just perform a standard retrieve in this environment.
+    return retrieve(zone, context, pagingInfo, metadata);
+  }
 }

@@ -32,6 +32,8 @@ import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.Consumer;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.QueryCriteria;
+import sif3.common.model.QueryPredicate;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceRights.AccessRight;
@@ -516,6 +518,84 @@ public abstract class AbstractConsumer implements Consumer
 		logger.debug("Time taken to call and process 'retrieve all' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 		return responses;
 	}
+	
+	 public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+	  {
+	    if (!initOK)
+	    {
+	      logger.error("Consumer not initialsied properly. See previous error log entries.");
+	      return null;
+	    }
+
+	    Timer timer = new Timer();
+	    timer.start();
+	    List<Response> responses = new ArrayList<Response>();
+	    
+	    if (!getConsumerEnvironment().getIsConnected())
+	    {
+	      logger.error("No connected environment for "+getConsumerEnvironment().getEnvironmentName()+". See previous erro log entries.");
+	      return responses;
+	    }
+	    // List is null or empty which means we perform action in default Zone/Context
+	    if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+	    {
+	      ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, null, null, requestType);
+	      if (error == null)
+	      {
+	        error = requestTypeSupported(requestType);
+	      }
+	      if (error == null) //all good
+	      {
+	        responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, getHeaderProperties(getConsumerEnvironment(), false, requestType, HeaderValues.ServiceType.SERVICEPATH), getMultiObjectClassInfo().getObjectType(), null, null));
+	      }
+	      else  //pretend to have received a 'fake' error Response
+	      {
+	        responses.add(createErrorResponse(error));
+	      }
+	    }
+	    else // Only perform action where environment matches current environment
+	    {
+	      for (ZoneContextInfo zoneCtx : zoneCtxList)
+	      {
+	        ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+	        if (error == null) //all good
+	        {
+	          responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, getHeaderProperties(getConsumerEnvironment(), false, requestType, HeaderValues.ServiceType.SERVICEPATH), getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+	        }
+	        else //pretend to have received a 'fake' error Response
+	        {
+	          responses.add(createErrorResponse(error));
+	        }
+	      }         
+	    }
+	    timer.finish();
+	    logger.debug("Time taken to call and process 'retrieve all' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
+	    return responses;
+	  }
+	 
+	 private String getServiceName(QueryCriteria queryCriteria) {
+	   String result = null;
+	   if (queryCriteria != null && queryCriteria.getPredicates() != null) {
+	     result = "";
+	     for (QueryPredicate predicate : queryCriteria.getPredicates()) {
+	       result += predicate.getSubject() + "/{}/";
+	     }
+	     result += getMultiObjectClassInfo().getObjectName();
+	   }
+	   return result;
+	 }
+	 
+   private String getServicePath(QueryCriteria queryCriteria) {
+     String result = null;
+     if (queryCriteria != null && queryCriteria.getPredicates() != null) {
+       result = "";
+       for (QueryPredicate predicate : queryCriteria.getPredicates()) {
+         result += predicate.getSubject() + "/" + predicate.getValue() + "/";
+       }
+       result += getMultiObjectClassInfo().getObjectName();
+     }
+     return result;
+   }
 
 	/*-----------------------*/
 	/*-- Update Operations --*/
@@ -667,28 +747,33 @@ public abstract class AbstractConsumer implements Consumer
 	  return ConsumerEnvironmentManager.getInstance().getSIF3Session();
 	}
 
+	private HeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation, RequestType requestType, HeaderValues.ServiceType serviceType) 
+	{
+	   HeaderProperties hdrProps = new HeaderProperties();
+	    
+	   // First create the properties for the authentication header.
+	   ClientUtils.setAuthenticationHeader(hdrProps, envInfo.getAuthMethod(), getSIF3Session().getSessionToken(), getSIF3Session().getPassword());
+	    
+	   // Set the remaining header fields for this type of request
+	   if (isCreateOperation)
+	   {
+	      hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, (envInfo.getUseAdvisory() ? "true" : "false"));
+	   }
+	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, serviceType.name());
+	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE, requestType.name());
+	    
+	   String generatorID = getGeneratorID();
+	   if (StringUtils.notEmpty(generatorID))
+	   {
+	      hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, generatorID);
+	   }
+	    
+	   return hdrProps;
+	}
+	
 	private HeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation, RequestType requestType)
 	{
-		HeaderProperties hdrProps = new HeaderProperties();
-		
-		// First create the properties for the authentication header.
-		ClientUtils.setAuthenticationHeader(hdrProps, envInfo.getAuthMethod(), getSIF3Session().getSessionToken(), getSIF3Session().getPassword());
-		
-		// Set the remaining header fields for this type of request
-		if (isCreateOperation)
-		{
-		  hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, (envInfo.getUseAdvisory() ? "true" : "false"));
-		}
-		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, HeaderValues.ServiceType.OBJECT.name());
-		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE, requestType.name());
-		
-		String generatorID = getGeneratorID();
-		if (StringUtils.notEmpty(generatorID))
-		{
-			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, generatorID);
-		}
-		
-		return hdrProps;
+	  return getHeaderProperties(envInfo, isCreateOperation, requestType, HeaderValues.ServiceType.OBJECT);
 	}
 	
 	private void setErrorDetails(BaseResponse response, ErrorDetails errorDetails)
@@ -704,9 +789,13 @@ public abstract class AbstractConsumer implements Consumer
 	 * Will perform hasAccess() and requestTypeSupported() checks. This is a convenience method, so that not each operation has to
 	 * call the two methods sequentially and manage all the flow.
 	 */
-	private ErrorDetails allClientChecks(AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType)
+	private ErrorDetails allClientChecks(AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType) {
+	  return allClientChecks(getMultiObjectClassInfo().getObjectName(), right, accessType, zone, context, requestType);
+	}
+	
+	private ErrorDetails allClientChecks(String serviceName, AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType)
 	{
-		ErrorDetails error = hasAccess(right, accessType, zone, context);
+		ErrorDetails error = hasAccess(serviceName, right, accessType, zone, context);
 		if (error == null)
 		{
 			error = requestTypeSupported(requestType);
@@ -714,16 +803,20 @@ public abstract class AbstractConsumer implements Consumer
 		return error;
 	}
 	
-	private ErrorDetails hasAccess(AccessRight right, AccessType accessType, SIFZone zone, SIFContext context)
+	private ErrorDetails hasAccess(AccessRight right, AccessType accessType, SIFZone zone, SIFContext context) {
+	  return hasAccess(getMultiObjectClassInfo().getObjectName(), right, accessType, zone, context);
+	}
+	
+	private ErrorDetails hasAccess(String serviceName, AccessRight right, AccessType accessType, SIFZone zone, SIFContext context)
 	{
 		ErrorDetails error = null;
 		if (checkACL)
 		{
-			if (!getSIF3Session().hasAccess(right, accessType, getMultiObjectClassInfo().getObjectName(), zone, context))
+			if (!getSIF3Session().hasAccess(right, accessType, serviceName, zone, context))
 			{
 				String zoneID = (zone == null) ? "Default" : zone.getId();
 				String contextID = (context == null) ? "Default" : context.getId();
-				error = new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not authorized.", right.name()+ " access is not set to "+accessType.name()+" for the service "+getMultiObjectClassInfo().getObjectName()+" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+getSIF3Session().getEnvironmentName(), "Client side check.");			
+				error = new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not authorized.", right.name()+ " access is not set to "+accessType.name()+" for the service " + serviceName +" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+getSIF3Session().getEnvironmentName(), "Client side check.");			
 			}
 		}
 		return error;

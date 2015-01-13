@@ -24,8 +24,12 @@ import sif.dd.au30.model.StudentCollectionType;
 import sif.dd.au30.model.StudentPersonalType;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.QueryCriteria;
+import sif3.common.model.QueryOperator;
+import sif3.common.model.QueryPredicate;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.ServicePathPredicate;
 import sif3.common.model.ZoneContextInfo;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.BulkOperationResponse;
@@ -42,10 +46,12 @@ import au.com.systemic.framework.utils.FileReaderWriter;
  */
 public class TestStudentPersonalConsumer
 {
-//	private final static String SINGLE_STUDENT_FILE_NAME = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
-//	private final static String MULTI_STUDENT_FILE_NAME = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
-	private final static String SINGLE_STUDENT_FILE_NAME = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
-	private final static String MULTI_STUDENT_FILE_NAME = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
+  private final static String PATH = "/Users/crub/dev/nsip/Users/crub/dev/nsip/sif3-framework-java-dev";
+  // private final static String PATH = "C:/DEV/eclipseWorkspace";
+  // private final static String PATH = "C:/Development/GitHubRepositories";
+  
+	private final static String SINGLE_STUDENT_FILE_NAME = PATH + "/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
+	private final static String MULTI_STUDENT_FILE_NAME = PATH + "/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
 //	private static final String CONSUMER_ID = "SecureStudentConsumer";
 	private static final String CONSUMER_ID = "StudentConsumer";
 	
@@ -287,6 +293,23 @@ public class TestStudentPersonalConsumer
 		}
 		System.out.println("Finished 'Get All Students' in all connected environments...");
 	}
+	
+	private void getStudentsByServicePath(String parent, String value, StudentPersonalConsumer consumer) {
+	  QueryCriteria criteria = new QueryCriteria();
+	  criteria.addPredicate(new ServicePathPredicate(parent, value));
+    System.out.println("Start 'Get All Students By Service Path' in all connected environments...");
+    try
+    {
+      List<Response> responses = consumer.retrieveByServicePath(criteria, new PagingInfo(5, 17), null, REQUEST_TYPE);
+      System.out.println("Responses from attempt to Get All Students:");
+      printResponses(responses, consumer);
+    }
+    catch (Exception ex)
+    {
+      ex.printStackTrace();
+    }
+    System.out.println("Finished 'Get All Students By Service Path' in all connected environments...");	  
+	}
 
 	private void getStudent(StudentPersonalConsumer consumer)
 	{
@@ -336,7 +359,9 @@ public class TestStudentPersonalConsumer
 		
   		StudentPersonalConsumer consumer = tester.getConsumer();
   		
-  		tester.getStudents(consumer);
+//  		tester.getStudents(consumer);
+  		tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
+//  		tester.getStudentsByServicePath("RoomInfos", "24ed508e1ed04bba82198233efa55859", consumer);
   //		tester.createStudent(consumer);
   //		tester.removeStudent(consumer);
 //  		tester.getStudent(consumer);
