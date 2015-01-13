@@ -131,7 +131,8 @@ public class QueueResource extends InfraResource
 		
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
 				return makeErrorResponse(error, ResponseAction.QUERY);
@@ -166,7 +167,8 @@ public class QueueResource extends InfraResource
 		}
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
 				return makeErrorResponse(error, ResponseAction.QUERY);
@@ -201,7 +203,8 @@ public class QueueResource extends InfraResource
 		}
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
 				return makeErrorResponse(error, ResponseAction.CREATE);
@@ -249,7 +252,8 @@ public class QueueResource extends InfraResource
 		}
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
 				return makeErrorResponse(error, ResponseAction.DELETE);
@@ -289,7 +293,8 @@ public class QueueResource extends InfraResource
 		}
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			
 			String consumerID = getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_CONSUMER_ID);
 			consumerID = consumerID == null ? "" : consumerID;
@@ -377,7 +382,8 @@ public class QueueResource extends InfraResource
 	/*------------------------*/
 	private QueueType createQueue(QueueType inputQueue)
 	{
-		SIF3Session sif3Session = getEnvironmentManager().getSessionBySessionToken(getSessionToken());
+		//SIF3Session sif3Session = getEnvironmentManager().getSessionBySessionToken(getTokenFromAuthToken());
+		SIF3Session sif3Session = getSIF3SessionForRequest();
 		dummyQueue = inputQueue;
 		dummyQueue.setCreated(Calendar.getInstance());
 		dummyQueue.setId(UUIDGenerator.getUUID());

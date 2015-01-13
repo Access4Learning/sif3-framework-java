@@ -554,6 +554,13 @@ public class AdapterEnvironmentStore implements Serializable
             
 		envInfo.setDefaultUpdateType(getUpdateType(props));
 		
+		// The properties below might only be applicable for DIRECT environments but this remains to be seen. Since they all have a default
+		// value it should not matter if they are set or not and what environment we are in.
+		envInfo.setAutoCreateEnvironment(props.getPropertyAsBool("env.allow.autoCreate", false));
+		
+  		// Authentication Method
+  		envInfo.setAccessTokenAuthMethod(adapterProperties.getPropertyAsString("adapter.default.accessToken.authentication.method", AuthenticationMethod.Bearer.name()));
+
 		if (errorsFound)
 		{
 			logger.error("Errors found in reading environment information from " + getAdapterFileNameWithoutExt() + ".properties. See previous log entries for details and please correct them.");

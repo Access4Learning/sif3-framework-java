@@ -21,6 +21,7 @@ package sif3.infra.common.env.types;
 import java.net.URI;
 
 import sif3.common.header.HeaderValues.UpdateType;
+import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 
 /**
  * This class represents a provider environment. This is a more complex class than a consumer environment as it has to validate a
@@ -33,13 +34,14 @@ public class ProviderEnvironment extends EnvironmentInfo
 {
     private static final long serialVersionUID = 6469968451023182574L;
     
-	private boolean connected              = false;
-	private String  templateXMLFileName    = null;
-	private URI     secureConnectorBaseURI = null; // Secure URI to connect to Provider 
-	private URI     connectorBaseURI       = null; // URI to connect to Provider
-	private UpdateType defaultUpdateType = UpdateType.FULL; // Default value for update events.
+	private boolean              connected              = false;
+	private String               templateXMLFileName    = null;
+	private URI                  secureConnectorBaseURI = null; // Secure URI to connect to Provider 
+	private URI                  connectorBaseURI       = null; // URI to connect to Provider
+	private UpdateType           defaultUpdateType      = UpdateType.FULL; // Default value for update events.
+	private boolean              autoCreateEnvironment  = false;
+	private AuthenticationMethod accessTokenAuthMethod  = AuthenticationMethod.Bearer; // Default Auth Method if accessToke is used.
     
-
 	/**
 	 * Constructor
 	 * 
@@ -132,13 +134,49 @@ public class ProviderEnvironment extends EnvironmentInfo
 		}
     }
 
+	public boolean getAutoCreateEnvironment()
+    {
+    	return this.autoCreateEnvironment;
+    }
+
+	public void setAutoCreateEnvironment(boolean autoCreateEnvironment)
+    {
+    	this.autoCreateEnvironment = autoCreateEnvironment;
+    }
+
+	public AuthenticationMethod getAccessTokenAuthMethod()
+    {
+    	return accessTokenAuthMethod;
+    }
+
+	public void setAccessTokenAuthMethod(AuthenticationMethod accessTokenAuthMethod)
+    {
+    	this.accessTokenAuthMethod = accessTokenAuthMethod;
+    }
+
+	// authMethod for accessToken: Valid values are what is listed in AuthenticationUtils.AuthenticationMethod (case sensitive!!!)
+	public void setAccessTokenAuthMethod(String accessTokenAuthMethod)
+    {
+		try
+		{
+			this.accessTokenAuthMethod = AuthenticationMethod.valueOf(accessTokenAuthMethod);
+		}
+		catch (Exception ex)
+		{
+			this.accessTokenAuthMethod = AuthenticationMethod.Bearer;
+		}
+    }
+
 	@Override
     public String toString()
     {
-	    return "ProviderEnvironment [connected=" + this.connected + ", templateXMLFileName="
-	            + this.templateXMLFileName + ", secureConnectorBaseURI="
-	            + this.secureConnectorBaseURI + ", connectorBaseURI=" + this.connectorBaseURI
-	            + ", defaultUpdateType=" + this.defaultUpdateType + ", toString()="
-	            + super.toString() + "]";
+	    return "ProviderEnvironment [accessTokenAuthMethod="
+	            + accessTokenAuthMethod + ", autoCreateEnvironment="
+	            + autoCreateEnvironment + ", connected=" + connected
+	            + ", connectorBaseURI=" + connectorBaseURI
+	            + ", defaultUpdateType=" + defaultUpdateType
+	            + ", secureConnectorBaseURI=" + secureConnectorBaseURI
+	            + ", templateXMLFileName=" + templateXMLFileName
+	            + ", toString()=" + super.toString() + "]";
     }
 }

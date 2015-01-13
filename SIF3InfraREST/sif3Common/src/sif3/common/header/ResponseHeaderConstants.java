@@ -33,6 +33,7 @@ public class ResponseHeaderConstants
 	 */
 	public static final String HDR_MESSAGE_ID = "messageId";
 	public static final String HDR_AUTH_TOKEN = HttpHeaders.AUTHORIZATION;
+	public static final String HDR_ENVIRONMENT_URI = "environmentURI";
 	public static final String HDR_GENERATOR_ID = "generatorId";
 	public static final String HDR_IF_NOT_MATCH = HttpHeaders.IF_NONE_MATCH;
 	public static final String HDR_ETAG = HttpHeaders.ETAG;
@@ -47,11 +48,11 @@ public class ResponseHeaderConstants
 	public static final String HDR_SERVICE_TYPE = "serviceType"; // OBJECT, FUNCTION, UTILITY, SERVICEPATH, XQUERYTEMPLATE
 
 	/* Paging and navigation related properties */
-  public static final String HDR_NAVIGATION_ID = CommonConstants.PagingResponseProperty.navigationId.name(); //"navigationId"; 
-  public static final String HDR_PAGE_SIZE = CommonConstants.PagingResponseProperty.navigationPageSize.name(); //"navigationPageSize";
-  public static final String HDR_PAGE_NO = CommonConstants.PagingResponseProperty.navigationPage.name(); //"navigationPage";
-  public static final String HDR_TOTAL_ITEMS = CommonConstants.PagingResponseProperty.navigationCount.name(); //"navigationCount";
-  public static final String HDR_LAST_PAGE_NO = CommonConstants.PagingResponseProperty.navigationLastPage.name(); //"navigationLastPage";
+	public static final String HDR_NAVIGATION_ID = CommonConstants.PagingResponseProperty.navigationId.name(); //"navigationId"; 
+	public static final String HDR_PAGE_SIZE = CommonConstants.PagingResponseProperty.navigationPageSize.name(); //"navigationPageSize";
+	public static final String HDR_PAGE_NO = CommonConstants.PagingResponseProperty.navigationPage.name(); //"navigationPage";
+	public static final String HDR_TOTAL_ITEMS = CommonConstants.PagingResponseProperty.navigationCount.name(); //"navigationCount";
+	public static final String HDR_LAST_PAGE_NO = CommonConstants.PagingResponseProperty.navigationLastPage.name(); //"navigationLastPage";
 
 	
 	/*---------------------------------------------------------*/
@@ -73,6 +74,7 @@ public class ResponseHeaderConstants
 	 {
 		 HDR_MESSAGE_ID,
 		 HDR_AUTH_TOKEN, 
+		 HDR_ENVIRONMENT_URI,
 		 HDR_GENERATOR_ID, 
 		 HDR_IF_NOT_MATCH, 
 		 HDR_NAVIGATION_ID, 

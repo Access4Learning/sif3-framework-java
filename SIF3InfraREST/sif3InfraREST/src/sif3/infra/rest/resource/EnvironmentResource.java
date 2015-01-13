@@ -30,26 +30,24 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
-import sif3.common.CommonConstants;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.model.AuthenticationInfo;
+import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.EnvironmentKey;
-import sif3.common.model.URLQueryParameter;
+import sif3.common.model.security.TokenInfo;
 import sif3.common.persist.model.AppEnvironmentTemplate;
+import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.ErrorDetails;
 import sif3.infra.common.env.mgr.DirectProviderEnvironmentManager;
 import sif3.infra.common.env.mgr.ProviderManagerFactory;
 import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.interfaces.EnvironmentManager;
-import sif3.infra.common.model.ApplicationInfoType;
 import sif3.infra.common.model.EnvironmentType;
-import sif3.infra.common.model.ObjectFactory;
-import sif3.infra.common.model.ProductIdentityType;
 import au.com.systemic.framework.utils.StringUtils;
 
 /*
@@ -66,10 +64,7 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 @Path("/environments{mimeType:(\\.[^/]*?)?}")
 public class EnvironmentResource extends InfraResource
-{
-  /* Name of query parameters for payload free environment creation */
-  private enum EnvironmentQueryParams {solutionId, applicationKey, userToken, instanceId, authenticationMethod, consumerName, supportedInfrastructureVersion, dataModelNamespace, transport, productName};
-  
+{  
 	// Needed in some cases where an environment is created.
 	private String sessionToken = null;
 
@@ -86,9 +81,9 @@ public class EnvironmentResource extends InfraResource
 	 * Mainly needed at creation of an environment
 	 */
 	@Override
-	public String getSessionToken()
+	public String getTokenFromAuthToken()
 	{
-		return (sessionToken == null) ? super.getSessionToken() : sessionToken;
+		return (sessionToken == null) ? super.getTokenFromAuthToken() : sessionToken;
 	}	
 
 	/*----------------------*/
@@ -102,7 +97,6 @@ public class EnvironmentResource extends InfraResource
     public EnvironmentManager getEnvironmentManager()
     {
     	return ProviderManagerFactory.getEnvironmentManager();
-//	    return DirectProviderEnvironmentManager.getInstance();
     }
 		
     // -------------------------------------------------//
@@ -123,16 +117,29 @@ public class EnvironmentResource extends InfraResource
 		
 		try
 		{
-		  EnvironmentType inputEnv = null;
-		  if (StringUtils.notEmpty(payload))
-		  {
-		    inputEnv = (EnvironmentType) getInfraUnmarshaller().unmarshal(payload, EnvironmentType.class, getRequestMediaType());
-		  }
-		  else // check if we have the environment information as URL query parameters
-		  {
-		    AuthenticationInfo authInfo = getAuthInfo(); // we should have an application key here at this stage
-		    inputEnv = makeEnvironmentFromQueryParams(getQueryParameters(), authInfo.getUserToken());
-		  }
+			EnvironmentType inputEnv = null;
+			AuthenticationInfo authInfo = getAuthInfo();
+		  
+			// The method below will set the bearer token info if the authentication method is 'Bearer'
+			// Any failures with the method below will throw a VerifyError exception
+			TokenInfo tokenInfo = getBearerTokenInfo(authInfo);
+		  
+			if (StringUtils.notEmpty(payload))
+			{
+				inputEnv = (EnvironmentType) getInfraUnmarshaller().unmarshal(payload, EnvironmentType.class, getRequestMediaType());
+			}
+			else // check if we have the environment information as URL query parameters
+			{
+				if (authInfo.getAuthMethod() != AuthenticationInfo.AuthenticationMethod.Bearer)
+				{
+					// authInfo should have an application key here at this stage if Basic or SIF_HMACSHA256
+					inputEnv = makeEnvironmentFromQueryParams(getQueryParameters(), authInfo.getUserToken(), true);
+				}
+				else // Bearer Token => We must get info about environment from TokenInfo or Query Parameters
+				{
+					inputEnv = makeEnvironmentForBearerToken(getQueryParameters(), tokenInfo);
+				}
+			}
 
 			ArrayList<String> envError = envDataValid(inputEnv); 
 			if (envError != null)
@@ -151,27 +158,36 @@ public class EnvironmentResource extends InfraResource
 				return makeErrorResponse(error, ResponseAction.CREATE);       				
 			}
 			
-			// check if initial Authentication Token is valid for this environment template.
-			ErrorDetails errors = validateAuthToken(appEnvTemplate.getApplicationKey(), appEnvTemplate.getPassword());
-			if (errors != null) // we had an issue with the authentication => return error.
+			// check if initial Authentication Token is valid for this environment template. 
+			// No validation of token required if it is bearer token because it was validated in getBearerTokenInfo()
+			// at the top of this method.
+			if (authInfo.getAuthMethod() != AuthenticationMethod.Bearer)
 			{
-				return makeErrorResponse(errors, ResponseAction.CREATE);       
+				ErrorDetails errors = validateNoneBearerAuthToken(appEnvTemplate.getApplicationKey(), appEnvTemplate.getPassword());
+				if (errors != null) // we had an issue with the authentication => return error.
+				{
+					return makeErrorResponse(errors, ResponseAction.CREATE);       
+				}
 			}
 			
 			// Here we are ok with authentication. Check if there is an environment for this application already.
-			EnvironmentType environment = getDirectEnvironmentManager().getEnvironmentFromWorkstore(envKey, isSecure());
+			EnvironmentType environment = getDirectEnvironmentManager().getEnvironmentFromWorkstore(envKey, tokenInfo, isSecure());
 			if (environment != null) // we have an environment already
 			{
 	  			// Ensure local session token is set for later authentication
 				this.sessionToken = environment.getSessionToken();
 				
+				// Note: This is an invalid state as far as the SIF Specification is concerned. We return HTTP Status 409
+				//       and for the time being return the environment that already exists. This might be wrong but it is
+				//       not clearly stated in the SIF Specification what should be returned with a 409 error. As far
+				//       as the framework is concerned we won't load a session into the session store.
 		        //TODO: JH - Confirm if we shall return it
 		        return createEnvResponse(environment, Status.CONFLICT.getStatusCode(), ResponseAction.CREATE);
 			}
 			
 			// If we get to this point then we don't have an environment/session yet. Create it the environment store and also add it to 
 			// the ClientEnvironmentManager.
-		    environment = getDirectEnvironmentManager().createOrUpdateEnvironment(inputEnv, isSecure());
+		    environment = getDirectEnvironmentManager().createOrUpdateEnvironment(inputEnv, tokenInfo, isSecure());
 		      
 		    if (environment == null) // We had a problem. Error logged
 		    {
@@ -191,17 +207,23 @@ public class EnvironmentResource extends InfraResource
 			logger.error("Environment Payload: "+ payload);
 			return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal environment payload: "+ ex.getMessage()), ResponseAction.CREATE);
 		}
-    catch (UnsupportedMediaTypeExcpetion ex)
-    {
-      logger.error("Failed to unmarshal payload into an environment: "+ ex.getMessage(), ex);
-      logger.error("Environment Payload: "+ payload);
-      return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal environment payload: "+ ex.getMessage()), ResponseAction.CREATE);
-    }
+	    catch (UnsupportedMediaTypeExcpetion ex)
+	    {
+	    	logger.error("Failed to unmarshal payload into an environment: "+ ex.getMessage(), ex);
+	    	logger.error("Environment Payload: "+ payload);
+	    	return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal environment payload: "+ ex.getMessage()), ResponseAction.CREATE);
+	    }
+	    catch (VerifyError ex)
+	    {
+	    	logger.error("Security Token issue. See previous error log entries.", ex);
+	    	logger.error("Environment Payload: "+ payload);
+	    	return makeErrorResponse( new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not authorized.", ex.getMessage()), ResponseAction.CREATE);
+	    }	    
 	    catch (Exception ex)
 	    {
-	      logger.error("Failed to create/retrieve environment session: "+ ex.getMessage(), ex);
-	      logger.error("Environment Payload: "+ payload);
-	      return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal environment payload: "+ ex.getMessage()), ResponseAction.CREATE);
+	    	logger.error("Failed to create/retrieve environment session: "+ ex.getMessage(), ex);
+	    	logger.error("Environment Payload: "+ payload);
+	    	return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal environment payload: "+ ex.getMessage()), ResponseAction.CREATE);
 	    }
 	}
 
@@ -218,16 +240,27 @@ public class EnvironmentResource extends InfraResource
 	{
 		logger.debug("Retrieve Environment with URL Postfix mimeType = '" + mimeType + "' and id = " + id);	
 				
-		// Ok there is a session for this environment. Validate if the user is the one that owns the environment	
-		ErrorDetails errors = validSession();
+		TokenInfo tokenInfo = null;
+		try
+		{
+			tokenInfo = getBearerTokenInfo(getAuthInfo());
+		}
+		catch (VerifyError ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not Authorized.", ex.getMessage()), ResponseAction.QUERY);
+		}
+		
+		// token already validated by getBearerTokenInfo() method above
+		ErrorDetails errors = validSession(getAuthInfo(), false, tokenInfo);
 		if (errors == null)
 		{
-			// Ok. All good. There is a session for the given session token. It has been loaded if it wasn't. Now get the actual
-			// Environment from the store.
+  			// If we get here then a session exists for the given security token and is now in the session 
+			// cache. Now get the actual Environment from the store.
 			try
 		    {
-				EnvironmentType environment = getDirectEnvironmentManager().reloadEnvironmentBySessionToken(getSessionToken(), isSecure());
-
+				SIF3Session sif3Session = getSIF3SessionForRequest();
+				EnvironmentType environment = getDirectEnvironmentManager().reloadEnvironmentBySessionToken(sif3Session.getSessionToken(), tokenInfo, isSecure());					
+				
 				// Also ensure that the id matches the ID of the environment otherwise we have a bit of a mixup
 	  			if (!id.equals(environment.getId()))
 	  			{
@@ -242,7 +275,6 @@ public class EnvironmentResource extends InfraResource
 		    	logger.error("Failed to retrieve environment with ID = "+id+": "+ ex.getMessage(), ex);
 		    	return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Error accessing environment store: "+ ex.getMessage()), ResponseAction.QUERY);
 		    }
-			
 		}
 		else
 		{
@@ -264,18 +296,26 @@ public class EnvironmentResource extends InfraResource
 	{
 		logger.debug("Delete Environment with URL Postfix mimeType = '" + mimeType + "' and id = " + id);
     
-		// check if authentication token is valid for this environment. This time round we should have a proper authentication 
-		// token based on sessionToken
-		ErrorDetails errors = validSession();
+		TokenInfo tokenInfo = null;
+		try
+		{
+			tokenInfo = getBearerTokenInfo(getAuthInfo());
+		}
+		catch (VerifyError ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not Authorized.", ex.getMessage()), ResponseAction.DELETE);
+		}
+		
+		// token already validated by getBearerTokenInfo() method above
+		ErrorDetails errors = validSession(getAuthInfo(), false, tokenInfo);
 		if (errors == null)
 		{
 		    try
 		    {
-	  			// If I get here then the client has an environment. Load and return it.
-	  		  	String sessionToken = getSessionToken();
-	  		  
-	  		  	// Ensure we reload and return the latest. Access the session store for this.
-	  			EnvironmentType environment = getDirectEnvironmentManager().reloadEnvironmentBySessionToken(sessionToken, isSecure());
+	  			// If we get here then a session exists for the given security token and is now in the session 
+				// cache. Now get the actual Environment from the store.
+				SIF3Session sif3Session = getSIF3SessionForRequest();
+	  			EnvironmentType environment = getDirectEnvironmentManager().reloadEnvironmentBySessionToken(sif3Session.getSessionToken(), tokenInfo, isSecure());
 	  			
 	  			// Also ensure that the id matches the ID of the environment otherwise we have a bit of a mixup
 	  			if (!id.equals(environment.getId()))
@@ -284,7 +324,7 @@ public class EnvironmentResource extends InfraResource
 					return makeErrorResponse(errors, ResponseAction.DELETE);
 	  			}
 	  			
-				if (getDirectEnvironmentManager().removeEnvironmentBySessionToken(sessionToken))
+				if (getDirectEnvironmentManager().removeEnvironmentBySessionToken(sif3Session.getSessionToken(), true))
 				{
 					return makeResopnseWithNoContent(false, ResponseAction.DELETE);
 				}
@@ -322,87 +362,8 @@ public class EnvironmentResource extends InfraResource
 	private DirectProviderEnvironmentManager getDirectEnvironmentManager()
 	{
 		return (DirectProviderEnvironmentManager)getEnvironmentManager();
-	}
-	
-	/* 
-	 * ApplicationKey can be part of the url query parameters or it could be in the authorisation header or access token. If it is in either
-	 * in the authorization header or as an access token then it must be passed to this method in the "applicationKey' parameter.
-	 */
-	private EnvironmentType makeEnvironmentFromQueryParams(URLQueryParameter urlParams, String applicationKey)
-	{
-	  if (urlParams != null)
-	  {
-	    ObjectFactory infraObjectFactory = new ObjectFactory();
-	    EnvironmentType env = infraObjectFactory.createEnvironmentType();
-	    env.setApplicationInfo(new ApplicationInfoType());
-	    env.getApplicationInfo().setApplicationKey(applicationKey);
-	    env.getApplicationInfo().setTransport(CommonConstants.REST_TRANSPORT_STR); // default!
-	    
-	    for (EnvironmentQueryParams urlParam : EnvironmentQueryParams.values())
-	    {
-	      String value = urlParams.getQueryParam(urlParam.name());
-	      if (StringUtils.notEmpty(value))
-	      {
-  	      switch (urlParam)
-  	      {
-  	        case solutionId:
-  	          env.setSolutionId(value);
-  	          break;
-  	        case applicationKey: // ensure that URL parameter has lowest precedence.
-  	          if (StringUtils.isEmpty(env.getApplicationInfo().getApplicationKey())) // only use URL parameter if it is not yet set
-  	          {
-  	            env.getApplicationInfo().setApplicationKey(value);
-  	          }
-  	          break;
-  	        case userToken:
-              env.setUserToken(value);
-  	          break;
-  	        case instanceId:
-              env.setInstanceId(value);
-  	          break;
-  	        case authenticationMethod:
-  	          env.setAuthenticationMethod(value);
-  	          break;
-  	        case consumerName:
-  	          env.setConsumerName(value);
-  	          break;
-  	        case supportedInfrastructureVersion:
-  	          env.getApplicationInfo().setSupportedInfrastructureVersion(value);
-  	          break;
-  	        case dataModelNamespace:
-  	          env.getApplicationInfo().setDataModelNamespace(value);
-  	          break;
-  	        case transport:
-  	          env.getApplicationInfo().setTransport(value);
-  	          break;
-  	        case productName:
-  	          if (env.getApplicationInfo().getApplicationProduct() == null)
-  	          {
-  	            env.getApplicationInfo().setApplicationProduct(new ProductIdentityType());
-  	          }
-  	          env.getApplicationInfo().getApplicationProduct().setProductName(value);
-  	          break;
-  	      }
-	      }
-	    }
-	    
-	    //ensure that we have at least the application key!
-	    if (env.getApplicationInfo().getApplicationKey() != null)
-	    {
-	      return env;
-	    }
-	    else // log an error and return null
-	    {
-	      logger.error("At least the application key must be provided. Set it as URL paramater or use HTTP Authorization Header as stated in the SIF Specification.");
-	      return null;
-	    }
-	  }
-	  else
-	  {
-	    return null;
-	  }
-	}
-	
+	}	
+
 	private ArrayList<String> envDataValid(EnvironmentType environment)
 	{
 		ArrayList<String> errors = new ArrayList<String>();
@@ -437,7 +398,7 @@ public class EnvironmentResource extends InfraResource
 			return errors;
 		}
 	}
-
+	
 	private Response createEnvResponse(EnvironmentType environment, int statusCode, ResponseAction responseAction)
 	{
 		return makeResponse(environment, statusCode, false, responseAction, getInfraMarshaller());

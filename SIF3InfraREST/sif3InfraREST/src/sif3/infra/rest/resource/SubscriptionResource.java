@@ -106,7 +106,8 @@ public class SubscriptionResource extends InfraResource
 		}
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
 				return makeErrorResponse(error, ResponseAction.QUERY);
@@ -141,7 +142,8 @@ public class SubscriptionResource extends InfraResource
 		}
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
 				return makeErrorResponse(error, ResponseAction.QUERY);
@@ -177,7 +179,8 @@ public class SubscriptionResource extends InfraResource
 		}
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
 				return makeErrorResponse(error, ResponseAction.CREATE);
@@ -226,7 +229,8 @@ public class SubscriptionResource extends InfraResource
 		}
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
 				return makeErrorResponse(error, ResponseAction.DELETE);
