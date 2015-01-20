@@ -5,8 +5,7 @@
         <CommonwealthId>012345</CommonwealthId>
         <SchoolName>Lincoln Secondary College</SchoolName>
         <LEAInfoRefId>73648462888624AA5294BC6380173276</LEAInfoRefId>
-        <OtherLEA SIF_RefObject="LEAInfo">AA648462888624AA5294BC638017320B
-        </OtherLEA>
+        <OtherLEA SIF_RefObject="LEAInfo">AA648462888624AA5294BC638017320B</OtherLEA>
         <SchoolDistrict> Southern Metropolitan Region</SchoolDistrict>
         <SchoolType>Pri/Sec</SchoolType>
         <SchoolFocusList>
