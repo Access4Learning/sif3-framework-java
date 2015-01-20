@@ -29,7 +29,8 @@ import systemic.sif3.demo.rest.ModelObjectConstants;
  * @author Joerg Huber
  *
  */
-public class StudentPersonalConsumer extends AUDataModelEventConsumer<StudentCollectionType> {	
+public class StudentPersonalConsumer extends AUDataModelEventConsumer<StudentCollectionType> 
+{	
     public StudentPersonalConsumer()
     {
 	    super();
