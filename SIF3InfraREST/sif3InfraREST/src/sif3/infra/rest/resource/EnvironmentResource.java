@@ -74,7 +74,7 @@ public class EnvironmentResource extends InfraResource
 				               @PathParam("mimeType") String mimeType)
 	{
 		super(uriInfo, requestHeaders, request, "", null, null);
-    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
+		logger.debug("URL Postfix mimeType: '"+mimeType+"'");
 	}
 	
 	/*
@@ -181,8 +181,16 @@ public class EnvironmentResource extends InfraResource
 				//       and for the time being return the environment that already exists. This might be wrong but it is
 				//       not clearly stated in the SIF Specification what should be returned with a 409 error. As far
 				//       as the framework is concerned we won't load a session into the session store.
-		        //TODO: JH - Confirm if we shall return it
-		        return createEnvResponse(environment, Status.CONFLICT.getStatusCode(), ResponseAction.CREATE);
+				
+				// Check if the response shall contain an error message rather than the environment XML.
+				if (envInfo.getEnvCreateConflictIsError())
+				{
+					return makeErrorResponse(new ErrorDetails(Status.CONFLICT.getStatusCode(), Status.CONFLICT.getReasonPhrase(), "An environment '"+envInfo.getEnvironmentName()+"' for consumer '"+inputEnv.getConsumerName()+"' already exists. Cannot create it again."), ResponseAction.CREATE);
+				}
+				else
+				{
+			        return createEnvResponse(environment, Status.CONFLICT.getStatusCode(), ResponseAction.CREATE);					
+				}
 			}
 			
 			// If we get to this point then we don't have an environment/session yet. Create it the environment store and also add it to 
