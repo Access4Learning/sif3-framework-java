@@ -274,8 +274,9 @@ public class EnvironmentClientConnector
           logger.error("Returned Response Data:\n"+response);
           return null;
         }
-        else //all good!
+        else //all might be good! It could still have a 409 (Conflict, i.e. already exist) and pyload might be empty!
         {
+        	//if (response.)
           return (EnvironmentType)response.getDataObject();
         }
     }
