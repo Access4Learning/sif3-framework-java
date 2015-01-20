@@ -24,9 +24,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.xml.bind.JAXBElement;
+
 import sif.dd.au30.model.ObjectFactory;
 import sif.dd.au30.model.StudentCollectionType;
 import sif.dd.au30.model.StudentPersonalType;
+import sif.dd.au30.model.TeachingGroupCollectionType;
+import sif.dd.au30.model.TeachingGroupType.StudentList;
+import sif.dd.au30.model.TeachingGroupType.StudentList.TeachingGroupStudent;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
@@ -36,6 +41,7 @@ import sif3.common.interfaces.QueryProvider;
 import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
+import sif3.common.model.QueryPredicate;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
@@ -57,6 +63,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 {
 	private static int numDeletes = 0;
 	private static HashMap<String, StudentPersonalType> students = null; //new HashMap<String, StudentPersonalType>();
+	private static HashMap<String, StudentPersonalType> teachingGroupStudents = null; //new HashMap<String, StudentPersonalType>();
 	private ObjectFactory dmObjectFactory = new ObjectFactory();
 	
 	public StudentPersonalProvider()
@@ -83,7 +90,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 						{
 							students.put(studentPersonal.getRefId(), studentPersonal);
 						}
-						logger.debug("Loaded " + students.size() + " s into memory.");
+						logger.debug("Loaded " + students.size() + " Students into memory.");
 					}
 				}
 				catch (UnmarshalException ex)
@@ -96,12 +103,55 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 				}
 			}
 		}
+		
+		if (teachingGroupStudents == null)
+		{
+			logger.debug("Try to load students for teaching group from XML file...");
+
+			// Load all students so that we can do some real stuff here.
+			String fileName = getServiceProperties().getPropertyAsString("provider.teachinggroup.file.location", null);
+			if (fileName != null)
+			{
+				String inputXML = FileReaderWriter.getFileContent(fileName);
+				try
+				{
+					TeachingGroupCollectionType classes = (TeachingGroupCollectionType) getUnmarshaller().unmarshalFromXML(inputXML, ModelObjectConstants.TEACHING_GROUPS.getObjectType());
+					if ((classes != null) && (classes.getTeachingGroup() != null))
+					{	
+						// Get student list of first teaching group
+						JAXBElement<StudentList> jaxbClassStudents = classes.getTeachingGroup().get(0).getStudentList();
+						if (jaxbClassStudents != null)
+						{
+							teachingGroupStudents = new HashMap<String, StudentPersonalType>();
+							StudentList classStudents = jaxbClassStudents.getValue();
+							for (TeachingGroupStudent student : classStudents.getTeachingGroupStudent())
+							{
+								teachingGroupStudents.put(student.getStudentPersonalRefId().getValue(), students.get(student.getStudentPersonalRefId().getValue()));
+							}
+						}
+						logger.debug("Loaded " + teachingGroupStudents.size() + " teaching group students for a class into memory.");
+					}
+				}
+				catch (UnmarshalException ex)
+				{
+					ex.printStackTrace();
+				}
+				catch (UnsupportedMediaTypeExcpetion ex)
+				{
+					ex.printStackTrace();
+				}
+			}			
+		}
 
 		// If students are still null then something must have failed and would have been logged.
 		// For the purpose of making things work ok we initialise the students hashmap now. It will avoid null pointer errors.
 		if (students == null)
 		{
 			students = new HashMap<String, StudentPersonalType>();
+		}
+		if (teachingGroupStudents == null)
+		{
+			teachingGroupStudents = new HashMap<String, StudentPersonalType>();
 		}
     }
 
@@ -259,39 +309,54 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     {
     	logger.debug("Retrieve Students for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
 
-    	ArrayList<StudentPersonalType> studentList = new ArrayList<StudentPersonalType>();
-    	if (pagingInfo == null) //return all
-    	{
-    		studentList.addAll(students.values());
-    	}
-    	else
-    	{
-    		pagingInfo.setTotalObjects(students.size());
-    		if ((pagingInfo.getPageSize() * (pagingInfo.getCurrentPageNo()+1)) > students.size())
-    		{
-    			return null; // Requested page outside of limits.
-    		}
-    		
-    		// retrieve applicable students
-    		Collection<StudentPersonalType> allStudent = students.values();
-    		int i = 0;
-    		int startPos = pagingInfo.getPageSize() * pagingInfo.getCurrentPageNo();
-    		int endPos = startPos + pagingInfo.getPageSize();
-    		for (Iterator<StudentPersonalType> iter = allStudent.iterator(); iter.hasNext();)
-    		{
-    			StudentPersonalType student = iter.next();
-    			if ((i>=startPos) && (i<endPos))
-    			{
-    				studentList.add(student);
-    			}
-    			i++;
-    		}
-    	}
+    	ArrayList<StudentPersonalType> studentList = fetchStudents(students, pagingInfo);
     	
     	StudentCollectionType studentCollection = dmObjectFactory.createStudentCollectionType();
     	studentCollection.getStudentPersonal().addAll(studentList);
 	    return studentCollection;
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see sif3.common.interfaces.QueryProvider#retrieveByServicePath(sif3.common.model.QueryCriteria, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo, sif3.common.model.RequestMetadata)
+     */
+    @Override
+	public Object retrieveByServicePath(QueryCriteria queryCriteria, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException
+	{
+		logger.debug("Performing query by service path.");
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("Query Condition (given by service path): " + queryCriteria);
+		}
+		
+		// Check if the query is SchoolInfo or TeachingGroup
+		List<QueryPredicate> predicates = queryCriteria.getPredicates();
+		if ((predicates != null) && (predicates.size() == 1)) // ensure it is a valid condition
+		{
+			if ("SchoolInfos".equals(predicates.get(0).getSubject()))
+			{
+				// Assume all students known from the file are at the same school.
+				return retrieve(zone, context, pagingInfo, metadata);
+			}
+			else if ("TeachingGroups".equals(predicates.get(0).getSubject()))
+			{
+		    	logger.debug("Retrieve Students for Teaching Group (class) "+predicates.get(0).getValue()+" for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
+
+		    	ArrayList<StudentPersonalType> studentList = fetchStudents(teachingGroupStudents, pagingInfo);
+		    	StudentCollectionType studentCollection = dmObjectFactory.createStudentCollectionType();
+		    	studentCollection.getStudentPersonal().addAll(studentList);
+			    return studentCollection;
+			}
+			else
+			{
+				throw new UnsupportedQueryException("The query condition (driven by the service path) "+queryCriteria+" is not supported by the provider.");
+			}
+		}
+		else // not supported query (only single level service path query supported by this provider)
+		{
+			throw new UnsupportedQueryException("The query condition (driven by the service path) "+queryCriteria+" is not supported by the provider.");
+		}
+	}
 
 	/* (non-Javadoc)
      * @see sif3.common.interfaces.Provider#createMany(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
@@ -429,17 +494,38 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 		
 		return buffer.toString();
 	}
-
-  @Override
-  public Object retrieveByServicePath(QueryCriteria queryCriteria, SIFZone zone, SIFContext context,
-      PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException {
-    logger.debug("Performing query by service path.");
-    if (logger.isDebugEnabled()) {
-      String queryString = queryCriteria == null ? "null" : queryCriteria.toString();
-      logger.debug("query: " + queryString);
-    }
-    // in a real implementation you would parse the query criteria and return filtered results.
-    // just perform a standard retrieve in this environment.
-    return retrieve(zone, context, pagingInfo, metadata);
-  }
+	
+	private ArrayList<StudentPersonalType> fetchStudents(HashMap<String, StudentPersonalType> studentMap, PagingInfo pagingInfo)
+	{
+    	ArrayList<StudentPersonalType> studentList = new ArrayList<StudentPersonalType>();
+    	if (pagingInfo == null) //return all
+    	{
+    		studentList.addAll(studentMap.values());
+    	}
+    	else
+    	{
+    		pagingInfo.setTotalObjects(studentMap.size());
+    		if ((pagingInfo.getPageSize() * (pagingInfo.getCurrentPageNo()+1)) > studentMap.size())
+    		{
+    			return null; // Requested page outside of limits.
+    		}
+    		
+    		// retrieve applicable students
+    		Collection<StudentPersonalType> allStudent = studentMap.values();
+    		int i = 0;
+    		int startPos = pagingInfo.getPageSize() * pagingInfo.getCurrentPageNo();
+    		int endPos = startPos + pagingInfo.getPageSize();
+    		for (Iterator<StudentPersonalType> iter = allStudent.iterator(); iter.hasNext();)
+    		{
+    			StudentPersonalType student = iter.next();
+    			if ((i>=startPos) && (i<endPos))
+    			{
+    				studentList.add(student);
+    			}
+    			i++;
+    		}
+    	}
+    	
+	    return studentList;
+	}
 }
