@@ -1,0 +1,153 @@
+<TeachingGroups xmlns="http://www.sifassociation.org/au/datamodel/1.3">
+  <TeachingGroup RefId="64A309DA063A2E35B359D75101A8C3D1" xmlns="http://www.sifassociation.org/au/datamodel/1.3">
+    <SchoolYear>2008</SchoolYear>
+    <LocalId>20087ASPN</LocalId>
+    <ShortName>7A SPN</ShortName>
+    <LongName>Year 7A Maths – Space and Numbers</LongName>
+    <Set>4</Set>
+    <Block>6</Block>
+    <CurriculumLevel>VELS Level 5</CurriculumLevel>
+    <StudentList>
+      <TeachingGroupStudent>
+        <StudentPersonalRefId>24ed508e1ed04bba82198233efa55859</StudentPersonalRefId>
+        <StudentLocalId>SMI001</StudentLocalId>
+        <Name Type="LGL">
+          <FamilyName>Smith</FamilyName>
+          <GivenName>Peter</GivenName>
+        </Name>
+      </TeachingGroupStudent>
+      <TeachingGroupStudent>
+        <StudentPersonalRefId>2ae2d4a3a3c04d77ad843b73adac7747</StudentPersonalRefId>
+        <StudentLocalId>SMI002</StudentLocalId>
+        <Name Type="LGL">
+          <FamilyName>Smith</FamilyName>
+          <GivenName>Jennifer</GivenName>
+        </Name>
+      </TeachingGroupStudent>
+      <TeachingGroupStudent>
+        <StudentPersonalRefId>2bc9ff83dbbe44e596da64b7271ec25e</StudentPersonalRefId>
+        <StudentLocalId>SMI003</StudentLocalId>
+        <Name Type="LGL">
+          <FamilyName>Smith</FamilyName>
+          <GivenName>Terence</GivenName>
+        </Name>
+      </TeachingGroupStudent>
+      <TeachingGroupStudent>
+        <StudentPersonalRefId>399f1200f6034d8fbeda72a81b634639</StudentPersonalRefId>
+        <StudentLocalId>SMI001</StudentLocalId>
+        <Name Type="LGL">
+          <FamilyName>Smith</FamilyName>
+          <GivenName>Peter</GivenName>
+        </Name>
+      </TeachingGroupStudent>
+      <TeachingGroupStudent>
+        <StudentPersonalRefId>57176d94b5224a15841c78dedf8b7284</StudentPersonalRefId>
+        <StudentLocalId>SMI002</StudentLocalId>
+        <Name Type="LGL">
+          <FamilyName>Smith</FamilyName>
+          <GivenName>Jennifer</GivenName>
+        </Name>
+      </TeachingGroupStudent>
+      <TeachingGroupStudent>
+        <StudentPersonalRefId>D7F268841E7211E3860BC0035B073B55</StudentPersonalRefId>
+        <StudentLocalId>SMI003</StudentLocalId>
+        <Name Type="LGL">
+          <FamilyName>Smith</FamilyName>
+          <GivenName>Terence</GivenName>
+        </Name>
+      </TeachingGroupStudent>
+      <TeachingGroupStudent>
+        <StudentPersonalRefId>DC5CC482026B11E3A5325DE06940ABA3</StudentPersonalRefId>
+        <StudentLocalId>SMI001</StudentLocalId>
+        <Name Type="LGL">
+          <FamilyName>Smith</FamilyName>
+          <GivenName>Peter</GivenName>
+        </Name>
+      </TeachingGroupStudent>
+      <TeachingGroupStudent>
+        <StudentPersonalRefId>DC636260026B11E3A5325DE06940ABA3</StudentPersonalRefId>
+        <StudentLocalId>SMI002</StudentLocalId>
+        <Name Type="LGL">
+          <FamilyName>Smith</FamilyName>
+          <GivenName>Jennifer</GivenName>
+        </Name>
+      </TeachingGroupStudent>
+      <TeachingGroupStudent>
+        <StudentPersonalRefId>DE0BD07A026B11E3A5325DE06940ABA3</StudentPersonalRefId>
+        <StudentLocalId>SMI003</StudentLocalId>
+        <Name Type="LGL">
+          <FamilyName>Smith</FamilyName>
+          <GivenName>Terence</GivenName>
+        </Name>
+      </TeachingGroupStudent>
+      <TeachingGroupStudent>
+        <StudentPersonalRefId>DE177D6C026B11E3A5325DE06940ABA3</StudentPersonalRefId>
+        <StudentLocalId>SMI001</StudentLocalId>
+        <Name Type="LGL">
+          <FamilyName>Smith</FamilyName>
+          <GivenName>Peter</GivenName>
+        </Name>
+      </TeachingGroupStudent>
+      <TeachingGroupStudent>
+        <StudentPersonalRefId>E267EFA0026B11E3A5325DE06940ABA3</StudentPersonalRefId>
+        <StudentLocalId>SMI002</StudentLocalId>
+        <Name Type="LGL">
+          <FamilyName>Smith</FamilyName>
+          <GivenName>Jennifer</GivenName>
+        </Name>
+      </TeachingGroupStudent>
+      <TeachingGroupStudent>
+        <StudentPersonalRefId>E39AF8B8026B11E3A5325DE06940ABA3</StudentPersonalRefId>
+        <StudentLocalId>SMI003</StudentLocalId>
+        <Name Type="LGL">
+          <FamilyName>Smith</FamilyName>
+          <GivenName>Terence</GivenName>
+        </Name>
+      </TeachingGroupStudent>  
+      <TeachingGroupStudent>
+        <StudentPersonalRefId>E53B7BD4026B11E3A5325DE06940ABA3</StudentPersonalRefId>
+        <StudentLocalId>SMI001</StudentLocalId>
+        <Name Type="LGL">
+          <FamilyName>Smith</FamilyName>
+          <GivenName>Peter</GivenName>
+        </Name>
+      </TeachingGroupStudent>
+      <TeachingGroupStudent>
+        <StudentPersonalRefId>E6F9B63E026B11E3A5325DE06940ABA3</StudentPersonalRefId>
+        <StudentLocalId>SMI002</StudentLocalId>
+        <Name Type="LGL">
+          <FamilyName>Smith</FamilyName>
+          <GivenName>Jennifer</GivenName>
+        </Name>
+      </TeachingGroupStudent>
+      <TeachingGroupStudent>
+        <StudentPersonalRefId>E39AF8B8026B11E3A5325DE06940ABA3</StudentPersonalRefId>
+        <StudentLocalId>SMI003</StudentLocalId>
+        <Name Type="LGL">
+          <FamilyName>Smith</FamilyName>
+          <GivenName>Terence</GivenName>
+        </Name>
+      </TeachingGroupStudent>    
+    </StudentList>
+    <TeacherList>
+      <TeachingGroupTeacher>
+        <StaffLocalId>SMI1</StaffLocalId>
+        <Name Type="LGL">
+          <FamilyName>Smith</FamilyName>
+          <GivenName>Thomas</GivenName>
+        </Name>
+        <Association>Class Teacher</Association>
+      </TeachingGroupTeacher>
+      <TeachingGroupTeacher>
+        <StaffPersonalRefId>A8CCCCE35B359D75101D00AA001A0000
+        </StaffPersonalRefId>
+        <StaffLocalId>LONG2</StaffLocalId>
+        <Name Type="LGL">
+          <FamilyName>Long</FamilyName>
+          <GivenName>Tamara</GivenName>
+        </Name>
+        <Association>Integration Aide</Association>
+      </TeachingGroupTeacher>
+    </TeacherList>
+  </TeachingGroup>
+</TeachingGroups>
