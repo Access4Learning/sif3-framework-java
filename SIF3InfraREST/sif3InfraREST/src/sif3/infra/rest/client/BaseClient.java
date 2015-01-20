@@ -18,6 +18,7 @@
 
 package sif3.infra.rest.client;
 
+import java.awt.TrayIcon.MessageType;
 import java.net.URI;
 import java.util.HashMap;
 
@@ -306,7 +307,11 @@ public abstract class BaseClient
 		response.setResourceURI(service.getURI());
 		response.setDataObjectType(returnObjectClass);
 
-		if (isSuccessStatusCode(clientResponse.getClientResponseStatus().getStatusCode(), successStatusCodes))
+		// Check if HTTP header messageType == ERROR
+		boolean isErrorMessageType = MessageType.ERROR.name().equals(response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_MESSAGE_TYPE));
+		
+		
+		if (isSuccessStatusCode(clientResponse.getClientResponseStatus().getStatusCode(), successStatusCodes) && !isErrorMessageType)
 		{
 			if (response.getHasEntity())
 			{
@@ -338,10 +343,10 @@ public abstract class BaseClient
 						{
 							response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
 						}
-            catch (UnsupportedMediaTypeExcpetion ex)
-            {
-              response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
-            }
+						catch (UnsupportedMediaTypeExcpetion ex)
+						{
+							response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
+						}
 					}
 				}
 				else // Strange. We have an entity but we returnObjectClass is null.
@@ -396,17 +401,26 @@ public abstract class BaseClient
 				}
 				else
 				{
-					response.setError(convertFromErrorType(error));
+					if (StringUtils.isEmpty(error.getMessage()) && StringUtils.isEmpty(error.getDescription()) && (error.getCode() <= 0))
+					{
+						// It appears that we could not get a useful error from the entity string for whatever reason. Return something hopefully
+						// more useful from the low level response
+						response.setError(new ErrorDetails(clientResponse.getStatus(), clientResponse.getClientResponseStatus().getReasonPhrase()));
+					}
+					else
+					{
+						response.setError(convertFromErrorType(error));
+					}
 				}
 			}
 			catch (UnmarshalException ex)
 			{
 				response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload into ErrorType object: "+ex.getMessage()+". See error description for payload details.", errorStr));
 			}
-      catch (UnsupportedMediaTypeExcpetion ex)
-      {
-        response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload into ErrorType object (unsupported media type): "+ex.getMessage()+". See error description for payload details.", errorStr));
-      }
+			catch (UnsupportedMediaTypeExcpetion ex)
+			{
+				response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload into ErrorType object (unsupported media type): "+ex.getMessage()+". See error description for payload details.", errorStr));
+			}
 		}
 		else // It appears we have an error but no content. So create an error object with custom message.
 		{
