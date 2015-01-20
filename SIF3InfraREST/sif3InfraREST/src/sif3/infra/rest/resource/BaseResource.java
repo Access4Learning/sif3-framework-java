@@ -142,7 +142,7 @@ public abstract class BaseResource
 		this.uriInfo = uriInfo;
 		this.request = request;
 		this.requestHeaders = requestHeaders;
-		setURLPostfixMediaType(uriInfo.getPath());
+		setURLMediaTypeFromPath(uriInfo.getPath());
 		extractHeaderProperties(requestHeaders);
 		extractQueryParameters(uriInfo);
 		setSecure(HTTPS_SCHEMA.equalsIgnoreCase(getUriInfo().getBaseUri().getScheme()));
@@ -793,10 +793,11 @@ public abstract class BaseResource
 
 	
 	/*
-	 * The URL postfix mime type can be of the form '.xml', 'xml', '.json' etc. all case insensitive. If null or an empty value is given then
-	 * a default of XML is returned.
+	 * This method checks if the given path has a postfix of '.xml', '.json' etc all case insensitive.
+	 * If a postfix does exist it is extracted and converted to a proper type. If no postfix is given then
+	 * the mime type of XML is assumed.
 	 */
-	protected void setURLPostfixMediaType(String urlPostfixMimeTypeStr)
+	private void setURLMediaTypeFromPath(String urlPostfixMimeTypeStr)
 	{
 	  if (StringUtils.isEmpty(urlPostfixMimeTypeStr))
 	  {
@@ -806,40 +807,47 @@ public abstract class BaseResource
 	  {
 		  // get the position of the last '.'.
 		  int pos = urlPostfixMimeTypeStr.lastIndexOf(".");
-		  if ((pos > -1) && (pos + 1 < urlPostfixMimeTypeStr.length())) // "." found. Get everything after the "."
+		  if ((pos == -1)) // no '.' found, so there is no postfix set! Assume XML
 		  {
-			  urlPostfixMimeTypeStr = urlPostfixMimeTypeStr.substring(pos+1);
+			  urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
 		  }
-		  
-		  // Start comparing for valid types
-		  PostFixMimeType mimeType = PostFixMimeType.XML;
-		  try
-		  {
-		    mimeType = PostFixMimeType.valueOf(urlPostfixMimeTypeStr.trim().toUpperCase());
-		  }
-		  catch (Exception ex)
-		  {
-		    logger.error("Failed to convert URL Postfix Mime Type '"+urlPostfixMimeTypeStr+"' to XML or JSON. Default to Media Type will be APPLICATION_XML");
-		    mimeType = PostFixMimeType.XML;
-		  }
-		  
-		  switch (mimeType)
-		  {
-			case XML:
-			{
-				urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
-				break;
-			}
-			case JSON:
-			{
-				urlPostfixMimeType = MediaType.APPLICATION_JSON_TYPE;
-				break;
-			}
-			default:
-			{
-				urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
-				break;
-			}
+		  else
+		  {  
+			  if ((pos > -1) && (pos + 1 < urlPostfixMimeTypeStr.length())) // "." found. Get everything after the "."
+			  {
+				  urlPostfixMimeTypeStr = urlPostfixMimeTypeStr.substring(pos+1);
+			  }
+			  
+			  // Start comparing for valid types
+			  PostFixMimeType mimeType = PostFixMimeType.XML;
+			  try
+			  {
+			    mimeType = PostFixMimeType.valueOf(urlPostfixMimeTypeStr.trim().toUpperCase());
+			  }
+			  catch (Exception ex)
+			  {
+			    logger.error("Failed to convert URL Postfix Mime Type '"+urlPostfixMimeTypeStr+"' to XML or JSON. Default to Media Type will be APPLICATION_XML");
+			    mimeType = PostFixMimeType.XML;
+			  }
+			  
+			  switch (mimeType)
+			  {
+				case XML:
+				{
+					urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
+					break;
+				}
+				case JSON:
+				{
+					urlPostfixMimeType = MediaType.APPLICATION_JSON_TYPE;
+					break;
+				}
+				default:
+				{
+					urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
+					break;
+				}
+			  }
 		  }
 	  }
 	}
