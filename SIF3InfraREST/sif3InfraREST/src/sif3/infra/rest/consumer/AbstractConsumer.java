@@ -519,83 +519,60 @@ public abstract class AbstractConsumer implements Consumer
 		return responses;
 	}
 	
-	 public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
-	  {
-	    if (!initOK)
-	    {
-	      logger.error("Consumer not initialsied properly. See previous error log entries.");
-	      return null;
-	    }
+	public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+	{
+		if (!initOK)
+		{
+			logger.error("Consumer not initialsied properly. See previous error log entries.");
+			return null;
+		}
 
-	    Timer timer = new Timer();
-	    timer.start();
-	    List<Response> responses = new ArrayList<Response>();
-	    
-	    if (!getConsumerEnvironment().getIsConnected())
-	    {
-	      logger.error("No connected environment for "+getConsumerEnvironment().getEnvironmentName()+". See previous erro log entries.");
-	      return responses;
-	    }
-	    // List is null or empty which means we perform action in default Zone/Context
-	    if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
-	    {
-	      ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, null, null, requestType);
-	      if (error == null)
-	      {
-	        error = requestTypeSupported(requestType);
-	      }
-	      if (error == null) //all good
-	      {
-	        responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, getHeaderProperties(getConsumerEnvironment(), false, requestType, HeaderValues.ServiceType.SERVICEPATH), getMultiObjectClassInfo().getObjectType(), null, null));
-	      }
-	      else  //pretend to have received a 'fake' error Response
-	      {
-	        responses.add(createErrorResponse(error));
-	      }
-	    }
-	    else // Only perform action where environment matches current environment
-	    {
-	      for (ZoneContextInfo zoneCtx : zoneCtxList)
-	      {
-	        ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
-	        if (error == null) //all good
-	        {
-	          responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, getHeaderProperties(getConsumerEnvironment(), false, requestType, HeaderValues.ServiceType.SERVICEPATH), getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
-	        }
-	        else //pretend to have received a 'fake' error Response
-	        {
-	          responses.add(createErrorResponse(error));
-	        }
-	      }         
-	    }
+		Timer timer = new Timer();
+		timer.start();
+		List<Response> responses = new ArrayList<Response>();
+
+		if (!getConsumerEnvironment().getIsConnected())
+		{
+			logger.error("No connected environment for " + getConsumerEnvironment().getEnvironmentName() + ". See previous erro log entries.");
+			return responses;
+		}
+		// List is null or empty which means we perform action in default  Zone/Context
+		if ((zoneCtxList == null) || (zoneCtxList.size() == 0))
+		{
+			ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, null, null, requestType);
+			if (error == null)
+			{
+				error = requestTypeSupported(requestType);
+			}
+			if (error == null) // all good
+			{
+				responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, getHeaderProperties(getConsumerEnvironment(), false,  requestType, HeaderValues.ServiceType.SERVICEPATH), getMultiObjectClassInfo().getObjectType(), null, null));
+			}
+			else // pretend to have received a 'fake' error Response
+			{
+				responses.add(createErrorResponse(error));
+			}
+		}
+		else // Only perform action where environment matches current environment
+		{
+			for (ZoneContextInfo zoneCtx : zoneCtxList)
+			{
+				ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+				if (error == null) // all good
+				{
+					responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, getHeaderProperties(getConsumerEnvironment(), false, requestType,  HeaderValues.ServiceType.SERVICEPATH), getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+				}
+				else // pretend to have received a 'fake' error Response
+				{
+					responses.add(createErrorResponse(error));
+				}
+			}
+		}
 	    timer.finish();
 	    logger.debug("Time taken to call and process 'retrieve all' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 	    return responses;
-	  }
+	}
 	 
-	 private String getServiceName(QueryCriteria queryCriteria) {
-	   String result = null;
-	   if (queryCriteria != null && queryCriteria.getPredicates() != null) {
-	     result = "";
-	     for (QueryPredicate predicate : queryCriteria.getPredicates()) {
-	       result += predicate.getSubject() + "/{}/";
-	     }
-	     result += getMultiObjectClassInfo().getObjectName();
-	   }
-	   return result;
-	 }
-	 
-   private String getServicePath(QueryCriteria queryCriteria) {
-     String result = null;
-     if (queryCriteria != null && queryCriteria.getPredicates() != null) {
-       result = "";
-       for (QueryPredicate predicate : queryCriteria.getPredicates()) {
-         result += predicate.getSubject() + "/" + predicate.getValue() + "/";
-       }
-       result += getMultiObjectClassInfo().getObjectName();
-     }
-     return result;
-   }
 
 	/*-----------------------*/
 	/*-- Update Operations --*/
@@ -614,7 +591,7 @@ public abstract class AbstractConsumer implements Consumer
       return null;
     }
 
-    Timer timer = new Timer();
+    	Timer timer = new Timer();
 		timer.start();
 		List<BulkOperationResponse<OperationStatus>> responses = new ArrayList<BulkOperationResponse<OperationStatus>>();
 		
@@ -669,7 +646,7 @@ public abstract class AbstractConsumer implements Consumer
       return null;
     }
 
-    Timer timer = new Timer();
+    	Timer timer = new Timer();
 		timer.start();
 		List<Response> responses = new ArrayList<Response>();
 		
@@ -852,4 +829,35 @@ public abstract class AbstractConsumer implements Consumer
 		setErrorDetails(response, error);
 		return response;	
 	}
+	
+	private String getServiceName(QueryCriteria queryCriteria)
+	{
+		String result = null;
+		if (queryCriteria != null && queryCriteria.getPredicates() != null)
+		{
+			result = "";
+			for (QueryPredicate predicate : queryCriteria.getPredicates())
+			{
+				result += predicate.getSubject() + "/{}/";
+			}
+			result += getMultiObjectClassInfo().getObjectName();
+		}
+		return result;
+	}
+
+	private String getServicePath(QueryCriteria queryCriteria)
+	{
+		String result = null;
+		if (queryCriteria != null && queryCriteria.getPredicates() != null)
+		{
+			result = "";
+			for (QueryPredicate predicate : queryCriteria.getPredicates())
+			{
+				result += predicate.getSubject() + "/" + predicate.getValue() + "/";
+			}
+			result += getMultiObjectClassInfo().getObjectName();
+		}
+		return result;
+	}
+
 }
