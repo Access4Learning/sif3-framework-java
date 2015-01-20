@@ -44,17 +44,18 @@ public class InfraUnmarshalFactory implements UnmarshalFactory
 	@Override
 	public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
 	{
-	  Object result = null;
-    try
-    {
-      result = JAXBUtils.unmarshalFromXMLIntoObject(payload, clazz);
-    }
-    catch (Exception e)
-    {
-      logger.error("An error occurred unmarshalling object from XML", e);
-      throw new UnmarshalException("An error occurred unmarshalling object from XML", e);
-    }
-    return result;	}
+		Object result = null;
+		try
+		{
+			result = JAXBUtils.unmarshalFromXMLIntoObject(payload, clazz);
+		}
+		catch (Exception e)
+		{
+			logger.error("An error occurred unmarshalling object from XML", e);
+			throw new UnmarshalException("An error occurred unmarshalling object from XML", e);
+		}
+		return result;
+	}
 
 	/* (non-Javadoc)
 	 * @see sif3.infra.common.conversion.UnmarshalFactory#unmarshalFromJSON(java.lang.String, java.lang.Class)
@@ -62,17 +63,17 @@ public class InfraUnmarshalFactory implements UnmarshalFactory
 	@Override
 	public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
 	{
-    Object result = null;
-    try
-    {
-      result = JAXBUtils.unmarshalFromJSONIntoObject(payload, clazz);
-    }
-    catch (Exception e)
-    {
-      logger.error("An error occurred unmarshalling object from XML", e);
-      throw new UnmarshalException("An error occurred unmarshalling object from XML", e);
-    }
-    return result;
+		Object result = null;
+		try
+		{
+			result = JAXBUtils.unmarshalFromJSONIntoObject(payload, clazz);
+		}
+		catch (Exception e)
+		{
+			logger.error("An error occurred unmarshalling object from XML", e);
+			throw new UnmarshalException("An error occurred unmarshalling object from XML", e);
+		}
+		return result;
 	}
 
 	/* (non-Javadoc)
