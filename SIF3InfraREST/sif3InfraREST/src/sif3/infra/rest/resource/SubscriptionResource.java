@@ -63,7 +63,6 @@ public class SubscriptionResource extends InfraResource
 	private ObjectFactory infraObjectFactory = new ObjectFactory();
 	private static HashMap<String, SubscriptionType> subscriptionsSet = new HashMap<String, SubscriptionType>();
 	/* End Testing variables */
-	
 
 	public SubscriptionResource(@Context UriInfo uriInfo,
             			 		@Context HttpHeaders requestHeaders,
@@ -71,7 +70,7 @@ public class SubscriptionResource extends InfraResource
        			                @PathParam("mimeType") String mimeType)
 	{
 		super(uriInfo, requestHeaders, request, "", null, null);
-    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
+		logger.debug("URL Postfix mimeType: '"+mimeType+"'");
 	}
 
 	/*----------------------*/
@@ -199,12 +198,12 @@ public class SubscriptionResource extends InfraResource
 				logger.error("Subscription Payload: "+ payload);
 				return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal subscription payload: "+ ex.getMessage()), ResponseAction.CREATE);
 			}
-      catch (UnsupportedMediaTypeExcpetion ex)
-      {
-        logger.error("Failed to unmarshal payload into an SubscriptionType: "+ ex.getMessage(), ex);
-        logger.error("Subscription Payload: "+ payload);
-        return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal subscription payload: "+ ex.getMessage()), ResponseAction.CREATE);
-      }
+			catch (UnsupportedMediaTypeExcpetion ex)
+			{
+				logger.error("Failed to unmarshal payload into an SubscriptionType: "+ ex.getMessage(), ex);
+				logger.error("Subscription Payload: "+ payload);
+				return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal subscription payload: "+ ex.getMessage()), ResponseAction.CREATE);
+			}
 		}
 		else
 		{

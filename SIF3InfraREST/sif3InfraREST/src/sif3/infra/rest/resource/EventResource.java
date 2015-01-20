@@ -52,7 +52,7 @@ public class EventResource extends BaseResource
 			             @PathParam("mimeType") String mimeType)
 	{
 		super(uriInfo, requestHeaders, request, "", null, null);
-    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
+		logger.debug("URL Postfix mimeType: '"+mimeType+"'");
 	}
 
 	/*----------------------*/

@@ -95,7 +95,7 @@ public class QueueResource extends InfraResource
 	{
 		super(uriInfo, requestHeaders, request, "", null, null);
 		this.deleteMessageId = deleteMessageId;
-    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
+		logger.debug("URL Postfix mimeType: '"+mimeType+"'");
 	}
 
 	/*----------------------*/
@@ -222,12 +222,12 @@ public class QueueResource extends InfraResource
 				logger.error("Queue Payload: "+ payload);
 				return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal queue payload: "+ ex.getMessage()), ResponseAction.CREATE);
 			}
-      catch (UnsupportedMediaTypeExcpetion ex)
-      {
-        logger.error("Failed to unmarshal payload into an QueueType: "+ ex.getMessage(), ex);
-        logger.error("Queue Payload: "+ payload);
-        return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal queue payload: "+ ex.getMessage()), ResponseAction.CREATE);
-      }
+			catch (UnsupportedMediaTypeExcpetion ex)
+			{
+				logger.error("Failed to unmarshal payload into an QueueType: "+ ex.getMessage(), ex);
+				logger.error("Queue Payload: "+ payload);
+				return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal queue payload: "+ ex.getMessage()), ResponseAction.CREATE);
+			}
 		}
 		else
 		{
@@ -315,7 +315,7 @@ public class QueueResource extends InfraResource
 					  Response response = getMessage(consumerID);
 					  if (response != null)
 					  {
-					    return response;
+						  return response;
 					  }
 					  else
 					  {
@@ -400,35 +400,35 @@ public class QueueResource extends InfraResource
 	
 	private Response getMessage(String consumerID)
 	{
-	  EventMsg event = null;
-	  if (events == null)
-	  {
-	    loadEventData();
+		EventMsg event = null;
+		if (events == null)
+		{
+			loadEventData();
+		}
+
+		if (numEventsTillNoMsg == null)
+		{
+			setNumEventsTillNoMsg();
+		}
+
+		if ((events == null) || (events.size() == 0))// unable to load events file or no events in file => stop here
+		{
+			return null;
 	  }
 	  
-	  if (numEventsTillNoMsg == null)
-	  {
-	    setNumEventsTillNoMsg();
-	  }
+		// Check if we need to return No Message
+		numGetMessages++;
+		if ((numEventsTillNoMsg == 0) || ((numGetMessages % numEventsTillNoMsg) == 0))
+		{
+			return null;
+		}
 
-	  if ((events == null) || (events.size() == 0))// unable to load events file or no events in file => stop here
-	  {
-	    return null;
-	  }
-	  
-	  // Check if we need to return No Message
-    numGetMessages++;
-    if ((numEventsTillNoMsg == 0) || ((numGetMessages % numEventsTillNoMsg) == 0))
-    {
-      return null;
-    }
-
-	  // If we get here then a message can be returned.
-	  event = events.get(currentEvent++);
-	  if (currentEvent >= events.size()) // reset if we reach the end of the list
-	  {
-	    currentEvent = 0;
-	  }
+		// If we get here then a message can be returned.
+		event = events.get(currentEvent++);
+		if (currentEvent >= events.size()) // reset if we reach the end of the list
+		{
+			currentEvent = 0;
+		}
 	  
 		String lastMsgID = UUIDGenerator.getUUID();
 		messageIDMap.put(consumerID, lastMsgID);
@@ -470,49 +470,48 @@ public class QueueResource extends InfraResource
 			String[] eventArray = StringUtils.splitter(eventStr, "###", false);
 			if (eventArray != null)
 			{
-			  events = new ArrayList<EventMsg>();
-			  for (int i=0; i<eventArray.length; i=i+2)
-			  {
-			    // First enrty is serviceName, second entry is actual message
-			    events.add(new EventMsg(eventArray[i].trim(), eventArray[i+1].trim()));
-			  }
-			  currentEvent = 0;
+				events = new ArrayList<EventMsg>();
+				for (int i=0; i<eventArray.length; i=i+2)
+				{
+					// First enrty is serviceName, second entry is actual message
+					events.add(new EventMsg(eventArray[i].trim(), eventArray[i+1].trim()));
+				}
+				currentEvent = 0;
 			}
-		  logger.debug("Loaded eventFileName. Total Events = "+events.size());
-
+			logger.debug("Loaded eventFileName. Total Events = "+events.size());
 		}
 	}
 	
 	private void setNumEventsTillNoMsg()
 	{
-	  AdvancedProperties props = getEnvironmentManager().getServiceProperties();
-	  numEventsTillNoMsg = props.getPropertyAsInt("event.numUntilNoMsg", 0);
-	  logger.debug("Loaded Propery event.numUntilNoMsg. Value = "+numEventsTillNoMsg);
+		AdvancedProperties props = getEnvironmentManager().getServiceProperties();
+		numEventsTillNoMsg = props.getPropertyAsInt("event.numUntilNoMsg", 0);
+		logger.debug("Loaded Propery event.numUntilNoMsg. Value = "+numEventsTillNoMsg);
 	}
 	
 	/*
-	 * For internal testing only 
+	 * For internal testing only
 	 */
-  private final class EventMsg
-  {
-    private String serviceName = null;
-    private String message = null;
-    
-    public EventMsg(String serviceName, String message) 
-    {
-      this.serviceName = serviceName;
-      this.message = message;
-    }
-    
-    public String getServiceName()
-    {
-      return serviceName;
-    }
+	private final class EventMsg
+	{
+		private String serviceName = null;
+		private String message = null;
 
-    public String getMessage()
-    {
-      return message;
-    }
-  }
+		public EventMsg(String serviceName, String message)
+		{
+			this.serviceName = serviceName;
+			this.message = message;
+		}
+
+		public String getServiceName()
+		{
+			return serviceName;
+		}
+
+		public String getMessage()
+		{
+			return message;
+		}
+	}
 	
 }
