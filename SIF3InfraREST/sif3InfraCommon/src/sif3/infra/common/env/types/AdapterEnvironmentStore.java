@@ -160,6 +160,7 @@ public class AdapterEnvironmentStore implements Serializable
 					environment.setEventsSupported(adapterProperties.getPropertyAsBool("env.events.supported", false));
 					environment.setRemoveEnvOnShutdown(adapterProperties.getPropertyAsBool("adapter.deleteEnvironment.onShutdown", false));
 					environment.setGeneratorID(adapterProperties.getPropertyAsString("adapter.generator.id", null));
+					environment.setEnvCreateConflictIsError(adapterProperties.getPropertyAsBool("env.create.conflictIsError", true));
 					
 					//This is also set for providers in brokered environment
 					environment.setSecureConnection(getSecureConnectionInfo(adapterProperties));
