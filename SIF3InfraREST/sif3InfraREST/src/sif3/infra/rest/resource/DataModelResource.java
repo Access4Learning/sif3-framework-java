@@ -33,8 +33,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.Status;
 
 import sif3.common.CommonConstants;
 import sif3.common.conversion.ModelObjectInfo;
@@ -43,12 +43,11 @@ import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderValues;
-import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.RequestHeaderConstants;
+import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.interfaces.Provider;
 import sif3.common.interfaces.QueryProvider;
 import sif3.common.model.PagingInfo;
-import sif3.common.model.RequestMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceRights.AccessRight;
@@ -678,15 +677,4 @@ public class DataModelResource extends BaseResource
 			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to DeleteRequestType. Problem reported: " + ex.getMessage()), ResponseAction.DELETE);
 		}
 	}
-  
-	private RequestMetadata getRequestMetadata()
-	{
-		RequestMetadata metadata = new RequestMetadata();
-		metadata.setGeneratorID(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID));
-		metadata.setNavigationID(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_NAVIGATION_ID));
-		metadata.setQueryIntention(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION));
-		metadata.setSourceName(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_SOURCE_NAME));
-		return metadata;
-	}
-
 }

@@ -46,6 +46,7 @@ import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.model.AuthenticationInfo;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.RequestMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceRights.AccessRight;
@@ -747,12 +748,68 @@ public abstract class BaseResource
 	{
 	    if (getSecurityService() != null)
 	    {
-	    	return getSecurityService().validate(securityToken);
+	    	return getSecurityService().validate(securityToken, getRequestMetadata());
 	    }
 	    else // No security service known => report error
 	    {
 	    	throw new VerifyError("No security service known to validate Bearer Token.");
 	    }
+	}
+
+	/*
+	 * This methods attempts to extract some request information that should be passed to the provider. There is a distinct set
+	 * of HTTP Header Parameters set (mostly optional) by the consumer that are allowed to be visible to the provider. The SIF
+	 * Specification states which HTTP Header fields they are.
+	 * 
+	 * SIF Simple consideration:
+	 * A number of HTTP Header fields can be set as URL Query Parameter instead if SIF Simple is used. In that case we also
+	 * need to check if some of these consumer fields are on the URL instead of the HTTP Header. As always if a field should be
+	 * stated on the URL as well as the HTTP Header, the HTTP Header will take precedence. 
+	 */
+	protected RequestMetadata getRequestMetadata()
+	{
+		RequestMetadata metadata = new RequestMetadata();
+		
+		// Get values from HTTP Header.
+		metadata.setGeneratorID(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID));
+		metadata.setNavigationID(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_NAVIGATION_ID));
+		metadata.setQueryIntention(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION));
+		metadata.setSourceName(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_SOURCE_NAME));
+		metadata.setApplicationKey(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY));
+		metadata.setUserToken(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_USER_TOKEN));
+		metadata.setInstanceID(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_INSTANCE_ID));
+		
+		// In case of SIF Simple most of the values could be URL Query Parameters. Use them if not yet set by HTTP Header
+		if (metadata.getGeneratorID() == null)
+		{
+			metadata.setGeneratorID(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_GENERATOR_ID));
+		}
+		if (metadata.getNavigationID() == null)
+		{
+			metadata.setNavigationID(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_NAVIGATION_ID));
+		}
+		if (metadata.getQueryIntention() == null)
+		{
+			metadata.setQueryIntention(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_QUERY_INTENTION));
+		}
+		if (metadata.getSourceName() == null)
+		{
+			metadata.setSourceName(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_SOURCE_NAME));
+		}
+		if (metadata.getApplicationKey() == null)
+		{
+			metadata.setApplicationKey(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_APPLICATION_KEY));
+		}
+		if (metadata.getUserToken() == null)
+		{
+			metadata.setUserToken(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_USER_TOKEN));
+		}
+		if (metadata.getInstanceID() == null)
+		{
+			metadata.setInstanceID(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_INSTANCE_ID));
+		}
+
+		return metadata;
 	}
 
 	/*
@@ -770,7 +827,7 @@ public abstract class BaseResource
 			if (validateBearerWithSecurityService(authInfo.getUserToken()))
 			{
 				// Now, what info can we get about the token
-				TokenInfo tokenInfo = getSecurityService().getInfo(authInfo.getUserToken());
+				TokenInfo tokenInfo = getSecurityService().getInfo(authInfo.getUserToken(), getRequestMetadata());
 				if (tokenInfo == null)
 				{
 					throw new VerifyError("No information about Bearer Token can be retrieved.");
