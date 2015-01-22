@@ -17,11 +17,22 @@
  */
 package sif3.common.model;
 
-
+/**
+ * This class represents a special version of a Query Predicate for Service Path Predicates.
+ * The operator is always EQUAL
+ *
+ * @author Ben Carter
+ */
 public class ServicePathPredicate extends QueryPredicate 
 {
 	private static final long serialVersionUID = -5647502092983681930L;
 
+	/**
+	 * Constructor represents the following service path subject/value
+	 * 
+	 * @param subject the left hand side of a service path couple
+	 * @param value the right hand side of a service path couple
+	 */
 	public ServicePathPredicate(String subject, String value)
 	{
 		super(subject, QueryOperator.EQUAL, value);

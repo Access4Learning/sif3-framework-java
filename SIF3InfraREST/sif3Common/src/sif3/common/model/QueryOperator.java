@@ -19,23 +19,18 @@ package sif3.common.model;
 
 import java.util.HashMap;
 
+/**
+ * This class represents an operator to be used when building a query predicate
+ *
+ * @author Ben Carter
+ */
 public enum QueryOperator
 {
 	EQUAL("=");
 
-	private String sign = null;
-
-	private QueryOperator(String sign)
-	{
-		this.sign = sign;
-	}
-
-	public String getSign()
-	{
-		return sign;
-	}
-
 	private static final HashMap<String, QueryOperator> SIGN_MAP = new HashMap<String, QueryOperator>();
+
+	private String sign = null;
 
 	static
 	{
@@ -45,6 +40,15 @@ public enum QueryOperator
 		}
 	}
 
+
+	public String getSign()
+	{
+		return sign;
+	}
+
+	/**
+	 * Lookup method to return the operator from the sign used to represent it.
+	 */
 	public static QueryOperator fromSign(String sign) throws IllegalArgumentException
 	{
 		QueryOperator result = SIGN_MAP.get(sign);
@@ -54,4 +58,14 @@ public enum QueryOperator
 		}
 		return result;
 	}
+
+	/*---------------------*/
+	/*-- Private Methods --*/
+	/*---------------------*/
+	private QueryOperator(String sign)
+	{
+		this.sign = sign;
+	}
+
+
 }

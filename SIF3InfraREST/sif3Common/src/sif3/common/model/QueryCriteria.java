@@ -21,49 +21,97 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class represents a query where all predicates can only be joined by one
+ * join method. It is intended to be used for both service path queries and URL
+ * parameter queries.
+ * 
+ * @author Ben Carter
+ */
 public class QueryCriteria implements Serializable
 {
 
-	private static final long serialVersionUID = 1803812315289373807L;
+	private static final long    serialVersionUID = 1803812315289373807L;
 
-	private QueryJoinType joinType;
-	private List<QueryPredicate> predicates = new ArrayList<QueryPredicate>();
+	private QueryJoinType        joinType;
+	private List<QueryPredicate> predicates;
 
+	/**
+	 * Default Constructor
+	 * 
+	 * joinType defaults to AND predicates defaults to an Empty List.
+	 */
 	public QueryCriteria()
 	{
-		joinType = QueryJoinType.AND;
+		this.joinType = QueryJoinType.AND;
+		this.predicates = new ArrayList<QueryPredicate>();
 	}
 
+	/**
+	 * Constructor
+	 * 
+	 * @param joinType the type of join to be applied to all predicates
+	 */
 	public QueryCriteria(QueryJoinType joinType)
 	{
 		this.joinType = joinType;
+		this.predicates = new ArrayList<QueryPredicate>();
 	}
 
+	/**
+	 * 
+	 * @return the joinType which should be applied to all predicates
+	 */
 	public QueryJoinType getJoinType()
 	{
 		return joinType;
 	}
 
+	/**
+	 * 
+	 * @param joinType the type of join to be applied to all predicates
+	 */
 	public void setJoinType(QueryJoinType joinType)
 	{
 		this.joinType = joinType;
 	}
 
+	/**
+	 * 
+	 * @return the list of predicates to be used to perform the query
+	 */
 	public List<QueryPredicate> getPredicates()
 	{
 		return predicates;
 	}
 
+	/**
+	 * 
+	 * @param predicates the list of predicates to be used to perform the query
+	 */
 	public void setPredicates(List<QueryPredicate> predicates)
 	{
 		this.predicates = predicates;
 	}
 
+	/**
+	 * Convenience method to add a predicate to the list of predicates
+	 * 
+	 * @param predicate a predicate to be used to perform the query
+	 */
 	public void addPredicate(QueryPredicate predicate)
 	{
+		if (this.predicates == null)
+		{
+			this.predicates = new ArrayList<QueryPredicate>();
+		}
 		this.predicates.add(predicate);
 	}
 
+	/**
+	 * 
+	 * @return how many predicates are in this query.
+	 */
 	public int size()
 	{
 		return predicates == null ? 0 : predicates.size();

@@ -17,6 +17,11 @@
  */
 package sif3.common.model;
 
+/**
+ * This class represents a join type to be used when performing queries.
+ *
+ * @author Ben Carter
+ */
 public enum QueryJoinType
 {
 	AND("and"), OR("or");
