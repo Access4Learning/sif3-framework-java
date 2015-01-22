@@ -18,6 +18,7 @@
 package sif3.common.security;
 
 import sif3.common.interfaces.SecurityService;
+import sif3.common.model.RequestMetadata;
 import sif3.common.model.security.TokenInfo;
 import au.com.systemic.framework.utils.AdvancedProperties;
 
@@ -46,10 +47,11 @@ public abstract class AbstractSecurityService implements SecurityService
 	 * incorrect tokens, not authenticated tokens etc.
 	 *     
 	 * @param securityToken The token that shall be validated against a given security service such as LDAP, OAuth, Active Directory, etc.
+     * @param requestMetadata Metadata that has been sourced from a request. 
 	 * 
 	 * @return TRUE if the token is known and valid to the security server and not expired. If a token is expired then FALSE should be returned.
 	 */
-	public abstract boolean validateToken(String securityToken);
+	public abstract boolean validateToken(String securityToken, RequestMetadata requestMetadata);
   
   	/**
   	 * This method may contact the security server which can be an OAuth server, and LDAP server a Active Directory etc. In return it will provide 
@@ -61,11 +63,12 @@ public abstract class AbstractSecurityService implements SecurityService
   	 * expire date is null in the returned TokenInfo object.
   	 * 
   	 * @param securityToken The security token for which the TokenInfo shall be returned.
+     * @param requestMetadata Metadata that has been sourced from a request. 
   	 * 
   	 * @return See Desc. It is expected that this method only returns either the environmentKey or the SIF environment ID or the SIF session token but
   	 *         not all of these at the same time.
   	 */
-  	public abstract TokenInfo getTokenInfo(String securityToken);
+  	public abstract TokenInfo getTokenInfo(String securityToken, RequestMetadata requestMetadata);
   
 	/**
 	 * Ensure constructor exists and has no arguments. This is the constructor called by the
@@ -88,14 +91,14 @@ public abstract class AbstractSecurityService implements SecurityService
 	/*-----------------------*/
 
 	@Override
-	public boolean validate(String securityToken)
+	public boolean validate(String securityToken, RequestMetadata requestMetadata)
 	{
-		return validateToken(securityToken);
+		return validateToken(securityToken, requestMetadata);
 	}
 
 	@Override
-	public TokenInfo getInfo(String securityToken)
+	public TokenInfo getInfo(String securityToken, RequestMetadata requestMetadata)
 	{
-		return getTokenInfo(securityToken);
+		return getTokenInfo(securityToken, requestMetadata);
 	}
 }
