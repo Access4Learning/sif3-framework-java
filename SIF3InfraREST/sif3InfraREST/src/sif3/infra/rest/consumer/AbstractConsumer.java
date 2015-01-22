@@ -28,17 +28,17 @@ import sif3.common.exception.ServiceInvokationException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
-import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.RequestHeaderConstants;
+import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.interfaces.Consumer;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.QueryPredicate;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.ZoneContextInfo;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
-import sif3.common.model.ZoneContextInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.BaseResponse;
 import sif3.common.ws.BulkOperationResponse;
@@ -51,7 +51,6 @@ import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.rest.client.ClientInterface;
 import sif3.infra.rest.client.ClientUtils;
 import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.StringUtils;
 import au.com.systemic.framework.utils.Timer;
 
 /**
@@ -133,6 +132,30 @@ public abstract class AbstractConsumer implements Consumer
 	  return ConsumerEnvironmentManager.getInstance().getServiceProperties();
 	}
 	
+	/*------------------------------------------------------------------------------------------------------------------------
+	 * Start of 'Dynamic' HTTP Header Field override section
+	 * 
+	 * The following set of methods are used for a more configurable way how some HTTP header parameters are set.
+	 * By default the following HTTP Header fields are retrieved from the consumer's property file and put in corresponding
+	 * HTTP Header Fields:
+	 * 
+	 * Property               HTTP Header
+	 * ----------------------------------
+	 * adapter.generator.id   generatorId
+	 * env.application.key    applicationKey
+	 * env.userToken          userToken
+	 * env.instanceID         instanceId
+	 * 
+	 * Only properties that are not null or empty string will be set in the corresponding HTTP Header.
+	 *
+	 * There are situations where and application may need a more 'dynamic' behaviour where the above values are determined
+	 * at runtime, based on other circumstances and therefore these properies must be retrieved from an other source than the
+	 * consumer's property file. In such a case the methods below gan be overwritten to make them dynamic and controlled by
+	 * the implementation rather than driven by the consumer's property file. If any of the methods below is overwritten then
+	 * the value of the over riding method is set in the corresponding HTTP Header field if the return value of the method 
+	 * is not null or an empty string.
+	 *------------------------------------------------------------------------------------------------------------------------*/
+	
 	/**
 	 * This method returns the value of the adapter.generator.id property from the consumer's property file. If that
 	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
@@ -143,6 +166,43 @@ public abstract class AbstractConsumer implements Consumer
 	{
 		return getConsumerEnvironment().getGeneratorID();
 	}
+	
+	/**
+	 * This method returns the value of the env.application.key property from the consumer's property file. If that
+	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The env.application.key property from the consumer's property file
+	 */
+	public String getApplicationKey()
+	{
+		return getConsumerEnvironment().getEnvironmentKey().getApplicationKey();
+	}
+
+	/**
+	 * This method returns the value of the env.userToken property from the consumer's property file. If that
+	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The env.userToken property from the consumer's property file
+	 */
+	public String getUserToken()
+	{
+		return getConsumerEnvironment().getEnvironmentKey().getUserToken();
+	}
+
+	/**
+	 * This method returns the value of the env.instanceID property from the consumer's property file. If that
+	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The env.instanceID property from the consumer's property file
+	 */
+	public String getInstanceID()
+	{
+		return getConsumerEnvironment().getEnvironmentKey().getInstanceID();
+	}
+
+	/*------------------------------------------------------------------------------------------------------------------------
+	 * End of 'Dynamic' HTTP Header Field override section
+	 *-----------------------------------------------------------------------------------------------------------------------*/ 
 
 	/**
 	 * @return Returns the actual Class Name of this consumer
@@ -739,11 +799,18 @@ public abstract class AbstractConsumer implements Consumer
 	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, serviceType.name());
 	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE, requestType.name());
 	    
-	   String generatorID = getGeneratorID();
-	   if (StringUtils.notEmpty(generatorID))
-	   {
-	      hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, generatorID);
-	   }
+	   // Set values of consumer property file or their overridden value. Note thsetHeaderProperty() method will do the check
+	   // for null, so no need to do this here.
+	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY, getApplicationKey());
+	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_USER_TOKEN, getUserToken());
+	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_INSTANCE_ID, getInstanceID());
+	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, getGeneratorID());
+	   
+//	   String generatorID = getGeneratorID();
+//	   if (StringUtils.notEmpty(generatorID))
+//	   {
+//	      hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, generatorID);
+//	   }
 	    
 	   return hdrProps;
 	}
