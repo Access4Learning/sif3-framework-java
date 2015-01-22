@@ -53,8 +53,8 @@ public class TestStudentPersonalConsumer
 	private final static String SINGLE_STUDENT_FILE_NAME = PATH + "/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
 	private final static String MULTI_STUDENT_FILE_NAME = PATH + "/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
 //	private static final String CONSUMER_ID = "SecureStudentConsumer";
-//	private static final String CONSUMER_ID = "StudentConsumer";
-	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
+	private static final String CONSUMER_ID = "StudentConsumer";
+//	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
 	
 	private static final RequestType REQUEST_TYPE = RequestType.IMMEDIATE;
 	
