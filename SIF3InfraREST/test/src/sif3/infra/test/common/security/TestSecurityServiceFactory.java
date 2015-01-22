@@ -42,7 +42,7 @@ public class TestSecurityServiceFactory
     AbstractSecurityService service = BearerSecurityFactory.getSecurityService(properties);
     if (service != null)
     {
-      service.validate("ABC");
+      service.validate("ABC", null);
     }
   }
   

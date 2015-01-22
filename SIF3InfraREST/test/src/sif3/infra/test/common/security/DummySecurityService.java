@@ -21,6 +21,7 @@ import java.util.Date;
 
 import au.com.systemic.framework.utils.AdvancedProperties;
 import sif3.common.model.EnvironmentKey;
+import sif3.common.model.RequestMetadata;
 import sif3.common.model.security.TokenInfo;
 import sif3.common.security.AbstractSecurityService;
 
@@ -35,10 +36,10 @@ public class DummySecurityService extends AbstractSecurityService
 	}
 
 	@Override
-	public TokenInfo getTokenInfo(String securityToken)
+	public TokenInfo getTokenInfo(String securityToken, RequestMetadata requestMetadata)
 	{
+		System.out.println("DummySecurityService.getTokenInfo() called for securityToken = "+securityToken+" and request metadata = "+requestMetadata);
 		long expireTime = MINUTE*5; // expire every x minute.
-		System.out.println("DummySecurityService.getTokenInfo() called.");
 		TokenInfo tokenInfo = new TokenInfo(securityToken);
 //		tokenInfo.setTokenExpiryDate(new Date(((new Date()).getTime()) + expireTime));
 //		tokenInfo.setSessionToken("80404112-96f7-4b2e-a118-3db458608877");
@@ -48,9 +49,9 @@ public class DummySecurityService extends AbstractSecurityService
 	}
 
 	@Override
-	public boolean validateToken(String securityToken)
+	public boolean validateToken(String securityToken, RequestMetadata requestMetadata)
 	{
-		System.out.println("DummySecurityService.validateToken() called.");
+		System.out.println("DummySecurityService.validateToken() called for securityToken = "+securityToken+" and request metadata = "+requestMetadata);
 		return true;
 	}
 
