@@ -313,7 +313,7 @@ public abstract class BaseResource
 	 * This method returns the userToken form the given Authorisation token. This can either be a sessionToken (Basic, 
 	 * SIF_HMACSH256) or a securityToken (Bearer). If no authorisation information is available then null is returned.
 	 * 
-	 * @return
+	 * @return the token held in the userToken property or null if no Authentication information is avaliable.
 	 */
 	public String getTokenFromAuthToken()
 	{

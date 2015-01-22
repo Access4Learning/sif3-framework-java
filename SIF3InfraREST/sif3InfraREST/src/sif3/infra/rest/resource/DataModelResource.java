@@ -92,7 +92,8 @@ public class DataModelResource extends BaseResource
 	 * @param uriInfo Extracted from the request.
 	 * @param requestHeaders Extracted from the request.
 	 * @param request Extracted from the request.
-	 * @param dmObjectNamePlural Extracted from the request.
+	 * @param objectNamePlural Extracted from the request.
+	 * @param mimeType The mime type postfix that might be set on the request URL.
 	 * @param zoneID Extracted from the request (Matrix Parameter).
 	 * @param contextID Extracted from the request (Matrix Parameter).
 	 */

@@ -244,7 +244,7 @@ public class DirectProviderEnvironmentManager implements EnvironmentManager
 	 * Returns TRUE if the provider knows an environment for the given security token. If no  environment is known 
 	 * for the given security token then FALSE is returned.
 	 * 
-	 * @param sessionToken The token to check for.
+	 * @param securityToken The token to check for.
 	 * 
 	 * @return See desc.
 	 */
