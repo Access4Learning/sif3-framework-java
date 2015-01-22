@@ -40,12 +40,19 @@ public class RequestHeaderConstants
 	public static final String HDR_DATE_TIME = "timestamp";
 	public static final String HDR_SOURCE_NAME = "sourceName";
 	
+	/*------------------------------- Early SIF 3.1.0 proposed header fields -------------------------------*/
+	/*-- Experimental as of January 2015: Use with care because it is not officially part of SIF 3.x, yet --*/
+	/*------------------------------------------------------------------------------------------------------*/
+	public static final String HDR_APPLICATION_KEY = "applicationKey"; 
+	public static final String HDR_USER_TOKEN = "userToken";
+	public static final String HDR_INSTANCE_ID = "instanceId";
+	
 	/*--------------------------------------------------------*/
 	/*-- Name of fields that are specific for CRUD Requests --*/
 	/*--------------------------------------------------------*/
 	public static final String HDR_IF_NOT_MATCH = HttpHeaders.IF_NONE_MATCH;
 	public static final String HDR_NAVIGATION_ID = CommonConstants.PagingRequestProperty.navigationId.name(); //"navigationId";
-  public static final String HDR_PAGE_SIZE = CommonConstants.PagingRequestProperty.navigationPageSize.name(); //"navigationPageSize";
+	public static final String HDR_PAGE_SIZE = CommonConstants.PagingRequestProperty.navigationPageSize.name(); //"navigationPageSize";
 	public static final String HDR_PAGE_NO = CommonConstants.PagingRequestProperty.navigationPage.name(); //"navigationPage";
 	public static final String HDR_REQUEST_ID = "requestId";
 	public static final String HDR_QUEUE_ID = "queueId";
@@ -74,6 +81,11 @@ public class RequestHeaderConstants
 		HDR_SERVICE_TYPE,
 		HDR_DATE_TIME,
 		HDR_SOURCE_NAME,
+		
+		// Early adption field (not yet officially supported
+		HDR_APPLICATION_KEY,
+		HDR_USER_TOKEN,
+		HDR_INSTANCE_ID,
 		
 		// CRUD Request Fields
 		HDR_IF_NOT_MATCH, 
