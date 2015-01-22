@@ -27,12 +27,29 @@ import sif3.common.model.QueryJoinType;
 import sif3.common.model.QueryOperator;
 import sif3.common.model.QueryPredicate;
 
+/**
+ * A helper class to parse an UriInfo into a service path query string which can be matched with a 
+ * SIF Service Definition.
+ * 
+ * ie: /requests/SchoolInfos/24ed508e1ed04bba82198233efa55859/StudentPersonals
+ * 
+ * will be parsed into : /SchoolInfos/{}/StudentPersonals
+ *
+ * @author Ben Carter
+ */
 public class ServicePathQueryParser
 {
 	private QueryCriteria queryCriteria = null;
 	private String servicePath = null;
 	private String objectNamePlural = null;
 
+  /**
+   * Constructor
+   * Parses the supplied uriInfo into a service path query string which can be matched
+   * with a Sif Service Definition
+   *
+   * @param uriInfo the uri info to parse
+   */
 	public ServicePathQueryParser(UriInfo uriInfo)
 	{
 		List<PathSegment> pathSegments = uriInfo.getPathSegments();
@@ -60,21 +77,36 @@ public class ServicePathQueryParser
 		}
 	}
 
+	/**
+	 * This is a list of predicates joined by "AND"
+	 * 
+	 * @return the service path represented as a query criteria object
+	 */
 	public QueryCriteria getQueryCriteria()
 	{
 		return queryCriteria;
 	}
 
+	/**
+	 * @return a string representation of the service path which can be matched with a SIF Service Definition
+	 */
 	public String getServicePath()
 	{
 		return servicePath;
 	}
 
+	/**
+	 * @return the name of the provider which should be invoked.
+	 */
 	public String getObjectNamePlural()
 	{
 		return objectNamePlural;
 	}
 
+	/**
+	 * 
+	 * @return true if the uri provided represents a service path query with at least one valid criteria, otherwise false
+	 */
 	public boolean isServicePath()
 	{
 		return servicePath != null && queryCriteria != null && queryCriteria.size() > 0;
