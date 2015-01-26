@@ -22,15 +22,11 @@ import org.apache.log4j.Logger;
 
 import sif3.infra.common.env.mgr.BrokeredProviderEnvironmentManager;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
-import sif3.infra.common.env.mgr.DirectProviderEnvironmentManager;
+import sif3.infra.common.env.mgr.HITSDirectProviderEnvironmentManager;
 import sif3.infra.common.interfaces.EnvironmentConnector;
 import sif3.infra.common.interfaces.EnvironmentManager;
 
 /**
- * Many classes within the framework use generic code and therefore use interfaces as their implementation. At runtime concrete implementation
- * are required based on the service type (consumer, provider) and context (DIRECT, BROKRED) they operate in. To get access to concrete runtime
- * implementations these classes use this factory to get the appropriate environment connector implementation.
- * 
  * @author Joerg Huber
  *
  */
@@ -49,8 +45,9 @@ public class EnvironmentConnectorFactory
 				switch (envMgr.getEnvironmentInfo().getEnvironmentType())
 				{
 					case DIRECT:
-						logger.debug("Direct Provider Environment Connector will be used.");
-						return new DirectProviderEnvironmentConnector((DirectProviderEnvironmentManager) envMgr);
+						// HITS Customisation
+						logger.debug("HITS Direct Provider Environment Connector will be used.");
+						return new DirectProviderEnvironmentConnector((HITSDirectProviderEnvironmentManager) envMgr);
 					case BROKERED:
 						logger.debug("Brokered Provider Environment Connector will be used.");
 						return new BrokeredProviderEnvironmentConnector((BrokeredProviderEnvironmentManager) envMgr);

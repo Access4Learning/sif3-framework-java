@@ -41,12 +41,12 @@ import sif3.infra.common.model.ObjectFactory;
  */
 public class InfraMarshalFactory implements MarshalFactory
 {
-	protected final Logger logger = Logger.getLogger(getClass());
-	
-	private static final HashMap<Class<?>, Method> CREATE_METHODS = new HashMap<Class<?>, Method>();
+  protected final Logger logger = Logger.getLogger(getClass());
+  
+  private static final HashMap<Class<?>, Method> CREATE_METHODS = new HashMap<Class<?>, Method>();
 
-	private ObjectFactory objFactory = new ObjectFactory();
-	
+  private ObjectFactory objFactory = new ObjectFactory();
+  
   /**
    * Pre-populate Create Method Cache for faster marshaling of objects.
    */
@@ -61,12 +61,12 @@ public class InfraMarshalFactory implements MarshalFactory
         CREATE_METHODS.put(method.getParameterTypes()[0], method);
       }
     }
-  }	
-	
-	/* (non-Javadoc)
-	 * @see sif3.infra.common.conversion.MarshalFactory#marshalToXML(java.lang.Object)
-	 */
-	@Override
+  } 
+  
+  /* (non-Javadoc)
+   * @see sif3.infra.common.conversion.MarshalFactory#marshalToXML(java.lang.Object)
+   */
+  @Override
   public String marshalToXML(Object obj) throws MarshalException, UnsupportedMediaTypeExcpetion
   {
     String result = null;
@@ -90,12 +90,12 @@ public class InfraMarshalFactory implements MarshalFactory
     return result;
   }
 
-	/* (non-Javadoc)
-	 * @see sif3.infra.common.conversion.MarshalFactory#marshalToJSON(java.lang.Object)
-	 */
-	@Override
-	public String marshalToJSON(Object obj) throws MarshalException, UnsupportedMediaTypeExcpetion
-	{
+  /* (non-Javadoc)
+   * @see sif3.infra.common.conversion.MarshalFactory#marshalToJSON(java.lang.Object)
+   */
+  @Override
+  public String marshalToJSON(Object obj) throws MarshalException, UnsupportedMediaTypeExcpetion
+  {
     String result = null;
     try
     {
@@ -115,33 +115,33 @@ public class InfraMarshalFactory implements MarshalFactory
       throw new MarshalException("An error occurred marshalling object to JSON", e);
     }
     return result;
-	}
+  }
 
-	/* (non-Javadoc)
-	 * @see sif3.infra.common.conversion.MarshalFactory#marschal(java.lang.Object, javax.ws.rs.core.MediaType)
-	 */
-	@Override
-	public String marshal(Object obj, MediaType mediaType) throws MarshalException, UnsupportedMediaTypeExcpetion
-	{
-		if (mediaType != null)
-		{
-			if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) ||	MediaType.TEXT_XML_TYPE.isCompatible(mediaType))
-			{
-				return marshalToXML(obj);
-			}
-			else if (MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType))
-			{
-				return marshalToJSON(obj);
-			}
-		}
-		// If we get here then we deal with an unknown media type
-		throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot marshal the given input to this media type.");
-	}
-	
-	/*---------------------*/
-	/*-- PRivate Methods --*/
+  /* (non-Javadoc)
+   * @see sif3.infra.common.conversion.MarshalFactory#marschal(java.lang.Object, javax.ws.rs.core.MediaType)
+   */
+  @Override
+  public String marshal(Object obj, MediaType mediaType) throws MarshalException, UnsupportedMediaTypeExcpetion
+  {
+    if (mediaType != null)
+    {
+      if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) || MediaType.TEXT_XML_TYPE.isCompatible(mediaType))
+      {
+        return marshalToXML(obj);
+      }
+      else if (MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType))
+      {
+        return marshalToJSON(obj);
+      }
+    }
+    // If we get here then we deal with an unknown media type
+    throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot marshal the given input to this media type.");
+  }
+  
   /*---------------------*/
-	
+  /*-- PRivate Methods --*/
+  /*---------------------*/
+  
   /*
    * Finds the method that has one parameter of the type provided.
    * 

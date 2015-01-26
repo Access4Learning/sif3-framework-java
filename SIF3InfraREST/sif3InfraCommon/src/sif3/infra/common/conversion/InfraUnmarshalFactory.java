@@ -36,65 +36,65 @@ import sif3.common.utils.JAXBUtils;
  */
 public class InfraUnmarshalFactory implements UnmarshalFactory
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+  protected final Logger logger = Logger.getLogger(getClass());
 
-	/* (non-Javadoc)
-	 * @see sif3.infra.common.conversion.UnmarshalFactory#unmarshalFromXML(java.lang.String, java.lang.Class)
-	 */
-	@Override
-	public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
-	{
-		Object result = null;
-		try
-		{
-			result = JAXBUtils.unmarshalFromXMLIntoObject(payload, clazz);
-		}
-		catch (Exception e)
-		{
-			logger.error("An error occurred unmarshalling object from XML", e);
-			throw new UnmarshalException("An error occurred unmarshalling object from XML", e);
-		}
-		return result;
-	}
+  /* (non-Javadoc)
+   * @see sif3.infra.common.conversion.UnmarshalFactory#unmarshalFromXML(java.lang.String, java.lang.Class)
+   */
+  @Override
+  public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
+  {
+    Object result = null;
+    try
+    {
+      result = JAXBUtils.unmarshalFromXMLIntoObject(payload, clazz);
+    }
+    catch (Exception e)
+    {
+      logger.error("An error occurred unmarshalling object from XML", e);
+      throw new UnmarshalException("An error occurred unmarshalling object from XML", e);
+    }
+    return result;
+  }
 
-	/* (non-Javadoc)
-	 * @see sif3.infra.common.conversion.UnmarshalFactory#unmarshalFromJSON(java.lang.String, java.lang.Class)
-	 */
-	@Override
-	public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
-	{
-		Object result = null;
-		try
-		{
-			result = JAXBUtils.unmarshalFromJSONIntoObject(payload, clazz);
-		}
-		catch (Exception e)
-		{
-			logger.error("An error occurred unmarshalling object from XML", e);
-			throw new UnmarshalException("An error occurred unmarshalling object from XML", e);
-		}
-		return result;
-	}
+  /* (non-Javadoc)
+   * @see sif3.infra.common.conversion.UnmarshalFactory#unmarshalFromJSON(java.lang.String, java.lang.Class)
+   */
+  @Override
+  public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
+  {
+    Object result = null;
+    try
+    {
+      result = JAXBUtils.unmarshalFromJSONIntoObject(payload, clazz);
+    }
+    catch (Exception e)
+    {
+      logger.error("An error occurred unmarshalling object from XML", e);
+      throw new UnmarshalException("An error occurred unmarshalling object from XML", e);
+    }
+    return result;
+  }
 
-	/* (non-Javadoc)
-	 * @see sif3.infra.common.conversion.UnmarshalFactory#unmarschal(java.lang.String, java.lang.Class, javax.ws.rs.core.MediaType)
-	 */
-	@Override
-	public Object unmarshal(String payload, Class<?> clazz, MediaType mediaType) throws UnmarshalException, UnsupportedMediaTypeExcpetion
-	{
-		if (mediaType != null)
-		{
-			if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) || MediaType.TEXT_XML_TYPE.isCompatible(mediaType)  ||	MediaType.TEXT_PLAIN_TYPE.isCompatible(mediaType))
-			{
-				return unmarshalFromXML(payload, clazz);
-			}
-			else if (MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType))
-			{
-				return unmarshalFromJSON(payload, clazz);
-			}
-		}
+  /* (non-Javadoc)
+   * @see sif3.infra.common.conversion.UnmarshalFactory#unmarschal(java.lang.String, java.lang.Class, javax.ws.rs.core.MediaType)
+   */
+  @Override
+  public Object unmarshal(String payload, Class<?> clazz, MediaType mediaType) throws UnmarshalException, UnsupportedMediaTypeExcpetion
+  {
+    if (mediaType != null)
+    {
+      if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) || MediaType.TEXT_XML_TYPE.isCompatible(mediaType)  || MediaType.TEXT_PLAIN_TYPE.isCompatible(mediaType))
+      {
+        return unmarshalFromXML(payload, clazz);
+      }
+      else if (MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType))
+      {
+        return unmarshalFromJSON(payload, clazz);
+      }
+    }
 
-		// If we get here then we deal with an unknown media type
-		throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot unmarshal the given input from this media type.");
-	}
+    // If we get here then we deal with an unknown media type
+    throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot unmarshal the given input from this media type.");
+  }
 }

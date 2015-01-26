@@ -24,6 +24,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -63,7 +64,7 @@ import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
-import sif3.infra.common.env.mgr.DirectProviderEnvironmentManager;
+import sif3.infra.common.env.mgr.HITSDirectProviderEnvironmentManager;
 import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.common.model.ApplicationInfoType;
@@ -82,6 +83,7 @@ import sif3.infra.common.model.ProductIdentityType;
 import sif3.infra.common.model.UpdateResponseType;
 import sif3.infra.common.model.UpdateType;
 import sif3.infra.common.model.UpdatesType;
+import sif3.infra.rest.audit.AuditableResource;
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.DateUtils;
 import au.com.systemic.framework.utils.StringUtils;
@@ -188,6 +190,11 @@ public abstract class BaseResource
 			logger.debug("ContextID          : " + getSifContext());
 			logger.debug("Security Service   : " + ((getSecurityService() == null) ? null : getSecurityService().getClass().getSimpleName()));
 			logger.debug("Resource Init ok   : " + allOK);
+		}
+		
+		if (AuditableResource.isAuditing()) {
+		  validSession(); // Ensure that the session is populated for all requests when auditing.
+		  AuditableResource.setResource(this);
 		}
 	}
 
@@ -441,11 +448,11 @@ public abstract class BaseResource
 				    	EnvironmentType environment = null;
 				    	if (authInfo.getAuthMethod() != AuthenticationMethod.Bearer) // Basic or SIF_HMACSHA256
 				    	{
-				    		environment = ((DirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentBySessionToken(authInfo.getUserToken(), tokenInfo, isSecure());
+				    		environment = ((HITSDirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentBySessionToken(authInfo.getUserToken(), tokenInfo, isSecure());
 				    	}
 				    	else // Bearer Token 
 				    	{
-				    		environment = ((DirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentForSecurityToken(tokenInfo, isSecure());
+				    		environment = ((HITSDirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentForSecurityToken(tokenInfo, isSecure());
 				    	}
 				    	// If we have no environment then there is no environment for that session token
 						if (environment == null)
@@ -1100,7 +1107,6 @@ public abstract class BaseResource
 	}
 	
 	private void extractQueryParameters(UriInfo uriInfo)
-	{
 		setQueryParameters(new URLQueryParameter(getUriInfo().getQueryParameters()));
 	}
 

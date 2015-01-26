@@ -31,102 +31,102 @@ import java.util.List;
 public class QueryCriteria implements Serializable
 {
 
-	private static final long    serialVersionUID = 1803812315289373807L;
+  private static final long    serialVersionUID = 1803812315289373807L;
 
-	private QueryJoinType        joinType;
-	private List<QueryPredicate> predicates;
+  private QueryJoinType        joinType;
+  private List<QueryPredicate> predicates;
 
-	/**
-	 * Default Constructor
-	 * 
-	 * joinType defaults to AND predicates defaults to an Empty List.
-	 */
-	public QueryCriteria()
-	{
-		this.joinType = QueryJoinType.AND;
-		this.predicates = new ArrayList<QueryPredicate>();
-	}
+  /**
+   * Default Constructor
+   * 
+   * joinType defaults to AND predicates defaults to an Empty List.
+   */
+  public QueryCriteria()
+  {
+    this.joinType = QueryJoinType.AND;
+    this.predicates = new ArrayList<QueryPredicate>();
+  }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param joinType the type of join to be applied to all predicates
-	 */
-	public QueryCriteria(QueryJoinType joinType)
-	{
-		this.joinType = joinType;
-		this.predicates = new ArrayList<QueryPredicate>();
-	}
+  /**
+   * Constructor
+   * 
+   * @param joinType the type of join to be applied to all predicates
+   */
+  public QueryCriteria(QueryJoinType joinType)
+  {
+    this.joinType = joinType;
+    this.predicates = new ArrayList<QueryPredicate>();
+  }
 
-	/**
-	 * 
-	 * @return the joinType which should be applied to all predicates
-	 */
-	public QueryJoinType getJoinType()
-	{
-		return joinType;
-	}
+  /**
+   * 
+   * @return the joinType which should be applied to all predicates
+   */
+  public QueryJoinType getJoinType()
+  {
+    return joinType;
+  }
 
-	/**
-	 * 
-	 * @param joinType the type of join to be applied to all predicates
-	 */
-	public void setJoinType(QueryJoinType joinType)
-	{
-		this.joinType = joinType;
-	}
+  /**
+   * 
+   * @param joinType the type of join to be applied to all predicates
+   */
+  public void setJoinType(QueryJoinType joinType)
+  {
+    this.joinType = joinType;
+  }
 
-	/**
-	 * 
-	 * @return the list of predicates to be used to perform the query
-	 */
-	public List<QueryPredicate> getPredicates()
-	{
-		return predicates;
-	}
+  /**
+   * 
+   * @return the list of predicates to be used to perform the query
+   */
+  public List<QueryPredicate> getPredicates()
+  {
+    return predicates;
+  }
 
-	/**
-	 * 
-	 * @param predicates the list of predicates to be used to perform the query
-	 */
-	public void setPredicates(List<QueryPredicate> predicates)
-	{
-		this.predicates = predicates;
-	}
+  /**
+   * 
+   * @param predicates the list of predicates to be used to perform the query
+   */
+  public void setPredicates(List<QueryPredicate> predicates)
+  {
+    this.predicates = predicates;
+  }
 
-	/**
-	 * Convenience method to add a predicate to the list of predicates
-	 * 
-	 * @param predicate a predicate to be used to perform the query
-	 */
-	public void addPredicate(QueryPredicate predicate)
-	{
-		if (this.predicates == null)
-		{
-			this.predicates = new ArrayList<QueryPredicate>();
-		}
-		this.predicates.add(predicate);
-	}
+  /**
+   * Convenience method to add a predicate to the list of predicates
+   * 
+   * @param predicate a predicate to be used to perform the query
+   */
+  public void addPredicate(QueryPredicate predicate)
+  {
+    if (this.predicates == null)
+    {
+      this.predicates = new ArrayList<QueryPredicate>();
+    }
+    this.predicates.add(predicate);
+  }
 
-	/**
-	 * 
-	 * @return how many predicates are in this query.
-	 */
-	public int size()
-	{
-		return predicates == null ? 0 : predicates.size();
-	}
+  /**
+   * 
+   * @return how many predicates are in this query.
+   */
+  public int size()
+  {
+    return predicates == null ? 0 : predicates.size();
+  }
 
-	public String toString()
-	{
-		String result = "";
-		String prefix = "";
-		for (int i = 0; predicates != null && i < predicates.size(); i++)
-		{
-			QueryPredicate predicate = predicates.get(i);
-			result += prefix + predicate.toString();
-			prefix = " " + joinType.getName() + " ";
-		}
-		return result;
-	}
+  public String toString()
+  {
+    String result = "";
+    String prefix = "";
+    for (int i = 0; predicates != null && i < predicates.size(); i++)
+    {
+      QueryPredicate predicate = predicates.get(i);
+      result += prefix + predicate.toString();
+      prefix = " " + joinType.getName() + " ";
+    }
+    return result;
+  }
 }

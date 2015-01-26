@@ -154,50 +154,91 @@
 		<mkdir dir="${dist.dir}"/>
 		<jar destfile="${dist.dir}/config.jar">
             <fileset dir="${config.dir}">
-            	<include name="basicsis/spring/*"/>
+                <include name="basicsis/spring/*"/>
             </fileset>
-		</jar>
-  -->
-	</target>
+        </jar>
+    -->
+    </target>
 
-	<!-- *************** -->
-	<!-- Create WAR file -->
-	<!-- *************** -->
-	<target name="80-build-war" depends="03-jar-components, jar-config" description="Package WAR for distribution">
-		<delete file="${dist.dir}/${app.name}.war}"/>
+    <!-- *************** -->
+    <!-- Create WAR file -->
+    <!-- *************** -->
+    <target name="80-build-war" depends="03-jar-components, jar-config" description="Package WAR for distribution">
+        <delete file="${dist.dir}/${app.name}.war}"/>
 
-		<!-- get all jar files -->
-		<copy todir="${web.lib.root.dir}">
-			<fileset dir="${dist.dir}" includes="*.jar"/>
-		</copy>
+        <!-- get all jar files -->
+        <copy todir="${web.lib.root.dir}">
+            <fileset dir="${dist.dir}" includes="*.jar"/>
+        </copy>
 
-		<echo message="War Creation: ${project.basedir}/${web.dir.name}"/>
-		<jar destfile="${dist.dir}/${app.name}.war">
-			<fileset dir="${project.basedir}/${web.dir.name}">
-				<exclude name="**/readme.txt"/>
-				<exclude name=".*"/>
-				<!-- ignore eclipse files -->
-			</fileset>
-		</jar>
+        <echo message="War Creation: ${project.basedir}/${web.dir.name}"/>
+        <jar destfile="${dist.dir}/${app.name}.war">
+            <fileset dir="${project.basedir}/${web.dir.name}">
+                <exclude name="**/readme.txt"/>
+                <exclude name=".*"/>
+                <!-- ignore eclipse files -->
+            </fileset>
+        </jar>
 
-		<!-- remove project jars from WEB-INF/lib again -->
-		<foreach list="${infra-jars}" target="del-project-jar" param="elem" trim="true"/>
-		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar"/>
-		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar"/>
-		<delete file="${web.lib.root.dir}/config.jar"/>
-	</target>
+        <!-- remove project jars from WEB-INF/lib again -->
+        <foreach list="${infra-jars}" target="del-project-jar" param="elem" trim="true"/>
+        <delete file="${web.lib.root.dir}/${jarprefix}DataModel_${locale}${sifddversion}.jar"/>
+        <delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar"/>
+        <delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar"/>
+        <delete file="${web.lib.root.dir}/config.jar"/>
+    </target>
 
-	<!-- delete project Jar file from WEB-INF/lib -->
-	<target name="del-project-jar">
-		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Infra-${elem}-${frameworkversion}.jar"/>
-	</target>
+    <!-- delete project Jar file from WEB-INF/lib -->
+    <target name="del-project-jar">
+        <delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Infra-${elem}-${frameworkversion}.jar"/>
+    </target>
 
-	<!-- ************************************ -->
-	<!-- Deploy to local web or app container -->
-	<!-- ************************************ -->
-	<target name="85-deploy-to-Local-WebContainer" depends="80-build-war" description="Deploy War to Local Web Container">
-		<echo message="Copy ${dist.dir}/${app.name}.war to ${deploy.install.dir}"/>
-		<copy file="${dist.dir}/${app.name}.war" todir="${deploy.install.dir}"/>
-	</target>
-
+    <!-- ************************************ -->
+    <!-- Deploy to local web or app container -->
+    <!-- ************************************ -->
+    <target name="85-deploy-to-Local-WebContainer" depends="80-build-war" description="Deploy War to Local Web Container">
+        <echo message="Copy ${dist.dir}/${app.name}.war to ${deploy.install.dir}"/>
+        <copy file="${dist.dir}/${app.name}.war" todir="${deploy.install.dir}"/>
+    </target>
+    
+    <!-- // HITS Customisation - Start -->
+    <!-- ********************** -->
+    <!-- Install jars in Maven  -->
+    <!-- ********************** --> 
+    <target name="90-maven-install" depends="03-jar-components" description="Install jars in local maven repo">
+      <antcall target="maven-install-jar">
+        <param name="filename" value="${dist.dir}/${jarprefix}DataModel_${locale}${sifddversion}.jar" />
+        <param name="artifactId" value="DataModel_${locale}" />
+        <param name="artifactVersion" value="${sifddversion}" />
+      </antcall>
+      <antcall target="maven-install-jar">
+        <param name="filename" value="${lib.root.dir}/${systemic.path}/systemic-framework-20140410.jar" />
+        <param name="artifactId" value="systemic-framework" />
+        <param name="artifactVersion" value="1.0" />
+      </antcall>
+      <antcall target="maven-install-jar">
+        <param name="filename" value="${dist.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar" />
+        <param name="artifactId" value="Common" />
+        <param name="artifactVersion" value="${frameworkversion}" />
+      </antcall>
+      <foreach list="${infra-jars}" target="maven-install-infra-jar" param="elem" trim="true" />
+    </target>
+    <target name="maven-install-infra-jar">
+      <antcall target="maven-install-jar">
+        <param name="filename" value="${dist.dir}/${jarprefix}${sifinfraversion}Infra-${elem}-${frameworkversion}.jar" />
+        <param name="artifactId" value="Infra-${elem}" />
+        <param name="artifactVersion" value="${frameworkversion}" />
+      </antcall>    
+    </target>
+    <target name="maven-install-jar">
+      <exec executable="${mvn.exec}">
+        <arg value="install:install-file" />
+        <arg value="-Dfile=${filename}" />
+        <arg value="-DgroupId=sif3" />
+        <arg value="-DartifactId=${artifactId}" />
+        <arg value="-Dversion=${artifactVersion}" />
+        <arg value="-Dpackaging=jar"/>
+      </exec>
+    </target>
+  <!-- // HITS Customisation - End -->
 </project>

@@ -43,7 +43,7 @@ import sif3.common.model.security.TokenInfo;
 import sif3.common.persist.model.AppEnvironmentTemplate;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.ErrorDetails;
-import sif3.infra.common.env.mgr.DirectProviderEnvironmentManager;
+import sif3.infra.common.env.mgr.HITSDirectProviderEnvironmentManager;
 import sif3.infra.common.env.mgr.ProviderManagerFactory;
 import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.interfaces.EnvironmentManager;
@@ -367,11 +367,90 @@ public class EnvironmentResource extends InfraResource
 	/*
 	 * Convenience Method.
 	 */
-	private DirectProviderEnvironmentManager getDirectEnvironmentManager()
+	private HITSDirectProviderEnvironmentManager getDirectEnvironmentManager()
 	{
-		return (DirectProviderEnvironmentManager)getEnvironmentManager();
-	}	
-
+		return (HITSDirectProviderEnvironmentManager)getEnvironmentManager();
+	}
+	
+	/* 
+	 * ApplicationKey can be part of the url query parameters or it could be in the authorisation header or access token. If it is in either
+	 * in the authorization header or as an access token then it must be passed to this method in the "applicationKey' parameter.
+	 */
+	private EnvironmentType makeEnvironmentFromQueryParams(URLQueryParameter urlParams, String applicationKey)
+	{
+	  if (urlParams != null)
+	  {
+	    ObjectFactory infraObjectFactory = new ObjectFactory();
+	    EnvironmentType env = infraObjectFactory.createEnvironmentType();
+	    env.setApplicationInfo(new ApplicationInfoType());
+	    env.getApplicationInfo().setApplicationKey(applicationKey);
+	    env.getApplicationInfo().setTransport(CommonConstants.REST_TRANSPORT_STR); // default!
+	    
+	    for (EnvironmentQueryParams urlParam : EnvironmentQueryParams.values())
+	    {
+	      String value = urlParams.getQueryParam(urlParam.name());
+	      if (StringUtils.notEmpty(value))
+	      {
+  	      switch (urlParam)
+  	      {
+  	        case solutionId:
+  	          env.setSolutionId(value);
+  	          break;
+  	        case applicationKey: // ensure that URL parameter has lowest precedence.
+  	          if (StringUtils.isEmpty(env.getApplicationInfo().getApplicationKey())) // only use URL parameter if it is not yet set
+  	          {
+  	            env.getApplicationInfo().setApplicationKey(value);
+  	          }
+  	          break;
+  	        case userToken:
+              env.setUserToken(value);
+  	          break;
+  	        case instanceId:
+              env.setInstanceId(value);
+  	          break;
+  	        case authenticationMethod:
+  	          env.setAuthenticationMethod(value);
+  	          break;
+  	        case consumerName:
+  	          env.setConsumerName(value);
+  	          break;
+  	        case supportedInfrastructureVersion:
+  	          env.getApplicationInfo().setSupportedInfrastructureVersion(value);
+  	          break;
+  	        case dataModelNamespace:
+  	          env.getApplicationInfo().setDataModelNamespace(value);
+  	          break;
+  	        case transport:
+  	          env.getApplicationInfo().setTransport(value);
+  	          break;
+  	        case productName:
+  	          if (env.getApplicationInfo().getApplicationProduct() == null)
+  	          {
+  	            env.getApplicationInfo().setApplicationProduct(new ProductIdentityType());
+  	          }
+  	          env.getApplicationInfo().getApplicationProduct().setProductName(value);
+  	          break;
+  	      }
+	      }
+	    }
+	    
+	    //ensure that we have at least the application key!
+	    if (env.getApplicationInfo().getApplicationKey() != null)
+	    {
+	      return env;
+	    }
+	    else // log an error and return null
+	    {
+	      logger.error("At least the application key must be provided. Set it as URL paramater or use HTTP Authorization Header as stated in the SIF Specification.");
+	      return null;
+	    }
+	  }
+	  else
+	  {
+	    return null;
+	  }
+	}
+	
 	private ArrayList<String> envDataValid(EnvironmentType environment)
 	{
 		ArrayList<String> errors = new ArrayList<String>();

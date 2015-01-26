@@ -28,104 +28,104 @@ import java.util.regex.Pattern;
  */
 public class QueryPredicate implements Serializable
 {
-	private static final long    serialVersionUID = 5515817219198796201L;
+  private static final long    serialVersionUID = 5515817219198796201L;
 
-	private static final Pattern predicateParser  = Pattern.compile("^([^\\s]*)\\s([^\\s]*)\\s(.*)$");
+  private static final Pattern predicateParser  = Pattern.compile("^([^\\s]*)\\s([^\\s]*)\\s(.*)$");
 
-	private String               subject;
-	private QueryOperator        operator;
-	private String               value;
+  private String               subject;
+  private QueryOperator        operator;
+  private String               value;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param subject the left hand side of a query predicate
-	 * @param operator the type of comparison to make when evaluating this predicate
-	 * @param value the right hand side of a query predicate
-	 */
-	public QueryPredicate(String subject, QueryOperator operator, String value)
-	{
-		this.subject = subject;
-		this.operator = operator;
-		this.value = value;
-	}
+  /**
+   * Constructor
+   * 
+   * @param subject the left hand side of a query predicate
+   * @param operator the type of comparison to make when evaluating this predicate
+   * @param value the right hand side of a query predicate
+   */
+  public QueryPredicate(String subject, QueryOperator operator, String value)
+  {
+    this.subject = subject;
+    this.operator = operator;
+    this.value = value;
+  }
 
-	/**
-	 * 
-	 * @return the left hand side of a query predicate
-	 */
-	public String getSubject()
-	{
-		return subject;
-	}
+  /**
+   * 
+   * @return the left hand side of a query predicate
+   */
+  public String getSubject()
+  {
+    return subject;
+  }
 
-	/**
-	 * 
-	 * @param subject the left hand side of a query predicate
-	 */
-	public void setSubject(String subject)
-	{
-		this.subject = subject;
-	}
+  /**
+   * 
+   * @param subject the left hand side of a query predicate
+   */
+  public void setSubject(String subject)
+  {
+    this.subject = subject;
+  }
 
-	/**
-	 * 
-	 * @return the type of comparison to make when evaluating this predicate
-	 */
-	public QueryOperator getOperator()
-	{
-		return operator;
-	}
+  /**
+   * 
+   * @return the type of comparison to make when evaluating this predicate
+   */
+  public QueryOperator getOperator()
+  {
+    return operator;
+  }
 
-	/**
-	 * 
-	 * @param operator the type of comparison to make when evaluating this predicate
-	 */
-	public void setOperator(QueryOperator operator)
-	{
-		this.operator = operator;
-	}
+  /**
+   * 
+   * @param operator the type of comparison to make when evaluating this predicate
+   */
+  public void setOperator(QueryOperator operator)
+  {
+    this.operator = operator;
+  }
 
-	/**
-	 * 
-	 * @return the right hand side of a query predicate
-	 */
-	public String getValue()
-	{
-		return value;
-	}
+  /**
+   * 
+   * @return the right hand side of a query predicate
+   */
+  public String getValue()
+  {
+    return value;
+  }
 
-	/**
-	 * 
-	 * @param value the right hand side of a query predicate
-	 */
-	public void setValue(String value)
-	{
-		this.value = value;
-	}
+  /**
+   * 
+   * @param value the right hand side of a query predicate
+   */
+  public void setValue(String value)
+  {
+    this.value = value;
+  }
 
-	/**
-	 * A convenience method to parse a string into a query predicate. value must be of the format "subject operator value" 
-	 * eg. name = john
-	 * 
-	 * @param value the string to parse.
-	 */
-	public static QueryPredicate parse(String value)
-	{
-		Matcher matcher = predicateParser.matcher(value);
-		if (matcher.matches())
-		{
-			return new QueryPredicate(matcher.group(1), QueryOperator.fromSign(matcher.group(2)), matcher.group(3));
-		}
-		else
-		{
-			return null;
-		}
-	}
+  /**
+   * A convenience method to parse a string into a query predicate. value must be of the format "subject operator value" 
+   * eg. name = john
+   * 
+   * @param value the string to parse.
+   */
+  public static QueryPredicate parse(String value)
+  {
+    Matcher matcher = predicateParser.matcher(value);
+    if (matcher.matches())
+    {
+      return new QueryPredicate(matcher.group(1), QueryOperator.fromSign(matcher.group(2)), matcher.group(3));
+    }
+    else
+    {
+      return null;
+    }
+  }
 
-	public String toString()
-	{
-		String operator = this.operator == null ? "null" : this.operator.getSign();
-		return subject + " " + operator + " " + value;
-	}
+  public String toString()
+  {
+    String operator = this.operator == null ? "null" : this.operator.getSign();
+    return subject + " " + operator + " " + value;
+  }
 }
