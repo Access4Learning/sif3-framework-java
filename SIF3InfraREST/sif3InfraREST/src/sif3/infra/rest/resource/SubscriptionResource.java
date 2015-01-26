@@ -63,7 +63,6 @@ public class SubscriptionResource extends InfraResource
 	private ObjectFactory infraObjectFactory = new ObjectFactory();
 	private static HashMap<String, SubscriptionType> subscriptionsSet = new HashMap<String, SubscriptionType>();
 	/* End Testing variables */
-	
 
 	public SubscriptionResource(@Context UriInfo uriInfo,
             			 		@Context HttpHeaders requestHeaders,
@@ -71,8 +70,7 @@ public class SubscriptionResource extends InfraResource
        			                @PathParam("mimeType") String mimeType)
 	{
 		super(uriInfo, requestHeaders, request, "", null, null);
-//	    setURLPostfixMediaType(mimeType);
-	    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
+		logger.debug("URL Postfix mimeType: '"+mimeType+"'");
 	}
 
 	/*----------------------*/
@@ -107,7 +105,8 @@ public class SubscriptionResource extends InfraResource
 		}
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
 				return makeErrorResponse(error, ResponseAction.QUERY);
@@ -129,21 +128,21 @@ public class SubscriptionResource extends InfraResource
      * Get a specific subscription for this environment.
      */
 	@GET
-	@Path("{subscriptionID:([^\\./])*}{mimeType:(\\.[^/]*?)?}")
+	@Path("{subscriptionID:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getSubscription(@PathParam("subscriptionID") String subscriptionID,
                                     @PathParam("mimeType") String mimeType)
 	{
-//	    setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Get Subscription by subscription ID (REST GET - Single): "+subscriptionID+" and URL Postfix mimeType = '" + mimeType + "'");
 		}
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
 				return makeErrorResponse(error, ResponseAction.QUERY);
@@ -179,7 +178,8 @@ public class SubscriptionResource extends InfraResource
 		}
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
 				return makeErrorResponse(error, ResponseAction.CREATE);
@@ -198,12 +198,12 @@ public class SubscriptionResource extends InfraResource
 				logger.error("Subscription Payload: "+ payload);
 				return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal subscription payload: "+ ex.getMessage()), ResponseAction.CREATE);
 			}
-      catch (UnsupportedMediaTypeExcpetion ex)
-      {
-        logger.error("Failed to unmarshal payload into an SubscriptionType: "+ ex.getMessage(), ex);
-        logger.error("Subscription Payload: "+ payload);
-        return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal subscription payload: "+ ex.getMessage()), ResponseAction.CREATE);
-      }
+			catch (UnsupportedMediaTypeExcpetion ex)
+			{
+				logger.error("Failed to unmarshal payload into an SubscriptionType: "+ ex.getMessage(), ex);
+				logger.error("Subscription Payload: "+ payload);
+				return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal subscription payload: "+ ex.getMessage()), ResponseAction.CREATE);
+			}
 		}
 		else
 		{
@@ -215,21 +215,21 @@ public class SubscriptionResource extends InfraResource
 	 * Delete a specific queue.
 	 */
 	@DELETE
-	@Path("{subscriptionID:([^\\./]*)}{mimeType:(\\.[^/]*?)?}")
+	@Path("{subscriptionID:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response removeSubscription(@PathParam("subscriptionID") String subscriptionID,
                                        @PathParam("mimeType") String mimeType)
 	{
-//	    setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Remove Subscription (REST DELETE - Single) with subscriptionID = "+subscriptionID+" and URL Postfix mimeType = '" + mimeType + "'");
 		}
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
 				return makeErrorResponse(error, ResponseAction.DELETE);

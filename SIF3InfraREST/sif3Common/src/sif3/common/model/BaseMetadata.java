@@ -21,6 +21,10 @@ package sif3.common.model;
 import java.io.Serializable;
 
 /**
+ * This class is mainly intended to be used to store information extracted from a HTTP request and pass it along 
+ * to an object provider. The properties of this class are generally retrieved either from the HTTP Headers or 
+ * URL Query Parameter from a HTTP request.
+ * 
  * @author Joerg Huber
  *
  */
@@ -29,6 +33,13 @@ public class BaseMetadata implements Serializable
     private static final long serialVersionUID = 4812586181544050954L;
    
     private String generatorID = null;  // This is an optional field and might be provided by the consumer.
+    
+    // The following three fields are early adopters for proposed SIF 3.1 inclusions. Should only be used once officially
+    // released. They may or may not be set. Until the official release they may not be set at all and if they are they
+    // may only be available in a DIRECT environment but NOT through a BROKERED environment.
+    private String applicationKey = null; // The applicationKey from the HTTP header field 'applicationKey' set by the consumer. 
+ 	private String userToken = null; // The user Token from the HTTP header field 'userToken' set by the consumer. 
+    private String instanceID = null; // The instanceId from the HTTP header field 'instanceId' set by the consumer. 
 
 	public String getGeneratorID()
     {
@@ -40,9 +51,41 @@ public class BaseMetadata implements Serializable
     	this.generatorID = generatorID;
     }
 
+	public String getApplicationKey()
+	{
+		return applicationKey;
+	}
+
+	public void setApplicationKey(String applicationKey)
+	{
+		this.applicationKey = applicationKey;
+	}
+
+	public String getUserToken()
+	{
+		return userToken;
+	}
+
+	public void setUserToken(String userToken)
+	{
+		this.userToken = userToken;
+	}
+
+	public String getInstanceID()
+	{
+		return instanceID;
+	}
+
+	public void setInstanceID(String instanceID)
+	{
+		this.instanceID = instanceID;
+	}
+
 	@Override
     public String toString()
     {
-	    return "BaseMetadata [generatorID=" + this.generatorID + "]";
+	    return "BaseMetadata [applicationKey=" + applicationKey
+	            + ", generatorID=" + generatorID + ", instanceID=" + instanceID
+	            + ", userToken=" + userToken + "]";
     }
 }

@@ -27,10 +27,20 @@ import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.utils.JAXBUtils;
 
+/**
+ * Implementation of an unmarshal Factory for all Infrastructure Model Objects. JAXB has been used to create Infrastructure POJOs and 
+ * this Factory uses JAXB's methods to unmarshal POJOs from XML. At this point in time (May 2014) JSON is not yet supported.
+ * 
+ * @author Joerg Huber
+ *
+ */
 public class InfraUnmarshalFactory implements UnmarshalFactory
 {
   protected final Logger logger = Logger.getLogger(getClass());
 
+  /* (non-Javadoc)
+   * @see sif3.infra.common.conversion.UnmarshalFactory#unmarshalFromXML(java.lang.String, java.lang.Class)
+   */
   @Override
   public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
   {
@@ -47,6 +57,9 @@ public class InfraUnmarshalFactory implements UnmarshalFactory
     return result;
   }
 
+  /* (non-Javadoc)
+   * @see sif3.infra.common.conversion.UnmarshalFactory#unmarshalFromJSON(java.lang.String, java.lang.Class)
+   */
   @Override
   public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
   {
@@ -63,14 +76,15 @@ public class InfraUnmarshalFactory implements UnmarshalFactory
     return result;
   }
 
+  /* (non-Javadoc)
+   * @see sif3.infra.common.conversion.UnmarshalFactory#unmarschal(java.lang.String, java.lang.Class, javax.ws.rs.core.MediaType)
+   */
   @Override
   public Object unmarshal(String payload, Class<?> clazz, MediaType mediaType) throws UnmarshalException, UnsupportedMediaTypeExcpetion
   {
     if (mediaType != null)
     {
-      if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) || 
-        MediaType.TEXT_XML_TYPE.isCompatible(mediaType)  || 
-        MediaType.TEXT_PLAIN_TYPE.isCompatible(mediaType))
+      if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) || MediaType.TEXT_XML_TYPE.isCompatible(mediaType)  || MediaType.TEXT_PLAIN_TYPE.isCompatible(mediaType))
       {
         return unmarshalFromXML(payload, clazz);
       }
@@ -83,5 +97,4 @@ public class InfraUnmarshalFactory implements UnmarshalFactory
     // If we get here then we deal with an unknown media type
     throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot unmarshal the given input from this media type.");
   }
-
 }

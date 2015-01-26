@@ -28,15 +28,17 @@ import sif3.common.exception.ServiceInvokationException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
-import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.RequestHeaderConstants;
+import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.interfaces.Consumer;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.QueryCriteria;
+import sif3.common.model.QueryPredicate;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.ZoneContextInfo;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
-import sif3.common.model.ZoneContextInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.BaseResponse;
 import sif3.common.ws.BulkOperationResponse;
@@ -49,7 +51,6 @@ import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.rest.client.ClientInterface;
 import sif3.infra.rest.client.ClientUtils;
 import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.StringUtils;
 import au.com.systemic.framework.utils.Timer;
 
 /**
@@ -87,6 +88,28 @@ public abstract class AbstractConsumer implements Consumer
 		
 		// Set some properties at this stage for simplicity reasons.
 		checkACL = getConsumerEnvironment().getCheckACL();
+		
+		//Check a few things to ensure that all core methods are implemented.
+		if (getMarshaller() == null)
+		{
+			logger.error("Consumer "+getConsumerName()+" has not implemented the getMarshaller() method properly. It returns null which is not valid.");
+			initOK = false;
+		}
+		if (getUnmarshaller() == null)
+		{
+			logger.error("Consumer "+getConsumerName()+" has not implemented the getUnmarshaller() method properly. It returns null which is not valid.");
+			initOK = false;
+		}
+		if (getSingleObjectClassInfo() == null)
+		{
+			logger.error("Consumer "+getConsumerName()+" has not implemented the getSingleObjectClassInfo() method properly. It returns null which is not valid.");
+			initOK = false;			
+		}
+		if (getMultiObjectClassInfo() == null)
+		{
+			logger.error("Consumer "+getConsumerName()+" has not implemented the getMultiObjectClassInfo() method properly. It returns null which is not valid.");
+			initOK = false;			
+		}
 	}
 
 	/**
@@ -109,6 +132,30 @@ public abstract class AbstractConsumer implements Consumer
 	  return ConsumerEnvironmentManager.getInstance().getServiceProperties();
 	}
 	
+	/*------------------------------------------------------------------------------------------------------------------------
+	 * Start of 'Dynamic' HTTP Header Field override section
+	 * 
+	 * The following set of methods are used for a more configurable way how some HTTP header parameters are set.
+	 * By default the following HTTP Header fields are retrieved from the consumer's property file and put in corresponding
+	 * HTTP Header Fields:
+	 * 
+	 * Property               HTTP Header
+	 * ----------------------------------
+	 * adapter.generator.id   generatorId
+	 * env.application.key    applicationKey
+	 * env.userToken          userToken
+	 * env.instanceID         instanceId
+	 * 
+	 * Only properties that are not null or empty string will be set in the corresponding HTTP Header.
+	 *
+	 * There are situations where and application may need a more 'dynamic' behaviour where the above values are determined
+	 * at runtime, based on other circumstances and therefore these properies must be retrieved from an other source than the
+	 * consumer's property file. In such a case the methods below gan be overwritten to make them dynamic and controlled by
+	 * the implementation rather than driven by the consumer's property file. If any of the methods below is overwritten then
+	 * the value of the over riding method is set in the corresponding HTTP Header field if the return value of the method 
+	 * is not null or an empty string.
+	 *------------------------------------------------------------------------------------------------------------------------*/
+	
 	/**
 	 * This method returns the value of the adapter.generator.id property from the consumer's property file. If that
 	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
@@ -119,6 +166,43 @@ public abstract class AbstractConsumer implements Consumer
 	{
 		return getConsumerEnvironment().getGeneratorID();
 	}
+	
+	/**
+	 * This method returns the value of the env.application.key property from the consumer's property file. If that
+	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The env.application.key property from the consumer's property file
+	 */
+	public String getApplicationKey()
+	{
+		return getConsumerEnvironment().getEnvironmentKey().getApplicationKey();
+	}
+
+	/**
+	 * This method returns the value of the env.userToken property from the consumer's property file. If that
+	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The env.userToken property from the consumer's property file
+	 */
+	public String getUserToken()
+	{
+		return getConsumerEnvironment().getEnvironmentKey().getUserToken();
+	}
+
+	/**
+	 * This method returns the value of the env.instanceID property from the consumer's property file. If that
+	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The env.instanceID property from the consumer's property file
+	 */
+	public String getInstanceID()
+	{
+		return getConsumerEnvironment().getEnvironmentKey().getInstanceID();
+	}
+
+	/*------------------------------------------------------------------------------------------------------------------------
+	 * End of 'Dynamic' HTTP Header Field override section
+	 *-----------------------------------------------------------------------------------------------------------------------*/ 
 
 	/**
 	 * @return Returns the actual Class Name of this consumer
@@ -158,13 +242,13 @@ public abstract class AbstractConsumer implements Consumer
 	@Override
 	public List<BulkOperationResponse<CreateOperationStatus>> createMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-	  if (!initOK)
-	  {
-	    logger.error("Consumer not initialsied properly. See previous error log entries.");
-	    return null;
-	  }
+		if (!initOK)
+	  	{
+			logger.error("Consumer not initialsied properly. See previous error log entries.");
+			return null;
+	  	}
 
-	  Timer timer = new Timer();
+		Timer timer = new Timer();
 		timer.start();
 		List<BulkOperationResponse<CreateOperationStatus>> responses = new ArrayList<BulkOperationResponse<CreateOperationStatus>>();
 		
@@ -494,6 +578,61 @@ public abstract class AbstractConsumer implements Consumer
 		logger.debug("Time taken to call and process 'retrieve all' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 		return responses;
 	}
+	
+	public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+	{
+		if (!initOK)
+		{
+			logger.error("Consumer not initialsied properly. See previous error log entries.");
+			return null;
+		}
+
+		Timer timer = new Timer();
+		timer.start();
+		List<Response> responses = new ArrayList<Response>();
+
+		if (!getConsumerEnvironment().getIsConnected())
+		{
+			logger.error("No connected environment for " + getConsumerEnvironment().getEnvironmentName() + ". See previous erro log entries.");
+			return responses;
+		}
+		// List is null or empty which means we perform action in default  Zone/Context
+		if ((zoneCtxList == null) || (zoneCtxList.size() == 0))
+		{
+			ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, null, null, requestType);
+			if (error == null)
+			{
+				error = requestTypeSupported(requestType);
+			}
+			if (error == null) // all good
+			{
+				responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, getHeaderProperties(getConsumerEnvironment(), false,  requestType, HeaderValues.ServiceType.SERVICEPATH), getMultiObjectClassInfo().getObjectType(), null, null));
+			}
+			else // pretend to have received a 'fake' error Response
+			{
+				responses.add(createErrorResponse(error));
+			}
+		}
+		else // Only perform action where environment matches current environment
+		{
+			for (ZoneContextInfo zoneCtx : zoneCtxList)
+			{
+				ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+				if (error == null) // all good
+				{
+					responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, getHeaderProperties(getConsumerEnvironment(), false, requestType,  HeaderValues.ServiceType.SERVICEPATH), getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+				}
+				else // pretend to have received a 'fake' error Response
+				{
+					responses.add(createErrorResponse(error));
+				}
+			}
+		}
+	    timer.finish();
+	    logger.debug("Time taken to call and process 'retrieve all' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
+	    return responses;
+	}
+	 
 
 	/*-----------------------*/
 	/*-- Update Operations --*/
@@ -512,7 +651,7 @@ public abstract class AbstractConsumer implements Consumer
       return null;
     }
 
-    Timer timer = new Timer();
+    	Timer timer = new Timer();
 		timer.start();
 		List<BulkOperationResponse<OperationStatus>> responses = new ArrayList<BulkOperationResponse<OperationStatus>>();
 		
@@ -567,7 +706,7 @@ public abstract class AbstractConsumer implements Consumer
       return null;
     }
 
-    Timer timer = new Timer();
+    	Timer timer = new Timer();
 		timer.start();
 		List<Response> responses = new ArrayList<Response>();
 		
@@ -645,28 +784,40 @@ public abstract class AbstractConsumer implements Consumer
 	  return ConsumerEnvironmentManager.getInstance().getSIF3Session();
 	}
 
+	private HeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation, RequestType requestType, HeaderValues.ServiceType serviceType) 
+	{
+	   HeaderProperties hdrProps = new HeaderProperties();
+	    
+	   // First create the properties for the authentication header.
+	   ClientUtils.setAuthenticationHeader(hdrProps, envInfo.getAuthMethod(), getSIF3Session().getSessionToken(), getSIF3Session().getPassword());
+	    
+	   // Set the remaining header fields for this type of request
+	   if (isCreateOperation)
+	   {
+	      hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, (envInfo.getUseAdvisory() ? "true" : "false"));
+	   }
+	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, serviceType.name());
+	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE, requestType.name());
+	    
+	   // Set values of consumer property file or their overridden value. Note thsetHeaderProperty() method will do the check
+	   // for null, so no need to do this here.
+	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY, getApplicationKey());
+	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_USER_TOKEN, getUserToken());
+	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_INSTANCE_ID, getInstanceID());
+	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, getGeneratorID());
+	   
+//	   String generatorID = getGeneratorID();
+//	   if (StringUtils.notEmpty(generatorID))
+//	   {
+//	      hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, generatorID);
+//	   }
+	    
+	   return hdrProps;
+	}
+	
 	private HeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation, RequestType requestType)
 	{
-		HeaderProperties hdrProps = new HeaderProperties();
-		
-		// First create the properties for the authentication header.
-		ClientUtils.setAuthenticationHeader(hdrProps, envInfo.getAuthMethod(), getSIF3Session().getSessionToken(), getSIF3Session().getPassword());
-		
-		// Set the remaining header fields for this type of request
-		if (isCreateOperation)
-		{
-		  hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, (envInfo.getUseAdvisory() ? "true" : "false"));
-		}
-		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, HeaderValues.ServiceType.OBJECT.name());
-		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE, requestType.name());
-		
-		String generatorID = getGeneratorID();
-		if (StringUtils.notEmpty(generatorID))
-		{
-			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, generatorID);
-		}
-		
-		return hdrProps;
+	  return getHeaderProperties(envInfo, isCreateOperation, requestType, HeaderValues.ServiceType.OBJECT);
 	}
 	
 	private void setErrorDetails(BaseResponse response, ErrorDetails errorDetails)
@@ -682,9 +833,13 @@ public abstract class AbstractConsumer implements Consumer
 	 * Will perform hasAccess() and requestTypeSupported() checks. This is a convenience method, so that not each operation has to
 	 * call the two methods sequentially and manage all the flow.
 	 */
-	private ErrorDetails allClientChecks(AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType)
+	private ErrorDetails allClientChecks(AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType) {
+	  return allClientChecks(getMultiObjectClassInfo().getObjectName(), right, accessType, zone, context, requestType);
+	}
+	
+	private ErrorDetails allClientChecks(String serviceName, AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType)
 	{
-		ErrorDetails error = hasAccess(right, accessType, zone, context);
+		ErrorDetails error = hasAccess(serviceName, right, accessType, zone, context);
 		if (error == null)
 		{
 			error = requestTypeSupported(requestType);
@@ -692,16 +847,20 @@ public abstract class AbstractConsumer implements Consumer
 		return error;
 	}
 	
-	private ErrorDetails hasAccess(AccessRight right, AccessType accessType, SIFZone zone, SIFContext context)
+	private ErrorDetails hasAccess(AccessRight right, AccessType accessType, SIFZone zone, SIFContext context) {
+	  return hasAccess(getMultiObjectClassInfo().getObjectName(), right, accessType, zone, context);
+	}
+	
+	private ErrorDetails hasAccess(String serviceName, AccessRight right, AccessType accessType, SIFZone zone, SIFContext context)
 	{
 		ErrorDetails error = null;
 		if (checkACL)
 		{
-			if (!getSIF3Session().hasAccess(right, accessType, getMultiObjectClassInfo().getObjectName(), zone, context))
+			if (!getSIF3Session().hasAccess(right, accessType, serviceName, zone, context))
 			{
 				String zoneID = (zone == null) ? "Default" : zone.getId();
 				String contextID = (context == null) ? "Default" : context.getId();
-				error = new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not authorized.", right.name()+ " access is not set to "+accessType.name()+" for the service "+getMultiObjectClassInfo().getObjectName()+" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+getSIF3Session().getEnvironmentName(), "Client side check.");			
+				error = new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not authorized.", right.name()+ " access is not set to "+accessType.name()+" for the service " + serviceName +" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+getSIF3Session().getEnvironmentName(), "Client side check.");			
 			}
 		}
 		return error;
@@ -737,4 +896,35 @@ public abstract class AbstractConsumer implements Consumer
 		setErrorDetails(response, error);
 		return response;	
 	}
+	
+	private String getServiceName(QueryCriteria queryCriteria)
+	{
+		String result = null;
+		if (queryCriteria != null && queryCriteria.getPredicates() != null)
+		{
+			result = "";
+			for (QueryPredicate predicate : queryCriteria.getPredicates())
+			{
+				result += predicate.getSubject() + "/{}/";
+			}
+			result += getMultiObjectClassInfo().getObjectName();
+		}
+		return result;
+	}
+
+	private String getServicePath(QueryCriteria queryCriteria)
+	{
+		String result = null;
+		if (queryCriteria != null && queryCriteria.getPredicates() != null)
+		{
+			result = "";
+			for (QueryPredicate predicate : queryCriteria.getPredicates())
+			{
+				result += predicate.getSubject() + "/" + predicate.getValue() + "/";
+			}
+			result += getMultiObjectClassInfo().getObjectName();
+		}
+		return result;
+	}
+
 }

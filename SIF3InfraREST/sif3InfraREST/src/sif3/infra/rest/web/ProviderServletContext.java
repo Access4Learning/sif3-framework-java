@@ -102,6 +102,15 @@ public class ProviderServletContext implements ServletContextListener
 			}
 		}
 		logger.info("Initialise Provider sucessful: "+allOK);
+		
+		// Force a RuntimeExcpetion. According to some sites this is the only way that the web-app is undeployed if
+		// The servlet context listener reports an error. It further depends on the web/app server is such an
+		// exception is honoured and indeed will undeploy the webapp. But this behaviour is outside the control
+		// of this class.
+		if (!allOK)
+		{
+			throw new RuntimeException("Failed to initialse ProviderServletContext. See previous error log entries for details");
+		}
     }
 
     /*

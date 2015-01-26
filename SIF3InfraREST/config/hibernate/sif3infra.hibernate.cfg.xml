@@ -16,26 +16,26 @@
         <!-- MySQL client/server -->
         <!-- ******************* -->
         <!-- property name="hibernate.default_schema">sif3_infra</property-->
-<!-- 
+<!--  
         <property name="dialect">org.hibernate.dialect.MySQLInnoDBDialect</property>
         <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
         <property name="connection.url">jdbc:mysql://localhost:3306/sif3_infra</property>
         <property name="connection.username">root</property>
         <property name="connection.password"></property>
--->
+-->       
         <!-- ******************** -->
         <!-- Oracle client/server -->
         <!-- ******************** -->
 
         <!-- property name="hibernate.default_schema">SIF</property-->
-<!-- 
+<!--
         <property name="dialect">org.hibernate.dialect.OracleDialect</property>
         <property name="connection.driver_class">oracle.jdbc.OracleDriver</property>
         <property name="connection.url">jdbc:oracle:thin:@test-jdglx-db11-vip:1521:tjdg1</property>
         <property name="connection.username">SIF</property>
         <property name="connection.password">SIF</property>
--->
-
+ -->
+ 
         <!-- ********************** -->
         <!-- Postgres client/server -->
         <!-- ********************** -->
@@ -51,7 +51,7 @@
         <!-- *************** -->
         <!-- SQLite Embedded -->
         <!-- *************** -->
- 
+
         <property name="dialect">sif3.common.persist.common.SQLiteDialect</property>
         <property name="connection.driver_class">org.sqlite.JDBC</property>
         <property name="connection.url">jdbc:sqlite:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/DB/Data/SIF3Infra.sqliteDB</property>

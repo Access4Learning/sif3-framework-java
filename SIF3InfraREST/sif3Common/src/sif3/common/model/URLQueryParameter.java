@@ -24,8 +24,8 @@ import java.util.Map;
 import javax.ws.rs.core.MultivaluedMap;
 
 /**
- * Utility class used to manage URL query parameters. This class simply uses an undelying hash map to hold attrbut value pairs that can be
- * used to add or extract URL query paramters from a URI. In essence this class helps extracting and adding URL query parameters (everything 
+ * Utility class used to manage URL query parameters. This class simply uses an underlying hash map to hold attribute value pairs that can be
+ * used to add or extract URL query parameters from a URI. In essence this class helps extracting and adding URL query parameters (everything 
  * after the '?' in a URL).
  * 
  * @author Joerg Huber
@@ -61,9 +61,9 @@ public class URLQueryParameter implements Serializable
   }
 
   /**
-   * This is a conveniece method to deal with the JAX-RS implementation of multivalued maps that is used to manage URL query parameters. This
+   * This is a convenience method to deal with the JAX-RS implementation of multivalued maps that is used to manage URL query parameters. This
    * method will copy the values in the MultivaluedMap across to a simple Map which also means that there is a limitation that each query 
-   * paramter can only occur ONCE! Only the first value of each unique query parameter name will be picked up.
+   * Parameter can only occur ONCE! Only the first value of each unique query parameter name will be picked up.
    * 
    * @param queryParams The Multivalued Map holding query parameters.
    */

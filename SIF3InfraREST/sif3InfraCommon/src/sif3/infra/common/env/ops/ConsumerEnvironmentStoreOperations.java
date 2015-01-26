@@ -18,6 +18,8 @@
 
 package sif3.infra.common.env.ops;
 
+import java.util.Date;
+
 import sif3.common.CommonConstants;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.persist.model.SIF3Session;
@@ -67,6 +69,14 @@ public class ConsumerEnvironmentStoreOperations extends AdapterBaseEnvStoreOpera
 		return createOrUpdateSession(inputEnv, ADAPTER_TYPE, service);
 	}
 
+	/*
+	 * 
+	 */
+	public boolean updateSessionSecurityInfo(String sessionToken, String securityToken, Date securityExpiryDate)
+	{
+		return updateSessionSecurityInfo(sessionToken, securityToken, securityExpiryDate, ADAPTER_TYPE, service);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see sif3.infra.common.env.ClientEnvStoreOperations#removeEnvFromWorkstoreBySessionToken(java.lang.String)

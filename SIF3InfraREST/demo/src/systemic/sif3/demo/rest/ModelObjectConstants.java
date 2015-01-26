@@ -24,6 +24,8 @@ import sif.dd.au30.model.StudentCollectionType;
 import sif.dd.au30.model.StudentDailyAttendanceCollectionType;
 import sif.dd.au30.model.StudentDailyAttendanceType;
 import sif.dd.au30.model.StudentPersonalType;
+import sif.dd.au30.model.TeachingGroupCollectionType;
+import sif.dd.au30.model.TeachingGroupType;
 import sif3.common.conversion.ModelObjectInfo;
 
 /**
@@ -38,4 +40,6 @@ public class ModelObjectConstants
 	public static final ModelObjectInfo SCHOOL_INFO               = new ModelObjectInfo("SchoolInfo", SchoolInfoType.class);
 	public static final ModelObjectInfo STUDENT_DAILY_ATTENDANCES = new ModelObjectInfo("StudentDailyAttendances", StudentDailyAttendanceCollectionType.class);
 	public static final ModelObjectInfo STUDENT_DAILY_ATTENDANCE  = new ModelObjectInfo("StudentDailyAttendance", StudentDailyAttendanceType.class);
+	public static final ModelObjectInfo TEACHING_GROUPS           = new ModelObjectInfo("TeachingGroups", TeachingGroupCollectionType.class);
+	public static final ModelObjectInfo TEACHING_GROUP            = new ModelObjectInfo("TeachingGroups", TeachingGroupType.class);
 }

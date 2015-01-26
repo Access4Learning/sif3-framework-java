@@ -18,9 +18,13 @@
 
 package sif3.infra.test.common.env;
 
+import java.util.Date;
+
+import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.MarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.model.EnvironmentKey;
+import sif3.common.persist.service.SIF3SessionService;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.env.ops.DirectProviderEnvStoreOps;
 import sif3.infra.common.model.ApplicationInfoType;
@@ -34,10 +38,12 @@ import sif3.infra.common.model.ProductIdentityType;
  */
 public class TestDirectProviderEnvStoreOps
 {
-//	private static final AdapterType PROVIDER = AdapterType.PROVIDER;
+	private static final long MINUTE = 1000*60;
+	private static final AdapterType PROVIDER = AdapterType.ENVIRONMENT_PROVIDER;
 //	private static final sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType DIRECT = sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType.DIRECT;
 	
 	private DirectProviderEnvStoreOps envOps = null;
+	private SIF3SessionService service = new SIF3SessionService();
 	
 	private static final String TEMPLATE_FILE_NAME="systemicDemoBrokerResponse.xml";
 	private static final String SERVICE_NAME="StudentProvider";
@@ -47,7 +53,7 @@ public class TestDirectProviderEnvStoreOps
 	private static final String SOLUTION_NAME="systemicDemo";
 	private static final String APPLICATION_KEY="DemoFramework";
 
-	private static final String SESSION_TOKEN="ec1447ad-d381-4709-b7c4-f389e12b3244";
+	private static final String SESSION_TOKEN="d4e10ac8-018a-42b6-9483-358c247e015b";
 	
 	private static final String ENV_ID="279cce2e-1334-45fb-b011-cb498bfdeea0";
 	
@@ -133,7 +139,7 @@ public class TestDirectProviderEnvStoreOps
 	{
 		try
         {
-	        printEnvironment(envOps.loadEnvironmentFromWorkstore(new EnvironmentKey(SOLUTION_NAME, APPLICATION_KEY, null, null), USE_HTTPS));
+	        printEnvironment(envOps.loadEnvironmentFromWorkstore(new EnvironmentKey(SOLUTION_NAME, APPLICATION_KEY, null, null), null, USE_HTTPS));
         }
         catch (Exception ex)
         {
@@ -155,7 +161,7 @@ public class TestDirectProviderEnvStoreOps
 	{
 		EnvironmentType inputEnv = envOps.loadEnvironmentFromTemplate(TEMPLATE_FILE_NAME); // use this if BROKERED
 //		EnvironmentType inputEnv = getInputEnvironment(); // use this for DIRECT
-		printEnvironment(envOps.createEnvironmentAndSession(inputEnv, USE_HTTPS));
+		printEnvironment(envOps.createEnvironmentAndSession(inputEnv, null, USE_HTTPS));
 	}
 
 	private void testCreateSession()
@@ -163,7 +169,30 @@ public class TestDirectProviderEnvStoreOps
 		EnvironmentType inputEnv = envOps.loadEnvironmentFromTemplate(TEMPLATE_FILE_NAME); // use this if BROKERED
 //		EnvironmentType inputEnv = getInputEnvironment(); // use this for DIRECT
 		
-		System.out.println("Session:\n" + envOps.createSession(inputEnv, USE_HTTPS));
+		System.out.println("Session:\n" + envOps.createSession(inputEnv, null, USE_HTTPS));
+	}
+	
+	private void testUpdateSessionSecurityInfo()
+	{
+		long expireTime = MINUTE;
+		try
+		{
+			String securityToken = "oauth-123";
+			Date securityExpiryDate = new Date(((new Date()).getTime())+expireTime);
+			boolean success = envOps.updateSessionSecurityInfo(SESSION_TOKEN, securityToken, securityExpiryDate);
+			if (success)
+			{
+				System.out.println(envOps.getSIF3SessionBySessionToken(SESSION_TOKEN, PROVIDER, service));
+			}
+			else
+			{
+				System.out.println("Failed to update Security Info for Session: "+SESSION_TOKEN);
+			}
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
 	}
 
 	public static void main(String[] args)
@@ -175,11 +204,12 @@ public class TestDirectProviderEnvStoreOps
 //		tester.testExistEnvironmentTemplate();
 //		tester.testLoadEnvironmentTemplate();
 //		tester.testExistEnvInWorkstore();
-		tester.testLoadEnvironmentFromWorkstore();
+//		tester.testLoadEnvironmentFromWorkstore();
 //		tester.testCreateEnvironment();
 //		tester.testCreateSession();
 //		tester.testRemoveEnvFromWorkstoreByEnvID();
 //		tester.testRemoveEnvFromWorkstoreBySessionToken();
+		tester.testUpdateSessionSecurityInfo();
 		
 		System.out.println("End Testing ProviderEnvironmentStoreOperations.");
 	}

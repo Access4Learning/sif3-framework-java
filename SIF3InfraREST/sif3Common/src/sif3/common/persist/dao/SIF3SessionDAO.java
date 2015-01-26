@@ -117,6 +117,11 @@ public class SIF3SessionDAO extends BaseDAO
     	return getSession(tx, "sessionToken", sessionToken, adapterType);
     }
 
+    public SIF3Session getSessionBySecurityToken(BasicTransaction tx, String securityToken, AdapterType adapterType) throws IllegalArgumentException, PersistenceException
+    {
+      return getSession(tx, "securityToken", securityToken, adapterType);
+    }
+
     public void save(BasicTransaction tx, SIF3Session sif3Session) throws IllegalArgumentException, PersistenceException
     {
         if (sif3Session == null)

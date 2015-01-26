@@ -34,7 +34,7 @@ import sif3.infra.common.model.ObjectFactory;
 
 /**
  * Implementation of a Marshal Factory for all Infrastructure Model Objects. JAXB has been used to create Infrastructure POJOs and this
- * Factory uses JAXB's methods to marshal POJOs to XML. At this point in time (May 2014) JSON is not yet supported.
+ * Factory uses JAXB's methods to marshal POJOs to XML or JSON.
  * 
  * @author Joerg Huber
  *
@@ -42,8 +42,10 @@ import sif3.infra.common.model.ObjectFactory;
 public class InfraMarshalFactory implements MarshalFactory
 {
   protected final Logger logger = Logger.getLogger(getClass());
-
+  
   private static final HashMap<Class<?>, Method> CREATE_METHODS = new HashMap<Class<?>, Method>();
+
+  private ObjectFactory objFactory = new ObjectFactory();
   
   /**
    * Pre-populate Create Method Cache for faster marshaling of objects.
@@ -59,10 +61,11 @@ public class InfraMarshalFactory implements MarshalFactory
         CREATE_METHODS.put(method.getParameterTypes()[0], method);
       }
     }
-  }
+  } 
   
-  private ObjectFactory objFactory = new ObjectFactory();
-  
+  /* (non-Javadoc)
+   * @see sif3.infra.common.conversion.MarshalFactory#marshalToXML(java.lang.Object)
+   */
   @Override
   public String marshalToXML(Object obj) throws MarshalException, UnsupportedMediaTypeExcpetion
   {
@@ -86,7 +89,10 @@ public class InfraMarshalFactory implements MarshalFactory
     }
     return result;
   }
-  
+
+  /* (non-Javadoc)
+   * @see sif3.infra.common.conversion.MarshalFactory#marshalToJSON(java.lang.Object)
+   */
   @Override
   public String marshalToJSON(Object obj) throws MarshalException, UnsupportedMediaTypeExcpetion
   {
@@ -110,8 +116,33 @@ public class InfraMarshalFactory implements MarshalFactory
     }
     return result;
   }
+
+  /* (non-Javadoc)
+   * @see sif3.infra.common.conversion.MarshalFactory#marschal(java.lang.Object, javax.ws.rs.core.MediaType)
+   */
+  @Override
+  public String marshal(Object obj, MediaType mediaType) throws MarshalException, UnsupportedMediaTypeExcpetion
+  {
+    if (mediaType != null)
+    {
+      if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) || MediaType.TEXT_XML_TYPE.isCompatible(mediaType))
+      {
+        return marshalToXML(obj);
+      }
+      else if (MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType))
+      {
+        return marshalToJSON(obj);
+      }
+    }
+    // If we get here then we deal with an unknown media type
+    throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot marshal the given input to this media type.");
+  }
   
-  /**
+  /*---------------------*/
+  /*-- PRivate Methods --*/
+  /*---------------------*/
+  
+  /*
    * Finds the method that has one parameter of the type provided.
    * 
    * @param obj object that needs to be marshaled.
@@ -127,22 +158,4 @@ public class InfraMarshalFactory implements MarshalFactory
     return result;
   }
 
-  @Override
-  public String marshal(Object obj, MediaType mediaType) throws MarshalException, UnsupportedMediaTypeExcpetion
-  {
-    if (mediaType != null)
-    {
-      if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) || 
-        MediaType.TEXT_XML_TYPE.isCompatible(mediaType))
-      {
-        return marshalToXML(obj);
-      }
-      else if (MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType))
-      {
-        return marshalToJSON(obj);
-      }
-    }
-    // If we get here then we deal with an unknown media type
-    throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot marshal the given input to this media type.");
-  }
 }

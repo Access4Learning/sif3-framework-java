@@ -100,6 +100,25 @@ public class SIF3SessionService extends DBService
 		return row;
     }
 
+    public SIF3Session getSessionBySecurityToken(String securityToken, AdapterType adapterType) throws IllegalArgumentException, PersistenceException
+    {
+      SIF3Session row = null;
+      BasicTransaction tx = null;
+
+      try
+      {
+        tx = startTransaction();
+          row = sif3SessionDAO.getSessionBySecurityToken(tx, securityToken, adapterType);
+        tx.commit();
+      }
+      catch (Exception ex)
+      {
+        rollback(tx);
+        exceptionMapper(ex, "Failed to retrieve session for securityToken = '"+ securityToken + "'.", true, false);
+      }
+    return row;
+    }
+
     public void save(SIF3Session sif3Session) throws IllegalArgumentException, PersistenceException
     {
     	BasicTransaction tx = null;	    	

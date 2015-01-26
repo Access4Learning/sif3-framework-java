@@ -29,7 +29,7 @@ import systemic.sif3.demo.rest.ModelObjectConstants;
  * @author Joerg Huber
  *
  */
-public class StudentPersonalConsumer extends AUDataModelEventConsumer<StudentCollectionType>
+public class StudentPersonalConsumer extends AUDataModelEventConsumer<StudentCollectionType> 
 {	
     public StudentPersonalConsumer()
     {
@@ -45,6 +45,17 @@ public class StudentPersonalConsumer extends AUDataModelEventConsumer<StudentCol
 //    public String getGeneratorID()
 //    {
 //		return "Overridden Generator ID";
+//    }
+    
+    /* 
+     * If the env.userToken property from the consumer property file shall be overridden or set specifically for a 
+     * consumer then the method below can be un-commented and the generator ID can be assigned. This value, if not 
+     * empty, will go into the HTTP Header of each request to the object provider.
+     */
+//    @Override
+//    public String getUserToken()
+//    {
+//		return "user-abc";
 //    }
     
 	/* (non-Javadoc)

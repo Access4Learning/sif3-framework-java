@@ -144,6 +144,25 @@ framework. The changes will not affect the developer's code base. Simply drop th
 your project to get the changes and bug fixes.
 Details of this release can be found in the directory "release/v0.3.2".
 
+=============================================================
+Version from December 2, 2014: v0.4.0 - Various changes
+=============================================================
+This  version update includes a few new bits of functionality, namely support for JSON as well as some restructuring
+of the data model generation. The AU 1.3 Datamodel is no longer part of this project but part of a new GitHub project
+called SIF3DMGenerator. 
+Details of this release can be found in the directory "release/v0.4.0".
+
+=============================================================
+Version from February 10, 2015: v0.5.0 - Various changes
+=============================================================
+Version 0.5.0 has a couple important new features. They include support for SIF 3.x Service Path functionality and
+support for External Security Services. The later is not yet part of the SIF 3.0.1 specification and it should be
+used with care as it is experimental at this stage. The DB structure for the SIF3_SESSION table has changed and
+therefore a database update script must be run to upgrade the previous version of the framework to this version.
+The new functionality is additional functionality and not changed functionality and therefore does not affect any
+code a developer has witten. Simply drop the new libraries into your project and the new functionlaity is availble.
+Details of this release including upgrade instructions can be found in the directory "release/v0.5.0".
+
 #########################################################################################################
 # Download Instructions
 #########################################################################################################

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0"> 
+  <display-name>SIF3InfraREST</display-name>
+
+    <!-- *************************** -->
+    <!-- JAX-RS (ie. RestEasy) Setup -->
+    <!-- *************************** -->
+    <servlet>
+        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        <url-pattern>/sif3/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- *********************************************************************************************** -->
+    <!-- Context listener: Used to initialise (start-up) and free (shut-down) resources of this servlet. -->
+    <!-- *********************************************************************************************** -->
+    <listener>
+        <listener-class>sif3.infra.rest.web.ProviderServletContext</listener-class>
+    </listener>
+    
+    <!-- ************************************************ -->
+    <!-- Parameters to be used in Context Listener above. -->
+    <!-- ************************************************ -->
+    <!--  
+      ***************************************************************************************************************************
+      The name of the service (consumer/provider) property file to use in this deployment.  
+      Note this file will be used to identify the service ID, service type (consumer/provider), environment store etc.
+      ***************************************************************************************************************************
+    -->
+    <context-param> 
+        <param-name>SERVICE_PROPERTY_FILE</param-name> 
+        <!--param-value>BrokeredSISProvider</param-value--> 
+        <param-value>StudentProvider</param-value> 
+    </context-param> 
+
+    
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+</web-app>

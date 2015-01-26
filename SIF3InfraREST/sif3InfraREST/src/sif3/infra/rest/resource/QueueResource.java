@@ -95,8 +95,7 @@ public class QueueResource extends InfraResource
 	{
 		super(uriInfo, requestHeaders, request, "", null, null);
 		this.deleteMessageId = deleteMessageId;
-//	    setURLPostfixMediaType(mimeType);
-	    logger.debug("URL Postfix mimeType: '"+mimeType+"'");
+		logger.debug("URL Postfix mimeType: '"+mimeType+"'");
 	}
 
 	/*----------------------*/
@@ -132,7 +131,8 @@ public class QueueResource extends InfraResource
 		
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
 				return makeErrorResponse(error, ResponseAction.QUERY);
@@ -154,21 +154,21 @@ public class QueueResource extends InfraResource
      * Get a specific Queues for this environment.
      */
 	@GET
-	@Path("{queueID:([^\\./]*)}{mimeType:(\\.[^/]*?)?}")
+	@Path("{queueID:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getQueue(@PathParam("queueID") String queueID,
 							 @PathParam("mimeType") String mimeType)
 	{
-//	    setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Get Queue by Queue ID (REST GET - Single): "+queueID+" and URL Postfix mime type = '"+mimeType+"'");
 		}
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
 				return makeErrorResponse(error, ResponseAction.QUERY);
@@ -203,7 +203,8 @@ public class QueueResource extends InfraResource
 		}
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
 				return makeErrorResponse(error, ResponseAction.CREATE);
@@ -221,12 +222,12 @@ public class QueueResource extends InfraResource
 				logger.error("Queue Payload: "+ payload);
 				return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal queue payload: "+ ex.getMessage()), ResponseAction.CREATE);
 			}
-      catch (UnsupportedMediaTypeExcpetion ex)
-      {
-        logger.error("Failed to unmarshal payload into an QueueType: "+ ex.getMessage(), ex);
-        logger.error("Queue Payload: "+ payload);
-        return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal queue payload: "+ ex.getMessage()), ResponseAction.CREATE);
-      }
+			catch (UnsupportedMediaTypeExcpetion ex)
+			{
+				logger.error("Failed to unmarshal payload into an QueueType: "+ ex.getMessage(), ex);
+				logger.error("Queue Payload: "+ payload);
+				return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal queue payload: "+ ex.getMessage()), ResponseAction.CREATE);
+			}
 		}
 		else
 		{
@@ -238,21 +239,21 @@ public class QueueResource extends InfraResource
 	 * Delete a specific queue.
 	 */
 	@DELETE
-	@Path("{queueID:([^\\./]*)}{mimeType:(\\.[^/]*?)?}")
+	@Path("{queueID:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response removeQueue(@PathParam("queueID") String queueID,
 			 				    @PathParam("mimeType") String mimeType)
 	{
-//	    setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Remove Queue (REST DELETE - Single) with queueID = "+queueID+" and URL Postfix mime type = '"+mimeType+"'");
 		}
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
 				return makeErrorResponse(error, ResponseAction.DELETE);
@@ -286,14 +287,14 @@ public class QueueResource extends InfraResource
 	public Response getNextMessage(@PathParam("queueID") String queueID,
 			    				   @PathParam("mimeType") String mimeType)
 	{
-//	    setURLPostfixMediaType(mimeType);
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Get Message from Queue (REST GET - Single): "+queueID +", URL Postfix mime type = '"+mimeType+"' and Remove message with ID = "+getDeleteMessageId());
 		}
 		if (isTestMode())
 		{
-			ErrorDetails error = validSession();
+			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
+			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			
 			String consumerID = getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_CONSUMER_ID);
 			consumerID = consumerID == null ? "" : consumerID;
@@ -314,7 +315,7 @@ public class QueueResource extends InfraResource
 					  Response response = getMessage(consumerID);
 					  if (response != null)
 					  {
-					    return response;
+						  return response;
 					  }
 					  else
 					  {
@@ -348,7 +349,7 @@ public class QueueResource extends InfraResource
 	 * Delete a specific queue.
 	 */
 	@DELETE
-	@Path("{queueID}/messages/{deleteMessageId:([^\\./]*)}{mimeType:(\\.[^/]*?)?}")
+	@Path("{queueID}/messages/{deleteMessageId:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -356,7 +357,6 @@ public class QueueResource extends InfraResource
 			                               @PathParam("deleteMessageId") String deleteMessageId,
 						 				   @PathParam("mimeType") String mimeType)
 	{
-//	    setURLPostfixMediaType(mimeType);
 		setDeleteMessageId(deleteMessageId);
 		if (logger.isDebugEnabled())
 		{
@@ -382,7 +382,8 @@ public class QueueResource extends InfraResource
 	/*------------------------*/
 	private QueueType createQueue(QueueType inputQueue)
 	{
-		SIF3Session sif3Session = getEnvironmentManager().getSessionBySessionToken(getSessionToken());
+		//SIF3Session sif3Session = getEnvironmentManager().getSessionBySessionToken(getTokenFromAuthToken());
+		SIF3Session sif3Session = getSIF3SessionForRequest();
 		dummyQueue = inputQueue;
 		dummyQueue.setCreated(Calendar.getInstance());
 		dummyQueue.setId(UUIDGenerator.getUUID());
@@ -399,35 +400,35 @@ public class QueueResource extends InfraResource
 	
 	private Response getMessage(String consumerID)
 	{
-	  EventMsg event = null;
-	  if (events == null)
-	  {
-	    loadEventData();
+		EventMsg event = null;
+		if (events == null)
+		{
+			loadEventData();
+		}
+
+		if (numEventsTillNoMsg == null)
+		{
+			setNumEventsTillNoMsg();
+		}
+
+		if ((events == null) || (events.size() == 0))// unable to load events file or no events in file => stop here
+		{
+			return null;
 	  }
 	  
-	  if (numEventsTillNoMsg == null)
-	  {
-	    setNumEventsTillNoMsg();
-	  }
+		// Check if we need to return No Message
+		numGetMessages++;
+		if ((numEventsTillNoMsg == 0) || ((numGetMessages % numEventsTillNoMsg) == 0))
+		{
+			return null;
+		}
 
-	  if ((events == null) || (events.size() == 0))// unable to load events file or no events in file => stop here
-	  {
-	    return null;
-	  }
-	  
-	  // Check if we need to return No Message
-    numGetMessages++;
-    if ((numEventsTillNoMsg == 0) || ((numGetMessages % numEventsTillNoMsg) == 0))
-    {
-      return null;
-    }
-
-	  // If we get here then a message can be returned.
-	  event = events.get(currentEvent++);
-	  if (currentEvent >= events.size()) // reset if we reach the end of the list
-	  {
-	    currentEvent = 0;
-	  }
+		// If we get here then a message can be returned.
+		event = events.get(currentEvent++);
+		if (currentEvent >= events.size()) // reset if we reach the end of the list
+		{
+			currentEvent = 0;
+		}
 	  
 		String lastMsgID = UUIDGenerator.getUUID();
 		messageIDMap.put(consumerID, lastMsgID);
@@ -469,49 +470,48 @@ public class QueueResource extends InfraResource
 			String[] eventArray = StringUtils.splitter(eventStr, "###", false);
 			if (eventArray != null)
 			{
-			  events = new ArrayList<EventMsg>();
-			  for (int i=0; i<eventArray.length; i=i+2)
-			  {
-			    // First enrty is serviceName, second entry is actual message
-			    events.add(new EventMsg(eventArray[i].trim(), eventArray[i+1].trim()));
-			  }
-			  currentEvent = 0;
+				events = new ArrayList<EventMsg>();
+				for (int i=0; i<eventArray.length; i=i+2)
+				{
+					// First enrty is serviceName, second entry is actual message
+					events.add(new EventMsg(eventArray[i].trim(), eventArray[i+1].trim()));
+				}
+				currentEvent = 0;
 			}
-		  logger.debug("Loaded eventFileName. Total Events = "+events.size());
-
+			logger.debug("Loaded eventFileName. Total Events = "+events.size());
 		}
 	}
 	
 	private void setNumEventsTillNoMsg()
 	{
-	  AdvancedProperties props = getEnvironmentManager().getServiceProperties();
-	  numEventsTillNoMsg = props.getPropertyAsInt("event.numUntilNoMsg", 0);
-	  logger.debug("Loaded Propery event.numUntilNoMsg. Value = "+numEventsTillNoMsg);
+		AdvancedProperties props = getEnvironmentManager().getServiceProperties();
+		numEventsTillNoMsg = props.getPropertyAsInt("event.numUntilNoMsg", 0);
+		logger.debug("Loaded Propery event.numUntilNoMsg. Value = "+numEventsTillNoMsg);
 	}
 	
 	/*
-	 * For internal testing only 
+	 * For internal testing only
 	 */
-  private final class EventMsg
-  {
-    private String serviceName = null;
-    private String message = null;
-    
-    public EventMsg(String serviceName, String message) 
-    {
-      this.serviceName = serviceName;
-      this.message = message;
-    }
-    
-    public String getServiceName()
-    {
-      return serviceName;
-    }
+	private final class EventMsg
+	{
+		private String serviceName = null;
+		private String message = null;
 
-    public String getMessage()
-    {
-      return message;
-    }
-  }
+		public EventMsg(String serviceName, String message)
+		{
+			this.serviceName = serviceName;
+			this.message = message;
+		}
+
+		public String getServiceName()
+		{
+			return serviceName;
+		}
+
+		public String getMessage()
+		{
+			return message;
+		}
+	}
 	
 }

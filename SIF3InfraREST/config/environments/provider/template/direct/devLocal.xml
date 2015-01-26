@@ -39,6 +39,18 @@
                     <right type="ADMIN">REJECTED</right>
                   </rights>
                 </service>
+                <!-- All students at a school -->  
+                <service name="SchoolInfos/{}/StudentPersonals" contextId="DEFAULT" type="SERVICEPATH">
+                  <rights>
+                    <right type="QUERY">APPROVED</right>
+                  </rights>
+                </service>
+                <!-- Students of a certain class -->             
+                <service name="TeachingGroups/{}/StudentPersonals" contextId="DEFAULT" type="SERVICEPATH">
+                  <rights>
+                    <right type="QUERY">APPROVED</right>
+                  </rights>
+                </service>                
                 <service name="StudentDailyAttendances" contextId="DEFAULT" type="OBJECT">
                   <rights>
                     <right type="QUERY">APPROVED</right>

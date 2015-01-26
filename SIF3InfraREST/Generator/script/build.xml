@@ -1,22 +1,12 @@
-<project name="SIF3POJOGenerator" basedir="." default="generate-sifau-dd">
+<project name="SIF3InfraPOJOGenerator" basedir="." default="generate-infra30">
 
-	<property name="project.basedir" value="${basedir}/.."/>
-
-	<!-- *************************** -->
-    <!-- Load default property files -->
-    <!-- *************************** -->
-    <property file="${project.basedir}/script/ant.properties"/>
+ 	  <property name="project.basedir" value="${basedir}/.."/>
 
     <!-- ********************* -->
     <!-- Environment Variables -->
     <!-- ********************* -->
-    <property name="sif.dir.name" value="sif${dictionary.locale}${dictionary.version}"/>
     <property name="output.base.name" value="${project.basedir}/data/output"/>
-    <property name="output.dir.sif" value="${output.base.name}/${sif.dir.name}/src"/>
     <property name="input.base.dir" value="${project.basedir}/data/input"/>
-    <property name="input.dir.name.sif" value="${input.base.dir}/XSD/${sif.dir.name}"/>
-    <property name="tmp.dir.base" value="${input.base.dir}/tmp"/>
-    <property name="tmp.dir.sif" value="${tmp.dir.base}/sif"/>
     <property name="jaxb.lib.root.dir" value="${project.basedir}/bin/lib/jaxblib" />
     
     <property name="verbose" value="true" />
@@ -31,18 +21,13 @@
     <target name="00-env" description="Show Ant variables">
         <echo message="project.basedir: ${project.basedir}"/>
         <echo message="output.base.name: ${output.base.name}"/>
-        <echo message="output.dir.sif: ${output.dir.sif}"/>
         <echo message="input.base.dir: ${input.base.dir}"/>
-        <echo message="input.dir.name.sif: ${input.dir.name.sif}"/>
-        <echo message="tmp.dir.base: ${tmp.dir.base}"/>
-        <echo message="tmp.dir.sif: ${tmp.dir.sif}"/>
         <echo message="jaxb.lib.root.dir: ${jaxb.lib.root.dir}"/>
     </target>
 
     <!-- Clean environment. -->
     <target name="02-clean" description="Deletes the build directory">
         <delete dir="${output.base.name}" />
-        <delete dir="${tmp.dir.base}"/>
     </target>
 
     <!-- ***************** -->
@@ -50,42 +35,11 @@
     <!-- ***************** -->
     <target name="init">
         <mkdir dir="${output.base.name}"/>
-        <mkdir dir="${tmp.dir.base}"/>
     </target>
 
-	
-    <!-- ******************************* -->
-    <!-- Compile Targets for Environment -->
-    <!-- ******************************* -->
-	<!-- Note: The input file must have the name SIF_Message.xsd. The location of the file is expeced to be -->
-	<!--       under input/XSD/sif<locale><version>.                                                        -->
-    <target name="generate-sifau-dd" depends="02-clean,init" description="Generate POJOs using JAXB">
-        <echo message="Generate Pojos for Locale ${dictionary.locale} and Version ${dictionary.version}"/>
-    	  <mkdir dir="${output.dir.sif}"/>
-        <copy todir="${tmp.dir.sif}">
-            <fileset dir="${input.dir.name.sif}"/>
-        </copy>
-        
-        <xjc destdir="${output.dir.sif}" 
-             package="sif.dd.${dictionary.locale}${dictionary.version}.model" 
-             extension="true" 
-             header="false" 
-             source="2.0">
-          <schema  dir="${tmp.dir.sif}" includes="*.xsd"/>
-          <binding dir="${basedir}" includes="custom.xjb"/>
-          <arg value="-npa"/>
-        </xjc>
-        
-        <!-- Clean up Temporary stuff -->
-    	<!--
-        <delete dir="${tmp.dir.sif}"/>
-        -->
-    </target>
-		
     <!-- ************************************** -->
     <!-- Generate SIF3.0 Infrastructure Objects -->
     <!-- ************************************** -->
-	
 	 <target name="generate-infra30" depends="02-clean,init" description="Create all Infrastructure POJOs based on XSD Directory">
 	        <echo message="Generate Pojos using JAXB for SIF 3.0.1 Infra for all XSDs in one go..."/>
 	          <mkdir dir="${output.base.name}/infra30"/>
@@ -96,27 +50,9 @@
 	             source="2.0">
 	            <!-- must exclude the infrastructurecommontypes.xsd so that it all works. It will still create the classes of that -->
 	            <!-- XSD because it is used as an include rather than import.                                                      --> 
-	          <schema  dir="${input.base.dir}/infra301" includes="*.xsd" excludes="infrastructurecommontypes.xsd infra30_noInclude.xsd"/>
+	          <schema  dir="${input.base.dir}/infra301" includes="*.xsd" excludes="infrastructurecommontypes.xsd"/>
 	          <binding dir="${basedir}" includes="infra30.xjb"/>
 	          <arg value="-npa"/>
 	        </xjc>
 	    </target>
-
-  <target name="generate-infra30_OneFile" depends="02-clean,init" description="Create all Infrastructure POJOs based on Sinle File">
-          <echo message="Generate Pojos using JAXB for SIF 3.0 Infra for all XSDs in one go..."/>
-            <mkdir dir="${output.base.name}/infra30"/>
-            <xjc destdir="${output.base.name}/infra30" 
-               package="sif3.infra.common.model" 
-               extension="true" 
-               header="false" 
-               source="2.0">
-              <!-- must exclude the infrastructurecommontypes.xsd so that it all works. It will still create the classes of that -->
-              <!-- XSD because it is used as an include rather than import.                                                      --> 
-            <schema  file="${input.base.dir}/infra30/infra30_noInclude.xsd"/>
-            <!--schema  file="${input.base.dir}/infra30/environment.xsd"/-->
-            <binding dir="${basedir}" includes="infra30.xjb"/>
-            <arg value="-npa"/>
-          </xjc>
-      </target>
-
 </project>

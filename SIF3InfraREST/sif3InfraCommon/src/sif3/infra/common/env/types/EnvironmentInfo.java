@@ -65,6 +65,9 @@ public class EnvironmentInfo implements Serializable
 	private String existingSessionToken = null;
     private URI existingEnvURI = null;
     
+    // Other framework specific properties
+    private boolean envCreateConflictIsError = true; // Shall the HTTP Status 409 for environment creation be treated as error (true)? 
+    
 	/* 
      * This is a runtime value only. But it is stored here rather than in the session because it is valid for ALL sessions of that
      * environment.
@@ -299,18 +302,31 @@ public class EnvironmentInfo implements Serializable
 		}
     }
 
+	public boolean getEnvCreateConflictIsError()
+    {
+    	return envCreateConflictIsError;
+    }
+
+	public void setEnvCreateConflictIsError(boolean envCreateConflictIsError)
+    {
+    	this.envCreateConflictIsError = envCreateConflictIsError;
+    }
+
 	@Override
     public String toString()
     {
-	    return "EnvironmentInfo [baseURI=" + this.baseURI + ", secureConnection="
-	            + this.secureConnection + ", mediaType=" + this.mediaType + ", adapterType="
-	            + this.adapterType + ", checkACL=" + this.checkACL + ", environmentType="
-	            + this.environmentType + ", authMethod=" + this.authMethod
-	            + ", removeEnvOnShutdown=" + this.removeEnvOnShutdown + ", adapterName="
-	            + this.adapterName + ", environmentKey=" + this.environmentKey + ", password="
-	            + this.password + ", eventsSupported=" + this.eventsSupported + ", generatorID="
-	            + this.generatorID + ", useExistingEnv=" + this.useExistingEnv
-	            + ", existingSessionToken=" + this.existingSessionToken + ", existingEnvURI="
-	            + this.existingEnvURI + ", connectorBaseURIs=" + this.connectorBaseURIs + "]";
+	    return "EnvironmentInfo [adapterName=" + adapterName + ", adapterType="
+	            + adapterType + ", authMethod=" + authMethod + ", baseURI="
+	            + baseURI + ", checkACL=" + checkACL + ", connectorBaseURIs="
+	            + connectorBaseURIs + ", envCreateConflictIsError="
+	            + envCreateConflictIsError + ", environmentKey="
+	            + environmentKey + ", environmentType=" + environmentType
+	            + ", eventsSupported=" + eventsSupported + ", existingEnvURI="
+	            + existingEnvURI + ", existingSessionToken="
+	            + existingSessionToken + ", generatorID=" + generatorID
+	            + ", mediaType=" + mediaType + ", password=" + password
+	            + ", removeEnvOnShutdown=" + removeEnvOnShutdown
+	            + ", secureConnection=" + secureConnection
+	            + ", useExistingEnv=" + useExistingEnv + "]";
     }
 }

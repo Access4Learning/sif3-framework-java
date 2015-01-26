@@ -38,6 +38,7 @@ public class TestSIF3SessionService extends ServiceBaseTest
 	
 	private static final String SESSION_TOKEN = "fa224931-9425-45e1-a7a1-432eb178e76e";
 	private static final String ENVIRONMENT_ID = "22d7a78a-cde3-4757-8ce3-db471ecd807a";
+	private static final String SECURITY_TOKEN = "OAUTH-TOKEN:1234";
 //	private static final String ENVIRONMENT_ID = "1f8d7a78-74f1-4757-8ce3-db471ecdf1eb";
 	private static final AdapterType ADAPTER_TYPE = AdapterType.CONSUMER;
 	
@@ -84,7 +85,13 @@ public class TestSIF3SessionService extends ServiceBaseTest
 		System.out.println("Session: "+session);
 	}
 
-	public void testRemoveSessionByEnvironmentID() throws Exception
+  public void testGetSessionBySecurityToken() throws Exception
+  {
+    SIF3Session session = service.getSessionBySecurityToken(SECURITY_TOKEN, ADAPTER_TYPE);
+    System.out.println("Session: "+session);
+  }
+
+  public void testRemoveSessionByEnvironmentID() throws Exception
 	{
 		service.removeSessionByEnvironmentID(ENVIRONMENT_ID, ADAPTER_TYPE);
 		System.out.println("Session Removed.");
@@ -109,7 +116,8 @@ public class TestSIF3SessionService extends ServiceBaseTest
 			//tester.testCreateNewSessionWithXML();
 //			tester.testGetSessionByEnvID();
 //			tester.testGetSessionBySessionToken();
-			tester.testRemoveSessionByEnvironmentID();
+			tester.testGetSessionBySecurityToken();
+//			tester.testRemoveSessionByEnvironmentID();
 			//tester.testSave();
        
         	tester.shutdown();

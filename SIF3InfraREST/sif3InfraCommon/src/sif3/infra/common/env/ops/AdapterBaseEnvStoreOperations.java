@@ -18,6 +18,8 @@
 
 package sif3.infra.common.env.ops;
 
+import java.util.Date;
+
 import org.apache.log4j.Logger;
 
 import sif3.common.CommonConstants.AdapterType;
@@ -103,19 +105,33 @@ public class AdapterBaseEnvStoreOperations
 	/**
 	 * Returns a SIF3Session for the given session token. If there is no such session then null is returned.
 	 * 
-   * @param sessionToken The sessionToken for which the SIF3 session shall be loaded, updated and retruned. 
-   * 
-   * @return See Desc.
-   * 
-   * @throws IllegalArgumentException sessionToken is null or empty.
-   * @throws PersistenceException Could not access the underlying workstore.
+	 * @param sessionToken The sessionToken for which the SIF3 session shall be loaded and returned. 
+	 * 
+	 * @return See Desc.
+	 * 
+	 * @throws IllegalArgumentException sessionToken is null or empty.
+	 * @throws PersistenceException Could not access the underlying workstore.
 	 */
 	public SIF3Session getSIF3SessionBySessionToken(String sessionToken, AdapterType adapterType, SIF3SessionService service) throws IllegalArgumentException, PersistenceException
 	{
-	  return service.getSessionBySessionToken(sessionToken, adapterType);
+		return service.getSessionBySessionToken(sessionToken, adapterType);
 	}
 
-	
+	/**
+	 * Returns a SIF3Session for the given security token. If there is no such session then null is returned.
+	 * 
+	 * @param securityToken The securityToken for which the SIF3 session shall be loaded, updated and returned. 
+	 * 
+	 * @return See Desc.
+	 * 
+	 * @throws IllegalArgumentException sessionToken is null or empty.
+	 * @throws PersistenceException Could not access the underlying workstore.
+	 */
+	public SIF3Session getSIF3SessionBySecurityToken(String securityToken, AdapterType adapterType, SIF3SessionService service) throws IllegalArgumentException, PersistenceException
+	{
+		return service.getSessionBySecurityToken(securityToken, adapterType);
+	}
+
 	/**
 	 * Load a session/environment from environment store for the given environment key and adapter type. This will only attempt to 
 	 * load the environment from the environment store but won't create it if it doesn't exist. If it doesn't exist then null is 
@@ -173,10 +189,10 @@ public class AdapterBaseEnvStoreOperations
 			return null;
 		}
 //		if (StringUtils.isEmpty(inputEnv.getSolutionId()) || StringUtils.isEmpty(inputEnv.getApplicationInfo().getApplicationKey()))
-    if (StringUtils.isEmpty(inputEnv.getApplicationInfo().getApplicationKey()))
+		if (StringUtils.isEmpty(inputEnv.getApplicationInfo().getApplicationKey()))
 		{
 //			logger.error("The application key and/or the solution id in the environment provider environment is null or empty. Environment/SIF3 Session cannot be created.");
-      logger.error("The application key  in the environment provider environment is null or empty. Environment/SIF3 Session cannot be created.");
+			logger.error("The application key  in the environment provider environment is null or empty. Environment/SIF3 Session cannot be created.");
 			return null;
 		}
 
@@ -222,6 +238,52 @@ public class AdapterBaseEnvStoreOperations
 		}
 	}
 	
+	/**
+	 * This method will set the security token and expire date for a given session in the session store. If 
+	 * the sessionToken doesn't exist then no action is taken and false is returned. If the underlying session
+	 * store cannot be updated due to internal errors then false is returned and an error is logged.
+	 * 
+	 * @param sessionToken The sessionToken for which the security information shall be updated.
+	 * @param securityToken The security token with witch the sessionToken shall be associated.
+	 * @param securityExpiryDate The expire date to be set for the security token. Can be null.
+	 * @param adapterType Adapter Type for which the environment is for.
+	 * @param service The service to load the actual session from the workstore.
+	 * 
+	 * @return See desc.
+	 */
+	public boolean updateSessionSecurityInfo(String sessionToken, String securityToken, Date securityExpiryDate, AdapterType adapterType, SIF3SessionService service)
+	{
+		if (StringUtils.notEmpty(sessionToken))
+		{
+			try
+			{
+				SIF3Session sif3Session = getSIF3SessionBySessionToken(sessionToken, adapterType, service);
+				if (sif3Session != null)
+				{
+					sif3Session.setSecurityToken(securityToken);
+					sif3Session.setSecurityTokenExpiry(securityExpiryDate);
+					service.save(sif3Session);
+					return true;
+				}
+				else
+				{
+					logger.debug("No session exists for sessionToken = "+sessionToken+". Security Information not updated. No action taken.");
+					return false;
+				}
+			}
+			catch (PersistenceException ex)
+			{
+				logger.error(ex.getMessage(), ex);
+				return false;
+			}
+		}
+		else
+		{
+			logger.error("SessionToken is null or empty. Cannot update security info.");
+			return false;
+		}
+	}
+
 	/**
 	 * This method takes the given XML environment string and converts it into a Infrastructure Environment Type. If the string is null or
 	 * invalid then an error is logged and null is returned. 

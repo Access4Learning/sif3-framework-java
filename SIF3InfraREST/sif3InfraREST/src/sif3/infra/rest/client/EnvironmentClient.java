@@ -91,7 +91,14 @@ public class EnvironmentClient extends BaseClient
 			}
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(envInfo.getAuthMethod(), envInfo.getEnvironmentKey().getApplicationKey(), envInfo.getPassword()), true).post(ClientResponse.class, payloadStr);
 
-			return setResponse(service, response, EnvironmentType.class, Status.CREATED, Status.CONFLICT);
+			if (envInfo.getEnvCreateConflictIsError())
+			{
+				return setResponse(service, response, EnvironmentType.class, Status.CREATED);
+			}
+			else // Allow the 'Conflict' HTTP Status to be treated as a valid behaviour.
+			{
+				return setResponse(service, response, EnvironmentType.class, Status.CREATED, Status.CONFLICT);
+			}
 		}
 		catch (Exception ex)
 		{
