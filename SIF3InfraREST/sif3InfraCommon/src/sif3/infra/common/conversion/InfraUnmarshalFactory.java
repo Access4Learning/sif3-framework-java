@@ -18,6 +18,11 @@
 
 package sif3.infra.common.conversion;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
@@ -28,8 +33,9 @@ import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.utils.JAXBUtils;
 
 /**
- * Implementation of an unmarshal Factory for all Infrastructure Model Objects. JAXB has been used to create Infrastructure POJOs and 
- * this Factory uses JAXB's methods to unmarshal POJOs from XML. At this point in time (May 2014) JSON is not yet supported.
+ * Implementation of an unmarshal Factory for all Infrastructure Model Objects. JAXB has been used to create Infrastructure POJOs 
+ * and this Factory uses JAXB's methods to unmarshal POJOs from XML. As of January 2015 JSON is not officially supported, yet. 
+ * The JSON media type should be used with caution.
  * 
  * @author Joerg Huber
  *
@@ -37,6 +43,10 @@ import sif3.common.utils.JAXBUtils;
 public class InfraUnmarshalFactory implements UnmarshalFactory
 {
 	protected final Logger logger = Logger.getLogger(getClass());
+
+	//List of supported media types.
+//	private static final HashSet<MediaType> supportedMediaTypes = new HashSet<MediaType>(Arrays.asList(MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE, MediaType.APPLICATION_JSON_TYPE, MediaType.TEXT_PLAIN_TYPE));
+	private static final HashSet<MediaType> supportedMediaTypes = new HashSet<MediaType>(Arrays.asList(MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_XML_TYPE, MediaType.APPLICATION_JSON_TYPE));
 
 	/* (non-Javadoc)
 	 * @see sif3.infra.common.conversion.UnmarshalFactory#unmarshalFromXML(java.lang.String, java.lang.Class)
@@ -84,7 +94,8 @@ public class InfraUnmarshalFactory implements UnmarshalFactory
 	{
 		if (mediaType != null)
 		{
-			if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) || MediaType.TEXT_XML_TYPE.isCompatible(mediaType)  ||	MediaType.TEXT_PLAIN_TYPE.isCompatible(mediaType))
+//			if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) || MediaType.TEXT_XML_TYPE.isCompatible(mediaType)  ||	MediaType.TEXT_PLAIN_TYPE.isCompatible(mediaType))
+			if (MediaType.APPLICATION_XML_TYPE.isCompatible(mediaType) || MediaType.TEXT_XML_TYPE.isCompatible(mediaType))
 			{
 				return unmarshalFromXML(payload, clazz);
 			}
@@ -97,4 +108,45 @@ public class InfraUnmarshalFactory implements UnmarshalFactory
 		// If we get here then we deal with an unknown media type
 		throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot unmarshal the given input from this media type.");
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see sif3.common.conversion.MediaTypeOperations#getDefault()
+	 */
+	@Override
+    public MediaType getDefault()
+    {
+	    return MediaType.APPLICATION_XML_TYPE;
+    }
+
+	/*
+	 * (non-Javadoc)
+	 * @see sif3.common.conversion.MediaTypeOperations#isSupported(javax.ws.rs.core.MediaType)
+	 */
+	@Override
+    public boolean isSupported(MediaType mediaType)
+    {
+		if (mediaType != null)
+		{
+			Set<MediaType> mediaTypes = getSupportedMediaTypes();
+			for (Iterator<MediaType> iter = mediaTypes.iterator(); iter.hasNext();)
+			{
+				if (mediaType.isCompatible(iter.next()))
+				{
+					return true;
+				}
+			}
+		}
+		
+		return false;
+    }
+	
+	/* (non-Javadoc)
+     * @see sif3.common.conversion.MediaTypeOperations#getSupportedMediaTypes()
+     */
+    @Override
+    public Set<MediaType> getSupportedMediaTypes()
+    {
+	    return supportedMediaTypes;
+    }
 }
