@@ -159,8 +159,6 @@ Version 0.5.0 has a couple important new features. They include support for SIF 
 support for External Security Services. The later is not yet part of the SIF 3.0.1 specification and it should be
 used with care as it is experimental at this stage. The DB structure for the SIF3_SESSION table has changed and
 therefore a database update script must be run to upgrade the previous version of the framework to this version.
-The new functionality is additional functionality and not changed functionality and therefore does not affect any
-code a developer has witten. Simply drop the new libraries into your project and the new functionlaity is availble.
 Details of this release including upgrade instructions can be found in the directory "release/v0.5.0".
 
 #########################################################################################################
