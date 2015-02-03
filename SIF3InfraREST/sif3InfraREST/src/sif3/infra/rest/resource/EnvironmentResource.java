@@ -107,8 +107,7 @@ public class EnvironmentResource extends InfraResource
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response createEnvironment(String payload,
-            						@PathParam("mimeType") String mimeType)
+	public Response createEnvironment(String payload, @PathParam("mimeType") String mimeType)
 	{
 		if (logger.isDebugEnabled())
 		{

@@ -43,8 +43,15 @@ public abstract class InfraResource extends BaseResource
 	public InfraResource(UriInfo uriInfo, HttpHeaders requestHeaders, Request request, String servicePrefixPath, String zoneID, String contextID)
 	{
 		super(uriInfo, requestHeaders, request, servicePrefixPath, zoneID, contextID);
+		determineMediaTypes(marshaller, unmarshaller, true);
+		
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("Request Media Type : " + getRequestMediaType());
+			logger.debug("Response Media Type: " + getResponseMediaType());
+		}
 	}
-
+	
 	public MarshalFactory getInfraMarshaller()
 	{
 		return this.marshaller;
@@ -54,6 +61,18 @@ public abstract class InfraResource extends BaseResource
 	{
 		return this.unmarshaller;
 	}
+
+	@Override
+    public MarshalFactory getMarshaller()
+    {
+	    return getInfraMarshaller();
+    }
+
+	@Override
+    public UnmarshalFactory getUnmarshaller()
+    {
+	    return getInfraUnmarshaller();
+    }
 
 	protected boolean isTestMode()
 	{
