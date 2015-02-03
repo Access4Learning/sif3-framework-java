@@ -234,6 +234,8 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     {
     	logger.debug("Create Single Student for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
 
+//    	return null; // test return null value
+    	
     	// Must be of type StudentPersonalType
     	if (data instanceof StudentPersonalType)
     	{
