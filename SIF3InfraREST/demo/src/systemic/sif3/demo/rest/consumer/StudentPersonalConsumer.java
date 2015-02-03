@@ -18,6 +18,8 @@
 
 package systemic.sif3.demo.rest.consumer;
 
+import javax.ws.rs.core.MediaType;
+
 import sif.dd.au30.model.StudentCollectionType;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.header.HeaderValues.EventAction;
@@ -56,6 +58,15 @@ public class StudentPersonalConsumer extends AUDataModelEventConsumer<StudentCol
 //    public String getUserToken()
 //    {
 //		return "user-abc";
+//    }
+    
+    /*
+     * Example how to override the response media type from the consumer's property file.
+     */
+//    @Override
+//    public MediaType getResponseMediaType()
+//    {
+//    	return MediaType.APPLICATION_JSON_TYPE;
 //    }
     
 	/* (non-Javadoc)
