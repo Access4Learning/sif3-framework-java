@@ -32,19 +32,19 @@ import sif3.common.exception.UnsupportedMediaTypeExcpetion;
  * @author Joerg Huber
  *
  */
-public interface UnmarshalFactory
+public interface UnmarshalFactory extends MediaTypeOperations
 {
 	/**
 	 * Unmarshal the given XML string into an object of type Class<?>. If anything goes wrong with that unmarshal method then
 	 * a UnmarshalException is returned.
 	 * 
-	 * @param payload The XML string to be unmarshaled into an object. 
+	 * @param payload The XML string to be unmarshalled into an object. 
 	 * @param clazz The object type to unmarshal into.
 	 * 
 	 * @return See description.
 	 * 
 	 * @throws UnmarshalException Failure to unmarshal the given XML string into an object.
-   * @throws UnsupportedMediaTypeExcpetion If XML is not a supported format.
+	 * @throws UnsupportedMediaTypeExcpetion If XML is not a supported format.
 	 */
 	public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion;
 	
@@ -52,13 +52,13 @@ public interface UnmarshalFactory
 	 * Unmarshal the given JSON string into an object of type Class<?>. If anything goes wrong with that unmarshal method then
 	 * a UnmarshalException is returned.
 	 * 
-	 * @param payload The JSON string to be unmarshaled into an object. 
+	 * @param payload The JSON string to be unmarshalled into an object. 
 	 * @param clazz The object type to unmarshal into.
 	 * 
 	 * @return See description.
 	 * 
 	 * @throws UnmarshalException Failure to unmarshal the given JSON string into an object.
-   * @throws UnsupportedMediaTypeExcpetion If JSON is not a supported format.
+	 * @throws UnsupportedMediaTypeExcpetion If JSON is not a supported format.
 	 */
 	public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion;
 	
@@ -68,12 +68,12 @@ public interface UnmarshalFactory
 	 * 
 	 * @param payload The string to marshal into an object.
 	 * @param clazz The object type to unmarshal into.
-	 * @param mediaType Indicates what the object shall be unmarshaled from (JSON or XML).
+	 * @param mediaType Indicates what the object shall be unmarshalled from (JSON or XML).
 	 * 
 	 * @return See description.
 	 * 
 	 * @throws UnmarshalException Failure to unmarshal the given string into an object.
-   * @throws UnsupportedMediaTypeExcpetion If the media type requested is not a supported format.
+	 * @throws UnsupportedMediaTypeExcpetion If the media type requested is not a supported format.
 	 */
 	public Object unmarshal(String payload, Class<?> clazz, MediaType mediaType) throws UnmarshalException, UnsupportedMediaTypeExcpetion;
 }
