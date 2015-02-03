@@ -62,7 +62,7 @@ public class EnvironmentClient extends BaseClient
 	 */
 	public EnvironmentClient(URI environmentURI, EnvironmentInfo envInfo, SIF3Session sif3Session)
 	{
-		super(environmentURI, envInfo.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), envInfo.getSecureConnection());
+		super(environmentURI, envInfo.getMediaType(), envInfo.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), envInfo.getSecureConnection());
 		this.envInfo = envInfo;
 		this.sif3Session = sif3Session;
 	}
@@ -83,7 +83,7 @@ public class EnvironmentClient extends BaseClient
 		try
 		{
 			service = buildURI(service, null);
-			String payloadStr = getDataModelMarshaller().marshal(template, getMediaType());
+			String payloadStr = getDataModelMarshaller().marshal(template, getRequestMediaType());
 
 			if (logger.isDebugEnabled())
 			{
