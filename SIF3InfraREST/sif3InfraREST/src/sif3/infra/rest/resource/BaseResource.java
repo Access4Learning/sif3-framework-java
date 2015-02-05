@@ -1152,14 +1152,14 @@ public abstract class BaseResource
 	 * This method attempts to validate the given media type against the given media type operations. If it is unable to determine and validate
 	 * the media type from the HTTP Header or URL postfix and no defaults ought to be used then it will automatically default it to application/xml.
 	 * This will, in most cases, be just fine. Only where a data model is used that is not XML based then we will get unsupported media type 
-	 * exceptions. This exception will be caught accoringli in the higher levels of the framework.
+	 * exceptions. This exception will be caught accordingly in the higher levels of the framework.
 	 */
 	private MediaType validateAndExtractMimeType(MediaTypeOperations marshalOps, MediaType mediaTypeToTest, MediaType urlMediaType, boolean useDefaults)
 	{
-		// Check and validate the media type according to the marshall operations
+		// Check and validate the media type according to the marshal operations
 		if (!marshalOps.isSupported(mediaTypeToTest)) // Not supported => try the URL postfix
 		{
-			// Check if we have a URL mime type 
+			// Check if we have a URL media type 
 			if (urlPostfixMimeType != null)
 			{
 				if (marshalOps.isSupported(urlMediaType))
@@ -1230,15 +1230,30 @@ public abstract class BaseResource
 			{
 				if (data != null)
 				{
-					String payload = marshaller.marshal(data, getResponseMediaType());
+					// We may deal with an error here. We must ensure that the media type for the response is valid.
+					MediaType finalMediaType = getResponseMediaType();
+					if (isError)// deal with the error => marshaller is the infrastructure marshaller. 
+					{
+						// If the client wants a media type that is not ok with the infra structure marshaller then the best we can do,
+						// and hope the client can recover, is to use the marshaller's default media type.
+						finalMediaType = (marshaller.isSupported(finalMediaType)) ?  finalMediaType : marshaller.getDefault();
+					}
+					String payload = marshaller.marshal(data, finalMediaType);
 					response = Response.status(status).entity(payload);
 					response = response.header(ResponseHeaderConstants.HDR_CONTENT_LENGTH, payload.length());
-					response = response.header(HttpHeaders.CONTENT_TYPE, getResponseMediaType());
+					response = response.header(HttpHeaders.CONTENT_TYPE, finalMediaType);
 				}
 				else
 				{
-					response = Response.status(status);
-//					response = Response.status(Status.NO_CONTENT);
+					if ((responseAction != null) && (responseAction == ResponseAction.QUERY))
+					{
+						// We had a query that returned no data. According to SIF 3.x this must return status of 204 (No Content)
+						response = Response.status(Status.NO_CONTENT);
+					}
+					else
+					{
+						response = Response.status(status);
+					}
 				}
 			}
 			
