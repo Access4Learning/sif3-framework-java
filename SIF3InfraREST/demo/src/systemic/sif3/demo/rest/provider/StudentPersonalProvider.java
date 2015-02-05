@@ -314,8 +314,16 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     	ArrayList<StudentPersonalType> studentList = fetchStudents(students, pagingInfo);
     	
     	StudentCollectionType studentCollection = dmObjectFactory.createStudentCollectionType();
-    	studentCollection.getStudentPersonal().addAll(studentList);
-	    return studentCollection;
+    	
+    	if (studentList != null)
+    	{
+    		studentCollection.getStudentPersonal().addAll(studentList);
+    		return studentCollection;
+    	}
+    	else
+    	{
+    		return null;
+    	}
     }
     
     /*
@@ -346,9 +354,16 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 
 		    	ArrayList<StudentPersonalType> studentList = fetchStudents(teachingGroupStudents, pagingInfo);
 		    	StudentCollectionType studentCollection = dmObjectFactory.createStudentCollectionType();
-		    	studentCollection.getStudentPersonal().addAll(studentList);
-			    return studentCollection;
-			}
+		    	if (studentList != null)
+		    	{
+		    		studentCollection.getStudentPersonal().addAll(studentList);
+		    		return studentCollection;
+		    	}
+		    	else
+		    	{
+		    		return null;
+		    	}
+		    }
 			else
 			{
 				throw new UnsupportedQueryException("The query condition (driven by the service path) "+queryCriteria+" is not supported by the provider.");
@@ -507,7 +522,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     	else
     	{
     		pagingInfo.setTotalObjects(studentMap.size());
-    		if ((pagingInfo.getPageSize() * (pagingInfo.getCurrentPageNo()+1)) > studentMap.size())
+    		if ((pagingInfo.getPageSize() * (pagingInfo.getCurrentPageNo())) > studentMap.size())
     		{
     			return null; // Requested page outside of limits.
     		}
@@ -526,6 +541,8 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     			}
     			i++;
     		}
+    		// Set the number of object that are returned in the paging info. Will ensure HTTP headers are set correctly.
+    		pagingInfo.setPageSize(studentList.size());
     	}
     	
 	    return studentList;
