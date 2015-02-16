@@ -117,51 +117,17 @@ templates has changed significantly and may need some re-configuring. Please ref
 details (section 5.3).
 
 =====================================
-Version from 12/08/2014: v0.3
+Version from 07/08/2014: v0.3
 =====================================
 This version updates the framework from version 0.2 to version 0.3. The latest jar files can be found in the 
-"release" directory. Also upgrade instructions can be found in the directory "release/v0.3".
+"release" directory. To upgrade to version 0.3 you must run the appropriate DB datafix script in the directory
+"DB/DDL/Datafix/current/v0.2-v0.3/Datafix20140626_<dbprod>.sql" in the database schema where you have installed
+the SIF3 Framework tables.
 Major Changes in this version include:
 - Bug Fixes (i.e. use header fields for paging information rather than query parameters)
 - Ability for a DIRECT provider to deal with multiple environment templates. For details refer to section 5.3.1.4
   in the Developer's Guide.
 - Updated AU 1.3 SIF data model to cater for latest changes to time table objects.
-
-=======================================================
-Version from 11/09/2014: v0.3.1 - Minor update to above
-=======================================================
-The provider interface class has changed which enforces an additional parameter on all methods. All object provider
-classes that extend the BaseProvider or BaseEventProvider must add the parameter "RequestMetadata metadata" to all
-methods. This new parameter allows the object provider to get access to some additional metadata relating to each 
-request. For details about the new parameter as well Provider Interface class please refer to the javadoc.
-Details about the changes and how to incorporate them into your code can be found in the directory "release/v0.3.1".
-
-=============================================================
-Version from 14/10/2014: v0.3.2 - Minor Changes (Bug Fixes)
-=============================================================
-This minor version update includes a couple of minor bug fixes and a couple of improvements to the
-framework. The changes will not affect the developer's code base. Simply drop the new libraries into
-your project to get the changes and bug fixes.
-Details of this release can be found in the directory "release/v0.3.2".
-
-=============================================================
-Version from December 2, 2014: v0.4.0 - Various changes
-=============================================================
-This  version update includes a few new bits of functionality, namely support for JSON as well as some restructuring
-of the data model generation. The AU 1.3 Datamodel is no longer part of this project but part of a new GitHub project
-called SIF3DMGenerator. 
-Details of this release can be found in the directory "release/v0.4.0".
-
-=============================================================
-Version from February 10, 2015: v0.5.0 - Various changes
-=============================================================
-Version 0.5.0 has a couple important new features. They include support for SIF 3.x Service Path functionality and
-support for External Security Services. The later is not yet part of the SIF 3.0.1 specification and it should be
-used with care as it is experimental at this stage. The DB structure for the SIF3_SESSION table has changed and
-therefore a database update script must be run to upgrade the previous version of the framework to this version.
-The new functionality is additional functionality and not changed functionality and therefore does not affect any
-code a developer has witten. Simply drop the new libraries into your project and the new functionlaity is availble.
-Details of this release including upgrade instructions can be found in the directory "release/v0.5.0".
 
 #########################################################################################################
 # Download Instructions

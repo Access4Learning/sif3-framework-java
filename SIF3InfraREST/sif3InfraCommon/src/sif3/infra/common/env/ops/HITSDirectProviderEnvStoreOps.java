@@ -18,14 +18,16 @@
 
 package sif3.infra.common.env.ops;
 
+import java.util.Date;
 import java.util.List;
 
 import sif3.common.CommonConstants;
-import sif3.common.HITSConstants;
 import sif3.common.CommonConstants.AdapterType;
+import sif3.common.HITSConstants;
 import sif3.common.exception.PersistenceException;
-import sif3.common.model.EnvironmentKey;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
+import sif3.common.model.EnvironmentKey;
+import sif3.common.model.security.TokenInfo;
 import sif3.common.persist.model.AppEnvironmentTemplate;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.persist.service.AppEnvironmentService;
@@ -129,6 +131,8 @@ public class HITSDirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 	 * To create the environment from a template then the 'createEnvironmentAndSession(...)' method in this class must be called.
 	 * 
 	 * @param environmentKey solutionID Mandatory, applicationKey Mandatory, userToken Optional, instanceID Optional 
+	 * @param tokenInfo Information related to the security token. Can be used to store expire date and a security token related to the
+	 *                  session to be created or updated.
 	 * @param useSecured TRUE => Indicates that HTTPS end-points shall be returned. FALSE => Return HTTP end-points if available
 	 * 
 	 * @return see Desc.
@@ -136,15 +140,71 @@ public class HITSDirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 	 * @throws IllegalArgumentException Any of the mandatory parameters is null or empty.
 	 * @throws PersistenceException Could not access the underlying workstore.
 	 */
-    public EnvironmentType loadEnvironmentFromWorkstore(EnvironmentKey environmentKey, boolean useSecured) throws IllegalArgumentException, PersistenceException
+    public EnvironmentType loadEnvironmentFromWorkstore(EnvironmentKey environmentKey, TokenInfo tokenInfo, boolean useSecured) throws IllegalArgumentException, PersistenceException
     {
-		SIF3Session session = loadAndUpdateSession(environmentKey, useSecured);
+		SIF3Session session = loadAndUpdateSession(environmentKey, tokenInfo, useSecured);
 		if (session != null)
 		{
 			return loadEnvironmentFromString(session.getEnvironmentXML());
 		}
 		return null;
-    }	
+    }
+    
+	/**
+	 * This method will attempt to load an existing session from the workstore and then update the XML with the 
+	 * latest template values such as connector URLSs, ACLs etc that may have changed since the last time the 
+	 * session was loaded. The changes are stored back to the session store and the updated session is returned. 
+	 * If no environment exits for the given environmentKey then null is returned.
+	 * 
+	 * @param environmentKey The environment information for which the session shall be loaded.
+	 * @param tokenInfo Information related to the security token. Can be used to store expire date and a security 
+	 *                  token related to the session to be created or updated.
+	 * @param useSecured TRUE => Indicates that HTTPS end-points shall be returned. FALSE => Return HTTP end-points if available
+	 * 
+	 * @return See desc.
+	 * 
+	 * @throws IllegalArgumentException environmentKey is null or environmentKey.applicationKey is null or empty.
+	 * @throws PersistenceException Could not access the underlying workstore.
+	 */
+	public SIF3Session loadAndUpdateSession(EnvironmentKey environmentKey, TokenInfo tokenInfo, boolean useSecured) throws IllegalArgumentException, PersistenceException
+	{
+		ProviderEnvironment envInfo = (ProviderEnvironment)getEnvironmentStore().getEnvironment();
+		SIF3Session sif3Session = service.getSessionBySolutionAppkeyUserInst(environmentKey, CommonConstants.AdapterType.ENVIRONMENT_PROVIDER);
+		if (sif3Session != null) // Session exists. May need to update some values
+		{
+			updateSessionInfo(sif3Session, envInfo, tokenInfo, useSecured);
+			return sif3Session;
+		}
+		return null;
+	}
+
+	/**
+	 * This method will attempt to load an existing session from the workstore and then update the XML with the 
+	 * latest template values such as connector URLSs, ACLs etc that may have changed since the last time the 
+	 * session was loaded. The changes are stored back to the session store and the updated session is returned. 
+	 * If no environment exits for the given environmentKey then null is returned.
+	 * 
+	 * @param environmentID The environment ID for which the session shall be loaded.
+	 * @param tokenInfo Information related to the security token. Can be used to store expire date and a security 
+	 *                  token related to the session to be created or updated.
+	 * @param useSecured TRUE => Indicates that HTTPS end-points shall be returned. FALSE => Return HTTP end-points if available
+	 * 
+	 * @return See desc.
+	 * 
+	 * @throws IllegalArgumentException environmentID is null or empty.
+	 * @throws PersistenceException Could not access the underlying workstore.
+	 */
+	public SIF3Session loadAndUpdateSession(String environmentID, TokenInfo tokenInfo, boolean useSecured) throws IllegalArgumentException, PersistenceException
+	{
+		ProviderEnvironment envInfo = (ProviderEnvironment)getEnvironmentStore().getEnvironment();
+		SIF3Session sif3Session = service.getSessionByEnvID(environmentID, CommonConstants.AdapterType.ENVIRONMENT_PROVIDER);
+		if (sif3Session != null) // Session exists. May need to update some values
+		{
+			updateSessionInfo(sif3Session, envInfo, tokenInfo, useSecured);
+			return sif3Session;
+		}
+		return null;
+	}
 	
 	/**
 	 * This method will load a SIF3 Session from the workstore and update it with the latest values form the template if needed. The updated
@@ -152,6 +212,8 @@ public class HITSDirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 	 * for the given session token then null is returned.
 	 * 
 	 * @param sessionToken The sessionToken for which the SIF3 session shall be loaded, updated and returned. 
+	 * @param tokenInfo Information related to the security token. Can be used to store expire date and a security token related to the
+	 *                  session to be created or updated.
 	 * @param useSecured TRUE => Indicates that HTTPS end-points shall be returned. FALSE => Return HTTP end-points if available
 	 * 
 	 * @return See Desc.
@@ -159,7 +221,7 @@ public class HITSDirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 	 * @throws IllegalArgumentException sessionToken is null or empty.
 	 * @throws PersistenceException Could not access the underlying workstore.
 	 */
-	public SIF3Session loadSessionFromWorkstore(String sessionToken, boolean useSecured) throws IllegalArgumentException, PersistenceException
+	public SIF3Session loadSessionFromWorkstore(String sessionToken, TokenInfo tokenInfo, boolean useSecured) throws IllegalArgumentException, PersistenceException
 	{
 		if (StringUtils.isEmpty(sessionToken))
 		{
@@ -170,7 +232,42 @@ public class HITSDirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 		if (sif3Session != null)
 		{
 			ProviderEnvironment envInfo = (ProviderEnvironment) getEnvironmentStore().getEnvironment();
-			updateSessionInfo(sif3Session, envInfo, useSecured);
+			updateSessionInfo(sif3Session, envInfo, tokenInfo, useSecured);
+		}
+		return sif3Session;
+	}
+
+	/**
+	 * This method will load a SIF3 Session from the workstore based on the security token (tokenInfo) and 
+	 * update it with the latest values form the template if needed. The updated values are then stored back 
+	 * to the work store and the final session is returned. If there is no known session in the workstore for 
+	 * the for the given security token (tokenInfo) then null is returned.
+	 * 
+	 * @param tokenInfo The token info for which the SIF3 session shall be loaded, updated and returned. This 
+	 *                  must hold the security token in the tokenInfo.token property.
+	 * @param useSecured TRUE => Indicates that HTTPS end-points shall be returned. FALSE => Return HTTP end-points if available
+	 * 
+	 * @return See Desc.
+	 * 
+	 * @throws IllegalArgumentException tokenInfo and/or tokenInfo.token is null or empty.
+	 * @throws PersistenceException Could not access the underlying workstore.
+	 */
+	public SIF3Session loadSessionFromWorkstore(TokenInfo tokenInfo, boolean useSecured) throws IllegalArgumentException, PersistenceException
+	{
+		if (tokenInfo == null)
+		{
+			throw new IllegalArgumentException("tokenInfo is null. Cannot retrive environment/session for this security token.");			
+		}
+		if (StringUtils.isEmpty(tokenInfo.getToken()))
+		{
+			throw new IllegalArgumentException("Token is not given in tokenInfo. Cannot retrive environment/session for this security token.");			
+		}
+		
+		SIF3Session sif3Session = getSIF3SessionBySecurityToken(tokenInfo.getToken(), AdapterType.ENVIRONMENT_PROVIDER, service);
+		if (sif3Session != null)
+		{
+			ProviderEnvironment envInfo = (ProviderEnvironment) getEnvironmentStore().getEnvironment();
+			updateSessionInfo(sif3Session, envInfo, tokenInfo, useSecured);
 		}
 		return sif3Session;
 	}
@@ -189,13 +286,15 @@ public class HITSDirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 	 * 
 	 * @param inputEnv The environment as provided by a environment provider (brokered) or the consumer (direct - in this case
 	 *                 is a cut-down version with minimal data as specified  in the SIF3 spec).
+	 * @param tokenInfo Information related to the security token. Can be used to store expiry date and a security token related to the
+	 *                  session to be created or updated.
 	 * @param useSecured TRUE => Indicates that HTTPS end-points shall be returned. FALSE => Return HTTP end-points if available
 	 *                 
 	 * @return The new Environment that has been created based on the inputEnv parameter and the context.
 	 */
-    public EnvironmentType createEnvironmentAndSession(EnvironmentType inputEnv, boolean useSecured)
+    public EnvironmentType createEnvironmentAndSession(EnvironmentType inputEnv, TokenInfo tokenInfo, boolean useSecured)
     {
-		SIF3Session sif3Session = createSession(inputEnv, useSecured);
+		SIF3Session sif3Session = createSession(inputEnv, tokenInfo, useSecured);
 		if (sif3Session != null) //we are all good
 		{
 			return loadEnvironmentFromString(sif3Session.getEnvironmentXML());
@@ -206,17 +305,27 @@ public class HITSDirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 		}
 	}
 
+	/*
+	 * 
+	 */
+	public boolean updateSessionSecurityInfo(String sessionToken, String securityToken, Date securityExpiryDate)
+	{
+		return updateSessionSecurityInfo(sessionToken, securityToken, securityExpiryDate, AdapterType.ENVIRONMENT_PROVIDER, service);
+	}
+
 	/**
 	 * The same behaviour as the createEnvironmentAndSession() method except that the returned value is a SIF3 Session 
 	 * where the environment is returned as an XML string value in the SIF3Session.environmentXML property.
 	 * 
 	 * @param inputEnv The environment as provided by a environment provider (brokered) or the consumer (direct - in this case
 	 *                 is a cut-down version with minimal data as specified  in the SIF3 spec).
+	 * @param tokenInfo Information related to the security token. Can be used to store expire date and a security token related to the
+	 *                  session to be created or updated.
 	 * @param useSecured TRUE => Indicates that HTTPS end-points shall be returned. FALSE => Return HTTP end-points if available
 	 *                 
 	 * @return A SIF3 Session object with all values populated that are relevant to the newly created session.
 	 */
-    public SIF3Session createSession(EnvironmentType inputEnv, boolean useSecured)
+    public SIF3Session createSession(EnvironmentType inputEnv, TokenInfo tokenInfo, boolean useSecured)
     {
 		if ((inputEnv == null) || (inputEnv.getApplicationInfo() == null))
 		{
@@ -226,16 +335,16 @@ public class HITSDirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 //	    if (StringUtils.isEmpty(inputEnv.getSolutionId()) || StringUtils.isEmpty(inputEnv.getApplicationInfo().getApplicationKey()))
 	    if (StringUtils.isEmpty(inputEnv.getApplicationInfo().getApplicationKey()))
 	    {
-//	      logger.error("The application key and/or the solution id in the consumer input environment is null or empty. Environment cannot be created.");
-        logger.error("The application key in the consumer input environment is null or empty. Environment cannot be created.");
-	      return null;
+//	      	logger.error("The application key and/or the solution id in the consumer input environment is null or empty. Environment cannot be created.");
+	    	logger.error("The application key in the consumer input environment is null or empty. Environment cannot be created.");
+	    	return null;
 	    }
 		ProviderEnvironment envInfo = (ProviderEnvironment)getEnvironmentStore().getEnvironment();
 	    
 		try
 		{
 			EnvironmentKey envKey = new EnvironmentKey(inputEnv.getSolutionId(), inputEnv.getApplicationInfo().getApplicationKey(), inputEnv.getUserToken(), inputEnv.getInstanceId());
-			SIF3Session sif3Session = loadAndUpdateSession(envKey, useSecured);
+			SIF3Session sif3Session = loadAndUpdateSession(envKey, tokenInfo, useSecured);
 			if (sif3Session != null) // Session exists. All done => return it.
 			{
 				logger.info("SIF3 Session for "+envInfo.getEnvironmentName()+" exists already. Simply updated connector URLs, ACLs etc if needed and return it and do not create it again.");
@@ -300,7 +409,7 @@ public class HITSDirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
   					}
 			    }
 				
-			  // If the input has a consumer name, use this otherwise leave what is in the template xml.
+			    // If the input has a consumer name, use this otherwise leave what is in the template xml.
 				if (StringUtils.notEmpty(inputEnv.getConsumerName()))
 				{
 					environment.setConsumerName(inputEnv.getConsumerName());
@@ -312,15 +421,15 @@ public class HITSDirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 				  environment.setSolutionId(appEnvTemplate.getSolutionID());
 				}
 
-        // Maybe the authentication method has changed, too.
-        if (StringUtils.notEmpty(appEnvTemplate.getAuthMethod()))
-        {
-          environment.setAuthenticationMethod(appEnvTemplate.getAuthMethod());
-        }
-        else if (StringUtils.isEmpty(environment.getAuthenticationMethod())) // if empty in env.xml set to Basic
-        {
-          environment.setAuthenticationMethod(AuthenticationMethod.Basic.name());
-        }
+		        // Maybe the authentication method has changed, too.
+		        if (StringUtils.notEmpty(appEnvTemplate.getAuthMethod()))
+		        {
+		          environment.setAuthenticationMethod(appEnvTemplate.getAuthMethod());
+		        }
+		        else if (StringUtils.isEmpty(environment.getAuthenticationMethod())) // if empty in env.xml set to Basic
+		        {
+		          environment.setAuthenticationMethod(AuthenticationMethod.Basic.name());
+		        }
 
 				environment.setType(EnvironmentTypeType.DIRECT); // It is a direct environment, so set it accordingly	
 				environment.setUserToken(inputEnv.getUserToken());
@@ -331,6 +440,13 @@ public class HITSDirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 				sif3Session.setPassword(appEnvTemplate.getPassword());
 				sif3Session.setAdapterName(environment.getConsumerName());
 				sif3Session.setSolutionID(environment.getSolutionId());
+				
+		        // There might be a security token attached to the session
+		        if (tokenInfo != null)
+		        {
+		          sif3Session.setSecurityToken(tokenInfo.getToken());
+		          sif3Session.setSecurityTokenExpiry(tokenInfo.getTokenExpiryDate());
+		        }
 				
 				if (storeEnvDataToWorkstore(sif3Session, environment, service))
 				{
@@ -383,26 +499,8 @@ public class HITSDirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 	
 	/*---------------------*/
     /*-- Private Methods --*/
-    /*---------------------*/
-	/*
-	 * This method will attempt to load an existing session from the workstore and then update the XML with the latest template values
-	 * such as connector URLSs, ACLs etc that may have changed since the last time the session was loaded. The changes are stored back to
-	 * the session store and the updated session is returned.
-	 * If no session exists to start of with then null is returned.
-	 */
-	private SIF3Session loadAndUpdateSession(EnvironmentKey environmentKey, boolean useSecured) throws IllegalArgumentException, PersistenceException
-	{
-		ProviderEnvironment envInfo = (ProviderEnvironment)getEnvironmentStore().getEnvironment();
-		SIF3Session sif3Session = service.getSessionBySolutionAppkeyUserInst(environmentKey, CommonConstants.AdapterType.ENVIRONMENT_PROVIDER);
-		if (sif3Session != null) // Session exists. May need to update some values
-		{
-			updateSessionInfo(sif3Session, envInfo, useSecured);
-			return sif3Session;
-		}
-		return null;
-	}
-	
-	private void updateSessionInfo(SIF3Session sif3Session, ProviderEnvironment envInfo, boolean useSecured)
+    /*---------------------*/	
+	private void updateSessionInfo(SIF3Session sif3Session, ProviderEnvironment envInfo, TokenInfo tokenInfo, boolean useSecured)
 	{
 		if (sif3Session != null) // Session exists. May need to update some values
 		{
@@ -415,14 +513,13 @@ public class HITSDirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 				AppEnvironmentTemplate appEnvTemplate = getTemplateInfo(sif3Session);
 				if (appEnvTemplate != null)
 				{
-//					EnvironmentType templateEnv = loadEnvironmentFromTemplate(envInfo.getTemplateXMLFileName());
 					EnvironmentType templateEnv = loadEnvironmentFromTemplate(appEnvTemplate.getEnvironmentTemplate().getTemplateFileName());
 					if (templateEnv != null)
 					{
 						//HITS Customisation: Start
 						updateTemplateInfo(templateEnv, sif3Session);
 						//HITS Customisation: End
-						
+
 						// Ensure that all ACLs are updated.
 						reloadServiceInfo(environment, templateEnv);
 						
@@ -456,9 +553,19 @@ public class HITSDirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 						{
 						  sif3Session.setSolutionID(templateEnv.getSolutionId()); // either given in template xml or not used.
 						}
+						
+						// There might be a security token attached to the session
+						if (tokenInfo != null)
+						{
+						  sif3Session.setSecurityToken(tokenInfo.getToken());
+						  if (tokenInfo.getTokenExpiryDate() != null)
+						  {
+							  sif3Session.setSecurityTokenExpiry(tokenInfo.getTokenExpiryDate());
+						  }
+						}
 
 						// ensure that other values that are of importance match the values in the template, especially since most value of the environment
-						// createion are optional and might be set in the template instead.
+						// creation are optional and might be set in the template instead.
 						if (StringUtils.isEmpty(sif3Session.getAdapterName())) // only override consumer if it doesn't exist
 						{
 						  sif3Session.setAdapterName(templateEnv.getConsumerName());

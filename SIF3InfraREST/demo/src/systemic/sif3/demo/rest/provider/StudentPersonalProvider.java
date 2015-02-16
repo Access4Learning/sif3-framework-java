@@ -234,6 +234,8 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     {
     	logger.debug("Create Single Student for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
 
+//    	return null; // test return null value
+    	
     	// Must be of type StudentPersonalType
     	if (data instanceof StudentPersonalType)
     	{
@@ -312,8 +314,16 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     	ArrayList<StudentPersonalType> studentList = fetchStudents(students, pagingInfo);
     	
     	StudentCollectionType studentCollection = dmObjectFactory.createStudentCollectionType();
-    	studentCollection.getStudentPersonal().addAll(studentList);
-	    return studentCollection;
+    	
+    	if (studentList != null)
+    	{
+    		studentCollection.getStudentPersonal().addAll(studentList);
+    		return studentCollection;
+    	}
+    	else
+    	{
+    		return null;
+    	}
     }
     
     /*
@@ -344,9 +354,16 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 
 		    	ArrayList<StudentPersonalType> studentList = fetchStudents(teachingGroupStudents, pagingInfo);
 		    	StudentCollectionType studentCollection = dmObjectFactory.createStudentCollectionType();
-		    	studentCollection.getStudentPersonal().addAll(studentList);
-			    return studentCollection;
-			}
+		    	if (studentList != null)
+		    	{
+		    		studentCollection.getStudentPersonal().addAll(studentList);
+		    		return studentCollection;
+		    	}
+		    	else
+		    	{
+		    		return null;
+		    	}
+		    }
 			else
 			{
 				throw new UnsupportedQueryException("The query condition (driven by the service path) "+queryCriteria+" is not supported by the provider.");
@@ -505,7 +522,8 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     	else
     	{
     		pagingInfo.setTotalObjects(studentMap.size());
-    		if ((pagingInfo.getPageSize() * (pagingInfo.getCurrentPageNo()+1)) > studentMap.size())
+//    		if ((pagingInfo.getPageSize() * (pagingInfo.getCurrentPageNo()+1)) > studentMap.size())
+    		if ((pagingInfo.getPageSize() * (pagingInfo.getCurrentPageNo())) > studentMap.size())
     		{
     			return null; // Requested page outside of limits.
     		}
@@ -524,6 +542,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     			}
     			i++;
     		}
+    		pagingInfo.setPageSize(studentList.size());
     	}
     	
 	    return studentList;

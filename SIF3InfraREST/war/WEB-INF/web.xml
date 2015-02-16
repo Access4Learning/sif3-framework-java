@@ -17,7 +17,7 @@
     <!--  SIF Direct REST mapping according to SIF REST Direct Spec -->
     <servlet-mapping>
         <servlet-name>Jersey REST Service</servlet-name>
-        <url-pattern>/sif3/*</url-pattern>
+        <url-pattern>/hits/*</url-pattern>
     </servlet-mapping>
     
     <!-- *********************************************************************************************** -->

@@ -19,12 +19,13 @@ package sif3.infra.rest.resource;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -35,6 +36,8 @@ import org.apache.log4j.Logger;
 
 import sif3.common.CommonConstants;
 import sif3.common.conversion.MarshalFactory;
+import sif3.common.conversion.MediaTypeOperations;
+import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.MarshalException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
@@ -130,7 +133,25 @@ public abstract class BaseResource
 	private AbstractSecurityService securityService = null;
 	
 	public abstract EnvironmentManager getEnvironmentManager();
-		
+
+	/**
+	 * The marshaller of the data model. The BaseResource class needs access in various places to the data model's marshaller functions.
+	 * Since the BaseResource also deals with infrastructure data model (i.e. for errors) it must have a way to distinguish between the
+	 * data models. For some resources (i.e. EnvironmentResource) the data model marshaller is the same as the infrastructure marshaller.
+	 * 
+	 * @return Data Model Marshaller.
+	 */
+	public abstract MarshalFactory getMarshaller();
+	
+	/**
+	 * The unmarshaller of the data model. The BaseResource class needs access in various places to the data model's unmarshaller functions.
+	 * Since the BaseResource also deals with infrastructure data model (i.e. for errors) it must have a way to distinguish between the
+	 * data models. For some resources (i.e. EnvironmentResource) the data model unmarshaller is the same as the infrastructure unmarshaller.
+	 * 
+	 * @return Data Model Marshaller.
+	 */
+	public abstract UnmarshalFactory getUnmarshaller();
+
 	/**
 	 * Constructor. Initialises the REST resource with a number of important properties that are needed throughout the SIF3 REST
 	 * resources. If a resource is accessed for the first time then this method will ensure that all environmental components such
@@ -184,18 +205,16 @@ public abstract class BaseResource
 			logger.debug("Protocol           : " + getUriInfo().getBaseUri().getScheme());
 			logger.debug("SIF3 Req. Headers  : " + getHeaderProperties());
 			logger.debug("URL Query Params   : " + getQueryParameters());
-			logger.debug("Hdr Req Media Type : " + getRequestMediaType());
-			logger.debug("Hdr Resp Media Type: " + getResponseMediaType());
 			logger.debug("Zone ID            : " + getSifZone());
 			logger.debug("ContextID          : " + getSifContext());
 			logger.debug("Security Service   : " + ((getSecurityService() == null) ? null : getSecurityService().getClass().getSimpleName()));
 			logger.debug("Resource Init ok   : " + allOK);
 		}
 		
-		if (AuditableResource.isAuditing()) {
-		  validSession(); // Ensure that the session is populated for all requests when auditing.
-		  AuditableResource.setResource(this);
-		}
+    if (AuditableResource.isAuditing()) {
+      validSession(); // Ensure that the session is populated for all requests when auditing.
+      AuditableResource.setResource(this);
+    }
 	}
 
 	public UriInfo getUriInfo()
@@ -246,7 +265,8 @@ public abstract class BaseResource
 	 */
 	public MediaType getRequestMediaType()
     {
-    	return ((this.requestMediaType != null) ? this.requestMediaType : (this.urlPostfixMimeType != null ? this.urlPostfixMimeType : MediaType.APPLICATION_XML_TYPE));
+		return this.requestMediaType;
+//    	return ((this.requestMediaType != null) ? this.requestMediaType : (this.urlPostfixMimeType != null ? this.urlPostfixMimeType : MediaType.APPLICATION_XML_TYPE));
     }
 
   /*
@@ -255,7 +275,8 @@ public abstract class BaseResource
    */
 	public MediaType getResponseMediaType()
     {
-    	return ((this.responseMediaType != null) ? this.responseMediaType : (this.urlPostfixMimeType != null ? this.urlPostfixMimeType : MediaType.APPLICATION_XML_TYPE));
+		return this.responseMediaType;
+//    	return ((this.responseMediaType != null) ? this.responseMediaType : (this.urlPostfixMimeType != null ? this.urlPostfixMimeType : MediaType.APPLICATION_XML_TYPE));
     }
 
 	public HttpHeaders getRequestHeaders()
@@ -350,10 +371,12 @@ public abstract class BaseResource
 	 * @param serviceName Service for which the access rights shall be checked.
 	 * @param right The access right (QUERY, UPDATE etc) that shall be checked for.
 	 * @param accessType The access level (SUPPORTED, APPROVED, etc) that must be met for the given service and right.
+	 * @param allowDelayed TRUE then the requeste operation allows delayed requests. In a DIRECT environment it is not supported at
+	 *                     all and this parameter will be ignored. FALSE if delayed requests are not allowed.
 	 * 
 	 * @return See desc
 	 */
-	public ErrorDetails validClient(String serviceName, AccessRight right, AccessType accessType)
+	public ErrorDetails validClient(String serviceName, AccessRight right, AccessType accessType, boolean allowDelayed)
 	{
 	    // There must be a session/environment for that client otherwise an error would have been returned with previous check
 	    ProviderEnvironment envInfo = getProviderEnvironment();
@@ -390,6 +413,21 @@ public abstract class BaseResource
 				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not supported with this DIRECT Environment");
 			}
 		}
+		else  // in a Brokered environment only the 'multiple' object operations are supporting delayed.
+		{
+			if (extractRequestType() == RequestType.DELAYED)
+			{
+    			if (!allowDelayed)
+    			{
+    				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not allowed for this operation");				
+    			}
+    			else
+    			{
+    				//TODO: JH - Once delayed is supported then the error below must be removed.
+    				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not supported by this provider.");				
+    			}
+			}
+		}
 		
 		if (envInfo.getCheckACL())
 		{
@@ -407,6 +445,10 @@ public abstract class BaseResource
 			}
 		}
 		return error;
+	}
+	
+	public void validSession() {
+	  validSession(getAuthInfo(), false, null);
 	}
 	
 	
@@ -448,11 +490,15 @@ public abstract class BaseResource
 				    	EnvironmentType environment = null;
 				    	if (authInfo.getAuthMethod() != AuthenticationMethod.Bearer) // Basic or SIF_HMACSHA256
 				    	{
+					    	// HITS Customisation - Start
 				    		environment = ((HITSDirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentBySessionToken(authInfo.getUserToken(), tokenInfo, isSecure());
+					    	// HITS Customisation - End
 				    	}
 				    	else // Bearer Token 
 				    	{
+					    	// HITS Customisation - Start
 				    		environment = ((HITSDirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentForSecurityToken(tokenInfo, isSecure());
+					    	// HITS Customisation - End
 				    	}
 				    	// If we have no environment then there is no environment for that session token
 						if (environment == null)
@@ -641,7 +687,7 @@ public abstract class BaseResource
 	 * This method will attempt to load a SIF3 Session from the session cache managed in the environment manager.
 	 * The SIF3 Session to be returned is based on the Authorisation HTTP header information available.
 	 */
-	protected SIF3Session getSIF3SessionForRequest()
+	public SIF3Session getSIF3SessionForRequest()
 	{
 		String token = getTokenFromAuthToken();
 
@@ -865,7 +911,8 @@ public abstract class BaseResource
 	{
 	  if (StringUtils.isEmpty(urlPostfixMimeTypeStr))
 	  {
-		  urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
+//		  urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
+		  urlPostfixMimeType = null;
 	  }
 	  else
 	  {
@@ -873,7 +920,8 @@ public abstract class BaseResource
 		  int pos = urlPostfixMimeTypeStr.lastIndexOf(".");
 		  if ((pos == -1)) // no '.' found, so there is no postfix set! Assume XML
 		  {
-			  urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
+//			  urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
+			  urlPostfixMimeType = null;
 		  }
 		  else
 		  {  
@@ -883,34 +931,40 @@ public abstract class BaseResource
 			  }
 			  
 			  // Start comparing for valid types
-			  PostFixMimeType mimeType = PostFixMimeType.XML;
+//			  PostFixMimeType mimeType = PostFixMimeType.XML;
+			  PostFixMimeType mimeType = null;
 			  try
 			  {
 			    mimeType = PostFixMimeType.valueOf(urlPostfixMimeTypeStr.trim().toUpperCase());
 			  }
 			  catch (Exception ex)
 			  {
-			    logger.error("Failed to convert URL Postfix Mime Type '"+urlPostfixMimeTypeStr+"' to XML or JSON. Default to Media Type will be APPLICATION_XML");
-			    mimeType = PostFixMimeType.XML;
+//			      logger.error("Failed to convert URL Postfix Mime Type '"+urlPostfixMimeTypeStr+"' to XML or JSON. Default to Media Type will be application/xml");
+				  logger.error("Failed to convert URL Postfix Mime Type '"+urlPostfixMimeTypeStr+"' to XML or JSON.");
+//			      mimeType = PostFixMimeType.XML;
+				  mimeType = null;
 			  }
 			  
-			  switch (mimeType)
+			  if (mimeType != null)
 			  {
-				case XML:
-				{
-					urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
-					break;
-				}
-				case JSON:
-				{
-					urlPostfixMimeType = MediaType.APPLICATION_JSON_TYPE;
-					break;
-				}
-				default:
-				{
-					urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
-					break;
-				}
+					switch (mimeType)
+					{
+						case XML:
+						{
+							urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
+							break;
+						}
+						case JSON:
+						{
+							urlPostfixMimeType = MediaType.APPLICATION_JSON_TYPE;
+							break;
+						}
+//						default:
+//						{
+//							urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
+//							break;
+//						}
+    			  }
 			  }
 		  }
 	  }
@@ -1047,6 +1101,34 @@ public abstract class BaseResource
 		return env;
 	}
 
+	/*
+	 * This method should be called in the constructors of each resource. It is intended to determine the media type of the request as well as
+	 * the response. The media types are being determined firstly on the HTTP header and scondly on the URL Postfix.
+	 */
+	protected void determineMediaTypes(MarshalFactory marshaller, UnmarshalFactory unmarshaller, boolean useDefaults)
+	{
+		// Get values from HTTP headers
+		requestMediaType  = getMediaTypeFromStr(requestHeaders.getRequestHeaders().getFirst(HttpHeaders.CONTENT_TYPE), HttpHeaders.CONTENT_TYPE);
+		responseMediaType = getMediaTypeFromStr(requestHeaders.getRequestHeaders().getFirst(HttpHeaders.ACCEPT), HttpHeaders.ACCEPT);
+
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("Request HTTP Header "+HttpHeaders.CONTENT_TYPE+": "+requestMediaType);
+			logger.debug("Request HTTP Header "+HttpHeaders.ACCEPT+": "+responseMediaType);
+			logger.debug("URL Mime Type: " + urlPostfixMimeType);
+		}
+		
+		requestMediaType = validateAndExtractMimeType(unmarshaller, requestMediaType, urlPostfixMimeType, useDefaults);
+
+		// set it to the value of the request if it is not set
+		if (responseMediaType == null) 
+		{
+			responseMediaType = requestMediaType;
+		}
+
+		responseMediaType = validateAndExtractMimeType(marshaller, responseMediaType, urlPostfixMimeType, useDefaults);
+	}
+
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
@@ -1060,32 +1142,6 @@ public abstract class BaseResource
 			{
 				hdrProperties.setHeaderProperty(hdrName, hdrValue);
 			}
-		}
-		
-		// Try to get the request and response media type
-		requestMediaType  = getMediaTypeFromStr(requestHeaders.getRequestHeaders().getFirst(HttpHeaders.CONTENT_TYPE), HttpHeaders.CONTENT_TYPE);
-		if (requestMediaType != null)
-		{
-		  // If it is not one of the accpted types then set it to null
-		  if (!(requestMediaType.isCompatible(MediaType.APPLICATION_XML_TYPE) ||
-		       requestMediaType.isCompatible(MediaType.TEXT_XML_TYPE) ||
-		       requestMediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)))
-		  {
-		    requestMediaType = null;
-		  }
-		}
-		
-		responseMediaType = getMediaTypeFromStr(requestHeaders.getRequestHeaders().getFirst(HttpHeaders.ACCEPT), HttpHeaders.ACCEPT);
-		if ((responseMediaType == null) || responseMediaType.isWildcardSubtype()) // not really specified, so we assume the same as request
-		{
-		  responseMediaType = requestMediaType;
-		}
-		// If it is not one of the accpted types then set it to value of request
-		else if (!(responseMediaType.isCompatible(MediaType.APPLICATION_XML_TYPE) ||
-		           responseMediaType.isCompatible(MediaType.TEXT_XML_TYPE) ||
-		           responseMediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)))
-		{
-		  responseMediaType = requestMediaType;
 		}
 	}
 
@@ -1106,10 +1162,46 @@ public abstract class BaseResource
 		}
 	}
 	
+	/*
+	 * This method attempts to validate the given media type against the given media type operations. If it is unable to determine and validate
+	 * the media type from the HTTP Header or URL postfix and no defaults ought to be used then it will automatically default it to application/xml.
+	 * This will, in most cases, be just fine. Only where a data model is used that is not XML based then we will get unsupported media type 
+	 * exceptions. This exception will be caught accordingly in the higher levels of the framework.
+	 */
+	private MediaType validateAndExtractMimeType(MediaTypeOperations marshalOps, MediaType mediaTypeToTest, MediaType urlMediaType, boolean useDefaults)
+	{
+		// Check and validate the media type according to the marshal operations
+		if (!marshalOps.isSupported(mediaTypeToTest)) // Not supported => try the URL postfix
+		{
+			// Check if we have a URL media type 
+			if (urlPostfixMimeType != null)
+			{
+				if (marshalOps.isSupported(urlMediaType))
+    			{
+					return urlMediaType;
+    			}
+			}
+			
+			// We have no or an unsupported media type
+			return (useDefaults) ? marshalOps.getDefault() : MediaType.APPLICATION_XML_TYPE;
+		}
+		else // supported but it might be a wildcard. In this case we take either the default or the url media type if available
+		{
+			if (mediaTypeToTest.isWildcardSubtype())
+			{
+				return (urlPostfixMimeType != null) ?  urlPostfixMimeType : marshalOps.getDefault();
+			}
+			else
+			{
+				return mediaTypeToTest;
+			}
+		}		
+	}
+	
 	private void extractQueryParameters(UriInfo uriInfo)
+	{
 		setQueryParameters(new URLQueryParameter(getUriInfo().getQueryParameters()));
 	}
-
 
 	/*--------------------------------------------------*/
 	/*-- Private Methods related to response creation --*/
@@ -1138,19 +1230,44 @@ public abstract class BaseResource
 			if (isError && (status == Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode()))
 			{
 				response = Response.status(Status.UNSUPPORTED_MEDIA_TYPE);
+				
+				// Set the media types that are accepted by this object provider. Note this may not be the 'marshaller' given to this method since 
+				// it could be the 'infrastructure' data model in case of an error! The getMarshaller() method is the one that gives access to
+				// the actual data model marshaller and this is the one to use in setting the accepted media types.
+				Set<MediaType> mediaTypes = getMarshaller().getSupportedMediaTypes();
+				for (Iterator<MediaType> iter = mediaTypes.iterator(); iter.hasNext();)
+				{
+					response = response.header(HttpHeaders.ACCEPT, iter.next());					
+				}
 			}
 			else // ok we do not deal with a unsupported media type.
 			{
 				if (data != null)
 				{
-					String payload = marshaller.marshal(data, getResponseMediaType());
+					// We may deal with an error here. We must ensure that the media type for the response is valid.
+					MediaType finalMediaType = getResponseMediaType();
+					if (isError)// deal with the error => marshaller is the infrastructure marshaller. 
+					{
+						// If the client wants a media type that is not ok with the infra structure marshaller then the best we can do,
+						// and hope the client can recover, is to use the marshaller's default media type.
+						finalMediaType = (marshaller.isSupported(finalMediaType)) ?  finalMediaType : marshaller.getDefault();
+					}
+					String payload = marshaller.marshal(data, finalMediaType);
 					response = Response.status(status).entity(payload);
 					response = response.header(ResponseHeaderConstants.HDR_CONTENT_LENGTH, payload.length());
-					response = response.header(HttpHeaders.CONTENT_TYPE, getResponseMediaType());
+					response = response.header(HttpHeaders.CONTENT_TYPE, finalMediaType);
 				}
 				else
 				{
-					response = Response.status(Status.NO_CONTENT);
+					if ((responseAction != null) && (responseAction == ResponseAction.QUERY))
+					{
+						// We had a query that returned no data. According to SIF 3.x this must return status of 204 (No Content)
+						response = Response.status(Status.NO_CONTENT);
+					}
+					else
+					{
+						response = Response.status(status);
+					}
 				}
 			}
 			
@@ -1326,7 +1443,9 @@ public abstract class BaseResource
 			{	
 				// In a direct environment the session for the given session token might not yet be loaded in the environment provider. 
 				// In this case we attempt to load it and then compare if everything is fine.
-				DirectProviderEnvironmentManager envMgr = ((DirectProviderEnvironmentManager)getEnvironmentManager());
+		    	// HITS Customisation - Start
+				HITSDirectProviderEnvironmentManager envMgr = ((HITSDirectProviderEnvironmentManager)getEnvironmentManager());
+		    	// HITS Customisation - End
 			    try
 			    {
 			    	TokenInfo tokenInfo = new TokenInfo(authInfo.getUserToken());
@@ -1391,7 +1510,9 @@ public abstract class BaseResource
 					// Now this should have potential expire date
 					if (tokenInfo.getTokenExpiryDate() != null)
 					{
-						DirectProviderEnvironmentManager envMgr = ((DirectProviderEnvironmentManager)getEnvironmentManager());
+				    	// HITS Customisation - Start
+						HITSDirectProviderEnvironmentManager envMgr = ((HITSDirectProviderEnvironmentManager)getEnvironmentManager());
+				    	// HITS Customisation - End
 
 						long now = (new Date()).getTime();
 					    if (tokenInfo.getTokenExpiryDate().getTime() >= now) // future date => update session
@@ -1561,7 +1682,10 @@ public abstract class BaseResource
 		}
 		else
 		{
-			logger.info("Missing request header '"+RequestHeaderConstants.HDR_REQUEST_TYPE+" not set. Assume IMMEDIATE");
+			if (logger.isInfoEnabled())
+			{
+				logger.info("Request header '"+RequestHeaderConstants.HDR_REQUEST_TYPE+"' not set. Assume IMMEDIATE");
+			}
 			return RequestType.IMMEDIATE;
 		}
 	}
@@ -1597,7 +1721,8 @@ public abstract class BaseResource
 	 *     - If one is found all is good and we don't need to create one and return null
 	 *   - appUserInfo is not available => log error and return ErrorDetails 
 	 */
-	private ErrorDetails createOrLoadEnvByTokenInfo(TokenInfo tokenInfo, DirectProviderEnvironmentManager envMgr)
+	//HITS Customisation : Use HITSDirectProviderEnvironmentManager in method signature.
+	private ErrorDetails createOrLoadEnvByTokenInfo(TokenInfo tokenInfo, HITSDirectProviderEnvironmentManager envMgr)
 	{
 		if (tokenInfo == null) // should not be the case but for robustness...
 		{

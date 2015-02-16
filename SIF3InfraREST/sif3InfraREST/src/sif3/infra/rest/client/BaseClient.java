@@ -77,7 +77,9 @@ public abstract class BaseClient
 	private ClientConfig config = null;
 	private Client client = null;
 	private WebResource service = null;
-	private MediaType mediaType = MediaType.APPLICATION_XML_TYPE;
+//	private MediaType mediaType = MediaType.APPLICATION_XML_TYPE;
+	private MediaType requestMediaType = MediaType.APPLICATION_XML_TYPE;
+	private MediaType responseMediaType = MediaType.APPLICATION_XML_TYPE;
 	private MarshalFactory dmMarshaller = null;
 	private UnmarshalFactory dmUnmarshaller = null;
 	
@@ -95,27 +97,29 @@ public abstract class BaseClient
 	 * Constructor<br/>
 	 * 
 	 * @param baseURI The base URI of this client. All URIs are for all other calls are relative to this base URL.
-	 * @param mediaType XML or JSON are the expected media types. They must be supported by the given marshaller and unmarshaller.
+	 * @param requestMediaType Media type of the request. It will be validated against the supported media types of the given dmMarshaller.
+	 * @param responseMediaType Media type of the response. It will be validated against the supported media types of the given dmUnmarshaller.
 	 * @param dmMarshaller Marshaller to marshal the payload of this client to appropriate representations. This marshaller must be valid
 	 *                   for the data model used with this client.
 	 * @param dmUnmarshaller Unmarshaller to unmarshal the payload of this client to appropriate representations. This unmarshaller 
 	 *                     must be valid for the data model used with this client.
 	 * @param secureConnection TRUE: Use HTTPS, FALSE use HTTP.
 	 */
-	public BaseClient(URI baseURI, MediaType mediaType, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection)
+	public BaseClient(URI baseURI, MediaType requestMediaType, MediaType responseMediaType, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection)
 	{
 		super();
 
-		this.mediaType = mediaType;
 		setDataModelMarshaller(dmMarshaller);
 		setDataModelUnmarshaller(dmUnmarshaller);
+		setRequestMediaType(requestMediaType, dmMarshaller);
+		setResponseMediaType(responseMediaType, dmUnmarshaller);
 		configureClienService(baseURI, secureConnection);
 		
 		logger.debug("Base URI for Call is: "+getBaseURI().toASCIIString());
 	}
 
 	/**
-	 * This constructor will default to XML as media type and default service type of OBJECT
+	 * This constructor will default the media type of the marshaller (request) and unmarshaller (response) and the default service type of OBJECT.
 	 * 
 	 * @param baseURI The base URI of this client. All URIs are for all other calls are relative to this base URL.
 	 * @param dmMarshaller Marshaller to marshal the payload of this client to appropriate representations. This marshaller must be valid
@@ -126,7 +130,7 @@ public abstract class BaseClient
 	 */
 	public BaseClient(URI baseURI, MarshalFactory dmMarshaller, UnmarshalFactory dmUmarshaller, boolean secureConnection)
 	{
-		this(baseURI, MediaType.APPLICATION_XML_TYPE, dmMarshaller, dmUmarshaller, secureConnection);
+		this(baseURI, ((dmMarshaller != null) ? dmMarshaller.getDefault() : null), ((dmUmarshaller != null) ? dmUmarshaller.getDefault() : null), dmMarshaller, dmUmarshaller, secureConnection);
 	}
 
 	public MarshalFactory getDataModelMarshaller()
@@ -169,16 +173,42 @@ public abstract class BaseClient
 		return service;
 	}
 
-	public MediaType getMediaType()
+	public MediaType getRequestMediaType()
 	{
-		return mediaType;
+		return requestMediaType;
 	}
 
-	public void setMediaType(MediaType mediaType)
+	/*
+	 * Sets the media type of the request. If the media type is null it will use the marshaller default media type. If the marhaller is null
+	 * as well then the requestMediaType will be set to null.
+	 */
+	public void setRequestMediaType(MediaType mediaType, MarshalFactory marshaller)
 	{
-		this.mediaType = mediaType;
+		if ((mediaType == null) && (marshaller != null))
+		{
+			this.requestMediaType = marshaller.getDefault();
+		}
+		this.requestMediaType = mediaType;
 	}
 	
+	public MediaType getResponseMediaType()
+	{
+		return responseMediaType;
+	}
+
+	/*
+	 * Sets the media type of the response. If the media type is null it will use the unmarshaller default media type. If the unmarshaller is null
+	 * as well then the responseMediaType will be set to null.
+	 */
+	public void setResponseMediaType(MediaType mediaType, UnmarshalFactory unmarshaller)
+	{
+		if ((mediaType == null) && (unmarshaller != null))
+		{
+			this.responseMediaType = unmarshaller.getDefault();
+		}
+		this.responseMediaType = mediaType;
+	}
+
 	protected ClientConfig getConfig()
     {
     	return this.config;
@@ -247,8 +277,10 @@ public abstract class BaseClient
 	 */
 	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, boolean includeRequestID)
 	{
-		//System.out.println("MediaType: "+getMediaType());
-		Builder builder = service.type(getMediaType()).accept(getMediaType());
+//		System.out.println("Client: Request MediaType: "+getRequestMediaType());
+//		System.out.println("Client Response MediaType: "+getResponseMediaType());
+		
+		Builder builder = service.type(getRequestMediaType()).accept(getResponseMediaType());
 		
 		// Always set the requestId and messageId.
 		builder = builder.header(RequestHeaderConstants.HDR_MESSAGE_ID, UUIDGenerator.getUUID());
@@ -310,7 +342,6 @@ public abstract class BaseClient
 		// Check if HTTP header messageType == ERROR
 		boolean isErrorMessageType = MessageType.ERROR.name().equals(response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_MESSAGE_TYPE));
 		
-		
 		if (isSuccessStatusCode(clientResponse.getClientResponseStatus().getStatusCode(), successStatusCodes) && !isErrorMessageType)
 		{
 			if (response.getHasEntity())
@@ -322,9 +353,8 @@ public abstract class BaseClient
 				}
 				if (returnObjectClass != null)
 				{
-					// There is a special case. If the 'returnObjectClass' is of type String.class then we don't
-					// want any unmarshal being performed. We just want the raw payload string as it has been 
-					// received.
+					// There is a special case. If the 'returnObjectClass' is of type String.class then we don't want any unmarshal being 
+					// performed. We just want the raw payload string as it has been received.
 					if (returnObjectClass.getSimpleName().equals(String.class.getSimpleName()))
 					{
 						response.setDataObject(payload);
@@ -333,7 +363,8 @@ public abstract class BaseClient
 					{
 						try
 						{
-							response.setDataObject(getDataModelUnmarshaller().unmarshal(payload, returnObjectClass, getMediaType()));
+							// We must use the actual data model response type in the unmarshaller.
+							response.setDataObject(getDataModelUnmarshaller().unmarshal(payload, returnObjectClass, getResponseMediaType()));
 							if (response.getDataObject() == null)// this is strange. So set the unmarshalled value.
 							{
 								response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));
@@ -393,8 +424,8 @@ public abstract class BaseClient
 			}
 			try
 			{
-				//Because ErrorType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-				ErrorType error = (ErrorType) infraUnmarshaller.unmarshal(errorStr, ErrorType.class, getMediaType());
+				//Because ErrorType is a Infrastructure thing we must ensure we use a valid Infrastructure Unmarshaller Media Type
+				ErrorType error = (ErrorType) infraUnmarshaller.unmarshal(errorStr, ErrorType.class, getInfraResponseMediaType(getResponseMediaType()));
 				if (error == null) // this is strange. So set the unmarshalled value.
 				{
 					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload into ErrorType object. See error description for payload details.", errorStr));
@@ -502,4 +533,15 @@ public abstract class BaseClient
 		this.service = client.resource(getBaseURI());
 	}
 
+	/*
+	 * Determine which media type to use in the unmarshalling of a response. Intended to be used when a response is received that is a
+	 * infrastructure message (i.e. Error Response, Environment Response, Queue Response etc.). In this case the response must be unmarshalled
+	 * with the infrastructure unmarshaller but the indicatedMediaType is set for a data model object which could be other than XML or JSON.
+	 * In this case we must unmarshal the response in the default infrastructure media type or we will get an unmrashal excpetion.
+	 */
+	private MediaType getInfraResponseMediaType(MediaType indicatedMediaType)
+	{
+		return getInfraUnmarshaller().isSupported(indicatedMediaType) ? indicatedMediaType : getInfraUnmarshaller().getDefault();
+	}
+	
 }

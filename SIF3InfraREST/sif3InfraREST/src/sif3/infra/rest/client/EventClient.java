@@ -94,7 +94,8 @@ public class EventClient extends BaseClient
 			this.providerEnvironment = providerEnvironment;
 			this.sif3Session = sif3Session;
 			this.serviceName = serviceName;
-			setMediaType(providerEnvironment.getMediaType());
+			setRequestMediaType(providerEnvironment.getMediaType(), null);
+			setResponseMediaType(providerEnvironment.getMediaType(), null);
 			setDataModelMarshaller(dmMarshaller);
 			configureClienService(eventConnector, providerEnvironment.getSecureConnection());
 		}
@@ -129,13 +130,13 @@ public class EventClient extends BaseClient
 				return response;
 			}
 	
-			// If we get here it appears that all is good an valid. Try to send event now.
+			// If we get here it appears that all is good and valid. Try to send event now.
 			WebResource service = getService();
 			
 			try
 			{
 				// Don't set zone & context here. They are header parameters in the case of events.
-			    String payloadStr = getDataModelMarshaller().marshal(event.getSIFObjectList(), getMediaType());
+			    String payloadStr = getDataModelMarshaller().marshal(event.getSIFObjectList(), getRequestMediaType());
 	
 //				if (logger.isDebugEnabled())
 //				{

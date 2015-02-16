@@ -27,14 +27,14 @@ public class AuditRequestWrapper extends HttpServletRequestWrapper implements Ht
   private AuditRecord auditRecord = null;
   private RecordingInputStream inputStream = null;
   private BaseResource resource = null;
-  
+
   public AuditRequestWrapper(HttpServletRequest request) {
     super(request);
     this.auditRecord = new AuditRecord();
     this.auditRecord.setRequestTime(new Date());
     this.auditRecord.setUrl(request.getRequestURL().toString());
   }
-  
+
   @Override
   public ServletInputStream getInputStream() throws IOException {
     if (inputStream == null) {
@@ -42,19 +42,19 @@ public class AuditRequestWrapper extends HttpServletRequestWrapper implements Ht
     }
     return inputStream;
   }
-   
+
   public void setResource(BaseResource resource) {
     this.resource = resource;
   }
-  
+
   public String getContent() {
     String result = null;
     if (inputStream != null) {
       result = inputStream.getContent();
-    } 
+    }
     return result;
   }
-  
+
   private void auditResource(BaseResource resource) {
     if (resource != null) {
       if (resource.getSifZone() != null) {
@@ -62,9 +62,6 @@ public class AuditRequestWrapper extends HttpServletRequestWrapper implements Ht
       }
       if (resource.getSifContext() != null) {
         auditRecord.setContext(resource.getSifContext().getId());
-      }
-      if (resource.getSessionToken() != null) {
-        auditRecord.setSessionToken(resource.getSessionToken());
       }
       if (resource.getRequestMediaType() != null) {
         auditRecord.setRequestMediaType(resource.getRequestMediaType());
@@ -82,15 +79,15 @@ public class AuditRequestWrapper extends HttpServletRequestWrapper implements Ht
           auditRecord.setInstanceId(environmentKey.getInstanceID());
           auditRecord.setUserToken(environmentKey.getUserToken());
         }
-
         resource.validSession();
-        SIF3Session session = resource.getEnvironmentManager().getSessionBySessionToken(auditRecord.getSessionToken());
+        SIF3Session session = resource.getSIF3SessionForRequest();
         if (session != null) {
           auditRecord.setSolutionId(session.getSolutionID());
           auditRecord.setAppKey(session.getApplicationKey());
           auditRecord.setInstanceId(session.getInstanceID());
           auditRecord.setUserToken(session.getUserToken());
           auditRecord.setEnvironmentToken(session.getEnvironmentID());
+          auditRecord.setSessionToken(session.getSessionToken());
           
           if (auditRecord.getZone() == null) {
             auditRecord.setZone(session.getDefaultZone().getId());
@@ -120,7 +117,7 @@ public class AuditRequestWrapper extends HttpServletRequestWrapper implements Ht
     }
     return result;
   }
-  
+
   private Map<String, Object> getHeaders(HttpHeaders httpRequest) {
     Map<String, Object> result = new HashMap<String, Object>();
     if (httpRequest != null) {
@@ -133,7 +130,7 @@ public class AuditRequestWrapper extends HttpServletRequestWrapper implements Ht
     }
     return result;
   }
-  
+
   private Object getHeaderValue(Collection<String> headerValues) {
     List<String> result = new ArrayList<String>();
     if (headerValues != null) {
@@ -149,7 +146,7 @@ public class AuditRequestWrapper extends HttpServletRequestWrapper implements Ht
 
   @Override
   public Collection<String> getHeaderNamesCollection() {
-    Collection<String> result = null; 
+    Collection<String> result = null;
     Enumeration<String> headerNames = getHeaderNames();
     if (headerNames != null) {
       result = Collections.list(headerNames);
@@ -159,7 +156,7 @@ public class AuditRequestWrapper extends HttpServletRequestWrapper implements Ht
 
   @Override
   public Collection<String> getHeadersCollection(String name) {
-    Collection<String> result = null; 
+    Collection<String> result = null;
     Enumeration<String> headers = getHeaders(name);
     if (headers != null) {
       result = Collections.list(headers);

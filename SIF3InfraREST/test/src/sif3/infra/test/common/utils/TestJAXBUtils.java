@@ -40,15 +40,11 @@ public class TestJAXBUtils
 {
 	private ObjectFactory objFactory = new ObjectFactory();
 	
-	private final static String INPUT_ENV_FILE_NAME_XML  = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/environment_large.xml";
-	private final static String OUTPUT_ENV_FILE_NAME_XML = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/output/environment_large.xml";
-  private final static String INPUT_ENV_FILE_NAME_JSON  = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/environment_large.json";
-  private final static String OUTPUT_ENV_FILE_NAME_JSON = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/output/environment_large.json";
+//	private final static String INPUT_ENV_FILE_NAME  = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/environment_large.xml";
+//	private final static String OUTPUT_ENV_FILE_NAME = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/output/environment_large.xml";
 
-//	private final static String INPUT_ENV_FILE_NAME_XML   = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/environment_large.xml";
-//	private final static String OUTPUT_ENV_FILE_NAME_XML  = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/output/environment_large.xml";	
-//  private final static String INPUT_ENV_FILE_NAME_JSON  = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/environment_large.json";
-//  private final static String OUTPUT_ENV_FILE_NAME_JSON = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/output/environment_large.json";
+	private final static String INPUT_ENV_FILE_NAME  = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/environment_large.xml";
+	private final static String OUTPUT_ENV_FILE_NAME = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/output/environment_large.xml";	
 
 	private void printEnvironment(EnvironmentType env)
 	{
@@ -110,46 +106,6 @@ public class TestJAXBUtils
 		return env;
 	}
 	
-	private String getEnvironmentFromFile(String fileName)
-	{
-	  return FileReaderWriter.getFileContent(fileName);
-	}
-	
-	private void writeEnvironmentToFile(String envStr, String fileName)
-  {
-    FileReaderWriter.writeContentToFile(envStr, fileName);
-  }
-	
-	private String getEnvironmentXMLFile()
-	{
-	  return getEnvironmentFromFile(INPUT_ENV_FILE_NAME_XML);
-	}
-	
-  private String getEnvironmentJSONFile()
-  {
-    return getEnvironmentFromFile(INPUT_ENV_FILE_NAME_JSON);
-  }
-  
-  private EnvironmentType getEnvironmentFromXMLFile() throws UnmarshalException
-  {
-    return (EnvironmentType) JAXBUtils.unmarshalFromXMLIntoObject(getEnvironmentXMLFile(), EnvironmentType.class);
-  }
-  
-  private void writeEnvironmentToXMLFile(EnvironmentType environment) throws MarshalException
-  {
-    writeEnvironmentToFile(JAXBUtils.marshalToXML(objFactory.createEnvironment(environment)), OUTPUT_ENV_FILE_NAME_XML);
-  }
-
-  private EnvironmentType getEnvironmentFromJSONFile() throws UnmarshalException
-  {
-    return (EnvironmentType) JAXBUtils.unmarshalFromJSONIntoObject(getEnvironmentJSONFile(), EnvironmentType.class);
-  }
-
-  private void writeEnvironmentToJSONFile(EnvironmentType environment) throws MarshalException
-  {
-    writeEnvironmentToFile(JAXBUtils.marshalToJSON(objFactory.createEnvironment(environment)), OUTPUT_ENV_FILE_NAME_JSON);
-  }
-  
 	private void testLists() throws MarshalException
 	{
 		AlertType alert = objFactory.createAlertType();
@@ -183,64 +139,19 @@ public class TestJAXBUtils
 		return JAXBUtils.marshalToXML(envJAXB);
 	}
 	
-	 private String testToJSON() throws MarshalException
-	 {
-	    EnvironmentType env = getEnvironment();
-	    JAXBElement<EnvironmentType> envJAXB = objFactory.createEnvironment(env);
-	    
-	    return JAXBUtils.marshalToJSON(envJAXB);
-	 }
-	
 	private void testFromXML() throws UnmarshalException, MarshalException
 	{
-	  String inputEnvXML = FileReaderWriter.getFileContent(INPUT_ENV_FILE_NAME_XML);
+	  String inputEnvXML = FileReaderWriter.getFileContent(INPUT_ENV_FILE_NAME);
 	  System.out.println("File content:\n"+inputEnvXML);
 	  	   
 		EnvironmentType env = (EnvironmentType) JAXBUtils.unmarshalFromXMLIntoObject(inputEnvXML, EnvironmentType.class);
 		printEnvironment(env);
 		
 		String ouputEnvXML = JAXBUtils.marshalToXML(objFactory.createEnvironment(env));
-		FileReaderWriter.writeContentToFile(ouputEnvXML, OUTPUT_ENV_FILE_NAME_XML);
-		System.out.println("Unmarshalled Environment stored in "+OUTPUT_ENV_FILE_NAME_XML);		
+		FileReaderWriter.writeContentToFile(ouputEnvXML, OUTPUT_ENV_FILE_NAME);
+		System.out.println("Unmarshalled Environment stored in "+OUTPUT_ENV_FILE_NAME);		
 	}
-	
-//	 private void testFromJSON() throws UnmarshalException, MarshalException
-//	  {
-//	    String inputEnvXML = FileReaderWriter.getFileContent(INPUT_ENV_FILE_NAME);
-//	    System.out.println("File content:\n"+inputEnvXML);
-//	         
-//	    EnvironmentType env = (EnvironmentType) JAXBUtils.unmarshalFromXMLIntoObject(inputEnvXML, EnvironmentType.class);
-//	    printEnvironment(env);
-//	    
-//	    String ouputEnvXML = JAXBUtils.marshalToXML(objFactory.createEnvironment(env));
-//	    FileReaderWriter.writeContentToFile(ouputEnvXML, OUTPUT_ENV_FILE_NAME);
-//	    System.out.println("Unmarshalled Environment stored in "+OUTPUT_ENV_FILE_NAME);   
-//	  }
 			
-	
-	private void testXMLToObjectToXML() throws UnmarshalException, MarshalException
-	{
-	  EnvironmentType env = getEnvironmentFromXMLFile(); // get environment from file and converts it to object
-	  writeEnvironmentToXMLFile(env); // converts environment object to XML and writes it to a file.
-	}
-	
-	private void testJSONToObjectToJSON() throws UnmarshalException, MarshalException
-	{
-    EnvironmentType env = getEnvironmentFromJSONFile(); // get environment from file and converts it to object
-    writeEnvironmentToJSONFile(env); //  converts environment object to JSON and writes it to a file.    	    
-	}
-
-	private void testXMLToObjectToJSON() throws UnmarshalException, MarshalException
-	{
-    EnvironmentType env = getEnvironmentFromXMLFile(); // get environment from file and converts it to object
-    writeEnvironmentToJSONFile(env); //  converts environment object to JSON and writes it to a file.    
-	}
-
-  private void testJSONToObjectToXML() throws UnmarshalException, MarshalException
-  {
-    EnvironmentType env = getEnvironmentFromJSONFile(); // get environment from file and converts it to object
-    writeEnvironmentToXMLFile(env); // converts environment object to XML and writes it to a file.
-	}
 	
 	public static void main(String[] args)
 	{
@@ -249,22 +160,14 @@ public class TestJAXBUtils
 		System.out.println("Start Testing JAXBUtils...");
 		try
 		{
-//			String envStr = tester.testToXML();
-//			System.out.println("Environment XML:\n" + envStr);
-//
-//			tester.testFromXML();
-//
-//			System.out.println("\n\nTest some Lists:");
-//			tester.testLists();
+			String envStr = tester.testToXML();
+			System.out.println("Environment XML:\n" + envStr);
+
+			tester.testFromXML();
+
+			System.out.println("\n\nTest some Lists:");
+			tester.testLists();
 			
-//		  String envStrJSON = tester.testToJSON();
-//      System.out.println("Environment JSON:\n" + envStrJSON);
-		  
-		  
-//		  tester.testXMLToObjectToXML();
-		  tester.testXMLToObjectToJSON();
-//			tester.testJSONToObjectToJSON();
-			tester.testJSONToObjectToXML();
 		}
 		catch (Exception ex)
 		{

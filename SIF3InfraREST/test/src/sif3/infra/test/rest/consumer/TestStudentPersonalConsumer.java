@@ -48,10 +48,10 @@ public class TestStudentPersonalConsumer
 {
 //	private final static String PATH = "/Users/crub/dev/nsip/Users/crub/dev/nsip/sif3-framework-java-dev";
 //	private final static String PATH = "C:/DEV/eclipseWorkspace";
-	private final static String PATH = "C:/Development/GitHubRepositories";
+	private final static String PATH = "C:/Development/GitHubRepositories/SIF3InfraRest";
   
-	private final static String SINGLE_STUDENT_FILE_NAME = PATH + "/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
-	private final static String MULTI_STUDENT_FILE_NAME = PATH + "/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
+	private final static String SINGLE_STUDENT_FILE_NAME = PATH + "/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
+	private final static String MULTI_STUDENT_FILE_NAME = PATH + "/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
 //	private static final String CONSUMER_ID = "SecureStudentConsumer";
 	private static final String CONSUMER_ID = "StudentConsumer";
 //	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
@@ -76,7 +76,7 @@ public class TestStudentPersonalConsumer
 					{
 						if (response.getHasEntity())
 						{
-							System.out.println("Data Object Response "+i+": "+consumer.getMarshaller().marshalToXML(response.getDataObject()));
+							System.out.println("Data Object Response "+i+": "+consumer.getMarshaller().marshal(response.getDataObject(), consumer.getResponseMediaType()));
 						}
 						else
 						{
@@ -366,7 +366,7 @@ public class TestStudentPersonalConsumer
 //  		tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
   		tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
 //  		tester.getStudentsByServicePath("RoomInfos", "24ed508e1ed04bba82198233efa55859", consumer);
-  //		tester.createStudent(consumer);
+//  			tester.createStudent(consumer);
   //		tester.removeStudent(consumer);
 //  		tester.getStudent(consumer);
   //		tester.updateStudent(consumer);

@@ -49,7 +49,7 @@ public class SubscriptionClient extends BaseClient
 	
 	public SubscriptionClient(ConsumerEnvironment consumerEnvironment, SIF3Session sif3Session)
 	{
-		super(consumerEnvironment.getConnectorBaseURI(ConnectorName.subscriptions), consumerEnvironment.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), consumerEnvironment.getSecureConnection());
+		super(consumerEnvironment.getConnectorBaseURI(ConnectorName.subscriptions), consumerEnvironment.getMediaType(), consumerEnvironment.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), consumerEnvironment.getSecureConnection());
 		this.consumerEnvInfo = consumerEnvironment;
 		this.sif3Session = sif3Session;
 	}
@@ -136,7 +136,7 @@ public class SubscriptionClient extends BaseClient
 		
 			service = buildURI(service, null);
 			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
-			String payloadStr = getInfraMarshaller().marshal(subscriptionInfo, getMediaType());
+			String payloadStr = getInfraMarshaller().marshal(subscriptionInfo, getRequestMediaType());
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("subscribe: Payload to send:\n"+payloadStr);

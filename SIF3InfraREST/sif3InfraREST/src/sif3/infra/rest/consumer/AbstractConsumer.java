@@ -19,6 +19,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
@@ -28,17 +29,17 @@ import sif3.common.exception.ServiceInvokationException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
-import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.HeaderValues.RequestType;
+import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.Consumer;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.QueryPredicate;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
-import sif3.common.model.ZoneContextInfo;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
+import sif3.common.model.ZoneContextInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.BaseResponse;
 import sif3.common.ws.BulkOperationResponse;
@@ -145,6 +146,7 @@ public abstract class AbstractConsumer implements Consumer
 	 * env.application.key    applicationKey
 	 * env.userToken          userToken
 	 * env.instanceID         instanceId
+	 * env.mediaType          Content-Type, Accept
 	 * 
 	 * Only properties that are not null or empty string will be set in the corresponding HTTP Header.
 	 *
@@ -198,6 +200,28 @@ public abstract class AbstractConsumer implements Consumer
 	public String getInstanceID()
 	{
 		return getConsumerEnvironment().getEnvironmentKey().getInstanceID();
+	}
+	
+	/**
+	 * This method returns the value of the env.mediaType property from the consumer's property file. If that
+	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The env.mediaType property from the consumer's property file
+	 */
+	public MediaType getRequestMediaType()
+	{
+		return getConsumerEnvironment().getMediaType();
+	}
+	
+	/**
+	 * This method returns the value of the env.mediaType property from the consumer's property file. If that
+	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The env.mediaType property from the consumer's property file
+	 */
+	public MediaType getResponseMediaType()
+	{
+		return getConsumerEnvironment().getMediaType();
 	}
 
 	/*------------------------------------------------------------------------------------------------------------------------
@@ -772,7 +796,8 @@ public abstract class AbstractConsumer implements Consumer
 		else
 		{
 			return new ClientInterface(envInfo.getConnectorBaseURI(ConsumerEnvironment.ConnectorName.requestsConnector), 
-	                   				   envInfo.getMediaType(),
+	                   				   getRequestMediaType(),
+	                   				   getResponseMediaType(),
 	                   				   getMarshaller(), 
 	                   				   getUnmarshaller(),
 	                   				   envInfo.getSecureConnection());

@@ -74,20 +74,21 @@ public class ClientInterface extends BaseClient
 	 * Constructor<br/>
 	 * 
 	 * @param baseURI The base URI of this client. All URIs are for all other calls are relative to this base URL.
-	 * @param mediaType XML or JSON are the expected media types. They must be supported by the given marshaller and unmarshaller.
+	 * @param requestMediaType Media type of the request. It will be validated against the supported media types of the given dmMarshaller.
+	 * @param responseMediaType Media type of the response. It will be validated against the supported media types of the given dmUnmarshaller.
 	 * @param dmMarshaller Marshaller to marshal the payload of this client to appropriate representations. This marshaller must be valid
 	 *                   for the data model used with this client.
 	 * @param dmUnmarshaller Unmarshaller to unmarshal the payload of this client to appropriate representations. This unmarshaller 
 	 *                     must be valid for the data model used with this client.
 	 * @param secureConnection TRUE: Use HTTPS, FALSE use HTTP.
 	 */
-	public ClientInterface(URI baseURI, MediaType mediaType, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection)
+	public ClientInterface(URI baseURI, MediaType requestMediaType, MediaType responseMediaType, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection)
 	{
-		super(baseURI, mediaType, dmMarshaller, dmUnmarshaller, secureConnection);
+		super(baseURI, requestMediaType, responseMediaType, dmMarshaller, dmUnmarshaller, secureConnection);
 	}
 
 	/**
-	 * This constructor will default to XML as media type and default service type of OBJECT
+	 * This constructor will default the media type of the marshaller (request) and unmarshaller (response) and the default service type of OBJECT.
 	 * 
 	 * @param baseURI The base URI of this client. All URIs are for all other calls are relative to this base URL.
 	 * @param dmMarshaller Marshaller to marshal the payload of this client to appropriate representations. This marshaller must be valid
@@ -166,7 +167,7 @@ public class ClientInterface extends BaseClient
 		try
 		{
 			service = buildURI(service, relURI, null, zone, context);
-			String payloadStr = getDataModelMarshaller().marshal(payload, getMediaType());
+			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestMediaType());
 
 			if (logger.isDebugEnabled())
 			{
@@ -209,7 +210,7 @@ public class ClientInterface extends BaseClient
 		try
 		{
 			service = buildURI(service, relURI, resourceID, zone, context);
-			String payloadStr = getDataModelMarshaller().marshal(payload, getMediaType());
+			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestMediaType());
 
 			if (logger.isDebugEnabled())
 			{
@@ -287,12 +288,12 @@ public class ClientInterface extends BaseClient
 		try
 		{
 			service = buildURI(service, relURI, null, zone, context);
-		  if (pagingInfo != null)
+			if (pagingInfo != null)
 			{
 //				QueryMetadata query = new QueryMetadata();
 //				query.setPagingInfo(pagingInfo);
 //				Map<String, String> queryParameters = query.getQueryParameters();
-        Map<String, String> queryParameters = pagingInfo.getRequestValues();
+			  	Map<String, String> queryParameters = pagingInfo.getRequestValues();
 				for (String key : queryParameters.keySet())
 				{
 				  hdrProperties.setHeaderProperty(key, queryParameters.get(key));
@@ -337,7 +338,7 @@ public class ClientInterface extends BaseClient
 		try
 		{
 			service = buildURI(service, relURI, null, zone, context);
-		    String payloadStr = getDataModelMarshaller().marshal(payload, getMediaType());
+		    String payloadStr = getDataModelMarshaller().marshal(payload, getRequestMediaType());
 
 			if (logger.isDebugEnabled())
 			{
@@ -379,7 +380,7 @@ public class ClientInterface extends BaseClient
 		{
 			service = buildURI(service, relURI, null, zone, context);
 
-			String payloadStr = getDataModelMarshaller().marshal(payload, getMediaType());
+			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestMediaType());
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("updateMany: Payload to send:\n"+payloadStr);
@@ -400,14 +401,14 @@ public class ClientInterface extends BaseClient
 	}
 	
 	/**
-	 * This invokes the REST DELETE call. This method is used to delete many objects in one call as defined by the SIF3 spec. The
+	 * This invokes the REST PUT call. This method is used to delete many objects in one call as defined by the SIF3 spec. The
 	 * returned list of responses equate to one response per object in the given payload. The order of the responses is the same as the
 	 * order in the original payload. The first response in the BulkOperationResponse list is the response to the create of the first
 	 * object in the payload etc.<br/><br/>
 	 * 
-	 * There is an issue with java.net.HttpURLConnection where it doesn't allow an payload for the DELETE! So currently the implementation of
-	 * the removeMany fakes such a behaviour and actually calls individual DELETEs. This is not ideal but until a work around is figured out
-	 * that is what this method does.
+	 * There is an issue with java.net.HttpURLConnection where it doesn't allow an payload for the HTTP DELETE operation. So currently 
+	 * the implementation of the removeMany fakes such a behaviour and actually calls the HTTP PUT with a HTTP Header called 'methodOverride' as
+	 * specified in the SIF 3.x specification.
 	 * 
 	 * @param relURI A relative URI to the baseURI given to the constructor of this class. It is appended to the baseURI as is.
 	 * @param resourceIDs A list of resourceId for the objects to be deleted.
@@ -421,42 +422,6 @@ public class ClientInterface extends BaseClient
 	 */
 	public BulkOperationResponse<OperationStatus> removeMany(String relURI, List<String> resourceIDs, HeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
-    /*-----------------------------------------------------------------------------------------------------------------------------
-     * Below is the dummy implementation (now commented out). It is what would be done if delete is called one by one because
-     * bulk-deletes are not allowed with the HTTP DELETE. Just Google for "java.net.ProtocolException: HTTP method DELETE doesn't 
-     * support output" for details. This is the exception thrown with the code below.
-     -----------------------------------------------------------------------------------------------------------------------------*/
-/*    
-		BulkOperationResponse bulkResponse = new BulkOperationResponse();
-		bulkResponse.setStatus(Status.OK.getStatusCode());
-		bulkResponse.setStatusMessage(Status.OK.getReasonPhrase());
-		bulkResponse.setMediaType(getMediaType());
-		bulkResponse.setContentLength(-1);
-		bulkResponse.setHasEntity(true);		
-
-		bulkResponse.setOperationStatuses(new ArrayList<OperationStatus>());
-		int i = 0;
-		if (resourceIDs != null)
-		{
-			for (String resourceID : resourceIDs)
-			{
-				Response singleOpResponse = removeSingle(relURI, resourceID, hdrProperties, zone, context);
-				if (i == 0)
-				{
-					bulkResponse.setHdrProperties(singleOpResponse.getHdrProperties());					
-				}
-				bulkResponse.getOperationStatuses().add(new OperationStatus(resourceID, singleOpResponse.getStatus(), singleOpResponse.getError()));
-				
-				//need to 'reset' the service with the base URL
-				this.service = client.resource(getBaseURI());
-			}
-		}
-		
-		return bulkResponse;
-*/		
-    /*-----------------------------------------------------------------------------------------------------------------------------
-     * End original code (now commented out).
-     -----------------------------------------------------------------------------------------------------------------------------*/
 		WebResource service = getService();
 		try
 		{
@@ -475,7 +440,7 @@ public class ClientInterface extends BaseClient
 			    deleteRequest.getDeletes().getDelete().add(id);
 			  }
 			}
-			String payloadStr = getInfraMarshaller().marshal(deleteRequest, getMediaType());
+			String payloadStr = getInfraMarshaller().marshal(deleteRequest, getRequestMediaType());
 			
 			// Set specific header so that PUT method knows that a DELETE and not an UPDATE is required! 
 			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.DELETE.name());
@@ -499,7 +464,6 @@ public class ClientInterface extends BaseClient
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-
 	private BulkOperationResponse<CreateOperationStatus> setCreateBulkResponse(ClientResponse clientResponse)
 	{
 		BulkOperationResponse<CreateOperationStatus> response = new BulkOperationResponse<CreateOperationStatus>();
@@ -512,7 +476,7 @@ public class ClientInterface extends BaseClient
 				try
 				{						
 					//Because CreateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-					CreateResponseType createManyResponse = (CreateResponseType)getInfraUnmarshaller().unmarshal(payload, CreateResponseType.class, getMediaType());
+					CreateResponseType createManyResponse = (CreateResponseType)getInfraUnmarshaller().unmarshal(payload, CreateResponseType.class, getResponseMediaType());
 					if (createManyResponse == null)// this is strange. So set the unmarshalled value.
 					{
 						response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));							
@@ -535,10 +499,10 @@ public class ClientInterface extends BaseClient
 				{
 					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
 				}
-	      catch (UnsupportedMediaTypeExcpetion ex)
-	      {
-	        response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
-	      }
+				catch (UnsupportedMediaTypeExcpetion ex)
+				{
+					response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
+				}
 			}			
 		}
 		else// We are dealing with an error case.
@@ -553,9 +517,9 @@ public class ClientInterface extends BaseClient
 		return response;
 	}
 
-  private BulkOperationResponse<OperationStatus> setDeleteBulkResponse(ClientResponse clientResponse)
+	private BulkOperationResponse<OperationStatus> setDeleteBulkResponse(ClientResponse clientResponse)
 	{
-	  BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
+		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
 		setBaseResponseData(response, clientResponse);
 		if (clientResponse.getClientResponseStatus().getStatusCode() == Status.OK.getStatusCode())
 		{
@@ -565,7 +529,7 @@ public class ClientInterface extends BaseClient
 				try
 				{						
 					//Because DeleteResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-					DeleteResponseType deleteManyResponse = (DeleteResponseType)getInfraUnmarshaller().unmarshal(payload, DeleteResponseType.class, getMediaType());
+					DeleteResponseType deleteManyResponse = (DeleteResponseType)getInfraUnmarshaller().unmarshal(payload, DeleteResponseType.class, getResponseMediaType());
 					if (deleteManyResponse == null)// this is strange. So set the unmarshalled value.
 					{
 						response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));							
@@ -587,10 +551,10 @@ public class ClientInterface extends BaseClient
 				{
 					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
 				}
-        catch (UnsupportedMediaTypeExcpetion ex)
-        {
-          response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
-        }
+				catch (UnsupportedMediaTypeExcpetion ex)
+				{
+					response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
+				}
 			}			
 		}
 		else// We are dealing with an error case.
@@ -617,7 +581,7 @@ public class ClientInterface extends BaseClient
 				try
 				{						
 					//Because UpdateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-					UpdateResponseType updateManyResponse = (UpdateResponseType)getInfraUnmarshaller().unmarshal(payload, UpdateResponseType.class, getMediaType());
+					UpdateResponseType updateManyResponse = (UpdateResponseType)getInfraUnmarshaller().unmarshal(payload, UpdateResponseType.class, getResponseMediaType());
 					if (updateManyResponse == null)// this is strange. So set the unmarshalled value.
 					{
 						response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));							
@@ -639,10 +603,10 @@ public class ClientInterface extends BaseClient
 				{
 					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
 				}
-        catch (UnsupportedMediaTypeExcpetion ex)
-        {
-          response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
-        }
+				catch (UnsupportedMediaTypeExcpetion ex)
+				{
+					response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
+				}
 			}			
 		}
 		else// We are dealing with an error case.

@@ -30,6 +30,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
+import sif3.common.conversion.MarshalFactory;
+import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.ws.ErrorDetails;
 import sif3.infra.common.env.mgr.DirectProviderEnvironmentManager;
@@ -84,4 +86,16 @@ public class EventResource extends BaseResource
 		
 		return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Events not supported.", "This DIRECT Environment implementation does not support events, yet."), ResponseAction.CREATE);
 	}
+
+	@Override
+    public MarshalFactory getMarshaller()
+    {
+	    return null;
+    }
+
+	@Override
+    public UnmarshalFactory getUnmarshaller()
+    {
+	    return null;
+    }
 }

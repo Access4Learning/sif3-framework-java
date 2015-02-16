@@ -1,163 +1,163 @@
-<project name="SIF3InfraREST" basedir="." default="03-jar-components">
+<project name="HITS" basedir="." default="03-jar-components">
 
-	<!-- ************************************************************************ -->
-	<!-- The following tasks need to be imported to Eclipse. They can be found in -->
-	<!-- ant-contrib.jar. (http://ant-contrib.sourceforge.net/)                   -->
-	<!-- To run this build script from the command line the ant-contrib.jar must  -->
-	<!-- be in the ant/lib directory.                                             -->
-	<!-- ************************************************************************ -->
+    <!-- ************************************************************************ -->
+    <!-- The following tasks need to be imported to Eclipse. They can be found in -->
+    <!-- ant-contrib.jar. (http://ant-contrib.sourceforge.net/)                   -->
+    <!-- To run this build script from the command line the ant-contrib.jar must  -->
+    <!-- be in the ant/lib directory.                                             -->
+    <!-- ************************************************************************ -->
 
-	<!--taskdef name="foreach" classname="net.sf.antcontrib.logic.ForEach" /-->
+    <!--taskdef name="foreach" classname="net.sf.antcontrib.logic.ForEach" /-->
 
-	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
-		<classpath>
-			<pathelement location="${basedir}/lib/ant-contrib-1.0b3/ant-contrib-1.0b3.jar"/>
-		</classpath>
-	</taskdef>
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+        <classpath>
+            <pathelement location="${basedir}/lib/ant-contrib-1.0b3/ant-contrib-1.0b3.jar"/>
+        </classpath>
+    </taskdef>
 
-	<property name="project.basedir" value="${basedir}"/>
+    <property name="project.basedir" value="${basedir}"/>
 
-	<!-- *************************** -->
-	<!-- Load default property files -->
-	<!-- *************************** -->
-	<property file="${project.basedir}/ant.properties"/>
+    <!-- *************************** -->
+    <!-- Load default property files -->
+    <!-- *************************** -->
+    <property file="${project.basedir}/ant.properties"/>
 
-	<!-- ********************* -->
-	<!-- Environment Variables -->
-	<!-- ********************* -->
-	<property name="app.name" value="${app.name}" />
-	<property name="build.dir" value="${project.basedir}/${builddir}"/>
-	<property name="web.dir.name" value="war"/>
-	<property name="dist.dir" value="${build.dir}/dist"/>
-	<property name="src.dir" value="src" />
-	<property name="class.dir" value="${build.dir}/classes" />
-	<property name="web.lib.root.dir" value="${project.basedir}/${web.dir.name}/WEB-INF/lib" />
-	<property name="lib.root.dir" value="${project.basedir}/lib" />
-	<property name="config.dir" value="${project.basedir}/config" />
-	<property name="verbose" value="true" />
+    <!-- ********************* -->
+    <!-- Environment Variables -->
+    <!-- ********************* -->
+    <property name="app.name" value="${app.name}" />
+    <property name="build.dir" value="${project.basedir}/${builddir}"/>
+    <property name="web.dir.name" value="war"/>
+    <property name="dist.dir" value="${build.dir}/dist"/>
+    <property name="src.dir" value="src" />
+    <property name="class.dir" value="${build.dir}/classes" />
+    <property name="web.lib.root.dir" value="${project.basedir}/${web.dir.name}/WEB-INF/lib" />
+    <property name="lib.root.dir" value="${project.basedir}/lib" />
+    <property name="config.dir" value="${project.basedir}/config" />
+    <property name="verbose" value="true" />
 
-	<path id="classpath">
-		<fileset dir="${lib.root.dir}">
-			<include name="**/*.jar" />
-			<include name="**/*.zip" />
-		</fileset>
-		<pathelement path="${class.dir}" />
-	</path>
+    <path id="classpath">
+        <fileset dir="${lib.root.dir}">
+            <include name="**/*.jar" />
+            <include name="**/*.zip" />
+        </fileset>
+        <pathelement path="${class.dir}" />
+    </path>
 
-	<!-- Comma separated list of Source directories -->
-	<property name="srcs" value="sif3Common,sif3InfraCommon,sif3InfraREST"/>
-	<property name="infra-jars" value="common,rest"/>
+    <!-- Comma separated list of Source directories -->
+    <property name="srcs" value="sif3Common,sif3InfraCommon,sif3InfraREST"/>
+    <property name="infra-jars" value="common,rest"/>
 
-	<!-- print some varaibles -->
-	<target name="00-env" description="Show Ant variables">
-		<echo message="project.basedir: ${project.basedir}"/>
-		<echo message="app.name: ${app.name}"/>
-		<echo message="build.dir: ${build.dir}"/>
-		<echo message="web.dir.name: ${web.dir.name}"/>
-		<echo message="dist.dir: ${dist.dir}"/>
-		<echo message="src.dir: ${src.dir}"/>
-		<echo message="class.dir: ${class.dir}"/>
-		<echo message="lib.root.dir: ${lib.root.dir}"/>
-		<echo message="web.lib.root.dir: ${web.lib.root.dir}"/>
-		<echo message="config.dir: ${config.dir}"/>
-		<echo message="deploy.install.dir: ${deploy.install.dir}"/>
-		<echo message="frameworkversion: ${frameworkversion}"/>
-		<echo message="javaversion: ${javaversion}"/>
-		<echo message="jarprefix: ${jarprefix}"/>
-		<echo message="classpath: ${toString:classpath}"/>
-	</target>
+    <!-- print some varaibles -->
+    <target name="00-env" description="Show Ant variables">
+        <echo message="project.basedir: ${project.basedir}"/>
+        <echo message="app.name: ${app.name}"/>
+        <echo message="build.dir: ${build.dir}"/>
+        <echo message="web.dir.name: ${web.dir.name}"/>
+        <echo message="dist.dir: ${dist.dir}"/>
+        <echo message="src.dir: ${src.dir}"/>
+        <echo message="class.dir: ${class.dir}"/>
+        <echo message="lib.root.dir: ${lib.root.dir}"/>
+        <echo message="web.lib.root.dir: ${web.lib.root.dir}"/>
+        <echo message="config.dir: ${config.dir}"/>
+        <echo message="deploy.install.dir: ${deploy.install.dir}"/>
+        <echo message="frameworkversion: ${frameworkversion}"/>
+        <echo message="javaversion: ${javaversion}"/>
+        <echo message="jarprefix: ${jarprefix}"/>
+        <echo message="classpath: ${toString:classpath}"/>
+    </target>
 
-	<!-- Check Dependencies -->
-	<target name="01-check-dependencies" depends="02-clean, compile-all" description="Check Build Dependencies"/>
+    <!-- Check Dependencies -->
+    <target name="01-check-dependencies" depends="02-clean, compile-all" description="Check Build Dependencies"/>
 
-	<!-- Clean environment. -->
-	<target name="02-clean" description="Deletes the build directory">
-		<delete dir="${dist.dir}" />
-		<delete dir="${class.dir}" />
-	</target>
+    <!-- Clean environment. -->
+    <target name="02-clean" description="Deletes the build directory">
+        <delete dir="${dist.dir}" />
+        <delete dir="${class.dir}" />
+    </target>
 
-	<!-- ***************** -->
-	<!-- Environment setup -->
-	<!-- ***************** -->
-	<target name="init">
-		<mkdir dir="${class.dir}"/>
-		<mkdir dir="${dist.dir}"/>
-	</target>
+    <!-- ***************** -->
+    <!-- Environment setup -->
+    <!-- ***************** -->
+    <target name="init">
+        <mkdir dir="${class.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+    </target>
 
-	<!-- ******************************* -->
-	<!-- Compile Targets for Environment -->
-	<!-- ******************************* -->
+    <!-- ******************************* -->
+    <!-- Compile Targets for Environment -->
+    <!-- ******************************* -->
 
-	<!-- Main Compile Target -->
-	<target name="compile-all" depends="init" description="Compile all sources">
+    <!-- Main Compile Target -->
+    <target name="compile-all" depends="init" description="Compile all sources">
 
-		<!-- Compile Inrastructure components -->
-		<foreach list="${srcs}" target="compile-src" param="elem" trim="true" />
+        <!-- Compile Inrastructure components -->
+        <foreach list="${srcs}" target="compile-src" param="elem" trim="true" />
 
-		<!-- Compile Demo Stuff -->
-		<echo message="Compile: SIF3 Demo Classes"/>
-		<javac destdir="${class.dir}" debug="on" verbose="false">
-			<compilerarg value="-Xbootclasspath/p:${toString:classpath}"/>
-			<src path="${project.basedir}/demo/${src.dir}" />
-		</javac>
+        <!-- Compile Demo Stuff -->
+        <echo message="Compile: SIF3 Demo Classes"/>
+        <javac destdir="${class.dir}" debug="on" verbose="false">
+            <compilerarg value="-Xbootclasspath/p:${toString:classpath}"/>
+            <src path="${project.basedir}/demo/${src.dir}" />
+        </javac>
 
-	</target>
+    </target>
 
-	<target name="compile-src">
-		<echo message="Compile: ${project.basedir}/${elem}/${src.dir}"/>
+    <target name="compile-src">
+        <echo message="Compile: ${project.basedir}/${elem}/${src.dir}"/>
 
-		<!-- Compile source -->
-		<javac destdir="${class.dir}" debug="on">
-			<!-- Ensure project jars are first. -->
-			<compilerarg value="-Xbootclasspath/p:${toString:classpath}"/>
-			<src path="${project.basedir}/${elem}/${src.dir}" />
-		</javac>
+        <!-- Compile source -->
+        <javac destdir="${class.dir}" debug="on">
+            <!-- Ensure project jars are first. -->
+            <compilerarg value="-Xbootclasspath/p:${toString:classpath}"/>
+            <src path="${project.basedir}/${elem}/${src.dir}" />
+        </javac>
 
-		<!-- copy all non-java files across -->
-		<copy todir="${class.dir}">
-			<fileset dir="${project.basedir}/${elem}/${src.dir}">
-				<exclude name="**/*.java"/>
-			</fileset>
-		</copy>
-	</target>
+        <!-- copy all non-java files across -->
+        <copy todir="${class.dir}">
+            <fileset dir="${project.basedir}/${elem}/${src.dir}">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
 
-	<!-- Main Jar Target -->
-	<target name="03-jar-components" depends="compile-all" description="Create JAR files for all components">
-		
-		<!-- Common Classes and resources -->
-		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar"/>
-		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar">
-			<fileset dir="${class.dir}" includes="**/sif3/common/**" excludes="**/readme.txt"/>
-		</jar>
+    <!-- Main Jar Target -->
+    <target name="03-jar-components" depends="compile-all" description="Create JAR files for all components">
+        
+        <!-- Common Classes and resources -->
+        <echo message="Create Jar: ${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar"/>
+        <jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar">
+            <fileset dir="${class.dir}" includes="**/sif3/common/**" excludes="**/readme.txt"/>
+        </jar>
 
-		<!-- jar infrastructure -->
-		<foreach list="${infra-jars}" target="jar-lib" param="elem" trim="true"/>
+        <!-- jar infrastructure -->
+        <foreach list="${infra-jars}" target="jar-lib" param="elem" trim="true"/>
 
-		<!-- Demo Classes and resources -->
-		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar"/>
-		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar">
-			<fileset dir="${class.dir}" includes="**/sif3/demo/**" excludes="**/readme.txt"/>
-		</jar>
-	</target>
+        <!-- Demo Classes and resources -->
+        <echo message="Create Jar: ${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar"/>
+        <jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar">
+            <fileset dir="${class.dir}" includes="**/sif3/demo/**" excludes="**/readme.txt"/>
+        </jar>
+    </target>
 
-	<target name="jar-lib">
-		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Infra-${elem}-${frameworkversion}.jar"/>
-		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Infra-${elem}-${frameworkversion}.jar">
-			<!-- Classes and resources -->
-			<fileset dir="${class.dir}" includes="**/infra/${elem}/**" excludes="**/readme.txt"/>
-		</jar>
-	</target>
+    <target name="jar-lib">
+        <echo message="Create Jar: ${jarprefix}${sifinfraversion}Infra-${elem}-${frameworkversion}.jar"/>
+        <jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Infra-${elem}-${frameworkversion}.jar">
+            <!-- Classes and resources -->
+            <fileset dir="${class.dir}" includes="**/infra/${elem}/**" excludes="**/readme.txt"/>
+        </jar>
+    </target>
 
-	<target name="jar-config">
-		<echo message="Jar: ${dist.dir}/config.jar"/>
-		<!--		
-		<mkdir dir="${dist.dir}"/>
-		<jar destfile="${dist.dir}/config.jar">
+    <target name="jar-config">
+        <echo message="Jar: ${dist.dir}/config.jar"/>
+        <!--        
+        <mkdir dir="${dist.dir}"/>
+        <jar destfile="${dist.dir}/config.jar">
             <fileset dir="${config.dir}">
                 <include name="basicsis/spring/*"/>
             </fileset>
         </jar>
-    -->
+  -->
     </target>
 
     <!-- *************** -->
@@ -182,7 +182,6 @@
 
         <!-- remove project jars from WEB-INF/lib again -->
         <foreach list="${infra-jars}" target="del-project-jar" param="elem" trim="true"/>
-        <delete file="${web.lib.root.dir}/${jarprefix}DataModel_${locale}${sifddversion}.jar"/>
         <delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar"/>
         <delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar"/>
         <delete file="${web.lib.root.dir}/config.jar"/>
@@ -207,12 +206,12 @@
     <!-- ********************** --> 
     <target name="90-maven-install" depends="03-jar-components" description="Install jars in local maven repo">
       <antcall target="maven-install-jar">
-        <param name="filename" value="${dist.dir}/${jarprefix}DataModel_${locale}${sifddversion}.jar" />
+        <param name="filename" value="${lib.root.dir}/datamodel/${jarprefix}DataModel_${locale}${sifddversion}.jar" />
         <param name="artifactId" value="DataModel_${locale}" />
         <param name="artifactVersion" value="${sifddversion}" />
       </antcall>
       <antcall target="maven-install-jar">
-        <param name="filename" value="${lib.root.dir}/${systemic.path}/systemic-framework-20140410.jar" />
+        <param name="filename" value="${lib.root.dir}/systemic/systemic-framework-20140410.jar" />
         <param name="artifactId" value="systemic-framework" />
         <param name="artifactVersion" value="1.0" />
       </antcall>

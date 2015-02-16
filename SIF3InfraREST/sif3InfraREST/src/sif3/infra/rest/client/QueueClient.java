@@ -48,7 +48,7 @@ public class QueueClient extends BaseClient
 	
 	public QueueClient(ConsumerEnvironment consumerEnvironment, SIF3Session sif3Session)
 	{
-		super(consumerEnvironment.getConnectorBaseURI(ConnectorName.queues), consumerEnvironment.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), consumerEnvironment.getSecureConnection());
+		super(consumerEnvironment.getConnectorBaseURI(ConnectorName.queues), consumerEnvironment.getMediaType(), consumerEnvironment.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), consumerEnvironment.getSecureConnection());
 		this.consumerEnvInfo = consumerEnvironment;
 		this.sif3Session = sif3Session;
 	}
@@ -205,7 +205,7 @@ public class QueueClient extends BaseClient
 		{
 			service = buildURI(service, null);
 			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
-			String payloadStr = getInfraMarshaller().marshal(inputQueue, getMediaType());
+			String payloadStr = getInfraMarshaller().marshal(inputQueue, getRequestMediaType());
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("createQueue: Payload to send:\n"+payloadStr);

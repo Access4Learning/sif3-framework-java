@@ -32,7 +32,7 @@ import sif3.common.exception.UnsupportedMediaTypeExcpetion;
  * @author Joerg Huber
  *
  */
-public interface MarshalFactory
+public interface MarshalFactory extends MediaTypeOperations
 {
 	/**
 	 * Marshal the given object to XML and returns the resulting XML as a String. If anything goes wrong with that marshal method then

@@ -18,11 +18,11 @@
 
 package sif3.infra.common.interfaces;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.persist.model.SIF3Session;
 import sif3.infra.common.env.types.EnvironmentInfo;
 import sif3.infra.common.model.EnvironmentType;
-import au.com.systemic.framework.utils.AdvancedProperties;
 
 
 /**

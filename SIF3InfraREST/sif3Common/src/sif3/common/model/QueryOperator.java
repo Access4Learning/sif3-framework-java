@@ -26,46 +26,46 @@ import java.util.HashMap;
  */
 public enum QueryOperator
 {
-  EQUAL("=");
+	EQUAL("=");
 
-  private static final HashMap<String, QueryOperator> SIGN_MAP = new HashMap<String, QueryOperator>();
+	private static final HashMap<String, QueryOperator> SIGN_MAP = new HashMap<String, QueryOperator>();
 
-  private String sign = null;
+	private String sign = null;
 
-  static
-  {
-    for (QueryOperator qo : QueryOperator.values())
-    {
-      SIGN_MAP.put(qo.getSign(), qo);
-    }
-  }
+	static
+	{
+		for (QueryOperator qo : QueryOperator.values())
+		{
+			SIGN_MAP.put(qo.getSign(), qo);
+		}
+	}
 
 
-  public String getSign()
-  {
-    return sign;
-  }
+	public String getSign()
+	{
+		return sign;
+	}
 
-  /**
-   * Lookup method to return the operator from the sign used to represent it.
-   */
-  public static QueryOperator fromSign(String sign) throws IllegalArgumentException
-  {
-    QueryOperator result = SIGN_MAP.get(sign);
-    if (result == null)
-    {
-      throw new IllegalArgumentException("No QueryOperator with sign : " + sign);
-    }
-    return result;
-  }
+	/**
+	 * Lookup method to return the operator from the sign used to represent it.
+	 */
+	public static QueryOperator fromSign(String sign) throws IllegalArgumentException
+	{
+		QueryOperator result = SIGN_MAP.get(sign);
+		if (result == null)
+		{
+			throw new IllegalArgumentException("No QueryOperator with sign : " + sign);
+		}
+		return result;
+	}
 
-  /*---------------------*/
-  /*-- Private Methods --*/
-  /*---------------------*/
-  private QueryOperator(String sign)
-  {
-    this.sign = sign;
-  }
+	/*---------------------*/
+	/*-- Private Methods --*/
+	/*---------------------*/
+	private QueryOperator(String sign)
+	{
+		this.sign = sign;
+	}
 
 
 }

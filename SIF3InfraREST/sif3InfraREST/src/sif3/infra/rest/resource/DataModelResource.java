@@ -27,17 +27,17 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
 import sif3.common.CommonConstants;
+import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.ModelObjectInfo;
+import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
@@ -82,6 +82,7 @@ import sif3.infra.rest.resource.helper.ServicePathQueryParser;
 @Path("/requests/{dmObjectNamePlural:([^\\./]*)}{mimeType:(\\.[^/]*?)?}")
 public class DataModelResource extends BaseResource
 {
+	private String dmObjectNamePlural = null; // This is also expected to be the key into the provider factory.
 	private Provider provider = null;
 	private ServicePathQueryParser parser = null;
 
@@ -105,6 +106,7 @@ public class DataModelResource extends BaseResource
 			                 @MatrixParam("contextId") String contextID)
     {
 	    super(uriInfo, requestHeaders, request, "requests", zoneID, contextID);
+
 		parser = new ServicePathQueryParser(uriInfo);
 		if (parser.isServicePath())
 		{
@@ -122,13 +124,22 @@ public class DataModelResource extends BaseResource
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Service to use: "+dmObjectNamePlural);
-			logger.debug("URL Postfix mimeType: '"+mimeType+"'");
+//			logger.debug("URL Postfix mimeType: '"+mimeType+"'");
 		}
 	    
 	    // Provider Factory should already be initialised. If not it will be done now...
 	    provider = ProviderFactory.getInstance().getProvider(new ModelObjectInfo(this.dmObjectNamePlural, null));
+	    if (provider != null)
+	    {
+	    	determineMediaTypes(provider.getMarshaller(), provider.getUnmarshaller(), false);
+	    }
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("Request Media Type : " + getRequestMediaType());
+			logger.debug("Response Media Type: " + getResponseMediaType());
+		}
     }
-       
+    
 	/*----------------------*/
 	/*-- Abstract Methods --*/
 	/*----------------------*/
@@ -141,23 +152,43 @@ public class DataModelResource extends BaseResource
     {
     	return ProviderManagerFactory.getEnvironmentManager();
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see sif3.infra.rest.resource.BaseResource#getMarshaller()
+     */
+	@Override
+    public MarshalFactory getMarshaller()
+    {
+		return (getProvider() != null) ? getProvider().getMarshaller() : null;
+    }
+
+	/*
+	 * (non-Javadoc)
+	 * @see sif3.infra.rest.resource.BaseResource#getUnmarshaller()
+	 */
+	@Override
+    public UnmarshalFactory getUnmarshaller()
+    {
+		return (getProvider() != null) ? getProvider().getUnmarshaller() : null;
+    }
      
     // -------------------------------------------------//
 	// -- POST Section: This is the C(reate) in CRUD. --//
 	// -------------------------------------------------//
 	@POST
 	@Path("{dmObjectNameSingle:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
-//  Let everything through and then deal with it when needed.	
+	//Let everything through and then deal with it when needed.	
 //	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML }) // only these are possible returns.
-	public Response createSingle(@PathParam("objectName") String objectName, @PathParam("mimeType") String mimeType, String payload)
+//	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML }) // only these are possible returns.
+	public Response createSingle(String payload, @PathParam("dmObjectNameSingle") String dmObjectNameSingle, @PathParam("mimeType") String mimeType)
 	{
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Create Single "+ objectName +" (REST POST) with URL Postfix mimeType = '" + mimeType + "' and input data: " + payload);
+			logger.debug("Create Single "+dmObjectNameSingle+" (REST POST) with URL Postfix mimeType = '" + mimeType + "' and input data: " + payload);
 		}
 		
-		ErrorDetails error = validClient(information.getObjectNamePlural(), getRight(AccessRight.CREATE), AccessType.APPROVED);
+		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.CREATE), AccessType.APPROVED, false);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.CREATE);
@@ -166,7 +197,7 @@ public class DataModelResource extends BaseResource
 		Provider provider = getProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+information.getObjectNamePlural()+" available."), ResponseAction.CREATE);			
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.CREATE);			
 		}
 	
 		try
@@ -183,24 +214,24 @@ public class DataModelResource extends BaseResource
 		{
 			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE);			
 		}
-    catch (UnsupportedMediaTypeExcpetion ex)
-    {
-      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE);     
-    }
+		catch (UnsupportedMediaTypeExcpetion ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE);     
+		}
 	}
 
 	@POST
-//Let everything through and then deal with it when needed. 
-//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	//Let everything through and then deal with it when needed. 
+//	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+//	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response createMany(String payload)
 	{
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Create Many "+information.getObjectNamePlural()+" (REST POST) with input data: " + payload);
+			logger.debug("Create Many "+dmObjectNamePlural+" (REST POST) with input data: " + payload);
 		}
 		
-		ErrorDetails error = validClient(information.getObjectNamePlural(), getRight(AccessRight.CREATE), AccessType.APPROVED);
+		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.CREATE), AccessType.APPROVED, true);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.CREATE);
@@ -208,7 +239,7 @@ public class DataModelResource extends BaseResource
 		Provider provider = getProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+information.getObjectNamePlural()+" available."), ResponseAction.CREATE);			
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.CREATE);			
 		}
 	
 		try
@@ -243,17 +274,17 @@ public class DataModelResource extends BaseResource
 	// --------------------------------------------------------//
 	@GET
 	@Path("{resourceID:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
-//  Let everything through and then deal with it when needed. 
+	//Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response getSingle(@PathParam("resourceID") String resourceID)
+//	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response getSingle(@PathParam("resourceID") String resourceID, @PathParam("mimeType") String mimeType)
 	{
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Get Resource by Resoucre ID (REST GET - Single): "+resourceID);
+			logger.debug("Get Resource by Resoucre ID (REST GET - Single): "+resourceID+" and URL Postfix mimeType = '"+mimeType+"'");
 		}
 		
-		ErrorDetails error = validClient(information.getObjectNamePlural(), getRight(AccessRight.QUERY), AccessType.APPROVED);
+		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED, false);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.QUERY);
@@ -262,7 +293,7 @@ public class DataModelResource extends BaseResource
 		Provider provider = getProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+information.getObjectNamePlural()+" available."), ResponseAction.QUERY);			
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.QUERY);			
 		}
 	
 		try
@@ -291,8 +322,8 @@ public class DataModelResource extends BaseResource
 	@GET
 	@Path("{resourceId:([^\\./]*)}/{remainingPath:.*}")
 	// Let everything through and then deal with it when needed.
-	// @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+//	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getServicePathQuery()
 	{
 		if (logger.isDebugEnabled())
@@ -304,7 +335,7 @@ public class DataModelResource extends BaseResource
 			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Invalid service path"), ResponseAction.QUERY);
 		}
 
-		ErrorDetails error = validClient(parser.getServicePath(), getRight(AccessRight.QUERY), AccessType.APPROVED);
+		ErrorDetails error = validClient(parser.getServicePath(), getRight(AccessRight.QUERY), AccessType.APPROVED, true);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.QUERY);
@@ -348,16 +379,16 @@ public class DataModelResource extends BaseResource
 
 	@GET
 	//Let everything through and then deal with it when needed. 
-	//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+//	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getMany()
 	{
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Get List (REST GET - Plural)");
 		}
-		
-		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED);
+	
+		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED, true);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.QUERY);
@@ -404,17 +435,17 @@ public class DataModelResource extends BaseResource
 	// ----------------------------------------------------------//
 	@PUT
 	@Path("{resourceID:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
-//  Let everything through and then deal with it when needed. 
+	//Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response updateSingle(String payload)
+//	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response updateSingle(String payload, @PathParam("resourceID") String resourceID, @PathParam("mimeType") String mimeType)
 	{
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Update Single "+information.getObjectNamePlural()+" (REST PUT) with resourceID = "+information.getResourceId()+", URL Postfix mimeType = "+information.getMimeType()+"' and input data: " + payload);
+			logger.debug("Update Single "+dmObjectNamePlural+" (REST PUT) with resourceID = "+resourceID+", URL Postfix mimeType = "+mimeType+"' and input data: " + payload);
 		}
 		
-		ErrorDetails error = validClient(information.getObjectNamePlural(), getRight(AccessRight.UPDATE), AccessType.APPROVED);
+		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.UPDATE), AccessType.APPROVED, false);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.UPDATE);
@@ -423,27 +454,27 @@ public class DataModelResource extends BaseResource
 		Provider provider = getProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+information.getObjectNamePlural()+" available."), ResponseAction.UPDATE);			
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.UPDATE);			
 		}
 	
 		try
 		{
-			if (provider.updateSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), information.getResourceId(), getSifZone(), getSifContext(), getRequestMetadata()))
+			if (provider.updateSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), resourceID, getSifZone(), getSifContext(), getRequestMetadata()))
 			{
 				return makeResopnseWithNoContent(false, ResponseAction.UPDATE);
 			}
 			else
 			{
-				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+information.getResourceId()+" does not exist."), ResponseAction.UPDATE);
+				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+resourceID+" does not exist."), ResponseAction.UPDATE);
 			}
 		}
 		catch (PersistenceException ex)
 		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+information.getResourceId()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);			
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+resourceID+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);			
 		}
 		catch (IllegalArgumentException ex)
 		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+information.getResourceId()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);			
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+resourceID+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);			
 		}
 		catch (UnmarshalException ex)
 		{
@@ -457,8 +488,8 @@ public class DataModelResource extends BaseResource
 
 	@PUT
 	//Let everything through and then deal with it when needed. 
-	//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+//	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response updateMany(String payload)
 	{
 		// Check what is really required: DELETE or UPDATE
@@ -476,7 +507,7 @@ public class DataModelResource extends BaseResource
 			}
 		}
 		
-		ErrorDetails error = validClient(information.getObjectNamePlural(), ((doDelete) ? getRight(AccessRight.DELETE) : getRight(AccessRight.UPDATE)), AccessType.APPROVED);
+		ErrorDetails error = validClient(dmObjectNamePlural, ((doDelete) ? getRight(AccessRight.DELETE) : getRight(AccessRight.UPDATE)), AccessType.APPROVED, true);
 		if (error != null) // Not allowed to access!
 		{
 			logger.debug("Error Found: "+error);
@@ -486,7 +517,7 @@ public class DataModelResource extends BaseResource
 		Provider provider = getProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+information.getObjectNamePlural()+" available."), ((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE));			
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE));			
 		}
 	
 		return (doDelete) ? deleteMany(provider, payload) : updateMany(provider, payload);
@@ -497,17 +528,17 @@ public class DataModelResource extends BaseResource
 	// -------------------------------------------------------------//
 	@DELETE
 	@Path("{resourceID:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
-//  Let everything through and then deal with it when needed. 
+	//Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Response removeSingle()
+//	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Response removeSingle(@PathParam("resourceID") String resourceID, @PathParam("mimeType") String mimeType)
 	{
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Remove Single "+information.getObjectNamePlural()+" (REST DELETE) with resourceID = "+information.getResourceId() + " and URL Postfix mimeType = '" + information.getMimeType() + "'.");
+			logger.debug("Remove Single "+dmObjectNamePlural+" (REST DELETE) with resourceID = "+resourceID + " and URL Postfix mimeType = '" + mimeType + "'.");
 		}
 		
-		ErrorDetails error = validClient(information.getObjectNamePlural(), getRight(AccessRight.DELETE), AccessType.APPROVED);
+		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.DELETE), AccessType.APPROVED, false);
 		if (error != null) // Not allowed to access!
 		{
 			logger.debug("Error Found: "+error);
@@ -517,34 +548,34 @@ public class DataModelResource extends BaseResource
 		Provider provider = getProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+information.getObjectNamePlural()+" available."), ResponseAction.DELETE);			
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.DELETE);			
 		}
 	
 		try
 		{
-			if (provider.deleteSingle(information.getResourceId(), getSifZone(), getSifContext(), getRequestMetadata()))
+			if (provider.deleteSingle(resourceID, getSifZone(), getSifContext(), getRequestMetadata()))
 			{
 				return makeResopnseWithNoContent(false, ResponseAction.DELETE);
 			}
 			else
 			{
-				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+information.getResourceId()+" does not exist."), ResponseAction.DELETE);
+				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+resourceID+" does not exist."), ResponseAction.DELETE);
 			}
 		}
 		catch (PersistenceException ex)
 		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete "+provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+information.getResourceId()+". Problem reported: "+ex.getMessage()), ResponseAction.DELETE);			
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete "+provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+resourceID+". Problem reported: "+ex.getMessage()), ResponseAction.DELETE);			
 		}
 		catch (IllegalArgumentException ex)
 		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete "+provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+information.getResourceId()+". Problem reported: "+ex.getMessage()), ResponseAction.DELETE);			
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete "+provider.getSingleObjectClassInfo().getObjectName()+" with resouce ID = "+resourceID+". Problem reported: "+ex.getMessage()), ResponseAction.DELETE);			
 		}
 	}
 	
 	@DELETE
 	//Let everything through and then deal with it when needed. 
-	//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+//	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	/*
 	 * NOTE: 
 	 * This method is not really implemented as DELETE is not supported with a payload. See PUT method for details about the way
@@ -554,7 +585,7 @@ public class DataModelResource extends BaseResource
 	{
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Delete Collection "+information.getObjectNamePlural()+" (REST DELETE) with input data: " + payload);
+			logger.debug("Delete Collection "+dmObjectNamePlural+" (REST DELETE) with input data: " + payload);
 		}
 		ErrorDetails error = new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Operation not supported.", "Use HTTP PUT with header field '"+RequestHeaderConstants.HDR_METHOD_OVERRIDE+"' set to "+HeaderValues.MethodType.DELETE.name()+" instead.");
 		return makeErrorResponse(error, ResponseAction.DELETE);
@@ -598,7 +629,7 @@ public class DataModelResource extends BaseResource
 	{
 		if (provider == null) // No provider known for this Object Type! This is an issue and needs to be logged.
 		{
-			logger.error("No Provider known for the object with the name: "+information.getObjectNamePlural());
+			logger.error("No Provider known for the object with the name: "+dmObjectNamePlural);
 		}
 		return provider;
 	}

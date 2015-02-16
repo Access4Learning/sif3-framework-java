@@ -60,13 +60,24 @@ public class TestInfraUnmarshalFactory
     }
   }
   
+  public void testSupportMethods()
+  {
+	  UnmarshalFactory unmarshaller = new InfraUnmarshalFactory();
+	  System.out.println("Get Default MediaType: "+unmarshaller.getDefault());
+	  System.out.println("Supported Media Types: "+unmarshaller.getSupportedMediaTypes());
+	  System.out.println("Test "+MediaType.WILDCARD_TYPE+": "+unmarshaller.isSupported(MediaType.WILDCARD_TYPE));
+	  System.out.println("Test "+MediaType.APPLICATION_FORM_URLENCODED_TYPE+": "+unmarshaller.isSupported(MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+	  System.out.println("Test "+MediaType.APPLICATION_JSON_TYPE+": "+unmarshaller.isSupported(MediaType.APPLICATION_JSON_TYPE));
+  }
+  
   public static void main(String[] args)
   {
     TestInfraUnmarshalFactory tester = new TestInfraUnmarshalFactory();
     
     System.out.println("Start Testing InfraUnmarshalFactory...");
     
-    tester.testFromXML();
+//    tester.testFromXML();
+    tester.testSupportMethods();
     
     System.out.println("End Testing InfraUnmarshalFactory.");
   }

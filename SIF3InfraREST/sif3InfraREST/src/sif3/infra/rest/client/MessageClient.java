@@ -50,7 +50,7 @@ public class MessageClient extends BaseClient
 	
 	public MessageClient(URI queueURI, ConsumerEnvironment consumerEnvironment, SIF3Session sif3Session)
 	{
-		super(queueURI, consumerEnvironment.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), consumerEnvironment.getSecureConnection());
+		super(queueURI, consumerEnvironment.getMediaType(), consumerEnvironment.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), consumerEnvironment.getSecureConnection());
 		this.consumerEnvInfo = consumerEnvironment;
 		this.sif3Session = sif3Session;
 	}
