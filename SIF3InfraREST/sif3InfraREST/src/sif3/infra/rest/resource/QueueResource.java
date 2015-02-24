@@ -283,7 +283,7 @@ public class QueueResource extends InfraResource
 	@Path("{queueID}/messages{mimeType:(\\.[^/]*?)?}")
 //  Let everything through and then deal with it when needed. 
 //  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response getNextMessage(@PathParam("queueID") String queueID,
 			    				   @PathParam("mimeType") String mimeType)
 	{
@@ -446,6 +446,7 @@ public class QueueResource extends InfraResource
 			response = response.header(ResponseHeaderConstants.HDR_SERVICE_TYPE, HeaderValues.ServiceType.OBJECT.name());
 			response = response.header(ResponseHeaderConstants.HDR_SERVICE_NAME, event.getServiceName());
 			response = response.header(ResponseHeaderConstants.HDR_MESSAGE_ID, lastMsgID);
+			response = response.header(HttpHeaders.CONTENT_TYPE, event.getMediaType());
 		}
 		else
 		{
@@ -496,10 +497,21 @@ public class QueueResource extends InfraResource
 	{
 		private String serviceName = null;
 		private String message = null;
+		private MediaType mediaType = MediaType.APPLICATION_XML_TYPE; // default if not stated
 
-		public EventMsg(String serviceName, String message)
+		public EventMsg(String serviceNameAndMediaType, String message)
 		{
-			this.serviceName = serviceName;
+			// serviceNameAndMediaType Syntax is: serviceName[':'mediaType]
+			String[] parts = serviceNameAndMediaType.split(":");
+			if (parts.length == 1) // only service name
+			{
+				this.serviceName = parts[0];
+			}
+			else
+			{
+				this.serviceName = parts[0];
+				this.mediaType = MediaType.valueOf(parts[1]);
+			}
 			this.message = message;
 		}
 
@@ -512,6 +524,11 @@ public class QueueResource extends InfraResource
 		{
 			return message;
 		}
+		
+		public MediaType getMediaType()
+        {
+        	return this.mediaType;
+        }
 	}
 	
 }

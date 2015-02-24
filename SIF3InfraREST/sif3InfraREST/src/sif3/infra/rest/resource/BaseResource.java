@@ -1156,6 +1156,13 @@ public abstract class BaseResource
 	 */
 	private MediaType validateAndExtractMimeType(MediaTypeOperations marshalOps, MediaType mediaTypeToTest, MediaType urlMediaType, boolean useDefaults)
 	{
+		if (marshalOps == null)
+		{
+			// the best we can do in this situation is to use the mediaTypeToTest or urlMediaType without
+			// any further checks.
+			return (mediaTypeToTest == null) ? urlMediaType : mediaTypeToTest;
+		}
+		
 		// Check and validate the media type according to the marshal operations
 		if (!marshalOps.isSupported(mediaTypeToTest)) // Not supported => try the URL postfix
 		{
