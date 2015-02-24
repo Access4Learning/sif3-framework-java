@@ -21,14 +21,12 @@ package sif3.infra.rest.resource;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
@@ -54,7 +52,9 @@ public class EventResource extends BaseResource
 			             @PathParam("mimeType") String mimeType)
 	{
 		super(uriInfo, requestHeaders, request, "", null, null);
-		logger.debug("URL Postfix mimeType: '"+mimeType+"'");
+		determineMediaTypes(null, null, false);
+		logger.debug("Request Media Type : " + getRequestMediaType());
+		logger.debug("Response Media Type: " + getResponseMediaType());
 	}
 
 	/*----------------------*/
@@ -75,8 +75,8 @@ public class EventResource extends BaseResource
 	// -------------------------------------------------//
 	@POST
 //Let everything through and then deal with it when needed. 
-//@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//  @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+//	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Response createEvent(String eventPayload)
 	{
 		if (logger.isDebugEnabled())
