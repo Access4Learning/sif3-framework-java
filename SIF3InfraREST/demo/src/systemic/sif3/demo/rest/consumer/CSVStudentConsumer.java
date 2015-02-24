@@ -18,21 +18,32 @@
 
 package systemic.sif3.demo.rest.consumer;
 
+import java.util.Date;
+
 import javax.ws.rs.core.MediaType;
 
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.conversion.UnmarshalFactory;
-import sif3.infra.rest.consumer.AbstractConsumer;
+import sif3.common.header.HeaderValues.EventAction;
+import sif3.common.header.HeaderValues.UpdateType;
+import sif3.common.model.EventMetadata;
+import sif3.common.model.SIFContext;
+import sif3.common.model.SIFEvent;
+import sif3.common.model.SIFZone;
+import sif3.infra.rest.consumer.AbstractEventConsumer;
 import systemic.sif3.demo.rest.conversion.CSVMarshaller;
 import systemic.sif3.demo.rest.conversion.CSVUnmarshaller;
+import au.com.systemic.framework.utils.DateUtils;
 
 /**
  * @author Joerg Huber
  *
  */
-public class CSVStudentConsumer extends AbstractConsumer
+public class CSVStudentConsumer extends AbstractEventConsumer<String>
 {
+
+	private final static String RECORD_MARKER = "\n================================================================================================\n";
 
 	/* (non-Javadoc)
      * @see sif3.common.interfaces.DataModelLink#getMarshaller()
@@ -93,4 +104,40 @@ public class CSVStudentConsumer extends AbstractConsumer
 		return getUnmarshaller().getDefault(); // Unmarshaling when receiving -> response
 //    	return MediaType.APPLICATION_JSON_TYPE;
 	}
+
+	/* (non-Javadoc)
+     * @see sif3.common.interfaces.EventConsumer#createEventObject(java.lang.Object, sif3.common.header.HeaderValues.EventAction, sif3.common.header.HeaderValues.UpdateType)
+     */
+    @Override
+    public SIFEvent<String> createEventObject(Object sifObjectList, EventAction eventAction, UpdateType updateType)
+    {
+    	if (sifObjectList != null)
+    	{
+	    	if (sifObjectList instanceof String)
+	    	{
+	    		//int size = ((StudentCollectionType)sifObjectList).getStudentPersonal().size();
+	    		return new SIFEvent<String>((String)sifObjectList, eventAction, updateType, 0);
+	    	}
+	    	else
+	    	{
+	    		logger.error("The given event data is not of type String as expected. Cannot create event object. Return null");
+	    	}
+    	}
+    	else
+    	{
+    		logger.error("The given event data is null. Cannot create event object. Return null");    		
+    	}
+	    return null; // if something is wrong then we get here.
+    }
+
+	/* (non-Javadoc)
+     * @see sif3.infra.rest.consumer.AbstractEventConsumer#processEvent(sif3.common.model.SIFEvent, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.EventMetadata, java.lang.String, java.lang.String)
+     */
+    @Override
+    public void processEvent(SIFEvent<String> sifEvent, SIFZone zone, SIFContext context, EventMetadata metadata, String msgReadID, String consumerID)
+    {
+    	// We know from the framework that zone and context is never null. For the time being we just log the event.
+        String timestamp = DateUtils.getISO8601withSecFraction(new Date());
+        logger.debug(RECORD_MARKER+"Record processed by Thread ID = "+Thread.currentThread().getId()+"\n"+sifEvent.getEventAction().name()+" Events from Queue Reader "+ msgReadID+"\nReceived at "+timestamp+" from Zone = "+zone.getId()+" and Context = "+context.getId()+"\nData:\n"+sifEvent.getSIFObjectList()+RECORD_MARKER);    	
+    }
 }
