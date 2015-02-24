@@ -20,7 +20,11 @@ package sif3.infra.rest.provider;
 
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
+
 import sif3.common.CommonConstants;
+import sif3.common.header.HeaderProperties;
+import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.interfaces.EventProvider;
@@ -68,7 +72,102 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
     {
     	return getServiceProperties().getPropertyAsInt(CommonConstants.EVENT_MAX_OBJ, getProviderName(), 10);
     }
-        
+    
+	/*------------------------------------------------------------------------------------------------------------------------
+	 * Start of 'Dynamic' HTTP Header Field override section for Events
+	 * 
+	 * The following set of methods are used for a more configurable way how some HTTP header parameters are set.
+	 * By default the following HTTP Header fields are retrieved from the provider's property file and put in corresponding
+	 * HTTP Header Fields of each event:
+	 * 
+	 * Property               HTTP Header
+	 * ----------------------------------
+	 * adapter.generator.id   generatorId
+	 * env.application.key    applicationKey
+	 * env.userToken          userToken
+	 * env.instanceID         instanceId
+	 * env.mediaType          Content-Type, Accept
+	 * 
+	 * Only properties that are not null or empty string will be set in the corresponding HTTP Header.
+	 *
+	 * There are situations where and application may need a more 'dynamic' behaviour where the above values are determined
+	 * at runtime, based on other circumstances and therefore these properties must be retrieved from an other source than the
+	 * providers's property file. In such a case the methods below can be overwritten to make them dynamic and controlled by
+	 * the implementation rather than driven by the provider's property file. If any of the methods below is overwritten then
+	 * the value of the over riding method is set in the corresponding HTTP Header field if the return value of the method 
+	 * is not null or an empty string.
+	 *------------------------------------------------------------------------------------------------------------------------*/
+	
+	/**
+	 * This method returns the value of the adapter.generator.id property from the provider's property file. If that
+	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The adapter.generator.id property from the provider's property file
+	 */
+	public String getGeneratorID()
+	{
+		return getProviderEnvironment().getGeneratorID();
+	}
+	
+	/**
+	 * This method returns the value of the env.application.key property from the provider's property file. If that
+	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The env.application.key property from the provider's property file
+	 */
+	public String getApplicationKey()
+	{
+		return getProviderEnvironment().getEnvironmentKey().getApplicationKey();
+	}
+
+	/**
+	 * This method returns the value of the env.userToken property from the provider's property file. If that
+	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The env.userToken property from the provider's property file
+	 */
+	public String getUserToken()
+	{
+		return getProviderEnvironment().getEnvironmentKey().getUserToken();
+	}
+
+	/**
+	 * This method returns the value of the env.instanceID property from the provider's property file. If that
+	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The env.instanceID property from the provider's property file
+	 */
+	public String getInstanceID()
+	{
+		return getProviderEnvironment().getEnvironmentKey().getInstanceID();
+	}
+	
+	/**
+	 * This method returns the value of the env.mediaType property from the provider's property file. If that
+	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The env.mediaType property from the provider's property file
+	 */
+	public MediaType getRequestMediaType()
+	{
+		return getProviderEnvironment().getMediaType();
+	}
+	
+	/**
+	 * This method returns the value of the env.mediaType property from the provider's property file. If that
+	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The env.mediaType property from the provider's property file
+	 */
+	public MediaType getResponseMediaType()
+	{
+		return getProviderEnvironment().getMediaType();
+	}
+
+	/*------------------------------------------------------------------------------------------------------------------------
+	 * End of 'Dynamic' HTTP Header Field override section
+	 *-----------------------------------------------------------------------------------------------------------------------*/ 
+
     
     /**
      * This method retrieves all events to be published by calling the abstract method getSIFEvents(). The returned list
@@ -100,7 +199,7 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 		try
 		{
 			// Let's get the Event Client
-			EventClient evtClient = new EventClient(getProviderEnvironment(), sif3Session, getServiceName(), getMarshaller());
+			EventClient evtClient = new EventClient(getProviderEnvironment(), getRequestMediaType(), getResponseMediaType(), sif3Session, getServiceName(), getMarshaller());
 			
 			SIFEventIterator<L> iterator = getSIFEvents();
 			if (iterator != null)
@@ -190,7 +289,7 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
     	logger.debug(getPrettyName()+" sending a "+getServiceName()+" event with "+sifEvents.getListSize()+" sif objects.");
     	try
     	{
-    		BaseResponse response = evtClient.sendEvents(sifEvents, zone, context);
+    		BaseResponse response = evtClient.sendEvents(sifEvents, zone, context, getOverrideHeaderProperties());
     		if (response.hasError())
     		{
     			logger.error("Failed to send event: "+response.getError());
@@ -206,6 +305,18 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
    			logger.error("An error occured sending an event message. See previous error log entries.", ex);
 			return false;
     	}
+    }
+    
+    
+    protected HeaderProperties getOverrideHeaderProperties()
+    {
+    	HeaderProperties hdrProps = new HeaderProperties();
+    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, getGeneratorID());
+    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY, getApplicationKey());
+    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_USER_TOKEN, getUserToken());
+    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_INSTANCE_ID, getInstanceID());
+
+    	return hdrProps;
     }
     
     private List<ServiceInfo> getServicesForProvider(SIF3Session sif3Session)

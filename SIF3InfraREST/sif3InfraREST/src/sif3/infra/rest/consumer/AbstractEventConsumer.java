@@ -48,23 +48,23 @@ import sif3.infra.rest.queue.LocalMessageConsumer;
  */
 public abstract class AbstractEventConsumer<L> extends AbstractConsumer implements EventConsumer<L>, Runnable
 {
-  private LocalConsumerQueue localConsumerQueue = null;
-  private ExecutorService service = null;
+	private LocalConsumerQueue localConsumerQueue = null;
+	private ExecutorService service = null;
   
-  /**
-   * This method is called when a consumer service has received an event. This class does implement the actual onEvent( method
-   * from the event interface. It may do some additional work for house keeping purpose so the original onEvent() id processed
-   * as part of this class but then this method is called so that the actual consumer can do its work as required.
-   * 
-   * @param sifEvent The event data that has been received and shall be processed by the consumer.
-   * @param zone The zone from which the event has been received.
-   * @param context The context for which the event is applicable for.
-   * @param msgReadID The ID of the SIF queue reader. It is informative only and is only of use where there are multiple concurrent 
-   *                  subscribers on a message queue.
-   * @param consumerID The consumer ID that has been used to receive the event from the event queue. It is informative
-   *                   only and is only of use where there are multiple event subscribers enabled.
-   */
-  public abstract void processEvent(SIFEvent<L> sifEvent, SIFZone zone, SIFContext context, EventMetadata metadata, String msgReadID, String consumerID);
+  	/**
+  	 * This method is called when a consumer service has received an event. This class does implement the actual onEvent( method
+  	 * from the event interface. It may do some additional work for house keeping purpose so the original onEvent() id processed
+  	 * as part of this class but then this method is called so that the actual consumer can do its work as required.
+  	 * 
+  	 * @param sifEvent The event data that has been received and shall be processed by the consumer.
+  	 * @param zone The zone from which the event has been received.
+  	 * @param context The context for which the event is applicable for.
+  	 * @param msgReadID The ID of the SIF queue reader. It is informative only and is only of use where there are multiple concurrent 
+  	 *                  subscribers on a message queue.
+  	 * @param consumerID The consumer ID that has been used to receive the event from the event queue. It is informative
+  	 *                   only and is only of use where there are multiple event subscribers enabled.
+  	 */
+  	public abstract void processEvent(SIFEvent<L> sifEvent, SIFZone zone, SIFContext context, EventMetadata metadata, String msgReadID, String consumerID);
   
 	public AbstractEventConsumer()
 	{

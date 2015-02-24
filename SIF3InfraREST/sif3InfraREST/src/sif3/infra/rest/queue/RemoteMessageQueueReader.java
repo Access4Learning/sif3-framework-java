@@ -251,7 +251,11 @@ public class RemoteMessageQueueReader implements Runnable
 	{
 		try
 		{
-			logger.debug("Header Properties for Event Response:\n"+response.getHdrProperties());
+			if (logger.isDebugEnabled())
+			{
+				//logger.debug("Header Properties for Event Response:\n"+response.getHdrProperties());
+				logger.debug("Event Message Received:\n"+response);
+			}
 			SIFZone zone = getZone(response);
 			SIFContext context = getContext(response);
 			String serviceName = response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_SERVICE_NAME);

@@ -151,8 +151,8 @@ public abstract class AbstractConsumer implements Consumer
 	 * Only properties that are not null or empty string will be set in the corresponding HTTP Header.
 	 *
 	 * There are situations where and application may need a more 'dynamic' behaviour where the above values are determined
-	 * at runtime, based on other circumstances and therefore these properies must be retrieved from an other source than the
-	 * consumer's property file. In such a case the methods below gan be overwritten to make them dynamic and controlled by
+	 * at runtime, based on other circumstances and therefore these properties must be retrieved from an other source than the
+	 * consumer's property file. In such a case the methods below can be overwritten to make them dynamic and controlled by
 	 * the implementation rather than driven by the consumer's property file. If any of the methods below is overwritten then
 	 * the value of the over riding method is set in the corresponding HTTP Header field if the return value of the method 
 	 * is not null or an empty string.
