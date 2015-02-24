@@ -124,7 +124,7 @@ public class TestCSVStudentConsumer
 		{
 			CSVStudentConsumer consumer = tester.getConsumer();
  
-  			tester.createCSV(consumer);
+  			//tester.createCSV(consumer);
   
   			System.out.println("Finalise Consumer (i.e. disconnect and remove environment).");
   			consumer.finalise();

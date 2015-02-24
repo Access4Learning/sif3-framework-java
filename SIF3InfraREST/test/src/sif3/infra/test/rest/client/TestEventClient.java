@@ -20,12 +20,16 @@ package sif3.infra.test.rest.client;
 
 import java.net.URI;
 
+import javax.ws.rs.core.MediaType;
+
 import sif.dd.au30.conversion.DataModelMarshalFactory;
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
 import sif.dd.au30.model.StudentCollectionType;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.ServiceInvokationException;
+import sif3.common.header.HeaderProperties;
+import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
@@ -34,6 +38,7 @@ import sif3.infra.common.env.types.AdapterEnvironmentStore;
 import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.rest.client.EventClient;
+import systemic.sif3.demo.rest.conversion.CSVMarshaller;
 import au.com.systemic.framework.utils.FileReaderWriter;
 
 /**
@@ -84,13 +89,24 @@ public class TestEventClient
 		}
 	}
 	
-	private SIFEvent<StudentCollectionType> getEvents()
+//	private SIFEvent<StudentCollectionType> getEvents()
+//	{
+//		SIFEvent<StudentCollectionType> events = new SIFEvent<StudentCollectionType>();
+//		events.setEventAction(EventAction.UPDATE);
+//		//events.setUpdateType(UpdateType.FULL); // If this is not set then the value from the property file should be used.
+//		events.setSIFObjectList(getStudents());
+//		events.setListSize(events.getSIFObjectList().getStudentPersonal().size());
+//		
+//		return events;
+//	}
+
+	private SIFEvent<String> getEvents()
 	{
-		SIFEvent<StudentCollectionType> events = new SIFEvent<StudentCollectionType>();
+		SIFEvent<String> events = new SIFEvent<String>();
 		events.setEventAction(EventAction.UPDATE);
 		//events.setUpdateType(UpdateType.FULL); // If this is not set then the value from the property file should be used.
-		events.setSIFObjectList(getStudents());
-		events.setListSize(events.getSIFObjectList().getStudentPersonal().size());
+		events.setSIFObjectList(new String("123,Peter,Hydon,1\n456,Dan,Carter,1\n890,Monica,Saladin,2"));
+		events.setListSize(3);
 		
 		return events;
 	}
@@ -123,14 +139,29 @@ public class TestEventClient
 	private EventClient getEventClient()
 	{
 		store.getEnvironment().addConnectorBaseURI(ConnectorName.eventsConnector, getEventConnectorURI());
-		return new EventClient((ProviderEnvironment)store.getEnvironment(), getSIF3Session(), "StudentPersonals", marshaller);
+		ProviderEnvironment env = (ProviderEnvironment)store.getEnvironment();
+		
+		return new EventClient(env, MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_PLAIN_TYPE, getSIF3Session(), "CSVStudents", new CSVMarshaller());
+//		return new EventClient(env, env.getMediaType(), env.getMediaType(), getSIF3Session(), "StudentPersonals", marshaller);
 	}
 	
 	private void sendEvent(EventClient evtClt) throws ServiceInvokationException
 	{
-		System.out.println(evtClt.sendEvents(getEvents(), null, null));
+		System.out.println(evtClt.sendEvents(getEvents(), null, null, getOverrideHeaderProperties()));
 	}
+
 	
+    private HeaderProperties getOverrideHeaderProperties()
+    {
+    	HeaderProperties hdrProps = new HeaderProperties();
+    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, "TestEventGenerator");
+    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY, "TestEventClient");
+    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_USER_TOKEN, "");
+    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_INSTANCE_ID, null);
+
+    	return hdrProps;
+    }
+    
 	public static void main(String[] args)
 	{
 		try
