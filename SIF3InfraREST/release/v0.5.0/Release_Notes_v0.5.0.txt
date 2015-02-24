@@ -16,7 +16,8 @@ New Functionality
   Providers.
 - Support for External Security Services. SIF 3.0.1 specifies two authentication methods (Basic & SIF_HMACSHA256).
   There is a strong push to allow additional authentication mechanisms provided through external security services
-  such as OAuth, SAML etc. to be utilised with SIF. This version allows to integrate external security services.
+  such as OAuth, SAML etc. to be utilised with SIF. This version allows to integrate external security services
+  for the provider in a DIRECT environment.
   Caution should be taken in using this functionality as it is not officially part of the SIF 3.0.1 specification 
   yet and therefore it is considered as experimental at this stage. Please refer to Section 5.8 of the Developer's
   Guide for details on external security services.   
@@ -59,6 +60,6 @@ If you are using the SIF AU data model you can find the latest build within the 
 Drop the jar file from that directory into your project's lib directory and/or WEB-INF/lib directory.
 
 The new functionality available in this version of the framework should not affect any classes exposed to the developer except if
-you have developed your own implementation of a MarshalFactory and/or UnmarshalFactory. In this case please refer to the 'Changed 
-Functionality' section in this release notes file.
+you have developed your own implementation of a MarshalFactory and/or UnmarshalFactory. In this case please refer to the first
+paragraph in this section.
 
