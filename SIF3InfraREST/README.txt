@@ -153,7 +153,7 @@ called SIF3DMGenerator.
 Details of this release can be found in the directory "release/v0.4.0".
 
 =============================================================
-Version from March 05, 2015: v0.5.0 - Various changes
+Version from March 03, 2015: v0.5.0 - Various changes
 =============================================================
 Version 0.5.0 has a couple important new features. They include support for SIF 3.x Service Path functionality and
 support for External Security Services (DIRECT Provider only). The later is not yet part of the SIF 3.0.1 

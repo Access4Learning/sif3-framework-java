@@ -1,5 +1,5 @@
 ==============================================================
-Release Notes for v0.5.0 of SIF3 Framework (March 05, 2015)
+Release Notes for v0.5.0 of SIF3 Framework (March 03, 2015)
 ==============================================================
 
 Bug Fixes
