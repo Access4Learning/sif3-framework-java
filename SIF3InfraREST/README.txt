@@ -1,5 +1,5 @@
 #########################################################################################################
-# Copyright 2013-2014 Systemic Pty Ltd
+# Copyright 2013-2015 Systemic Pty Ltd
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -153,13 +153,14 @@ called SIF3DMGenerator.
 Details of this release can be found in the directory "release/v0.4.0".
 
 =============================================================
-Version from February 10, 2015: v0.5.0 - Various changes
+Version from March 05, 2015: v0.5.0 - Various changes
 =============================================================
 Version 0.5.0 has a couple important new features. They include support for SIF 3.x Service Path functionality and
-support for External Security Services. The later is not yet part of the SIF 3.0.1 specification and it should be
-used with care as it is experimental at this stage. The DB structure for the SIF3_SESSION table has changed and
-therefore a database update script must be run to upgrade the previous version of the framework to this version.
-Details of this release including upgrade instructions can be found in the directory "release/v0.5.0".
+support for External Security Services (DIRECT Provider only). The later is not yet part of the SIF 3.0.1 
+specification and it should be used with care as it is experimental at this stage. The DB structure for the 
+SIF3_SESSION table has changed and therefore a database update script must be run to upgrade the previous 
+version of the framework to this version. Details of this release including upgrade instructions can be found 
+in the directory "release/v0.5.0".
 
 #########################################################################################################
 # Download Instructions

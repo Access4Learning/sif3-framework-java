@@ -1,5 +1,5 @@
 ==============================================================
-Release Notes for v0.5.0 of SIF3 Framework (February 10, 2015)
+Release Notes for v0.5.0 of SIF3 Framework (March 05, 2015)
 ==============================================================
 
 Bug Fixes
@@ -57,7 +57,8 @@ then you MUST re-build the appropriate data model library from that project. It 
 from that project are used. Drop the latest data model jar file into your project's lib directory and/or WEB-INF/lib directory.
 
 If you are using the SIF AU data model you can find the latest build within the SIF3 Framework in the <install_dir>/lib/datamodel.
-Drop the jar file from that directory into your project's lib directory and/or WEB-INF/lib directory.
+Drop the jar file from that directory into your project's lib directory and/or WEB-INF/lib directory. This AU datamodel
+jar contains the latest changes that have been approved and published by the DSWG on February 19, 2015.
 
 The new functionality available in this version of the framework should not affect any classes exposed to the developer except if
 you have developed your own implementation of a MarshalFactory and/or UnmarshalFactory. In this case please refer to the first
