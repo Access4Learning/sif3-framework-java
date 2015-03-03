@@ -50,7 +50,18 @@
                   <rights>
                     <right type="QUERY">APPROVED</right>
                   </rights>
-                </service>                
+                </service>   
+                <service name="CSVStudents" contextId="DEFAULT" type="OBJECT">
+                  <rights>
+                    <right type="QUERY">REJECTED</right>
+                    <right type="CREATE">APPROVED</right>
+                    <right type="UPDATE">REJECTED</right>
+                    <right type="DELETE">REJECTED</right>
+                    <right type="PROVIDE">REJECTED</right>
+                    <right type="SUBSCRIBE">APPROVED</right>
+                    <right type="ADMIN">REJECTED</right>
+                  </rights>
+                </service>
                 <service name="StudentDailyAttendances" contextId="DEFAULT" type="OBJECT">
                   <rights>
                     <right type="QUERY">APPROVED</right>
