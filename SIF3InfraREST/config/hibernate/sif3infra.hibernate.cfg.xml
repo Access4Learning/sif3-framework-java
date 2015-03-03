@@ -16,13 +16,13 @@
         <!-- MySQL client/server -->
         <!-- ******************* -->
         <!-- property name="hibernate.default_schema">sif3_infra</property-->
-<!--  
+ 
         <property name="dialect">org.hibernate.dialect.MySQLInnoDBDialect</property>
         <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
         <property name="connection.url">jdbc:mysql://localhost:3306/sif3_infra</property>
         <property name="connection.username">root</property>
         <property name="connection.password"></property>
--->       
+       
         <!-- ******************** -->
         <!-- Oracle client/server -->
         <!-- ******************** -->
@@ -51,13 +51,13 @@
         <!-- *************** -->
         <!-- SQLite Embedded -->
         <!-- *************** -->
-
+<!-- 
         <property name="dialect">sif3.common.persist.common.SQLiteDialect</property>
         <property name="connection.driver_class">org.sqlite.JDBC</property>
         <property name="connection.url">jdbc:sqlite:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/DB/Data/SIF3Infra.sqliteDB</property>
         <property name="connection.username"></property>
         <property name="connection.password"></property>
-
+-->
 
         <!-- ********************** -->
         <!--  Connection Pool Setup -->
