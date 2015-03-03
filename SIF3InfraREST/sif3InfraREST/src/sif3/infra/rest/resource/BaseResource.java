@@ -441,7 +441,6 @@ public abstract class BaseResource
 		return error;
 	}
 	
-	
 	/**
 	 * This method checks if the information in the authentication token matches an existing session and if the token is an
 	 * authorised/authenticated token. If all tests succeed then null is returned, otherwise and ErrorDetails object is returned
