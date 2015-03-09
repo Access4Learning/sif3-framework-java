@@ -28,9 +28,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.log4j.Logger;
 
@@ -43,19 +43,19 @@ import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
-import sif3.common.header.RequestHeaderConstants;
-import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.HeaderValues.ResponseAction;
+import sif3.common.header.RequestHeaderConstants;
+import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.model.AuthenticationInfo;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
-import sif3.common.model.URLQueryParameter;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
+import sif3.common.model.URLQueryParameter;
 import sif3.common.model.security.TokenInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.security.AbstractSecurityService;
@@ -86,6 +86,7 @@ import sif3.infra.common.model.ProductIdentityType;
 import sif3.infra.common.model.UpdateResponseType;
 import sif3.infra.common.model.UpdateType;
 import sif3.infra.common.model.UpdatesType;
+import sif3.infra.rest.resource.audit.AuditableResource;
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.DateUtils;
 import au.com.systemic.framework.utils.StringUtils;
@@ -208,6 +209,12 @@ public abstract class BaseResource
 			logger.debug("ContextID          : " + getSifContext());
 			logger.debug("Security Service   : " + ((getSecurityService() == null) ? null : getSecurityService().getClass().getSimpleName()));
 			logger.debug("Resource Init ok   : " + allOK);
+		}
+		
+		// If auditing is enabled then we must give the resource to the 'auditor' for it to extract information about the sif3 session, zones etc.
+		if (AuditableResource.isAuditing())
+		{
+			AuditableResource.setResource(this);
 		}
 	}
 
@@ -353,166 +360,58 @@ public abstract class BaseResource
 		return getEnvironmentManager().getEnvironmentInfo().getAdapterName();
 	}
 	
-
 	/*---------------------------------*/
 	/*-- Security Validation Methods --*/
 	/*---------------------------------*/
+
 	/**
-	 * If the client is valid then the ErrorDetails returned is null. If there is something wrong, then the ErrorDetails will be 
-	 * set accordingly and returned. Checks include if authentication token is valid for an environment and if the access
-	 * rights for the requested service are at expected levels.
+	 * This method combines the validSession() and validateBearerSession() method into a higher level, so that the caller doesn't have to know
+	 * which one to invoke, rather have the code here to determine it automatically as it is possible in most cases.
 	 * 
-	 * @param serviceName Service for which the access rights shall be checked.
-	 * @param right The access right (QUERY, UPDATE etc) that shall be checked for.
-	 * @param accessType The access level (SUPPORTED, APPROVED, etc) that must be met for the given service and right.
-	 * @param allowDelayed TRUE then the requeste operation allows delayed requests. In a DIRECT environment it is not supported at
-	 *                     all and this parameter will be ignored. FALSE if delayed requests are not allowed.
-	 * 
-	 * @return See desc
+	 * @return Null if all is fine, ErrorDetails otherwise.
 	 */
-	public ErrorDetails validClient(String serviceName, AccessRight right, AccessType accessType, boolean allowDelayed)
+	protected ErrorDetails validateSession()
 	{
-	    // There must be a session/environment for that client otherwise an error would have been returned with previous check
-	    ProviderEnvironment envInfo = getProviderEnvironment();
-    
 	    AuthenticationInfo authInfo = getAuthInfo();
 		if ((authInfo == null) || (authInfo.getUserToken() == null))
 		{
 			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No or invalid Authorization Token provided");				
 		}
-	        
-	    ErrorDetails error = null;
 	    if (authInfo.getAuthMethod() != AuthenticationMethod.Bearer) // Basic or SIF_HMACSHA256
 	    {
-	    	error = validSession(authInfo, false, null);
+	    	return validSession(authInfo, false, null);
 	    }
 	    else
 	    {
-	    	error = validateBearerSession(authInfo);
+	    	return validateBearerSession(authInfo);
 	    }
-	    		
-		if (error != null)
-		{
-			return error;
-		}
-
-		// If we get to this point then all validation so far has succeeded and we do have a valid session
-		// in the session cache and workstore (DB).
-		
-		// Check if DELAYED requests are supported. Right now this direct environment does not support it.=> Return an error.
-		if (isDirectEnvironment())
-		{
-			if (extractRequestType() == RequestType.DELAYED)
-			{
-				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not supported with this DIRECT Environment");
-			}
-		}
-		else  // in a Brokered environment only the 'multiple' object operations are supporting delayed.
-		{
-			if (extractRequestType() == RequestType.DELAYED)
-			{
-    			if (!allowDelayed)
-    			{
-    				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not allowed for this operation");				
-    			}
-    			else
-    			{
-    				//TODO: JH - Once delayed is supported then the error below must be removed.
-    				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not supported by this provider.");				
-    			}
-			}
-		}
-		
-		if (envInfo.getCheckACL())
-		{
-			// We must have a valid session for that request otherwise it would have failed in validSession() method.
-			SIF3Session sif3Session = getSIF3SessionForRequest();
-			SIFContext context = getSifContext();
-			SIFZone zone = getSifZone();
-			
-			//Check access rights
-			if (!sif3Session.hasAccess(right, accessType, serviceName, zone, context))
-			{
-				String zoneID = (zone == null) ? "Default" : zone.getId();
-				String contextID = (context == null) ? "Default" : context.getId();
-				error = new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, right.name()+ " access is not set to "+accessType.name()+" for the service "+serviceName+" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+sif3Session.getEnvironmentName(), "Provider side check.");			
-			}
-		}
-		return error;
 	}
 	
 	/**
-	 * This method checks if the information in the authentication token matches an existing session and if the token is an
-	 * authorised/authenticated token. If all tests succeed then null is returned, otherwise and ErrorDetails object is returned
-	 * that holds all the required error information and status.
+	 * This method will attempt to load a SIF3 Session from the session cache managed in the environment manager.
+	 * The SIF3 Session to be returned is based on the Authorisation HTTP header information available.
 	 * 
-	 * @param validateBearerToken TRUE: Bearer Token will be validated against security service.
-	 *                            FALSE: Bearer Token is assumed to already be validated.
-	 * @param tokenInfo The token Info if authentication method is Bearer. In all other cases this parameter
-	 *                  is null and session token info should be used from the AuthInfo object.
-	 * 
-	 * @return See desc
+	 * @return SIF3Session if available.
 	 */
-	public ErrorDetails validSession(AuthenticationInfo authInfo, boolean validateBearerToken, TokenInfo tokenInfo)
+	public SIF3Session getSIF3SessionForRequest()
 	{
-		// we must have a authentication token and there must be an environment with that authentication token
-		if ((authInfo != null) && (authInfo.getUserToken() != null))
+		String token = getTokenFromAuthToken();
+
+		if (token != null)
 		{
-			SIF3Session sif3Session = getSIF3SessionForRequest();
-			if (sif3Session == null) // not in cached session store, yet. => Attempt to load it
+			if (getAuthInfo().getAuthMethod() == AuthenticationMethod.Bearer)
 			{
-				if (isBrokeredEnvironment())
-				{
-					// In a brokered environment the provider environment manager must really have the session already loaded for 
-					// the provider, otherwise we may have a real problem and things are in an inconsistent state. We should return 
-					// an error as it appears a request with an invalid sessionToken tries to access the provider.
-					String errStr = "Provider's sessionToken doesn't match the request's sessoionToken, or the provider has no session initialised.";
-					logger.error(errStr+" See previous error log entries for details.");
-					return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, errStr);								
-				}
-				else
-				{
-					// In a direct environment the session for the given session token might not yet be loaded in the environment provider. 
-					// In this case we attempt to load it and then compare if everything is fine.
-				    try
-				    {
-				    	EnvironmentType environment = null;
-				    	if (authInfo.getAuthMethod() != AuthenticationMethod.Bearer) // Basic or SIF_HMACSHA256
-				    	{
-				    		environment = ((DirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentBySessionToken(authInfo.getUserToken(), tokenInfo, isSecure());
-				    	}
-				    	else // Bearer Token 
-				    	{
-				    		environment = ((DirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentForSecurityToken(tokenInfo, isSecure());
-				    	}
-				    	// If we have no environment then there is no environment for that session token
-						if (environment == null)
-						{
-							String errorStr = "No environment exits for the given security token = "+authInfo.getUserToken()+". Ensure that environment is created first.";
-					    	logger.error(errorStr);
-					    	return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, errorStr);			
-						}
-						
-						//Now I should have a session in the store.
-						sif3Session = getSIF3SessionForRequest();
-				    }
-				    catch (Exception ex)
-				    {
-				    	logger.error("Failed to retrieve environment for security token = "+authInfo.getUserToken()+": "+ ex.getMessage(), ex);
-				    	return new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Error accessing environment store: "+ ex.getMessage());
-				    }
-				}
+				return getEnvironmentManager().getSessionBySecurityToken(token);
 			}
-			
-			// Do the full validation of Auth Token.
-			return validateAuthTokenWithSession(sif3Session, validateBearerToken);
+			else // Basic, SIF_HMACSHA256
+			{
+				return getEnvironmentManager().getSessionBySessionToken(token);
+			}
 		}
-		else // we have no or an invalid authorisation token
-		{
-			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No or invalid Authorization Token provided");				
-		}
+
+		return null;
 	}
-	
+
 	/*------------------------------------------*/
 	/*-- Public Methods for Response Creation --*/
 	/*------------------------------------------*/
@@ -669,29 +568,6 @@ public abstract class BaseResource
 	}
 
 	/*
-	 * This method will attempt to load a SIF3 Session from the session cache managed in the environment manager.
-	 * The SIF3 Session to be returned is based on the Authorisation HTTP header information available.
-	 */
-	protected SIF3Session getSIF3SessionForRequest()
-	{
-		String token = getTokenFromAuthToken();
-
-		if (token != null)
-		{
-			if (getAuthInfo().getAuthMethod() == AuthenticationMethod.Bearer)
-			{
-				return getEnvironmentManager().getSessionBySecurityToken(token);
-			}
-			else // Basic, SIF_HMACSHA256
-			{
-				return getEnvironmentManager().getSessionBySessionToken(token);
-			}
-		}
-
-		return null;
-	}
-	
-	/*
 	 * This method processes the low level SIF3 DeleteRequest message and returns its content in a nice and easy to handle 
 	 * data structure.
 	 * 
@@ -719,6 +595,147 @@ public abstract class BaseResource
 	    return resourceIDs;
 	}
 	
+	/*---------------------------------*/
+	/*-- Security Validation Methods --*/
+	/*---------------------------------*/
+	/**
+	 * If the client is valid then the ErrorDetails returned is null. If there is something wrong, then the ErrorDetails will be 
+	 * set accordingly and returned. Checks include if authentication token is valid for an environment and if the access
+	 * rights for the requested service are at expected levels.
+	 * 
+	 * @param serviceName Service for which the access rights shall be checked.
+	 * @param right The access right (QUERY, UPDATE etc) that shall be checked for.
+	 * @param accessType The access level (SUPPORTED, APPROVED, etc) that must be met for the given service and right.
+	 * @param allowDelayed TRUE then the request operation allows delayed requests. In a DIRECT environment it is not supported at
+	 *                     all and this parameter will be ignored. FALSE if delayed requests are not allowed.
+	 * 
+	 * @return See desc
+	 */
+	protected ErrorDetails validClient(String serviceName, AccessRight right, AccessType accessType, boolean allowDelayed)
+	{
+	    ErrorDetails error = validateSession();
+		if (error != null)
+		{
+			return error;
+		}
+
+		// If we get to this point then all validation so far has succeeded and we do have a valid session
+		// in the session cache and workstore (DB).
+		
+		// Check if DELAYED requests are supported. Right now this direct environment does not support it.=> Return an error.
+		if (isDirectEnvironment())
+		{
+			if (extractRequestType() == RequestType.DELAYED)
+			{
+				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not supported with this DIRECT Environment");
+			}
+		}
+		else  // in a Brokered environment only the 'multiple' object operations are supporting delayed.
+		{
+			if (extractRequestType() == RequestType.DELAYED)
+			{
+    			if (!allowDelayed)
+    			{
+    				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not allowed for this operation");				
+    			}
+    			else
+    			{
+    				//TODO: JH - Once delayed is supported then the error below must be removed.
+    				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not supported by this provider.");				
+    			}
+			}
+		}
+		
+		if (getProviderEnvironment().getCheckACL())
+		{
+			// We must have a valid session for that request otherwise it would have failed in validSession() method.
+			SIF3Session sif3Session = getSIF3SessionForRequest();
+			SIFContext context = getSifContext();
+			SIFZone zone = getSifZone();
+			
+			//Check access rights
+			if (!sif3Session.hasAccess(right, accessType, serviceName, zone, context))
+			{
+				String zoneID = (zone == null) ? "Default" : zone.getId();
+				String contextID = (context == null) ? "Default" : context.getId();
+				error = new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, right.name()+ " access is not set to "+accessType.name()+" for the service "+serviceName+" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+sif3Session.getEnvironmentName(), "Provider side check.");			
+			}
+		}
+		return error;
+	}
+
+	/**
+	 * This method checks if the information in the authentication token matches an existing session and if the token is an
+	 * authorised/authenticated token. If all tests succeed then null is returned, otherwise and ErrorDetails object is returned
+	 * that holds all the required error information and status.
+	 * 
+	 * @param validateBearerToken TRUE: Bearer Token will be validated against security service.
+	 *                            FALSE: Bearer Token is assumed to already be validated.
+	 * @param tokenInfo The token Info if authentication method is Bearer. In all other cases this parameter
+	 *                  is null and session token info should be used from the AuthInfo object.
+	 * 
+	 * @return See desc
+	 */
+	protected ErrorDetails validSession(AuthenticationInfo authInfo, boolean validateBearerToken, TokenInfo tokenInfo)
+	{
+		// we must have a authentication token and there must be an environment with that authentication token
+		if ((authInfo != null) && (authInfo.getUserToken() != null))
+		{
+			SIF3Session sif3Session = getSIF3SessionForRequest();
+			if (sif3Session == null) // not in cached session store, yet. => Attempt to load it
+			{
+				if (isBrokeredEnvironment())
+				{
+					// In a brokered environment the provider environment manager must really have the session already loaded for 
+					// the provider, otherwise we may have a real problem and things are in an inconsistent state. We should return 
+					// an error as it appears a request with an invalid sessionToken tries to access the provider.
+					String errStr = "Provider's sessionToken doesn't match the request's sessoionToken, or the provider has no session initialised.";
+					logger.error(errStr+" See previous error log entries for details.");
+					return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, errStr);								
+				}
+				else
+				{
+					// In a direct environment the session for the given session token might not yet be loaded in the environment provider. 
+					// In this case we attempt to load it and then compare if everything is fine.
+				    try
+				    {
+				    	EnvironmentType environment = null;
+				    	if (authInfo.getAuthMethod() != AuthenticationMethod.Bearer) // Basic or SIF_HMACSHA256
+				    	{
+				    		environment = ((DirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentBySessionToken(authInfo.getUserToken(), tokenInfo, isSecure());
+				    	}
+				    	else // Bearer Token 
+				    	{
+				    		environment = ((DirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentForSecurityToken(tokenInfo, isSecure());
+				    	}
+				    	// If we have no environment then there is no environment for that session token
+						if (environment == null)
+						{
+							String errorStr = "No environment exits for the given security token = "+authInfo.getUserToken()+". Ensure that environment is created first.";
+					    	logger.error(errorStr);
+					    	return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, errorStr);			
+						}
+						
+						//Now I should have a session in the store.
+						sif3Session = getSIF3SessionForRequest();
+				    }
+				    catch (Exception ex)
+				    {
+				    	logger.error("Failed to retrieve environment for security token = "+authInfo.getUserToken()+": "+ ex.getMessage(), ex);
+				    	return new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Error accessing environment store: "+ ex.getMessage());
+				    }
+				}
+			}
+			
+			// Do the full validation of Auth Token.
+			return validateAuthTokenWithSession(sif3Session, validateBearerToken);
+		}
+		else // we have no or an invalid authorisation token
+		{
+			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No or invalid Authorization Token provided");				
+		}
+	}
+
 	/*
 	 * This method validates the user token and password against the two valid SIF authentication methods of
 	 * Basic or SIF_HMACSHA256. If the authentication method should be set to bearer and this method is 
