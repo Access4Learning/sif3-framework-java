@@ -162,6 +162,13 @@ SIF3_SESSION table has changed and therefore a database update script must be ru
 version of the framework to this version. Details of this release including upgrade instructions can be found 
 in the directory "release/v0.5.0".
 
+=============================================================
+Version from Month Day, 2015: v0.6.0 - Various changes
+=============================================================
+Version 0.6.0 adds an auditing framework for providers to the SIF3 Framework. This is an optional feature.
+Further this new version requires all providers to be deployed in a web-/application container that supports
+the servlet 3.0 specification. Please refer to the release notes in the directory "release/v0.6.0" for details.
+
 #########################################################################################################
 # Download Instructions
 #########################################################################################################

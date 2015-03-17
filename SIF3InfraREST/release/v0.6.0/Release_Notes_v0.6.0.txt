@@ -1,0 +1,51 @@
+==============================================================
+Release Notes for v0.6.0 of SIF3 Framework (Month Day, 2015)
+==============================================================
+
+Bug Fixes
+---------
+None
+
+New Functionality
+-----------------
+- Support for auditing on the provider. See Section 5.x in the Developer's Guide for details on how to enable
+  auditing and what can be audited.
+
+Changed Functionality
+---------------------
+Due to some features in the SIF3 Framework the provider must be deployed in a web-/application container that 
+supports the servlet v3.0 specification. Please refer to your web-/application container's documentation to ensure 
+that it supports the servlet 3.0 specification. Tomcat 7 and above, Jetty 8 and above, JBoss AS 6 and above, Glasfish 3.x
+all support the servlet 3.0 specification. 
+
+Removed Artifacts/Functionality
+-------------------------------
+None  
+
+--------------------------
+-- Upgrade Instructions --
+--------------------------
+
+Infrastructure Upgrade
+----------------------
+All of the above fixes & changes do not affect any classes currently exposed to the developer. No code changes
+will be required in your service implementations to upgrade from version v0.5.0 to this version. Simply drop the 
+latest framework libraries into your project and all changes will be available without any other interactions 
+by the developer.
+
+Because of the requirement for the servlet 3.0 support for providers the web.xml for your deployment MUST have the appropriate
+entry to indicate the servlet 3.0 specification. Generally the first line in the web.xml must be something like this:
+
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+         http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" 
+         version="3.0">
+         
+Note the version number in the 'version' attribute as well as the version number of the xsd namespace.         
+
+
+Data Model Upgrade
+------------------
+None.
+
