@@ -120,4 +120,9 @@ public class CommonConstants
 	public static final String AUTH_METHOD       = "authenticationMethod"; // Indicates the authentication method to use with access token	
 	public static final String ISO8601_TIMESTAMP = "timestamp";	// If SIF_HMACHSHA256 is used a timestamp in ISO8601 has to be provided.
 
+	/*----------------------------------------------------------------*/
+	/* HTTP Status that are not listed in the Response.Status class --*/
+	/*----------------------------------------------------------------*/
+	public static final int RESPONSE_TOO_LARGE = 413;
+	
 }
