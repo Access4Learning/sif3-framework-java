@@ -33,6 +33,7 @@ import sif.dd.au30.model.TeachingGroupCollectionType;
 import sif.dd.au30.model.TeachingGroupType.StudentList;
 import sif.dd.au30.model.TeachingGroupType.StudentList.TeachingGroupStudent;
 import sif3.common.conversion.ModelObjectInfo;
+import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
@@ -307,10 +308,15 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.Provider#retrive(sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo)
      */
     @Override
-    public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException
+    public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
     {
     	logger.debug("Retrieve Students for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
 
+    	if (pagingInfo == null)
+    	{
+    		throw new DataTooLargeException("No paging info is provided. Please provide navigationPage and navigationPageSize.");
+    	}
+    	
     	ArrayList<StudentPersonalType> studentList = fetchStudents(students, pagingInfo);
     	
     	StudentCollectionType studentCollection = dmObjectFactory.createStudentCollectionType();
@@ -331,7 +337,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.QueryProvider#retrieveByServicePath(sif3.common.model.QueryCriteria, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo, sif3.common.model.RequestMetadata)
      */
     @Override
-	public Object retrieveByServicePath(QueryCriteria queryCriteria, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException
+	public Object retrieveByServicePath(QueryCriteria queryCriteria, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
 	{
 		logger.debug("Performing query by service path.");
 		if (logger.isDebugEnabled())

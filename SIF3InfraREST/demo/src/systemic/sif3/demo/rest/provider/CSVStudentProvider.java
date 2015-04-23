@@ -25,6 +25,7 @@ import javax.ws.rs.core.MediaType;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.conversion.UnmarshalFactory;
+import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.interfaces.SIFEventIterator;
@@ -103,7 +104,7 @@ public class CSVStudentProvider extends  BaseEventProvider<String>
      * @see sif3.common.interfaces.Provider#retrive(sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo)
      */
     @Override
-    public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException
+    public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
     {
     	logger.debug("Retrieve All for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	throw new IllegalArgumentException("Not implemented for CSV Provider.");

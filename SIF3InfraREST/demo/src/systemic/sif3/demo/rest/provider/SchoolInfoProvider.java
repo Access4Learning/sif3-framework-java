@@ -27,8 +27,8 @@ import java.util.List;
 import sif.dd.au30.model.ObjectFactory;
 import sif.dd.au30.model.SchoolCollectionType;
 import sif.dd.au30.model.SchoolInfoType;
-import sif.dd.au30.model.StudentCollectionType;
 import sif3.common.conversion.ModelObjectInfo;
+import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.model.PagingInfo;
@@ -188,7 +188,7 @@ public class SchoolInfoProvider extends AUDataModelProvider
      * @see sif3.common.interfaces.Provider#retrive(sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo)
      */
     @Override
-    public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException
+    public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
     {
     	logger.debug("Retrieve schools for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	ArrayList<SchoolInfoType> schoolList = new ArrayList<SchoolInfoType>();
