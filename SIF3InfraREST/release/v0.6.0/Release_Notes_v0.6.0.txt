@@ -4,19 +4,27 @@ Release Notes for v0.6.0 of SIF3 Framework (Month Day, 2015)
 
 Bug Fixes
 ---------
-None
+- Return HTTP Status of 403 (Forbidden) if consumer issues a request for an operation where it doesn't have 
+  permission for (i.e. ACL states a 'REJECT" for a particular operation). Now it meets the latest SIF Specification.
+- Return HTTP Status of 400 (Bad Request) if a unsupported query criteria is provides in a service path call. Now it
+  meets the latest SIF Specification.
 
 New Functionality
 -----------------
 - Support for auditing on the provider. See Section 5.x in the Developer's Guide for details on how to enable
   auditing and what can be audited.
+- Added DataTooLargeException to retrieve() method in Provider interface and retrieveByServicePath() method in the
+  QueryProvider interface. This enabled the developer to raise an appropriate exception if the requested data set
+  is too large. The exception will be translated into appropriate HTTP Status in the response to meet the SIF
+  specification.
 
 Changed Functionality
 ---------------------
-Due to some features in the SIF3 Framework the provider must be deployed in a web-/application container that 
-supports the servlet v3.0 specification. Please refer to your web-/application container's documentation to ensure 
-that it supports the servlet 3.0 specification. Tomcat 7 and above, Jetty 8 and above, JBoss AS 6 and above, Glasfish 3.x
-all support the servlet 3.0 specification. 
+- Servlet 3.0 Requirement:
+  Due to some features in the SIF3 Framework the provider must be deployed in a web-/application container that 
+  supports the servlet v3.0 specification. Please refer to your web-/application container's documentation to ensure 
+  that it supports the servlet 3.0 specification. Tomcat 7 and above, Jetty 8 and above, JBoss AS 6 and above, Glassfish 3.x
+  all support the servlet 3.0 specification.
 
 Removed Artifacts/Functionality
 -------------------------------
@@ -28,7 +36,9 @@ None
 
 Infrastructure Upgrade
 ----------------------
-All of the above fixes & changes do not affect any classes currently exposed to the developer. No code changes
+Depending on your implementation of your provider you may need to add the DataTooLargeException to the list of 
+exceptions in the retrieve() and/or retrieveByServicePath() method to avoid a compile error. Otherwise all of 
+the above fixes & changes do not affect any classes currently exposed to the developer. No code changes
 will be required in your service implementations to upgrade from version v0.5.0 to this version. Simply drop the 
 latest framework libraries into your project and all changes will be available without any other interactions 
 by the developer.
