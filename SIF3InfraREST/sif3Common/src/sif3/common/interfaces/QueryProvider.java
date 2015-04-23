@@ -17,6 +17,7 @@
  */
 package sif3.common.interfaces;
 
+import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.model.PagingInfo;
@@ -36,6 +37,10 @@ public interface QueryProvider extends Provider
 	/**
 	 * This method is used to retrieve any number of objects, filtered by the service path. Each predicate within the 
 	 * criteria holds a parent object and it's key. This method uses 'paging' in the same way as Provider.retrieve.
+	 * The number of records to be returned are determined by the query criteria as well as information within the
+	 * paging info parameter. If the data set to be returned is considered too large by the provider (implementation 
+	 * dependent) then a DataTooLargeException must be raised. This exception is then translated into an appropriate
+	 * HTTP Status within the framework to meet the SIF Specification.
 	 * 
 	 * @param queryCriteria The criteria to use when filtering results
 	 * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
@@ -48,10 +53,12 @@ public interface QueryProvider extends Provider
 	 * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is 
 	 *                              performed and the  message of the exceptions holds some info.
 	 * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
+	 * @throws DataTooLargeException If the data that shall be returned is too large due to the query criteria or
+	 *                               values in the paging info.
 	 */
 	public Object retrieveByServicePath(QueryCriteria queryCriteria, 
 			                            SIFZone zone, 
 			                            SIFContext context, 
 			                            PagingInfo pagingInfo, 
-			                            RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException;
+			                            RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
 }
