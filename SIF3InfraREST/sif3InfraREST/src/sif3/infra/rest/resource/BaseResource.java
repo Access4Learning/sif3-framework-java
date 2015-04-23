@@ -658,7 +658,7 @@ public abstract class BaseResource
 			{
 				String zoneID = (zone == null) ? "Default" : zone.getId();
 				String contextID = (context == null) ? "Default" : context.getId();
-				error = new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, right.name()+ " access is not set to "+accessType.name()+" for the service "+serviceName+" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+sif3Session.getEnvironmentName(), "Provider side check.");			
+				error = new ErrorDetails(Status.FORBIDDEN.getStatusCode(), "Consumer is not authorized to issue the requested operation.", right.name()+ " access is not set to "+accessType.name()+" for the service "+serviceName+" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+sif3Session.getEnvironmentName(), "Provider side check.");			
 			}
 		}
 		return error;

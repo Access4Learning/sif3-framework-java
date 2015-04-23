@@ -31,20 +31,21 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import sif3.common.CommonConstants;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.conversion.UnmarshalFactory;
+import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderValues;
-import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.HeaderValues.ResponseAction;
+import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.Provider;
 import sif3.common.interfaces.QueryProvider;
 import sif3.common.model.PagingInfo;
@@ -373,7 +374,11 @@ public class DataModelResource extends BaseResource
 		}
 		catch (UnsupportedQueryException ex)
 		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+		}
+		catch (DataTooLargeException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(CommonConstants.RESPONSE_TOO_LARGE, "Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
 		}
 	}
 
@@ -425,7 +430,11 @@ public class DataModelResource extends BaseResource
 		}
 		catch (UnsupportedQueryException ex)
 		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "+provider.getMultiObjectClassInfo().getObjectName()+" with Paging Information: "+pagingInfo+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY);			
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Failed to retrieve "+provider.getMultiObjectClassInfo().getObjectName()+" with Paging Information: "+pagingInfo+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY);			
+		}
+		catch (DataTooLargeException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(CommonConstants.RESPONSE_TOO_LARGE, "Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
 		}
 	}
 

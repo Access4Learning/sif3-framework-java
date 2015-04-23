@@ -885,7 +885,7 @@ public abstract class AbstractConsumer implements Consumer
 			{
 				String zoneID = (zone == null) ? "Default" : zone.getId();
 				String contextID = (context == null) ? "Default" : context.getId();
-				error = new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not authorized.", right.name()+ " access is not set to "+accessType.name()+" for the service " + serviceName +" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+getSIF3Session().getEnvironmentName(), "Client side check.");			
+				error = new ErrorDetails(Status.FORBIDDEN.getStatusCode(), "Consumer is not authorized to issue the requested operation.", right.name()+ " access is not set to "+accessType.name()+" for the service " + serviceName +" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+getSIF3Session().getEnvironmentName(), "Client side check.");			
 			}
 		}
 		return error;
