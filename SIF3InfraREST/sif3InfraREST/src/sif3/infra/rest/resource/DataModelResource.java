@@ -203,7 +203,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			Object returnObj = provider.createSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata());
+			Object returnObj = provider.createSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest()));
 
 			return makeResponse(returnObj, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, provider.getMarshaller());
 		}
@@ -245,7 +245,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			List<CreateOperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata());
+			List<CreateOperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest()));
 			
 			if (statusList != null)
 			{
@@ -299,7 +299,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			Object returnObj = provider.retrievByPrimaryKey(resourceID, getSifZone(), getSifContext(), getRequestMetadata());
+			Object returnObj = provider.retrievByPrimaryKey(resourceID, getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest()));
 			
 			if (returnObj != null)
 			{
@@ -360,7 +360,7 @@ public class DataModelResource extends BaseResource
 
 		try
 		{
-			Object returnObj = QueryProvider.class.cast(provider).retrieveByServicePath(parser.getQueryCriteria(), getSifZone(), getSifContext(), pagingInfo, getRequestMetadata());
+			Object returnObj = QueryProvider.class.cast(provider).retrieveByServicePath(parser.getQueryCriteria(), getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest()));
 			
 			return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
 		}
@@ -417,7 +417,7 @@ public class DataModelResource extends BaseResource
 		
 		try
 		{
-			Object returnObj = provider.retrieve(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata());
+			Object returnObj = provider.retrieve(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest()));
 			return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
 		}
 		catch (PersistenceException ex)
@@ -468,7 +468,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			if (provider.updateSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), resourceID, getSifZone(), getSifContext(), getRequestMetadata()))
+			if (provider.updateSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), resourceID, getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest())))
 			{
 				return makeResopnseWithNoContent(false, ResponseAction.UPDATE);
 			}
@@ -562,7 +562,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			if (provider.deleteSingle(resourceID, getSifZone(), getSifContext(), getRequestMetadata()))
+			if (provider.deleteSingle(resourceID, getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest())))
 			{
 				return makeResopnseWithNoContent(false, ResponseAction.DELETE);
 			}
@@ -642,7 +642,7 @@ public class DataModelResource extends BaseResource
 		}
 		return provider;
 	}
-	
+
 	private boolean getAdvisory()
 	{
 	    return Boolean.valueOf(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, "false"));
@@ -663,7 +663,7 @@ public class DataModelResource extends BaseResource
 	{
 	    try
 	    {
-	    	List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata());
+	    	List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest()));
 	      
 	    	if (statusList != null)
 	    	{
@@ -692,7 +692,7 @@ public class DataModelResource extends BaseResource
 	{
 		try
 		{
-			List<OperationStatus> statusList = provider.deleteMany(getResourceIDsFromDeleteRequest(payload), getSifZone(), getSifContext(), getRequestMetadata());
+			List<OperationStatus> statusList = provider.deleteMany(getResourceIDsFromDeleteRequest(payload), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest()));
       
 			if (statusList != null)
 			{

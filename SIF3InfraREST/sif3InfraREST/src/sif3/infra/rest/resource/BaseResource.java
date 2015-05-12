@@ -43,6 +43,7 @@ import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
+import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.RequestHeaderConstants;
@@ -803,7 +804,7 @@ public abstract class BaseResource
 	{
 	    if (getSecurityService() != null)
 	    {
-	    	return getSecurityService().validate(securityToken, getRequestMetadata());
+	    	return getSecurityService().validate(securityToken, getRequestMetadata(null));
 	    }
 	    else // No security service known => report error
 	    {
@@ -820,19 +821,25 @@ public abstract class BaseResource
 	 * A number of HTTP Header fields can be set as URL Query Parameter instead if SIF Simple is used. In that case we also
 	 * need to check if some of these consumer fields are on the URL instead of the HTTP Header. As always if a field should be
 	 * stated on the URL as well as the HTTP Header, the HTTP Header will take precedence. 
+	 * 
+	 * @param sif3Session The session information of the requester if known. Can be null.
 	 */
-	protected RequestMetadata getRequestMetadata()
+	protected RequestMetadata getRequestMetadata(SIF3Session sif3Session)
 	{
 		RequestMetadata metadata = new RequestMetadata();
 		
 		// Get values from HTTP Header.
 		metadata.setGeneratorID(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID));
 		metadata.setNavigationID(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_NAVIGATION_ID));
-		metadata.setQueryIntention(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION));
+		metadata.setQueryIntention(QueryIntention.valueOfHTTPHeader(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION)));
 		metadata.setSourceName(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_SOURCE_NAME));
 		metadata.setApplicationKey(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY));
-		metadata.setUserToken(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_USER_TOKEN));
-		metadata.setInstanceID(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_INSTANCE_ID));
+		metadata.setAuthentictedUser(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_AUTHENTICATED_USER));
+		
+		if (sif3Session != null)
+		{
+			metadata.setEnvironmentID(sif3Session.getEnvironmentID());
+		}
 		
 		// In case of SIF Simple most of the values could be URL Query Parameters. Use them if not yet set by HTTP Header
 		if (metadata.getGeneratorID() == null)
@@ -845,7 +852,7 @@ public abstract class BaseResource
 		}
 		if (metadata.getQueryIntention() == null)
 		{
-			metadata.setQueryIntention(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_QUERY_INTENTION));
+			metadata.setQueryIntention(QueryIntention.valueOfHTTPHeader(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_QUERY_INTENTION)));
 		}
 		if (metadata.getSourceName() == null)
 		{
@@ -855,13 +862,21 @@ public abstract class BaseResource
 		{
 			metadata.setApplicationKey(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_APPLICATION_KEY));
 		}
-		if (metadata.getUserToken() == null)
+		if (metadata.getAuthentictedUser() == null)
 		{
-			metadata.setUserToken(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_USER_TOKEN));
+			metadata.setAuthentictedUser(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_AUTHENTICATED_USER));
 		}
-		if (metadata.getInstanceID() == null)
+		
+		// We have not set the applicationKey in the HTTP header or the URL then we retrieve it from the session.
+		// In such a case we have the following two options:
+		//     a) In a DIRECT environment this will be the applicationKey from the consumer. 
+		//     b) In a BROKERED environment it is the applicationKey of the provider as seen by the broker.
+		if (metadata.getApplicationKey() == null)
 		{
-			metadata.setInstanceID(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_INSTANCE_ID));
+			if (sif3Session != null)
+			{
+				metadata.setApplicationKey(sif3Session.getApplicationKey());
+			}
 		}
 
 		return metadata;
@@ -882,7 +897,7 @@ public abstract class BaseResource
 			if (validateBearerWithSecurityService(authInfo.getUserToken()))
 			{
 				// Now, what info can we get about the token
-				TokenInfo tokenInfo = getSecurityService().getInfo(authInfo.getUserToken(), getRequestMetadata());
+				TokenInfo tokenInfo = getSecurityService().getInfo(authInfo.getUserToken(), getRequestMetadata(null));
 				if (tokenInfo == null)
 				{
 					throw new VerifyError("No information about Bearer Token can be retrieved.");
