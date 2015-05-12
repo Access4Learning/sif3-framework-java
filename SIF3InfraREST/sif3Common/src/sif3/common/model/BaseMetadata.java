@@ -34,12 +34,11 @@ public class BaseMetadata implements Serializable
    
     private String generatorID = null;  // This is an optional field and might be provided by the consumer.
     
-    // The following three fields are early adopters for proposed SIF 3.1 inclusions. Should only be used once officially
+    // The following two fields are early adopters for proposed SIF 3.1 inclusions. Should only be used once officially
     // released. They may or may not be set. Until the official release they may not be set at all and if they are they
     // may only be available in a DIRECT environment but NOT through a BROKERED environment.
     private String applicationKey = null; // The applicationKey from the HTTP header field 'applicationKey' set by the consumer. 
- 	private String userToken = null; // The user Token from the HTTP header field 'userToken' set by the consumer. 
-    private String instanceID = null; // The instanceId from the HTTP header field 'instanceId' set by the consumer. 
+ 	private String authentictedUser = null; // The user Token from the HTTP header field 'authentictedUser' set by the consumer. 
 
 	public String getGeneratorID()
     {
@@ -61,31 +60,20 @@ public class BaseMetadata implements Serializable
 		this.applicationKey = applicationKey;
 	}
 
-	public String getUserToken()
+	public String getAuthentictedUser()
 	{
-		return userToken;
+		return authentictedUser;
 	}
 
-	public void setUserToken(String userToken)
+	public void setAuthentictedUser(String authentictedUser)
 	{
-		this.userToken = userToken;
-	}
-
-	public String getInstanceID()
-	{
-		return instanceID;
-	}
-
-	public void setInstanceID(String instanceID)
-	{
-		this.instanceID = instanceID;
+		this.authentictedUser = authentictedUser;
 	}
 
 	@Override
     public String toString()
     {
-	    return "BaseMetadata [applicationKey=" + applicationKey
-	            + ", generatorID=" + generatorID + ", instanceID=" + instanceID
-	            + ", userToken=" + userToken + "]";
+	    return "BaseMetadata [generatorID=" + this.generatorID + ", applicationKey="
+	            + this.applicationKey + ", authentictedUser=" + this.authentictedUser + "]";
     }
 }
