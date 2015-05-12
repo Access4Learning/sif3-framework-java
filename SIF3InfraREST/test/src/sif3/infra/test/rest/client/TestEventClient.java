@@ -156,8 +156,7 @@ public class TestEventClient
     	HeaderProperties hdrProps = new HeaderProperties();
     	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, "TestEventGenerator");
     	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY, "TestEventClient");
-    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_USER_TOKEN, "");
-    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_INSTANCE_ID, null);
+    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTHENTICATED_USER, "");
 
     	return hdrProps;
     }

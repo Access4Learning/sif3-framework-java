@@ -284,7 +284,8 @@ public class TestStudentPersonalConsumer
 		System.out.println("Start 'Get All Students' in all connected environments...");
 		try
 		{
-			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), null, REQUEST_TYPE);
+//			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), null, REQUEST_TYPE);
+			List<Response> responses = consumer.retrieve(null, null, REQUEST_TYPE);
 			System.out.println("Responses from attempt to Get All Students:");
 			printResponses(responses, consumer);
 		}
@@ -362,7 +363,7 @@ public class TestStudentPersonalConsumer
 		
   		StudentPersonalConsumer consumer = tester.getConsumer();
   		
-//  		tester.getStudents(consumer);
+  		tester.getStudents(consumer);
 //  		tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
 //  		tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
 //  		tester.getStudentsByServicePath("RoomInfos", "24ed508e1ed04bba82198233efa55859", consumer);
@@ -372,7 +373,7 @@ public class TestStudentPersonalConsumer
   //		tester.updateStudent(consumer);
   //		tester.updateStudents(consumer);
   //		tester.createStudents(consumer);
-  //		tester.deleteStudents(consumer);
+//  		tester.deleteStudents(consumer);
   
   		System.out.println("Finalise Consumer (i.e. disconnect and remove environment).");
   		consumer.finalise();
