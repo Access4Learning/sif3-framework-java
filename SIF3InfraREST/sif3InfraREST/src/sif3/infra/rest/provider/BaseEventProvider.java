@@ -84,7 +84,7 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 	 * ----------------------------------
 	 * adapter.generator.id   generatorId
 	 * env.application.key    applicationKey
-	 * env.userToken          userToken
+	 * env.userToken          authenticatedUser
 	 * env.instanceID         instanceId
 	 * env.mediaType          Content-Type, Accept
 	 * 
@@ -126,21 +126,21 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 	 * 
 	 * @return The env.userToken property from the provider's property file
 	 */
-	public String getUserToken()
+	public String getAuthentictedUser()
 	{
 		return getProviderEnvironment().getEnvironmentKey().getUserToken();
 	}
 
-	/**
-	 * This method returns the value of the env.instanceID property from the provider's property file. If that
-	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
-	 * 
-	 * @return The env.instanceID property from the provider's property file
-	 */
-	public String getInstanceID()
-	{
-		return getProviderEnvironment().getEnvironmentKey().getInstanceID();
-	}
+//	/**
+//	 * This method returns the value of the env.instanceID property from the provider's property file. If that
+//	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+//	 * 
+//	 * @return The env.instanceID property from the provider's property file
+//	 */
+//	public String getInstanceID()
+//	{
+//		return getProviderEnvironment().getEnvironmentKey().getInstanceID();
+//	}
 	
 	/**
 	 * This method returns the value of the env.mediaType property from the provider's property file. If that
@@ -313,8 +313,8 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
     	HeaderProperties hdrProps = new HeaderProperties();
     	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, getGeneratorID());
     	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY, getApplicationKey());
-    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_USER_TOKEN, getUserToken());
-    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_INSTANCE_ID, getInstanceID());
+    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTHENTICATED_USER, getAuthentictedUser());
+//    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_INSTANCE_ID, getInstanceID());
 
     	return hdrProps;
     }
