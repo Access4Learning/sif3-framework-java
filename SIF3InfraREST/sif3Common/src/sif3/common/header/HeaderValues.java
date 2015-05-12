@@ -18,6 +18,8 @@
 
 package sif3.common.header;
 
+import au.com.systemic.framework.utils.StringUtils;
+
 /**
  * @author Joerg Huber
  *
@@ -58,4 +60,48 @@ public class HeaderValues
 	 * Valid values for the "requestType" header field in the request.
 	 */
 	public enum RequestType {IMMEDIATE, DELAYED};
+	
+	/**
+	 * Valid values for the "queryIntention" header field in the request.
+	 */
+	public enum QueryIntention 
+	{
+		ALL ("ALL"), ONE_OFF ("ONE-OFF"), NO_CACHE ("NO-CACHE");
+		
+		private String httpHeaderValue;
+		private QueryIntention(String httpHeaderValue)
+		{
+			this.httpHeaderValue = httpHeaderValue;
+		}
+		
+		public String getHTTPHeaderValue()
+		{
+			return httpHeaderValue;
+		}
+		
+		/*
+		 * Return the QueryIntention as an enumerated value based on the string that is given in a HTTP Header.
+		 */
+		public static QueryIntention valueOfHTTPHeader(String httpHeaderValue)
+		{
+			if (StringUtils.isEmpty(httpHeaderValue))
+			{
+				return null;
+			}
+			if ("ALL".equalsIgnoreCase(httpHeaderValue))
+			{
+				return ALL;
+			}
+			if ("ONE-OFF".equalsIgnoreCase(httpHeaderValue))
+			{
+				return ONE_OFF;
+			}
+			if ("NO-CACHE".equalsIgnoreCase(httpHeaderValue))
+			{
+				return NO_CACHE;
+			}
+			
+			return null; //Nothing matched => undefined, so we return null
+		}
+	};
 }

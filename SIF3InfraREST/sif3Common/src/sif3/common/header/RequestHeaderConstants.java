@@ -44,8 +44,8 @@ public class RequestHeaderConstants
 	/*-- Experimental as of January 2015: Use with care because it is not officially part of SIF 3.x, yet --*/
 	/*------------------------------------------------------------------------------------------------------*/
 	public static final String HDR_APPLICATION_KEY = "applicationKey"; 
-	public static final String HDR_USER_TOKEN = "userToken";
-	public static final String HDR_INSTANCE_ID = "instanceId";
+	public static final String HDR_AUTHENTICATED_USER = "authenticatedUser";
+	//public static final String HDR_INSTANCE_ID = "instanceId";
 	
 	/*--------------------------------------------------------*/
 	/*-- Name of fields that are specific for CRUD Requests --*/
@@ -59,7 +59,7 @@ public class RequestHeaderConstants
 	public static final String HDR_ADVISORY = "mustUseAdvisory"; //true, false
 	public static final String HDR_METHOD_OVERRIDE = "methodOverride"; //DELETE, UPDATE
 	public static final String HDR_REQUEST_TYPE = "requestType"; //IMMEDIATE, DELAYED
-	public static final String HDR_QUERY_INTENTION = "queryIntention";
+	public static final String HDR_QUERY_INTENTION = "queryIntention"; //ALL, ONE-OFF, NO-CACHING
 
 	/*---------------------------------------------------------*/
 	/*-- Name of fields that are specific for Event Requests --*/
@@ -82,10 +82,9 @@ public class RequestHeaderConstants
 		HDR_DATE_TIME,
 		HDR_SOURCE_NAME,
 		
-		// Early adption field (not yet officially supported
+		// Early adopted field (not yet officially supported)
 		HDR_APPLICATION_KEY,
-		HDR_USER_TOKEN,
-		HDR_INSTANCE_ID,
+		HDR_AUTHENTICATED_USER,
 		
 		// CRUD Request Fields
 		HDR_IF_NOT_MATCH, 
