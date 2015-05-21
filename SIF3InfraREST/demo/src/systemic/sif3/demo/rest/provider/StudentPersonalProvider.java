@@ -311,7 +311,9 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
     {
     	logger.debug("Retrieve Students for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
-
+    	logger.debug("ChangedSince Date: "+metadata.getRequestParameter("ChangedSince"));
+    	logger.debug("Custom HTTP Header (customHdr): "+metadata.getHTTPParameter("customHdr"));
+    	
     	if (pagingInfo == null)
     	{
     		throw new DataTooLargeException("No paging info is provided. Please provide navigationPage and navigationPageSize.");
