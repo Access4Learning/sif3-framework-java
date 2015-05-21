@@ -125,6 +125,7 @@ public abstract class BaseProvider implements Provider, Runnable
     {
     	return getMultiObjectClassInfo().getObjectName();
     }
+
     
     /**
      * (non-Javadoc)
@@ -204,7 +205,6 @@ public abstract class BaseProvider implements Provider, Runnable
 		logger.debug(providerName+" started.");
     }
 
-    
     /*---------------------*/
     /*-- Private methods --*/
     /*---------------------*/

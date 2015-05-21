@@ -85,7 +85,6 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 	 * adapter.generator.id   generatorId
 	 * env.application.key    applicationKey
 	 * env.userToken          authenticatedUser
-	 * env.instanceID         instanceId
 	 * env.mediaType          Content-Type, Accept
 	 * 
 	 * Only properties that are not null or empty string will be set in the corresponding HTTP Header.
