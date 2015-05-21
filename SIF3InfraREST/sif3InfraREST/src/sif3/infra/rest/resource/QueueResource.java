@@ -296,7 +296,7 @@ public class QueueResource extends InfraResource
 			// The call below means that this test mode only works for Basic and SIF_HMACSHA256
 			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			
-			String consumerID = getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_CONSUMER_ID);
+			String consumerID = getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_CONSUMER_ID);
 			consumerID = consumerID == null ? "" : consumerID;
 			logger.debug("Consumer ID = "+consumerID+" requested next message");
 			if (error != null) // Not allowed to access!
@@ -360,7 +360,7 @@ public class QueueResource extends InfraResource
 		setDeleteMessageId(deleteMessageId);
 		if (logger.isDebugEnabled())
 		{
-			String consumerID = getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_CONSUMER_ID);
+			String consumerID = getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_CONSUMER_ID);
 			logger.debug("Remove Message from Queue (REST DELETE - Single) with queueID = "+queueID+", URL Postfix mime type = '"+mimeType+"' and message with ID = "+getDeleteMessageId()+" requested by consumer = "+consumerID);
 		}
 		return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Queues not supported.", "This DIRECT Environment implementation does not support queues, yet."), ResponseAction.DELETE);
