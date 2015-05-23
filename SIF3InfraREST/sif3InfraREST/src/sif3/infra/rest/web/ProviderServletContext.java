@@ -18,6 +18,10 @@
 
 package sif3.infra.rest.web;
 
+import java.util.EnumSet;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration.Dynamic;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -29,6 +33,7 @@ import sif3.infra.common.interfaces.EnvironmentConnector;
 import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.rest.env.connectors.EnvironmentConnectorFactory;
 import sif3.infra.rest.provider.ProviderFactory;
+import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.StringUtils;
 
 /**
@@ -94,6 +99,9 @@ public class ProviderServletContext implements ServletContextListener
 					logger.error("Failed to establish connection with Environment Provider. See prveious error logs for details.");
 					allOK = false;
 				}
+				
+				// If all is good till now we try to install the Auditor Filter
+				installAuditorFilter(servletCtxEvent, envMgr.getServiceProperties());
 			}
 			else
 			{
@@ -135,4 +143,36 @@ public class ProviderServletContext implements ServletContextListener
         HibernateUtil.shutdown();
         logger.info("Shutdown Provider: done.");
     }
+    
+    /*---------------------*/
+    /*-- Private methods --*/
+    /*---------------------*/
+    private void installAuditorFilter(ServletContextEvent servletCtxEvent, AdvancedProperties props)
+    {
+    	String auditClass = props.getPropertyAsString("adapter.audit.service", null);
+    	if (StringUtils.isEmpty(auditClass)) // none defined. No need to install audit filter
+    	{
+    		logger.debug("Property adapter.audit.service is not set in provider property file. No audit filter will be installed.");
+    		//return true;
+    	}
+    	else
+    	{
+    		logger.debug("Audit Class to use: "+auditClass+". Install Audit Service...");
+    		try
+    		{
+        		Dynamic registration = servletCtxEvent.getServletContext().addFilter("auditFilter", new AuditFilter());
+        		registration.setInitParameter(AuditFilter.AUDIT_SERVICE_CLASS, auditClass);
+        		registration.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
+        		
+        		logger.debug("Audit Service Installed successfully.");
+        		//return true;
+    		}
+    		catch (Exception ex)
+    		{
+    			logger.error("Failed to install Audit Service: "+ex.getMessage(), ex);
+    			//return false;
+    		}
+    	}
+    }
+    
 }

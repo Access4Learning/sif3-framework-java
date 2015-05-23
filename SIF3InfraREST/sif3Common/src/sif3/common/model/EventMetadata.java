@@ -28,7 +28,7 @@ public class EventMetadata extends BaseMetadata
 
     public EventMetadata()
     {
-    	super();
+    	super(null, null);
     }
 
 	@Override

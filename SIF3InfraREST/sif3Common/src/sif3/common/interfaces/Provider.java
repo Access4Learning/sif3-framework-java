@@ -20,6 +20,7 @@ package sif3.common.interfaces;
 
 import java.util.List;
 
+import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.model.PagingInfo;
@@ -129,7 +130,10 @@ public interface Provider extends DataModelLink
 	/**
      * This method is used to retrieve any number of objects. This is achieved in terms of 'paging' through the list of objects. The consumer
      * is expected to provide paging information to tell the provider which objects in the list shall be returned. The first page has
-     * the number 0.
+     * the number 0. The number of records to be returned are determined by the information within the
+	 * paging info parameter. If the data set to be returned is considered too large by the provider (implementation 
+	 * dependent) then a DataTooLargeException must be raised. This exception is then translated into an appropriate
+	 * HTTP Status within the framework to meet the SIF Specification.
      * 
      * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
      * @param context The Context for which the objects shall be returned. Can be Null (default Zone)
@@ -139,8 +143,9 @@ public interface Provider extends DataModelLink
      * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
+	 * @throws DataTooLargeException If the data that shall be returned is too large due to the values in the paging info.
 	 */
-	public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException;
+	public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
 	
 	/**
      * This method will create many objects in one call. The 'data' parameter is a collection-style object that is defined in the data

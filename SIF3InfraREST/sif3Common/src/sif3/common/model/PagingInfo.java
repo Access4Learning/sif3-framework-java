@@ -44,7 +44,7 @@ public class PagingInfo implements Serializable
     private int pageSize = NOT_DEFINED; // The number of object per page: Response & Request
     private int totalObjects = NOT_DEFINED; // The total number of objects available for the 'query': count(*). This is only part of a response!
     private int currentPageNo = NOT_DEFINED; // The number of the current page. Starts with 0(!): Response & Request
-    private String navigationId = null; // Used for paged requests where consumer wants re-use prvious query results: Response & Request
+    private String navigationId = null; // Used for paged requests where consumer wants re-use previous query results: Response & Request
 	
   public PagingInfo()
 	{}

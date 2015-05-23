@@ -43,18 +43,18 @@ public class TestQueueClient
 	private AdapterEnvironmentStore store = new AdapterEnvironmentStore(PROP_FILE_NAME);
 
 	// Brokered
-	private static final String QUEUE_CONNECTOR_URI = "https://australia.hostedzone.com/svcs/systemicDemo/queues";
-	private static final String SESSION_TOKEN = "1a47dae9-579b-4aa5-8048-608b06c611cb";
-	private static final String ZONE="demo";
-	private static final String PWD="DemoSIS1";
+//	private static final String QUEUE_CONNECTOR_URI = "https://australia.hostedzone.com/svcs/systemicDemo/queues";
+//	private static final String SESSION_TOKEN = "1a47dae9-579b-4aa5-8048-608b06c611cb";
+//	private static final String ZONE="demo";
+//	private static final String PWD="DemoSIS1";
 //	private static final String QUEUE_ID="f8dccdcb-f496-469b-bf2a-626e9f7afffb";
 
 	// Direct
-//	private static final String QUEUE_CONNECTOR_URI = "http://localhost:9080/SIF3InfraREST/sif3/queues";
-//	private static final String SESSION_TOKEN = "f8dccdcb-f496-469b-bf2a-626e9f7afffb";
-//	private static final String ZONE="auSchoolTestingZone";
-//	private static final String PWD="Password1";
-//	private static final String QUEUE_ID="f8dccdcb-f496-469b-bf2a-626e9f7afffb";
+	private static final String QUEUE_CONNECTOR_URI = "http://localhost:9080/SIF3InfraREST/sif3/queues";
+	private static final String SESSION_TOKEN = "f2658b59-435b-4a8d-9f76-c2400b6655c1";
+	private static final String ZONE="auSchoolTestingZone";
+	private static final String PWD="Password1";
+	private static final String QUEUE_ID="7d4dbb4a-24b0-4951-8f34-b561c24f43ef";
 
 	private void printResponse(Response response) throws Exception
 	{
@@ -228,14 +228,14 @@ public class TestQueueClient
 		    System.out.println("Start Testing TestQueueClient...");
 		    
 		    QueueClient clt = tester.getClient();
-//		    QueueType queue = tester.testCreateImmediateQueue(clt);
+		    QueueType queue = tester.testCreateImmediateQueue(clt);
 //		    QueueType queue = tester.testCreateLongPolloingQueue(clt);
 		    tester.testGetQueues(clt);
 //		    tester.testGetQueue(clt, queue);
 //		    tester.testRemoveQueue(clt, queue);
 //		    tester.testGetQueue(clt, queue);
-//		    nextMesgID = tester.testGetNextMessage(queue, nextMesgID);
-//		    nextMesgID = tester.testGetNextMessage(queue, nextMesgID);
+		    nextMesgID = tester.testGetNextMessage(queue, nextMesgID);
+		    nextMesgID = tester.testGetNextMessage(queue, nextMesgID);
 //		    nextMesgID = tester.testGetNextMessages(queue);
 //		    tester.testGetQueue(clt, queue);
 //		    tester.testRemoveMessage(queue, nextMesgID);

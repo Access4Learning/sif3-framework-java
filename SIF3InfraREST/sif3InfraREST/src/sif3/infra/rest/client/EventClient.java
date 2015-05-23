@@ -20,6 +20,7 @@ package sif3.infra.rest.client;
 
 import java.net.URI;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import sif3.common.CommonConstants;
@@ -63,7 +64,7 @@ public class EventClient extends BaseClient
 	 * @param sif3Session The active SIF3 session to use to create the authentication token.
 	 * @param serviceName The serviceName for which the event is. This is generally the SIF Object name such as StudentPersonals (plural form!)
 	 */
-	public EventClient(ProviderEnvironment providerEnvironment, SIF3Session sif3Session, String serviceName, MarshalFactory dmMarshaller)
+	public EventClient(ProviderEnvironment providerEnvironment, MediaType requestMediaType, MediaType responseMediaType, SIF3Session sif3Session, String serviceName, MarshalFactory dmMarshaller)
 	{
 		super();
 		if (providerEnvironment == null)
@@ -94,9 +95,11 @@ public class EventClient extends BaseClient
 			this.providerEnvironment = providerEnvironment;
 			this.sif3Session = sif3Session;
 			this.serviceName = serviceName;
-			setRequestMediaType(providerEnvironment.getMediaType(), null);
-			setResponseMediaType(providerEnvironment.getMediaType(), null);
 			setDataModelMarshaller(dmMarshaller);
+//			setRequestMediaType(providerEnvironment.getMediaType(), null);
+//			setResponseMediaType(providerEnvironment.getMediaType(), null);
+			setRequestMediaType(requestMediaType, dmMarshaller);
+			setResponseMediaType(responseMediaType, null);
 			configureClienService(eventConnector, providerEnvironment.getSecureConnection());
 		}
 	}
@@ -115,7 +118,7 @@ public class EventClient extends BaseClient
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
      */
-	public BaseResponse sendEvents(SIFEvent<?> event, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public BaseResponse sendEvents(SIFEvent<?> event, SIFZone zone, SIFContext context, HeaderProperties overrideHdrFields) throws ServiceInvokationException
 	{
 		if (allOK) // Only send events if all is fine.
 		{
@@ -142,7 +145,7 @@ public class EventClient extends BaseClient
 //				{
 //					logger.debug("sendEvents: Payload to send:\n"+payloadStr);
 //				}
-				HeaderProperties headerProps = getEventHeaders(event.getEventAction(),	event.getUpdateType(), zone, context);
+				HeaderProperties headerProps = getEventHeaders(event.getEventAction(),	event.getUpdateType(), zone, context, overrideHdrFields);
 				
 				Builder builder = setRequestHeaderAndMediaTypes(service, headerProps, false);
 				logger.debug("Send Event with payload size: "+payloadStr.length());
@@ -175,25 +178,26 @@ public class EventClient extends BaseClient
 	 * @param context The context for this event. Can be null.
 	 * @return
 	 */
-	private HeaderProperties getEventHeaders(EventAction eventAction, UpdateType updateType, SIFZone zone, SIFContext context)
+	private HeaderProperties getEventHeaders(EventAction eventAction, UpdateType updateType, SIFZone zone, SIFContext context, HeaderProperties overrideHdrFields)
 	{
-		HeaderProperties hdrProperties = new HeaderProperties();
-		
-		// First create the properties for the authentication header.
+		// Set the override header fields
+		HeaderProperties hdrProperties = (overrideHdrFields != null) ? new HeaderProperties(overrideHdrFields.getHeaderProperties()) : new HeaderProperties();
+
+		// Add properties for the authentication header.
 		ClientUtils.setAuthenticationHeader(hdrProperties, providerEnvironment.getAuthMethod(), sif3Session.getSessionToken(), sif3Session.getPassword());
 
-		// Set event specific properties
+		// Add event specific properties
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_MESSAGE_TYPE, HeaderValues.MessageType.EVENT.name());
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_EVENT_ACTION, eventAction.name());
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, HeaderValues.ServiceType.OBJECT.name());
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_NAME, serviceName);
 		
-		String generatorID = providerEnvironment.getGeneratorID();
-		if (StringUtils.notEmpty(generatorID))
-		{
-			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, generatorID);
-		}
-		
+//		String generatorID = providerEnvironment.getGeneratorID();
+//		if (StringUtils.notEmpty(generatorID))
+//		{
+//			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, generatorID);
+//		}
+				
 		if (eventAction == EventAction.UPDATE)
 		{
 			if (updateType == null)

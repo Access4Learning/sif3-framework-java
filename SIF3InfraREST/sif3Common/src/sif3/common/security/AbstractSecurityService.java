@@ -47,7 +47,8 @@ public abstract class AbstractSecurityService implements SecurityService
 	 * incorrect tokens, not authenticated tokens etc.
 	 *     
 	 * @param securityToken The token that shall be validated against a given security service such as LDAP, OAuth, Active Directory, etc.
-     * @param requestMetadata Metadata that has been sourced from a request. 
+     * @param requestMetadata Metadata that has been sourced from a request. The environmentID property is always null because the token is
+     *                        not yet authenticated and therefore the environment is not yet determined. 
 	 * 
 	 * @return TRUE if the token is known and valid to the security server and not expired. If a token is expired then FALSE should be returned.
 	 */
@@ -63,7 +64,8 @@ public abstract class AbstractSecurityService implements SecurityService
   	 * expire date is null in the returned TokenInfo object.
   	 * 
   	 * @param securityToken The security token for which the TokenInfo shall be returned.
-     * @param requestMetadata Metadata that has been sourced from a request. 
+     * @param requestMetadata Metadata that has been sourced from a request. The environmentID property is always null because the token is
+     *                        not yet authenticated and therefore the environment is not yet determined.
   	 * 
   	 * @return See Desc. It is expected that this method only returns either the environmentKey or the SIF environment ID or the SIF session token but
   	 *         not all of these at the same time.

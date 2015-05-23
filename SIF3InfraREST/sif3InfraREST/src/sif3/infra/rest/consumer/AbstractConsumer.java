@@ -29,6 +29,7 @@ import sif3.common.exception.ServiceInvokationException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
+import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.Consumer;
@@ -144,15 +145,14 @@ public abstract class AbstractConsumer implements Consumer
 	 * ----------------------------------
 	 * adapter.generator.id   generatorId
 	 * env.application.key    applicationKey
-	 * env.userToken          userToken
-	 * env.instanceID         instanceId
+	 * env.userToken          authenticatedUser
 	 * env.mediaType          Content-Type, Accept
 	 * 
 	 * Only properties that are not null or empty string will be set in the corresponding HTTP Header.
 	 *
 	 * There are situations where and application may need a more 'dynamic' behaviour where the above values are determined
-	 * at runtime, based on other circumstances and therefore these properies must be retrieved from an other source than the
-	 * consumer's property file. In such a case the methods below gan be overwritten to make them dynamic and controlled by
+	 * at runtime, based on other circumstances and therefore these properties must be retrieved from an other source than the
+	 * consumer's property file. In such a case the methods below can be overwritten to make them dynamic and controlled by
 	 * the implementation rather than driven by the consumer's property file. If any of the methods below is overwritten then
 	 * the value of the over riding method is set in the corresponding HTTP Header field if the return value of the method 
 	 * is not null or an empty string.
@@ -186,21 +186,21 @@ public abstract class AbstractConsumer implements Consumer
 	 * 
 	 * @return The env.userToken property from the consumer's property file
 	 */
-	public String getUserToken()
+	public String getAuthentictedUser()
 	{
 		return getConsumerEnvironment().getEnvironmentKey().getUserToken();
 	}
 
-	/**
-	 * This method returns the value of the env.instanceID property from the consumer's property file. If that
-	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
-	 * 
-	 * @return The env.instanceID property from the consumer's property file
-	 */
-	public String getInstanceID()
-	{
-		return getConsumerEnvironment().getEnvironmentKey().getInstanceID();
-	}
+//	/**
+//	 * This method returns the value of the env.instanceID property from the consumer's property file. If that
+//	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+//	 * 
+//	 * @return The env.instanceID property from the consumer's property file
+//	 */
+//	public String getInstanceID()
+//	{
+//		return getConsumerEnvironment().getEnvironmentKey().getInstanceID();
+//	}
 	
 	/**
 	 * This method returns the value of the env.mediaType property from the consumer's property file. If that
@@ -496,13 +496,13 @@ public abstract class AbstractConsumer implements Consumer
 	@Override
 	public List<Response> retrievByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-    if (!initOK)
-    {
-      logger.error("Consumer not initialsied properly. See previous error log entries.");
-      return null;
-    }
+		if (!initOK)
+		{
+			logger.error("Consumer not initialsied properly. See previous error log entries.");
+			return null;
+		}
 
-    Timer timer = new Timer();
+		Timer timer = new Timer();
 		timer.start();
 		List<Response> responses = new ArrayList<Response>();
 		
@@ -549,15 +549,15 @@ public abstract class AbstractConsumer implements Consumer
 	 * @see sif3.common.consumer.Consumer#retrieve(sif3.common.model.PagingInfo, java.util.List)
 	 */
 	@Override
-	public List<Response> retrieve(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+	public List<Response> retrieve(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
-    if (!initOK)
-    {
-      logger.error("Consumer not initialsied properly. See previous error log entries.");
-      return null;
-    }
+		if (!initOK)
+		{
+			logger.error("Consumer not initialsied properly. See previous error log entries.");
+			return null;
+		}
 
-    Timer timer = new Timer();
+		Timer timer = new Timer();
 		timer.start();
 		List<Response> responses = new ArrayList<Response>();
 		
@@ -566,6 +566,16 @@ public abstract class AbstractConsumer implements Consumer
 			logger.error("No connected environment for "+getConsumerEnvironment().getEnvironmentName()+". See previous erro log entries.");
 			return responses;
 		}
+		
+		// Ensure query Intention is not null. if so default to ONE-OFF as per SIF 3.x spec.
+		queryIntention = (queryIntention == null) ? QueryIntention.ONE_OFF : queryIntention;
+		
+		// Set default set of HTTP Header fields
+		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, requestType);
+		
+		// Add query intention to headers.
+		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION, queryIntention.getHTTPHeaderValue());
+		
 		// List is null or empty which means we perform action in default Zone/Context
 		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
 		{
@@ -576,7 +586,7 @@ public abstract class AbstractConsumer implements Consumer
 			}
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, getHeaderProperties(getConsumerEnvironment(), false, requestType), getMultiObjectClassInfo().getObjectType(), null, null));
+				responses.add(getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, getMultiObjectClassInfo().getObjectType(), null, null));
 			}
 			else  //pretend to have received a 'fake' error Response
 			{
@@ -590,7 +600,7 @@ public abstract class AbstractConsumer implements Consumer
 				ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 				if (error == null) //all good
 				{
-					responses.add(getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, getHeaderProperties(getConsumerEnvironment(), false, requestType), getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+					responses.add(getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 				}
 				else //pretend to have received a 'fake' error Response
 				{
@@ -602,8 +612,17 @@ public abstract class AbstractConsumer implements Consumer
 		logger.debug("Time taken to call and process 'retrieve all' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 		return responses;
 	}
+
+	/*
+	 * See description of retrieve() but without the queryIntention parameter. Since this parameter is not required
+	 * by this method it will be assumed null, which in turn will assume ONE-OFF as per interface definition.
+	 */
+	public List<Response> retrieve(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+	{
+		return retrieve(pagingInfo, zoneCtxList, requestType, QueryIntention.ONE_OFF);
+	}
 	
-	public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+	public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
 		if (!initOK)
 		{
@@ -620,6 +639,17 @@ public abstract class AbstractConsumer implements Consumer
 			logger.error("No connected environment for " + getConsumerEnvironment().getEnvironmentName() + ". See previous erro log entries.");
 			return responses;
 		}
+		
+		// Ensure query Intention is not null. if so default to ONE-OFF as per SIF 3.x spec.
+		queryIntention = (queryIntention == null) ? QueryIntention.ONE_OFF : queryIntention;
+		
+		// Set default set of HTTP Header fields
+		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, requestType, HeaderValues.ServiceType.SERVICEPATH);
+		
+		// Add query intention to headers.
+		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION, queryIntention.getHTTPHeaderValue());
+
+		
 		// List is null or empty which means we perform action in default  Zone/Context
 		if ((zoneCtxList == null) || (zoneCtxList.size() == 0))
 		{
@@ -630,7 +660,7 @@ public abstract class AbstractConsumer implements Consumer
 			}
 			if (error == null) // all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, getHeaderProperties(getConsumerEnvironment(), false,  requestType, HeaderValues.ServiceType.SERVICEPATH), getMultiObjectClassInfo().getObjectType(), null, null));
+				responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, hdrProps, getMultiObjectClassInfo().getObjectType(), null, null));
 			}
 			else // pretend to have received a 'fake' error Response
 			{
@@ -644,7 +674,7 @@ public abstract class AbstractConsumer implements Consumer
 				ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 				if (error == null) // all good
 				{
-					responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, getHeaderProperties(getConsumerEnvironment(), false, requestType,  HeaderValues.ServiceType.SERVICEPATH), getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+					responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, hdrProps, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 				}
 				else // pretend to have received a 'fake' error Response
 				{
@@ -657,7 +687,15 @@ public abstract class AbstractConsumer implements Consumer
 	    return responses;
 	}
 	 
-
+	/*
+	 * See description of retrieveByServicePath() but without the queryIntention parameter. Since this parameter is not required
+	 * by this method it will be assumed null, which in turn will assume ONE-OFF as per interface definition.
+	 */
+	public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+	{
+		return retrieveByServicePath(queryCriteria, pagingInfo, zoneCtxList, requestType, QueryIntention.ONE_OFF);
+	}
+	
 	/*-----------------------*/
 	/*-- Update Operations --*/
 	/*-----------------------*/
@@ -827,8 +865,8 @@ public abstract class AbstractConsumer implements Consumer
 	   // Set values of consumer property file or their overridden value. Note thsetHeaderProperty() method will do the check
 	   // for null, so no need to do this here.
 	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY, getApplicationKey());
-	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_USER_TOKEN, getUserToken());
-	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_INSTANCE_ID, getInstanceID());
+	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTHENTICATED_USER, getAuthentictedUser());
+//	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_INSTANCE_ID, getInstanceID());
 	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, getGeneratorID());
 	   
 //	   String generatorID = getGeneratorID();
@@ -885,7 +923,7 @@ public abstract class AbstractConsumer implements Consumer
 			{
 				String zoneID = (zone == null) ? "Default" : zone.getId();
 				String contextID = (context == null) ? "Default" : context.getId();
-				error = new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not authorized.", right.name()+ " access is not set to "+accessType.name()+" for the service " + serviceName +" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+getSIF3Session().getEnvironmentName(), "Client side check.");			
+				error = new ErrorDetails(Status.FORBIDDEN.getStatusCode(), "Consumer is not authorized to issue the requested operation.", right.name()+ " access is not set to "+accessType.name()+" for the service " + serviceName +" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+getSIF3Session().getEnvironmentName(), "Client side check.");			
 			}
 		}
 		return error;

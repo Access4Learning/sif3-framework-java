@@ -22,6 +22,7 @@ import java.util.List;
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
 import sif.dd.au30.model.StudentCollectionType;
 import sif.dd.au30.model.StudentPersonalType;
+import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
@@ -284,7 +285,8 @@ public class TestStudentPersonalConsumer
 		System.out.println("Start 'Get All Students' in all connected environments...");
 		try
 		{
-			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), null, REQUEST_TYPE);
+			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), null, REQUEST_TYPE, QueryIntention.NO_CACHE);
+//			List<Response> responses = consumer.retrieve(null, null, REQUEST_TYPE);
 			System.out.println("Responses from attempt to Get All Students:");
 			printResponses(responses, consumer);
 		}
@@ -303,7 +305,7 @@ public class TestStudentPersonalConsumer
 		try
 		{
 			// Get all students for a service path cirteria. Get 5 students per page (i.e page 1). 
-			List<Response> responses = consumer.retrieveByServicePath(criteria, new PagingInfo(5, 1), null, REQUEST_TYPE);
+			List<Response> responses = consumer.retrieveByServicePath(criteria, new PagingInfo(5, 1), null, REQUEST_TYPE, QueryIntention.ALL);
 			System.out.println("Responses from attempt to Get All Students for '" + criteria + "': ");
 			printResponses(responses, consumer);
 		}
@@ -372,7 +374,7 @@ public class TestStudentPersonalConsumer
   //		tester.updateStudent(consumer);
   //		tester.updateStudents(consumer);
   //		tester.createStudents(consumer);
-  //		tester.deleteStudents(consumer);
+//  		tester.deleteStudents(consumer);
   
   		System.out.println("Finalise Consumer (i.e. disconnect and remove environment).");
   		consumer.finalise();

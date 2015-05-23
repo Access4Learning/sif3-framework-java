@@ -209,9 +209,9 @@
         <param name="filename" value="${lib.root.dir}/datamodel/${jarprefix}DataModel_${locale}${sifddversion}.jar" />
         <param name="artifactId" value="DataModel_${locale}" />
         <param name="artifactVersion" value="${sifddversion}" />
-      </antcall>
+      </antcall>   
       <antcall target="maven-install-jar">
-        <param name="filename" value="${lib.root.dir}/systemic/systemic-framework-20140410.jar" />
+        <param name="filename" value="${lib.root.dir}/${systemic.path}/systemic-framework-20140410.jar" />
         <param name="artifactId" value="systemic-framework" />
         <param name="artifactVersion" value="1.0" />
       </antcall>

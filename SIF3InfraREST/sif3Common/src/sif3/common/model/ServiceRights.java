@@ -29,7 +29,7 @@ public class ServiceRights implements Serializable
 {
     private static final long serialVersionUID = 2972634204650446881L;
 
-	public enum AccessType {APPROVED, SUPPORTED, REJECTED};
+	public enum AccessType {APPROVED, SUPPORTED, REJECTED, REQUESTED, UNSUPPORTED };
 	
 	public enum AccessRight {QUERY, CREATE, UPDATE, DELETE, PROVIDE, SUBSCRIBE, ADMIN};
 	

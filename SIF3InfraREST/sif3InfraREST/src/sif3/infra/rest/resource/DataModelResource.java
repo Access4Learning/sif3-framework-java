@@ -31,20 +31,21 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import sif3.common.CommonConstants;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.conversion.UnmarshalFactory;
+import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderValues;
-import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.HeaderValues.ResponseAction;
+import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.Provider;
 import sif3.common.interfaces.QueryProvider;
 import sif3.common.model.PagingInfo;
@@ -124,7 +125,6 @@ public class DataModelResource extends BaseResource
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Service to use: "+dmObjectNamePlural);
-//			logger.debug("URL Postfix mimeType: '"+mimeType+"'");
 		}
 	    
 	    // Provider Factory should already be initialised. If not it will be done now...
@@ -202,7 +202,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			Object returnObj = provider.createSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata());
+			Object returnObj = provider.createSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
 
 			return makeResponse(returnObj, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, provider.getMarshaller());
 		}
@@ -244,7 +244,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			List<CreateOperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata());
+			List<CreateOperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
 			
 			if (statusList != null)
 			{
@@ -298,7 +298,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			Object returnObj = provider.retrievByPrimaryKey(resourceID, getSifZone(), getSifContext(), getRequestMetadata());
+			Object returnObj = provider.retrievByPrimaryKey(resourceID, getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
 			
 			if (returnObj != null)
 			{
@@ -347,7 +347,7 @@ public class DataModelResource extends BaseResource
 			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + parser.getObjectNamePlural() + " available."), ResponseAction.QUERY);
 		}
 
-		PagingInfo pagingInfo = new PagingInfo(getHeaderProperties(), getQueryParameters());
+		PagingInfo pagingInfo = new PagingInfo(getSIFHeaderProperties(), getQueryParameters());
 		if (pagingInfo.getPageSize() <= PagingInfo.NOT_DEFINED) // page size not defined. Pass null to provider.
 		{
 			pagingInfo = null;
@@ -359,7 +359,7 @@ public class DataModelResource extends BaseResource
 
 		try
 		{
-			Object returnObj = QueryProvider.class.cast(provider).retrieveByServicePath(parser.getQueryCriteria(), getSifZone(), getSifContext(), pagingInfo, getRequestMetadata());
+			Object returnObj = QueryProvider.class.cast(provider).retrieveByServicePath(parser.getQueryCriteria(), getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
 			
 			return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
 		}
@@ -373,7 +373,11 @@ public class DataModelResource extends BaseResource
 		}
 		catch (UnsupportedQueryException ex)
 		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+		}
+		catch (DataTooLargeException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(CommonConstants.RESPONSE_TOO_LARGE, "Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
 		}
 	}
 
@@ -400,7 +404,7 @@ public class DataModelResource extends BaseResource
 			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.QUERY);			
 		}
 	
-		PagingInfo pagingInfo = new PagingInfo(getHeaderProperties(), getQueryParameters());
+		PagingInfo pagingInfo = new PagingInfo(getSIFHeaderProperties(), getQueryParameters());
 		if (pagingInfo.getPageSize() <= PagingInfo.NOT_DEFINED) // page size not defined. Pass null to provider.
 		{
 			pagingInfo = null;
@@ -412,7 +416,7 @@ public class DataModelResource extends BaseResource
 		
 		try
 		{
-			Object returnObj = provider.retrieve(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata());
+			Object returnObj = provider.retrieve(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
 			return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
 		}
 		catch (PersistenceException ex)
@@ -425,7 +429,11 @@ public class DataModelResource extends BaseResource
 		}
 		catch (UnsupportedQueryException ex)
 		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "+provider.getMultiObjectClassInfo().getObjectName()+" with Paging Information: "+pagingInfo+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY);			
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Failed to retrieve "+provider.getMultiObjectClassInfo().getObjectName()+" with Paging Information: "+pagingInfo+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY);			
+		}
+		catch (DataTooLargeException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(CommonConstants.RESPONSE_TOO_LARGE, "Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
 		}
 	}
 
@@ -459,7 +467,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			if (provider.updateSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), resourceID, getSifZone(), getSifContext(), getRequestMetadata()))
+			if (provider.updateSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), resourceID, getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false)))
 			{
 				return makeResopnseWithNoContent(false, ResponseAction.UPDATE);
 			}
@@ -493,7 +501,7 @@ public class DataModelResource extends BaseResource
 	public Response updateMany(String payload)
 	{
 		// Check what is really required: DELETE or UPDATE
-		boolean doDelete = HeaderValues.MethodType.DELETE.name().equalsIgnoreCase(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE));
+		boolean doDelete = HeaderValues.MethodType.DELETE.name().equalsIgnoreCase(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE));
 	  
 		if (logger.isDebugEnabled())
 		{
@@ -553,7 +561,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			if (provider.deleteSingle(resourceID, getSifZone(), getSifContext(), getRequestMetadata()))
+			if (provider.deleteSingle(resourceID, getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false)))
 			{
 				return makeResopnseWithNoContent(false, ResponseAction.DELETE);
 			}
@@ -633,10 +641,10 @@ public class DataModelResource extends BaseResource
 		}
 		return provider;
 	}
-	
+
 	private boolean getAdvisory()
 	{
-	    return Boolean.valueOf(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, "false"));
+	    return Boolean.valueOf(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, "false"));
 	}
 	
 	/*
@@ -654,7 +662,7 @@ public class DataModelResource extends BaseResource
 	{
 	    try
 	    {
-	    	List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata());
+	    	List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
 	      
 	    	if (statusList != null)
 	    	{
@@ -683,7 +691,7 @@ public class DataModelResource extends BaseResource
 	{
 		try
 		{
-			List<OperationStatus> statusList = provider.deleteMany(getResourceIDsFromDeleteRequest(payload), getSifZone(), getSifContext(), getRequestMetadata());
+			List<OperationStatus> statusList = provider.deleteMany(getResourceIDsFromDeleteRequest(payload), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
       
 			if (statusList != null)
 			{

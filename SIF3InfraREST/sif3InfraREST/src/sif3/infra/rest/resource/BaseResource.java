@@ -26,6 +26,7 @@ import java.util.Set;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -43,6 +44,7 @@ import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
+import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.RequestHeaderConstants;
@@ -86,7 +88,7 @@ import sif3.infra.common.model.ProductIdentityType;
 import sif3.infra.common.model.UpdateResponseType;
 import sif3.infra.common.model.UpdateType;
 import sif3.infra.common.model.UpdatesType;
-import sif3.infra.rest.audit.AuditableResource;
+import sif3.infra.rest.resource.audit.AuditableResource;
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.DateUtils;
 import au.com.systemic.framework.utils.StringUtils;
@@ -116,11 +118,12 @@ public abstract class BaseResource
 
 	private UriInfo uriInfo;
 	private Request request;
-	private HttpHeaders requestHeaders;
+//	private HttpHeaders requestHeaders;
 	private ObjectFactory infraObjectFactory = new ObjectFactory();
 	private InfraMarshalFactory infraMarshaller = new InfraMarshalFactory();
 	private InfraUnmarshalFactory infraUnmarshaller = new InfraUnmarshalFactory();
-	private HeaderProperties hdrProperties = new HeaderProperties();
+	private HeaderProperties sifHdrProperties = new HeaderProperties();
+	private HeaderProperties allHTTPHdrProperties = new HeaderProperties();
 	private SIFZone sifZone = null;
 	private SIFContext sifContext = null;
 	private boolean isSecure = false;
@@ -165,9 +168,10 @@ public abstract class BaseResource
 	{
 		this.uriInfo = uriInfo;
 		this.request = request;
-		this.requestHeaders = requestHeaders;
+//		this.requestHeaders = requestHeaders;
 		setURLMediaTypeFromPath(uriInfo.getPath());
-		extractHeaderProperties(requestHeaders);
+		extractSIFHeaderProperties(requestHeaders);
+		extractAllHTTPHeaderProperties(requestHeaders);
 		extractQueryParameters(uriInfo);
 		setSecure(HTTPS_SCHEMA.equalsIgnoreCase(getUriInfo().getBaseUri().getScheme()));
 		setRelativeServicePath(getUriInfo().getPath(), servicePrefixPath);
@@ -203,7 +207,8 @@ public abstract class BaseResource
 			logger.debug("Relative URI       : " + getUriInfo().getPath());
 			logger.debug("Rel. Service Path  : " + getRelativeServicePath());
 			logger.debug("Protocol           : " + getUriInfo().getBaseUri().getScheme());
-			logger.debug("SIF3 Req. Headers  : " + getHeaderProperties());
+			logger.debug("SIF3 Req. Headers  : " + getSIFHeaderProperties());
+			logger.debug("All HTTP Headers   : " + getAllHTTPHeaderProperties());
 			logger.debug("URL Query Params   : " + getQueryParameters());
 			logger.debug("Zone ID            : " + getSifZone());
 			logger.debug("ContextID          : " + getSifContext());
@@ -211,10 +216,11 @@ public abstract class BaseResource
 			logger.debug("Resource Init ok   : " + allOK);
 		}
 		
-    if (AuditableResource.isAuditing()) {
-      validSession(); // Ensure that the session is populated for all requests when auditing.
-      AuditableResource.setResource(this);
-    }
+		// If auditing is enabled then we must give the resource to the 'auditor' for it to extract information about the sif3 session, zones etc.
+		if (AuditableResource.isAuditing())
+		{
+			AuditableResource.setResource(this);
+		}
 	}
 
 	public UriInfo getUriInfo()
@@ -255,9 +261,19 @@ public abstract class BaseResource
 		return allOK;
 	}
 
-	public HeaderProperties getHeaderProperties()
+	public HeaderProperties getSIFHeaderProperties()
     {
-    	return this.hdrProperties;
+    	return this.sifHdrProperties;
+    }
+	
+	/**
+	 * Returns all HTTP Headers and their value. The name of a particular header is in always in lower case!
+	 * 
+	 * @return All the avaialble HTTP header properties of the request. See also desc for more info.
+	 */
+	public HeaderProperties getAllHTTPHeaderProperties()
+    {
+    	return this.allHTTPHdrProperties;
     }
 
 	/*
@@ -279,10 +295,10 @@ public abstract class BaseResource
 //    	return ((this.responseMediaType != null) ? this.responseMediaType : (this.urlPostfixMimeType != null ? this.urlPostfixMimeType : MediaType.APPLICATION_XML_TYPE));
     }
 
-	public HttpHeaders getRequestHeaders()
-    {
-    	return this.requestHeaders;
-    }
+//	public HttpHeaders getRequestHeaders()
+//    {
+//    	return this.requestHeaders;
+//    }
 
 	public AbstractSecurityService getSecurityService()
     {
@@ -359,175 +375,58 @@ public abstract class BaseResource
 		return getEnvironmentManager().getEnvironmentInfo().getAdapterName();
 	}
 	
-
 	/*---------------------------------*/
 	/*-- Security Validation Methods --*/
 	/*---------------------------------*/
+
 	/**
-	 * If the client is valid then the ErrorDetails returned is null. If there is something wrong, then the ErrorDetails will be 
-	 * set accordingly and returned. Checks include if authentication token is valid for an environment and if the access
-	 * rights for the requested service are at expected levels.
+	 * This method combines the validSession() and validateBearerSession() method into a higher level, so that the caller doesn't have to know
+	 * which one to invoke, rather have the code here to determine it automatically as it is possible in most cases.
 	 * 
-	 * @param serviceName Service for which the access rights shall be checked.
-	 * @param right The access right (QUERY, UPDATE etc) that shall be checked for.
-	 * @param accessType The access level (SUPPORTED, APPROVED, etc) that must be met for the given service and right.
-	 * @param allowDelayed TRUE then the requeste operation allows delayed requests. In a DIRECT environment it is not supported at
-	 *                     all and this parameter will be ignored. FALSE if delayed requests are not allowed.
-	 * 
-	 * @return See desc
+	 * @return Null if all is fine, ErrorDetails otherwise.
 	 */
-	public ErrorDetails validClient(String serviceName, AccessRight right, AccessType accessType, boolean allowDelayed)
+	protected ErrorDetails validateSession()
 	{
-	    // There must be a session/environment for that client otherwise an error would have been returned with previous check
-	    ProviderEnvironment envInfo = getProviderEnvironment();
-    
 	    AuthenticationInfo authInfo = getAuthInfo();
 		if ((authInfo == null) || (authInfo.getUserToken() == null))
 		{
 			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No or invalid Authorization Token provided");				
 		}
-	        
-	    ErrorDetails error = null;
 	    if (authInfo.getAuthMethod() != AuthenticationMethod.Bearer) // Basic or SIF_HMACSHA256
 	    {
-	    	error = validSession(authInfo, false, null);
+	    	return validSession(authInfo, false, null);
 	    }
 	    else
 	    {
-	    	error = validateBearerSession(authInfo);
+	    	return validateBearerSession(authInfo);
 	    }
-	    		
-		if (error != null)
-		{
-			return error;
-		}
-
-		// If we get to this point then all validation so far has succeeded and we do have a valid session
-		// in the session cache and workstore (DB).
-		
-		// Check if DELAYED requests are supported. Right now this direct environment does not support it.=> Return an error.
-		if (isDirectEnvironment())
-		{
-			if (extractRequestType() == RequestType.DELAYED)
-			{
-				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not supported with this DIRECT Environment");
-			}
-		}
-		else  // in a Brokered environment only the 'multiple' object operations are supporting delayed.
-		{
-			if (extractRequestType() == RequestType.DELAYED)
-			{
-    			if (!allowDelayed)
-    			{
-    				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not allowed for this operation");				
-    			}
-    			else
-    			{
-    				//TODO: JH - Once delayed is supported then the error below must be removed.
-    				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not supported by this provider.");				
-    			}
-			}
-		}
-		
-		if (envInfo.getCheckACL())
-		{
-			// We must have a valid session for that request otherwise it would have failed in validSession() method.
-			SIF3Session sif3Session = getSIF3SessionForRequest();
-			SIFContext context = getSifContext();
-			SIFZone zone = getSifZone();
-			
-			//Check access rights
-			if (!sif3Session.hasAccess(right, accessType, serviceName, zone, context))
-			{
-				String zoneID = (zone == null) ? "Default" : zone.getId();
-				String contextID = (context == null) ? "Default" : context.getId();
-				error = new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, right.name()+ " access is not set to "+accessType.name()+" for the service "+serviceName+" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+sif3Session.getEnvironmentName(), "Provider side check.");			
-			}
-		}
-		return error;
 	}
-	
-	public void validSession() {
-	  validSession(getAuthInfo(), false, null);
-	}
-	
 	
 	/**
-	 * This method checks if the information in the authentication token matches an existing session and if the token is an
-	 * authorised/authenticated token. If all tests succeed then null is returned, otherwise and ErrorDetails object is returned
-	 * that holds all the required error information and status.
+	 * This method will attempt to load a SIF3 Session from the session cache managed in the environment manager.
+	 * The SIF3 Session to be returned is based on the Authorisation HTTP header information available.
 	 * 
-	 * @param validateBearerToken TRUE: Bearer Token will be validated against security service.
-	 *                            FALSE: Bearer Token is assumed to already be validated.
-	 * @param tokenInfo The token Info if authentication method is Bearer. In all other cases this parameter
-	 *                  is null and session token info should be used from the AuthInfo object.
-	 * 
-	 * @return See desc
+	 * @return SIF3Session if available.
 	 */
-	public ErrorDetails validSession(AuthenticationInfo authInfo, boolean validateBearerToken, TokenInfo tokenInfo)
+	public SIF3Session getSIF3SessionForRequest()
 	{
-		// we must have a authentication token and there must be an environment with that authentication token
-		if ((authInfo != null) && (authInfo.getUserToken() != null))
+		String token = getTokenFromAuthToken();
+
+		if (token != null)
 		{
-			SIF3Session sif3Session = getSIF3SessionForRequest();
-			if (sif3Session == null) // not in cached session store, yet. => Attempt to load it
+			if (getAuthInfo().getAuthMethod() == AuthenticationMethod.Bearer)
 			{
-				if (isBrokeredEnvironment())
-				{
-					// In a brokered environment the provider environment manager must really have the session already loaded for 
-					// the provider, otherwise we may have a real problem and things are in an inconsistent state. We should return 
-					// an error as it appears a request with an invalid sessionToken tries to access the provider.
-					String errStr = "Provider's sessionToken doesn't match the request's sessoionToken, or the provider has no session initialised.";
-					logger.error(errStr+" See previous error log entries for details.");
-					return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, errStr);								
-				}
-				else
-				{
-					// In a direct environment the session for the given session token might not yet be loaded in the environment provider. 
-					// In this case we attempt to load it and then compare if everything is fine.
-				    try
-				    {
-				    	EnvironmentType environment = null;
-				    	if (authInfo.getAuthMethod() != AuthenticationMethod.Bearer) // Basic or SIF_HMACSHA256
-				    	{
-					    	// HITS Customisation - Start
-				    		environment = ((HITSDirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentBySessionToken(authInfo.getUserToken(), tokenInfo, isSecure());
-					    	// HITS Customisation - End
-				    	}
-				    	else // Bearer Token 
-				    	{
-					    	// HITS Customisation - Start
-				    		environment = ((HITSDirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentForSecurityToken(tokenInfo, isSecure());
-					    	// HITS Customisation - End
-				    	}
-				    	// If we have no environment then there is no environment for that session token
-						if (environment == null)
-						{
-							String errorStr = "No environment exits for the given security token = "+authInfo.getUserToken()+". Ensure that environment is created first.";
-					    	logger.error(errorStr);
-					    	return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, errorStr);			
-						}
-						
-						//Now I should have a session in the store.
-						sif3Session = getSIF3SessionForRequest();
-				    }
-				    catch (Exception ex)
-				    {
-				    	logger.error("Failed to retrieve environment for security token = "+authInfo.getUserToken()+": "+ ex.getMessage(), ex);
-				    	return new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Error accessing environment store: "+ ex.getMessage());
-				    }
-				}
+				return getEnvironmentManager().getSessionBySecurityToken(token);
 			}
-			
-			// Do the full validation of Auth Token.
-			return validateAuthTokenWithSession(sif3Session, validateBearerToken);
+			else // Basic, SIF_HMACSHA256
+			{
+				return getEnvironmentManager().getSessionBySessionToken(token);
+			}
 		}
-		else // we have no or an invalid authorisation token
-		{
-			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No or invalid Authorization Token provided");				
-		}
+
+		return null;
 	}
-	
+
 	/*------------------------------------------*/
 	/*-- Public Methods for Response Creation --*/
 	/*------------------------------------------*/
@@ -684,29 +583,6 @@ public abstract class BaseResource
 	}
 
 	/*
-	 * This method will attempt to load a SIF3 Session from the session cache managed in the environment manager.
-	 * The SIF3 Session to be returned is based on the Authorisation HTTP header information available.
-	 */
-	public SIF3Session getSIF3SessionForRequest()
-	{
-		String token = getTokenFromAuthToken();
-
-		if (token != null)
-		{
-			if (getAuthInfo().getAuthMethod() == AuthenticationMethod.Bearer)
-			{
-				return getEnvironmentManager().getSessionBySecurityToken(token);
-			}
-			else // Basic, SIF_HMACSHA256
-			{
-				return getEnvironmentManager().getSessionBySessionToken(token);
-			}
-		}
-
-		return null;
-	}
-	
-	/*
 	 * This method processes the low level SIF3 DeleteRequest message and returns its content in a nice and easy to handle 
 	 * data structure.
 	 * 
@@ -734,6 +610,151 @@ public abstract class BaseResource
 	    return resourceIDs;
 	}
 	
+	/*---------------------------------*/
+	/*-- Security Validation Methods --*/
+	/*---------------------------------*/
+	/**
+	 * If the client is valid then the ErrorDetails returned is null. If there is something wrong, then the ErrorDetails will be 
+	 * set accordingly and returned. Checks include if authentication token is valid for an environment and if the access
+	 * rights for the requested service are at expected levels.
+	 * 
+	 * @param serviceName Service for which the access rights shall be checked.
+	 * @param right The access right (QUERY, UPDATE etc) that shall be checked for.
+	 * @param accessType The access level (SUPPORTED, APPROVED, etc) that must be met for the given service and right.
+	 * @param allowDelayed TRUE then the request operation allows delayed requests. In a DIRECT environment it is not supported at
+	 *                     all and this parameter will be ignored. FALSE if delayed requests are not allowed.
+	 * 
+	 * @return See desc
+	 */
+	protected ErrorDetails validClient(String serviceName, AccessRight right, AccessType accessType, boolean allowDelayed)
+	{
+	    ErrorDetails error = validateSession();
+		if (error != null)
+		{
+			return error;
+		}
+
+		// If we get to this point then all validation so far has succeeded and we do have a valid session
+		// in the session cache and workstore (DB).
+		
+		// Check if DELAYED requests are supported. Right now this direct environment does not support it.=> Return an error.
+		if (isDirectEnvironment())
+		{
+			if (extractRequestType() == RequestType.DELAYED)
+			{
+				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not supported with this DIRECT Environment");
+			}
+		}
+		else  // in a Brokered environment only the 'multiple' object operations are supporting delayed.
+		{
+			if (extractRequestType() == RequestType.DELAYED)
+			{
+    			if (!allowDelayed)
+    			{
+    				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not allowed for this operation");				
+    			}
+    			else
+    			{
+    				//TODO: JH - Once delayed is supported then the error below must be removed.
+    				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not supported by this provider.");				
+    			}
+			}
+		}
+		
+		if (getProviderEnvironment().getCheckACL())
+		{
+			// We must have a valid session for that request otherwise it would have failed in validSession() method.
+			SIF3Session sif3Session = getSIF3SessionForRequest();
+			SIFContext context = getSifContext();
+			SIFZone zone = getSifZone();
+			
+			//Check access rights
+			if (!sif3Session.hasAccess(right, accessType, serviceName, zone, context))
+			{
+				String zoneID = (zone == null) ? "Default" : zone.getId();
+				String contextID = (context == null) ? "Default" : context.getId();
+				error = new ErrorDetails(Status.FORBIDDEN.getStatusCode(), "Consumer is not authorized to issue the requested operation.", right.name()+ " access is not set to "+accessType.name()+" for the service "+serviceName+" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+sif3Session.getEnvironmentName(), "Provider side check.");			
+			}
+		}
+		return error;
+	}
+
+	/**
+	 * This method checks if the information in the authentication token matches an existing session and if the token is an
+	 * authorised/authenticated token. If all tests succeed then null is returned, otherwise and ErrorDetails object is returned
+	 * that holds all the required error information and status.
+	 * 
+	 * @param validateBearerToken TRUE: Bearer Token will be validated against security service.
+	 *                            FALSE: Bearer Token is assumed to already be validated.
+	 * @param tokenInfo The token Info if authentication method is Bearer. In all other cases this parameter
+	 *                  is null and session token info should be used from the AuthInfo object.
+	 * 
+	 * @return See desc
+	 */
+	protected ErrorDetails validSession(AuthenticationInfo authInfo, boolean validateBearerToken, TokenInfo tokenInfo)
+	{
+		// we must have a authentication token and there must be an environment with that authentication token
+		if ((authInfo != null) && (authInfo.getUserToken() != null))
+		{
+			SIF3Session sif3Session = getSIF3SessionForRequest();
+			if (sif3Session == null) // not in cached session store, yet. => Attempt to load it
+			{
+				if (isBrokeredEnvironment())
+				{
+					// In a brokered environment the provider environment manager must really have the session already loaded for 
+					// the provider, otherwise we may have a real problem and things are in an inconsistent state. We should return 
+					// an error as it appears a request with an invalid sessionToken tries to access the provider.
+					String errStr = "Provider's sessionToken doesn't match the request's sessoionToken, or the provider has no session initialised.";
+					logger.error(errStr+" See previous error log entries for details.");
+					return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, errStr);								
+				}
+				else
+				{
+					// In a direct environment the session for the given session token might not yet be loaded in the environment provider. 
+					// In this case we attempt to load it and then compare if everything is fine.
+				    try
+				    {
+				    	EnvironmentType environment = null;
+				    	if (authInfo.getAuthMethod() != AuthenticationMethod.Bearer) // Basic or SIF_HMACSHA256
+				    	{
+					    	// HITS Customisation - Start
+				    		environment = ((HITSDirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentBySessionToken(authInfo.getUserToken(), tokenInfo, isSecure());
+					    	// HITS Customisation - End
+				    	}
+				    	else // Bearer Token 
+				    	{
+					    	// HITS Customisation - Start
+				    		environment = ((HITSDirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentForSecurityToken(tokenInfo, isSecure());
+					    	// HITS Customisation - End
+				    	}
+				    	// If we have no environment then there is no environment for that session token
+						if (environment == null)
+						{
+							String errorStr = "No environment exits for the given security token = "+authInfo.getUserToken()+". Ensure that environment is created first.";
+					    	logger.error(errorStr);
+					    	return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, errorStr);			
+						}
+						
+						//Now I should have a session in the store.
+						sif3Session = getSIF3SessionForRequest();
+				    }
+				    catch (Exception ex)
+				    {
+				    	logger.error("Failed to retrieve environment for security token = "+authInfo.getUserToken()+": "+ ex.getMessage(), ex);
+				    	return new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Error accessing environment store: "+ ex.getMessage());
+				    }
+				}
+			}
+			
+			// Do the full validation of Auth Token.
+			return validateAuthTokenWithSession(sif3Session, validateBearerToken);
+		}
+		else // we have no or an invalid authorisation token
+		{
+			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No or invalid Authorization Token provided");				
+		}
+	}
+
 	/*
 	 * This method validates the user token and password against the two valid SIF authentication methods of
 	 * Basic or SIF_HMACSHA256. If the authentication method should be set to bearer and this method is 
@@ -801,7 +822,7 @@ public abstract class BaseResource
 	{
 	    if (getSecurityService() != null)
 	    {
-	    	return getSecurityService().validate(securityToken, getRequestMetadata());
+	    	return getSecurityService().validate(securityToken, getRequestMetadata(null, false));
 	    }
 	    else // No security service known => report error
 	    {
@@ -818,19 +839,61 @@ public abstract class BaseResource
 	 * A number of HTTP Header fields can be set as URL Query Parameter instead if SIF Simple is used. In that case we also
 	 * need to check if some of these consumer fields are on the URL instead of the HTTP Header. As always if a field should be
 	 * stated on the URL as well as the HTTP Header, the HTTP Header will take precedence. 
+	 * 
+	 * @param sif3Session The session information of the requester if known. Can be null.
 	 */
-	protected RequestMetadata getRequestMetadata()
+	protected RequestMetadata getRequestMetadata(SIF3Session sif3Session, boolean isQuery)
 	{
-		RequestMetadata metadata = new RequestMetadata();
+		RequestMetadata metadata = new RequestMetadata(getQueryParameters(), getAllHTTPHeaderProperties());
 		
 		// Get values from HTTP Header.
-		metadata.setGeneratorID(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID));
-		metadata.setNavigationID(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_NAVIGATION_ID));
-		metadata.setQueryIntention(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION));
-		metadata.setSourceName(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_SOURCE_NAME));
-		metadata.setApplicationKey(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY));
-		metadata.setUserToken(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_USER_TOKEN));
-		metadata.setInstanceID(getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_INSTANCE_ID));
+		metadata.setGeneratorID(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID));
+		metadata.setNavigationID(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_NAVIGATION_ID));
+		metadata.setApplicationKey(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY));
+		metadata.setAuthentictedUser(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_AUTHENTICATED_USER));
+
+		// Source Name is a HTTP header if DBROKERED. Defaulted to applicationKey if DIRECT
+		if (isBrokeredEnvironment())
+		{
+			metadata.setSourceName(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_SOURCE_NAME));
+			
+			//Or is it a URL query parameter
+			if (metadata.getSourceName() == null)
+			{
+				metadata.setSourceName(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_SOURCE_NAME));
+			}
+		}
+		else // In a direct environment we set the SourceName to the consumer's application key if available.
+		{
+			if (sif3Session != null)
+			{
+				metadata.setSourceName(sif3Session.getApplicationKey());
+			}
+		}
+		
+		if (sif3Session != null)
+		{
+			metadata.setEnvironmentID(sif3Session.getEnvironmentID());
+		}
+
+		// If a query type request is made then we may have a query intention set!
+		if (isQuery)
+		{
+			metadata.setQueryIntention(QueryIntention.valueOfHTTPHeader(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION)));
+
+			// It could be on the URL parameter
+			if (metadata.getQueryIntention() == null)
+			{
+				metadata.setQueryIntention(QueryIntention.valueOfHTTPHeader(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_QUERY_INTENTION)));
+			}
+			
+			// If still not set then we default it to ONE-OFF
+			if (metadata.getQueryIntention() == null)
+			{
+				metadata.setQueryIntention(QueryIntention.ONE_OFF);
+				logger.debug("Query Intention not set. Default to ONE-OFF.");
+			}
+		}
 		
 		// In case of SIF Simple most of the values could be URL Query Parameters. Use them if not yet set by HTTP Header
 		if (metadata.getGeneratorID() == null)
@@ -841,25 +904,26 @@ public abstract class BaseResource
 		{
 			metadata.setNavigationID(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_NAVIGATION_ID));
 		}
-		if (metadata.getQueryIntention() == null)
-		{
-			metadata.setQueryIntention(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_QUERY_INTENTION));
-		}
-		if (metadata.getSourceName() == null)
-		{
-			metadata.setSourceName(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_SOURCE_NAME));
-		}
+		
 		if (metadata.getApplicationKey() == null)
 		{
 			metadata.setApplicationKey(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_APPLICATION_KEY));
 		}
-		if (metadata.getUserToken() == null)
+		if (metadata.getAuthentictedUser() == null)
 		{
-			metadata.setUserToken(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_USER_TOKEN));
+			metadata.setAuthentictedUser(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_AUTHENTICATED_USER));
 		}
-		if (metadata.getInstanceID() == null)
+		
+		// We have not set the applicationKey in the HTTP header or the URL then we retrieve it from the session.
+		// In such a case we have the following two options:
+		//     a) In a DIRECT environment this will be the applicationKey from the consumer. 
+		//     b) In a BROKERED environment it is the applicationKey of the provider as seen by the broker.
+		if (metadata.getApplicationKey() == null)
 		{
-			metadata.setInstanceID(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_INSTANCE_ID));
+			if (sif3Session != null)
+			{
+				metadata.setApplicationKey(sif3Session.getApplicationKey());
+			}
 		}
 
 		return metadata;
@@ -880,7 +944,7 @@ public abstract class BaseResource
 			if (validateBearerWithSecurityService(authInfo.getUserToken()))
 			{
 				// Now, what info can we get about the token
-				TokenInfo tokenInfo = getSecurityService().getInfo(authInfo.getUserToken(), getRequestMetadata());
+				TokenInfo tokenInfo = getSecurityService().getInfo(authInfo.getUserToken(), getRequestMetadata(null, false));
 				if (tokenInfo == null)
 				{
 					throw new VerifyError("No information about Bearer Token can be retrieved.");
@@ -1103,13 +1167,13 @@ public abstract class BaseResource
 
 	/*
 	 * This method should be called in the constructors of each resource. It is intended to determine the media type of the request as well as
-	 * the response. The media types are being determined firstly on the HTTP header and scondly on the URL Postfix.
+	 * the response. The media types are being determined firstly on the HTTP header and secondly on the URL Postfix.
 	 */
 	protected void determineMediaTypes(MarshalFactory marshaller, UnmarshalFactory unmarshaller, boolean useDefaults)
 	{
 		// Get values from HTTP headers
-		requestMediaType  = getMediaTypeFromStr(requestHeaders.getRequestHeaders().getFirst(HttpHeaders.CONTENT_TYPE), HttpHeaders.CONTENT_TYPE);
-		responseMediaType = getMediaTypeFromStr(requestHeaders.getRequestHeaders().getFirst(HttpHeaders.ACCEPT), HttpHeaders.ACCEPT);
+		requestMediaType  = getMediaTypeFromStr(getAllHTTPHeaderProperties().getHeaderProperty(HttpHeaders.CONTENT_TYPE.toLowerCase()), HttpHeaders.CONTENT_TYPE);
+		responseMediaType = getMediaTypeFromStr(getAllHTTPHeaderProperties().getHeaderProperty(HttpHeaders.ACCEPT.toLowerCase()), HttpHeaders.ACCEPT);
 
 		if (logger.isDebugEnabled())
 		{
@@ -1132,17 +1196,29 @@ public abstract class BaseResource
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-	private void extractHeaderProperties(HttpHeaders requestHeaders)
+	private void extractSIFHeaderProperties(HttpHeaders requestHeaders)
 	{
-		hdrProperties = new HeaderProperties(); //ensure it is clean, ie. not holding values from a previous call.
+		sifHdrProperties = new HeaderProperties(); //ensure it is clean, ie. not holding values from a previous call.
 		for (String hdrName : RequestHeaderConstants.HEADER_NAME_ARRAY)
 		{
 			String hdrValue = requestHeaders.getRequestHeaders().getFirst(hdrName);
 			if (StringUtils.notEmpty(hdrValue))
 			{
-				hdrProperties.setHeaderProperty(hdrName, hdrValue);
+				sifHdrProperties.setHeaderProperty(hdrName, hdrValue);
 			}
 		}
+	}
+
+	private void extractAllHTTPHeaderProperties(HttpHeaders requestHeaders)
+	{
+		allHTTPHdrProperties = new HeaderProperties(); //ensure it is clean, ie. not holding values from a previous call.
+		MultivaluedMap<String, String> headerMap = requestHeaders.getRequestHeaders();
+		
+		// ensure that we make all header names lower case for later retrieval.
+		for (String hdrName : headerMap.keySet())
+		{
+			allHTTPHdrProperties.setHeaderProperty(hdrName.toLowerCase(), headerMap.getFirst(hdrName));
+		}		
 	}
 
 	private MediaType getMediaTypeFromStr(String mediaTypeStr, String headerName)
@@ -1170,6 +1246,13 @@ public abstract class BaseResource
 	 */
 	private MediaType validateAndExtractMimeType(MediaTypeOperations marshalOps, MediaType mediaTypeToTest, MediaType urlMediaType, boolean useDefaults)
 	{
+		if (marshalOps == null)
+		{
+			// the best we can do in this situation is to use the mediaTypeToTest or urlMediaType without
+			// any further checks.
+			return (mediaTypeToTest == null) ? urlMediaType : mediaTypeToTest;
+		}
+		
 		// Check and validate the media type according to the marshal operations
 		if (!marshalOps.isSupported(mediaTypeToTest)) // Not supported => try the URL postfix
 		{
@@ -1277,7 +1360,7 @@ public abstract class BaseResource
 			response = response.header(ResponseHeaderConstants.HDR_MESSAGE_TYPE, (isError) ? HeaderValues.MessageType.ERROR.name() : HeaderValues.MessageType.RESPONSE.name());					
 			response = response.header(ResponseHeaderConstants.HDR_RESPONSE_ACTION, responseAction.name());
 			response = response.header(ResponseHeaderConstants.HDR_REL_SERVICE_PATH, getRelativeServicePath());
-			response = response.header(ResponseHeaderConstants.HDR_SERVICE_TYPE, hdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE));
+			response = response.header(ResponseHeaderConstants.HDR_SERVICE_TYPE, getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE));
 
 			if (pagingInfo != null)
 			{
@@ -1289,7 +1372,7 @@ public abstract class BaseResource
 			}
 
 			// Mirror requestId if available
-			String requestID = hdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_REQUEST_ID);
+			String requestID = getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_REQUEST_ID);
 			if (requestID != null)
 			{
 				response = response.header(ResponseHeaderConstants.HDR_REQUEST_ID, requestID);				
@@ -1338,7 +1421,7 @@ public abstract class BaseResource
 
 	private void extractAuthTokenInfo()
 	{
-		String authToken = getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN);
+		String authToken = getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN);
 		if (StringUtils.notEmpty(authToken))
 		{
 			setAuthInfo(AuthenticationUtils.getPartsFromAuthToken(authToken));
@@ -1667,7 +1750,7 @@ public abstract class BaseResource
 
 	private RequestType extractRequestType()
 	{
-		String requestType = getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE);
+		String requestType = getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE);
 		if (StringUtils.notEmpty(requestType))
 		{
 			try
@@ -1682,9 +1765,9 @@ public abstract class BaseResource
 		}
 		else
 		{
-			if (logger.isInfoEnabled())
+			if (logger.isDebugEnabled())
 			{
-				logger.info("Request header '"+RequestHeaderConstants.HDR_REQUEST_TYPE+"' not set. Assume IMMEDIATE");
+				logger.debug("Request header '"+RequestHeaderConstants.HDR_REQUEST_TYPE+"' not set. Assume IMMEDIATE");
 			}
 			return RequestType.IMMEDIATE;
 		}
@@ -1693,7 +1776,7 @@ public abstract class BaseResource
 	private String getTimestampFromRequest()
 	{
 		// Try to get it from HTTP Header (standard behaviour)
-		String timestampStr = getHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME);
+		String timestampStr = getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME);
 		
 		// If it is null we may have it as a URL Query Parameter
 		if (timestampStr == null)

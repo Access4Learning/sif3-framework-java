@@ -33,6 +33,7 @@ import sif.dd.au30.model.TeachingGroupCollectionType;
 import sif.dd.au30.model.TeachingGroupType.StudentList;
 import sif.dd.au30.model.TeachingGroupType.StudentList.TeachingGroupStudent;
 import sif3.common.conversion.ModelObjectInfo;
+import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
@@ -307,10 +308,17 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.Provider#retrive(sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo)
      */
     @Override
-    public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException
+    public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
     {
     	logger.debug("Retrieve Students for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
-
+    	logger.debug("ChangedSince Date: "+metadata.getRequestParameter("ChangedSince"));
+    	logger.debug("Custom HTTP Header (customHdr): "+metadata.getHTTPParameter("customHdr"));
+    	
+    	if (pagingInfo == null)
+    	{
+    		throw new DataTooLargeException("No paging info is provided. Please provide navigationPage and navigationPageSize.");
+    	}
+    	
     	ArrayList<StudentPersonalType> studentList = fetchStudents(students, pagingInfo);
     	
     	StudentCollectionType studentCollection = dmObjectFactory.createStudentCollectionType();
@@ -331,7 +339,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.QueryProvider#retrieveByServicePath(sif3.common.model.QueryCriteria, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo, sif3.common.model.RequestMetadata)
      */
     @Override
-	public Object retrieveByServicePath(QueryCriteria queryCriteria, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException
+	public Object retrieveByServicePath(QueryCriteria queryCriteria, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
 	{
 		logger.debug("Performing query by service path.");
 		if (logger.isDebugEnabled())
@@ -522,7 +530,6 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     	else
     	{
     		pagingInfo.setTotalObjects(studentMap.size());
-//    		if ((pagingInfo.getPageSize() * (pagingInfo.getCurrentPageNo()+1)) > studentMap.size())
     		if ((pagingInfo.getPageSize() * (pagingInfo.getCurrentPageNo())) > studentMap.size())
     		{
     			return null; // Requested page outside of limits.
@@ -542,6 +549,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     			}
     			i++;
     		}
+    		// Set the number of object that are returned in the paging info. Will ensure HTTP headers are set correctly.
     		pagingInfo.setPageSize(studentList.size());
     	}
     	

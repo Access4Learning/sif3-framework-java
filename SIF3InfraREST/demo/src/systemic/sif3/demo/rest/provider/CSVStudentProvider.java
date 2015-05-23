@@ -20,26 +20,32 @@ package systemic.sif3.demo.rest.provider;
 
 import java.util.List;
 
+import javax.ws.rs.core.MediaType;
+
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.conversion.UnmarshalFactory;
+import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnsupportedQueryException;
+import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.SIFContext;
+import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
 import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.OperationStatus;
-import sif3.infra.rest.provider.BaseProvider;
+import sif3.infra.rest.provider.BaseEventProvider;
 import systemic.sif3.demo.rest.conversion.CSVMarshaller;
 import systemic.sif3.demo.rest.conversion.CSVUnmarshaller;
+import systemic.sif3.demo.rest.provider.iterators.CSVStudentIterator;
 
 /**
  * @author Joerg Huber
  *
  */
-public class CSVStudentProvider extends BaseProvider
+public class CSVStudentProvider extends  BaseEventProvider<String>
 {
 	public CSVStudentProvider()
 	{
@@ -98,7 +104,7 @@ public class CSVStudentProvider extends BaseProvider
      * @see sif3.common.interfaces.Provider#retrive(sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo)
      */
     @Override
-    public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException
+    public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
     {
     	logger.debug("Retrieve All for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	throw new IllegalArgumentException("Not implemented for CSV Provider.");
@@ -134,6 +140,69 @@ public class CSVStudentProvider extends BaseProvider
     	throw new IllegalArgumentException("Not implemented for CSV Provider.");
     }
 
+    /*--------------------------------------*/
+    /*-- Event required Interface Methods --*/
+    /*--------------------------------------*/
+
+    /* (non-Javadoc)
+     * @see sif3.common.interfaces.EventProvider#getSIFEvents()
+     */
+    @Override
+    public SIFEventIterator<String> getSIFEvents()
+    {
+	    return new CSVStudentIterator(getServiceProperties());
+    }
+
+	/* (non-Javadoc)
+     * @see sif3.common.interfaces.EventProvider#modifyBeforePublishing(sif3.common.model.SIFEvent, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
+     */
+    @Override
+    public SIFEvent<String> modifyBeforePublishing(SIFEvent<String> sifEvent, SIFZone zone, SIFContext context)
+    {
+    	// At this point we don't need to modify anything. Just send as is...
+	    return sifEvent;
+    }
+
+	/* (non-Javadoc)
+     * @see sif3.common.interfaces.EventProvider#onEventError(sif3.common.model.SIFEvent, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
+     */
+    @Override
+    public void onEventError(SIFEvent<String> sifEvent, SIFZone zone, SIFContext context)
+    {
+	    //We need to deal with the error. At this point in time we just log it.
+    	if ((sifEvent != null) && (sifEvent.getSIFObjectList() != null))
+    	{
+//    		try
+//    		{
+//    			String eventXML = getMarshaller().marshalToXML(sifEvent.getSIFObjectList());
+        		logger.error("Failed to sent "+getServiceName()+" Objects as and Event to Zone ("+zone+") and Context ("+context+").");
+//    		}
+//    		catch (Exception ex)
+//    		{
+//    			logger.error("Failed to marshall events.", ex);
+//    		}
+    	}
+    	else
+    	{
+    		logger.error("sifEvent Object is null, or there are no events on sifEvent.sifObjectList");
+    	}
+    }
+
+    /*------------------------------------*/
+    /*-- Media Type Override for Events --*/
+    /*------------------------------------*/
+	@Override
+    public MediaType getRequestMediaType()
+	{
+		return getMarshaller().getDefault();
+	}
+	
+	@Override
+	public MediaType getResponseMediaType()
+	{
+		return getUnmarshaller().getDefault();
+	}    
+    
     /*--------------------------------------*/
     /*-- Other required Interface Methods --*/
     /*--------------------------------------*/
