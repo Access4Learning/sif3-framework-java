@@ -59,6 +59,7 @@ public abstract class AbstractEventConsumer<L> extends AbstractConsumer implemen
   	 * @param sifEvent The event data that has been received and shall be processed by the consumer.
   	 * @param zone The zone from which the event has been received.
   	 * @param context The context for which the event is applicable for.
+  	 * @param metadata Additional metadata that is known for the event. Typical values include custom HTTP headers, sourceName etc.
   	 * @param msgReadID The ID of the SIF queue reader. It is informative only and is only of use where there are multiple concurrent 
   	 *                  subscribers on a message queue.
   	 * @param consumerID The consumer ID that has been used to receive the event from the event queue. It is informative

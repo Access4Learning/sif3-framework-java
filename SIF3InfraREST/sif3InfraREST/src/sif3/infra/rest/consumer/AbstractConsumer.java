@@ -33,6 +33,7 @@ import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.Consumer;
+import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.QueryPredicate;
@@ -40,6 +41,7 @@ import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
+import sif3.common.model.URLQueryParameter;
 import sif3.common.model.ZoneContextInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.BaseResponse;
@@ -190,17 +192,6 @@ public abstract class AbstractConsumer implements Consumer
 	{
 		return getConsumerEnvironment().getEnvironmentKey().getUserToken();
 	}
-
-//	/**
-//	 * This method returns the value of the env.instanceID property from the consumer's property file. If that
-//	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
-//	 * 
-//	 * @return The env.instanceID property from the consumer's property file
-//	 */
-//	public String getInstanceID()
-//	{
-//		return getConsumerEnvironment().getEnvironmentKey().getInstanceID();
-//	}
 	
 	/**
 	 * This method returns the value of the env.mediaType property from the consumer's property file. If that
@@ -264,7 +255,7 @@ public abstract class AbstractConsumer implements Consumer
 	 * @see sif3.common.consumer.Consumer#createMany(java.lang.Object, java.util.List)
 	 */
 	@Override
-	public List<BulkOperationResponse<CreateOperationStatus>> createMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<BulkOperationResponse<CreateOperationStatus>> createMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
 		if (!initOK)
 	  	{
@@ -274,6 +265,7 @@ public abstract class AbstractConsumer implements Consumer
 
 		Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<BulkOperationResponse<CreateOperationStatus>> responses = new ArrayList<BulkOperationResponse<CreateOperationStatus>>();
 		
 		if (!getConsumerEnvironment().getIsConnected())
@@ -288,7 +280,7 @@ public abstract class AbstractConsumer implements Consumer
 			ErrorDetails error = allClientChecks(AccessRight.CREATE, AccessType.APPROVED, null, null, requestType);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, requestType), null, null));
+				responses.add(getClient(getConsumerEnvironment()).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, requestType, customParameters), urlQueryParameter, null, null));
 			}
 			else  //pretend to have received a 'fake' error Response
 			{
@@ -302,7 +294,7 @@ public abstract class AbstractConsumer implements Consumer
 				ErrorDetails error = allClientChecks(AccessRight.CREATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 				if (error == null) //all good
 				{
-					responses.add(getClient(getConsumerEnvironment()).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, requestType), zoneCtx.getZone(), zoneCtx.getContext()));
+					responses.add(getClient(getConsumerEnvironment()).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, requestType, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 				}
 				else //pretend to have received a 'fake' error Response
 				{
@@ -316,20 +308,29 @@ public abstract class AbstractConsumer implements Consumer
 	}
 
 	/*
+	 * Convenience method. The same as above but without the parameter 'customParameters' which is defaulted to null.
+	 */
+	public List<BulkOperationResponse<CreateOperationStatus>> createMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	{
+		return createMany(data, zoneCtxList, requestType, null);
+	}
+
+	/*
 	 * (non-Javadoc)
 	 * @see sif3.common.consumer.Consumer#createSingle(java.lang.Object, java.util.List)
 	 */
 	@Override
-	public List<Response> createSingle(Object data, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<Response> createSingle(Object data, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-    if (!initOK)
-    {
-      logger.error("Consumer not initialsied properly. See previous error log entries.");
-      return null;
-    }
+	    if (!initOK)
+	    {
+	      logger.error("Consumer not initialsied properly. See previous error log entries.");
+	      return null;
+	    }
 
-    Timer timer = new Timer();
+	    Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<Response> responses = new ArrayList<Response>();
 		
 		if (!getConsumerEnvironment().getIsConnected())
@@ -343,7 +344,7 @@ public abstract class AbstractConsumer implements Consumer
 			ErrorDetails error = hasAccess(AccessRight.CREATE, AccessType.APPROVED, null, null);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).createSingle(getMultiObjectClassInfo().getObjectName()+"/"+getSingleObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, RequestType.IMMEDIATE), getSingleObjectClassInfo().getObjectType(), null, null));
+				responses.add(getClient(getConsumerEnvironment()).createSingle(getMultiObjectClassInfo().getObjectName()+"/"+getSingleObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, RequestType.IMMEDIATE, customParameters), urlQueryParameter, getSingleObjectClassInfo().getObjectType(), null, null));
 			}
 			else  //pretend to have received a 'fake' error Response
 			{
@@ -357,7 +358,7 @@ public abstract class AbstractConsumer implements Consumer
 				ErrorDetails error = hasAccess(AccessRight.CREATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext());
 				if (error == null) //all good
 				{
-					responses.add(getClient(getConsumerEnvironment()).createSingle(getMultiObjectClassInfo().getObjectName()+"/"+getSingleObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, RequestType.IMMEDIATE), getSingleObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+					responses.add(getClient(getConsumerEnvironment()).createSingle(getMultiObjectClassInfo().getObjectName()+"/"+getSingleObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, RequestType.IMMEDIATE, customParameters), urlQueryParameter, getSingleObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 				}
 				else //pretend to have received a 'fake' error Response
 				{
@@ -370,6 +371,14 @@ public abstract class AbstractConsumer implements Consumer
 		return responses;
 	}
 
+	/*
+	 * Convenience method. The same as above but without the parameter 'customParameters' which is defaulted to null.
+	 */
+	public List<Response> createSingle(Object data, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	{
+		return createSingle(data, zoneCtxList, null);
+	}
+	
 	/*-----------------------*/
 	/*-- Delete Operations --*/
 	/*-----------------------*/
@@ -379,16 +388,17 @@ public abstract class AbstractConsumer implements Consumer
 	 * @see sif3.common.consumer.Consumer#deleteMany(java.lang.Object, java.util.List)
 	 */
 	@Override
-	public List<BulkOperationResponse<OperationStatus>> deleteMany(List<String> resourceIDs, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<BulkOperationResponse<OperationStatus>> deleteMany(List<String> resourceIDs, List<ZoneContextInfo> zoneCtxList, RequestType requestType, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-    if (!initOK)
-    {
-      logger.error("Consumer not initialsied properly. See previous error log entries.");
-      return null;
-    }
+	    if (!initOK)
+	    {
+	      logger.error("Consumer not initialsied properly. See previous error log entries.");
+	      return null;
+	    }
 
-    Timer timer = new Timer();
+	    Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<BulkOperationResponse<OperationStatus>> responses = new ArrayList<BulkOperationResponse<OperationStatus>>();
 		
 		if (!getConsumerEnvironment().getIsConnected())
@@ -403,7 +413,7 @@ public abstract class AbstractConsumer implements Consumer
 			ErrorDetails error = allClientChecks(AccessRight.DELETE, AccessType.APPROVED, null, null, requestType);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(getConsumerEnvironment(), false, requestType), null, null));
+				responses.add(getClient(getConsumerEnvironment()).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters), urlQueryParameter, null, null));
 			}
 			else  //pretend to have received a 'fake' error Response
 			{
@@ -417,7 +427,7 @@ public abstract class AbstractConsumer implements Consumer
 				ErrorDetails error = allClientChecks(AccessRight.DELETE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 				if (error == null) //all good
 				{
-					responses.add(getClient(getConsumerEnvironment()).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(getConsumerEnvironment(), false, requestType), zoneCtx.getZone(), zoneCtx.getContext()));
+					responses.add(getClient(getConsumerEnvironment()).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 				}
 				else //pretend to have received a 'fake' error Response
 				{
@@ -431,20 +441,29 @@ public abstract class AbstractConsumer implements Consumer
 	}
 
 	/*
+	 * Convenience method. The same as above but without the parameter 'customParameters' which is defaulted to null.
+	 */
+	public List<BulkOperationResponse<OperationStatus>> deleteMany(List<String> resourceIDs, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	{
+		return deleteMany(resourceIDs, zoneCtxList, requestType, null);
+	}
+	
+	/*
 	 * (non-Javadoc)
 	 * @see sif3.common.consumer.Consumer#deleteSingle(java.lang.String, java.util.List)
 	 */
 	@Override
-	public List<Response> deleteSingle(String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<Response> deleteSingle(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-    if (!initOK)
-    {
-      logger.error("Consumer not initialsied properly. See previous error log entries.");
-      return null;
-    }
+	    if (!initOK)
+	    {
+	      logger.error("Consumer not initialsied properly. See previous error log entries.");
+	      return null;
+	    }
 
-    Timer timer = new Timer();
+	    Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<Response> responses = new ArrayList<Response>();
 		
 		if (!getConsumerEnvironment().getIsConnected())
@@ -458,7 +477,7 @@ public abstract class AbstractConsumer implements Consumer
 			ErrorDetails error = hasAccess(AccessRight.DELETE, AccessType.APPROVED, null, null);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).removeSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE), null, null));
+				responses.add(getClient(getConsumerEnvironment()).removeSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, null, null));
 			}
 			else  //pretend to have received a 'fake' error Response
 			{
@@ -472,7 +491,7 @@ public abstract class AbstractConsumer implements Consumer
 				ErrorDetails error = hasAccess(AccessRight.DELETE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext());
 				if (error == null) //all good
 				{
-					responses.add(getClient(getConsumerEnvironment()).removeSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE), zoneCtx.getZone(), zoneCtx.getContext()));
+					responses.add(getClient(getConsumerEnvironment()).removeSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 				}
 				else //pretend to have received a 'fake' error Response
 				{
@@ -485,6 +504,14 @@ public abstract class AbstractConsumer implements Consumer
 		return responses;
 	}
 
+	/*
+	 * Convenience method. The same as above but without the parameter 'customParameters' which is defaulted to null.
+	 */
+	public List<Response> deleteSingle(String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	{
+		return deleteSingle(resourceID, zoneCtxList, null);
+	}
+	
 	/*-------------------------*/
 	/*-- Retrieve Operations --*/
 	/*-------------------------*/
@@ -494,7 +521,7 @@ public abstract class AbstractConsumer implements Consumer
 	 * @see sif3.common.consumer.Consumer#retrievByPrimaryKey(java.lang.String, java.util.List)
 	 */
 	@Override
-	public List<Response> retrievByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<Response> retrievByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
 		if (!initOK)
 		{
@@ -504,6 +531,7 @@ public abstract class AbstractConsumer implements Consumer
 
 		Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<Response> responses = new ArrayList<Response>();
 		
 		if (!getConsumerEnvironment().getIsConnected())
@@ -517,7 +545,7 @@ public abstract class AbstractConsumer implements Consumer
 			ErrorDetails error = hasAccess(AccessRight.QUERY, AccessType.APPROVED, null, null);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).getSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE), getSingleObjectClassInfo().getObjectType(), null, null));
+				responses.add(getClient(getConsumerEnvironment()).getSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, getSingleObjectClassInfo().getObjectType(), null, null));
 			}
 			else  //pretend to have received a 'fake' error Response
 			{
@@ -531,7 +559,7 @@ public abstract class AbstractConsumer implements Consumer
 				ErrorDetails error = hasAccess(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext());
 				if (error == null) //all good
 				{
-					responses.add(getClient(getConsumerEnvironment()).getSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE), getSingleObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+					responses.add(getClient(getConsumerEnvironment()).getSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, getSingleObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 				}
 				else //pretend to have received a 'fake' error Response
 				{
@@ -545,11 +573,19 @@ public abstract class AbstractConsumer implements Consumer
 	}
 
 	/*
+	 * Convenience method. The same as above but without the parameter 'customParameters' which is defaulted to null.
+	 */
+	public List<Response> retrievByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	{
+		return retrievByPrimaryKey(resourceID, zoneCtxList, null);
+	}
+	
+	/*
 	 * (non-Javadoc)
 	 * @see sif3.common.consumer.Consumer#retrieve(sif3.common.model.PagingInfo, java.util.List)
 	 */
 	@Override
-	public List<Response> retrieve(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+	public List<Response> retrieve(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention, CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
 		if (!initOK)
 		{
@@ -559,6 +595,7 @@ public abstract class AbstractConsumer implements Consumer
 
 		Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<Response> responses = new ArrayList<Response>();
 		
 		if (!getConsumerEnvironment().getIsConnected())
@@ -571,7 +608,7 @@ public abstract class AbstractConsumer implements Consumer
 		queryIntention = (queryIntention == null) ? QueryIntention.ONE_OFF : queryIntention;
 		
 		// Set default set of HTTP Header fields
-		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, requestType);
+		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters);
 		
 		// Add query intention to headers.
 		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION, queryIntention.getHTTPHeaderValue());
@@ -586,7 +623,7 @@ public abstract class AbstractConsumer implements Consumer
 			}
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, getMultiObjectClassInfo().getObjectType(), null, null));
+				responses.add(getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), null, null));
 			}
 			else  //pretend to have received a 'fake' error Response
 			{
@@ -600,7 +637,7 @@ public abstract class AbstractConsumer implements Consumer
 				ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 				if (error == null) //all good
 				{
-					responses.add(getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+					responses.add(getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 				}
 				else //pretend to have received a 'fake' error Response
 				{
@@ -615,14 +652,15 @@ public abstract class AbstractConsumer implements Consumer
 
 	/*
 	 * See description of retrieve() but without the queryIntention parameter. Since this parameter is not required
-	 * by this method it will be assumed null, which in turn will assume ONE-OFF as per interface definition.
+	 * by this method it will be assumed null, which in turn will assume ONE-OFF as per interface definition. Further
+	 * the customParameters will be set to null.
 	 */
 	public List<Response> retrieve(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
-		return retrieve(pagingInfo, zoneCtxList, requestType, QueryIntention.ONE_OFF);
+		return retrieve(pagingInfo, zoneCtxList, requestType, QueryIntention.ONE_OFF, null);
 	}
 	
-	public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+	public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention, CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
 		if (!initOK)
 		{
@@ -632,6 +670,7 @@ public abstract class AbstractConsumer implements Consumer
 
 		Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<Response> responses = new ArrayList<Response>();
 
 		if (!getConsumerEnvironment().getIsConnected())
@@ -644,7 +683,7 @@ public abstract class AbstractConsumer implements Consumer
 		queryIntention = (queryIntention == null) ? QueryIntention.ONE_OFF : queryIntention;
 		
 		// Set default set of HTTP Header fields
-		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, requestType, HeaderValues.ServiceType.SERVICEPATH);
+		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, requestType, HeaderValues.ServiceType.SERVICEPATH, customParameters);
 		
 		// Add query intention to headers.
 		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION, queryIntention.getHTTPHeaderValue());
@@ -660,7 +699,7 @@ public abstract class AbstractConsumer implements Consumer
 			}
 			if (error == null) // all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, hdrProps, getMultiObjectClassInfo().getObjectType(), null, null));
+				responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), null, null));
 			}
 			else // pretend to have received a 'fake' error Response
 			{
@@ -674,7 +713,7 @@ public abstract class AbstractConsumer implements Consumer
 				ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 				if (error == null) // all good
 				{
-					responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, hdrProps, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+					responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 				}
 				else // pretend to have received a 'fake' error Response
 				{
@@ -689,11 +728,12 @@ public abstract class AbstractConsumer implements Consumer
 	 
 	/*
 	 * See description of retrieveByServicePath() but without the queryIntention parameter. Since this parameter is not required
-	 * by this method it will be assumed null, which in turn will assume ONE-OFF as per interface definition.
+	 * by this method it will be assumed null, which in turn will assume ONE-OFF as per interface definition.. Further
+	 * the customParameters will be set to null.
 	 */
 	public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
-		return retrieveByServicePath(queryCriteria, pagingInfo, zoneCtxList, requestType, QueryIntention.ONE_OFF);
+		return retrieveByServicePath(queryCriteria, pagingInfo, zoneCtxList, requestType, QueryIntention.ONE_OFF, null);
 	}
 	
 	/*-----------------------*/
@@ -705,7 +745,7 @@ public abstract class AbstractConsumer implements Consumer
 	 * @see sif3.common.consumer.Consumer#updateMany(java.lang.Object, java.util.List)
 	 */
 	@Override
-	public List<BulkOperationResponse<OperationStatus>> updateMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<BulkOperationResponse<OperationStatus>> updateMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
     if (!initOK)
     {
@@ -715,6 +755,7 @@ public abstract class AbstractConsumer implements Consumer
 
     	Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<BulkOperationResponse<OperationStatus>> responses = new ArrayList<BulkOperationResponse<OperationStatus>>();
 		
 		if (!getConsumerEnvironment().getIsConnected())
@@ -728,7 +769,7 @@ public abstract class AbstractConsumer implements Consumer
 			ErrorDetails error = allClientChecks(AccessRight.UPDATE, AccessType.APPROVED, null, null, requestType);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), false, requestType), null, null));
+				responses.add(getClient(getConsumerEnvironment()).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters), urlQueryParameter, null, null));
 			}
 			else  //pretend to have received a 'fake' error Response
 			{
@@ -742,7 +783,7 @@ public abstract class AbstractConsumer implements Consumer
 				ErrorDetails error = allClientChecks(AccessRight.UPDATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 				if (error == null) //all good
 				{
-					responses.add(getClient(getConsumerEnvironment()).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), false, requestType), zoneCtx.getZone(), zoneCtx.getContext()));
+					responses.add(getClient(getConsumerEnvironment()).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 				}
 				else //pretend to have received a 'fake' error Response
 				{
@@ -756,20 +797,29 @@ public abstract class AbstractConsumer implements Consumer
 	}
 
 	/*
+	 * Convenience method. The same as above but without the parameter 'customParameters' which is defaulted to null.
+	 */
+	public List<BulkOperationResponse<OperationStatus>> updateMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	{
+		return updateMany(data, zoneCtxList, requestType, null);
+	}
+	
+	/*
 	 * (non-Javadoc)
 	 * @see sif3.common.consumer.Consumer#updateSingle(java.lang.Object, java.lang.String, java.util.List)
 	 */
 	@Override
-	public List<Response> updateSingle(Object data, String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<Response> updateSingle(Object data, String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-    if (!initOK)
-    {
-      logger.error("Consumer not initialsied properly. See previous error log entries.");
-      return null;
-    }
+		if (!initOK)
+		{
+			logger.error("Consumer not initialsied properly. See previous error log entries.");
+			return null;
+		}
 
     	Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<Response> responses = new ArrayList<Response>();
 		
 		if (!getConsumerEnvironment().getIsConnected())
@@ -783,7 +833,7 @@ public abstract class AbstractConsumer implements Consumer
 			ErrorDetails error = hasAccess(AccessRight.UPDATE, AccessType.APPROVED, null, null);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).updateSingle(getMultiObjectClassInfo().getObjectName(), resourceID, data, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE), null, null));
+				responses.add(getClient(getConsumerEnvironment()).updateSingle(getMultiObjectClassInfo().getObjectName(), resourceID, data, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, null, null));
 			}
 			else  //pretend to have received a 'fake' error Response
 			{
@@ -797,7 +847,7 @@ public abstract class AbstractConsumer implements Consumer
 				ErrorDetails error = hasAccess(AccessRight.UPDATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext());
 				if (error == null) //all good
 				{
-					responses.add(getClient(getConsumerEnvironment()).updateSingle(getMultiObjectClassInfo().getObjectName(), resourceID, data, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE), zoneCtx.getZone(), zoneCtx.getContext()));
+					responses.add(getClient(getConsumerEnvironment()).updateSingle(getMultiObjectClassInfo().getObjectName(), resourceID, data, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 				}
 				else //pretend to have received a 'fake' error Response
 				{
@@ -808,6 +858,14 @@ public abstract class AbstractConsumer implements Consumer
 		timer.finish();
 		logger.debug("Time taken to call and process 'update by primary key' for "+getMultiObjectClassInfo().getObjectName()+"/"+resourceID+": "+timer.timeTaken()+"ms");
 		return responses;
+	}
+	
+	/*
+	 * Convenience method. The same as above but without the parameter 'customParameters' which is defaulted to null.
+	 */
+	public List<Response> updateSingle(Object data, String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	{
+		return updateSingle(data, resourceID, zoneCtxList, null);
 	}
 	
 	/*
@@ -847,10 +905,19 @@ public abstract class AbstractConsumer implements Consumer
 	  return ConsumerEnvironmentManager.getInstance().getSIF3Session();
 	}
 
-	private HeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation, RequestType requestType, HeaderValues.ServiceType serviceType) 
+	private HeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation, RequestType requestType, HeaderValues.ServiceType serviceType, CustomParameters customParameters) 
 	{
 	   HeaderProperties hdrProps = new HeaderProperties();
+	   
+	   // First we add all Custom HTTP Headers. We add SIF defined HTTP header later. This will also ensure that we
+	   // will override custom properties with SIF defined properties.
+	   if ((customParameters != null) && (customParameters.getHttpHeaderParams() != null))
+	   {
+		   hdrProps = customParameters.getHttpHeaderParams();
+	   }
 	    
+	   // Now we set SIF defined HTTP headers...
+	   
 	   // First create the properties for the authentication header.
 	   ClientUtils.setAuthenticationHeader(hdrProps, envInfo.getAuthMethod(), getSIF3Session().getSessionToken(), getSIF3Session().getPassword());
 	    
@@ -866,21 +933,14 @@ public abstract class AbstractConsumer implements Consumer
 	   // for null, so no need to do this here.
 	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY, getApplicationKey());
 	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTHENTICATED_USER, getAuthentictedUser());
-//	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_INSTANCE_ID, getInstanceID());
 	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, getGeneratorID());
-	   
-//	   String generatorID = getGeneratorID();
-//	   if (StringUtils.notEmpty(generatorID))
-//	   {
-//	      hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, generatorID);
-//	   }
-	    
+	   	    
 	   return hdrProps;
 	}
 	
-	private HeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation, RequestType requestType)
+	private HeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation, RequestType requestType, CustomParameters customParameters)
 	{
-	  return getHeaderProperties(envInfo, isCreateOperation, requestType, HeaderValues.ServiceType.OBJECT);
+	  return getHeaderProperties(envInfo, isCreateOperation, requestType, HeaderValues.ServiceType.OBJECT, customParameters);
 	}
 	
 	private void setErrorDetails(BaseResponse response, ErrorDetails errorDetails)
