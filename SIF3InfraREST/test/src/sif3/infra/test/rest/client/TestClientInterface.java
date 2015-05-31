@@ -24,6 +24,7 @@ import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.RequestHeaderConstants;
+import sif3.common.model.URLQueryParameter;
 import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
@@ -59,8 +60,9 @@ public class TestClientInterface
 
 			HeaderProperties hdrProps = new HeaderProperties();
 			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AUTH_TOKEN);
+			URLQueryParameter urlQueryParams = new URLQueryParameter();
 			
-			Response response = client.getSingle("environments", ENV_ID, hdrProps, EnvironmentType.class, null, null);
+			Response response = client.getSingle("environments", ENV_ID, hdrProps, urlQueryParams, EnvironmentType.class, null, null);
 			
 			if (response.hasError())
 			{
