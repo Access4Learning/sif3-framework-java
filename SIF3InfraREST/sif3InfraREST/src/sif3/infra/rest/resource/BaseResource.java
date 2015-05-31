@@ -1129,8 +1129,7 @@ public abstract class BaseResource
 					case productName:
 						if (env.getApplicationInfo().getApplicationProduct() == null)
 						{
-							env.getApplicationInfo().setApplicationProduct(
-							        new ProductIdentityType());
+							env.getApplicationInfo().setApplicationProduct(new ProductIdentityType());
 						}
 						env.getApplicationInfo().getApplicationProduct().setProductName(value);
 						break;
@@ -1210,10 +1209,9 @@ public abstract class BaseResource
 		allHTTPHdrProperties = new HeaderProperties(); //ensure it is clean, ie. not holding values from a previous call.
 		MultivaluedMap<String, String> headerMap = requestHeaders.getRequestHeaders();
 		
-		// ensure that we make all header names lower case for later retrieval.
 		for (String hdrName : headerMap.keySet())
 		{
-			allHTTPHdrProperties.setHeaderProperty(hdrName.toLowerCase(), headerMap.getFirst(hdrName));
+			allHTTPHdrProperties.setHeaderProperty(hdrName, headerMap.getFirst(hdrName));
 		}		
 	}
 
@@ -1704,7 +1702,7 @@ public abstract class BaseResource
 	/*
 	 * This method attempts to retrieve the URL Query Parameter called 'accessToken' which may be used for SIF Simple. It will then
 	 * attempt to also get the authentication method from the URL Query Parameters. If it is provided it will be used, assuming it has a valid
-	 * value, otherwise a lookup to the provider's config file will be performed to determine the dafault accessToken authentication method. 
+	 * value, otherwise a lookup to the provider's config file will be performed to determine the default accessToken authentication method. 
 	 * If this is set then this will be used otherwise it is defaulted to 'Bearer'.
 	 */
 	private AuthenticationInfo getAccessToken()
