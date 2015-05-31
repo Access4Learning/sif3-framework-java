@@ -38,6 +38,7 @@ import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.exception.UnsupportedQueryException;
+import sif3.common.header.HeaderProperties;
 import sif3.common.interfaces.QueryProvider;
 import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.PagingInfo;
@@ -200,8 +201,10 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.EventProvider#modifyBeforeSent(sif3.common.model.SIFEvent, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public SIFEvent<StudentCollectionType> modifyBeforePublishing(SIFEvent<StudentCollectionType> sifEvent, SIFZone zone, SIFContext context)
+    public SIFEvent<StudentCollectionType> modifyBeforePublishing(SIFEvent<StudentCollectionType> sifEvent, SIFZone zone, SIFContext context, HeaderProperties customHTTPHeaders)
     {
+        // Here we could add some custom HTTP header values but at this time we have no interest to do so.
+    	
     	// At this point we don't need to modify anything. Just send as is...
 	    return sifEvent;
     }
