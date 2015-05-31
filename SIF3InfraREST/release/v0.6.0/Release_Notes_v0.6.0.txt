@@ -17,17 +17,26 @@ New Functionality
   QueryProvider interface. This enabled the developer to raise an appropriate exception if the requested data set
   is too large. The exception will be translated into appropriate HTTP Status in the response to meet the SIF
   specification.
+- Consumers can send custom HTTP Header fields and custom URL query parameters in OBJECT services. This functionality
+  is allowed by the SIF Specification and is now enabled in the SIF3 Framework. The Consumer interface class has 
+  changed but it does not affect any classes directly used by a developer. The AbstractConsumer overloads all methods
+  to ensure that backward compatibility.
 
 Changed Functionality
 ---------------------
 - Servlet 3.0 Requirement:
   Due to some features in the SIF3 Framework the provider must be deployed in a web-/application container that 
   supports the servlet v3.0 specification. Please refer to your web-/application container's documentation to ensure 
-  that it supports the servlet 3.0 specification. Tomcat 7 and above, Jetty 8 and above, JBoss AS 6 and above, Glassfish 3.x
-  all support the servlet 3.0 specification.
+  that it supports the servlet 3.0 specification. Tomcat 7 and above, Jetty 8 and above, JBoss AS 6 and above, 
+  Glassfish 3.x all support the servlet 3.0 specification.
 - RequestMetadata parameter in all methods of the provider interface is populated correctly. Also the RequestMetadata object
   has new properties. Most notable it gives access to all URL Query parameters and all HTTP Header fields. Please refer to
   Javadoc for that object as it holds important information how each property is populated.
+- The method modifyBeforePublishing(...) in the EventProvider interface has an additional parameter called 
+  customHTTPHeaders (see javadoc for details). If events are currently implemented in your provider then this 
+  parameter must be added to the modifyBeforePublishing(...) method in all classes that extend the BaseEventProvider. 
+  Note that only the parameter must be added but no further code changes are necessary. If your provider does not implement
+  events then no changes in the code is required.
 
 Removed Artifacts/Functionality
 -------------------------------
