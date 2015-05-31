@@ -42,8 +42,7 @@ public class BaseMetadata implements Serializable
     private String applicationKey = null; // The applicationKey from the HTTP header field 'applicationKey' set by the consumer. 
  	private String authentictedUser = null; // The user Token from the HTTP header field 'authentictedUser' set by the consumer. 
 
- 	private URLQueryParameter queryParams = null;
- 	private HeaderProperties httpHeaderParams = null;
+ 	private RequestParameters requestParameters = new RequestParameters();
  	
  	/**
  	 * Constructor.
@@ -55,8 +54,8 @@ public class BaseMetadata implements Serializable
  	public BaseMetadata(URLQueryParameter queryParams, HeaderProperties httpHeaderParams)
  	{
  		super();
- 		this.queryParams = queryParams;
- 		this.httpHeaderParams = httpHeaderParams;
+ 		requestParameters.setHttpHeaderParams(httpHeaderParams);
+ 		requestParameters.setQueryParams(queryParams);
  	}
  	
 	public String getGeneratorID()
@@ -112,17 +111,13 @@ public class BaseMetadata implements Serializable
      * This method returns the value of the given URL query parameter as a string. If no URL query parameter with that name
      * exists then null is returned. The parameterName is case sensitive.
      * 
-     * @param paramterName Name of the URL query parameter for which the value shall be returned.
+     * @param requestParameters Name of the URL query parameter for which the value shall be returned.
      * 
      * @return See desc.
      */
-    public String getURLQueryParameter(String paramterName)
+    public String getURLQueryParameter(String parameterName)
     {
-    	if ((queryParams != null) && (paramterName != null))
-    	{
-    		return queryParams.getQueryParam(paramterName);
-    	}
-    	return null;
+    	return requestParameters.getURLQueryParameter(parameterName);
     }
     
     /**
@@ -133,13 +128,9 @@ public class BaseMetadata implements Serializable
      * 
      * @return See desc.
      */
-    public String getHTTPParameter(String paramterName)
+    public String getHTTPParameter(String parameterName)
     {
-    	if ((httpHeaderParams != null) && (paramterName != null))
-    	{
-    		return httpHeaderParams.getHeaderProperty(paramterName.toLowerCase());
-    	}
-    	return null;
+    	return requestParameters.getHTTPParameter(parameterName);
     }
     
     /**
@@ -166,8 +157,7 @@ public class BaseMetadata implements Serializable
     {
 	    return "BaseMetadata [generatorID=" + this.generatorID + ", applicationKey="
 	            + this.applicationKey + ", authentictedUser=" + this.authentictedUser
-	            + ", queryParams=" + this.queryParams + ", httpHeaderParams="
-	            + this.httpHeaderParams + "]";
+	            + ", requestParameters=" + this.requestParameters + "]";
     }
 	
 }
