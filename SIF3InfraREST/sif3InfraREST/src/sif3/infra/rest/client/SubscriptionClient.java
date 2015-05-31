@@ -78,7 +78,7 @@ public class SubscriptionClient extends BaseClient
 		WebResource service = getService();
 		try
 		{
-			service = buildURI(service, null, subscriptionID, null, null);
+			service = buildURI(service, null, subscriptionID, null, null, null);
 			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
 			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
 
@@ -168,7 +168,7 @@ public class SubscriptionClient extends BaseClient
 		WebResource service = getService();
 		try
 		{
-			service = buildURI(service, null, subscriptionID, null, null);
+			service = buildURI(service, null, subscriptionID, null, null, null);
 			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
 		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).delete(ClientResponse.class);
 

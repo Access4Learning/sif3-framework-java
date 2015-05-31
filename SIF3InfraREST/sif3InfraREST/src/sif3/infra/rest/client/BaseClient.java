@@ -24,8 +24,8 @@ import java.util.HashMap;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriBuilder;
 
 import org.apache.log4j.Logger;
 
@@ -38,6 +38,7 @@ import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.URLQueryParameter;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.BaseResponse;
 import sif3.common.ws.ErrorDetails;
@@ -235,7 +236,7 @@ public abstract class BaseClient
 	/*-----------------------*/
 	/*-- Protected Methods --*/
 	/*-----------------------*/
-	protected WebResource buildURI(WebResource svc, String relURI, String resourceID, SIFZone zone, SIFContext ctx)
+	protected WebResource buildURI(WebResource svc, String relURI, String resourceID, SIFZone zone, SIFContext ctx, URLQueryParameter urlQueryParams)
 	{
 		UriBuilder uriBuilder = svc.getUriBuilder();
 		if (StringUtils.notEmpty(relURI))
@@ -254,13 +255,22 @@ public abstract class BaseClient
 		{
 			uriBuilder.matrixParam("contextId", ctx.getId());
 		}
+		
+		//Add custom URL Query Parameters.
+		if ((urlQueryParams != null) && (urlQueryParams.getQueryParams() != null))
+		{
+			for (String paramName : urlQueryParams.getQueryParams().keySet())
+			{
+				uriBuilder = uriBuilder.queryParam(paramName, urlQueryParams.getQueryParam(paramName));
+			}
+		}
 
 		return svc.uri(uriBuilder.build());
 	}
 
 	protected WebResource buildURI(WebResource svc, String relURI)
 	{
-		return buildURI(svc, relURI, null, null, null);
+		return buildURI(svc, relURI, null, null, null, null);
 	}
 		
 	/**
@@ -282,22 +292,36 @@ public abstract class BaseClient
 		
 		Builder builder = service.type(getRequestMediaType()).accept(getResponseMediaType());
 		
+		// Set some specific SIF HTTP header. First ensure that we have a valid header property structure
+		if (hdrProperties == null)
+		{
+			hdrProperties = new HeaderProperties();
+		}
+		
 		// Always set the requestId and messageId.
-		builder = builder.header(RequestHeaderConstants.HDR_MESSAGE_ID, UUIDGenerator.getUUID());
+		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_MESSAGE_ID, UUIDGenerator.getUUID());
+		//builder = builder.header(RequestHeaderConstants.HDR_MESSAGE_ID, UUIDGenerator.getUUID());
 		
 		// Sometimes the request ID is not required (i.e. events)
 		if (includeRequestID)
 		{
-			builder = builder.header(RequestHeaderConstants.HDR_REQUEST_ID, UUIDGenerator.getUUID());
+			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_ID, UUIDGenerator.getUUID());
+			//builder = builder.header(RequestHeaderConstants.HDR_REQUEST_ID, UUIDGenerator.getUUID());
 		}
 		
 		// timestamp header must be set but only if it is not set, yet. If the authentication method is SIF_HMACSHA256
 		// then this property should already be set! Don't override because it is critical to the hash of the authentication token. 
 		if (hdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME) == null) // not set yet
 		{
-			builder = builder.header(RequestHeaderConstants.HDR_DATE_TIME, DateUtils.nowAsISO8601());
+			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME, DateUtils.nowAsISO8601());
+			//builder = builder.header(RequestHeaderConstants.HDR_DATE_TIME, DateUtils.nowAsISO8601());
 		}
 
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("Final set of HTTP Headers to be used in request: "+hdrProperties);
+		}
+		
 		if ((hdrProperties != null) && (hdrProperties.getHeaderProperties() != null) && (!hdrProperties.getHeaderProperties().isEmpty()))
 		{
 			HashMap<String, String> hdrMap = hdrProperties.getHeaderProperties();
@@ -316,19 +340,29 @@ public abstract class BaseClient
 	
 	protected HeaderProperties extractHeaderInfo(ClientResponse clientResponse)
 	{
+//		HeaderProperties hdrProps = new HeaderProperties();
+//		MultivaluedMap<String, String> respHdrProps = clientResponse.getHeaders();
+//
+//		if ((respHdrProps != null))
+//		{
+//			for (String propName : ResponseHeaderConstants.HEADER_NAME_ARRAY)
+//			{
+//				String hdrValue = respHdrProps.getFirst(propName); // there should only be one value for each of these properties
+//				if (hdrValue != null)
+//				{
+//					hdrProps.setHeaderProperty(propName, hdrValue);
+//				}
+//			}
+//		}
+
 		HeaderProperties hdrProps = new HeaderProperties();
-		MultivaluedMap<String, String> respHdrProps = clientResponse.getHeaders();
-		if ((respHdrProps != null))
+		MultivaluedMap<String, String> respHdrProps =  clientResponse.getHeaders();
+		
+		for (String hdrName : respHdrProps.keySet())
 		{
-			for (String propName : ResponseHeaderConstants.HEADER_NAME_ARRAY)
-			{
-				String hdrValue = respHdrProps.getFirst(propName); // there should only be one value for each of these properties
-				if (hdrValue != null)
-				{
-					hdrProps.setHeaderProperty(propName, hdrValue);
-				}
-			}
-		}
+			hdrProps.setHeaderProperty(hdrName, respHdrProps.getFirst(hdrName));
+		}		
+		
 		return hdrProps;
 	}
 	
@@ -410,6 +444,11 @@ public abstract class BaseClient
 
 		// Extract header properties.
 		response.setHdrProperties(extractHeaderInfo(clientResponse));
+		
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("HTTP Headers of Response: "+response.getHdrProperties());
+		}
 		response.setHasEntity(clientResponse.hasEntity() && (clientResponse.getClientResponseStatus().getStatusCode() != Status.NO_CONTENT.getStatusCode()));		
 	}
 	

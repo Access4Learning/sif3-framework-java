@@ -112,13 +112,14 @@ public class EventClient extends BaseClient
 	 * @param event The event to be sent.
 	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
 	 * @param context The context for which this operation shall be invoked. Can be null which indicates the DEFAULT context.
-	 * 
+	 * @param customHdrFields Custom HTTP header fields to be added to the request.
+	 *
 	 * @return BaseResponse Object holding appropriate values and results of the call. This call won't return any data model objects, just
 	 *                      status and/or an error message.
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
      */
-	public BaseResponse sendEvents(SIFEvent<?> event, SIFZone zone, SIFContext context, HeaderProperties overrideHdrFields) throws ServiceInvokationException
+	public BaseResponse sendEvents(SIFEvent<?> event, SIFZone zone, SIFContext context, HeaderProperties customHdrFields) throws ServiceInvokationException
 	{
 		if (allOK) // Only send events if all is fine.
 		{
@@ -145,7 +146,7 @@ public class EventClient extends BaseClient
 //				{
 //					logger.debug("sendEvents: Payload to send:\n"+payloadStr);
 //				}
-				HeaderProperties headerProps = getEventHeaders(event.getEventAction(),	event.getUpdateType(), zone, context, overrideHdrFields);
+				HeaderProperties headerProps = getEventHeaders(event.getEventAction(),	event.getUpdateType(), zone, context, customHdrFields);
 				
 				Builder builder = setRequestHeaderAndMediaTypes(service, headerProps, false);
 				logger.debug("Send Event with payload size: "+payloadStr.length());
@@ -191,13 +192,7 @@ public class EventClient extends BaseClient
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_EVENT_ACTION, eventAction.name());
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, HeaderValues.ServiceType.OBJECT.name());
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_NAME, serviceName);
-		
-//		String generatorID = providerEnvironment.getGeneratorID();
-//		if (StringUtils.notEmpty(generatorID))
-//		{
-//			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, generatorID);
-//		}
-				
+						
 		if (eventAction == EventAction.UPDATE)
 		{
 			if (updateType == null)

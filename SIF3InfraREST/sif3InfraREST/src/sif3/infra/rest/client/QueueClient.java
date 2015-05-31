@@ -77,7 +77,7 @@ public class QueueClient extends BaseClient
 		WebResource service = getService();
 		try
 		{
-			service = buildURI(service, null, queueID, null, null);
+			service = buildURI(service, null, queueID, null, null, null);
 			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
 			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
 
@@ -152,7 +152,7 @@ public class QueueClient extends BaseClient
 		WebResource service = getService();
 		try
 		{
-			service = buildURI(service, null, queueID, null, null);
+			service = buildURI(service, null, queueID, null, null, null);
 			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
 		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).delete(ClientResponse.class);
 
