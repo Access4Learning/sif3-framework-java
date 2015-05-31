@@ -277,9 +277,13 @@ public class RemoteMessageQueueReader implements Runnable
 					updateType = getUpdateType(response);
 				}
 				
-				EventMetadata metadata = new EventMetadata();
+				EventMetadata metadata = new EventMetadata(response.getHdrProperties());
+				
+				// Set the generator ID in its specific property for easy access.
 				metadata.setGeneratorID(response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_GENERATOR_ID));
-
+				
+				//TODO: JH - Do we need applicationKey and authenticatedUser HTTP header here?				
+				
 				EventInfo eventInfo = new EventInfo(eventPayload, response.getMediaType(), eventAction, updateType, zone, context, metadata, getReaderID());
 				logger.debug(getReaderID()+": Attempts to push Event to local queue...");
 				localQueue.blockingPush(eventInfo);
