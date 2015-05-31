@@ -111,7 +111,7 @@ public class BaseMetadata implements Serializable
      * This method returns the value of the given URL query parameter as a string. If no URL query parameter with that name
      * exists then null is returned. The parameterName is case sensitive.
      * 
-     * @param requestParameters Name of the URL query parameter for which the value shall be returned.
+     * @param parameterName Name of the URL query parameter for which the value shall be returned.
      * 
      * @return See desc.
      */
@@ -124,7 +124,7 @@ public class BaseMetadata implements Serializable
      * This method returns the value of the given HTTP header field as a string. If no HTTP header field with that name
      * exists then null is returned. The parameterName is case insensitive.
      * 
-     * @param paramterName Name of the HTTP header field for which the value shall be returned.
+     * @param parameterName Name of the HTTP header field for which the value shall be returned.
      * 
      * @return See desc.
      */

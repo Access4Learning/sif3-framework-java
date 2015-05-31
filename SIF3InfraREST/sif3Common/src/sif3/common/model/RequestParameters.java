@@ -216,7 +216,7 @@ public class RequestParameters implements Serializable
      * or a URL query parameter. If a value exists in both (URL query parameter and HTTP header) then the HTTP header will
      * take precedence and be returned. If the parameter does not exist then null is returned.
      * 
-     * @param paramterName Name of the HTTP header or URL query parameter for which the value shall be returned.
+     * @param parameterName Name of the HTTP header or URL query parameter for which the value shall be returned.
      * 
      * @return See desc.
      */
