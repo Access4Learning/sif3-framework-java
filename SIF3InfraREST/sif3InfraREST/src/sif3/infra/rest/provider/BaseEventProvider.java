@@ -129,17 +129,6 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 	{
 		return getProviderEnvironment().getEnvironmentKey().getUserToken();
 	}
-
-//	/**
-//	 * This method returns the value of the env.instanceID property from the provider's property file. If that
-//	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
-//	 * 
-//	 * @return The env.instanceID property from the provider's property file
-//	 */
-//	public String getInstanceID()
-//	{
-//		return getProviderEnvironment().getEnvironmentKey().getInstanceID();
-//	}
 	
 	/**
 	 * This method returns the value of the env.mediaType property from the provider's property file. If that
@@ -222,13 +211,14 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 								EventAction eventAction = sifEvents.getEventAction();
 								if (hasAccess(service, eventAction))
 								{
-									SIFEvent<L> modifiedEvents = modifyBeforePublishing(sifEvents, service.getZone(), service.getContext());
+									HeaderProperties customHTTPHeaders = new HeaderProperties();
+									SIFEvent<L> modifiedEvents = modifyBeforePublishing(sifEvents, service.getZone(), service.getContext(), customHTTPHeaders);
 									if (modifiedEvents != null)
 									{
 										//Just in case the developer has changed it. Should not be allowed :-)
 										modifiedEvents.setEventAction(eventAction);
 										
-										if (!sendEvents(evtClient, modifiedEvents, service.getZone(), service.getContext()))
+										if (!sendEvents(evtClient, modifiedEvents, service.getZone(), service.getContext(), customHTTPHeaders))
 										{
 											//Report back to the caller. This should also give the event back to the caller.
 											onEventError(modifiedEvents, service.getZone(), service.getContext());
@@ -280,15 +270,29 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
      * 
      * @param event The event to be published to the zone.
      * @param zone The zone to which the event is published to.
+     * @param customHTTPHeaders Custom HTTP Headers to be added to the event. 
      * 
      * @return TRUE: Event sent successfully. FALSE: Failed to send event. Error must be logged.
      */
-    protected boolean sendEvents(EventClient evtClient, SIFEvent<?> sifEvents, SIFZone zone, SIFContext context)
+    protected boolean sendEvents(EventClient evtClient, SIFEvent<?> sifEvents, SIFZone zone, SIFContext context, HeaderProperties customHTTPHeaders)
     {
     	logger.debug(getPrettyName()+" sending a "+getServiceName()+" event with "+sifEvents.getListSize()+" sif objects.");
     	try
     	{
-    		BaseResponse response = evtClient.sendEvents(sifEvents, zone, context, getOverrideHeaderProperties());
+    		if (logger.isDebugEnabled())
+    		{
+    			logger.debug("Custom HTTP Headers set by modifyBeforePublishing() method: "+customHTTPHeaders);
+    		}
+    		if (customHTTPHeaders == null)
+    		{
+    			customHTTPHeaders = new HeaderProperties();
+    		}
+    		
+    		// Add all other HTTP headers to this customHTTPHeader. This ensures that SIF managed HTTP headers will
+    		// override custom HTTP Headers.
+    		addSIF3OverrideHeaderProperties(customHTTPHeaders);
+    		
+    		BaseResponse response = evtClient.sendEvents(sifEvents, zone, context, customHTTPHeaders);
     		if (response.hasError())
     		{
     			logger.error("Failed to send event: "+response.getError());
@@ -307,15 +311,14 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
     }
     
     
-    protected HeaderProperties getOverrideHeaderProperties()
+    protected void addSIF3OverrideHeaderProperties(HeaderProperties hdrProps)
     {
-    	HeaderProperties hdrProps = new HeaderProperties();
+    	//HeaderProperties hdrProps = new HeaderProperties();
     	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, getGeneratorID());
     	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY, getApplicationKey());
     	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTHENTICATED_USER, getAuthentictedUser());
-//    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_INSTANCE_ID, getInstanceID());
 
-    	return hdrProps;
+    	//return hdrProps;
     }
     
     private List<ServiceInfo> getServicesForProvider(SIF3Session sif3Session)
