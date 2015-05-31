@@ -167,7 +167,9 @@ Version from Month Day, 2015: v0.6.0 - Various changes
 =============================================================
 Version 0.6.0 adds an auditing framework for providers to the SIF3 Framework. This is an optional feature.
 Further this new version requires all providers to be deployed in a web-/application container that supports
-the servlet 3.0 specification. Please refer to the release notes in the directory "release/v0.6.0" for details.
+the servlet 3.0 specification. 
+There are additional changes, additions, bug fixes etc. in the latest version of the SIF3 Framework. Please refer 
+to the release notes in the directory "release/v0.6.0" for details.
 
 #########################################################################################################
 # Download Instructions
