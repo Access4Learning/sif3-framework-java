@@ -24,11 +24,10 @@ import sif.dd.au30.model.StudentCollectionType;
 import sif.dd.au30.model.StudentPersonalType;
 import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
+import sif3.common.header.RequestHeaderConstants;
+import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
-import sif3.common.model.QueryOperator;
-import sif3.common.model.QueryPredicate;
-import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServicePathPredicate;
 import sif3.common.model.ZoneContextInfo;
@@ -242,8 +241,8 @@ public class TestStudentPersonalConsumer
 	}
 	
 
-	 private void updateStudents(StudentPersonalConsumer consumer)
-	  {
+	private void updateStudents(StudentPersonalConsumer consumer)
+	{
 	    System.out.println("Start 'Update Students - Bulk Operation' in all connected environments...");
 	    StudentCollectionType students = getStudents((DataModelUnmarshalFactory)consumer.getUnmarshaller());
 	    try
@@ -276,16 +275,26 @@ public class TestStudentPersonalConsumer
 	      ex.printStackTrace();
 	    }
 	    System.out.println("Finished 'Update Students' in all connected environments...");
-	  }
+	}
 
-	
-	
 	private void getStudents(StudentPersonalConsumer consumer)
 	{
 		System.out.println("Start 'Get All Students' in all connected environments...");
 		try
 		{
-			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), null, REQUEST_TYPE, QueryIntention.NO_CACHE);
+			CustomParameters params = new CustomParameters();
+			
+			// Set some HTTP Header fields
+			params.addHTTPHeaderParameter(RequestHeaderConstants.HDR_GENERATOR_ID, "Ignore This");
+			params.addHTTPHeaderParameter("GenID", "This should not be ignored");
+			params.addHTTPHeaderParameter("customHdr", "Go all the way to Provider");
+			
+			// Set some custom URL query Params
+			params.addURLQueryParameter("ChangedSince", "01/05/2015");
+			params.addURLQueryParameter("myURLQueryParam", "show in provider");
+			
+			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), null, REQUEST_TYPE, QueryIntention.NO_CACHE, params);
+//			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), null, REQUEST_TYPE);
 //			List<Response> responses = consumer.retrieve(null, null, REQUEST_TYPE);
 			System.out.println("Responses from attempt to Get All Students:");
 			printResponses(responses, consumer);
@@ -305,7 +314,7 @@ public class TestStudentPersonalConsumer
 		try
 		{
 			// Get all students for a service path cirteria. Get 5 students per page (i.e page 1). 
-			List<Response> responses = consumer.retrieveByServicePath(criteria, new PagingInfo(5, 1), null, REQUEST_TYPE, QueryIntention.ALL);
+			List<Response> responses = consumer.retrieveByServicePath(criteria, new PagingInfo(5, 1), null, REQUEST_TYPE, QueryIntention.ALL, null);
 			System.out.println("Responses from attempt to Get All Students for '" + criteria + "': ");
 			printResponses(responses, consumer);
 		}
@@ -364,9 +373,9 @@ public class TestStudentPersonalConsumer
 		
   		StudentPersonalConsumer consumer = tester.getConsumer();
   		
-//  		tester.getStudents(consumer);
+  		tester.getStudents(consumer);
 //  		tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
-  		tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
+//  		tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
 //  		tester.getStudentsByServicePath("RoomInfos", "24ed508e1ed04bba82198233efa55859", consumer);
 //  			tester.createStudent(consumer);
   //		tester.removeStudent(consumer);
