@@ -342,7 +342,8 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.QueryProvider#retrieveByServicePath(sif3.common.model.QueryCriteria, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo, sif3.common.model.RequestMetadata)
      */
     @Override
-	public Object retrieveByServicePath(QueryCriteria queryCriteria, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+	public Object retrieveByServicePath(QueryCriteria queryCriteria, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) 
+    	throws PersistenceException, UnsupportedQueryException, DataTooLargeException
 	{
 		logger.debug("Performing query by service path.");
 		if (logger.isDebugEnabled())
@@ -384,6 +385,35 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 		{
 			throw new UnsupportedQueryException("The query condition (driven by the service path) "+queryCriteria+" is not supported by the provider.");
 		}
+	}
+    
+    /*
+     * (non-Javadoc)
+     * @see sif3.common.interfaces.QueryProvider#retrieveByQBE(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo, sif3.common.model.RequestMetadata)
+     */
+    public Object retrieveByQBE(Object exampleObject, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) 
+    	throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+	{
+		logger.debug("Performing QBE query for: "+exampleObject);
+    	if (exampleObject instanceof StudentPersonalType)
+    	{
+	    	ArrayList<StudentPersonalType> studentList = fetchStudents(students, pagingInfo);
+	    	StudentCollectionType studentCollection = dmObjectFactory.createStudentCollectionType();
+	    	if (studentList != null)
+	    	{
+	    		studentCollection.getStudentPersonal().addAll(studentList);
+	    		return studentCollection;
+	    	}
+	    	else
+	    	{
+	    		return null;
+	    	}
+    	}
+    	else
+    	{
+    		throw new IllegalArgumentException("Expected Object Type  = StudentPersonalType. Received Object Type = "+exampleObject.getClass().getSimpleName());
+    	}
+    	//throw new UnsupportedQueryException("QBE not supported for StudentPersonals");
 	}
 
 	/* (non-Javadoc)
