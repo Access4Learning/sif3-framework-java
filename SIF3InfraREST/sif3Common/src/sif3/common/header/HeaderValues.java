@@ -47,9 +47,9 @@ public class HeaderValues
 	public enum ResponseAction {CREATE, UPDATE, DELETE, QUERY};
 	
 	/**
-	 * Valid values for the "methodOverride" header field in the PUT (Update) request.
+	 * Valid values for the "methodOverride" header field in the PUT (Update) or POST (Create) request.
 	 */
-	public enum MethodType {DELETE, UPDATE};
+	public enum MethodType {DELETE, UPDATE, GET, POST};
 	
 	/**
 	 * Valid values for the "serviceType" header field in the request.
