@@ -300,20 +300,7 @@ public class ClientInterface extends BaseClient
 		try
 		{
 			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
-			if (pagingInfo != null)
-			{
-//				QueryMetadata query = new QueryMetadata();
-//				query.setPagingInfo(pagingInfo);
-//				Map<String, String> queryParameters = query.getQueryParameters();
-			  	Map<String, String> queryParameters = pagingInfo.getRequestValues();
-				for (String key : queryParameters.keySet())
-				{
-				  hdrProperties.setHeaderProperty(key, queryParameters.get(key));
-				  //service = service.queryParam(key, queryParameters.get(key));
-				}
-				
-				//service = service.queryParams(query.getQueryParametersAsMultivaluedMap());
-			}
+			addPagingInfoToHeaders(pagingInfo, hdrProperties);
 			
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
 
@@ -322,6 +309,55 @@ public class ClientInterface extends BaseClient
 		catch (Exception ex)
 		{
 			String errorMsg = "Failed to invoke 'getMany' service (REST GET) on URI " + service.getURI() + ": " + ex.getMessage();
+			logger.error(errorMsg);
+			throw new ServiceInvokationException(errorMsg, ex);
+		}
+	}
+	
+	/**
+	 * Will invoke the REST POST call but with a 'methodOverride' for a 'GET' to enable a payload to be transfered for a
+	 * Query style operation. This method is used for Query By Example requests. All parameters except the 'exampleObject'
+	 * are used in the same manner as with the getMany() method in this class. A list of objects (collection) is returned
+	 * as part of this method. Additional parameters of this method indicate what part of the collection shall be 
+	 * returned (pagingInfo) as well as what zone and context this query shall apply to.
+	 * 
+	 * @param relURI A relative URI to the baseURI given to the constructor of this class. It is appended to the baseURI as is.
+	 * @param exampleObject The example data model object. This must be the single object type.
+	 * @param pagingInfo Page information to be set for the provider to determine which results to return.
+	 * @param hdrProperties Header Properties to be added to the header of the GET request.
+	 * @param returnObjectClass The class type into which the object shall be unmarshalled into. The final object is stored in the
+	 *                          returned Response object.
+	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
+	 * @param context The context for which this operation shall be invoked. Can be null which indicates the DEFAULT context.
+	 * 
+	 * @return Response Object holding appropriate values and results of the call. 
+	 * 
+	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
+	 */
+	public Response getByQBE(String relURI, Object exampleObject, PagingInfo pagingInfo, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, Class<?> returnObjectClass, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	{
+		WebResource service = getService();
+		try
+		{
+			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
+		    String payloadStr = getDataModelMarshaller().marshal(exampleObject, getRequestMediaType());
+
+			addPagingInfoToHeaders(pagingInfo, hdrProperties);
+
+			// Set specific header so that POST method knows that a GET and not an CREATE is required! 
+			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.GET.name());
+
+			if (logger.isDebugEnabled())
+			{
+				logger.debug("getByQBE: Payload to send:\n"+payloadStr);
+			}
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).post(ClientResponse.class, payloadStr);
+
+			return setResponse(service, response, returnObjectClass, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
+		}
+		catch (Exception ex)
+		{
+			String errorMsg = "Failed to invoke 'getByQBE' service (REST POST) on URI " + service.getURI() + ": " + ex.getMessage();
 			logger.error(errorMsg);
 			throw new ServiceInvokationException(errorMsg, ex);
 		}
@@ -641,5 +677,16 @@ public class ClientInterface extends BaseClient
 		}
 		return response;
 	}
-
+	
+	private void addPagingInfoToHeaders(PagingInfo pagingInfo, HeaderProperties hdrProperties)
+	{	
+		if (pagingInfo != null)
+		{
+		  	Map<String, String> queryParameters = pagingInfo.getRequestValues();
+			for (String key : queryParameters.keySet())
+			{
+			  hdrProperties.setHeaderProperty(key, queryParameters.get(key));
+			}
+		}
+	}
 }
