@@ -33,6 +33,7 @@ import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.Consumer;
+import sif3.common.interfaces.QueryConsumer;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
@@ -70,7 +71,7 @@ import au.com.systemic.framework.utils.Timer;
  * 
  * @author Joerg Huber
  */
-public abstract class AbstractConsumer implements Consumer
+public abstract class AbstractConsumer implements Consumer, QueryConsumer
 {
 	protected final Logger logger = Logger.getLogger(getClass());
 
@@ -660,6 +661,10 @@ public abstract class AbstractConsumer implements Consumer
 		return retrieve(pagingInfo, zoneCtxList, requestType, QueryIntention.ONE_OFF, null);
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see sif3.common.interfaces.QueryConsumer#retrieveByServicePath(sif3.common.model.QueryCriteria, sif3.common.model.PagingInfo, java.util.List, sif3.common.header.HeaderValues.RequestType, sif3.common.header.HeaderValues.QueryIntention, sif3.common.model.CustomParameters)
+	 */
 	public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention, CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
 		if (!initOK)
@@ -687,7 +692,6 @@ public abstract class AbstractConsumer implements Consumer
 		
 		// Add query intention to headers.
 		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION, queryIntention.getHTTPHeaderValue());
-
 		
 		// List is null or empty which means we perform action in default  Zone/Context
 		if ((zoneCtxList == null) || (zoneCtxList.size() == 0))
@@ -727,13 +731,100 @@ public abstract class AbstractConsumer implements Consumer
 	}
 	 
 	/*
-	 * See description of retrieveByServicePath() but without the queryIntention parameter. Since this parameter is not required
-	 * by this method it will be assumed null, which in turn will assume ONE-OFF as per interface definition.. Further
+	 * See description of retrieveByServicePath() but without the queryIntention & customParameters parameters. Since this parameter 
+	 * is not required by this method it will be assumed null, which in turn will assume ONE-OFF as per interface definition. Further
 	 * the customParameters will be set to null.
 	 */
 	public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
 		return retrieveByServicePath(queryCriteria, pagingInfo, zoneCtxList, requestType, QueryIntention.ONE_OFF, null);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see sif3.common.interfaces.QueryConsumer#retrieveByQBE(java.lang.Object, sif3.common.model.PagingInfo, java.util.List, sif3.common.header.HeaderValues.RequestType, sif3.common.header.HeaderValues.QueryIntention, sif3.common.model.CustomParameters)
+	 */
+	public List<Response> retrieveByQBE(Object exampleObject, 
+								        PagingInfo pagingInfo, 
+								        List<ZoneContextInfo> zoneCtxList, 
+								        RequestType requestType, 
+								        QueryIntention queryIntention, 
+								        CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+	{
+		if (!initOK)
+		{
+			logger.error("Consumer not initialsied properly. See previous error log entries.");
+			return null;
+		}
+
+		Timer timer = new Timer();
+		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
+		List<Response> responses = new ArrayList<Response>();
+
+		if (!getConsumerEnvironment().getIsConnected())
+		{
+			logger.error("No connected environment for " + getConsumerEnvironment().getEnvironmentName() + ". See previous erro log entries.");
+			return responses;
+		}
+
+		// Ensure query Intention is not null. if so default to ONE-OFF as per SIF 3.x spec.
+		queryIntention = (queryIntention == null) ? QueryIntention.ONE_OFF : queryIntention;
+		
+		// Set default set of HTTP Header fields
+		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, requestType, HeaderValues.ServiceType.OBJECT, customParameters);
+		
+		// Add query intention to headers.
+		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION, queryIntention.getHTTPHeaderValue());
+
+		// List is null or empty which means we perform action in default  Zone/Context
+		if ((zoneCtxList == null) || (zoneCtxList.size() == 0))
+		{
+			ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, null, null, requestType);
+			if (error == null)
+			{
+				error = requestTypeSupported(requestType);
+			}
+			if (error == null) // all good
+			{
+				responses.add(getClient(getConsumerEnvironment()).getByQBE(getMultiObjectClassInfo().getObjectName(), exampleObject, pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), null, null));
+			}
+			else // pretend to have received a 'fake' error Response
+			{
+				responses.add(createErrorResponse(error));
+			}
+		}
+		else // Only perform action where environment matches current environment
+		{
+			for (ZoneContextInfo zoneCtx : zoneCtxList)
+			{
+				ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+				if (error == null) // all good
+				{
+					responses.add(getClient(getConsumerEnvironment()).getByQBE(getMultiObjectClassInfo().getObjectName(), exampleObject, pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+				}
+				else // pretend to have received a 'fake' error Response
+				{
+					responses.add(createErrorResponse(error));
+				}
+			}
+		}
+	    timer.finish();
+	    logger.debug("Time taken to call and process 'retrieve all' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
+	    return responses;
+	}
+	
+	/*
+	 * See description of retrieveByServicePath() but without the queryIntention & customParameters parameters. Since this parameter 
+	 * is not required by this method it will be assumed null, which in turn will assume ONE-OFF as per interface definition. Further
+	 * the customParameters will be set to null.
+	 */
+	public Object retrieveByQBE(Object exampleObject, 
+								PagingInfo pagingInfo, 
+								List<ZoneContextInfo> zoneCtxList, 
+								RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+	{
+		return retrieveByQBE(exampleObject, pagingInfo, zoneCtxList, requestType, QueryIntention.ONE_OFF, null);
 	}
 	
 	/*-----------------------*/
