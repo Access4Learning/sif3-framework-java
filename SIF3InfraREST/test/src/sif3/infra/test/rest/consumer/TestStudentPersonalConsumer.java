@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
+import sif.dd.au30.model.NameOfRecordType;
+import sif.dd.au30.model.ObjectFactory;
 import sif.dd.au30.model.StudentCollectionType;
 import sif.dd.au30.model.StudentPersonalType;
 import sif3.common.header.HeaderValues.QueryIntention;
@@ -57,6 +59,8 @@ public class TestStudentPersonalConsumer
 //	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
 	
 	private static final RequestType REQUEST_TYPE = RequestType.IMMEDIATE;
+	
+	private static ObjectFactory auDMObjects = new ObjectFactory();
 	
 	private void printResponses(List<Response> responses, StudentPersonalConsumer consumer)
 	{
@@ -324,6 +328,41 @@ public class TestStudentPersonalConsumer
 		}
 		System.out.println("Finished 'Get All Students By Service Path' in all connected environments...");
 	}
+	
+	private void getStudentsByQBE(StudentPersonalConsumer consumer)
+	{
+		StudentPersonalType student = auDMObjects.createStudentPersonalType();
+		student.setPersonInfo(auDMObjects.createPersonInfoType());
+        NameOfRecordType name = new NameOfRecordType();
+        name.setFamilyName(auDMObjects.createBaseNameTypeFamilyName("%an%"));
+		student.getPersonInfo().setName(name);
+
+		CustomParameters params = new CustomParameters();
+
+		// Set some HTTP Header fields
+		params.addHTTPHeaderParameter(RequestHeaderConstants.HDR_GENERATOR_ID, "Ignore This");
+		params.addHTTPHeaderParameter("GenID", "This should not be ignored");
+		params.addHTTPHeaderParameter("customHdr", "Go all the way to Provider");
+		
+		// Set some custom URL query Params
+		params.addURLQueryParameter("ChangedSince", "01/05/2015");
+		params.addURLQueryParameter("myURLQueryParam", "show in provider");
+
+		System.out.println("Start 'Get Students By Example' in all connected environments...");
+		try
+		{
+			// Get all students by example. Get 5 students per page (i.e page 1). 
+			List<Response> responses = consumer.retrieveByQBE(student, new PagingInfo(5, 1), null, REQUEST_TYPE, QueryIntention.ALL, params);
+			System.out.println("Responses from attempt to Get Students By Example': ");
+			printResponses(responses, consumer);
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		System.out.println("Finished 'Get Students By Example' in all connected environments...");
+	}
+
 
 	private void getStudent(StudentPersonalConsumer consumer)
 	{
@@ -384,6 +423,7 @@ public class TestStudentPersonalConsumer
   //		tester.updateStudents(consumer);
   //		tester.createStudents(consumer);
 //  		tester.deleteStudents(consumer);
+  		tester.getStudentsByQBE(consumer);
   
   		System.out.println("Finalise Consumer (i.e. disconnect and remove environment).");
   		consumer.finalise();
