@@ -5,8 +5,8 @@ Release Notes for v0.6.0 of SIF3 Framework (Month Day, 2015)
 Bug Fixes
 ---------
 - Return HTTP Status of 403 (Forbidden) if consumer issues a request for an operation where it doesn't have 
-  permission for (i.e. ACL states a 'REJECT" for a particular operation). Now it meets the latest SIF Specification.
-- Return HTTP Status of 400 (Bad Request) if a unsupported query criteria is provides in a service path call. Now it
+  permission for (i.e. ACL states a 'REJECT" for a particular operation). This meets the latest SIF Specification.
+- Return HTTP Status of 400 (Bad Request) if an unsupported query criteria is provides in a service path call. This
   meets the latest SIF Specification.
 
 New Functionality
@@ -21,6 +21,16 @@ New Functionality
   is allowed by the SIF Specification and is now enabled in the SIF3 Framework. The Consumer interface class has 
   changed but it does not affect any classes directly used by a developer. The AbstractConsumer overloads all methods
   to ensure that backward compatibility.
+- Added 'Query By Example' (QBE) functionality. This requires a code change to all providers that implement the 
+  QueryProvider interface. A new method called retrieveByQBE() has been added to the QueryProvider interface class.
+  To fix compilation errors simply add the following code to your provider class:
+  
+      public Object retrieveByQBE(Object exampleObject, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) 
+        throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+      {
+          throw new UnsupportedQueryException("QBE not supported for ...");
+      }
+  Also refer to section 5.8 of the Developer's Guide for details about QBE functionality.
 
 Changed Functionality
 ---------------------
