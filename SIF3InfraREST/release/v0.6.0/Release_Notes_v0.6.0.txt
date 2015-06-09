@@ -11,7 +11,7 @@ Bug Fixes
 
 New Functionality
 -----------------
-- Support for auditing on the provider. See Section 5.x in the Developer's Guide for details on how to enable
+- Support for auditing on the provider. See Section 5.11 in the Developer's Guide for details on how to enable
   auditing and what can be audited.
 - Added DataTooLargeException to retrieve() method in Provider interface and retrieveByServicePath() method in the
   QueryProvider interface. This enabled the developer to raise an appropriate exception if the requested data set
