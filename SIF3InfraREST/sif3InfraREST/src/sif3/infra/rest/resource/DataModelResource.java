@@ -233,7 +233,7 @@ public class DataModelResource extends BaseResource
 		{
 			if (isQBE)
 			{
-				logger.debug("QBE on "+dmObjectNamePlural+" (REST POST, method OVERRODE=GET) with input data: " + payload);
+				logger.debug("QBE on "+dmObjectNamePlural+" (REST POST, method OVERRIDE=GET) with input data: " + payload);
 			}
 			else
 			{
