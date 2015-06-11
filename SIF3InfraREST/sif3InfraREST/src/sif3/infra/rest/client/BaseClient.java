@@ -366,10 +366,10 @@ public abstract class BaseClient
 		return hdrProps;
 	}
 	
-	protected Response setResponse(WebResource service, ClientResponse clientResponse, Class<?> returnObjectClass, Status... successStatusCodes)
+	protected Response setResponse(WebResource service, ClientResponse clientResponse, Class<?> returnObjectClass, SIFZone zone, SIFContext context, Status... successStatusCodes)
 	{
 		Response response = new Response();
-		setBaseResponseData(response, clientResponse);
+		setBaseResponseData(response, clientResponse, zone, context);
 		response.setResourceURI(service.getURI());
 		response.setDataObjectType(returnObjectClass);
 
@@ -435,12 +435,14 @@ public abstract class BaseClient
 	}
 
 	
-	protected void setBaseResponseData(BaseResponse response, ClientResponse clientResponse)
+	protected void setBaseResponseData(BaseResponse response, ClientResponse clientResponse, SIFZone zone, SIFContext context)
 	{
 		response.setStatus(clientResponse.getClientResponseStatus().getStatusCode());
 		response.setStatusMessage(clientResponse.getClientResponseStatus().getReasonPhrase());
 		response.setMediaType(clientResponse.getType());
 		response.setContentLength(clientResponse.getLength());
+		response.setZone(zone);
+		response.setContext(context);
 
 		// Extract header properties.
 		response.setHdrProperties(extractHeaderInfo(clientResponse));

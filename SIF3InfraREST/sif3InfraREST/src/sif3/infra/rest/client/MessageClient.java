@@ -70,7 +70,7 @@ public class MessageClient extends BaseClient
 			logger.debug("HTTP GET Next Message received.");
 		    
 		    //OK: Message Returned, NO_CONTENT: No message on queue: Both are valid returns
-		    return setResponse(service, clientResponse, String.class, Status.OK, Status.NO_CONTENT);
+		    return setResponse(service, clientResponse, String.class, null, null, Status.OK, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -92,7 +92,7 @@ public class MessageClient extends BaseClient
 			HeaderProperties hdrProperties = getHeaderProperties(sif3Session, consumerInstanceID);
 		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).delete(ClientResponse.class);
 
-			return setResponse(service, clientResponse, null, Status.NO_CONTENT);
+			return setResponse(service, clientResponse, null, null, null, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{

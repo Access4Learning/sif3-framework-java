@@ -93,11 +93,11 @@ public class EnvironmentClient extends BaseClient
 
 			if (envInfo.getEnvCreateConflictIsError())
 			{
-				return setResponse(service, response, EnvironmentType.class, Status.CREATED);
+				return setResponse(service, response, EnvironmentType.class, null, null, Status.CREATED);
 			}
 			else // Allow the 'Conflict' HTTP Status to be treated as a valid behaviour.
 			{
-				return setResponse(service, response, EnvironmentType.class, Status.CREATED, Status.CONFLICT);
+				return setResponse(service, response, EnvironmentType.class, null, null, Status.CREATED, Status.CONFLICT);
 			}
 		}
 		catch (Exception ex)
@@ -125,7 +125,7 @@ public class EnvironmentClient extends BaseClient
 //      ClientResponse response = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(envInfo.getAuthMethod(), sif3Session.getSessionToken(), sif3Session.getPassword()), true).get(ClientResponse.class);
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(envInfo.getAuthMethod(), sif3Session.getSessionToken(), envInfo.getPassword()), true).get(ClientResponse.class);
 
-			return setResponse(service, response, EnvironmentType.class, Status.OK, Status.NOT_MODIFIED);
+			return setResponse(service, response, EnvironmentType.class, null, null, Status.OK, Status.NOT_MODIFIED);
 		}
 		catch (Exception ex)
 		{
@@ -150,7 +150,7 @@ public class EnvironmentClient extends BaseClient
 			service = buildURI(service, null);
 		    ClientResponse remoteResponse = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(envInfo.getAuthMethod(), sif3Session.getSessionToken(), sif3Session.getPassword()), true).delete(ClientResponse.class);
 
-		    Response response = setResponse(service, remoteResponse, null, Status.NO_CONTENT);    
+		    Response response = setResponse(service, remoteResponse, null, null, null, Status.NO_CONTENT);    
 		    if (response.hasError())
 		    {
 		      logger.error("An error has been returned in removing the environment with ID = " + sif3Session.getEnvironmentID() + " form location: " + response.getResourceURI());

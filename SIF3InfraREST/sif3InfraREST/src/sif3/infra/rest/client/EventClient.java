@@ -131,6 +131,8 @@ public class EventClient extends BaseClient
 				response.setHasEntity(false);
 				response.setStatus(Status.ACCEPTED.getStatusCode());
 				response.setStatusMessage(Status.ACCEPTED.getReasonPhrase());
+				response.setZone(getFullZone(zone));
+				response.setContext(getFullContext(context));
 				return response;
 			}
 	
@@ -153,7 +155,7 @@ public class EventClient extends BaseClient
 				ClientResponse response = builder.post(ClientResponse.class, payloadStr);
 				logger.debug("Receive Event Response Status: "+response.getStatus());
 	
-				return setEventResponse(service, response);
+				return setEventResponse(service, response, zone, context);
 			}
 			catch (Exception ex)
 			{
@@ -226,8 +228,32 @@ public class EventClient extends BaseClient
 		return hdrProperties;
 	}
 	
-	private BaseResponse setEventResponse(WebResource service, ClientResponse clientResponse)
+	private BaseResponse setEventResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context)
 	{
-		return setResponse(service, clientResponse, null, Status.ACCEPTED);
+		return setResponse(service, clientResponse, null, getFullZone(zone), getFullContext(context), Status.ACCEPTED);
+	}
+	
+	private SIFZone getFullZone(SIFZone zone)
+	{
+		if ((zone == null) || (zone.getIsDefault()) || StringUtils.isEmpty(zone.getId())) // Assume default zone!
+		{
+			return new SIFZone(sif3Session.getDefaultZone().getId(), true);			
+		}
+		else
+		{
+			return zone;
+		}
+	}
+	
+	private SIFContext getFullContext(SIFContext context)
+	{
+		if ((context == null) || (context.getIsDefault()) || StringUtils.isEmpty(context.getId())) // Assume default context!
+		{
+			return new SIFContext(CommonConstants.DEFAULT_CONTEXT_NAME, true);
+		}
+		else
+		{
+			return context;
+		}
 	}
 }

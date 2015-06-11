@@ -135,7 +135,7 @@ public class ClientInterface extends BaseClient
 			service = buildURI(service, relURI, resourceID, zone, context, urlQueryParams);
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
 
-			return setResponse(service, response, returnObjectClass, Status.OK, Status.NOT_MODIFIED);
+			return setResponse(service, response, returnObjectClass, zone, context, Status.OK, Status.NOT_MODIFIED);
 		}
 		catch (Exception ex)
 		{
@@ -181,7 +181,7 @@ public class ClientInterface extends BaseClient
 			}
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).post(ClientResponse.class, payloadStr);
 
-			return setResponse(service, response, returnObjectClass, Status.CREATED, Status.CONFLICT);
+			return setResponse(service, response, returnObjectClass, zone, context, Status.CREATED, Status.CONFLICT);
 		}
 		catch (Exception ex)
 		{
@@ -227,7 +227,7 @@ public class ClientInterface extends BaseClient
 			}
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).put(ClientResponse.class, payloadStr);
 
-			return setResponse(service, response, null, Status.NO_CONTENT);
+			return setResponse(service, response, null, zone, context, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -264,7 +264,7 @@ public class ClientInterface extends BaseClient
 			service = buildURI(service, relURI, resourceID, zone, context, urlQueryParams);
 		    ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).delete(ClientResponse.class);
 
-			return setResponse(service, response, null, Status.NO_CONTENT);
+			return setResponse(service, response, null, zone, context, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -304,7 +304,7 @@ public class ClientInterface extends BaseClient
 			
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
 
-			return setResponse(service, response, returnObjectClass, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
+			return setResponse(service, response, returnObjectClass, zone, context, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -353,7 +353,7 @@ public class ClientInterface extends BaseClient
 			}
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).post(ClientResponse.class, payloadStr);
 
-			return setResponse(service, response, returnObjectClass, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
+			return setResponse(service, response, returnObjectClass, zone, context, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -397,7 +397,7 @@ public class ClientInterface extends BaseClient
 			}
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).post(ClientResponse.class, payloadStr);
 
-			return setCreateBulkResponse(response);
+			return setCreateBulkResponse(response, zone, context);
 		}
 		catch (Exception ex)
 		{
@@ -444,7 +444,7 @@ public class ClientInterface extends BaseClient
 			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.UPDATE.name());																																			
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).put(ClientResponse.class, payloadStr);
 
-			return setUpdateBulkResponse(response);
+			return setUpdateBulkResponse(response, zone, context);
 		}
 		catch (Exception ex)
 		{
@@ -508,7 +508,7 @@ public class ClientInterface extends BaseClient
 			}
 			ClientResponse cltResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).put(ClientResponse.class, payloadStr);
 			
-			return setDeleteBulkResponse(cltResponse);
+			return setDeleteBulkResponse(cltResponse, zone, context);
 		}
 		catch (Exception ex)
 		{
@@ -521,10 +521,10 @@ public class ClientInterface extends BaseClient
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-	private BulkOperationResponse<CreateOperationStatus> setCreateBulkResponse(ClientResponse clientResponse)
+	private BulkOperationResponse<CreateOperationStatus> setCreateBulkResponse(ClientResponse clientResponse, SIFZone zone, SIFContext context)
 	{
 		BulkOperationResponse<CreateOperationStatus> response = new BulkOperationResponse<CreateOperationStatus>();
-		setBaseResponseData(response, clientResponse);
+		setBaseResponseData(response, clientResponse, zone, context);
 		if (clientResponse.getClientResponseStatus().getStatusCode() == Status.CREATED.getStatusCode())
 		{
 			if (response.getHasEntity())
@@ -574,10 +574,10 @@ public class ClientInterface extends BaseClient
 		return response;
 	}
 
-	private BulkOperationResponse<OperationStatus> setDeleteBulkResponse(ClientResponse clientResponse)
+	private BulkOperationResponse<OperationStatus> setDeleteBulkResponse(ClientResponse clientResponse, SIFZone zone, SIFContext context)
 	{
 		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
-		setBaseResponseData(response, clientResponse);
+		setBaseResponseData(response, clientResponse, zone, context);
 		if (clientResponse.getClientResponseStatus().getStatusCode() == Status.OK.getStatusCode())
 		{
 			if (response.getHasEntity())
@@ -626,10 +626,10 @@ public class ClientInterface extends BaseClient
 		return response;
 	}
 
-	private BulkOperationResponse<OperationStatus> setUpdateBulkResponse(ClientResponse clientResponse)
+	private BulkOperationResponse<OperationStatus> setUpdateBulkResponse(ClientResponse clientResponse, SIFZone zone, SIFContext context)
 	{
 		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
-		setBaseResponseData(response, clientResponse);
+		setBaseResponseData(response, clientResponse, zone, context);
 		if (clientResponse.getClientResponseStatus().getStatusCode() == Status.OK.getStatusCode())
 		{
 			if (response.getHasEntity())
