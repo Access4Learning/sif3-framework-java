@@ -24,6 +24,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
 
+import sif3.common.CommonConstants;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.exception.UnsupportedQueryException;
@@ -56,6 +57,7 @@ import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.rest.client.ClientInterface;
 import sif3.infra.rest.client.ClientUtils;
 import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.StringUtils;
 import au.com.systemic.framework.utils.Timer;
 
 /**
@@ -275,34 +277,22 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			return responses;
 		}
 
-		// List is null or empty which means we attempt to perform action in default Zone/Context of each environment
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = allClientChecks(AccessRight.CREATE, AccessType.APPROVED, null, null, requestType);
-			if (error == null) //all good
+			ErrorDetails error = allClientChecks(AccessRight.CREATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+			if (error == null) //all good => Send request.
 			{
-				responses.add(getClient(getConsumerEnvironment()).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, requestType, customParameters), urlQueryParameter, null, null));
+				responses.add(getClient(getConsumerEnvironment()).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, requestType, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 			}
-			else  //pretend to have received a 'fake' error Response
+			else //pretend to have received a 'fake' error Response
 			{
 				responses.add(makeBulkErrorResponseForCreates(error));
 			}
-		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = allClientChecks(AccessRight.CREATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
-				if (error == null) //all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, requestType, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else //pretend to have received a 'fake' error Response
-				{
-					responses.add(makeBulkErrorResponseForCreates(error));
-				}
-			}					
-		}
+		}					
+
 		timer.finish();
 		logger.debug("Time taken to call and process 'createMany' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 		return responses;
@@ -339,34 +329,23 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			logger.error("No connected environment for "+getConsumerEnvironment().getEnvironmentName()+". See previous erro log entries.");
 			return responses;
 		}
-		// List is null or empty which means we perform action in default Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = hasAccess(AccessRight.CREATE, AccessType.APPROVED, null, null);
+			ErrorDetails error = allClientChecks(AccessRight.CREATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).createSingle(getMultiObjectClassInfo().getObjectName()+"/"+getSingleObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, RequestType.IMMEDIATE, customParameters), urlQueryParameter, getSingleObjectClassInfo().getObjectType(), null, null));
+				responses.add(getClient(getConsumerEnvironment()).createSingle(getMultiObjectClassInfo().getObjectName()+"/"+getSingleObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, RequestType.IMMEDIATE, customParameters), urlQueryParameter, getSingleObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 			}
-			else  //pretend to have received a 'fake' error Response
+			else //pretend to have received a 'fake' error Response
 			{
 				responses.add(createErrorResponse(error));
 			}
-		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = hasAccess(AccessRight.CREATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext());
-				if (error == null) //all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).createSingle(getMultiObjectClassInfo().getObjectName()+"/"+getSingleObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, RequestType.IMMEDIATE, customParameters), urlQueryParameter, getSingleObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else //pretend to have received a 'fake' error Response
-				{
-					responses.add(createErrorResponse(error));
-				}
-			}					
-		}
+		}					
+
 		timer.finish();
 		logger.debug("Time taken to call and process 'createSingle' for "+getSingleObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 		return responses;
@@ -408,34 +387,22 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			return responses;
 		}
 
-		// List is null or empty which means we perform action in default Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = allClientChecks(AccessRight.DELETE, AccessType.APPROVED, null, null, requestType);
-			if (error == null) //all good
+			ErrorDetails error = allClientChecks(AccessRight.DELETE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+			if (error == null) //all good => Send request
 			{
-				responses.add(getClient(getConsumerEnvironment()).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters), urlQueryParameter, null, null));
+				responses.add(getClient(getConsumerEnvironment()).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 			}
-			else  //pretend to have received a 'fake' error Response
+			else //pretend to have received a 'fake' error Response
 			{
 				responses.add(makeBulkErrorResponse(error));
 			}
 		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = allClientChecks(AccessRight.DELETE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
-				if (error == null) //all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else //pretend to have received a 'fake' error Response
-				{
-					responses.add(makeBulkErrorResponse(error));
-				}
-			}					
-		}
+
 		timer.finish();
 		logger.debug("Time taken to call and process 'removeMany' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 		return responses;
@@ -472,34 +439,23 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			logger.error("No connected environment for "+getConsumerEnvironment().getEnvironmentName()+". See previous erro log entries.");
 			return responses;
 		}
-		// List is null or empty which means we perform action in default Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = hasAccess(AccessRight.DELETE, AccessType.APPROVED, null, null);
+			ErrorDetails error = allClientChecks(AccessRight.DELETE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).removeSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, null, null));
+				responses.add(getClient(getConsumerEnvironment()).removeSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 			}
-			else  //pretend to have received a 'fake' error Response
+			else //pretend to have received a 'fake' error Response
 			{
 				responses.add(createErrorResponse(error));
 			}
-		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = hasAccess(AccessRight.DELETE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext());
-				if (error == null) //all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).removeSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else //pretend to have received a 'fake' error Response
-				{
-					responses.add(createErrorResponse(error));
-				}
-			}					
-		}
+		}					
+
 		timer.finish();
 		logger.debug("Time taken to call and process 'delete by primary key' for "+getMultiObjectClassInfo().getObjectName()+"/"+resourceID+": "+timer.timeTaken()+"ms");
 		return responses;
@@ -540,34 +496,23 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			logger.error("No connected environment for "+getConsumerEnvironment().getEnvironmentName()+". See previous erro log entries.");
 			return responses;
 		}
-		// List is null or empty which means we perform action in default Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+		
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = hasAccess(AccessRight.QUERY, AccessType.APPROVED, null, null);
+			ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).getSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, getSingleObjectClassInfo().getObjectType(), null, null));
+				responses.add(getClient(getConsumerEnvironment()).getSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, getSingleObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 			}
-			else  //pretend to have received a 'fake' error Response
+			else //pretend to have received a 'fake' error Response
 			{
 				responses.add(createErrorResponse(error));
 			}
-		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = hasAccess(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext());
-				if (error == null) //all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).getSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, getSingleObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else //pretend to have received a 'fake' error Response
-				{
-					responses.add(createErrorResponse(error));
-				}
-			}					
-		}
+		}					
+
 		timer.finish();
 		logger.debug("Time taken to call and process 'retrieve by primary key' for "+getSingleObjectClassInfo().getObjectName()+"/"+resourceID+": "+timer.timeTaken()+"ms");
 		return responses;
@@ -614,38 +559,22 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 		// Add query intention to headers.
 		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION, queryIntention.getHTTPHeaderValue());
 		
-		// List is null or empty which means we perform action in default Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, null, null, requestType);
-			if (error == null)
+			ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+			if (error == null) //all good => Send request
 			{
-				error = requestTypeSupported(requestType);
+				responses.add(getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 			}
-			if (error == null) //all good
-			{
-				responses.add(getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), null, null));
-			}
-			else  //pretend to have received a 'fake' error Response
+			else //pretend to have received a 'fake' error Response
 			{
 				responses.add(createErrorResponse(error));
 			}
-		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
-				if (error == null) //all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else //pretend to have received a 'fake' error Response
-				{
-					responses.add(createErrorResponse(error));
-				}
-			}					
-		}
+		}					
+
 		timer.finish();
 		logger.debug("Time taken to call and process 'retrieve all' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 		return responses;
@@ -692,39 +621,23 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 		
 		// Add query intention to headers.
 		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION, queryIntention.getHTTPHeaderValue());
-		
-		// List is null or empty which means we perform action in default  Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0))
+
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, null, null, requestType);
-			if (error == null)
+			ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+			if (error == null) //all good => Send request
 			{
-				error = requestTypeSupported(requestType);
-			}
-			if (error == null) // all good
-			{
-				responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), null, null));
+				responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 			}
 			else // pretend to have received a 'fake' error Response
 			{
 				responses.add(createErrorResponse(error));
 			}
 		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
-				if (error == null) // all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else // pretend to have received a 'fake' error Response
-				{
-					responses.add(createErrorResponse(error));
-				}
-			}
-		}
+
 	    timer.finish();
 	    logger.debug("Time taken to call and process 'retrieve all' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 	    return responses;
@@ -777,38 +690,22 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 		// Add query intention to headers.
 		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION, queryIntention.getHTTPHeaderValue());
 
-		// List is null or empty which means we perform action in default  Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0))
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, null, null, requestType);
-			if (error == null)
+			ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+			if (error == null) //all good => Send request
 			{
-				error = requestTypeSupported(requestType);
-			}
-			if (error == null) // all good
-			{
-				responses.add(getClient(getConsumerEnvironment()).getByQBE(getMultiObjectClassInfo().getObjectName(), exampleObject, pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), null, null));
+				responses.add(getClient(getConsumerEnvironment()).getByQBE(getMultiObjectClassInfo().getObjectName(), exampleObject, pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 			}
 			else // pretend to have received a 'fake' error Response
 			{
 				responses.add(createErrorResponse(error));
 			}
 		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
-				if (error == null) // all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).getByQBE(getMultiObjectClassInfo().getObjectName(), exampleObject, pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else // pretend to have received a 'fake' error Response
-				{
-					responses.add(createErrorResponse(error));
-				}
-			}
-		}
+
 	    timer.finish();
 	    logger.debug("Time taken to call and process 'retrieve all' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 	    return responses;
@@ -854,34 +751,23 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			logger.error("No connected environment for "+getConsumerEnvironment().getEnvironmentName()+". See previous erro log entries.");
 			return responses;
 		}
-		// List is null or empty which means we perform action in default Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = allClientChecks(AccessRight.UPDATE, AccessType.APPROVED, null, null, requestType);
-			if (error == null) //all good
+			ErrorDetails error = allClientChecks(AccessRight.UPDATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+			if (error == null) //all good => Send request
 			{
-				responses.add(getClient(getConsumerEnvironment()).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters), urlQueryParameter, null, null));
+				responses.add(getClient(getConsumerEnvironment()).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 			}
-			else  //pretend to have received a 'fake' error Response
+			else //pretend to have received a 'fake' error Response
 			{
 				responses.add(makeBulkErrorResponse(error));
 			}
-		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = allClientChecks(AccessRight.UPDATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
-				if (error == null) //all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else //pretend to have received a 'fake' error Response
-				{
-					responses.add(makeBulkErrorResponse(error));
-				}
-			}					
-		}
+		}					
+
 		timer.finish();
 		logger.debug("Time taken to call and process 'updateMany' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 		return responses;
@@ -918,34 +804,23 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			logger.error("No connected environment for "+getConsumerEnvironment().getEnvironmentName()+". See previous erro log entries.");
 			return responses;
 		}
-		// List is null or empty which means we perform action in default Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = hasAccess(AccessRight.UPDATE, AccessType.APPROVED, null, null);
+			ErrorDetails error = allClientChecks(AccessRight.UPDATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).updateSingle(getMultiObjectClassInfo().getObjectName(), resourceID, data, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, null, null));
+				responses.add(getClient(getConsumerEnvironment()).updateSingle(getMultiObjectClassInfo().getObjectName(), resourceID, data, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 			}
-			else  //pretend to have received a 'fake' error Response
+			else //pretend to have received a 'fake' error Response
 			{
 				responses.add(createErrorResponse(error));
 			}
-		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = hasAccess(AccessRight.UPDATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext());
-				if (error == null) //all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).updateSingle(getMultiObjectClassInfo().getObjectName(), resourceID, data, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else //pretend to have received a 'fake' error Response
-				{
-					responses.add(createErrorResponse(error));
-				}
-			}					
-		}
+		}					
+
 		timer.finish();
 		logger.debug("Time taken to call and process 'update by primary key' for "+getMultiObjectClassInfo().getObjectName()+"/"+resourceID+": "+timer.timeTaken()+"ms");
 		return responses;
@@ -1047,24 +922,21 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 	 * Will perform hasAccess() and requestTypeSupported() checks. This is a convenience method, so that not each operation has to
 	 * call the two methods sequentially and manage all the flow.
 	 */
-	private ErrorDetails allClientChecks(AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType) {
+	private ErrorDetails allClientChecks(AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType) 
+	{
 	  return allClientChecks(getMultiObjectClassInfo().getObjectName(), right, accessType, zone, context, requestType);
 	}
 	
 	private ErrorDetails allClientChecks(String serviceName, AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType)
 	{
 		ErrorDetails error = hasAccess(serviceName, right, accessType, zone, context);
-		if (error == null)
+		if ((error == null) && (requestType != null))
 		{
 			error = requestTypeSupported(requestType);
 		}	
 		return error;
 	}
-	
-	private ErrorDetails hasAccess(AccessRight right, AccessType accessType, SIFZone zone, SIFContext context) {
-	  return hasAccess(getMultiObjectClassInfo().getObjectName(), right, accessType, zone, context);
-	}
-	
+		
 	private ErrorDetails hasAccess(String serviceName, AccessRight right, AccessType accessType, SIFZone zone, SIFContext context)
 	{
 		ErrorDetails error = null;
@@ -1140,5 +1012,40 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 		}
 		return result;
 	}
-
+	
+	private List<ZoneContextInfo> getFinalZoneCtxList( List<ZoneContextInfo> zoneCtxList, SIF3Session sif3Session)
+	{
+		List<ZoneContextInfo> finalZoneContextList = null;
+		
+		if (zoneCtxList == null)
+		{
+			finalZoneContextList = new ArrayList<ZoneContextInfo>();
+		}
+		else
+		{
+			finalZoneContextList = zoneCtxList;
+		}
+		
+		if (finalZoneContextList.size() == 0) //add default context and zone
+		{
+			finalZoneContextList.add(new ZoneContextInfo(new SIFZone(sif3Session.getDefaultZone().getId(), true), new SIFContext(CommonConstants.DEFAULT_CONTEXT_NAME, true)));
+		}
+		
+		// Check all entries and if 'null' is used as zone or context then we assign the default.
+		for (ZoneContextInfo zoneCtxInfo : finalZoneContextList)
+		{
+			// If zone or zone ID is null then we set the default zone.
+			if ((zoneCtxInfo.getZone() == null) || StringUtils.isEmpty(zoneCtxInfo.getZone().getId()))
+			{
+				zoneCtxInfo.setZone(new SIFZone(sif3Session.getDefaultZone().getId(), true));
+			}
+			// If zone or zone ID is null then we set the default zone.
+			if ((zoneCtxInfo.getContext() == null) || StringUtils.isEmpty(zoneCtxInfo.getContext().getId()))
+			{
+				zoneCtxInfo.setContext(new SIFContext(CommonConstants.DEFAULT_CONTEXT_NAME, true));
+			}
+		}
+		
+		return finalZoneContextList;
+	}
 }
