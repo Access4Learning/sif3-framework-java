@@ -30,6 +30,7 @@ import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
+import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServicePathPredicate;
 import sif3.common.model.ZoneContextInfo;
@@ -296,10 +297,17 @@ public class TestStudentPersonalConsumer
 			// Set some custom URL query Params
 			params.addURLQueryParameter("ChangedSince", "01/05/2015");
 			params.addURLQueryParameter("myURLQueryParam", "show in provider");
-			
-			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), null, REQUEST_TYPE, QueryIntention.NO_CACHE, params);
-//			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), null, REQUEST_TYPE);
-//			List<Response> responses = consumer.retrieve(null, null, REQUEST_TYPE);
+
+			List<ZoneContextInfo> envZoneCtxList = null;
+//			envZoneCtxList = new ArrayList<ZoneContextInfo>();
+//			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auRolloverTestingZone"), null));
+//			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auSchoolTestingZone"),  null));
+//			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
+//			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
+
+			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), envZoneCtxList, REQUEST_TYPE, QueryIntention.NO_CACHE, params);
+//			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), envZoneCtxList, REQUEST_TYPE);
+//			List<Response> responses = consumer.retrieve(null, envZoneCtxList, REQUEST_TYPE);
 			System.out.println("Responses from attempt to Get All Students:");
 			printResponses(responses, consumer);
 		}
@@ -348,11 +356,18 @@ public class TestStudentPersonalConsumer
 		params.addURLQueryParameter("ChangedSince", "01/05/2015");
 		params.addURLQueryParameter("myURLQueryParam", "show in provider");
 
+		List<ZoneContextInfo> envZoneCtxList = null;
+//		envZoneCtxList = new ArrayList<ZoneContextInfo>();
+//		envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auRolloverTestingZone"), null));
+//		envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auSchoolTestingZone"),  null));
+//		envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
+//		envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
+		
 		System.out.println("Start 'Get Students By Example' in all connected environments...");
 		try
 		{
 			// Get all students by example. Get 5 students per page (i.e page 1). 
-			List<Response> responses = consumer.retrieveByQBE(student, new PagingInfo(5, 1), null, REQUEST_TYPE, QueryIntention.ALL, params);
+			List<Response> responses = consumer.retrieveByQBE(student, new PagingInfo(5, 1), envZoneCtxList, REQUEST_TYPE, QueryIntention.ALL, params);
 			System.out.println("Responses from attempt to Get Students By Example': ");
 			printResponses(responses, consumer);
 		}
@@ -419,11 +434,11 @@ public class TestStudentPersonalConsumer
 //  			tester.createStudent(consumer);
   //		tester.removeStudent(consumer);
 //  		tester.getStudent(consumer);
-  //		tester.updateStudent(consumer);
+//  		tester.updateStudent(consumer);
   //		tester.updateStudents(consumer);
   //		tester.createStudents(consumer);
 //  		tester.deleteStudents(consumer);
-  		tester.getStudentsByQBE(consumer);
+//  		tester.getStudentsByQBE(consumer);
   
   		System.out.println("Finalise Consumer (i.e. disconnect and remove environment).");
   		consumer.finalise();
