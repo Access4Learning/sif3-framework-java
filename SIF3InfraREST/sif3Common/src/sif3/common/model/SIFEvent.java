@@ -18,6 +18,7 @@
 
 package sif3.common.model;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 import sif3.common.header.HeaderValues.EventAction;
@@ -32,7 +33,7 @@ import sif3.common.header.HeaderValues.UpdateType;
  * 
  * @author Joerg Huber
  */
-public class SIFEvent<L>
+public class SIFEvent<L> implements Serializable
 {
 	private static final long serialVersionUID = 7122348903009L;
 
