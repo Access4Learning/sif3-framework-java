@@ -163,7 +163,7 @@ version of the framework to this version. Details of this release including upgr
 in the directory "release/v0.5.0".
 
 =============================================================
-Version from Month Day, 2015: v0.6.0 - Various changes
+Version from June 16, 2015: v0.6.0 - Various changes
 =============================================================
 Version 0.6.0 adds an auditing framework for providers to the SIF3 Framework. This is an optional feature.
 Further this new version requires all providers to be deployed in a web-/application container that supports
