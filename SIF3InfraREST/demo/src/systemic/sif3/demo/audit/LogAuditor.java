@@ -72,9 +72,9 @@ public class LogAuditor implements Auditor
 		writer.println("--");
 		writer.print("HTTP Response Status:");
 		writer.println(auditRecord.getResponseData().getHttpStatus());
-//		writer.println("Response:");
-//		writer.println("--");
-//		writer.println(auditRecord.getResponseData().getPayload());
+		writer.println("Response:");
+		writer.println("--");
+		writer.println(auditRecord.getResponseData().getPayload());
 		writer.println("--");
 		writer.print("Response Date: ");
 		writer.println(sdf.format(auditRecord.getResponseData().getTimestamp()));
