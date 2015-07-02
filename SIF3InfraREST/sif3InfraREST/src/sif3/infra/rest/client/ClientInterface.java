@@ -81,10 +81,13 @@ public class ClientInterface extends BaseClient
 	 * @param dmUnmarshaller Unmarshaller to unmarshal the payload of this client to appropriate representations. This unmarshaller 
 	 *                     must be valid for the data model used with this client.
 	 * @param secureConnection TRUE: Use HTTPS, FALSE use HTTP.
+	 * @param useCompression TRUE: Payloads (request & response) shall be compressed before sending or de-compressed at the
+	 *                             time of receiving.
+	 *                       FALSE: No compression is used.
 	 */
-	public ClientInterface(URI baseURI, MediaType requestMediaType, MediaType responseMediaType, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection)
+	public ClientInterface(URI baseURI, MediaType requestMediaType, MediaType responseMediaType, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection, boolean useCompression)
 	{
-		super(baseURI, requestMediaType, responseMediaType, dmMarshaller, dmUnmarshaller, secureConnection);
+		super(baseURI, requestMediaType, responseMediaType, dmMarshaller, dmUnmarshaller, secureConnection, useCompression);
 	}
 
 	/**
@@ -96,10 +99,13 @@ public class ClientInterface extends BaseClient
 	 * @param dmUnmarshaller Unmarshaller to unmarshal the payload of this client to appropriate representations. This unmarshaller 
 	 *                     must be valid for the data model used with this client.
 	 * @param secureConnection TRUE: Use HTTPS, FALSE use HTTP.
+	 * @param useCompression TRUE: Payloads (request & response) shall be compressed before sending or de-compressed at the
+	 *                             time of receiving.
+	 *                       FALSE: No compression is used.
 	 */
-	public ClientInterface(URI baseURI, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection)
+	public ClientInterface(URI baseURI, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection, boolean useCompression)
 	{
-		super(baseURI, dmMarshaller, dmUnmarshaller, secureConnection);
+		super(baseURI, dmMarshaller, dmUnmarshaller, secureConnection, useCompression);
 	}
 
 	/*----------------------------------*/
@@ -133,7 +139,7 @@ public class ClientInterface extends BaseClient
 		try
 		{
 			service = buildURI(service, relURI, resourceID, zone, context, urlQueryParams);
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
 
 			return setResponse(service, response, returnObjectClass, zone, context, Status.OK, Status.NOT_MODIFIED);
 		}
@@ -179,7 +185,7 @@ public class ClientInterface extends BaseClient
 			{
 				logger.debug("createSingle: Payload to send:\n"+payloadStr);
 			}
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).post(ClientResponse.class, payloadStr);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true).post(ClientResponse.class, payloadStr);
 
 			return setResponse(service, response, returnObjectClass, zone, context, Status.CREATED, Status.CONFLICT);
 		}
@@ -225,7 +231,7 @@ public class ClientInterface extends BaseClient
 			{
 				logger.debug("updateSingle: Payload to send:\n"+payloadStr);
 			}
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).put(ClientResponse.class, payloadStr);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true).put(ClientResponse.class, payloadStr);
 
 			return setResponse(service, response, null, zone, context, Status.NO_CONTENT);
 		}
@@ -262,7 +268,7 @@ public class ClientInterface extends BaseClient
 		try
 		{
 			service = buildURI(service, relURI, resourceID, zone, context, urlQueryParams);
-		    ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).delete(ClientResponse.class);
+		    ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).delete(ClientResponse.class);
 
 			return setResponse(service, response, null, zone, context, Status.NO_CONTENT);
 		}
@@ -302,7 +308,7 @@ public class ClientInterface extends BaseClient
 			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
 			addPagingInfoToHeaders(pagingInfo, hdrProperties);
 			
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
 
 			return setResponse(service, response, returnObjectClass, zone, context, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
 		}
@@ -351,7 +357,7 @@ public class ClientInterface extends BaseClient
 			{
 				logger.debug("getByQBE: Payload to send:\n"+payloadStr);
 			}
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).post(ClientResponse.class, payloadStr);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true).post(ClientResponse.class, payloadStr);
 
 			return setResponse(service, response, returnObjectClass, zone, context, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
 		}
@@ -395,7 +401,7 @@ public class ClientInterface extends BaseClient
 			{
 				logger.debug("createMany: Payload to send:\n"+payloadStr);
 			}
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).post(ClientResponse.class, payloadStr);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true).post(ClientResponse.class, payloadStr);
 
 			return setCreateBulkResponse(response, zone, context);
 		}
@@ -442,7 +448,7 @@ public class ClientInterface extends BaseClient
 
 			// Set specific header so that PUT method knows that an UPDATE and not a DELETE is required! 
 			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.UPDATE.name());																																			
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).put(ClientResponse.class, payloadStr);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true).put(ClientResponse.class, payloadStr);
 
 			return setUpdateBulkResponse(response, zone, context);
 		}
@@ -506,7 +512,7 @@ public class ClientInterface extends BaseClient
 			{
 				logger.debug("removeMany: Payload to send:\n"+payloadStr);
 			}
-			ClientResponse cltResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).put(ClientResponse.class, payloadStr);
+			ClientResponse cltResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true).put(ClientResponse.class, payloadStr);
 			
 			return setDeleteBulkResponse(cltResponse, zone, context);
 		}

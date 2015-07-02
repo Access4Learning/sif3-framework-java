@@ -49,7 +49,7 @@ public class SubscriptionClient extends BaseClient
 	
 	public SubscriptionClient(ConsumerEnvironment consumerEnvironment, SIF3Session sif3Session)
 	{
-		super(consumerEnvironment.getConnectorBaseURI(ConnectorName.subscriptions), consumerEnvironment.getMediaType(), consumerEnvironment.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), consumerEnvironment.getSecureConnection());
+		super(consumerEnvironment.getConnectorBaseURI(ConnectorName.subscriptions), consumerEnvironment.getMediaType(), consumerEnvironment.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), consumerEnvironment.getSecureConnection(), consumerEnvironment.getCompressionEnabled());
 		this.consumerEnvInfo = consumerEnvironment;
 		this.sif3Session = sif3Session;
 	}
@@ -61,7 +61,7 @@ public class SubscriptionClient extends BaseClient
 		{
 			service = buildURI(service, null);
 			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
-			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
+			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
 
 			return setResponse(service, clientResponse, SubscriptionCollectionType.class, null, null, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
 		}
@@ -80,7 +80,7 @@ public class SubscriptionClient extends BaseClient
 		{
 			service = buildURI(service, null, subscriptionID, null, null, null);
 			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
-			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
+			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
 
 			return setResponse(service, clientResponse, SubscriptionType.class, null, null, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
 		}
@@ -141,7 +141,7 @@ public class SubscriptionClient extends BaseClient
 			{
 				logger.debug("subscribe: Payload to send:\n"+payloadStr);
 			}
-			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).post(ClientResponse.class, payloadStr);
+			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true).post(ClientResponse.class, payloadStr);
 			return setResponse(service, clientResponse, SubscriptionType.class, null, null, Status.CREATED, Status.CONFLICT);
 		}
 		catch (Exception ex)
@@ -170,7 +170,7 @@ public class SubscriptionClient extends BaseClient
 		{
 			service = buildURI(service, null, subscriptionID, null, null, null);
 			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
-		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).delete(ClientResponse.class);
+		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).delete(ClientResponse.class);
 
 			return setResponse(service, clientResponse, null, null, null, Status.NO_CONTENT);
 		}

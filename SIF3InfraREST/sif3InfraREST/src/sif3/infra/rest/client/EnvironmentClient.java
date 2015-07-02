@@ -62,7 +62,7 @@ public class EnvironmentClient extends BaseClient
 	 */
 	public EnvironmentClient(URI environmentURI, EnvironmentInfo envInfo, SIF3Session sif3Session)
 	{
-		super(environmentURI, envInfo.getMediaType(), envInfo.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), envInfo.getSecureConnection());
+		super(environmentURI, envInfo.getMediaType(), envInfo.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), envInfo.getSecureConnection(), envInfo.getCompressionEnabled());
 		this.envInfo = envInfo;
 		this.sif3Session = sif3Session;
 	}
@@ -89,7 +89,7 @@ public class EnvironmentClient extends BaseClient
 			{
 				logger.debug("createEnvironment: Payload to send:\n"+payloadStr);
 			}
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(envInfo.getAuthMethod(), envInfo.getEnvironmentKey().getApplicationKey(), envInfo.getPassword()), true).post(ClientResponse.class, payloadStr);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(envInfo.getAuthMethod(), envInfo.getEnvironmentKey().getApplicationKey(), envInfo.getPassword()), true, true).post(ClientResponse.class, payloadStr);
 
 			if (envInfo.getEnvCreateConflictIsError())
 			{
@@ -123,7 +123,7 @@ public class EnvironmentClient extends BaseClient
 		{
 			service = buildURI(service, null);
 //      ClientResponse response = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(envInfo.getAuthMethod(), sif3Session.getSessionToken(), sif3Session.getPassword()), true).get(ClientResponse.class);
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(envInfo.getAuthMethod(), sif3Session.getSessionToken(), envInfo.getPassword()), true).get(ClientResponse.class);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(envInfo.getAuthMethod(), sif3Session.getSessionToken(), envInfo.getPassword()), true, false).get(ClientResponse.class);
 
 			return setResponse(service, response, EnvironmentType.class, null, null, Status.OK, Status.NOT_MODIFIED);
 		}
@@ -148,7 +148,7 @@ public class EnvironmentClient extends BaseClient
 		try
 		{
 			service = buildURI(service, null);
-		    ClientResponse remoteResponse = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(envInfo.getAuthMethod(), sif3Session.getSessionToken(), sif3Session.getPassword()), true).delete(ClientResponse.class);
+		    ClientResponse remoteResponse = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(envInfo.getAuthMethod(), sif3Session.getSessionToken(), sif3Session.getPassword()), true, false).delete(ClientResponse.class);
 
 		    Response response = setResponse(service, remoteResponse, null, null, null, Status.NO_CONTENT);    
 		    if (response.hasError())

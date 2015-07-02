@@ -18,10 +18,10 @@
 
 package sif3.infra.rest.client;
 
-import java.awt.TrayIcon.MessageType;
 import java.net.URI;
 import java.util.HashMap;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response.Status;
@@ -34,6 +34,8 @@ import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.header.HeaderProperties;
+import sif3.common.header.HeaderValues;
+import sif3.common.header.HeaderValues.MessageType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.model.SIFContext;
@@ -88,6 +90,7 @@ public abstract class BaseClient
 	private InfraUnmarshalFactory infraUnmarshaller = new InfraUnmarshalFactory();
 	private InfraMarshalFactory infraMarshaller = new InfraMarshalFactory();
 	private ObjectFactory infraObjectFactory = new ObjectFactory();
+	private boolean useCompression = false;
 
 	public BaseClient()
 	{
@@ -105,8 +108,11 @@ public abstract class BaseClient
 	 * @param dmUnmarshaller Unmarshaller to unmarshal the payload of this client to appropriate representations. This unmarshaller 
 	 *                     must be valid for the data model used with this client.
 	 * @param secureConnection TRUE: Use HTTPS, FALSE use HTTP.
+	 * @param useCompression TRUE: Payloads (request & response) shall be compressed before sending or de-compressed at the
+	 *                             time of receiving.
+	 *                       FALSE: No compression is used.
 	 */
-	public BaseClient(URI baseURI, MediaType requestMediaType, MediaType responseMediaType, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection)
+	public BaseClient(URI baseURI, MediaType requestMediaType, MediaType responseMediaType, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection, boolean useCompression)
 	{
 		super();
 
@@ -114,7 +120,8 @@ public abstract class BaseClient
 		setDataModelUnmarshaller(dmUnmarshaller);
 		setRequestMediaType(requestMediaType, dmMarshaller);
 		setResponseMediaType(responseMediaType, dmUnmarshaller);
-		configureClienService(baseURI, secureConnection);
+		setUseCompression(useCompression);
+		configureClienService(baseURI, secureConnection, getUseCompression());
 		
 		logger.debug("Base URI for Call is: "+getBaseURI().toASCIIString());
 	}
@@ -128,10 +135,13 @@ public abstract class BaseClient
 	 * @param dmUmarshaller Unmarshaller to unmarshal the payload of this client to appropriate representations. This unmarshaller 
 	 *                     must be valid for the data model used with this client.
 	 * @param secureConnection TRUE: Use HTTPS, FALSE use HTTP.
+	 * @param useCompression TRUE: Payloads (request & response) shall be compressed before sending or de-compressed at the
+	 *                             time of receiving.
+	 *                       FALSE: No compression is used.
 	 */
-	public BaseClient(URI baseURI, MarshalFactory dmMarshaller, UnmarshalFactory dmUmarshaller, boolean secureConnection)
+	public BaseClient(URI baseURI, MarshalFactory dmMarshaller, UnmarshalFactory dmUmarshaller, boolean secureConnection, boolean useCompression)
 	{
-		this(baseURI, ((dmMarshaller != null) ? dmMarshaller.getDefault() : null), ((dmUmarshaller != null) ? dmUmarshaller.getDefault() : null), dmMarshaller, dmUmarshaller, secureConnection);
+		this(baseURI, ((dmMarshaller != null) ? dmMarshaller.getDefault() : null), ((dmUmarshaller != null) ? dmUmarshaller.getDefault() : null), dmMarshaller, dmUmarshaller, secureConnection, useCompression);
 	}
 
 	public MarshalFactory getDataModelMarshaller()
@@ -225,14 +235,24 @@ public abstract class BaseClient
     	this.dmMarshaller = dmMarshaller;
     }
 	
-	protected void configureClienService(URI baseURI, boolean secureConnection)
+	protected void configureClienService(URI baseURI, boolean secureConnection, boolean useCompression)
 	{
 		createConfig(secureConnection);
 
 		// Set URI which will also create the actual client and service fir this class
-		createServiceForURI(baseURI);		
+		createServiceForURI(baseURI, useCompression);		
 	}
 	
+	public boolean getUseCompression()
+    {
+    	return this.useCompression;
+    }
+
+	public void setUseCompression(boolean useCompression)
+    {
+    	this.useCompression = useCompression;
+    }
+
 	/*-----------------------*/
 	/*-- Protected Methods --*/
 	/*-----------------------*/
@@ -282,10 +302,12 @@ public abstract class BaseClient
 	 * @param service The service to which media type and header properties shall be added.
 	 * @param hdrProperties A set of defined header properties. Should really hold the authentication token!
 	 * @param includeRequestID TRUE: Add a generated request ID header property
+	 * @hasPayload TRUE: The request will contain a payload. Required for compression header settings
+	 *             FALSE: The request is payload free.
 	 * 
 	 * @return A builder class on which a HTTP operation can be invoked on.
 	 */
-	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, boolean includeRequestID)
+	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, boolean includeRequestID, boolean hasPayload)
 	{
 //		System.out.println("Client: Request MediaType: "+getRequestMediaType());
 //		System.out.println("Client Response MediaType: "+getResponseMediaType());
@@ -315,6 +337,20 @@ public abstract class BaseClient
 		{
 			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME, DateUtils.nowAsISO8601());
 			//builder = builder.header(RequestHeaderConstants.HDR_DATE_TIME, DateUtils.nowAsISO8601());
+		}
+		
+		// Compression related headers
+		if (getUseCompression())
+		{
+			// Request encoding
+			if (hasPayload)
+			{
+				hdrProperties.setHeaderProperty(HttpHeaders.CONTENT_ENCODING, HeaderValues.EncodingType.gzip.name());
+			}
+			
+			//Accepted encodings for response
+			hdrProperties.setHeaderProperty(HttpHeaders.ACCEPT_ENCODING, HeaderValues.ACCEPT_ENCODING_ALL);	
+//			hdrProperties.setHeaderProperty(HttpHeaders.ACCEPT_ENCODING, HeaderValues.EncodingType.gzip.name());	
 		}
 
 		if (logger.isDebugEnabled())
@@ -361,8 +397,8 @@ public abstract class BaseClient
 		for (String hdrName : respHdrProps.keySet())
 		{
 			hdrProps.setHeaderProperty(hdrName, respHdrProps.getFirst(hdrName));
-		}		
-		
+		}
+				
 		return hdrProps;
 	}
 	
@@ -562,13 +598,19 @@ public abstract class BaseClient
 		this.config = cltCfgMgr.getClientConfig(secureConnection);
 	}
 	
-	private void createServiceForURI(URI baseURI)
+	private void createServiceForURI(URI baseURI, boolean useCompression)
 	{
 		// This is also going to change the service.
 		this.baseURI = baseURI;
 		
 		// Create the Client Service
 		this.client = Client.create(config);
+		
+		if (useCompression)
+		{
+			logger.debug("Set GZIP Compression for client.");
+			this.client.addFilter(new com.sun.jersey.api.client.filter.GZIPContentEncodingFilter(true));
+		}
 
 		// Retrieve connector to resource
 		this.service = client.resource(getBaseURI());
@@ -578,11 +620,43 @@ public abstract class BaseClient
 	 * Determine which media type to use in the unmarshalling of a response. Intended to be used when a response is received that is a
 	 * infrastructure message (i.e. Error Response, Environment Response, Queue Response etc.). In this case the response must be unmarshalled
 	 * with the infrastructure unmarshaller but the indicatedMediaType is set for a data model object which could be other than XML or JSON.
-	 * In this case we must unmarshal the response in the default infrastructure media type or we will get an unmrashal excpetion.
+	 * In this case we must unmarshal the response in the default infrastructure media type or we will get an unmarshal exception.
 	 */
 	private MediaType getInfraResponseMediaType(MediaType indicatedMediaType)
 	{
 		return getInfraUnmarshaller().isSupported(indicatedMediaType) ? indicatedMediaType : getInfraUnmarshaller().getDefault();
 	}
 	
+//	private boolean isResponseCompressed(EncodingType encodeType)
+//	{
+//		return (encodeType != null) ? encodeType == EncodingType.gzip : false;
+//	}
+//	
+//	/* 
+//	 * This method gets the encoding type from Content-Encoding HTTP header. If no encoding is given then 'identity' is
+//	 * returned. If an unsupported content encoding is set then null is returned and an error is logged.
+//	 */
+//	private EncodingType getEncodingTypeFromResponse(HeaderProperties hdrProps)
+//	{
+//		EncodingType encodeType = EncodingType.identity;
+//		if (hdrProps != null)
+//		{
+//			String encodeValue = hdrProps.getHeaderProperty(HttpHeaders.CONTENT_ENCODING);
+//			if (encodeValue != null) 
+//			{
+//				try
+//				{
+//					encodeType = EncodingType.valueOf(encodeValue);
+//				}
+//				catch (Exception ex)
+//				{
+//					logger.error("An unsupported value for "+HttpHeaders.CONTENT_ENCODING+" HTTP header found: '"+encodeValue+"'");
+//					return null;
+//				}
+//			}
+//		}
+//		
+//		// If we get here then the HTTP header is not set and we assume not encoded
+//		return encodeType;
+//	}
 }

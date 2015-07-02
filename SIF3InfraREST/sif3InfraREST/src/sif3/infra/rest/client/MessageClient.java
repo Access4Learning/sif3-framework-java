@@ -50,7 +50,7 @@ public class MessageClient extends BaseClient
 	
 	public MessageClient(URI queueURI, ConsumerEnvironment consumerEnvironment, SIF3Session sif3Session)
 	{
-		super(queueURI, consumerEnvironment.getMediaType(), consumerEnvironment.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), consumerEnvironment.getSecureConnection());
+		super(queueURI, consumerEnvironment.getMediaType(), consumerEnvironment.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), consumerEnvironment.getSecureConnection(), consumerEnvironment.getCompressionEnabled());
 		this.consumerEnvInfo = consumerEnvironment;
 		this.sif3Session = sif3Session;
 	}
@@ -66,7 +66,7 @@ public class MessageClient extends BaseClient
 			service = buildMessageURI(service, removeMsgID, true);
 			HeaderProperties hdrProperties = getHeaderProperties(sif3Session, consumerInstanceID);
 			logger.debug("HTTP GET Next Message...");
-		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
+		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
 			logger.debug("HTTP GET Next Message received.");
 		    
 		    //OK: Message Returned, NO_CONTENT: No message on queue: Both are valid returns
@@ -90,7 +90,7 @@ public class MessageClient extends BaseClient
 		{
 			service = buildMessageURI(service, removeMsgID, false);
 			HeaderProperties hdrProperties = getHeaderProperties(sif3Session, consumerInstanceID);
-		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).delete(ClientResponse.class);
+		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).delete(ClientResponse.class);
 
 			return setResponse(service, clientResponse, null, null, null, Status.NO_CONTENT);
 		}

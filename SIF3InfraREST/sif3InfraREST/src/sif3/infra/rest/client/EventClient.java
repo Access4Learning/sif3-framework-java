@@ -58,13 +58,20 @@ public class EventClient extends BaseClient
 	private SIF3Session sif3Session;
 	private String serviceName;
 	
-	/*
+	/**
+	 * This method initialises the Event Client. As part of the initialisation it will also check a number of environment
+	 * properties to ensure that the event client can function properly. If anything is incorrect an error will be logged
+	 * and all methods of this class will have no effect (i.e. are ignored when calling).
+	 * 
 	 * @param providerEnvironment Environment information. Used to lookup event connector, baseURI etc, so that an event is sent to
 	 *                            the correct location and using the correct protocol.
 	 * @param sif3Session The active SIF3 session to use to create the authentication token.
 	 * @param serviceName The serviceName for which the event is. This is generally the SIF Object name such as StudentPersonals (plural form!)
+	 * @param useCompression TRUE: Payloads (request & response) shall be compressed before sending or de-compressed at the
+	 *                             time of receiving.
+	 *                       FALSE: No compression is used.
 	 */
-	public EventClient(ProviderEnvironment providerEnvironment, MediaType requestMediaType, MediaType responseMediaType, SIF3Session sif3Session, String serviceName, MarshalFactory dmMarshaller)
+	public EventClient(ProviderEnvironment providerEnvironment, MediaType requestMediaType, MediaType responseMediaType, SIF3Session sif3Session, String serviceName, MarshalFactory dmMarshaller, boolean useCompression)
 	{
 		super();
 		if (providerEnvironment == null)
@@ -100,7 +107,8 @@ public class EventClient extends BaseClient
 //			setResponseMediaType(providerEnvironment.getMediaType(), null);
 			setRequestMediaType(requestMediaType, dmMarshaller);
 			setResponseMediaType(responseMediaType, null);
-			configureClienService(eventConnector, providerEnvironment.getSecureConnection());
+			setUseCompression(useCompression);
+			configureClienService(eventConnector, this.providerEnvironment.getSecureConnection(), getUseCompression());
 		}
 	}
 	
@@ -150,7 +158,7 @@ public class EventClient extends BaseClient
 //				}
 				HeaderProperties headerProps = getEventHeaders(event.getEventAction(),	event.getUpdateType(), zone, context, customHdrFields);
 				
-				Builder builder = setRequestHeaderAndMediaTypes(service, headerProps, false);
+				Builder builder = setRequestHeaderAndMediaTypes(service, headerProps, false, true);
 				logger.debug("Send Event with payload size: "+payloadStr.length());
 				ClientResponse response = builder.post(ClientResponse.class, payloadStr);
 				logger.debug("Receive Event Response Status: "+response.getStatus());
