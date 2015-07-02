@@ -90,6 +90,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 						students = new HashMap<String, StudentPersonalType>();
 						for (StudentPersonalType studentPersonal : studentList.getStudentPersonal())
 						{
+//							studentPersonal.setRefId(UUIDGenerator.getUUID());
 							students.put(studentPersonal.getRefId(), studentPersonal);
 						}
 						logger.debug("Loaded " + students.size() + " Students into memory.");

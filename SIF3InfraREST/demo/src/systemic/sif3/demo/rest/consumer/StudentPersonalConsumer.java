@@ -18,8 +18,6 @@
 
 package systemic.sif3.demo.rest.consumer;
 
-import javax.ws.rs.core.MediaType;
-
 import sif.dd.au30.model.StudentCollectionType;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.header.HeaderValues.EventAction;
@@ -67,6 +65,16 @@ public class StudentPersonalConsumer extends AUDataModelEventConsumer<StudentCol
 //    public MediaType getResponseMediaType()
 //    {
 //    	return MediaType.APPLICATION_JSON_TYPE;
+//    }
+    
+    
+    /*
+     * Example how to override the compression property from the consumer's property file.
+     */
+//    @Override
+//    public boolean getCompressionEnabled()
+//    {
+//    	return false;
 //    }
     
 	/* (non-Javadoc)
