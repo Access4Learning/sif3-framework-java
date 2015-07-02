@@ -41,7 +41,7 @@ public class ProviderEnvironment extends EnvironmentInfo
 	private UpdateType           defaultUpdateType      = UpdateType.FULL; // Default value for update events.
 	private boolean              autoCreateEnvironment  = false;
 	private AuthenticationMethod accessTokenAuthMethod  = AuthenticationMethod.Bearer; // Default Auth Method if accessToke is used.
-    
+	
 	/**
 	 * Constructor
 	 * 
@@ -166,17 +166,15 @@ public class ProviderEnvironment extends EnvironmentInfo
 			this.accessTokenAuthMethod = AuthenticationMethod.Bearer;
 		}
     }
-
+	
 	@Override
     public String toString()
     {
-	    return "ProviderEnvironment [accessTokenAuthMethod="
-	            + accessTokenAuthMethod + ", autoCreateEnvironment="
-	            + autoCreateEnvironment + ", connected=" + connected
-	            + ", connectorBaseURI=" + connectorBaseURI
-	            + ", defaultUpdateType=" + defaultUpdateType
-	            + ", secureConnectorBaseURI=" + secureConnectorBaseURI
-	            + ", templateXMLFileName=" + templateXMLFileName
-	            + ", toString()=" + super.toString() + "]";
+	    return "ProviderEnvironment [connected=" + this.connected + ", templateXMLFileName="
+	            + this.templateXMLFileName + ", secureConnectorBaseURI="
+	            + this.secureConnectorBaseURI + ", connectorBaseURI=" + this.connectorBaseURI
+	            + ", defaultUpdateType=" + this.defaultUpdateType + ", autoCreateEnvironment="
+	            + this.autoCreateEnvironment + ", accessTokenAuthMethod="
+	            + this.accessTokenAuthMethod + ", toString()=" + super.toString() + "]";
     }
 }

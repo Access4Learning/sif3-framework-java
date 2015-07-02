@@ -59,6 +59,7 @@ public class EnvironmentInfo implements Serializable
     private String    password              = null;
     private boolean eventsSupported = false;
     private String generatorID  = null; // Value to be used for the generatorId HTTP Header field. 
+    private boolean compressionEnabled = false;
     
 	// Properties for using an existing environment.
     private boolean useExistingEnv = false;
@@ -141,6 +142,16 @@ public class EnvironmentInfo implements Serializable
 	public void setGeneratorID(String generatorID)
     {
     	this.generatorID = generatorID;
+    }
+	
+	public boolean getCompressionEnabled()
+    {
+    	return this.compressionEnabled;
+    }
+
+	public void setCompressionEnabled(boolean compressionEnabled)
+    {
+    	this.compressionEnabled = compressionEnabled;
     }
 
 	public URI getBaseURI()
@@ -315,18 +326,17 @@ public class EnvironmentInfo implements Serializable
 	@Override
     public String toString()
     {
-	    return "EnvironmentInfo [adapterName=" + adapterName + ", adapterType="
-	            + adapterType + ", authMethod=" + authMethod + ", baseURI="
-	            + baseURI + ", checkACL=" + checkACL + ", connectorBaseURIs="
-	            + connectorBaseURIs + ", envCreateConflictIsError="
-	            + envCreateConflictIsError + ", environmentKey="
-	            + environmentKey + ", environmentType=" + environmentType
-	            + ", eventsSupported=" + eventsSupported + ", existingEnvURI="
-	            + existingEnvURI + ", existingSessionToken="
-	            + existingSessionToken + ", generatorID=" + generatorID
-	            + ", mediaType=" + mediaType + ", password=" + password
-	            + ", removeEnvOnShutdown=" + removeEnvOnShutdown
-	            + ", secureConnection=" + secureConnection
-	            + ", useExistingEnv=" + useExistingEnv + "]";
+	    return "EnvironmentInfo [baseURI=" + this.baseURI + ", secureConnection="
+	            + this.secureConnection + ", mediaType=" + this.mediaType + ", adapterType="
+	            + this.adapterType + ", checkACL=" + this.checkACL + ", environmentType="
+	            + this.environmentType + ", authMethod=" + this.authMethod
+	            + ", removeEnvOnShutdown=" + this.removeEnvOnShutdown + ", adapterName="
+	            + this.adapterName + ", environmentKey=" + this.environmentKey + ", password="
+	            + this.password + ", eventsSupported=" + this.eventsSupported + ", generatorID="
+	            + this.generatorID + ", compressionEnabled=" + this.compressionEnabled
+	            + ", useExistingEnv=" + this.useExistingEnv + ", existingSessionToken="
+	            + this.existingSessionToken + ", existingEnvURI=" + this.existingEnvURI
+	            + ", envCreateConflictIsError=" + this.envCreateConflictIsError
+	            + ", connectorBaseURIs=" + this.connectorBaseURIs + "]";
     }
 }
