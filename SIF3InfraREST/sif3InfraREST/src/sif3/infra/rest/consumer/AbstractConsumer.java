@@ -146,12 +146,13 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 	 * By default the following HTTP Header fields are retrieved from the consumer's property file and put in corresponding
 	 * HTTP Header Fields:
 	 * 
-	 * Property               HTTP Header
-	 * ----------------------------------
-	 * adapter.generator.id   generatorId
-	 * env.application.key    applicationKey
-	 * env.userToken          authenticatedUser
-	 * env.mediaType          Content-Type, Accept
+	 * Property                      HTTP Header
+	 * ------------------------------------------------
+	 * adapter.generator.id          generatorId
+	 * env.application.key           applicationKey
+	 * env.userToken                 authenticatedUser
+	 * env.mediaType                 Content-Type, Accept
+	 * adapter.compression.enabled   Content-Encoding, Accept-Encoding
 	 * 
 	 * Only properties that are not null or empty string will be set in the corresponding HTTP Header.
 	 *
@@ -216,6 +217,18 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 	public MediaType getResponseMediaType()
 	{
 		return getConsumerEnvironment().getMediaType();
+	}
+
+	
+	/**
+	 * This method returns the value of the adapter.compression.enabled property from the consumer's property file. If 
+	 * that needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The adapter.compression.enabled property from the consumer's property file
+	 */
+	public boolean getCompressionEnabled()
+	{
+		return getConsumerEnvironment().getCompressionEnabled();
 	}
 
 	/*------------------------------------------------------------------------------------------------------------------------
@@ -862,7 +875,8 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 	                   				   getResponseMediaType(),
 	                   				   getMarshaller(), 
 	                   				   getUnmarshaller(),
-	                   				   envInfo.getSecureConnection());
+	                   				   envInfo.getSecureConnection(),
+	                   				   getCompressionEnabled());
 		}
 	}
 		

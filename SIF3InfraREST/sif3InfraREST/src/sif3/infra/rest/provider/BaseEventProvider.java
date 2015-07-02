@@ -80,12 +80,13 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 	 * By default the following HTTP Header fields are retrieved from the provider's property file and put in corresponding
 	 * HTTP Header Fields of each event:
 	 * 
-	 * Property               HTTP Header
-	 * ----------------------------------
-	 * adapter.generator.id   generatorId
-	 * env.application.key    applicationKey
-	 * env.userToken          authenticatedUser
-	 * env.mediaType          Content-Type, Accept
+	 * Property                      HTTP Header
+	 * ----------------------------------------------------------------
+	 * adapter.generator.id          generatorId
+	 * env.application.key           applicationKey
+	 * env.userToken                 authenticatedUser
+	 * env.mediaType                 Content-Type, Accept
+	 * adapter.compression.enabled   Content-Encoding, Accept-Encoding
 	 * 
 	 * Only properties that are not null or empty string will be set in the corresponding HTTP Header.
 	 *
@@ -151,6 +152,18 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 	{
 		return getProviderEnvironment().getMediaType();
 	}
+	
+	/**
+	 * This method returns the value of the adapter.compression.enabled property from the provider's property file. If 
+	 * that needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The adapter.compression.enabled property from the provider's property file
+	 */
+	public boolean getCompressionEnabled()
+	{
+		return getProviderEnvironment().getCompressionEnabled();
+	}
+
 
 	/*------------------------------------------------------------------------------------------------------------------------
 	 * End of 'Dynamic' HTTP Header Field override section
@@ -187,7 +200,13 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 		try
 		{
 			// Let's get the Event Client
-			EventClient evtClient = new EventClient(getProviderEnvironment(), getRequestMediaType(), getResponseMediaType(), sif3Session, getServiceName(), getMarshaller());
+			EventClient evtClient = new EventClient(getProviderEnvironment(), 
+													getRequestMediaType(), 
+													getResponseMediaType(), 
+													sif3Session, 
+													getServiceName(), 
+													getMarshaller(), 
+													getCompressionEnabled());
 			
 			SIFEventIterator<L> iterator = getSIFEvents();
 			if (iterator != null)
