@@ -141,7 +141,7 @@ public class TestEventClient
 		store.getEnvironment().addConnectorBaseURI(ConnectorName.eventsConnector, getEventConnectorURI());
 		ProviderEnvironment env = (ProviderEnvironment)store.getEnvironment();
 		
-		return new EventClient(env, MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_PLAIN_TYPE, getSIF3Session(), "CSVStudents", new CSVMarshaller());
+		return new EventClient(env, MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_PLAIN_TYPE, getSIF3Session(), "CSVStudents", new CSVMarshaller(), false);
 //		return new EventClient(env, env.getMediaType(), env.getMediaType(), getSIF3Session(), "StudentPersonals", marshaller);
 	}
 	

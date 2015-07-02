@@ -30,7 +30,6 @@ import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
-import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServicePathPredicate;
 import sif3.common.model.ZoneContextInfo;
@@ -42,6 +41,7 @@ import sif3.common.ws.Response;
 import sif3.infra.rest.consumer.ConsumerLoader;
 import systemic.sif3.demo.rest.consumer.StudentPersonalConsumer;
 import au.com.systemic.framework.utils.FileReaderWriter;
+import au.com.systemic.framework.utils.Timer;
 
 /**
  * @author Joerg Huber
@@ -50,7 +50,7 @@ import au.com.systemic.framework.utils.FileReaderWriter;
 public class TestStudentPersonalConsumer
 {
 //	private final static String PATH = "/Users/crub/dev/nsip/Users/crub/dev/nsip/sif3-framework-java-dev";
-//	private final static String PATH = "C:/DEV/eclipseWorkspace";
+//	private final static String PATH = "C:/DEV/lunaWorkspace";
 	private final static String PATH = "C:/Development/GitHubRepositories/SIF3InfraRest";
   
 	private final static String SINGLE_STUDENT_FILE_NAME = PATH + "/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
@@ -282,9 +282,12 @@ public class TestStudentPersonalConsumer
 	    System.out.println("Finished 'Update Students' in all connected environments...");
 	}
 
-	private void getStudents(StudentPersonalConsumer consumer)
+	private void getStudents(StudentPersonalConsumer consumer, boolean printRepsonse)
 	{
-		System.out.println("Start 'Get All Students' in all connected environments...");
+		if (printRepsonse)
+		{
+			System.out.println("Start 'Get All Students' in all connected environments...");
+		}
 		try
 		{
 			CustomParameters params = new CustomParameters();
@@ -305,17 +308,23 @@ public class TestStudentPersonalConsumer
 //			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
 //			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
 
-			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), envZoneCtxList, REQUEST_TYPE, QueryIntention.NO_CACHE, params);
+			List<Response> responses = consumer.retrieve(new PagingInfo(500, 0), envZoneCtxList, REQUEST_TYPE, QueryIntention.NO_CACHE, params);
 //			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), envZoneCtxList, REQUEST_TYPE);
 //			List<Response> responses = consumer.retrieve(null, envZoneCtxList, REQUEST_TYPE);
-			System.out.println("Responses from attempt to Get All Students:");
-			printResponses(responses, consumer);
+			if (printRepsonse)
+			{
+				System.out.println("Responses from attempt to Get All Students:");
+				printResponses(responses, consumer);
+			}
 		}
 		catch (Exception ex)
 		{
 			ex.printStackTrace();
 		}
-		System.out.println("Finished 'Get All Students' in all connected environments...");
+		if (printRepsonse)
+		{
+			System.out.println("Finished 'Get All Students' in all connected environments...");
+		}
 	}
 	
 	private void getStudentsByServicePath(String parent, String value, StudentPersonalConsumer consumer)
@@ -417,6 +426,24 @@ public class TestStudentPersonalConsumer
 		System.out.println("Finished 'Remove Student' in all connected environments...");
 	}
 	
+	
+	private void performanceTest(StudentPersonalConsumer consumer)
+	{
+		System.out.println("Start Performance Test...");
+		Timer timer = new Timer();
+		timer.start();
+		for (int i = 0; i <= 100; i++)
+		{
+			getStudents(consumer, false);
+		}
+		
+		timer.finish();
+		System.out.println("End Performance Test with Compression "+(consumer.getCompressionEnabled() ? "ON" : "OFF")+". Time taken: "+timer.timeTaken()+"ms");
+	}
+	
+	
+	
+	
 	public static void main(String[] args)
 	{
 		TestStudentPersonalConsumer tester = new TestStudentPersonalConsumer();
@@ -427,7 +454,7 @@ public class TestStudentPersonalConsumer
 		
   		StudentPersonalConsumer consumer = tester.getConsumer();
   		
-  		tester.getStudents(consumer);
+//  		tester.getStudents(consumer, true);
 //  		tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
 //  		tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
 //  		tester.getStudentsByServicePath("RoomInfos", "24ed508e1ed04bba82198233efa55859", consumer);
@@ -436,9 +463,11 @@ public class TestStudentPersonalConsumer
 //  		tester.getStudent(consumer);
 //  		tester.updateStudent(consumer);
   //		tester.updateStudents(consumer);
-  //		tester.createStudents(consumer);
+//  		tester.createStudents(consumer);
 //  		tester.deleteStudents(consumer);
 //  		tester.getStudentsByQBE(consumer);
+  		
+  		tester.performanceTest(consumer);
   
   		System.out.println("Finalise Consumer (i.e. disconnect and remove environment).");
   		consumer.finalise();
