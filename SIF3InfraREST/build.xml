@@ -45,9 +45,11 @@
 	</path>
 
 	<!-- Comma separated list of Source directories -->
-	<property name="srcs" value="sif3Common,sif3InfraCommon,sif3InfraREST"/>
+	<property name="srcs" value="sif3Common,sif3InfraModel,sif3InfraCommon,sif3InfraREST"/>
+<!--	
 	<property name="infra-jars" value="common,rest"/>
-
+-->
+	
 	<!-- print some varaibles -->
 	<target name="00-env" description="Show Ant variables">
 		<echo message="project.basedir: ${project.basedir}"/>
@@ -124,15 +126,33 @@
 	<!-- Main Jar Target -->
 	<target name="03-jar-components" depends="compile-all" description="Create JAR files for all components">
 		
-		<!-- Common Classes and resources -->
+		<!-- jar Common: Classes and resources -->
 		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar"/>
 		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar">
 			<fileset dir="${class.dir}" includes="**/sif3/common/**" excludes="**/readme.txt"/>
 		</jar>
 
 		<!-- jar infrastructure -->
-		<foreach list="${infra-jars}" target="jar-lib" param="elem" trim="true"/>
+		<!--foreach list="${infra-jars}" target="jar-lib" param="elem" trim="true"/-->
 
+		<!-- jar InfraCommon Model only: Classes and resources -->
+		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Infra-model-${frameworkversion}.jar"/>
+		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Infra-model-${frameworkversion}.jar">
+			<fileset dir="${class.dir}" includes="**/infra/common/model/**,**/infra/common/conversion/**" excludes="**/readme.txt"/>
+		</jar>
+
+		<!-- jar InfraCommon excluding Model: Classes and resources -->
+		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Infra-common-${frameworkversion}.jar"/>
+		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Infra-common-${frameworkversion}.jar">
+			<fileset dir="${class.dir}" includes="**/infra/common/**" excludes="**/readme.txt,**/infra/common/model/**,**/infra/common/conversion/**"/>
+		</jar>
+
+		<!-- jar InfraREST: Classes and resources -->
+		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Infra-rest-${frameworkversion}.jar"/>
+		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Infra-rest-${frameworkversion}.jar">
+			<fileset dir="${class.dir}" includes="**/infra/rest/**" excludes="**/readme.txt"/>
+		</jar>
+		
 		<!-- Demo Classes and resources -->
 		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar"/>
 		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar">
@@ -140,14 +160,15 @@
 		</jar>
 	</target>
 
+<!--
 	<target name="jar-lib">
 		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Infra-${elem}-${frameworkversion}.jar"/>
 		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Infra-${elem}-${frameworkversion}.jar">
-			<!-- Classes and resources -->
 			<fileset dir="${class.dir}" includes="**/infra/${elem}/**" excludes="**/readme.txt"/>
 		</jar>
 	</target>
-
+-->
+	
 	<target name="jar-config">
 		<echo message="Jar: ${dist.dir}/config.jar"/>
 		<!--		
@@ -181,17 +202,21 @@
 		</jar>
 
 		<!-- remove project jars from WEB-INF/lib again -->
-		<foreach list="${infra-jars}" target="del-project-jar" param="elem" trim="true"/>
+		<!--foreach list="${infra-jars}" target="del-project-jar" param="elem" trim="true"/-->
 		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar"/>
+		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Infra-model-${frameworkversion}.jar"/>
+		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Infra-common-${frameworkversion}.jar"/>
+		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Infra-rest-${frameworkversion}.jar"/>
 		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar"/>
 		<delete file="${web.lib.root.dir}/config.jar"/>
 	</target>
 
 	<!-- delete project Jar file from WEB-INF/lib -->
+<!--	
 	<target name="del-project-jar">
 		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Infra-${elem}-${frameworkversion}.jar"/>
 	</target>
-
+-->
 	<!-- ************************************ -->
 	<!-- Deploy to local web or app container -->
 	<!-- ************************************ -->
