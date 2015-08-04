@@ -11,6 +11,7 @@ New Functionality
 - Support for compression (gzip) for all payloads on consumer and provider. For details please refer to section 5.12
   in the Developer's Guide. If compression is turned on within the SIF3 Framework for a provider then the library
   pjl-comp-filter-1.8.1.jar in the lib/pjl directory must be copied to the WEB-INF/lib directory of your project.
+- Added external security service capabilities to consumers. See section 5.9.3 in the developer's guide.
 
 
 Changed Functionality
@@ -38,6 +39,24 @@ Infrastructure Upgrade
 - Drop the latest framework library into your project's lib directory/directories. Note that the new  
   sif3.0.1Infra-model-<version>.jar is now also required in your projetc's lib directories.
 - Replace systemic-framework-20140410.jar with systemic-framework-20150618.jar in your projetc's lib directories.
+
+===================================
+NOTE: Potential Compilation Error!!
+-----
+If you use external security service functionality in your provider you will get a compilation error with the latest
+SIF3 Framework libraries. To resolve that compilation error, you must implement the following method in your concrete
+implementation of the security class that extends the AbstractSecurityService:
+
+   TokenInfo generateToken(TokenCoreInfo coreInfo, String password)
+   
+This new method is enforced by the AbstractSecurityService class. The new method is only used by consumers and therefore
+can be 'nulled' out in your security class:
+
+   public TokenInfo generateToken(TokenCoreInfo coreInfo, String password) {
+      return null;
+   }
+===================================
+
 
 Data Model Upgrade
 ------------------
