@@ -19,6 +19,7 @@
 package sif3.infra.common.interfaces;
 
 import sif3.common.model.EnvironmentKey;
+import sif3.common.model.security.TokenInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.infra.common.env.types.EnvironmentInfo;
 import sif3.infra.common.model.EnvironmentType;
@@ -54,10 +55,12 @@ public interface ClientEnvStoreOperations
 	 * environment is stored as an XML in the environmentXML property.
 	 * 
 	 * @param inputEnv full environment as returned from the environment provider including sessionToken, environmentID
+	 * @param tokenInfo Information related to the security token. Can be used to store expire date and a security token related 
+	 *                  to the session to be created or updated.
 	 * 
 	 * @return See desc.
 	 */
-	public SIF3Session createOrUpdateSession(EnvironmentType inputEnv);
+	public SIF3Session createOrUpdateSession(EnvironmentType inputEnv, TokenInfo tokenInfo);
 
 	/**
 	 * This removes the environment data stored in the environment store for the given sessionToken. This operation should be used 

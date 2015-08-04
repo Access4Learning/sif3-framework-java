@@ -18,6 +18,7 @@ package sif3.infra.common.interfaces;
 
 import sif3.common.exception.PersistenceException;
 import sif3.common.model.EnvironmentKey;
+import sif3.common.model.security.TokenInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.infra.common.model.EnvironmentType;
 
@@ -69,10 +70,12 @@ public interface ClientEnvironmentManager extends EnvironmentManager
   * provider including sessionToken, environmentID etc. The stored environment is then returned.
   * 
   * @param inputEnvironment full environment as returned from the environment provider including sessionToken, environmentID
+  * @param tokenInfo Information related to the security token. Can be used to store expire date and a security token related to the
+  *                  session to be created or updated.
   * 
   * @return See desc.
   */
-  public EnvironmentType createOrUpdateEnvironment(EnvironmentType inputEnvironment);
+  public EnvironmentType createOrUpdateEnvironment(EnvironmentType inputEnvironment, TokenInfo tokenInfo);
   
   /**
    * This method will only disconnect the current session but it won't remove the environment in the environment store. 
