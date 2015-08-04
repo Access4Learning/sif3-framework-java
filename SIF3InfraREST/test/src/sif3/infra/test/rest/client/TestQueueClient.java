@@ -21,16 +21,14 @@ package sif3.infra.test.rest.client;
 import java.net.URI;
 
 import sif3.common.header.ResponseHeaderConstants;
-import sif3.common.model.SIFZone;
-import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
-import sif3.infra.common.env.types.AdapterEnvironmentStore;
-import sif3.infra.common.env.types.ConsumerEnvironment;
+import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.common.model.QueueType;
 import sif3.infra.rest.client.MessageClient;
 import sif3.infra.rest.client.QueueClient;
+import sif3.infra.rest.consumer.ConsumerLoader;
 import au.com.systemic.framework.utils.StringUtils;
 
 /**
@@ -39,8 +37,14 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class TestQueueClient
 {
-	private static final String PROP_FILE_NAME="StudentConsumer";
-	private AdapterEnvironmentStore store = new AdapterEnvironmentStore(PROP_FILE_NAME);
+//	private static final String PROP_FILE_NAME="StudentConsumer";
+//	private AdapterEnvironmentStore store = new AdapterEnvironmentStore(PROP_FILE_NAME);
+
+    // Local
+    private static final String CONSUMER_ID = "StudentConsumer";
+
+    // Broker
+  //private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
 
 	// Brokered
 //	private static final String QUEUE_CONNECTOR_URI = "https://australia.hostedzone.com/svcs/systemicDemo/queues";
@@ -51,10 +55,10 @@ public class TestQueueClient
 
 	// Direct
 	private static final String QUEUE_CONNECTOR_URI = "http://localhost:9080/SIF3InfraREST/sif3/queues";
-	private static final String SESSION_TOKEN = "f2658b59-435b-4a8d-9f76-c2400b6655c1";
+//	private static final String SESSION_TOKEN = "f2658b59-435b-4a8d-9f76-c2400b6655c1";
 	private static final String ZONE="auSchoolTestingZone";
-	private static final String PWD="Password1";
-	private static final String QUEUE_ID="7d4dbb4a-24b0-4951-8f34-b561c24f43ef";
+//	private static final String PWD="Password1";
+	private static final String QUEUE_ID="1edf60b9-3432-4e94-b6cf-c3fd9074385d";
 
 	private void printResponse(Response response) throws Exception
 	{
@@ -69,18 +73,25 @@ public class TestQueueClient
 		System.out.println("Full Response Data:\n"+response);
 		if (!response.hasError())
 		{
-			if (!response.hasError())
-			{
-				if (response.getDataObjectType().getSimpleName().equals(String.class.getSimpleName()))
-				{
-					System.out.println("Data Object Data:\n"+response.getDataObject());
-				}
-				else
-				{
-					InfraMarshalFactory marshaller = new InfraMarshalFactory(); 
-					System.out.println("Data Object Data:\n"+marshaller.marshalToXML(response.getDataObject()));
-				}
-			}
+		    if (response.getDataObject() != null)
+		    {
+    			if (!response.hasError())
+    			{
+    				if (response.getDataObjectType().getSimpleName().equals(String.class.getSimpleName()))
+    				{
+    					System.out.println("Data Object Data:\n"+response.getDataObject());
+    				}
+    				else
+    				{
+    					InfraMarshalFactory marshaller = new InfraMarshalFactory(); 
+    					System.out.println("Data Object Data:\n"+marshaller.marshalToXML(response.getDataObject()));
+    				}
+    			}
+		    }
+		    else
+		    {
+		        System.out.println("No Data Object returned.");
+		    }
 		}
 		else // valid in case where NO_CONTENT is returned
 		{
@@ -115,20 +126,20 @@ public class TestQueueClient
 	/*
 	 * Just fake a SIF3Session.
 	 */
-	private SIF3Session getSIF3Session()
-	{
-		SIF3Session session = new SIF3Session();
-		session.setSessionToken(SESSION_TOKEN);
-		session.setPassword(PWD);
-		session.setDefaultZone(new SIFZone(ZONE, true));
-		
-		return session;
-	}
+//	private SIF3Session getSIF3Session()
+//	{
+//		SIF3Session session = new SIF3Session();
+//		session.setSessionToken(SESSION_TOKEN);
+//		session.setPassword(PWD);
+//		session.setDefaultZone(new SIFZone(ZONE, true));
+//		
+//		return session;
+//	}
 
 	private QueueClient getClient()
 	{
-		store.getEnvironment().addConnectorBaseURI(ConnectorName.queues, getQueueConnectorURI());
-		return new QueueClient((ConsumerEnvironment)store.getEnvironment(), getSIF3Session());
+        ConsumerEnvironmentManager.getInstance().getEnvironmentInfo().addConnectorBaseURI(ConnectorName.queues, getQueueConnectorURI());
+		return new QueueClient(ConsumerEnvironmentManager.getInstance());
 	}
 	
 	private void testGetQueue(QueueClient clt, QueueType queue) throws Exception
@@ -145,6 +156,23 @@ public class TestQueueClient
 		}
 		System.out.println("Get Queue done!");
 	}
+	
+    private QueueType testGetQueue(QueueClient clt) throws Exception
+    {
+        System.out.println("Get Single Queue: " + QUEUE_ID);
+
+        if (StringUtils.notEmpty(QUEUE_ID))
+        {
+            Response response = clt.getQueue(QUEUE_ID);
+            printResponse(response);
+            return getQueue(response);
+        }
+        else
+        {
+            System.out.println("Queue ID is null. Cannot retrieve queue details. No action taken.");
+            return null;
+        }
+    }
 	
 	private void testGetQueues(QueueClient clt) throws Exception
 	{
@@ -187,7 +215,7 @@ public class TestQueueClient
 	private String testGetNextMessage(QueueType queue, String deleteMsgID) throws Exception
 	{
 		System.out.println("Get Next Message...");
-		MessageClient clt = new MessageClient(new URI(queue.getQueueUri()),(ConsumerEnvironment)store.getEnvironment(), getSIF3Session()); 
+		MessageClient clt = new MessageClient(ConsumerEnvironmentManager.getInstance(), new URI(queue.getQueueUri())); 
 		
 		Response response = clt.getMessage(deleteMsgID, "Thread-1");
 		printResponse(response);
@@ -200,7 +228,7 @@ public class TestQueueClient
 	{
 		System.out.println("Get Next Message...");
 		String deleteMsgID = null;
-		MessageClient clt = new MessageClient(new URI(queue.getQueueUri()),(ConsumerEnvironment)store.getEnvironment(), getSIF3Session()); 
+		MessageClient clt = new MessageClient(ConsumerEnvironmentManager.getInstance(), new URI(queue.getQueueUri())); 
 		for (int i = 0; i<10; i++)
 		{
 			Response response = clt.getMessage(deleteMsgID, "Thread-1");
@@ -213,11 +241,12 @@ public class TestQueueClient
 	private void testRemoveMessage(QueueType queue, String deleteMsgID) throws Exception
 	{
 		System.out.println("Remove Message...");
-		MessageClient clt = new MessageClient(new URI(queue.getQueueUri()),(ConsumerEnvironment)store.getEnvironment(), getSIF3Session()); 
+		MessageClient clt = new MessageClient(ConsumerEnvironmentManager.getInstance(), new URI(queue.getQueueUri())); 
 		printResponse(clt.removeMessage(deleteMsgID, "Thread-1"));
 		System.out.println("Remove Message done.");
 	}
 
+	
 	public static void main(String[] args)
 	{
 		try
@@ -227,18 +256,27 @@ public class TestQueueClient
 		    
 		    System.out.println("Start Testing TestQueueClient...");
 		    
-		    QueueClient clt = tester.getClient();
-		    QueueType queue = tester.testCreateImmediateQueue(clt);
-//		    QueueType queue = tester.testCreateLongPolloingQueue(clt);
-		    tester.testGetQueues(clt);
-//		    tester.testGetQueue(clt, queue);
-//		    tester.testRemoveQueue(clt, queue);
-//		    tester.testGetQueue(clt, queue);
-		    nextMesgID = tester.testGetNextMessage(queue, nextMesgID);
-		    nextMesgID = tester.testGetNextMessage(queue, nextMesgID);
-//		    nextMesgID = tester.testGetNextMessages(queue);
-//		    tester.testGetQueue(clt, queue);
-//		    tester.testRemoveMessage(queue, nextMesgID);
+            if (ConsumerLoader.initialise(CONSUMER_ID))
+            {
+    		    QueueClient clt = tester.getClient();
+//    		    QueueType queue = tester.testCreateImmediateQueue(clt);
+    		    QueueType queue = tester.testCreateLongPolloingQueue(clt);
+//                tester.testGetQueues(clt);
+//                QueueType queue = tester.testGetQueue(clt);
+//                tester.testGetQueue(clt, queue);
+//                tester.testRemoveQueue(clt, queue);
+                tester.testGetQueue(clt, queue);
+                nextMesgID = tester.testGetNextMessage(queue, nextMesgID);
+                nextMesgID = tester.testGetNextMessage(queue, nextMesgID);
+//              nextMesgID = tester.testGetNextMessages(queue);
+//              tester.testGetQueue(clt, queue);
+                tester.testRemoveMessage(queue, nextMesgID);
+                ConsumerLoader.shutdown();
+            }
+            else
+            {
+                System.out.println("Failed to initialse tester!");
+            }
 		    
 		    System.out.println("End Testing TestQueueClient.");
 		}

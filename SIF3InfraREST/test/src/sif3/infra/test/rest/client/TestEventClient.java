@@ -29,13 +29,11 @@ import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderProperties;
-import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.HeaderValues.EventAction;
+import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.SIFEvent;
-import sif3.common.model.SIFZone;
-import sif3.common.persist.model.SIF3Session;
+import sif3.infra.common.env.mgr.BrokeredProviderEnvironmentManager;
 import sif3.infra.common.env.types.AdapterEnvironmentStore;
-import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.rest.client.EventClient;
 import systemic.sif3.demo.rest.conversion.CSVMarshaller;
@@ -126,22 +124,23 @@ public class TestEventClient
 	/*
 	 * Just fake a SIF3Session.
 	 */
-	private SIF3Session getSIF3Session()
-	{
-		SIF3Session session = new SIF3Session();
-		session.setSessionToken(SESSION_TOKEN);
-		session.setPassword(PWD);
-		session.setDefaultZone(new SIFZone(ZONE, true));
-		
-		return session;
-	}
+//	private SIF3Session getSIF3Session()
+//	{
+//		SIF3Session session = new SIF3Session();
+//		session.setSessionToken(SESSION_TOKEN);
+//		session.setPassword(PWD);
+//		session.setDefaultZone(new SIFZone(ZONE, true));
+//		
+//		return session;
+//	}
 
 	private EventClient getEventClient()
 	{
-		store.getEnvironment().addConnectorBaseURI(ConnectorName.eventsConnector, getEventConnectorURI());
-		ProviderEnvironment env = (ProviderEnvironment)store.getEnvironment();
+//		store.getEnvironment().addConnectorBaseURI(ConnectorName.eventsConnector, getEventConnectorURI());
+//		ProviderEnvironment env = (ProviderEnvironment)store.getEnvironment();
 		
-		return new EventClient(env, MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_PLAIN_TYPE, getSIF3Session(), "CSVStudents", new CSVMarshaller(), false);
+		BrokeredProviderEnvironmentManager.getInstance().getEnvironmentInfo().addConnectorBaseURI(ConnectorName.eventsConnector, getEventConnectorURI());
+		return new EventClient(BrokeredProviderEnvironmentManager.getInstance(), MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_PLAIN_TYPE, "CSVStudents", new CSVMarshaller(), false);
 //		return new EventClient(env, env.getMediaType(), env.getMediaType(), getSIF3Session(), "StudentPersonals", marshaller);
 	}
 	

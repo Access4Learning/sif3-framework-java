@@ -21,16 +21,14 @@ package sif3.infra.test.rest.client;
 import java.net.URI;
 
 import sif3.common.header.HeaderValues.ServiceType;
-import sif3.common.model.SIFZone;
-import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
-import sif3.infra.common.env.types.AdapterEnvironmentStore;
-import sif3.infra.common.env.types.ConsumerEnvironment;
+import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.SubscriptionType;
 import sif3.infra.rest.client.SubscriptionClient;
+import sif3.infra.rest.consumer.ConsumerLoader;
 import au.com.systemic.framework.utils.StringUtils;
 
 /**
@@ -39,9 +37,16 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class TestSubscriptionClient
 {
-	private static final String PROP_FILE_NAME="StudentConsumer";
-	private AdapterEnvironmentStore store = new AdapterEnvironmentStore(PROP_FILE_NAME);
+//	private static final String PROP_FILE_NAME="StudentConsumer";
+//	private AdapterEnvironmentStore store = new AdapterEnvironmentStore(PROP_FILE_NAME);
 
+	  // Local
+	  private static final String CONSUMER_ID = "StudentConsumer";
+
+	  // Broker
+	//private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
+
+	
 	// Brokered
 //	private static final String CONNECTOR_URI = "https://australia.hostedzone.com/svcs/systemicDemo/subscriptions";
 //	private static final String SESSION_TOKEN = "1a47dae9-579b-4aa5-8048-608b06c611cb";
@@ -51,9 +56,9 @@ public class TestSubscriptionClient
 
 	// Direct
 	private static final String CONNECTOR_URI = "http://localhost:9080/SIF3InfraREST/sif3/subscriptions";
-	private static final String SESSION_TOKEN = "4a19bb4b-64f0-48cb-889f-d0fb747a0d6c";
+//	private static final String SESSION_TOKEN = "4a19bb4b-64f0-48cb-889f-d0fb747a0d6c";
 	private static final String ZONE="auSchoolTestingZone";
-	private static final String PWD="Password1";
+//	private static final String PWD="Password1";
 	private static final String QUEUE_ID="c59666ec-d92b-48b3-bd2a-4634ea06c5e5";
 
 	private void printResponse(Response response) throws Exception
@@ -115,20 +120,20 @@ public class TestSubscriptionClient
 	/*
 	 * Just fake a SIF3Session.
 	 */
-	private SIF3Session getSIF3Session()
-	{
-		SIF3Session session = new SIF3Session();
-		session.setSessionToken(SESSION_TOKEN);
-		session.setPassword(PWD);
-		session.setDefaultZone(new SIFZone(ZONE, true));
-		
-		return session;
-	}
+//	private SIF3Session getSIF3Session()
+//	{
+//		SIF3Session session = new SIF3Session();
+//		session.setSessionToken(SESSION_TOKEN);
+//		session.setPassword(PWD);
+//		session.setDefaultZone(new SIFZone(ZONE, true));
+//		
+//		return session;
+//	}
 
 	private SubscriptionClient getClient()
 	{
-		store.getEnvironment().addConnectorBaseURI(ConnectorName.subscriptions, getConnectorURI());
-		return new SubscriptionClient((ConsumerEnvironment)store.getEnvironment(), getSIF3Session());
+	    ConsumerEnvironmentManager.getInstance().getEnvironmentInfo().addConnectorBaseURI(ConnectorName.subscriptions, getConnectorURI());
+		return new SubscriptionClient(ConsumerEnvironmentManager.getInstance());
 	}
 	
 	private void testGetSubscription(SubscriptionClient clt, SubscriptionType subscription) throws Exception
@@ -188,14 +193,22 @@ public class TestSubscriptionClient
 	{
 		try
 		{
-			TestSubscriptionClient tester = new TestSubscriptionClient();
-		    
+			TestSubscriptionClient tester = new TestSubscriptionClient();		    
 		    System.out.println("Start Testing TestSubscriptionClient...");
-		    
-		    SubscriptionClient clt = tester.getClient();
-		    SubscriptionType subscription = tester.testCreateSubscription(clt);
-//		    tester.testGetSubscription(clt, subscription);
-//		    tester.testRemoveSubscription(clt, subscription);
+
+            if (ConsumerLoader.initialise(CONSUMER_ID))
+            {
+                SubscriptionClient clt = tester.getClient();
+                SubscriptionType subscription = tester.testCreateSubscription(clt);
+                tester.testGetSubscription(clt, subscription);
+                tester.testRemoveSubscription(clt, subscription);
+
+                ConsumerLoader.shutdown();
+            }
+            else
+            {
+                System.out.println("Failed to initialse tester!");
+            }
 		    
 		    System.out.println("End Testing TestSubscriptionClient.");
 		}
