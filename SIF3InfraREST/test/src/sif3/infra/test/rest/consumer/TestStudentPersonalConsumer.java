@@ -308,7 +308,7 @@ public class TestStudentPersonalConsumer
 //			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
 //			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
 
-			List<Response> responses = consumer.retrieve(new PagingInfo(500, 0), envZoneCtxList, REQUEST_TYPE, QueryIntention.NO_CACHE, params);
+			List<Response> responses = consumer.retrieve(new PagingInfo(10, 0), envZoneCtxList, REQUEST_TYPE, QueryIntention.NO_CACHE, params);
 //			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), envZoneCtxList, REQUEST_TYPE);
 //			List<Response> responses = consumer.retrieve(null, envZoneCtxList, REQUEST_TYPE);
 			if (printRepsonse)
@@ -442,8 +442,6 @@ public class TestStudentPersonalConsumer
 	}
 	
 	
-	
-	
 	public static void main(String[] args)
 	{
 		TestStudentPersonalConsumer tester = new TestStudentPersonalConsumer();
@@ -454,7 +452,7 @@ public class TestStudentPersonalConsumer
 		
   		StudentPersonalConsumer consumer = tester.getConsumer();
   		
-//  		tester.getStudents(consumer, true);
+  		tester.getStudents(consumer, true);
 //  		tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
 //  		tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
 //  		tester.getStudentsByServicePath("RoomInfos", "24ed508e1ed04bba82198233efa55859", consumer);
@@ -467,7 +465,7 @@ public class TestStudentPersonalConsumer
 //  		tester.deleteStudents(consumer);
 //  		tester.getStudentsByQBE(consumer);
   		
-  		tester.performanceTest(consumer);
+//  		tester.performanceTest(consumer);
   
   		System.out.println("Finalise Consumer (i.e. disconnect and remove environment).");
   		consumer.finalise();
