@@ -172,7 +172,7 @@ public abstract class BaseResource
 		setURLMediaTypeFromPath(uriInfo.getPath());
 		extractSIFHeaderProperties(requestHeaders);
 		extractAllHTTPHeaderProperties(requestHeaders);
-		extractQueryParameters(uriInfo);
+		extractQueryParameters();
 		setSecure(HTTPS_SCHEMA.equalsIgnoreCase(getUriInfo().getBaseUri().getScheme()));
 		setRelativeServicePath(getUriInfo().getPath(), servicePrefixPath);
 		extractAuthTokenInfo();
@@ -195,7 +195,7 @@ public abstract class BaseResource
 	    {
 		    if ((authInfo.getAuthMethod() == AuthenticationInfo.AuthenticationMethod.Bearer))
 			{
-		    	setSecurityService(BearerSecurityFactory.getSecurityService(getServiceProperties()));
+		        setSecurityService(BearerSecurityFactory.getSecurityService(getServiceProperties()));
 			}
 	    }
 		
@@ -791,7 +791,7 @@ public abstract class BaseResource
 			String timestamp = getTimestampFromRequest();
 			if (StringUtils.notEmpty(timestamp))
 			{
-				newAuthToken = AuthenticationUtils.getSIFHMACSHA256Token(userToken, password, timestamp);
+				newAuthToken = AuthenticationUtils.getSIFHMACSHA256AuthToken(userToken, password, timestamp);
 			}
 			else
 			{
@@ -1275,7 +1275,7 @@ public abstract class BaseResource
 		}		
 	}
 	
-	private void extractQueryParameters(UriInfo uriInfo)
+	private void extractQueryParameters()
 	{
 		setQueryParameters(new URLQueryParameter(getUriInfo().getQueryParameters()));
 	}
