@@ -67,7 +67,7 @@ public class TestConsumerSubscriptionConnector
 		ConsumerEnvironment envInfo = (ConsumerEnvironment)store.getEnvironment();
 		envInfo.addConnectorBaseURI(ConnectorName.subscriptions, getConnectorURI());
 
-		connector = new ConsumerSubscriptionConnector(envInfo, getSIF3Session());
+		connector = new ConsumerSubscriptionConnector();
 	}
 	
 	/*
