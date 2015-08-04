@@ -86,7 +86,7 @@ public class TestAuthUtils
 		String now = DateUtils.getISO8601withSecFraction(new Date());
 
 		long startTime = (new Date()).getTime();
-		String authToken = AuthenticationUtils.getSIFHMACSHA256Token(username, password, now);
+		String authToken = AuthenticationUtils.getSIFHMACSHA256AuthToken(username, password, now);
 		long endTime = (new Date()).getTime();
 
 		System.out.println("HMACSHA256 Auth Token for username/password/date="+username+"/"+password+"/"+now+": " + authToken + " Time taken to compute: "+(endTime-startTime)+" millis.");
@@ -102,14 +102,14 @@ public class TestAuthUtils
 
 		// Initial calculation. Run this before timer starts so that initialisation overhead is removed.
 		String now = DateUtils.getISO8601withSecFraction(new Date());
-		String authToken = AuthenticationUtils.getSIFHMACSHA256Token(username, password, now);
+		String authToken = AuthenticationUtils.getSIFHMACSHA256AuthToken(username, password, now);
 		
 		// Start actual test
 		long startTime = (new Date()).getTime();
 		for (int i=0; i<numRuns; i++)
 		{
 			now = DateUtils.getISO8601withSecFraction(new Date());
-			authToken = AuthenticationUtils.getSIFHMACSHA256Token(username, password, now);
+			authToken = AuthenticationUtils.getSIFHMACSHA256AuthToken(username, password, now);
 			System.out.println("HMACSHA256 Auth Token for username/password/date="+username+"/"+password+"/"+now+": " + authToken);
 		}
 		long endTime = (new Date()).getTime();
@@ -127,7 +127,7 @@ public class TestAuthUtils
 		String now = DateUtils.getISO8601withSecFraction(new Date());
 
 		System.out.println("");
-		String authToken = AuthenticationUtils.getSIFHMACSHA256Token(username, password, now);
+		String authToken = AuthenticationUtils.getSIFHMACSHA256AuthToken(username, password, now);
 		System.out.println("HMACSHA256 Auth Token for username/password/date: "+username+"/"+password+"/"+now+": " + authToken);
 		token = AuthenticationUtils.extractAuthToken(authToken);		
 		System.out.println("Auth Method: '"+AuthenticationUtils.extractAuthenticationMethod(authToken)+"' Token: '"+token+"'");
@@ -156,7 +156,7 @@ public class TestAuthUtils
 		String username = "new";
 		String password = "guest";
 		String now = DateUtils.getISO8601withSecFraction(new Date());
-		String authToken = AuthenticationUtils.getSIFHMACSHA256Token(username, password, now);
+		String authToken = AuthenticationUtils.getSIFHMACSHA256AuthToken(username, password, now);
 
 		System.out.println("HMACSHA256 Auth Token for username/password/date="+username+"/"+password+"/"+now+": " + authToken + ".");
 		AuthenticationInfo authInfo = AuthenticationUtils.getPartsFromAuthToken(authToken);
