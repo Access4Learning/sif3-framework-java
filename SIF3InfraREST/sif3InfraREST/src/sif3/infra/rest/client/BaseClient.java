@@ -19,6 +19,7 @@
 package sif3.infra.rest.client;
 
 import java.net.URI;
+import java.util.Date;
 import java.util.HashMap;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -38,15 +39,24 @@ import sif3.common.header.HeaderValues;
 import sif3.common.header.HeaderValues.MessageType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.ResponseHeaderConstants;
+import sif3.common.model.AuthenticationInfo;
+import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.URLQueryParameter;
+import sif3.common.model.security.TokenCoreInfo;
+import sif3.common.model.security.TokenInfo;
+import sif3.common.persist.model.SIF3Session;
+import sif3.common.security.AbstractSecurityService;
+import sif3.common.security.BearerSecurityFactory;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.BaseResponse;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
+import sif3.infra.common.env.types.EnvironmentInfo;
+import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.ErrorType;
 import sif3.infra.common.model.ObjectFactory;
 import au.com.systemic.framework.utils.DateUtils;
@@ -91,15 +101,27 @@ public abstract class BaseClient
 	private InfraMarshalFactory infraMarshaller = new InfraMarshalFactory();
 	private ObjectFactory infraObjectFactory = new ObjectFactory();
 	private boolean useCompression = false;
+	private ClientEnvironmentManager clientEnvMgr = null;
 
-	public BaseClient()
+	/**
+     * Constructor<br/>
+	 * 
+	 * @param clientEnvMgr This manager is used to update session related information of the client. This is mainly the case were
+	 *                     external security services are used and therefore the authorisation header may need to be generated for
+	 *                     as session after it has expired. In this case the session information of the client must be updated.
+	 */
+	public BaseClient(ClientEnvironmentManager clientEnvMgr)
 	{
 		super();
+        setClientEnvMgr(clientEnvMgr);
 	}
 	
 	/**
 	 * Constructor<br/>
 	 * 
+     * @param clientEnvMgr This manager is used to update session related information of the client. This is mainly the case were
+     *                     external security services are used and therefore the authorisation header may need to be generated for
+     *                     as session after it has expired. In this case the session information of the client must be updated.
 	 * @param baseURI The base URI of this client. All URIs are for all other calls are relative to this base URL.
 	 * @param requestMediaType Media type of the request. It will be validated against the supported media types of the given dmMarshaller.
 	 * @param responseMediaType Media type of the response. It will be validated against the supported media types of the given dmUnmarshaller.
@@ -112,10 +134,11 @@ public abstract class BaseClient
 	 *                             time of receiving.
 	 *                       FALSE: No compression is used.
 	 */
-	public BaseClient(URI baseURI, MediaType requestMediaType, MediaType responseMediaType, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection, boolean useCompression)
+	public BaseClient(ClientEnvironmentManager clientEnvMgr, URI baseURI, MediaType requestMediaType, MediaType responseMediaType, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection, boolean useCompression)
 	{
 		super();
 
+		setClientEnvMgr(clientEnvMgr);
 		setDataModelMarshaller(dmMarshaller);
 		setDataModelUnmarshaller(dmUnmarshaller);
 		setRequestMediaType(requestMediaType, dmMarshaller);
@@ -129,6 +152,9 @@ public abstract class BaseClient
 	/**
 	 * This constructor will default the media type of the marshaller (request) and unmarshaller (response) and the default service type of OBJECT.
 	 * 
+     * @param clientEnvMgr This manager is used to update session related information of the client. This is mainly the case were
+     *                     external security services are used and therefore the authorisation header may need to be generated for
+     *                     as session after it has expired. In this case the session information of the client must be updated.
 	 * @param baseURI The base URI of this client. All URIs are for all other calls are relative to this base URL.
 	 * @param dmMarshaller Marshaller to marshal the payload of this client to appropriate representations. This marshaller must be valid
 	 *                   for the data model used with this client.
@@ -139,10 +165,33 @@ public abstract class BaseClient
 	 *                             time of receiving.
 	 *                       FALSE: No compression is used.
 	 */
-	public BaseClient(URI baseURI, MarshalFactory dmMarshaller, UnmarshalFactory dmUmarshaller, boolean secureConnection, boolean useCompression)
+	public BaseClient(ClientEnvironmentManager clientEnvMgr, URI baseURI, MarshalFactory dmMarshaller, UnmarshalFactory dmUmarshaller, boolean secureConnection, boolean useCompression)
 	{
-		this(baseURI, ((dmMarshaller != null) ? dmMarshaller.getDefault() : null), ((dmUmarshaller != null) ? dmUmarshaller.getDefault() : null), dmMarshaller, dmUmarshaller, secureConnection, useCompression);
+		this(clientEnvMgr, baseURI, ((dmMarshaller != null) ? dmMarshaller.getDefault() : null), ((dmUmarshaller != null) ? dmUmarshaller.getDefault() : null), dmMarshaller, dmUmarshaller, secureConnection, useCompression);
 	}
+	
+	/**
+     * @return the clientEnvMgr
+     */
+    protected ClientEnvironmentManager getClientEnvMgr()
+    {
+        return clientEnvMgr;
+    }
+    
+    protected SIF3Session getSIF3Session()
+    {
+        return getClientEnvMgr().getSIF3Session();
+    }
+
+    /**
+     * @param clientEnvMgr the clientEnvMgr to set
+     */
+    private void setClientEnvMgr(ClientEnvironmentManager clientEnvMgr)
+    {
+        this.clientEnvMgr = clientEnvMgr;
+    }
+
+
 
 	public MarshalFactory getDataModelMarshaller()
     {
@@ -300,7 +349,7 @@ public abstract class BaseClient
 	 * of the given header properties. It WON'T be added as part of this method.
 	 * 
 	 * @param service The service to which media type and header properties shall be added.
-	 * @param hdrProperties A set of defined header properties. Should really hold the authentication token!
+	 * @param hdrProperties A set of defined header properties. Should really hold the authentication related properties!
 	 * @param includeRequestID TRUE: Add a generated request ID header property
 	 * @hasPayload TRUE: The request will contain a payload. Required for compression header settings
 	 *             FALSE: The request is payload free.
@@ -350,7 +399,6 @@ public abstract class BaseClient
 			
 			//Accepted encodings for response
 			hdrProperties.setHeaderProperty(HttpHeaders.ACCEPT_ENCODING, HeaderValues.ACCEPT_ENCODING_ALL);	
-//			hdrProperties.setHeaderProperty(HttpHeaders.ACCEPT_ENCODING, HeaderValues.EncodingType.gzip.name());	
 		}
 
 		if (logger.isDebugEnabled())
@@ -374,23 +422,21 @@ public abstract class BaseClient
 		return builder;
 	}
 	
+	protected HeaderProperties createAuthenticationHdr(boolean isEnvCreate, SIF3Session pseudoSIF3Session)
+	{
+		AuthenticationInfo authInfo = getAuthenicationInfo(isEnvCreate, pseudoSIF3Session);
+		HeaderProperties hdrProps = new HeaderProperties();
+		if (authInfo != null) // all good
+		{
+			// First create the properties for the authentication header.
+			ClientUtils.setAuthenticationHeader(hdrProps, authInfo.getAuthMethod(), authInfo.getUserToken(), authInfo.getPassword());
+		}		
+
+		return hdrProps;
+	}
+
 	protected HeaderProperties extractHeaderInfo(ClientResponse clientResponse)
 	{
-//		HeaderProperties hdrProps = new HeaderProperties();
-//		MultivaluedMap<String, String> respHdrProps = clientResponse.getHeaders();
-//
-//		if ((respHdrProps != null))
-//		{
-//			for (String propName : ResponseHeaderConstants.HEADER_NAME_ARRAY)
-//			{
-//				String hdrValue = respHdrProps.getFirst(propName); // there should only be one value for each of these properties
-//				if (hdrValue != null)
-//				{
-//					hdrProps.setHeaderProperty(propName, hdrValue);
-//				}
-//			}
-//		}
-
 		HeaderProperties hdrProps = new HeaderProperties();
 		MultivaluedMap<String, String> respHdrProps =  clientResponse.getHeaders();
 		
@@ -626,37 +672,184 @@ public abstract class BaseClient
 	{
 		return getInfraUnmarshaller().isSupported(indicatedMediaType) ? indicatedMediaType : getInfraUnmarshaller().getDefault();
 	}
+
+	/*
+	 * By default this method tries to create an AuthenticationInfo object based on the information that is in the current SIF3 Session
+	 * of the client. It will take the userName, sessionToken etc from there. If there is no session available (i.e. first time the client 
+	 * connects and therefore must create an environment first) then information will be taken from the appropriate property file for the 
+	 * creation of authentication info object.
+	 * 
+ 	 * If the parameter isEnvCreateRequest = true then it is assumed that it s the first time that a security token is created. Also a SIF3 Session
+	 * does not yet exist. In this case the AuthenticationInfo is populated but no data is updated in a cache or a data store relation to this
+	 * client since it has not yet a session.
+	 * In all other cases the cache and the data store relating to the SIF3 session is updated if the security token or its expire date have changed. 
+	 * Such an update is only expected to occur for 'Bearer' authentication where an external security service is contacted and potentially expire
+	 * dates change for such security tokens.
+	 * If standard SIF 'Basic' or 'SIF_HMACSHA256' is used then no data needs to be updated as everything is managed in-memory and no external
+	 * security sources are involved.
+	 * 
+	 * There is one odd case to consider as well where we need to get an existing environment. In that case we don't have a
+	 * sif3Session and are not in a create environment operation. In such a case we may have the sessionToken for the environment
+	 * to sync with in the TokenInfo even if we don't use external security services. This is the only way to avoid to many 
+	 * confusing parameters to this method.
+	 * 
+	 * This method will populate the properties in the AuthenticationInfo. After this call the AuthenticationInfo can be used to generate
+	 * HTTP Header data using the AuthenticationUtils class (getFullBase64Token() method).
+	 * 
+	 * If anything fails then null is returned. An error will already be logged.
+	 */
+	private AuthenticationInfo getAuthenicationInfo(boolean isEnvCreateRequest, SIF3Session pseudoSIF3Session)
+//    private AuthenticationInfo getAuthenicationInfo(boolean isEnvCreateRequest, TokenInfo tokenInfo)
+	{
+		EnvironmentInfo envInfo = getClientEnvMgr().getEnvironmentInfo();
+		String pwd = envInfo.getPassword();
+
+	    String user = null;
+	    if (isEnvCreateRequest)
+	    {
+	        user = envInfo.getEnvironmentKey().getApplicationKey();
+	    }
+	    else 
+	    {
+	        // it is not a createEnv request but if we may have a pseudoSIF3Session  then it should have a sessionToken populated
+	        if (pseudoSIF3Session == null) // we must have a session
+	        {
+	            user =  getSIF3Session().getSessionToken();
+	        }
+	        else // use tempSIF3Session session
+	        {
+	            user = pseudoSIF3Session.getSessionToken();
+	        }
+	    }
+		
+		AuthenticationInfo authInfo = null;
+		if (envInfo.getAuthMethod() != AuthenticationMethod.Bearer)
+		{
+            authInfo = new AuthenticationInfo(envInfo.getAuthMethod(), user, pwd);
+		}
+		else // Use Bearer Authentication => potentially requires external security service.
+		{
+		    TokenInfo tokenInfo = null;
+		    if (pseudoSIF3Session != null) // we don't have a real session. Use pseudoSIF3Session and extract token info from there.
+		    {
+		        tokenInfo = new TokenInfo(pseudoSIF3Session.getSecurityToken(), pseudoSIF3Session.getSecurityTokenExpiry());
+		    }
+            authInfo = getBearerAuthorisationInfo(isEnvCreateRequest, tokenInfo);
+		}
+		
+		return authInfo;
+	}
 	
-//	private boolean isResponseCompressed(EncodingType encodeType)
-//	{
-//		return (encodeType != null) ? encodeType == EncodingType.gzip : false;
-//	}
-//	
-//	/* 
-//	 * This method gets the encoding type from Content-Encoding HTTP header. If no encoding is given then 'identity' is
-//	 * returned. If an unsupported content encoding is set then null is returned and an error is logged.
-//	 */
-//	private EncodingType getEncodingTypeFromResponse(HeaderProperties hdrProps)
-//	{
-//		EncodingType encodeType = EncodingType.identity;
-//		if (hdrProps != null)
-//		{
-//			String encodeValue = hdrProps.getHeaderProperty(HttpHeaders.CONTENT_ENCODING);
-//			if (encodeValue != null) 
-//			{
-//				try
-//				{
-//					encodeType = EncodingType.valueOf(encodeValue);
-//				}
-//				catch (Exception ex)
-//				{
-//					logger.error("An unsupported value for "+HttpHeaders.CONTENT_ENCODING+" HTTP header found: '"+encodeValue+"'");
-//					return null;
-//				}
-//			}
-//		}
-//		
-//		// If we get here then the HTTP header is not set and we assume not encoded
-//		return encodeType;
-//	}
+	/*
+	 * This method will check if a security token must be retrieved from an external security service. If so it will attempt to do so and populate the 
+	 * AuthenticationInfo accordingly. If a SIF3 Session exists then it will be updated if the security token or the expire data has changed. If null is 
+	 * returned then there is an issue in retrieving a security token. In this case a request should not be made to the provider.
+	 * 
+	 * If the parameter isEnvCreateRequest = true then it is assumed that this method is used to create an environment. In such
+	 * a case there is no SIF3 session available and a TokenInfo cannot be retrieved from there. Therefore the given tokenInfo
+	 * parameter shall be used and it is not necessary to call the external security service as it is assume that it has already
+	 * been called because the TokenInfo is given. In this case the AuthenticationInfo is populated but no data is updated in a 
+	 * cache or a data store relation to this client since it has not yet a session.
+	 * In all other cases the cache and the data store relating to the SIF3 session is updated if the security token or its expire date have changed.
+	 *  
+	 * If anything fails then null is returned and an error is logged.
+	 */
+	private AuthenticationInfo getBearerAuthorisationInfo(boolean isEnvCreateRequest, TokenInfo tokenInfo)
+	{
+		boolean retrieveToken = false;
+		if (!isEnvCreateRequest) // we should have a SIF3 Session
+		{
+		    if (tokenInfo == null) // don't use an already created token
+		    {
+        		SIF3Session sif3Session = getSIF3Session();
+        		if (StringUtils.notEmpty(sif3Session.getSecurityToken())) // we already have a token. This is not the first time we do a call
+        		{
+        			if (sif3Session.getSecurityTokenExpiry() != null) // token may already be expired
+        			{
+        				long now = (new Date()).getTime();
+        				if (sif3Session.getSecurityTokenExpiry().getTime() < now) // expired date! => Renew token
+        				{
+        					retrieveToken = true;
+        				}
+        			}
+        		}
+        		else // we don't have a token yet! => get one
+        		{
+        			retrieveToken = true;
+        		}
+		    } // else => tokenInfo is not null so we must use it. No need to retrieve one.
+		} 
+		else // isEnvCreateRequest == true
+		{
+		    // First time access an external token should be given. No need to get one. But we do a check here.
+		    if ((tokenInfo == null) || (StringUtils.isEmpty(tokenInfo.getToken())))
+		    {
+                logger.error("An environment shall be created using external security but no security toke is given to the createEnvironment() method.");
+                return null;
+		    }
+		}
+		
+		EnvironmentInfo envInfo = getClientEnvMgr().getEnvironmentInfo();
+		if (retrieveToken) // We must get a token from that service
+		{
+			AbstractSecurityService securityService = BearerSecurityFactory.getSecurityService(getClientEnvMgr().getServiceProperties());
+			if (securityService != null)
+			{
+    			TokenCoreInfo coreInfo = new TokenCoreInfo();
+    			if (isEnvCreateRequest)
+    			{
+    				coreInfo.setAppUserInfo(envInfo.getEnvironmentKey());
+    				coreInfo.setConsumerName(envInfo.getAdapterName());
+    			}
+    			else
+    			{
+        			coreInfo.setAppUserInfo(getSIF3Session());
+        			coreInfo.setConsumerName(getSIF3Session().getAdapterName());
+        			coreInfo.setEnvironmentID(getSIF3Session().getEnvironmentID());
+        			coreInfo.setSessionToken(getSIF3Session().getSessionToken());    				
+    			}
+    			
+    			// Now call the security service and if successful update appropriate data
+    			TokenInfo newTokenInfo = securityService.createToken(coreInfo, envInfo.getPassword());
+    			if ((newTokenInfo != null) && StringUtils.notEmpty(newTokenInfo.getToken())) // we just got a valid token => save it in the sif3Session
+    			{
+    				AuthenticationInfo authInfo = new AuthenticationInfo(envInfo.getAuthMethod(), newTokenInfo.getToken(), envInfo.getPassword(), newTokenInfo.getTokenExpiryDate());
+    				if (!isEnvCreateRequest) // not initial request => Update session!
+    				{
+        				getSIF3Session().setSecurityToken(newTokenInfo.getToken());
+        				getSIF3Session().setSecurityTokenExpiry(newTokenInfo.getTokenExpiryDate());
+        				if (!getClientEnvMgr().updateSessionSecurityInfo(getSIF3Session().getSessionToken(), newTokenInfo.getToken(), newTokenInfo.getTokenExpiryDate()))
+        				{
+                            logger.error("Failed to update session with new security token from the security service. Check previous error log entries for details.");
+                            return null;    				    
+        				}
+    				}
+    				
+    				// If we get here then all is successful and we return the authentication info.
+    				return authInfo;
+    			}
+    			else // failed to retrieve token
+    			{
+    				logger.error("Failed to retrieve a security token from the security service. Check previous error log entries for details.");
+    				return null;
+    			}
+			}
+			else // failed to get security service implementation from BearerSecurityFactory
+			{
+				logger.error("Failed to retrieve a security service implementation. Check previous error log entries for details.");
+				return null;				
+			}
+		}
+		else // nothing to do in terms of creating a new security token. We can use the existing values of the SIF3 Session or the tokenInfo
+		{
+		    if (tokenInfo != null)
+		    {
+                return new AuthenticationInfo(envInfo.getAuthMethod(), tokenInfo.getToken(), envInfo.getPassword(), tokenInfo.getTokenExpiryDate());
+		    }
+		    else // we get it from the session.
+		    {
+		        return new AuthenticationInfo(envInfo.getAuthMethod(), getSIF3Session().getSecurityToken(), envInfo.getPassword(), getSIF3Session().getSecurityTokenExpiry());
+		    }
+		}
+	}
 }
