@@ -250,7 +250,7 @@ public class JAXBUtils
 			Unmarshaller unmarshaller = getContext(clazz).createUnmarshaller();
 			synchronized(unmarshaller)
 			{
-				elem = (JAXBElement<?>) unmarshaller.unmarshal(new StreamSource(new StringReader(xmlStr)), clazz);
+				elem = unmarshaller.unmarshal(new StreamSource(new StringReader(xmlStr)), clazz);
 			}
 
 		}
@@ -270,7 +270,7 @@ public class JAXBUtils
 			Unmarshaller unmarshaller = getContext(clazz).createUnmarshaller();
 			synchronized (unmarshaller)
 			{
-				elem = (JAXBElement<T>) unmarshaller.unmarshal(getJSONStreamReader(jsonStr, clazz), clazz);
+				elem = unmarshaller.unmarshal(getJSONStreamReader(jsonStr, clazz), clazz);
 			}
 		}
 		catch (Exception ex)
