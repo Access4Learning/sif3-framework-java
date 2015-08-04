@@ -22,6 +22,7 @@ import java.util.Date;
 
 import sif3.common.CommonConstants;
 import sif3.common.model.EnvironmentKey;
+import sif3.common.model.security.TokenInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.persist.service.SIF3SessionService;
 import sif3.infra.common.interfaces.ClientEnvStoreOperations;
@@ -64,9 +65,9 @@ public class ConsumerEnvironmentStoreOperations extends AdapterBaseEnvStoreOpera
 	 * 
 	 * @see sif3.infra.common.env.ClientEnvStoreOperations#createOrUpdateSession(sif3.infra.common.model.EnvironmentType)
 	 */
-	public SIF3Session createOrUpdateSession(EnvironmentType inputEnv)
+	public SIF3Session createOrUpdateSession(EnvironmentType inputEnv, TokenInfo tokenInfo)
 	{
-		return createOrUpdateSession(inputEnv, ADAPTER_TYPE, service);
+		return createOrUpdateSession(inputEnv, tokenInfo, ADAPTER_TYPE, service);
 	}
 
 	/*

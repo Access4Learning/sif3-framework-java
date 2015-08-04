@@ -25,6 +25,7 @@ import org.apache.log4j.Logger;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.PersistenceException;
 import sif3.common.model.EnvironmentKey;
+import sif3.common.model.security.TokenInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.persist.service.SIF3SessionService;
 import sif3.common.utils.FileAndFolderUtils;
@@ -175,14 +176,17 @@ public class AdapterBaseEnvStoreOperations
 	 *       environment should not really use that method. 
 	 * 
 	 * @param inputEnv full environment as returned from the environment provider including sessionToken, environmentID
+	 * @param tokenInfo Information related to the security token. Can be used to store expire date and a security token related 
+	 *                  to the session to be created or updated. Since this is not part of the environment XML/POJO it must be given to 
+	 *                  this method as a separate parameter.
 	 * @param adapterType Adapter Type for which the environment is for.
 	 * @param service The service to load the actual session from the workstore.
 	 * 
 	 * @return See desc.
 	 */
-	public SIF3Session createOrUpdateSession(EnvironmentType inputEnv, AdapterType adapterType, SIF3SessionService service)
+	public SIF3Session createOrUpdateSession(EnvironmentType inputEnv, TokenInfo tokenInfo, AdapterType adapterType, SIF3SessionService service)
 	{
-		getEnvironmentStore().getEnvironment();
+		//getEnvironmentStore().getEnvironment();
 		if ((inputEnv == null) || (inputEnv.getApplicationInfo() == null))
 		{
 			logger.error("The environment provider environment is null or does not have the Application Info set. Environment/SIF3 Session cannot be created.");
@@ -204,6 +208,13 @@ public class AdapterBaseEnvStoreOperations
 			{
 				// There is the possibility that the password has been reset since the last access. => Update it just in case
 				sif3Session.setPassword(getEnvironmentStore().getEnvironment().getPassword());
+				
+				// Also add the security token info if it is available
+				if (tokenInfo != null)
+				{
+					sif3Session.setSecurityToken(tokenInfo.getToken());
+					sif3Session.setSecurityTokenExpiry(tokenInfo.getTokenExpiryDate());
+				}
 			}
 			else
 			{
@@ -214,6 +225,14 @@ public class AdapterBaseEnvStoreOperations
 				sif3Session.setAdapterType(adapterType.name());
 				sif3Session.setSessionToken(inputEnv.getSessionToken());
 				sif3Session.setEnvironmentID(inputEnv.getId());
+
+				// Also add the security token info if it is available
+				if (tokenInfo != null)
+				{
+					sif3Session.setSecurityToken(tokenInfo.getToken());
+					sif3Session.setSecurityTokenExpiry(tokenInfo.getTokenExpiryDate());
+				}
+
 				if (adapterType == AdapterType.CONSUMER) // set queue strategy
 				{
 					sif3Session.setQueueStrategy(((ConsumerEnvironment)getEnvironmentStore().getEnvironment()).getQueueStrategy().name());
