@@ -121,7 +121,7 @@ public class TestConsumerEnvStoreOps
 //		session.setSessionToken(SESSION_TOKEN);
 //		session.setEnvironmentID(ENV_ID);
 //		session.setAdapterType(AdapterType.CONSUMER.name());
-		System.out.println("Environment Stored: "+envOps.createOrUpdateSession(env));
+		System.out.println("Environment Stored: "+envOps.createOrUpdateSession(env, null));
 	}
 	
 	private void testRemoveEnvFromWorkstoreBySessionTK()
