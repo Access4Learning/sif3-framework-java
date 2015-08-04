@@ -119,6 +119,20 @@ public class HeaderProperties
 		return createCopy(this.hdrProperties);
 	}
 	
+	/**
+	 * This method will add all the properties of the addHdrProps parameter to the existing header properties. This will override
+	 * properties that already exist if they are in the addHdrProps parameter.
+	 * 
+	 * @param addHdrProps Header Properties to be added to the existing header properties. If null then no action is taken.
+	 */
+	public void addHeaderProperties(HeaderProperties addHdrProps)
+	{
+	    if (addHdrProps != null)
+	    {
+	        hdrProperties.putAll(addHdrProps.getHeaderProperties());
+	    }
+	}
+	
 	@Override
     public String toString()
     {
