@@ -34,10 +34,10 @@ import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
-import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.BaseResponse;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.common.env.types.ProviderEnvironment;
+import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import au.com.systemic.framework.utils.StringUtils;
 
 import com.sun.jersey.api.client.ClientResponse;
@@ -54,8 +54,6 @@ import com.sun.jersey.api.client.WebResource.Builder;
 public class EventClient extends BaseClient
 {
 	private boolean allOK = true;
-	private ProviderEnvironment providerEnvironment;
-	private SIF3Session sif3Session;
 	private String serviceName;
 	
 	/**
@@ -63,23 +61,21 @@ public class EventClient extends BaseClient
 	 * properties to ensure that the event client can function properly. If anything is incorrect an error will be logged
 	 * and all methods of this class will have no effect (i.e. are ignored when calling).
 	 * 
-	 * @param providerEnvironment Environment information. Used to lookup event connector, baseURI etc, so that an event is sent to
-	 *                            the correct location and using the correct protocol.
-	 * @param sif3Session The active SIF3 session to use to create the authentication token.
+     * @param clientEnvMgr Session manager to access the clients session information.
 	 * @param serviceName The serviceName for which the event is. This is generally the SIF Object name such as StudentPersonals (plural form!)
-	 * @param useCompression TRUE: Payloads (request & response) shall be compressed before sending or de-compressed at the
+	 * @param useCompression TRUE: Payload (request & response) shall be compressed before sending or de-compressed at the
 	 *                             time of receiving.
 	 *                       FALSE: No compression is used.
 	 */
-	public EventClient(ProviderEnvironment providerEnvironment, MediaType requestMediaType, MediaType responseMediaType, SIF3Session sif3Session, String serviceName, MarshalFactory dmMarshaller, boolean useCompression)
+	public EventClient(ClientEnvironmentManager clientEnvMgr, MediaType requestMediaType, MediaType responseMediaType, String serviceName, MarshalFactory dmMarshaller, boolean useCompression)
 	{
-		super();
-		if (providerEnvironment == null)
+		super(clientEnvMgr);
+		if ((getClientEnvMgr() == null) || (getClientEnvMgr().getEnvironmentInfo() == null))
 		{
 			logger.error("Provider Environment not valid/initialised. Cannot send events.");
 			allOK = false;
 		}
-		if (sif3Session == null)
+		if (getSIF3Session() == null)
 		{
 			logger.error("No active SIF3 Session available. Provider might not be connected. Cannot send events.");
 			allOK = false;
@@ -89,7 +85,7 @@ public class EventClient extends BaseClient
 			logger.error("No Service Name given for events. Cannot send events.");
 			allOK = false;
 		}
-		URI eventConnector = providerEnvironment.getConnectorBaseURI(ConnectorName.eventsConnector);
+		URI eventConnector = getProviderEnvironment().getConnectorBaseURI(ConnectorName.eventsConnector);
 		if (eventConnector == null)
 		{
 			logger.error("Event Connector not defined in environment. Cannot send events.");
@@ -99,16 +95,12 @@ public class EventClient extends BaseClient
 		// if we get here we should be ok.
 		if (allOK)
 		{
-			this.providerEnvironment = providerEnvironment;
-			this.sif3Session = sif3Session;
 			this.serviceName = serviceName;
 			setDataModelMarshaller(dmMarshaller);
-//			setRequestMediaType(providerEnvironment.getMediaType(), null);
-//			setResponseMediaType(providerEnvironment.getMediaType(), null);
 			setRequestMediaType(requestMediaType, dmMarshaller);
 			setResponseMediaType(responseMediaType, null);
 			setUseCompression(useCompression);
-			configureClienService(eventConnector, this.providerEnvironment.getSecureConnection(), getUseCompression());
+			configureClienService(eventConnector, getProviderEnvironment().getSecureConnection(), getUseCompression());
 		}
 	}
 	
@@ -182,6 +174,11 @@ public class EventClient extends BaseClient
 	/*-- Private Methods --*/
 	/*---------------------*/
 
+	private ProviderEnvironment getProviderEnvironment()
+	{
+	    return (ProviderEnvironment)getClientEnvMgr().getEnvironmentInfo();
+	}
+	
 	/*
 	 * This method sets all header properties for events as specified by the SIF3 Spec.
 	 * 
@@ -195,8 +192,8 @@ public class EventClient extends BaseClient
 		HeaderProperties hdrProperties = (overrideHdrFields != null) ? new HeaderProperties(overrideHdrFields.getHeaderProperties()) : new HeaderProperties();
 
 		// Add properties for the authentication header.
-		ClientUtils.setAuthenticationHeader(hdrProperties, providerEnvironment.getAuthMethod(), sif3Session.getSessionToken(), sif3Session.getPassword());
-
+		hdrProperties.addHeaderProperties(createAuthenticationHdr(false, null));
+		
 		// Add event specific properties
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_MESSAGE_TYPE, HeaderValues.MessageType.EVENT.name());
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_EVENT_ACTION, eventAction.name());
@@ -207,7 +204,7 @@ public class EventClient extends BaseClient
 		{
 			if (updateType == null)
 			{
-				hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_UPDATE_TYPE, providerEnvironment.getDefaultUpdateType().name());
+				hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_UPDATE_TYPE, getProviderEnvironment().getDefaultUpdateType().name());
 			}
 			else
 			{
@@ -217,7 +214,7 @@ public class EventClient extends BaseClient
 		
 		if ((zone == null) || (zone.getIsDefault()) || StringUtils.isEmpty(zone.getId())) // Assume default zone!
 		{
-			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_ZONE_ID, sif3Session.getDefaultZone().getId());			
+			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_ZONE_ID, getSIF3Session().getDefaultZone().getId());			
 		}
 		else
 		{
@@ -245,7 +242,7 @@ public class EventClient extends BaseClient
 	{
 		if ((zone == null) || (zone.getIsDefault()) || StringUtils.isEmpty(zone.getId())) // Assume default zone!
 		{
-			return new SIFZone(sif3Session.getDefaultZone().getId(), true);			
+			return new SIFZone(getSIF3Session().getDefaultZone().getId(), true);			
 		}
 		else
 		{

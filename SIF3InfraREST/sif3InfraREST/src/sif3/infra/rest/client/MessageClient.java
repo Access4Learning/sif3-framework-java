@@ -20,22 +20,20 @@ package sif3.infra.rest.client;
 
 import java.net.URI;
 
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
-
-import au.com.systemic.framework.utils.StringUtils;
-
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
+import javax.ws.rs.core.UriBuilder;
 
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.RequestHeaderConstants;
-import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
-import sif3.infra.common.env.types.ConsumerEnvironment;
+import sif3.infra.common.interfaces.ClientEnvironmentManager;
+import au.com.systemic.framework.utils.StringUtils;
+
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 
 /**
  * This class implements the REST client for the queue connector but only for the "message" related operations. The implementation meets SIF3 Spec.
@@ -45,14 +43,9 @@ import sif3.infra.common.env.types.ConsumerEnvironment;
  */
 public class MessageClient extends BaseClient
 {
-	private ConsumerEnvironment consumerEnvInfo = null;
-	private SIF3Session sif3Session = null;
-	
-	public MessageClient(URI queueURI, ConsumerEnvironment consumerEnvironment, SIF3Session sif3Session)
+	public MessageClient(ClientEnvironmentManager clientEnvMgr, URI queueURI)
 	{
-		super(queueURI, consumerEnvironment.getMediaType(), consumerEnvironment.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), consumerEnvironment.getSecureConnection(), consumerEnvironment.getCompressionEnabled());
-		this.consumerEnvInfo = consumerEnvironment;
-		this.sif3Session = sif3Session;
+		super(clientEnvMgr, queueURI, clientEnvMgr.getEnvironmentInfo().getMediaType(), clientEnvMgr.getEnvironmentInfo().getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), clientEnvMgr.getEnvironmentInfo().getSecureConnection(), clientEnvMgr.getEnvironmentInfo().getCompressionEnabled());
 	}
 
 	/*
@@ -64,7 +57,7 @@ public class MessageClient extends BaseClient
 		try
 		{
 			service = buildMessageURI(service, removeMsgID, true);
-			HeaderProperties hdrProperties = getHeaderProperties(sif3Session, consumerInstanceID);
+			HeaderProperties hdrProperties = getHeaderProperties(consumerInstanceID);
 			logger.debug("HTTP GET Next Message...");
 		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
 			logger.debug("HTTP GET Next Message received.");
@@ -75,6 +68,7 @@ public class MessageClient extends BaseClient
 		catch (Exception ex)
 		{
 			String errorMsg = "Failed to invoke 'getMessage' service (REST GET) on URI " + service.getURI() + ": " + ex.getMessage();
+			//ex.printStackTrace();
 			logger.error(errorMsg);
 			throw new ServiceInvokationException(errorMsg, ex);
 		}
@@ -89,7 +83,7 @@ public class MessageClient extends BaseClient
 		try
 		{
 			service = buildMessageURI(service, removeMsgID, false);
-			HeaderProperties hdrProperties = getHeaderProperties(sif3Session, consumerInstanceID);
+			HeaderProperties hdrProperties = getHeaderProperties(consumerInstanceID);
 		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).delete(ClientResponse.class);
 
 			return setResponse(service, clientResponse, null, null, null, Status.NO_CONTENT);
@@ -129,13 +123,10 @@ public class MessageClient extends BaseClient
 	 * @param consumerInstanceID Can be null.
 	 * @return
 	 */
-	private HeaderProperties getHeaderProperties(SIF3Session sif3Session, String consumerInstanceID)
+	private HeaderProperties getHeaderProperties(String consumerInstanceID)
 	{
-		HeaderProperties hdrProperties = new HeaderProperties();
-		
-		// First create the properties for the authentication header.
-		ClientUtils.setAuthenticationHeader(hdrProperties, consumerEnvInfo.getAuthMethod(), sif3Session.getSessionToken(), sif3Session.getPassword());
-
+	    // Add Authentication info to existing header properties
+		HeaderProperties hdrProperties = createAuthenticationHdr(false, null);
 		if (StringUtils.notEmpty(consumerInstanceID))
 		{
 			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_CONSUMER_ID, consumerInstanceID);

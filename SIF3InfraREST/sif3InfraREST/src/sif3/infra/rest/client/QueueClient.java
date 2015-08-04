@@ -23,12 +23,11 @@ import javax.ws.rs.core.Response.Status;
 import sif3.common.CommonConstants.QueuePollingType;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderProperties;
-import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
-import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
+import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.QueueCollectionType;
 import sif3.infra.common.model.QueueType;
 
@@ -43,14 +42,9 @@ import com.sun.jersey.api.client.WebResource;
  */
 public class QueueClient extends BaseClient
 {
-	private ConsumerEnvironment consumerEnvInfo = null;
-	private SIF3Session sif3Session = null;
-	
-	public QueueClient(ConsumerEnvironment consumerEnvironment, SIF3Session sif3Session)
+	public QueueClient(ClientEnvironmentManager clientEnvMgr)
 	{
-		super(consumerEnvironment.getConnectorBaseURI(ConnectorName.queues), consumerEnvironment.getMediaType(), consumerEnvironment.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), consumerEnvironment.getSecureConnection(), consumerEnvironment.getCompressionEnabled());
-		this.consumerEnvInfo = consumerEnvironment;
-		this.sif3Session = sif3Session;
+		super(clientEnvMgr, clientEnvMgr.getEnvironmentInfo().getConnectorBaseURI(ConnectorName.queues), clientEnvMgr.getEnvironmentInfo().getMediaType(), clientEnvMgr.getEnvironmentInfo().getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), clientEnvMgr.getEnvironmentInfo().getSecureConnection(), clientEnvMgr.getEnvironmentInfo().getCompressionEnabled());
 	}
 	
 	public Response getQueues() throws ServiceInvokationException
@@ -59,7 +53,7 @@ public class QueueClient extends BaseClient
 		try
 		{
 			service = buildURI(service, null);
-			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
+			HeaderProperties hdrProperties = getHeaderProperties();		
 			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
 
 			return setResponse(service, clientResponse, QueueCollectionType.class, null, null, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
@@ -78,7 +72,7 @@ public class QueueClient extends BaseClient
 		try
 		{
 			service = buildURI(service, null, queueID, null, null, null);
-			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
+			HeaderProperties hdrProperties = getHeaderProperties();		
 			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
 
 			return setResponse(service, clientResponse, QueueType.class, null, null, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
@@ -153,7 +147,7 @@ public class QueueClient extends BaseClient
 		try
 		{
 			service = buildURI(service, null, queueID, null, null, null);
-			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
+			HeaderProperties hdrProperties = getHeaderProperties();		
 		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).delete(ClientResponse.class);
 
 			return setResponse(service, clientResponse, null, null, null, Status.NO_CONTENT);
@@ -176,13 +170,10 @@ public class QueueClient extends BaseClient
 	 * @param sif3Session TSession information. Required for authentication token creation.
 	 * @return
 	 */
-	private HeaderProperties getHeaderProperties(SIF3Session sif3Session)
+	private HeaderProperties getHeaderProperties()
 	{
-		HeaderProperties hdrProperties = new HeaderProperties();
-		
-		// First create the properties for the authentication header.
-		ClientUtils.setAuthenticationHeader(hdrProperties, consumerEnvInfo.getAuthMethod(), sif3Session.getSessionToken(), sif3Session.getPassword());
-		return hdrProperties;
+        // Add Authentication info to existing header properties
+        return createAuthenticationHdr(false, null);
 	}
 
 	/*
@@ -204,7 +195,7 @@ public class QueueClient extends BaseClient
 		try
 		{
 			service = buildURI(service, null);
-			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
+			HeaderProperties hdrProperties = getHeaderProperties();		
 			String payloadStr = getInfraMarshaller().marshal(inputQueue, getRequestMediaType());
 			if (logger.isDebugEnabled())
 			{

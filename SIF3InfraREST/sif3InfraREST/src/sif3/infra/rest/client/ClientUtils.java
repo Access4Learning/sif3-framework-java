@@ -41,16 +41,37 @@ public class ClientUtils
 	 */
 	public static synchronized void setAuthenticationHeader(HeaderProperties hdrProps, AuthenticationMethod authenticationMethod, String username, String password)
 	{
-		if (authenticationMethod == AuthenticationMethod.Basic)
+		switch (authenticationMethod)
 		{
-			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AuthenticationUtils.getBasicAuthToken(username, password));
+			case Basic:
+			{
+				hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AuthenticationUtils.getBasicAuthToken(username, password));
+				break;
+			}
+			case SIF_HMACSHA256:
+			{
+				String iso8601Date = DateUtils.nowAsISO8601withSecFraction();
+				hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AuthenticationUtils.getSIFHMACSHA256AuthToken(username, password, iso8601Date));
+				hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME, iso8601Date);			
+				break;
+			}
+			case Bearer:
+			{
+				hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AuthenticationUtils.getBearerAuthToken(username, password));
+				break;
+			}
 		}
-		else
-		{
-			String iso8601Date = DateUtils.nowAsISO8601withSecFraction();
-			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AuthenticationUtils.getSIFHMACSHA256Token(username, password, iso8601Date));
-			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME, iso8601Date);			
-		}
+		
+//		if (authenticationMethod == AuthenticationMethod.Basic)
+//		{
+//			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AuthenticationUtils.getBasicAuthToken(username, password));
+//		}
+//		else if (authenticationMethod == AuthenticationMethod.SIF_HMACSHA256)
+//		{
+//			String iso8601Date = DateUtils.nowAsISO8601withSecFraction();
+//			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AuthenticationUtils.getSIFHMACSHA256Token(username, password, iso8601Date));
+//			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME, iso8601Date);			
+//		}
 
 	}
 }
