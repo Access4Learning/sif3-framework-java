@@ -55,7 +55,6 @@ import sif3.common.ws.Response;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.rest.client.ClientInterface;
-import sif3.infra.rest.client.ClientUtils;
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.StringUtils;
 import au.com.systemic.framework.utils.Timer;
@@ -870,7 +869,8 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 		}
 		else
 		{
-			return new ClientInterface(envInfo.getConnectorBaseURI(ConsumerEnvironment.ConnectorName.requestsConnector), 
+			return new ClientInterface(ConsumerEnvironmentManager.getInstance(),
+			                           envInfo.getConnectorBaseURI(ConsumerEnvironment.ConnectorName.requestsConnector), 
 	                   				   getRequestMediaType(),
 	                   				   getResponseMediaType(),
 	                   				   getMarshaller(), 
@@ -897,10 +897,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 	   }
 	    
 	   // Now we set SIF defined HTTP headers...
-	   
-	   // First create the properties for the authentication header.
-	   ClientUtils.setAuthenticationHeader(hdrProps, envInfo.getAuthMethod(), getSIF3Session().getSessionToken(), getSIF3Session().getPassword());
-	    
+	   	    
 	   // Set the remaining header fields for this type of request
 	   if (isCreateOperation)
 	   {

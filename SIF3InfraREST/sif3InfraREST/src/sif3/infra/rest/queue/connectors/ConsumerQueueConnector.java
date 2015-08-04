@@ -33,6 +33,7 @@ import sif3.common.persist.model.SIF3Queue;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.persist.service.SIF3QueueService;
 import sif3.common.ws.Response;
+import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.model.QueueCollectionType;
 import sif3.infra.common.model.QueueType;
@@ -52,14 +53,14 @@ public class ConsumerQueueConnector
 
 	private SIF3QueueService queueService = new SIF3QueueService();
 	private QueueClient queueClient = null;
-	private ConsumerEnvironment consumerEnvInfo;
+    private ConsumerEnvironmentManager consumerEvnMgr = null;
 	private SIF3Session sif3Session;
 	
-	public ConsumerQueueConnector(ConsumerEnvironment consumerEnvInfo, SIF3Session sif3Session)
+	public ConsumerQueueConnector()
 	{
 		super();
-		setConsumerEnvInfo(consumerEnvInfo);
-		setSif3Session(sif3Session);
+        consumerEvnMgr = ConsumerEnvironmentManager.getInstance();
+        sif3Session = consumerEvnMgr.getSIF3Session();
 	}
 	
 	/**
@@ -154,42 +155,37 @@ public class ConsumerQueueConnector
 	{
 		logger.debug("Sync & Shutdown Remote and Local SIF Queues.");
 	}
-	
-	public ConsumerEnvironment getConsumerEnvInfo()
-    {
-    	return this.consumerEnvInfo;
-    }
-
-	public void setConsumerEnvInfo(ConsumerEnvironment consumerEnvInfo)
-    {
-    	this.consumerEnvInfo = consumerEnvInfo;
-    }
-
-	public SIF3Session getSif3Session()
-    {
-    	return this.sif3Session;
-    }
-
-	public void setSif3Session(SIF3Session sif3Session)
-    {
-    	this.sif3Session = sif3Session;
-    }
-	
+		
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-	private void checkQueueStrategy()
+    private ConsumerEnvironmentManager getConsumerEvnMgr()
+    {
+        return consumerEvnMgr;
+    }
+
+    private SIF3Session getSif3Session()
+    {
+        return sif3Session;
+    }
+    
+    private ConsumerEnvironment getConsumerEnvInfo()
+    {
+        return (ConsumerEnvironment)getConsumerEvnMgr().getEnvironmentInfo();
+    }
+
+    private void checkQueueStrategy()
 	{
 		// Currently only ADAPTER_LEVEL queue strategy is supported. This means only one queue is available.
 		if (!getConsumerEnvInfo().getQueueStrategy().name().equals(getSif3Session().getQueueStrategy()))
 		{
 			logger.error("Cannot change queue strategy from "+getSif3Session().getQueueStrategy()+" to "+getConsumerEnvInfo().getQueueStrategy()+". This is not yet supported. Only supported queue strategy is "+QueueStrategy.ADAPTER_LEVEL+".");
-			consumerEnvInfo.setQueueStrategy(QueueStrategy.ADAPTER_LEVEL);
+			getConsumerEnvInfo().setQueueStrategy(QueueStrategy.ADAPTER_LEVEL);
 		} 
 		else if (getConsumerEnvInfo().getQueueStrategy() != QueueStrategy.ADAPTER_LEVEL)
 		{
 			logger.error("Queue strategy "+getConsumerEnvInfo().getQueueStrategy()+"not yet supported. Dafault to "+QueueStrategy.ADAPTER_LEVEL+".");
-			consumerEnvInfo.setQueueStrategy(QueueStrategy.ADAPTER_LEVEL);			
+			getConsumerEnvInfo().setQueueStrategy(QueueStrategy.ADAPTER_LEVEL);			
 		}
 	}
 	
@@ -216,7 +212,7 @@ public class ConsumerQueueConnector
 	
 	private QueueType createRemoteQueue() throws ServiceInvokationException
 	{		
-		queueClient = new QueueClient(getConsumerEnvInfo(), getSif3Session());
+		queueClient = new QueueClient(getConsumerEvnMgr());
 		Response response = null;
 		if (getConsumerEnvInfo().getQueueType() == QueuePollingType.LONG)
 		{
@@ -241,7 +237,7 @@ public class ConsumerQueueConnector
 	 */
 	private QueueType getRemoteQueue(SIF3Session sif3Session) throws ServiceInvokationException
 	{
-		queueClient = new QueueClient(getConsumerEnvInfo(), getSif3Session());
+		queueClient = new QueueClient(getConsumerEvnMgr());
 	    Response response = queueClient.getQueues();
 
 	    if (response.hasError())

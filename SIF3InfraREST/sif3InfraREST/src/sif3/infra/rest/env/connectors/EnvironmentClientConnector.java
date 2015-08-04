@@ -20,7 +20,12 @@ package sif3.infra.rest.env.connectors;
 import org.apache.log4j.Logger;
 
 import sif3.common.exception.ServiceInvokationException;
+import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
+import sif3.common.model.security.TokenCoreInfo;
+import sif3.common.model.security.TokenInfo;
 import sif3.common.persist.model.SIF3Session;
+import sif3.common.security.AbstractSecurityService;
+import sif3.common.security.BearerSecurityFactory;
 import sif3.common.ws.Response;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.common.env.types.EnvironmentInfo;
@@ -114,16 +119,24 @@ public class EnvironmentClientConnector
 
       if (remoteEnv != null) // All good. Store the latest version in the Environment Store.
       {
-        localEnvironment = getEnvironmentManager().createOrUpdateEnvironment(remoteEnv);
-        if (localEnvironment == null)
-        {
-          // could not store the latest environment in the Environment Store. This might not be a problem so right now we 
-          // only flag the issue in the log but otherwise we assume all is fine.
-          logger.warn("Environment could be retrieved from remote location but not updated in Environment Store. This could pose a problem.");
-        }
+    	  // The security token might be available. Get it as it is needed in the update of the createOrUpdateEnvironment() method
+    	  TokenInfo tokenInfo = null;
+    	  if (StringUtils.notEmpty(sif3Session.getSecurityToken()))
+    	  {
+    		  tokenInfo = new TokenInfo(sif3Session.getSecurityToken());
+    		  tokenInfo.setTokenExpiryDate(sif3Session.getSecurityTokenExpiry());
+    	  }
+    	  
+    	  localEnvironment = getEnvironmentManager().createOrUpdateEnvironment(remoteEnv, tokenInfo);
+    	  if (localEnvironment == null)
+    	  {
+    		  // could not store the latest environment in the Environment Store. This might not be a problem so right now we 
+    		  // only flag the issue in the log but otherwise we assume all is fine.
+    		  logger.warn("Environment could be retrieved from remote location but not updated in Environment Store. This could pose a problem.");
+    	  }
 
-        logger.debug("Successfully connected to environment: " + envInfo);
-        return true;
+    	  logger.debug("Successfully connected to environment: " + envInfo);
+    	  return true;
       }
       else
       {
@@ -134,21 +147,49 @@ public class EnvironmentClientConnector
     }
     else // We have no session in workstore => create new environment with environment provider
     {
-    	// Check if we shall use pre-existing environment or create a new one from scratch
+    	// Check if we shall use pre-existing environment or create a new one from scratch.
+        // Also since we connect to exiting or may need to create a new environment we may need to use an
+        // external security service. There is no existing session at the moment so we cannot retrieve the info from there.
+        TokenInfo tokenInfo = null;
+        if (envInfo.getAuthMethod() == AuthenticationMethod.Bearer)
+        {
+            AbstractSecurityService securityService = BearerSecurityFactory.getSecurityService(getEnvironmentManager().getServiceProperties());
+            if (securityService != null)
+            {
+                TokenCoreInfo coreInfo = new TokenCoreInfo();
+                coreInfo.setAppUserInfo(envInfo.getEnvironmentKey());
+                coreInfo.setConsumerName(envInfo.getAdapterName());
+                coreInfo.setSessionToken(envInfo.getUseExistingEnv() ? envInfo.getExistingSessionToken() : null);
+
+                // Now call the security service
+                tokenInfo = securityService.createToken(coreInfo, envInfo.getPassword());
+                if ((tokenInfo == null) || StringUtils.isEmpty(tokenInfo.getToken())) // we failed to get a token!
+                {
+                   logger.error("Failed to retrieve a security token. See previous error log entries.");
+                   return false;
+                }                       
+            }            
+        }
+            
     	if (envInfo.getUseExistingEnv())
     	{
     		logger.debug("No Environment for " + envInfo.getEnvironmentName() + " exists. Attempt to connect to existing environment without creating it (use pre-existing) ...");
 
-    		// Create a temporary SIF3 Session
+    		// Create a temporary pseudo SIF3 Session
     		sif3Session = new SIF3Session();
     		sif3Session.setSessionToken(envInfo.getExistingSessionToken());
     		sif3Session.setPassword(envInfo.getPassword());
+    		if (tokenInfo != null)
+    		{
+    		    sif3Session.setSecurityToken(tokenInfo.getToken());
+    		    sif3Session.setSecurityTokenExpiry(tokenInfo.getTokenExpiryDate());
+    		}
     		
     		// And try to retrieve environment from remote location.
     		EnvironmentType remoteEnv = retrieveRemoteEnvironment(envInfo, sif3Session, true);
 			if (remoteEnv != null) // successfully retrieved
 			{
-				localEnvironment = getEnvironmentManager().createOrUpdateEnvironment(remoteEnv);
+				localEnvironment = getEnvironmentManager().createOrUpdateEnvironment(remoteEnv, tokenInfo);
 
 				if (localEnvironment == null) // oops something is not good. => disconnect
 				{
@@ -169,15 +210,16 @@ public class EnvironmentClientConnector
     	else // create one from scratch. This is standard behaviour.
     	{
 	      logger.debug("No Environment for " + envInfo.getEnvironmentName() + " exists. Attempt to create and connect ...");
-	      EnvironmentType remoteEnv = createRemoteEnvironment(envInfo, template);
+	      
+	      EnvironmentType remoteEnv = createRemoteEnvironment(envInfo, template, tokenInfo);
 	      if (remoteEnv != null) // successfully created
 	      {
-	        localEnvironment = getEnvironmentManager().createOrUpdateEnvironment(remoteEnv);
+	        localEnvironment = getEnvironmentManager().createOrUpdateEnvironment(remoteEnv, tokenInfo);
 	
 	        if (localEnvironment == null) // oops something is not good. => remove it again from remote location
 	        {
 	          logger.error("Environment has been created on remote location but not updated in Environment Store. Environment is deleted on remote location again");
-	          removeRemoteEnvironment(envInfo, sif3Session); // error or info already logged
+	          removeRemoteEnvironment(envInfo); // error or info already logged
 	          disconnect();
 	          return false;       
 	        }
@@ -212,7 +254,7 @@ public class EnvironmentClientConnector
   /*---------------------*/
 
   // sif3Session cannot be null! Check before call. 
-  private EnvironmentType retrieveRemoteEnvironment(EnvironmentInfo envInfo, SIF3Session sif3Session, boolean useExistingEnvURI)
+  private EnvironmentType retrieveRemoteEnvironment(EnvironmentInfo envInfo, SIF3Session pseudoSIF3Session, boolean useExistingEnvURI)
   {
     Response response = null;
     try
@@ -220,13 +262,20 @@ public class EnvironmentClientConnector
     	EnvironmentClient client = null;
     	if (useExistingEnvURI)
     	{
-    		client = new EnvironmentClient(envInfo.getExistingEnvURI(), envInfo, sif3Session);
+    	    // We do not really have a valid SIF3 Session yet. We must first get an already existing environment.
+    		client = new EnvironmentClient(getEnvironmentManager(), envInfo.getExistingEnvURI(), envInfo);
+    		
+    		// Use the method that is intended for getting an existing environment that is not yet known to the consumer.
+    		response = client.getEnvironment(pseudoSIF3Session);
     	}
     	else
     	{
-    		client = new EnvironmentClient(envInfo.getConnectorBaseURI(ConnectorName.environment), envInfo, sif3Session);
+    		client = new EnvironmentClient(getEnvironmentManager(), envInfo.getConnectorBaseURI(ConnectorName.environment), envInfo);
+
+            // We have an existing environment. We only want to sync-up with remote location to get latest changes.
+            // Don't use the pseudo session as the getEnvironment will use the internal proper session of none is given.
+    		response = client.getEnvironment(null);
     	}
-    	response = client.getEnvironment();
     }
     catch (ServiceInvokationException ex)
     {
@@ -245,7 +294,7 @@ public class EnvironmentClientConnector
     }
   }
   
-  private EnvironmentType createRemoteEnvironment(EnvironmentInfo envInfo, EnvironmentType template)
+  private EnvironmentType createRemoteEnvironment(EnvironmentInfo envInfo, EnvironmentType template, TokenInfo tokenInfo)
   {
     if (template != null)
     {
@@ -260,8 +309,8 @@ public class EnvironmentClientConnector
         Response response = null;
         try
         {
-        	EnvironmentClient client = new EnvironmentClient(envInfo.getBaseURI(), envInfo, null);
-        	response = client.createEnvironment(template);
+        	EnvironmentClient client = new EnvironmentClient(getEnvironmentManager(), envInfo.getBaseURI(), envInfo);
+        	response = client.createEnvironment(template, tokenInfo);
         }
         catch (ServiceInvokationException ex)
         {
@@ -274,9 +323,8 @@ public class EnvironmentClientConnector
           logger.error("Returned Response Data:\n"+response);
           return null;
         }
-        else //all might be good! It could still have a 409 (Conflict, i.e. already exist) and pyload might be empty!
+        else //all might be good! It could still have a 409 (Conflict, i.e. already exist) and payload might be empty!
         {
-        	//if (response.)
           return (EnvironmentType)response.getDataObject();
         }
     }
@@ -313,7 +361,7 @@ public class EnvironmentClientConnector
     if (sif3Session != null)
     {
       // First we attempt to remove the environment on the environment provider
-      if (removeRemoteEnvironment(envInfo, sif3Session))
+      if (removeRemoteEnvironment(envInfo))
       {
         // that worked. Now we need to remove it in the environment and session store.
         return getEnvironmentManager().removeEnvironment(sif3Session);
@@ -334,9 +382,9 @@ public class EnvironmentClientConnector
   }
   
   // environment cannot be null! Check before call. It must also have a sessionToken and environmentID. 
-  private boolean removeRemoteEnvironment(EnvironmentInfo envInfo, SIF3Session sif3Session)
+  private boolean removeRemoteEnvironment(EnvironmentInfo envInfo)
   {
-    EnvironmentClient client = new EnvironmentClient(envInfo.getConnectorBaseURI(ConnectorName.environment), envInfo, sif3Session);
+    EnvironmentClient client = new EnvironmentClient(getEnvironmentManager(), envInfo.getConnectorBaseURI(ConnectorName.environment), envInfo);
     return client.removeEnvironment();
   }
 }

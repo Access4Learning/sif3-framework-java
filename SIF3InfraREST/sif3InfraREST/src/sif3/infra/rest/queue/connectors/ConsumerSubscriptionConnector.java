@@ -39,6 +39,7 @@ import sif3.common.persist.model.SIF3Subscription;
 import sif3.common.persist.service.SIF3QueueService;
 import sif3.common.persist.service.SIF3SubscriptionService;
 import sif3.common.ws.Response;
+import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.SubscriptionCollectionType;
@@ -61,15 +62,15 @@ public class ConsumerSubscriptionConnector
 	private static final AdapterType CONSUMER = AdapterType.CONSUMER;
 
 	private SIF3SubscriptionService subscriptionService = new SIF3SubscriptionService();
-	private SIF3QueueService queueService = new SIF3QueueService();
-	private ConsumerEnvironment consumerEnvInfo;
+	private ConsumerEnvironmentManager consumerEvnMgr = null;
+    private SIF3QueueService queueService = new SIF3QueueService();
 	private SIF3Session sif3Session;
 	
-	public ConsumerSubscriptionConnector(ConsumerEnvironment consumerEnvInfo, SIF3Session sif3Session)
+	public ConsumerSubscriptionConnector()
 	{
 		super();
-		setConsumerEnvInfo(consumerEnvInfo);
-		setSif3Session(sif3Session);
+		consumerEvnMgr = ConsumerEnvironmentManager.getInstance();
+		sif3Session = consumerEvnMgr.getSIF3Session();
 	}
 	
 	/**
@@ -96,7 +97,7 @@ public class ConsumerSubscriptionConnector
 			subscriptionService.removeAllSubscriptionsForEnvironment(getSif3Session().getEnvironmentID(), CONSUMER);
 
 			logger.debug("Get subscriptions from remote location and apply them to the DB.");
-			SubscriptionCollectionType remoteSubscriptions = getRemoteSubscriptions(getSif3Session());
+			SubscriptionCollectionType remoteSubscriptions = getRemoteSubscriptions();
 			if (remoteSubscriptions != null)
 			{
 				for (SubscriptionType subscription : remoteSubscriptions.getSubscription())
@@ -141,7 +142,7 @@ public class ConsumerSubscriptionConnector
 				subscriptionService.removeAllSubscriptionsForEnvironment(getSif3Session().getEnvironmentID(), CONSUMER);
 				
 				logger.debug("Remove subscriptions on remote location...");
-				removeRemoteSubscriptions(getSif3Session());
+				removeRemoteSubscriptions();
 				
 				logger.debug("All subscriptions removed.");
 			}
@@ -151,33 +152,28 @@ public class ConsumerSubscriptionConnector
 			}
 		}
 	}
-	
-	public ConsumerEnvironment getConsumerEnvInfo()
-    {
-    	return this.consumerEnvInfo;
-    }
-
-	public void setConsumerEnvInfo(ConsumerEnvironment consumerEnvInfo)
-    {
-    	this.consumerEnvInfo = consumerEnvInfo;
-    }
-
-	public SIF3Session getSif3Session()
-    {
-    	return this.sif3Session;
-    }
-
-	public void setSif3Session(SIF3Session sif3Session)
-    {
-    	this.sif3Session = sif3Session;
-    }
-	
+		
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-	private SubscriptionCollectionType getRemoteSubscriptions(SIF3Session sif3Session) throws ServiceInvokationException
+    private ConsumerEnvironmentManager getConsumerEvnMgr()
+    {
+        return consumerEvnMgr;
+    }
+
+    private SIF3Session getSif3Session()
+    {
+        return sif3Session;
+    }
+    
+    private ConsumerEnvironment getConsumerEnvInfo()
+    {
+        return (ConsumerEnvironment)getConsumerEvnMgr().getEnvironmentInfo();
+    }
+
+    private SubscriptionCollectionType getRemoteSubscriptions() throws ServiceInvokationException
 	{
-		SubscriptionClient subscriptionClient = new SubscriptionClient(getConsumerEnvInfo(), sif3Session);
+		SubscriptionClient subscriptionClient = new SubscriptionClient(getConsumerEvnMgr());
 	    Response response = subscriptionClient.getSubscriptions();
 	
 	    if (response.hasError())
@@ -200,12 +196,12 @@ public class ConsumerSubscriptionConnector
 		}
 	}
 	
-	private void removeRemoteSubscriptions(SIF3Session sif3Session) throws ServiceInvokationException
+	private void removeRemoteSubscriptions() throws ServiceInvokationException
 	{
-		SubscriptionCollectionType remoteSubscriptions = getRemoteSubscriptions(sif3Session);
+		SubscriptionCollectionType remoteSubscriptions = getRemoteSubscriptions();
 		if (remoteSubscriptions != null)
 		{
-			SubscriptionClient subscriptionClient = new SubscriptionClient(getConsumerEnvInfo(), getSif3Session());
+			SubscriptionClient subscriptionClient = new SubscriptionClient(getConsumerEvnMgr());
 			for (SubscriptionType subscription : remoteSubscriptions.getSubscription())
 			{
 				subscriptionClient.unsubscribe(subscription.getId());
@@ -213,9 +209,9 @@ public class ConsumerSubscriptionConnector
 		}
 	}
 	
-	private SubscriptionType createRemoteSubscription(SIF3Session sif3Session, ServiceInfo service, List<SIF3Queue> dbQueues) throws ServiceInvokationException
+	private SubscriptionType createRemoteSubscription(ServiceInfo service, List<SIF3Queue> dbQueues) throws ServiceInvokationException
 	{
-		SubscriptionClient subscriptionClient = new SubscriptionClient(getConsumerEnvInfo(), sif3Session);
+		SubscriptionClient subscriptionClient = new SubscriptionClient(getConsumerEvnMgr());
 		SubscriptionType subscriptionInfo = new ObjectFactory().createSubscriptionType();
 		subscriptionInfo.setContextId(service.getContext().getId());
 		subscriptionInfo.setZoneId(service.getZone().getId());
@@ -272,7 +268,7 @@ public class ConsumerSubscriptionConnector
 				List<SIF3Subscription> dbSubscriptions = subscriptionService.getSubscriptionsForEnvironment(getSif3Session().getEnvironmentID(), CONSUMER);
 				if ((dbSubscriptions != null) && (dbSubscriptions.size() > 0))
 				{
-					SubscriptionClient subscriptionClient = new SubscriptionClient(getConsumerEnvInfo(), getSif3Session());
+					SubscriptionClient subscriptionClient = new SubscriptionClient(getConsumerEvnMgr());
 					for (ServiceInfo service : getSif3Session().getServices())
 					{
 						if (!service.getRights().hasRight(AccessRight.SUBSCRIBE, AccessType.APPROVED))
@@ -357,7 +353,7 @@ public class ConsumerSubscriptionConnector
 	
 	private void createSubscription(ServiceInfo service, List<SIF3Queue> dbQueues) throws ServiceInvokationException, PersistenceException
 	{
-		SubscriptionType remoteSubscription = createRemoteSubscription(getSif3Session(), service, dbQueues);
+		SubscriptionType remoteSubscription = createRemoteSubscription(service, dbQueues);
 		if (remoteSubscription != null)
 		{
 			subscriptionService.saveSubscription(getSubscription(remoteSubscription));

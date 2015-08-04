@@ -24,9 +24,9 @@ import javax.ws.rs.core.MediaType;
 
 import sif3.common.CommonConstants;
 import sif3.common.header.HeaderProperties;
-import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.ServiceType;
+import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.EventProvider;
 import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.SIFContext;
@@ -200,14 +200,7 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 		try
 		{
 			// Let's get the Event Client
-			EventClient evtClient = new EventClient(getProviderEnvironment(), 
-													getRequestMediaType(), 
-													getResponseMediaType(), 
-													sif3Session, 
-													getServiceName(), 
-													getMarshaller(), 
-													getCompressionEnabled());
-			
+			EventClient evtClient = new EventClient(getEnvironmentManager(), getRequestMediaType(), getResponseMediaType(), getServiceName(), getMarshaller(), getCompressionEnabled());
 			SIFEventIterator<L> iterator = getSIFEvents();
 			if (iterator != null)
 			{
@@ -228,7 +221,7 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 								// keep event action. Just in case the developer changes it in modifyBeforePublishing() which would confuse
 								// everything.
 								EventAction eventAction = sifEvents.getEventAction();
-								if (hasAccess(service, eventAction))
+								if (hasAccess(service))
 								{
 									HeaderProperties customHTTPHeaders = new HeaderProperties();
 									SIFEvent<L> modifiedEvents = modifyBeforePublishing(sifEvents, service.getZone(), service.getContext(), customHTTPHeaders);
@@ -340,6 +333,33 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
     	//return hdrProps;
     }
     
+    
+    private BrokeredProviderEnvironmentManager getEnvironmentManager()
+    {
+        EnvironmentManager envMgr = ProviderManagerFactory.getEnvironmentManager();
+        if (envMgr != null) // we have a proper setup and are initialised.
+        {
+            // Note: Currently we only support events for Brokered Environments, so the EnvironmentManager should be of type 
+            //       BrokeredProviderEnvironmentManager
+            if (envMgr instanceof BrokeredProviderEnvironmentManager)
+            {
+                return (BrokeredProviderEnvironmentManager)envMgr;
+            }
+            else
+            {
+                logger.error("Events are only supported for BROKERED environments. This provider is a DIRECT Environment.");
+            }
+        }
+        else
+        {
+            logger.error("Environment Manager not initialised. Not connected to an environment. No Environment Manger available.");
+        }
+        
+        // If we get here then we don't have a valid environment manager.
+        return null;
+     }
+    
+    
     private List<ServiceInfo> getServicesForProvider(SIF3Session sif3Session)
     {
     	if (sif3Session != null)
@@ -352,53 +372,18 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
     
     private SIF3Session getActiveSession()
     {
-    	EnvironmentManager envMgr = ProviderManagerFactory.getEnvironmentManager();
-    	if (envMgr != null) // we have a proper setup and are initialised.
-    	{
-    		// Note: Currently we only support events for Brokered Environments, so the EnvironmentManager should be of type 
-    		//       BrokeredProviderEnvironmentManager
-    		if (envMgr instanceof BrokeredProviderEnvironmentManager)
-    		{
-    			return ((BrokeredProviderEnvironmentManager)envMgr).getSIF3Session();
-    		}
-    		else
-    		{
-    			logger.error("Events are only supported for BROKERED environments. This provider is a DIRECT Environment.");
-    		}
-    	}
-    	else
-    	{
-			logger.error("Environment Manager not initialised. Not connected to an environment. No active SIF3 Session.");
-    	}
-    	
-    	return null;
+        BrokeredProviderEnvironmentManager envMgr = getEnvironmentManager();
+        if (envMgr != null)
+        {
+            return envMgr.getSIF3Session();
+        }
+
+        return null; // Error already logged.
     }
     
-    private boolean hasAccess(ServiceInfo service, EventAction eventAction)
+    private boolean hasAccess(ServiceInfo service)
     {
     	// All that is required is PROVIDE right to be set to APPROVED.
     	return service.getRights().hasRight(AccessRight.PROVIDE, AccessType.APPROVED);
-    	// Map eventAction (CREATE, UPDATE, DELETE) to an AccessRight (CREATE, UPDATE, DELETE)
-//    	AccessRight right = null;
-//    	if (eventAction != null)
-//    	{
-//	    	switch (eventAction)
-//	    	{
-//	    		case CREATE:
-//	    			right = AccessRight.CREATE;
-//	    			break;
-//	    		case UPDATE:
-//	    			right = AccessRight.UPDATE;
-//	    			break;
-//	    		case DELETE:
-//	    			right = AccessRight.DELETE;
-//	    			break;
-//	    	}
-//	    	return service.getRights().hasRight(right, AccessType.APPROVED);
-//    	}
-//    	
-//    	// If we get here then the event type is not set! That is an issue, so we cannot allow access
-//    	logger.error("No event action set in events. Must be either CREATE, UPDATE or DELETE. No events will be sent for this provider.");
-//    	return false;
     }
 }
