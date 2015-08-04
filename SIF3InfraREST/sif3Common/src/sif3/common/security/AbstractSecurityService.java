@@ -17,14 +17,20 @@
  */
 package sif3.common.security;
 
+import java.util.HashMap;
+
 import sif3.common.interfaces.SecurityService;
 import sif3.common.model.RequestMetadata;
+import sif3.common.model.security.TokenCoreInfo;
 import sif3.common.model.security.TokenInfo;
 import au.com.systemic.framework.utils.AdvancedProperties;
 
 /**
  * All custom security services that shall be used for 'Bearer' security must extend this abstract Security Service. This will enforce the
- * implementation of specific constructors that are used within the Security Factory to instantiate a given security service.<br/><br/> 
+ * implementation of specific constructors that are used within the Security Factory to instantiate a given security service.<br/><br/>
+ * 
+ * This class is only intended to be used by providers to reconcile security tokens with an external security service. Consumer will use
+ * the AbstractConsumerSecurityService instead.<br/><br/>
  * 
  * <b>Note</b><br/>
  * As of January 2015 SIF 3.0.1 does not officially specify any other security mechanism except 'Basic' and 'SIF_HMACSH256'. If a SIF 3
@@ -36,14 +42,18 @@ import au.com.systemic.framework.utils.AdvancedProperties;
  */
 public abstract class AbstractSecurityService implements SecurityService
 {
+    private static final String PROP_PREFIX = "security.service.property.";
   
-	/* The consumer's or provider's properties. Used to access the property file within the security service implementation. */
+	/* The consumer's properties. Used to access the property file within the security service implementation. */
 	private AdvancedProperties properties = null;
 
 	/**
+	 * Only a provider needs to implement this method. If the security service is used by a consumer it might 'null out' this method (i.e. return 
+	 * false).<br/><br/>
+	 * 
 	 * This method return true if the given 'securityToken' is a valid token for the given security service. The security service can be any service
 	 * such as OAuth, LDAP, ActiveDirectory, OpenID etc. It is up to the implementor of this interface to interact with the appropriate security
-	 * service to determine if the given securityToken is valid. Reasons for a token to not be valid include but are not limited to, expried tokens, 
+	 * service to determine if the given securityToken is valid. Reasons for a token to not be valid include but are not limited to, expired tokens, 
 	 * incorrect tokens, not authenticated tokens etc.
 	 *     
 	 * @param securityToken The token that shall be validated against a given security service such as LDAP, OAuth, Active Directory, etc.
@@ -55,10 +65,13 @@ public abstract class AbstractSecurityService implements SecurityService
 	public abstract boolean validateToken(String securityToken, RequestMetadata requestMetadata);
   
   	/**
+	 * Only a provider needs to implement this method. If the security service is used by a consumer it might 'null out' this method (i.e. return 
+	 * null).<br/><br/>
+	 * 
   	 * This method may contact the security server which can be an OAuth server, and LDAP server a Active Directory etc. In return it will provide 
   	 * information that relate to the securityToken such as: <br/>
   	 * a) Information about the application and/or user of that securityToken (appUserInfo property populated in the TokenInfo) or
-  	 * b) Information about the SIF environment or SIF session the securityToken relates to. This would be the case for alredy existing SIF 
+  	 * b) Information about the SIF environment or SIF session the securityToken relates to. This would be the case for already existing SIF 
   	 *    Environments.
   	 * Further an expire date might be set for the securityToken if the token has expired. If the securityToken does not expire then the 
   	 * expire date is null in the returned TokenInfo object.
@@ -71,7 +84,27 @@ public abstract class AbstractSecurityService implements SecurityService
   	 *         not all of these at the same time.
   	 */
   	public abstract TokenInfo getTokenInfo(String securityToken, RequestMetadata requestMetadata);
-  
+
+  	/**
+	 * All consumers should implement this method. Providers only need to implement this method if the participate in a BROKERED environment.
+	 * If the provider is a DIRECT provider then it might 'null out' this method (i.e. return null).<br/><br/>
+	 * 
+  	 * This method may contact the security server which can be an OAuth server, and LDAP server an Active Directory etc. It will then
+  	 * retrieve a security token and optionally a expire date for that token based on the 'coreInfo' and optionally the 'password' given
+  	 * to this method. In return the TokenInfo object which will have the 'token' property set (the security token). Optional the 
+  	 * 'tokenExpiryDate' may be set if the token has an expire date. If the 'tokenExpiryDate' is null it is assumed that the returned 
+  	 * security token won't expire. For additional details on the returned token 
+  	 * @see sif3.common.interfaces.SecurityService#createToken(sif3.common.model.security.TokenCoreInfo, java.lang.String).
+  	 * 
+     * @param coreInfo Information about the consumer/provider that might be used to generate a security token by the external security service.
+     *                 In most cases it would at least need the application key.
+     * @param password It is very likely that some sort of password will be required to generate a security token.
+  	 * 
+  	 * @return @see sif3.common.interfaces.SecurityService#createToken(sif3.common.model.security.TokenCoreInfo, java.lang.String).
+  	 */
+  	public abstract TokenInfo generateToken(TokenCoreInfo coreInfo, String password);
+
+  	
 	/**
 	 * Ensure constructor exists and has no arguments. This is the constructor called by the
 	 * framework to instantiate a concrete security service implementation.
@@ -93,14 +126,36 @@ public abstract class AbstractSecurityService implements SecurityService
 	/*-----------------------*/
 
 	@Override
-	public boolean validate(String securityToken, RequestMetadata requestMetadata)
+	public final boolean validate(String securityToken, RequestMetadata requestMetadata)
 	{
 		return validateToken(securityToken, requestMetadata);
 	}
 
 	@Override
-	public TokenInfo getInfo(String securityToken, RequestMetadata requestMetadata)
+	public final TokenInfo getInfo(String securityToken, RequestMetadata requestMetadata)
 	{
 		return getTokenInfo(securityToken, requestMetadata);
 	}
+
+    @Override
+    public final TokenInfo createToken(TokenCoreInfo coreInfo, String password)
+    {
+        if (coreInfo != null)
+        {
+            if (coreInfo.getOtherInfo() == null)
+            {
+                coreInfo.setOtherInfo(new HashMap<String, String>());
+            }
+            AdvancedProperties props = getServiceProperties();
+            for (Object key : props.getProperties().keySet())
+            {
+                String propName = (String)key;
+                if (propName.startsWith(PROP_PREFIX))
+                {
+                    coreInfo.getOtherInfo().put(propName.replace(PROP_PREFIX, ""), props.getPropertyAsString(propName, null));
+                }
+            }
+        }        
+        return generateToken(coreInfo, password);
+    }
 }
