@@ -175,7 +175,8 @@ to the release notes in the directory "release/v0.6.0" for details.
 Version from July xx, 2015: v0.7.0 - Various changes
 =============================================================
 Version 0.7.0 adds payload compression to all request/responses. This is an optional feature. Further the infrastructure
-data model is now in its own jar file rather than part of the infra-common jar file.
+data model is now in its own jar file rather than part of the infra-common jar file. Finally support for external
+security services for consumers has been added.
 Please refer to the release notes in the directory "release/v0.7.0" for additional details and upgrade instructions. 
 
 #########################################################################################################
