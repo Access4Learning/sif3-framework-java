@@ -19,6 +19,7 @@
 package sif3.infra.test.rest.consumer;
 
 import sif3.infra.rest.consumer.ConsumerLoader;
+import systemic.sif3.demo.rest.consumer.StudentConsumerService;
 
 /**
  * @author Joerg Huber
@@ -32,6 +33,35 @@ public class TestConsumerLoader
 	// Broker
 	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
 
+	
+	  public void stopService(String serviceID)
+	  {
+	    System.out.println("Shutting down "+serviceID);
+	    ConsumerLoader.shutdown();
+	  }
+	  
+	  public void startService(final String serviceID, String consumerPropFileName) throws Exception
+	  {
+	    System.out.println(serviceID+" startService() called...");
+	    System.out.println(serviceID+": Installing shutdown hook");
+	    final TestConsumerLoader tmpSvc = this;
+	    Runtime.getRuntime().addShutdownHook(new Thread()
+	    {
+	      public void run()
+	      {
+	        tmpSvc.stopService(serviceID);
+	      }
+	    });
+
+	    if (ConsumerLoader.initialise(consumerPropFileName))
+	    {
+	      System.out.println(serviceID+"initialised successfully.");
+	    }
+
+	    System.out.println(serviceID+" is running (Press Ctrl-C to stop)");
+	  }
+	
+	
 	public static void main(String[] args)
 	{
 		System.out.println("Start Testing TestConsumerLoader...");
@@ -41,7 +71,22 @@ public class TestConsumerLoader
 			System.out.println("Consumer loaded successfully.");
 		}
 		
-		
+        // Put this agent to a blocking wait.....
+        try
+        {
+            Object semaphore = new Object();
+            synchronized (semaphore) // this will block until CTRL-C is pressed.
+            {
+                System.out.println("==================================================\nTestConsumerLoader is running (Press Ctrl-C to stop)\n==================================================");
+                semaphore.wait();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.out.println("Blocking wait in TestConsumerLoader interrupted: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+        
 		ConsumerLoader.shutdown();
 		System.out.println("End Testing TestConsumerLoader.");
 	}
