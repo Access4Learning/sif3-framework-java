@@ -447,4 +447,16 @@ public class AdapterBaseEnvStoreOperations
 	{
 		return  path+"/"+envFileName;
 	}
+	
+	/*
+	 * This method must only be called for Brokered Providers and standard Consumers to update the SIF3Session object with some additional, 
+	 * transient data from the properties file or other sources.
+	 */
+	protected void updateSIF3SessionForClients(SIF3Session sif3Session)
+	{
+	    if (sif3Session != null) // only the case for create environment!
+	    {
+	        sif3Session.setAuthenticationMethod(getEnvironmentInfo().getAuthMethod());
+	    }
+	}
 }

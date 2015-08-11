@@ -57,7 +57,9 @@ public class ConsumerEnvironmentStoreOperations extends AdapterBaseEnvStoreOpera
 	 */
 	public SIF3Session loadSession(EnvironmentKey environmentKey)
 	{
-		return loadSession(environmentKey, ADAPTER_TYPE, service);
+	    SIF3Session sif3Session = loadSession(environmentKey, ADAPTER_TYPE, service);
+	    updateSIF3SessionForClients(sif3Session);
+		return sif3Session;
 	}
 		
 	/*
@@ -67,7 +69,9 @@ public class ConsumerEnvironmentStoreOperations extends AdapterBaseEnvStoreOpera
 	 */
 	public SIF3Session createOrUpdateSession(EnvironmentType inputEnv, TokenInfo tokenInfo)
 	{
-		return createOrUpdateSession(inputEnv, tokenInfo, ADAPTER_TYPE, service);
+        SIF3Session sif3Session = createOrUpdateSession(inputEnv, tokenInfo, ADAPTER_TYPE, service);
+        updateSIF3SessionForClients(sif3Session);
+        return sif3Session;
 	}
 
 	/*
