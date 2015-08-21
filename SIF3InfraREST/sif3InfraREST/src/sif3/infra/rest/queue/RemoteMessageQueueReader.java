@@ -34,6 +34,7 @@ import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.Response;
+import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.rest.client.MessageClient;
 import sif3.infra.rest.queue.types.EventInfo;
@@ -58,7 +59,8 @@ public class RemoteMessageQueueReader implements Runnable
 	protected final Logger logger = Logger.getLogger(getClass());
 
 	private QueueListenerInfo queueListenerInfo = null;
-	private ConsumerEnvironment consumerEnvInfo = null;
+//	private ConsumerEnvironment consumerEnvInfo = null;
+    private ConsumerEnvironmentManager consumerEvnMgr = null;
 	private SIF3Session sif3Session = null;
 	private String readerID = null;
 	private String lastMsgeID = null;
@@ -72,23 +74,18 @@ public class RemoteMessageQueueReader implements Runnable
 	 * 
 	 * @param queueListenerInfo
 	 *            Holds all the information for this reader to identify what SIF queue to read from and where to distribute messages to.
-	 * @param consumerEnvInfo
-	 *            Consumer configuration. It is required to determine timeout delays and other user configured properties for message 
-	 *            consumption from a queue.
-	 * @param sif3Session
-	 *            The session for which this queue reader is for. This is required to connect to the message URI from the SIF queue.
 	 * @param readerID
 	 *            A string identifying the ID of this reader. Since it is expected that readers are running in multiple threads each 
 	 *            reader should have its own id to identify it for logging purpose.
 	 */
-	public RemoteMessageQueueReader(QueueListenerInfo queueListenerInfo, ConsumerEnvironment consumerEnvInfo, SIF3Session sif3Session, String readerID) throws ServiceInvokationException
+	public RemoteMessageQueueReader(QueueListenerInfo queueListenerInfo, String readerID) throws ServiceInvokationException
 	{
 		super();
 		try
 		{
 			this.queueListenerInfo = queueListenerInfo;
-			this.consumerEnvInfo = consumerEnvInfo;
-			this.sif3Session = sif3Session;
+	        consumerEvnMgr = ConsumerEnvironmentManager.getInstance();
+	        sif3Session = consumerEvnMgr.getSIF3Session();
 			this.readerID = readerID;
 
 			// Get the wait time between get message calls once a no message is returned. Timeout is  the max from what the queue indicates
@@ -96,7 +93,7 @@ public class RemoteMessageQueueReader implements Runnable
 			waitTime = Math.max(longToInt(getQueueListenerInfo().getQueue().getWaitTime()), getConsumerEnvInfo().getPollFrequency()) * CommonConstants.MILISEC;
 
 			// Initialise message client. Only needs to be done once, so we do this here.
-			client = new MessageClient(new URI(queueListenerInfo.getQueue().getMessageURI()), getConsumerEnvInfo(), getSif3Session());
+			client = new MessageClient(getConsumerEvnMgr(), new URI(queueListenerInfo.getQueue().getMessageURI()));
 		}
 		catch (Exception ex)
 		{
@@ -277,9 +274,13 @@ public class RemoteMessageQueueReader implements Runnable
 					updateType = getUpdateType(response);
 				}
 				
-				EventMetadata metadata = new EventMetadata();
+				EventMetadata metadata = new EventMetadata(response.getHdrProperties());
+				
+				// Set the generator ID in its specific property for easy access.
 				metadata.setGeneratorID(response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_GENERATOR_ID));
-
+				
+				//TODO: JH - Do we need applicationKey and authenticatedUser HTTP header here?				
+				
 				EventInfo eventInfo = new EventInfo(eventPayload, response.getMediaType(), eventAction, updateType, zone, context, metadata, getReaderID());
 				logger.debug(getReaderID()+": Attempts to push Event to local queue...");
 				localQueue.blockingPush(eventInfo);
@@ -386,15 +387,20 @@ public class RemoteMessageQueueReader implements Runnable
 		return queueListenerInfo;
 	}
 
-	private ConsumerEnvironment getConsumerEnvInfo()
-	{
-		return consumerEnvInfo;
-	}
+    private ConsumerEnvironmentManager getConsumerEvnMgr()
+    {
+        return consumerEvnMgr;
+    }
 
-	private SIF3Session getSif3Session()
-	{
-		return sif3Session;
-	}
+    private SIF3Session getSif3Session()
+    {
+        return sif3Session;
+    }
+    
+    private ConsumerEnvironment getConsumerEnvInfo()
+    {
+        return (ConsumerEnvironment)getConsumerEvnMgr().getEnvironmentInfo();
+    }
 
 	private MessageClient getClient()
 	{

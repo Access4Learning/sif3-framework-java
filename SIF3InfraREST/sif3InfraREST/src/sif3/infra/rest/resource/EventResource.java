@@ -46,7 +46,8 @@ import sif3.infra.common.interfaces.EnvironmentManager;
 @Path("/eventsConnector{mimeType:(\\.[^/]*?)?}")
 public class EventResource extends BaseResource
 {
-	public EventResource(@Context UriInfo uriInfo,
+	@SuppressWarnings("unused")
+    public EventResource(@Context UriInfo uriInfo,
 			             @Context HttpHeaders requestHeaders,
 			             @Context Request request,
 			             @PathParam("mimeType") String mimeType)

@@ -1,33 +1,44 @@
 ==============================================================
-Release Notes for v0.6.0 of SIF3 Framework (Month Day, 2015)
+Release Notes for v0.6.0 of SIF3 Framework (June Day, 2015)
 ==============================================================
 
 Bug Fixes
 ---------
 - Return HTTP Status of 403 (Forbidden) if consumer issues a request for an operation where it doesn't have 
-  permission for (i.e. ACL states a 'REJECT" for a particular operation). Now it meets the latest SIF Specification.
-- Return HTTP Status of 400 (Bad Request) if a unsupported query criteria is provides in a service path call. Now it
+  permission for (i.e. ACL states a 'REJECT" for a particular operation). This meets the latest SIF Specification.
+- Return HTTP Status of 400 (Bad Request) if an unsupported query criteria is provides in a service path call. This
   meets the latest SIF Specification.
 
 New Functionality
 -----------------
-- Support for auditing on the provider. See Section 5.x in the Developer's Guide for details on how to enable
+- Support for auditing on the provider. See Section 5.11 in the Developer's Guide for details on how to enable
   auditing and what can be audited.
 - Added DataTooLargeException to retrieve() method in Provider interface and retrieveByServicePath() method in the
   QueryProvider interface. This enabled the developer to raise an appropriate exception if the requested data set
   is too large. The exception will be translated into appropriate HTTP Status in the response to meet the SIF
   specification.
+- Consumers can send custom HTTP Header fields and custom URL query parameters in OBJECT services. This functionality
+  is allowed by the SIF Specification and is now enabled in the SIF3 Framework. The Consumer interface class has 
+  changed but it does not affect any classes directly used by a developer. The AbstractConsumer overloads all methods
+  to ensure that backward compatibility.
+- Added 'Query By Example' (QBE) functionality. Please refer to the 'Upgrade Instructions' section in this file. 
+  Also refer to section 5.8 of the Developer's Guide for details about QBE functionality in general.
 
 Changed Functionality
 ---------------------
 - Servlet 3.0 Requirement:
   Due to some features in the SIF3 Framework the provider must be deployed in a web-/application container that 
   supports the servlet v3.0 specification. Please refer to your web-/application container's documentation to ensure 
-  that it supports the servlet 3.0 specification. Tomcat 7 and above, Jetty 8 and above, JBoss AS 6 and above, Glassfish 3.x
-  all support the servlet 3.0 specification.
+  that it supports the servlet 3.0 specification. Tomcat 7 and above, Jetty 8 and above, JBoss AS 6 and above, 
+  Glassfish 3.x all support the servlet 3.0 specification.
 - RequestMetadata parameter in all methods of the provider interface is populated correctly. Also the RequestMetadata object
   has new properties. Most notable it gives access to all URL Query parameters and all HTTP Header fields. Please refer to
   Javadoc for that object as it holds important information how each property is populated.
+- The method modifyBeforePublishing(...) in the EventProvider interface has an additional parameter called 
+  customHTTPHeaders (see javadoc for details). If events are currently implemented in your provider then this 
+  parameter must be added to the modifyBeforePublishing(...) method in all classes that extend the BaseEventProvider. 
+  Note that only the parameter must be added but no further code changes are necessary. If your provider does not implement
+  events then no changes in the code is required.
 
 Removed Artifacts/Functionality
 -------------------------------
@@ -39,13 +50,31 @@ None
 
 Infrastructure Upgrade
 ----------------------
+Step 1
+------
 Depending on your implementation of your provider you may need to add the DataTooLargeException to the list of 
-exceptions in the retrieve() and/or retrieveByServicePath() method to avoid a compile error. Otherwise all of 
-the above fixes & changes do not affect any classes currently exposed to the developer. No code changes
-will be required in your service implementations to upgrade from version v0.5.0 to this version. Simply drop the 
-latest framework libraries into your project and all changes will be available without any other interactions 
-by the developer.
+exceptions in the retrieve() and/or retrieveByServicePath() method of each provider class to avoid a compilation 
+error. 
 
+Step 2
+------
+Because the QueryProvider interface class has an additional method called retrieveByQBE(), all providers that implement
+that interface need a code change to fix the resulting compilation error. Simply add the following code to each of
+your provider class:
+  
+      public Object retrieveByQBE(Object exampleObject, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) 
+        throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+      {
+          throw new UnsupportedQueryException("QBE not supported for ...");
+      }
+
+Otherwise all of the fixes & changes mentioned in this release notes do not affect any classes currently exposed to 
+the developer. No other code changes will be required in your service implementations to upgrade from version v0.5.0 
+to this version. Simply drop the latest framework libraries into your project and all changes will be available 
+without any other interactions by the developer.
+
+Step 3
+------
 Because of the requirement for the servlet 3.0 support for providers the web.xml for your deployment MUST have the appropriate
 entry to indicate the servlet 3.0 specification. Generally the first line in the web.xml must be something like this:
 

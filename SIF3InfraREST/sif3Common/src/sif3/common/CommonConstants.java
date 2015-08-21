@@ -109,13 +109,13 @@ public class CommonConstants
 	public enum QueueStrategy {ADAPTER_LEVEL, ZONE_LEVEL, OBJECT_LEVEL};
 
 	/*
-	 * Poling Type on Queues
+	 * Polling Type on Queues
 	 */
 	public enum QueuePollingType {IMMEDIATE, LONG};
-	
-	/*---------------------------------------------------------------------------------*/
-	/* URL Query Parameter names in rlation to security (special case for SIF Simple --*/
-	/*---------------------------------------------------------------------------------*/
+		
+	/*----------------------------------------------------------------------------------*/
+	/* URL Query Parameter names in relation to security (special case for SIF Simple --*/
+	/*----------------------------------------------------------------------------------*/
 	public static final String ACCESS_TOKEN      = "accessToken";
 	public static final String AUTH_METHOD       = "authenticationMethod"; // Indicates the authentication method to use with access token	
 	public static final String ISO8601_TIMESTAMP = "timestamp";	// If SIF_HMACHSHA256 is used a timestamp in ISO8601 has to be provided.

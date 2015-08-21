@@ -167,7 +167,7 @@ public class ConsumerLoader
 		if (getConsumerEnvironment().getEventsEnabled() && getConsumerEnvironment().getEventsSupported())
 		{
 			logger.info("Events are enabled and supported. Event Processing will be started.");
-			if (!initEventProcessor(ConsumerEnvironmentManager.getInstance().getServiceProperties()))
+			if (!initEventProcessor())
 			{
 				shutdown();
 				logAndThrowException("Failed to initialise event processing. See previoue error log entries for details.");
@@ -244,7 +244,7 @@ public class ConsumerLoader
 		throw new Exception(errorText);
 	}
 
-	private boolean initEventProcessor(AdvancedProperties adapterProps)
+	private boolean initEventProcessor()
 	{
 		// Get Event Services for all consumer
 		List<ServiceInfo> allServices = new ArrayList<ServiceInfo>();
@@ -255,14 +255,14 @@ public class ConsumerLoader
 
 		// Sync up Queues and Subscriptions
 		logger.debug("Start Queue Connector...");
-		queueConnector = new ConsumerQueueConnector(getConsumerEnvironment(), getSIF3Session());
+		queueConnector = new ConsumerQueueConnector();
 		if (!queueConnector.syncQueuesAtStartup())
 		{
 			return false;
 		}
 		
 		logger.debug("Start Subscription Connector...");
-		subscriptionConnector = new ConsumerSubscriptionConnector(getConsumerEnvironment(), getSIF3Session());
+		subscriptionConnector = new ConsumerSubscriptionConnector();
 		if (!subscriptionConnector.syncSubscriptionsAtStartup(allServices))
 		{
 			return false;
@@ -331,7 +331,7 @@ public class ConsumerLoader
 			String readerID = remoteQueueName+" - Reader "+(i+1);
 			try
 			{
-				RemoteMessageQueueReader remoteReader = new RemoteMessageQueueReader(queueListenerInfo, getConsumerEnvironment(), getSIF3Session(), readerID);
+				RemoteMessageQueueReader remoteReader = new RemoteMessageQueueReader(queueListenerInfo, readerID);
 				logger.debug("Start Remote Reader "+readerID);
 				service.execute(remoteReader);
 			}

@@ -28,6 +28,7 @@ import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnsupportedQueryException;
+import sif3.common.header.HeaderProperties;
 import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
@@ -157,7 +158,7 @@ public class CSVStudentProvider extends  BaseEventProvider<String>
      * @see sif3.common.interfaces.EventProvider#modifyBeforePublishing(sif3.common.model.SIFEvent, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public SIFEvent<String> modifyBeforePublishing(SIFEvent<String> sifEvent, SIFZone zone, SIFContext context)
+    public SIFEvent<String> modifyBeforePublishing(SIFEvent<String> sifEvent, SIFZone zone, SIFContext context, HeaderProperties customHTTPHeaders)
     {
     	// At this point we don't need to modify anything. Just send as is...
 	    return sifEvent;

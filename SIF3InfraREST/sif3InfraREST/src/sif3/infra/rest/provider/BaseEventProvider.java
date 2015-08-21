@@ -24,9 +24,9 @@ import javax.ws.rs.core.MediaType;
 
 import sif3.common.CommonConstants;
 import sif3.common.header.HeaderProperties;
-import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.ServiceType;
+import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.EventProvider;
 import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.SIFContext;
@@ -80,12 +80,13 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 	 * By default the following HTTP Header fields are retrieved from the provider's property file and put in corresponding
 	 * HTTP Header Fields of each event:
 	 * 
-	 * Property               HTTP Header
-	 * ----------------------------------
-	 * adapter.generator.id   generatorId
-	 * env.application.key    applicationKey
-	 * env.userToken          authenticatedUser
-	 * env.mediaType          Content-Type, Accept
+	 * Property                      HTTP Header
+	 * ----------------------------------------------------------------
+	 * adapter.generator.id          generatorId
+	 * env.application.key           applicationKey
+	 * env.userToken                 authenticatedUser
+	 * env.mediaType                 Content-Type, Accept
+	 * adapter.compression.enabled   Content-Encoding, Accept-Encoding
 	 * 
 	 * Only properties that are not null or empty string will be set in the corresponding HTTP Header.
 	 *
@@ -129,17 +130,6 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 	{
 		return getProviderEnvironment().getEnvironmentKey().getUserToken();
 	}
-
-//	/**
-//	 * This method returns the value of the env.instanceID property from the provider's property file. If that
-//	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
-//	 * 
-//	 * @return The env.instanceID property from the provider's property file
-//	 */
-//	public String getInstanceID()
-//	{
-//		return getProviderEnvironment().getEnvironmentKey().getInstanceID();
-//	}
 	
 	/**
 	 * This method returns the value of the env.mediaType property from the provider's property file. If that
@@ -162,6 +152,18 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 	{
 		return getProviderEnvironment().getMediaType();
 	}
+	
+	/**
+	 * This method returns the value of the adapter.compression.enabled property from the provider's property file. If 
+	 * that needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The adapter.compression.enabled property from the provider's property file
+	 */
+	public boolean getCompressionEnabled()
+	{
+		return getProviderEnvironment().getCompressionEnabled();
+	}
+
 
 	/*------------------------------------------------------------------------------------------------------------------------
 	 * End of 'Dynamic' HTTP Header Field override section
@@ -198,8 +200,7 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 		try
 		{
 			// Let's get the Event Client
-			EventClient evtClient = new EventClient(getProviderEnvironment(), getRequestMediaType(), getResponseMediaType(), sif3Session, getServiceName(), getMarshaller());
-			
+			EventClient evtClient = new EventClient(getEnvironmentManager(), getRequestMediaType(), getResponseMediaType(), getServiceName(), getMarshaller(), getCompressionEnabled());
 			SIFEventIterator<L> iterator = getSIFEvents();
 			if (iterator != null)
 			{
@@ -220,15 +221,16 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 								// keep event action. Just in case the developer changes it in modifyBeforePublishing() which would confuse
 								// everything.
 								EventAction eventAction = sifEvents.getEventAction();
-								if (hasAccess(service, eventAction))
+								if (hasAccess(service))
 								{
-									SIFEvent<L> modifiedEvents = modifyBeforePublishing(sifEvents, service.getZone(), service.getContext());
+									HeaderProperties customHTTPHeaders = new HeaderProperties();
+									SIFEvent<L> modifiedEvents = modifyBeforePublishing(sifEvents, service.getZone(), service.getContext(), customHTTPHeaders);
 									if (modifiedEvents != null)
 									{
 										//Just in case the developer has changed it. Should not be allowed :-)
 										modifiedEvents.setEventAction(eventAction);
 										
-										if (!sendEvents(evtClient, modifiedEvents, service.getZone(), service.getContext()))
+										if (!sendEvents(evtClient, modifiedEvents, service.getZone(), service.getContext(), customHTTPHeaders))
 										{
 											//Report back to the caller. This should also give the event back to the caller.
 											onEventError(modifiedEvents, service.getZone(), service.getContext());
@@ -280,15 +282,29 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
      * 
      * @param event The event to be published to the zone.
      * @param zone The zone to which the event is published to.
+     * @param customHTTPHeaders Custom HTTP Headers to be added to the event. 
      * 
      * @return TRUE: Event sent successfully. FALSE: Failed to send event. Error must be logged.
      */
-    protected boolean sendEvents(EventClient evtClient, SIFEvent<?> sifEvents, SIFZone zone, SIFContext context)
+    protected boolean sendEvents(EventClient evtClient, SIFEvent<?> sifEvents, SIFZone zone, SIFContext context, HeaderProperties customHTTPHeaders)
     {
     	logger.debug(getPrettyName()+" sending a "+getServiceName()+" event with "+sifEvents.getListSize()+" sif objects.");
     	try
     	{
-    		BaseResponse response = evtClient.sendEvents(sifEvents, zone, context, getOverrideHeaderProperties());
+    		if (logger.isDebugEnabled())
+    		{
+    			logger.debug("Custom HTTP Headers set by modifyBeforePublishing() method: "+customHTTPHeaders);
+    		}
+    		if (customHTTPHeaders == null)
+    		{
+    			customHTTPHeaders = new HeaderProperties();
+    		}
+    		
+    		// Add all other HTTP headers to this customHTTPHeader. This ensures that SIF managed HTTP headers will
+    		// override custom HTTP Headers.
+    		addSIF3OverrideHeaderProperties(customHTTPHeaders);
+    		
+    		BaseResponse response = evtClient.sendEvents(sifEvents, zone, context, customHTTPHeaders);
     		if (response.hasError())
     		{
     			logger.error("Failed to send event: "+response.getError());
@@ -307,16 +323,42 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
     }
     
     
-    protected HeaderProperties getOverrideHeaderProperties()
+    protected void addSIF3OverrideHeaderProperties(HeaderProperties hdrProps)
     {
-    	HeaderProperties hdrProps = new HeaderProperties();
+    	//HeaderProperties hdrProps = new HeaderProperties();
     	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, getGeneratorID());
     	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY, getApplicationKey());
     	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTHENTICATED_USER, getAuthentictedUser());
-//    	hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_INSTANCE_ID, getInstanceID());
 
-    	return hdrProps;
+    	//return hdrProps;
     }
+    
+    
+    private BrokeredProviderEnvironmentManager getEnvironmentManager()
+    {
+        EnvironmentManager envMgr = ProviderManagerFactory.getEnvironmentManager();
+        if (envMgr != null) // we have a proper setup and are initialised.
+        {
+            // Note: Currently we only support events for Brokered Environments, so the EnvironmentManager should be of type 
+            //       BrokeredProviderEnvironmentManager
+            if (envMgr instanceof BrokeredProviderEnvironmentManager)
+            {
+                return (BrokeredProviderEnvironmentManager)envMgr;
+            }
+            else
+            {
+                logger.error("Events are only supported for BROKERED environments. This provider is a DIRECT Environment.");
+            }
+        }
+        else
+        {
+            logger.error("Environment Manager not initialised. Not connected to an environment. No Environment Manger available.");
+        }
+        
+        // If we get here then we don't have a valid environment manager.
+        return null;
+     }
+    
     
     private List<ServiceInfo> getServicesForProvider(SIF3Session sif3Session)
     {
@@ -330,53 +372,18 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
     
     private SIF3Session getActiveSession()
     {
-    	EnvironmentManager envMgr = ProviderManagerFactory.getEnvironmentManager();
-    	if (envMgr != null) // we have a proper setup and are initialised.
-    	{
-    		// Note: Currently we only support events for Brokered Environments, so the EnvironmentManager should be of type 
-    		//       BrokeredProviderEnvironmentManager
-    		if (envMgr instanceof BrokeredProviderEnvironmentManager)
-    		{
-    			return ((BrokeredProviderEnvironmentManager)envMgr).getSIF3Session();
-    		}
-    		else
-    		{
-    			logger.error("Events are only supported for BROKERED environments. This provider is a DIRECT Environment.");
-    		}
-    	}
-    	else
-    	{
-			logger.error("Environment Manager not initialised. Not connected to an environment. No active SIF3 Session.");
-    	}
-    	
-    	return null;
+        BrokeredProviderEnvironmentManager envMgr = getEnvironmentManager();
+        if (envMgr != null)
+        {
+            return envMgr.getSIF3Session();
+        }
+
+        return null; // Error already logged.
     }
     
-    private boolean hasAccess(ServiceInfo service, EventAction eventAction)
+    private boolean hasAccess(ServiceInfo service)
     {
     	// All that is required is PROVIDE right to be set to APPROVED.
     	return service.getRights().hasRight(AccessRight.PROVIDE, AccessType.APPROVED);
-    	// Map eventAction (CREATE, UPDATE, DELETE) to an AccessRight (CREATE, UPDATE, DELETE)
-//    	AccessRight right = null;
-//    	if (eventAction != null)
-//    	{
-//	    	switch (eventAction)
-//	    	{
-//	    		case CREATE:
-//	    			right = AccessRight.CREATE;
-//	    			break;
-//	    		case UPDATE:
-//	    			right = AccessRight.UPDATE;
-//	    			break;
-//	    		case DELETE:
-//	    			right = AccessRight.DELETE;
-//	    			break;
-//	    	}
-//	    	return service.getRights().hasRight(right, AccessType.APPROVED);
-//    	}
-//    	
-//    	// If we get here then the event type is not set! That is an issue, so we cannot allow access
-//    	logger.error("No event action set in events. Must be either CREATE, UPDATE or DELETE. No events will be sent for this provider.");
-//    	return false;
     }
 }

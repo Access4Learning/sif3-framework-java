@@ -1,0 +1,64 @@
+==============================================================
+Release Notes for v0.7.0 of SIF3 Framework (July XX, 2015)
+==============================================================
+
+Bug Fixes
+---------
+- None
+
+New Functionality
+-----------------
+- Support for compression (gzip) for all payloads on consumer and provider. For details please refer to section 5.12
+  in the Developer's Guide. If compression is turned on within the SIF3 Framework for a provider then the library
+  pjl-comp-filter-1.8.1.jar in the lib/pjl directory must be copied to the WEB-INF/lib directory of your project.
+- Added external security service capabilities to consumers. See section 5.9.3 in the developer's guide.
+
+
+Changed Functionality
+---------------------
+- Split sif3.0.1Infra-common-<version>.jar into 2 jars called:  
+  - sif3.0.1Infra-common-<version>.jar
+  - sif3.0.1Infra-model-<version>.jar
+  The sif3.0.1Infra-model-<version>.jar holds the generated SIF Infrastructure data model. Please ensure that you have 
+  both these jar files in your project code.  
+- The latest version of the systemic-framework library has been added to the project. There are no changes in that
+  library that affect the SIF3 Framework. It has been added to keep the SIF3 Framework up-to-date with the latest version
+  of that library. Ensure to copy the new systemic-framework-20150618.jar to your project's library and remove the previous
+  version (systemic-framework-20140410.jar).
+
+Removed Artifacts/Functionality
+-------------------------------
+- None  
+
+--------------------------
+-- Upgrade Instructions --
+--------------------------
+
+Infrastructure Upgrade
+----------------------
+- Drop the latest framework library into your project's lib directory/directories. Note that the new  
+  sif3.0.1Infra-model-<version>.jar is now also required in your projetc's lib directories.
+- Replace systemic-framework-20140410.jar with systemic-framework-20150618.jar in your projetc's lib directories.
+
+===================================
+NOTE: Potential Compilation Error!!
+-----
+If you use external security service functionality in your provider you will get a compilation error with the latest
+SIF3 Framework libraries. To resolve that compilation error, you must implement the following method in your concrete
+implementation of the security class that extends the AbstractSecurityService:
+
+   TokenInfo generateToken(TokenCoreInfo coreInfo, String password)
+   
+This new method is enforced by the AbstractSecurityService class. The new method is only used by consumers and therefore
+can be 'nulled' out in your security class:
+
+   public TokenInfo generateToken(TokenCoreInfo coreInfo, String password) {
+      return null;
+   }
+===================================
+
+
+Data Model Upgrade
+------------------
+None.
+

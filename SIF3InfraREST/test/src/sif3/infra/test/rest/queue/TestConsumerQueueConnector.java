@@ -20,8 +20,6 @@ package sif3.infra.test.rest.queue;
 
 import java.net.URI;
 
-import sif3.common.model.SIFZone;
-import sif3.common.persist.model.SIF3Session;
 import sif3.infra.common.env.types.AdapterEnvironmentStore;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
@@ -45,10 +43,10 @@ public class TestConsumerQueueConnector
 
 	//Broker setup
 	private static final String CONSUMER_PROP_FILE_NAME = "QueueTestConsumer";
-	private static final String SESSION_TOKEN = "c743ce4c-8826-42ef-bcf0-1504980027cd";
-	private static final String ENV_ID = "acc75216-9ff8-4d4f-93c8-de100c63aa72";
-	private static final String ZONE="demo";
-	private static final String PWD="QueueTest1";
+//	private static final String SESSION_TOKEN = "c743ce4c-8826-42ef-bcf0-1504980027cd";
+//	private static final String ENV_ID = "acc75216-9ff8-4d4f-93c8-de100c63aa72";
+//	private static final String ZONE="demo";
+//	private static final String PWD="QueueTest1";
 	private static final String QUEUE_CONNECTOR_URI = "https://australia.hostedzone.com/svcs/systemicDemo/queues";
 	
 	
@@ -61,23 +59,23 @@ public class TestConsumerQueueConnector
 		ConsumerEnvironment envInfo = (ConsumerEnvironment)store.getEnvironment();
 		envInfo.addConnectorBaseURI(ConnectorName.queues, getQueueConnectorURI());
 
-		connector = new ConsumerQueueConnector(envInfo, getSIF3Session());
+		connector = new ConsumerQueueConnector();
 	}
 	
 	
 	/*
 	 * Just fake a SIF3Session.
 	 */
-	private SIF3Session getSIF3Session()
-	{
-		SIF3Session session = new SIF3Session();
-		session.setSessionToken(SESSION_TOKEN);
-		session.setPassword(PWD);
-		session.setDefaultZone(new SIFZone(ZONE, true));
-		session.setEnvironmentID(ENV_ID);
-		
-		return session;
-	}
+//	private SIF3Session getSIF3Session()
+//	{
+//		SIF3Session session = new SIF3Session();
+//		session.setSessionToken(SESSION_TOKEN);
+//		session.setPassword(PWD);
+//		session.setDefaultZone(new SIFZone(ZONE, true));
+//		session.setEnvironmentID(ENV_ID);
+//		
+//		return session;
+//	}
 	
 	private URI getQueueConnectorURI()
 	{

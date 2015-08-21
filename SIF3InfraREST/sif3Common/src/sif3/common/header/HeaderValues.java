@@ -47,9 +47,9 @@ public class HeaderValues
 	public enum ResponseAction {CREATE, UPDATE, DELETE, QUERY};
 	
 	/**
-	 * Valid values for the "methodOverride" header field in the PUT (Update) request.
+	 * Valid values for the "methodOverride" header field in the PUT (Update) or POST (Create) request.
 	 */
-	public enum MethodType {DELETE, UPDATE};
+	public enum MethodType {DELETE, UPDATE, GET, POST};
 	
 	/**
 	 * Valid values for the "serviceType" header field in the request.
@@ -61,6 +61,16 @@ public class HeaderValues
 	 */
 	public enum RequestType {IMMEDIATE, DELAYED};
 	
+	/*
+	 * Supported encoding types
+	 */
+	public enum EncodingType {gzip, identity};
+	
+	/* In the Accept-Encoding HTTP header we want to support both gzip and identity. This constant can be used to 
+	 * set that HTTP header accordingly.
+	 */
+	public static final String ACCEPT_ENCODING_ALL = EncodingType.gzip.name()+","+EncodingType.identity.name();
+
 	/**
 	 * Valid values for the "queryIntention" header field in the request.
 	 */

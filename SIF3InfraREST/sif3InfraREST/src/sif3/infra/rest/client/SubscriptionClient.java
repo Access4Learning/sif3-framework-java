@@ -23,12 +23,11 @@ import javax.ws.rs.core.Response.Status;
 import sif3.common.CommonConstants;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderProperties;
-import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
-import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
+import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.SubscriptionCollectionType;
 import sif3.infra.common.model.SubscriptionType;
 import au.com.systemic.framework.utils.StringUtils;
@@ -44,14 +43,9 @@ import com.sun.jersey.api.client.WebResource;
  */
 public class SubscriptionClient extends BaseClient
 {
-	private ConsumerEnvironment consumerEnvInfo = null;
-	private SIF3Session sif3Session = null;
-	
-	public SubscriptionClient(ConsumerEnvironment consumerEnvironment, SIF3Session sif3Session)
+	public SubscriptionClient(ClientEnvironmentManager clientEnvMgr)
 	{
-		super(consumerEnvironment.getConnectorBaseURI(ConnectorName.subscriptions), consumerEnvironment.getMediaType(), consumerEnvironment.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), consumerEnvironment.getSecureConnection());
-		this.consumerEnvInfo = consumerEnvironment;
-		this.sif3Session = sif3Session;
+		super(clientEnvMgr, clientEnvMgr.getEnvironmentInfo().getConnectorBaseURI(ConnectorName.subscriptions), clientEnvMgr.getEnvironmentInfo().getMediaType(), clientEnvMgr.getEnvironmentInfo().getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), clientEnvMgr.getEnvironmentInfo().getSecureConnection(), clientEnvMgr.getEnvironmentInfo().getCompressionEnabled());
 	}
 	
 	public Response getSubscriptions() throws ServiceInvokationException
@@ -60,10 +54,10 @@ public class SubscriptionClient extends BaseClient
 		try
 		{
 			service = buildURI(service, null);
-			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
-			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
+			HeaderProperties hdrProperties = getHeaderProperties();		
+			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
 
-			return setResponse(service, clientResponse, SubscriptionCollectionType.class, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
+			return setResponse(service, clientResponse, SubscriptionCollectionType.class, null, null, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -78,11 +72,11 @@ public class SubscriptionClient extends BaseClient
 		WebResource service = getService();
 		try
 		{
-			service = buildURI(service, null, subscriptionID, null, null);
-			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
-			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
+			service = buildURI(service, null, subscriptionID, null, null, null);
+			HeaderProperties hdrProperties = getHeaderProperties();		
+			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
 
-			return setResponse(service, clientResponse, SubscriptionType.class, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
+			return setResponse(service, clientResponse, SubscriptionType.class, null, null, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -126,7 +120,7 @@ public class SubscriptionClient extends BaseClient
 			if (StringUtils.isEmpty(subscriptionInfo.getZoneId()))
 			{
 				// Set default zone
-				subscriptionInfo.setZoneId(sif3Session.getDefaultZone().getId());
+				subscriptionInfo.setZoneId(getSIF3Session().getDefaultZone().getId());
 			}
 			if (StringUtils.isEmpty(subscriptionInfo.getContextId()))
 			{
@@ -135,14 +129,14 @@ public class SubscriptionClient extends BaseClient
 			}
 		
 			service = buildURI(service, null);
-			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
+			HeaderProperties hdrProperties = getHeaderProperties();		
 			String payloadStr = getInfraMarshaller().marshal(subscriptionInfo, getRequestMediaType());
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("subscribe: Payload to send:\n"+payloadStr);
 			}
-			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).post(ClientResponse.class, payloadStr);
-			return setResponse(service, clientResponse, SubscriptionType.class, Status.CREATED, Status.CONFLICT);
+			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true).post(ClientResponse.class, payloadStr);
+			return setResponse(service, clientResponse, SubscriptionType.class, null, null, Status.CREATED, Status.CONFLICT);
 		}
 		catch (Exception ex)
 		{
@@ -168,11 +162,11 @@ public class SubscriptionClient extends BaseClient
 		WebResource service = getService();
 		try
 		{
-			service = buildURI(service, null, subscriptionID, null, null);
-			HeaderProperties hdrProperties = getHeaderProperties(sif3Session);		
-		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).delete(ClientResponse.class);
+			service = buildURI(service, null, subscriptionID, null, null, null);
+			HeaderProperties hdrProperties = getHeaderProperties();		
+		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).delete(ClientResponse.class);
 
-			return setResponse(service, clientResponse, null, Status.NO_CONTENT);
+			return setResponse(service, clientResponse, null, null, null, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -189,16 +183,12 @@ public class SubscriptionClient extends BaseClient
 	/*
 	 * This method sets all header properties for queue related request as specified by the SIF3 Spec.
 	 * 
-	 * @param sif3Session TSession information. Required for authentication token creation.
 	 * @return
 	 */
-	private HeaderProperties getHeaderProperties(SIF3Session sif3Session)
+	private HeaderProperties getHeaderProperties()
 	{
-		HeaderProperties hdrProperties = new HeaderProperties();
-		
-		// First create the properties for the authentication header.
-		ClientUtils.setAuthenticationHeader(hdrProperties, consumerEnvInfo.getAuthMethod(), sif3Session.getSessionToken(), sif3Session.getPassword());
-		return hdrProperties;
+        // Add Authentication info to existing header properties
+        return createAuthenticationHdr(false, null);
 	}
 
 }

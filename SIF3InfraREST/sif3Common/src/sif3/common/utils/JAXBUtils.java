@@ -60,7 +60,7 @@ public class JAXBUtils
 	private static HashMap<String, JAXBContext> jaxbCtx = new HashMap<String, JAXBContext>();
 
 	private static String JSON_VALUE_KEY = "#text";
-  private static String JSON_ATTRIBUTE_KEY = "@";
+	private static String JSON_ATTRIBUTE_KEY = "@";
 
     /**
 	 * This method unmarshals the given XML String into an object of the class indicated with the 'clazz' parameter.
@@ -138,75 +138,75 @@ public class JAXBUtils
 		return sw.toString();
     }
 
-  /**
-   * Unmarshal a JSON object represented as a string into a Model object
-   * 
-   * @param jsonStr The JSON String to unmarshal
-   * @param clazz Indicates the class of the object to un-marshal into.
-   * 
-   * @return See desc.
-   * 
-   * @throws UnmarshalException Failed to unmarshal the string. See message of exception for more details.
-   */
-  public static <T> T unmarshalFromJSONIntoObject(String jsonStr, Class<T> clazz) throws UnmarshalException
-  {
-    Timer timer = null;
-    if (logger.isDebugEnabled())
-    {
-      timer = new Timer();
-      timer.start();
-    }
-    JAXBElement<T> elem = unmarshalFromJSON(jsonStr, clazz);
-    if (logger.isDebugEnabled())
-    {
-      timer.finish();
-      logger.debug("Time taken to unmarshal " + clazz.getSimpleName() + " from XML: " + timer.timeTaken() + "ms");
-    }
+	/**
+	 * Unmarshal a JSON object represented as a string into a Model object
+	 * 
+	 * @param jsonStr The JSON String to unmarshal
+	 * @param clazz Indicates the class of the object to un-marshal into.
+	 * 
+	 * @return See desc.
+	 * 
+	 * @throws UnmarshalException Failed to unmarshal the string. See message of exception for more details.
+	 */
+	public static <T> T unmarshalFromJSONIntoObject(String jsonStr, Class<T> clazz) throws UnmarshalException
+	{
+		Timer timer = null;
+		if (logger.isDebugEnabled())
+		{
+			timer = new Timer();
+			timer.start();
+		}
+		JAXBElement<T> elem = unmarshalFromJSON(jsonStr, clazz);
+		if (logger.isDebugEnabled())
+		{
+			timer.finish();
+			logger.debug("Time taken to unmarshal " + clazz.getSimpleName() + " from XML: " + timer.timeTaken() + "ms");
+		}
 
-    return (elem != null) ? elem.getValue() : null;
-  }
+		return (elem != null) ? elem.getValue() : null;
+	}
 
-  /**
-   * Returns the string version of the JSON presentation of the given JAXBElement.
-   * 
-   * @param object The object to be marshaled to a String.
-   * 
-   * @return See desc.
-   * 
-   * @throws MarshalException Failure to marshal the given object to a JSON string.
-   */
-  public static String marshalToJSON(JAXBElement<?> object) throws MarshalException
-  {
-    Timer timer = null;
-    if (logger.isDebugEnabled())
-    {
-      timer = new Timer();
-      timer.start();
-    }
-    StringWriter sw = new StringWriter();
-    try
-    {
-      Class<?> clazz = object.getValue().getClass();
-      Marshaller marshaller = getContext(clazz).createMarshaller();
+	/**
+	 * Returns the string version of the JSON presentation of the given JAXBElement.
+	 * 
+	 * @param object The object to be marshaled to a String.
+	 * 
+	 * @return See desc.
+	 * 
+	 * @throws MarshalException Failure to marshal the given object to a JSON string.
+	 */
+	public static String marshalToJSON(JAXBElement<?> object) throws MarshalException
+	{
+		Timer timer = null;
+		if (logger.isDebugEnabled())
+		{
+			timer = new Timer();
+			timer.start();
+		}
+		StringWriter sw = new StringWriter();
+		try
+		{
+			Class<?> clazz = object.getValue().getClass();
+			Marshaller marshaller = getContext(clazz).createMarshaller();
 
-      synchronized (marshaller)
-      {
-        marshaller.marshal(object, getJSONStreamWriter(clazz, sw));
-      }
-    }
-    catch (JAXBException ex)
-    {
-      throw new MarshalException("Failed to marshal to XML: " + ex.getMessage(), ex);
-    }
+			synchronized (marshaller)
+			{
+				marshaller.marshal(object, getJSONStreamWriter(clazz, sw));
+			}
+		}
+		catch (JAXBException ex)
+		{
+			throw new MarshalException("Failed to marshal to XML: " + ex.getMessage(), ex);
+		}
 
-    if (logger.isDebugEnabled())
-    {
-      timer.finish();
-      logger.debug("Time taken to marshal " + object.getValue().getClass().getSimpleName() + " to XML: " + timer.timeTaken() + "ms");
-    }
+		if (logger.isDebugEnabled())
+		{
+			timer.finish();
+			logger.debug("Time taken to marshal " + object.getValue().getClass().getSimpleName()+ " to XML: " + timer.timeTaken() + "ms");
+		}
 
-    return sw.toString();
-  }
+		return sw.toString();
+	}
     
     /**
      * This is a convenience method so that JAXB Contexts can be initialised at any time. This proves to be
@@ -250,7 +250,7 @@ public class JAXBUtils
 			Unmarshaller unmarshaller = getContext(clazz).createUnmarshaller();
 			synchronized(unmarshaller)
 			{
-				elem = (JAXBElement<?>) unmarshaller.unmarshal(new StreamSource(new StringReader(xmlStr)), clazz);
+				elem = unmarshaller.unmarshal(new StreamSource(new StringReader(xmlStr)), clazz);
 			}
 
 		}
@@ -262,71 +262,71 @@ public class JAXBUtils
 		return elem;
 	}
 
-  private static <T> JAXBElement<T> unmarshalFromJSON(String jsonStr, Class<T> clazz) throws UnmarshalException
-  {
-    JAXBElement<T> elem = null;
-    try
-    {
-      Unmarshaller unmarshaller = getContext(clazz).createUnmarshaller();
-      synchronized (unmarshaller)
-      {
-        elem = (JAXBElement<T>) unmarshaller.unmarshal(getJSONStreamReader(jsonStr, clazz), clazz);
-      }
-    }
-    catch (Exception ex)
-    {
-      throw new UnmarshalException("Failed to unmarshal the given JSON string into a JAXB Object of type " + clazz.getSimpleName(), ex);
-    }
+	private static <T> JAXBElement<T> unmarshalFromJSON(String jsonStr, Class<T> clazz) throws UnmarshalException
+	{
+		JAXBElement<T> elem = null;
+		try
+		{
+			Unmarshaller unmarshaller = getContext(clazz).createUnmarshaller();
+			synchronized (unmarshaller)
+			{
+				elem = unmarshaller.unmarshal(getJSONStreamReader(jsonStr, clazz), clazz);
+			}
+		}
+		catch (Exception ex)
+		{
+			throw new UnmarshalException("Failed to unmarshal the given JSON string into a JAXB Object of type " + clazz.getSimpleName(), ex);
+		}
 
-    return elem;
-  }
+		return elem;
+	}
 
-  private static XMLStreamWriter getJSONStreamWriter(Class<?> clazz, Writer writer)
-  {
-    Configuration jsonConfiguration = getJSONConfiguration(clazz);
-    MappedNamespaceConvention jsonConvention = new MappedNamespaceConvention(jsonConfiguration);
-    MappedXMLStreamWriter result = new MappedXMLStreamWriter(jsonConvention, writer);
-    result.setValueKey(JSON_VALUE_KEY);
-    return result;
-  }
+	private static XMLStreamWriter getJSONStreamWriter(Class<?> clazz, Writer writer)
+	{
+		Configuration jsonConfiguration = getJSONConfiguration(clazz);
+		MappedNamespaceConvention jsonConvention = new MappedNamespaceConvention(jsonConfiguration);
+		MappedXMLStreamWriter result = new MappedXMLStreamWriter(jsonConvention, writer);
+		result.setValueKey(JSON_VALUE_KEY);
+		return result;
+	}
 
-  private static XMLStreamReader getJSONStreamReader(String jsonStr, Class<?> clazz) throws JSONException, XMLStreamException
-  {
-    Configuration jsonConfiguration = getJSONConfiguration(clazz);
-    MappedNamespaceConvention jsonConvention = new MappedNamespaceConvention(jsonConfiguration);
-    JSONObject jsonObject = new JSONObject(jsonStr);
-    MappedXMLStreamReader result = new MappedXMLStreamReader(jsonObject, jsonConvention);
-    result.setValueKey(JSON_VALUE_KEY);
-    return result;
-  }
-  
-  private static Configuration getJSONConfiguration(Class<?> clazz)
-  {
-    Configuration result = new Configuration();
-    Map<String, String> namespaceMapping = new HashMap<String, String>();
-    String namespace = getObjectNamespace(clazz);
-    if (namespace != null)
-    {
-      namespaceMapping.put(namespace, ""); // Default namespace
-    }
-    namespaceMapping.put("http://www.w3.org/2001/XMLSchema-instance", "xsi");
-    result.setXmlToJsonNamespaces(namespaceMapping);
-    result.setAttributeKey(JSON_ATTRIBUTE_KEY);
-    result.setTypeConverter(new SimpleConverter());
-    return result;
-  }
+	private static XMLStreamReader getJSONStreamReader(String jsonStr, Class<?> clazz) throws JSONException, XMLStreamException
+	{
+		Configuration jsonConfiguration = getJSONConfiguration(clazz);
+		MappedNamespaceConvention jsonConvention = new MappedNamespaceConvention(jsonConfiguration);
+		JSONObject jsonObject = new JSONObject(jsonStr);
+		MappedXMLStreamReader result = new MappedXMLStreamReader(jsonObject, jsonConvention);
+		result.setValueKey(JSON_VALUE_KEY);
+		return result;
+	}
 
-  private static String getObjectNamespace(Class<?> clazz)
-  {
-    String result = null;
-    XmlType typeAnnotation = clazz.getAnnotation(XmlType.class);
-    if (typeAnnotation != null)
-    {
-      result = typeAnnotation.namespace();
-    }
-    return result;
-  }
-  
+	private static Configuration getJSONConfiguration(Class<?> clazz)
+	{
+		Configuration result = new Configuration();
+		Map<String, String> namespaceMapping = new HashMap<String, String>();
+		String namespace = getObjectNamespace(clazz);
+		if (namespace != null)
+		{
+			namespaceMapping.put(namespace, ""); // Default namespace
+		}
+		namespaceMapping.put("http://www.w3.org/2001/XMLSchema-instance", "xsi");
+		result.setXmlToJsonNamespaces(namespaceMapping);
+		result.setAttributeKey(JSON_ATTRIBUTE_KEY);
+		result.setTypeConverter(new SimpleConverter());
+		return result;
+	}
+
+	private static String getObjectNamespace(Class<?> clazz)
+	{
+		String result = null;
+		XmlType typeAnnotation = clazz.getAnnotation(XmlType.class);
+		if (typeAnnotation != null)
+		{
+			result = typeAnnotation.namespace();
+		}
+		return result;
+	}
+
     private synchronized static JAXBContext getContext(Class<?> clazz) throws JAXBException
     {
     	JAXBContext ctx = jaxbCtx.get(clazz.getSimpleName());

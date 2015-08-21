@@ -25,6 +25,7 @@ import java.util.List;
 
 import sif3.common.CommonConstants;
 import sif3.common.header.HeaderValues.ServiceType;
+import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
@@ -58,7 +59,8 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	
 	// The properties below are runtime properties. They are not read or maintained in the DB!
 	private transient SIFZone defaultZone             = null;
-	private transient ArrayList<ServiceInfo> services = new ArrayList<ServiceInfo>();
+	private transient AuthenticationMethod authenticationMethod = AuthenticationMethod.Basic;
+    private transient ArrayList<ServiceInfo> services = new ArrayList<ServiceInfo>();
 
 	public SIF3Session() {}
 	
@@ -190,6 +192,26 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	public void setLastAccessed(Date lastAccessed)
     {
     	this.lastAccessed = lastAccessed;
+    }
+	
+    public AuthenticationMethod getAuthenticationMethod()
+    {
+        return authenticationMethod;
+    }
+
+    /**
+     * Will default to BASIC if set to null.
+     * 
+     * @param authenticationMethod the authenticationMethod to set.
+     */
+    public void setAuthenticationMethod(AuthenticationMethod authenticationMethod)
+    {
+        this.authenticationMethod = (authenticationMethod == null) ? AuthenticationMethod.Basic : authenticationMethod;
+    }
+    
+    public void setAuthenticationMethod(String authenticationMethod)
+    {
+        this.authenticationMethod = StringUtils.isEmpty(authenticationMethod) ? AuthenticationMethod.Basic : AuthenticationMethod.valueOf(authenticationMethod);
     }
 	
 	/*---------------------------------------------------------------------------------------------------------------------------------------*/
@@ -357,16 +379,19 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 		return null; // not found
 	}
 	
-	@Override
-  public String toString()
-  {
-    return "SIF3Session [adapterName=" + adapterName + ", adapterType="
-        + adapterType + ", created=" + created + ", environmentID="
-        + environmentID + ", environmentXML=" + environmentXML
-        + ", lastAccessed=" + lastAccessed + ", password=" + password
-        + ", queueStrategy=" + queueStrategy + ", securityToken="
-        + securityToken + ", securityTokenExpiry=" + securityTokenExpiry
-        + ", sessionID=" + sessionID + ", sessionToken=" + sessionToken
-        + ", toString()=" + super.toString() + "]";
-  }	
+	/* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+        return "SIF3Session [sessionID=" + sessionID + ", adapterName=" + adapterName
+                + ", password=" + password + ", sessionToken=" + sessionToken + ", environmentID="
+                + environmentID + ", adapterType=" + adapterType + ", securityToken="
+                + securityToken + ", securityTokenExpiry=" + securityTokenExpiry
+                + ", environmentXML=" + environmentXML + ", queueStrategy=" + queueStrategy
+                + ", created=" + created + ", lastAccessed=" + lastAccessed + ", defaultZone="
+                + defaultZone + ", authenticationMethod=" + authenticationMethod + ", services="
+                + services + ", toString()=" + super.toString() + "]";
+    }	
 }

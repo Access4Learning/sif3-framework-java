@@ -18,6 +18,8 @@
 
 package sif3.common.model;
 
+import sif3.common.header.HeaderProperties;
+
 /**
  * @author Joerg Huber
  *
@@ -26,9 +28,9 @@ public class EventMetadata extends BaseMetadata
 {
     private static final long serialVersionUID = 7520826455394603343L;
 
-    public EventMetadata()
+    public EventMetadata(HeaderProperties httpHeaderParams)
     {
-    	super(null, null);
+    	super(null, httpHeaderParams);
     }
 
 	@Override

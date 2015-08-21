@@ -20,15 +20,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
+import sif.dd.au30.model.NameOfRecordType;
+import sif.dd.au30.model.ObjectFactory;
 import sif.dd.au30.model.StudentCollectionType;
 import sif.dd.au30.model.StudentPersonalType;
 import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
+import sif3.common.header.RequestHeaderConstants;
+import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
-import sif3.common.model.QueryOperator;
-import sif3.common.model.QueryPredicate;
-import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServicePathPredicate;
 import sif3.common.model.ZoneContextInfo;
@@ -40,6 +41,7 @@ import sif3.common.ws.Response;
 import sif3.infra.rest.consumer.ConsumerLoader;
 import systemic.sif3.demo.rest.consumer.StudentPersonalConsumer;
 import au.com.systemic.framework.utils.FileReaderWriter;
+import au.com.systemic.framework.utils.Timer;
 
 /**
  * @author Joerg Huber
@@ -48,7 +50,7 @@ import au.com.systemic.framework.utils.FileReaderWriter;
 public class TestStudentPersonalConsumer
 {
 //	private final static String PATH = "/Users/crub/dev/nsip/Users/crub/dev/nsip/sif3-framework-java-dev";
-//	private final static String PATH = "C:/DEV/eclipseWorkspace";
+//	private final static String PATH = "C:/DEV/lunaWorkspace";
 	private final static String PATH = "C:/Development/GitHubRepositories/SIF3InfraRest";
   
 	private final static String SINGLE_STUDENT_FILE_NAME = PATH + "/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
@@ -58,6 +60,8 @@ public class TestStudentPersonalConsumer
 //	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
 	
 	private static final RequestType REQUEST_TYPE = RequestType.IMMEDIATE;
+	
+	private static ObjectFactory auDMObjects = new ObjectFactory();
 	
 	private void printResponses(List<Response> responses, StudentPersonalConsumer consumer)
 	{
@@ -242,8 +246,8 @@ public class TestStudentPersonalConsumer
 	}
 	
 
-	 private void updateStudents(StudentPersonalConsumer consumer)
-	  {
+	private void updateStudents(StudentPersonalConsumer consumer)
+	{
 	    System.out.println("Start 'Update Students - Bulk Operation' in all connected environments...");
 	    StudentCollectionType students = getStudents((DataModelUnmarshalFactory)consumer.getUnmarshaller());
 	    try
@@ -276,25 +280,51 @@ public class TestStudentPersonalConsumer
 	      ex.printStackTrace();
 	    }
 	    System.out.println("Finished 'Update Students' in all connected environments...");
-	  }
+	}
 
-	
-	
-	private void getStudents(StudentPersonalConsumer consumer)
+	private void getStudents(StudentPersonalConsumer consumer, boolean printRepsonse)
 	{
-		System.out.println("Start 'Get All Students' in all connected environments...");
+		if (printRepsonse)
+		{
+			System.out.println("Start 'Get All Students' in all connected environments...");
+		}
 		try
 		{
-			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), null, REQUEST_TYPE, QueryIntention.NO_CACHE);
-//			List<Response> responses = consumer.retrieve(null, null, REQUEST_TYPE);
-			System.out.println("Responses from attempt to Get All Students:");
-			printResponses(responses, consumer);
+			CustomParameters params = new CustomParameters();
+			
+			// Set some HTTP Header fields
+			params.addHTTPHeaderParameter(RequestHeaderConstants.HDR_GENERATOR_ID, "Ignore This");
+			params.addHTTPHeaderParameter("GenID", "This should not be ignored");
+			params.addHTTPHeaderParameter("customHdr", "Go all the way to Provider");
+			
+			// Set some custom URL query Params
+			params.addURLQueryParameter("ChangedSince", "01/05/2015");
+			params.addURLQueryParameter("myURLQueryParam", "show in provider");
+
+			List<ZoneContextInfo> envZoneCtxList = null;
+//			envZoneCtxList = new ArrayList<ZoneContextInfo>();
+//			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auRolloverTestingZone"), null));
+//			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auSchoolTestingZone"),  null));
+//			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
+//			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
+
+			List<Response> responses = consumer.retrieve(new PagingInfo(500, 0), envZoneCtxList, REQUEST_TYPE, QueryIntention.NO_CACHE, params);
+//			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), envZoneCtxList, REQUEST_TYPE);
+//			List<Response> responses = consumer.retrieve(null, envZoneCtxList, REQUEST_TYPE);
+			if (printRepsonse)
+			{
+				System.out.println("Responses from attempt to Get All Students:");
+				printResponses(responses, consumer);
+			}
 		}
 		catch (Exception ex)
 		{
 			ex.printStackTrace();
 		}
-		System.out.println("Finished 'Get All Students' in all connected environments...");
+		if (printRepsonse)
+		{
+			System.out.println("Finished 'Get All Students' in all connected environments...");
+		}
 	}
 	
 	private void getStudentsByServicePath(String parent, String value, StudentPersonalConsumer consumer)
@@ -305,7 +335,7 @@ public class TestStudentPersonalConsumer
 		try
 		{
 			// Get all students for a service path cirteria. Get 5 students per page (i.e page 1). 
-			List<Response> responses = consumer.retrieveByServicePath(criteria, new PagingInfo(5, 1), null, REQUEST_TYPE, QueryIntention.ALL);
+			List<Response> responses = consumer.retrieveByServicePath(criteria, new PagingInfo(5, 1), null, REQUEST_TYPE, QueryIntention.ALL, null);
 			System.out.println("Responses from attempt to Get All Students for '" + criteria + "': ");
 			printResponses(responses, consumer);
 		}
@@ -315,6 +345,48 @@ public class TestStudentPersonalConsumer
 		}
 		System.out.println("Finished 'Get All Students By Service Path' in all connected environments...");
 	}
+	
+	private void getStudentsByQBE(StudentPersonalConsumer consumer)
+	{
+		StudentPersonalType student = auDMObjects.createStudentPersonalType();
+		student.setPersonInfo(auDMObjects.createPersonInfoType());
+        NameOfRecordType name = new NameOfRecordType();
+        name.setFamilyName(auDMObjects.createBaseNameTypeFamilyName("%an%"));
+		student.getPersonInfo().setName(name);
+
+		CustomParameters params = new CustomParameters();
+
+		// Set some HTTP Header fields
+		params.addHTTPHeaderParameter(RequestHeaderConstants.HDR_GENERATOR_ID, "Ignore This");
+		params.addHTTPHeaderParameter("GenID", "This should not be ignored");
+		params.addHTTPHeaderParameter("customHdr", "Go all the way to Provider");
+		
+		// Set some custom URL query Params
+		params.addURLQueryParameter("ChangedSince", "01/05/2015");
+		params.addURLQueryParameter("myURLQueryParam", "show in provider");
+
+		List<ZoneContextInfo> envZoneCtxList = null;
+//		envZoneCtxList = new ArrayList<ZoneContextInfo>();
+//		envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auRolloverTestingZone"), null));
+//		envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auSchoolTestingZone"),  null));
+//		envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
+//		envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
+		
+		System.out.println("Start 'Get Students By Example' in all connected environments...");
+		try
+		{
+			// Get all students by example. Get 5 students per page (i.e page 1). 
+			List<Response> responses = consumer.retrieveByQBE(student, new PagingInfo(5, 1), envZoneCtxList, REQUEST_TYPE, QueryIntention.ALL, params);
+			System.out.println("Responses from attempt to Get Students By Example': ");
+			printResponses(responses, consumer);
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		System.out.println("Finished 'Get Students By Example' in all connected environments...");
+	}
+
 
 	private void getStudent(StudentPersonalConsumer consumer)
 	{
@@ -354,6 +426,24 @@ public class TestStudentPersonalConsumer
 		System.out.println("Finished 'Remove Student' in all connected environments...");
 	}
 	
+	
+	private void performanceTest(StudentPersonalConsumer consumer)
+	{
+		System.out.println("Start Performance Test...");
+		Timer timer = new Timer();
+		timer.start();
+		for (int i = 0; i <= 100; i++)
+		{
+			getStudents(consumer, false);
+		}
+		
+		timer.finish();
+		System.out.println("End Performance Test with Compression "+(consumer.getCompressionEnabled() ? "ON" : "OFF")+". Time taken: "+timer.timeTaken()+"ms");
+	}
+	
+	
+	
+	
 	public static void main(String[] args)
 	{
 		TestStudentPersonalConsumer tester = new TestStudentPersonalConsumer();
@@ -364,17 +454,20 @@ public class TestStudentPersonalConsumer
 		
   		StudentPersonalConsumer consumer = tester.getConsumer();
   		
-//  		tester.getStudents(consumer);
+//  		tester.getStudents(consumer, true);
 //  		tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
-  		tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
+//  		tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
 //  		tester.getStudentsByServicePath("RoomInfos", "24ed508e1ed04bba82198233efa55859", consumer);
 //  			tester.createStudent(consumer);
   //		tester.removeStudent(consumer);
 //  		tester.getStudent(consumer);
-  //		tester.updateStudent(consumer);
+//  		tester.updateStudent(consumer);
   //		tester.updateStudents(consumer);
-  //		tester.createStudents(consumer);
+//  		tester.createStudents(consumer);
 //  		tester.deleteStudents(consumer);
+//  		tester.getStudentsByQBE(consumer);
+  		
+  		tester.performanceTest(consumer);
   
   		System.out.println("Finalise Consumer (i.e. disconnect and remove environment).");
   		consumer.finalise();

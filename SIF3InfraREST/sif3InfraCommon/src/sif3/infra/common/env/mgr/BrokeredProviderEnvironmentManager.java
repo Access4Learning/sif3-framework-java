@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 
 import sif3.common.exception.PersistenceException;
 import sif3.common.model.EnvironmentKey;
+import sif3.common.model.security.TokenInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.infra.common.env.ops.BrokeredProviderEnvStoreOps;
 import sif3.infra.common.env.types.ConsumerEnvironment;
@@ -229,9 +230,9 @@ public class BrokeredProviderEnvironmentManager implements ClientEnvironmentMana
 	 * (non-Javadoc)
 	 * @see sif3.infra.rest.env.ClientEnvironmentManager#createOrUpdateEnvironment(sif3.infra.common.model.EnvironmentType)
 	 */
-	public EnvironmentType createOrUpdateEnvironment(EnvironmentType inputEnvironment)
+	public EnvironmentType createOrUpdateEnvironment(EnvironmentType inputEnvironment, TokenInfo tokenInfo)
 	{
-		setSIF3Session(envOps.createOrUpdateSession(inputEnvironment));
+		setSIF3Session(envOps.createOrUpdateSession(inputEnvironment, tokenInfo));
 		if (getSIF3Session() != null) // creation was successful
 		{
 			// Extract the service info and store it in an easy accessible way in the session.

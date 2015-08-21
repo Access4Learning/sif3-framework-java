@@ -430,6 +430,9 @@ public class HITSDirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 		        {
 		          environment.setAuthenticationMethod(AuthenticationMethod.Basic.name());
 		        }
+		        
+		        // Set Authentication Method is sif3 Session.
+		        sif3Session.setAuthenticationMethod(environment.getAuthenticationMethod());
 
 				environment.setType(EnvironmentTypeType.DIRECT); // It is a direct environment, so set it accordingly	
 				environment.setUserToken(inputEnv.getUserToken());
@@ -530,13 +533,16 @@ public class HITSDirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 						// Maybe the authentication method has changed, too.
 						if (StringUtils.notEmpty(appEnvTemplate.getAuthMethod()))
 						{
-							environment.setAuthenticationMethod(appEnvTemplate.getAuthMethod());
+							environment.setAuthenticationMethod(appEnvTemplate.getAuthMethod());							
 						}
 						else // assume Basic
 						{
 							environment.setAuthenticationMethod(AuthenticationMethod.Basic.name());
 						}
 						
+                        // Set authentication method it in the session.
+                        sif3Session.setAuthenticationMethod(environment.getAuthenticationMethod());
+
 						// Maybe the password has changed, too.
 						if (StringUtils.notEmpty(appEnvTemplate.getPassword()))
 						{

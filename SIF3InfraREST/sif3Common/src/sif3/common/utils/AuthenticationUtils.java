@@ -60,13 +60,45 @@ public class AuthenticationUtils
 	 */
 	public static String getBasicAuthToken(String username, String password)
 	{
-		return AuthenticationMethod.Basic.toString()+" "+base64Encode(username, password);
+		return AuthenticationMethod.Basic.name()+" "+base64Encode(username, password);
 	}
 
 	/**
+	 * This method returns a HMAC-SHA256 hashed authentication token with the prefix "SIF_HMACSHA256 ". The token is
+	 * generated based on the given date string (in ISO8601). The password is used to hash the username and date 
+	 * string using HMAC-SHA256 algorithm. The final result is bas64 encoded. The exact algorithm is described in the
+	 * SIF3 specification.
+	 * 
+	 * @param username Username to use for the creation of the authentication token.
+	 * @param password Password to be used to hash the authentication token with HMAC-SHA256
+	 * @param dateAsISO8601 Date in ISO8601 format (i.e 2014-01-14T09:48:42.942Z).
+	 * 
+	 * @return See desc.
+	 */
+	public static String getSIFHMACSHA256AuthToken(String username, String password, String dateAsISO8601)
+	{
+		String token = username+":"+hmacsha256Base64(username+":"+dateAsISO8601, password);
+		return AuthenticationMethod.SIF_HMACSHA256.name()+" "+new String(Base64.encodeBase64(token.getBytes()), Charset.forName("ASCII"));
+	}
+
+	/**
+	 * Returns the full token with the authentication method prefixed.
+	 * 
+	 * @param token The token to be used got the final authentication token.
+	 * @param password Optional. Not currently used.
+	 * 
+	 * @return The Bearer Authentication Token of the form "Bearer <token>".
+	 */
+	public static String getBearerAuthToken(String token, String password)
+	{
+		return AuthenticationMethod.Bearer.name()+" "+ token;
+	}
+
+	
+	/**
 	 * This method create the full authentication token of the format:<br/>
 	 * If authentication method is Basic or SIF_HMACSHA256: <AuthMethod>" "base64Encode(<userToken>:<password>)<br/>
-	 * If authentication method is Bearer: Bearer <userToken><br/>
+	 * If authentication method is Bearer: Bearer <userToken>. Meaning that the userToken is untouched, i.e. not base64 encoded.<br/>
 	 * <br/>
 	 * If the authInfo is null then null is returned.
 	 * 
@@ -87,7 +119,7 @@ public class AuthenticationUtils
 		}
 		else // It is Bearer so leave token untouched!
 		{
-			return AuthenticationInfo.AuthenticationMethod.Bearer.name() + " " + authInfo.getUserToken();
+			return getBearerAuthToken(authInfo.getUserToken(), null);
 		}
 	}
 	
@@ -103,24 +135,6 @@ public class AuthenticationUtils
 	{
 		String token = username+":"+password;
 		return new String(Base64.encodeBase64(token.getBytes()), Charset.forName("ASCII"));
-	}
-	
-	/**
-	 * This method returns a HMAC-SHA256 hashed authentication token with the prefix "SIF_HMACSHA256 ". The token is
-	 * generated based on the given date string (in ISO8601). The password is used to hash the username and date 
-	 * string using HMAC-SHA256 algorithm. The final result is bas64 encoded. The exact algorithm is described in the
-	 * SIF3 specification.
-	 * 
-	 * @param username Username to use for the creation of the authentication token.
-	 * @param password Password to be used to hash the authentication token with HMAC-SHA256
-	 * @param dateAsISO8601 Date in ISO8601 format (i.e 2014-01-14T09:48:42.942Z).
-	 * 
-	 * @return See desc.
-	 */
-	public static String getSIFHMACSHA256Token(String username, String password, String dateAsISO8601)
-	{
-		String token = username+":"+hmacsha256Base64(username+":"+dateAsISO8601, password);
-		return AuthenticationMethod.SIF_HMACSHA256.toString()+" "+new String(Base64.encodeBase64(token.getBytes()), Charset.forName("ASCII"));
 	}
 	
 	/**

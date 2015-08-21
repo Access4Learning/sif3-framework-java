@@ -27,7 +27,8 @@ import au.com.systemic.framework.utils.StringUtils;
  * well as some other useful methods to manage header properties for SIF3.
  * 
  * Ideally all methods in this class should use the constants from the RequestHeaderConstants and ResponseHeaderConstants class to 
- * set or retrieve header properties by the property name.
+ * set or retrieve header properties by the property name. As per HTTP specification HTTP header names are case insensitive
+ * and therefore this class ignores the case of HTTP header names.
  * 
  * @author Joerg Huber
  */
@@ -47,7 +48,7 @@ public class HeaderProperties
 	 * 'hdrPropertyValue' is null then then the property with the name 'hdrPropertyName' will be removed. If the 'hdrPropertyName' is
 	 * null or empty string then no action is taken.
 	 * 
-	 * @param hdrPropertyName Header property name.
+	 * @param hdrPropertyName Header property name. Case insensitive!
 	 * @param hdrPropertyValue Header property value.
 	 */
 	public void setHeaderProperty(String hdrPropertyName, String hdrPropertyValue)
@@ -56,11 +57,11 @@ public class HeaderProperties
 		{
 			if (hdrPropertyValue == null)
 			{
-				hdrProperties.remove(hdrPropertyName);
+				hdrProperties.remove(hdrPropertyName.toLowerCase());
 			}
 			else
 			{
-				hdrProperties.put(hdrPropertyName, hdrPropertyValue);
+				hdrProperties.put(hdrPropertyName.toLowerCase(), hdrPropertyValue);
 			}
 		}
 	}
@@ -78,27 +79,34 @@ public class HeaderProperties
 	/**
 	 * Returns the value of a header property. If the property with that name does not exist then null is returned.
 	 * 
-	 * @param hdrPropertyName Header property name.
+	 * @param hdrPropertyName Header property name. Case insensitive!
 	 * @return Header property value. Null if it doesn't exist.
 	 */
 	public String getHeaderProperty(String hdrPropertyName)
 	{
-		return hdrProperties.get(hdrPropertyName);
+		return (hdrPropertyName != null) ? hdrProperties.get(hdrPropertyName.toLowerCase()) : null;
 	}
 
 	/**
 	 * Returns the value of a header property. If the property with that name does not exist or is null then the default 
 	 * value is returned.
 	 * 
-	 * @param hdrPropertyName Header property name.
+	 * @param hdrPropertyName Header property name. Case insensitive!
 	 * @param hdrDefaultValue Value to return if no property for the given hdrPropertyName exists.
 	 * 
 	 * @return Header property value. 'hdrDefaultValue' if it doesn't exist.
 	 */
 	public String getHeaderProperty(String hdrPropertyName, String hdrDefaultValue)
 	{
-		String value = hdrProperties.get(hdrPropertyName);
-		return (value == null) ? hdrDefaultValue : value;
+		if (hdrPropertyName != null)
+		{
+			String value = hdrProperties.get(hdrPropertyName.toLowerCase());
+			return (value == null) ? hdrDefaultValue : value;
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	/**
@@ -109,6 +117,20 @@ public class HeaderProperties
 	public HashMap<String, String> getHeaderProperties()
 	{
 		return createCopy(this.hdrProperties);
+	}
+	
+	/**
+	 * This method will add all the properties of the addHdrProps parameter to the existing header properties. This will override
+	 * properties that already exist if they are in the addHdrProps parameter.
+	 * 
+	 * @param addHdrProps Header Properties to be added to the existing header properties. If null then no action is taken.
+	 */
+	public void addHeaderProperties(HeaderProperties addHdrProps)
+	{
+	    if (addHdrProps != null)
+	    {
+	        hdrProperties.putAll(addHdrProps.getHeaderProperties());
+	    }
 	}
 	
 	@Override
@@ -125,7 +147,10 @@ public class HeaderProperties
 		HashMap<String, String> copyProps = new HashMap<String, String>();
 		if (hdrProperties != null)
 		{
-			copyProps.putAll(hdrProperties);
+			for (String hdrName : hdrProperties.keySet())
+			{
+				copyProps.put(hdrName.toLowerCase(), hdrProperties.get(hdrName));
+			}
 		}
 		return copyProps;
 	}

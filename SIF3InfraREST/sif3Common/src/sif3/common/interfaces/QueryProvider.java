@@ -61,4 +61,30 @@ public interface QueryProvider extends Provider
 			                            SIFContext context, 
 			                            PagingInfo pagingInfo, 
 			                            RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
+
+	/**
+	 * This method is used to retrieve data based on the 'Query By Example' (QBE) concept. All objects that match the
+	 * exampleObject parameter shall be returned. The exampleObject is a single SIF Object type such as 
+	 * StudentPersonalType where as the returned data is a collection of the same SIF Object type such as 
+	 * StudentPersonalCollectionType as defined in the data model.
+	 * 
+	 * @param exampleObject The example data model object. This must be the single object type.
+	 * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
+	 * @param context The Context for which the objects shall be returned. Can be Null (default Zone)
+	 * @param pagingInfo Page information to determine which results to return. Null = Return all (NOT RECOMMENDED!).
+	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
+	 * 
+	 * @return Object Plural Type containing list of objects.
+	 * 
+	 * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is 
+	 *                              performed and the  message of the exceptions holds some info.
+	 * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
+	 * @throws DataTooLargeException If the data that shall be returned is too large due to the query criteria or
+	 *                               values in the paging info.
+	 */
+	public Object retrieveByQBE(Object exampleObject, 
+            					SIFZone zone, 
+            					SIFContext context, 
+            					PagingInfo pagingInfo, 
+            					RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
 }

@@ -168,11 +168,10 @@ public abstract class BaseResource
 	{
 		this.uriInfo = uriInfo;
 		this.request = request;
-//		this.requestHeaders = requestHeaders;
 		setURLMediaTypeFromPath(uriInfo.getPath());
 		extractSIFHeaderProperties(requestHeaders);
 		extractAllHTTPHeaderProperties(requestHeaders);
-		extractQueryParameters(uriInfo);
+		extractQueryParameters();
 		setSecure(HTTPS_SCHEMA.equalsIgnoreCase(getUriInfo().getBaseUri().getScheme()));
 		setRelativeServicePath(getUriInfo().getPath(), servicePrefixPath);
 		extractAuthTokenInfo();
@@ -195,7 +194,7 @@ public abstract class BaseResource
 	    {
 		    if ((authInfo.getAuthMethod() == AuthenticationInfo.AuthenticationMethod.Bearer))
 			{
-		    	setSecurityService(BearerSecurityFactory.getSecurityService(getServiceProperties()));
+		        setSecurityService(BearerSecurityFactory.getSecurityService(getServiceProperties()));
 			}
 	    }
 		
@@ -269,7 +268,7 @@ public abstract class BaseResource
 	/**
 	 * Returns all HTTP Headers and their value. The name of a particular header is in always in lower case!
 	 * 
-	 * @return All the avaialble HTTP header properties of the request. See also desc for more info.
+	 * @return All the available HTTP header properties of the request. See also desc for more info.
 	 */
 	public HeaderProperties getAllHTTPHeaderProperties()
     {
@@ -277,12 +276,11 @@ public abstract class BaseResource
     }
 
 	/*
-	 * If the request media type is not set it will try to get the media type from the URL Postfix. If thait is not set either then XML is returned
+	 * If the request media type is not set it will try to get the media type from the URL Postfix. If that is not set either then XML is returned
 	 */
 	public MediaType getRequestMediaType()
     {
 		return this.requestMediaType;
-//    	return ((this.requestMediaType != null) ? this.requestMediaType : (this.urlPostfixMimeType != null ? this.urlPostfixMimeType : MediaType.APPLICATION_XML_TYPE));
     }
 
   /*
@@ -292,13 +290,7 @@ public abstract class BaseResource
 	public MediaType getResponseMediaType()
     {
 		return this.responseMediaType;
-//    	return ((this.responseMediaType != null) ? this.responseMediaType : (this.urlPostfixMimeType != null ? this.urlPostfixMimeType : MediaType.APPLICATION_XML_TYPE));
     }
-
-//	public HttpHeaders getRequestHeaders()
-//    {
-//    	return this.requestHeaders;
-//    }
 
 	public AbstractSecurityService getSecurityService()
     {
@@ -357,7 +349,7 @@ public abstract class BaseResource
 	 * This method returns the userToken form the given Authorisation token. This can either be a sessionToken (Basic, 
 	 * SIF_HMACSH256) or a securityToken (Bearer). If no authorisation information is available then null is returned.
 	 * 
-	 * @return the token held in the userToken property or null if no Authentication information is avaliable.
+	 * @return the token held in the userToken property or null if no Authentication information is available.
 	 */
 	public String getTokenFromAuthToken()
 	{
@@ -704,7 +696,7 @@ public abstract class BaseResource
 					// In a brokered environment the provider environment manager must really have the session already loaded for 
 					// the provider, otherwise we may have a real problem and things are in an inconsistent state. We should return 
 					// an error as it appears a request with an invalid sessionToken tries to access the provider.
-					String errStr = "Provider's sessionToken doesn't match the request's sessoionToken, or the provider has no session initialised.";
+					String errStr = "Provider's sessionToken doesn't match the request's sessionToken, or the provider has no session initialised.";
 					logger.error(errStr+" See previous error log entries for details.");
 					return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, errStr);								
 				}
@@ -795,7 +787,7 @@ public abstract class BaseResource
 			String timestamp = getTimestampFromRequest();
 			if (StringUtils.notEmpty(timestamp))
 			{
-				newAuthToken = AuthenticationUtils.getSIFHMACSHA256Token(userToken, password, timestamp);
+				newAuthToken = AuthenticationUtils.getSIFHMACSHA256AuthToken(userToken, password, timestamp);
 			}
 			else
 			{
@@ -1133,8 +1125,7 @@ public abstract class BaseResource
 					case productName:
 						if (env.getApplicationInfo().getApplicationProduct() == null)
 						{
-							env.getApplicationInfo().setApplicationProduct(
-							        new ProductIdentityType());
+							env.getApplicationInfo().setApplicationProduct(new ProductIdentityType());
 						}
 						env.getApplicationInfo().getApplicationProduct().setProductName(value);
 						break;
@@ -1214,10 +1205,9 @@ public abstract class BaseResource
 		allHTTPHdrProperties = new HeaderProperties(); //ensure it is clean, ie. not holding values from a previous call.
 		MultivaluedMap<String, String> headerMap = requestHeaders.getRequestHeaders();
 		
-		// ensure that we make all header names lower case for later retrieval.
 		for (String hdrName : headerMap.keySet())
 		{
-			allHTTPHdrProperties.setHeaderProperty(hdrName.toLowerCase(), headerMap.getFirst(hdrName));
+			allHTTPHdrProperties.setHeaderProperty(hdrName, headerMap.getFirst(hdrName));
 		}		
 	}
 
@@ -1281,7 +1271,7 @@ public abstract class BaseResource
 		}		
 	}
 	
-	private void extractQueryParameters(UriInfo uriInfo)
+	private void extractQueryParameters()
 	{
 		setQueryParameters(new URLQueryParameter(getUriInfo().getQueryParameters()));
 	}
@@ -1452,6 +1442,12 @@ public abstract class BaseResource
 			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Choose between Basic, SIF_HMACSHA256 or Bearer as Authentication Method. Refer to SIF3 Specification for details.");
 		}
 
+		// Check if the Authentication Method matches the session's mandated authentication method.
+		if (getAuthInfo().getAuthMethod() != sif3Session.getAuthenticationMethod())
+		{
+            return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Invalid authentication method. Authentication method must be "+sif3Session.getAuthenticationMethod().name());	    
+		}
+		
 		if (getAuthInfo().getAuthMethod() != AuthenticationInfo.AuthenticationMethod.Bearer) // It is Basic or SIF_HMACSHA256
 		{
 			return validateNoneBearerAuthToken(getAuthInfo().getUserToken(), sif3Session.getPassword());
@@ -1518,7 +1514,7 @@ public abstract class BaseResource
 				// In a brokered environment the provider environment manager must really have the session already loaded for 
 				// the provider, otherwise we may have a real problem and things are in an inconsistent state. We should return 
 				// an error as it appears a request with an invalid sessionToken tries to access the provider.
-				errorStr = "Provider's security token doesn't match the providers request's sif3 sessoion, or the provider has no session initialised.";
+				errorStr = "Provider's security token doesn't match the providers request's sif3 session, or the provider has no session initialised.";
 				logger.error(errorStr+" See previous error log entries for details.");
 				return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, errorStr);								
 			}
@@ -1623,11 +1619,19 @@ public abstract class BaseResource
 		}
 		else // Brokered environment => Bearer Authentication not yet supported.
 		{
+		    //TODO: JH - Add code once External Security is enabled for brokered providers.
 			errorStr = "Bearer Token security not yet supported for Brokered Environment Provider.";
 			logger.error(errorStr);
 		    return new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), errorStr);
 		}
 		
+        // At this point we should have a SIF3Session which we can check to see if Authentication Method matches the Authorisation header
+        // Check if the Authentication Method matches the session's mandated authentication method.
+        if (getAuthInfo().getAuthMethod() != sif3Session.getAuthenticationMethod())
+        {
+            return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Invalid authentication method. Authentication method must be "+sif3Session.getAuthenticationMethod().name());     
+        }
+	
 		// If we get to this point then all validations have succeeded.
 		return null;
 	}
@@ -1712,7 +1716,7 @@ public abstract class BaseResource
 	/*
 	 * This method attempts to retrieve the URL Query Parameter called 'accessToken' which may be used for SIF Simple. It will then
 	 * attempt to also get the authentication method from the URL Query Parameters. If it is provided it will be used, assuming it has a valid
-	 * value, otherwise a lookup to the provider's config file will be performed to determine the dafault accessToken authentication method. 
+	 * value, otherwise a lookup to the provider's config file will be performed to determine the default accessToken authentication method. 
 	 * If this is set then this will be used otherwise it is defaulted to 'Bearer'.
 	 */
 	private AuthenticationInfo getAccessToken()

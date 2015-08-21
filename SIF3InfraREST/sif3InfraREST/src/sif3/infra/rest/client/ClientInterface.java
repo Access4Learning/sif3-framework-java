@@ -32,14 +32,15 @@ import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.PagingInfo;
-//import sif3.common.model.QueryMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.URLQueryParameter;
 import sif3.common.ws.BulkOperationResponse;
 import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.common.ws.Response;
+import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.CreateResponseType;
 import sif3.infra.common.model.CreateType;
 import sif3.infra.common.model.DeleteIdType;
@@ -73,6 +74,7 @@ public class ClientInterface extends BaseClient
 	/**
 	 * Constructor<br/>
 	 * 
+     * @param clientEnvMgr Session manager to access the clients session information.
 	 * @param baseURI The base URI of this client. All URIs are for all other calls are relative to this base URL.
 	 * @param requestMediaType Media type of the request. It will be validated against the supported media types of the given dmMarshaller.
 	 * @param responseMediaType Media type of the response. It will be validated against the supported media types of the given dmUnmarshaller.
@@ -81,25 +83,32 @@ public class ClientInterface extends BaseClient
 	 * @param dmUnmarshaller Unmarshaller to unmarshal the payload of this client to appropriate representations. This unmarshaller 
 	 *                     must be valid for the data model used with this client.
 	 * @param secureConnection TRUE: Use HTTPS, FALSE use HTTP.
+	 * @param useCompression TRUE: Payloads (request & response) shall be compressed before sending or de-compressed at the
+	 *                             time of receiving.
+	 *                       FALSE: No compression is used.
 	 */
-	public ClientInterface(URI baseURI, MediaType requestMediaType, MediaType responseMediaType, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection)
+	public ClientInterface(ClientEnvironmentManager clientEnvMgr, URI baseURI, MediaType requestMediaType, MediaType responseMediaType, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection, boolean useCompression)
 	{
-		super(baseURI, requestMediaType, responseMediaType, dmMarshaller, dmUnmarshaller, secureConnection);
+		super(clientEnvMgr, baseURI, requestMediaType, responseMediaType, dmMarshaller, dmUnmarshaller, secureConnection, useCompression);
 	}
 
 	/**
 	 * This constructor will default the media type of the marshaller (request) and unmarshaller (response) and the default service type of OBJECT.
 	 * 
+     * @param clientEnvMgr Session manager to access the clients session information.
 	 * @param baseURI The base URI of this client. All URIs are for all other calls are relative to this base URL.
 	 * @param dmMarshaller Marshaller to marshal the payload of this client to appropriate representations. This marshaller must be valid
 	 *                   for the data model used with this client.
 	 * @param dmUnmarshaller Unmarshaller to unmarshal the payload of this client to appropriate representations. This unmarshaller 
 	 *                     must be valid for the data model used with this client.
 	 * @param secureConnection TRUE: Use HTTPS, FALSE use HTTP.
+	 * @param useCompression TRUE: Payloads (request & response) shall be compressed before sending or de-compressed at the
+	 *                             time of receiving.
+	 *                       FALSE: No compression is used.
 	 */
-	public ClientInterface(URI baseURI, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection)
+	public ClientInterface(ClientEnvironmentManager clientEnvMgr, URI baseURI, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection, boolean useCompression)
 	{
-		super(baseURI, dmMarshaller, dmUnmarshaller, secureConnection);
+		super(clientEnvMgr, baseURI, dmMarshaller, dmUnmarshaller, secureConnection, useCompression);
 	}
 
 	/*----------------------------------*/
@@ -115,6 +124,9 @@ public class ClientInterface extends BaseClient
 	 * @param resourceID The Id of the object to be returned. If the object doesn't exist the appropriate status is set in the
 	 *                   returned Response object as defined by the SIF3 spec.
 	 * @param hdrProperties Header Properties to be added to the header of the GET request.
+	 * @param urlQueryParams URL query parameters to be added to the request. It is assumed that these are custom
+	 *                       URL query parameters. They are conveyed to the provider unchanged. URL query parameter
+	 *                       names are case sensitive. This parameter can be null.
 	 * @param returnObjectClass The class type into which the object shall be unmarshalled into. The final object is stored in the
 	 *                          returned Response object.
 	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
@@ -124,15 +136,15 @@ public class ClientInterface extends BaseClient
 	 * 
 	 * @throws ServiceInvokationException An internal error occurred. An error is logged.
 	 */
-	public Response getSingle(String relURI, String resourceID, HeaderProperties hdrProperties, Class<?> returnObjectClass, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public Response getSingle(String relURI, String resourceID, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, Class<?> returnObjectClass, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
 		WebResource service = getService();
 		try
 		{
-			service = buildURI(service, relURI, resourceID, zone, context);
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
+			service = buildURI(service, relURI, resourceID, zone, context, urlQueryParams);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, addAuthenticationHdrProps(hdrProperties), true, false).get(ClientResponse.class);
 
-			return setResponse(service, response, returnObjectClass, Status.OK, Status.NOT_MODIFIED);
+			return setResponse(service, response, returnObjectClass, zone, context, Status.OK, Status.NOT_MODIFIED);
 		}
 		catch (Exception ex)
 		{
@@ -151,6 +163,9 @@ public class ClientInterface extends BaseClient
 	 * @param payload The payload in its object form. The marshaller given in the constructor of this method is used to convert the 
 	 *                payload to appropriate format (mediaType).
 	 * @param hdrProperties Header Properties to be added to the header of the POST request.
+	 * @param urlQueryParams URL query parameters to be added to the request. It is assumed that these are custom
+	 *                       URL query parameters. They are conveyed to the provider unchanged. URL query parameter
+	 *                       names are case sensitive. This parameter can be null.
 	 * @param returnObjectClass The class type into which the object shall be unmarshalled into. The final object is stored in the
 	 *                          returned Response object.
 	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
@@ -161,21 +176,21 @@ public class ClientInterface extends BaseClient
 	 * @throws ServiceInvokationException Any underlying errors occurred such as unable to marshal the object into its media
 	 *                                    type, failure to invoke actual web-service etc. 
 	 */
-	public Response createSingle(String relURI, Object payload, HeaderProperties hdrProperties, Class<?> returnObjectClass, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public Response createSingle(String relURI, Object payload, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, Class<?> returnObjectClass, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
 		WebResource service = getService();
 		try
 		{
-			service = buildURI(service, relURI, null, zone, context);
+			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
 			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestMediaType());
 
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("createSingle: Payload to send:\n"+payloadStr);
 			}
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).post(ClientResponse.class, payloadStr);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, addAuthenticationHdrProps(hdrProperties), true, true).post(ClientResponse.class, payloadStr);
 
-			return setResponse(service, response, returnObjectClass, Status.CREATED, Status.CONFLICT);
+			return setResponse(service, response, returnObjectClass, zone, context, Status.CREATED, Status.CONFLICT);
 		}
 		catch (Exception ex)
 		{
@@ -196,6 +211,9 @@ public class ClientInterface extends BaseClient
 	 * @param payload The payload in its object form. The marshaller given in the constructor of this method is used to convert the 
 	 *                payload to appropriate format (mediaType).
 	 * @param hdrProperties Header Properties to be added to the header of the PUT request.
+	 * @param urlQueryParams URL query parameters to be added to the request. It is assumed that these are custom
+	 *                       URL query parameters. They are conveyed to the provider unchanged. URL query parameter
+	 *                       names are case sensitive. This parameter can be null.
 	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
 	 * @param context The context for which this operation shall be invoked. Can be null which indicates the DEFAULT context.
 	 * 
@@ -204,21 +222,21 @@ public class ClientInterface extends BaseClient
 	 * @throws ServiceInvokationException Any underlying errors occurred such as unable to marshal the object into its media type, 
 	 *                                    failure to invoke actual web-service etc. 
 	 */
-	public Response updateSingle(String relURI, String resourceID, Object payload, HeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public Response updateSingle(String relURI, String resourceID, Object payload, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
 		WebResource service = getService();
 		try
 		{
-			service = buildURI(service, relURI, resourceID, zone, context);
+			service = buildURI(service, relURI, resourceID, zone, context, urlQueryParams);
 			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestMediaType());
 
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("updateSingle: Payload to send:\n"+payloadStr);
 			}
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).put(ClientResponse.class, payloadStr);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, addAuthenticationHdrProps(hdrProperties), true, true).put(ClientResponse.class, payloadStr);
 
-			return setResponse(service, response, null, Status.NO_CONTENT);
+			return setResponse(service, response, null, zone, context, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -237,6 +255,9 @@ public class ClientInterface extends BaseClient
 	 * @param resourceID The Id of the object to be deleted. If the object doesn't exist the appropriate status is set in the
 	 *                   returned Response object as defined by the SIF3 spec.
 	 * @param hdrProperties Header Properties to be added to the header of the DELETE request.
+	 * @param urlQueryParams URL query parameters to be added to the request. It is assumed that these are custom
+	 *                       URL query parameters. They are conveyed to the provider unchanged. URL query parameter
+	 *                       names are case sensitive. This parameter can be null.
 	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
 	 * @param context The context for which this operation shall be invoked. Can be null which indicates the DEFAULT context.
 	 * 
@@ -244,15 +265,15 @@ public class ClientInterface extends BaseClient
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
 	 */
-	public Response removeSingle(String relURI, String resourceID, HeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public Response removeSingle(String relURI, String resourceID, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
 		WebResource service = getService();
 		try
 		{
-			service = buildURI(service, relURI, resourceID, zone, context);
-		    ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).delete(ClientResponse.class);
+			service = buildURI(service, relURI, resourceID, zone, context, urlQueryParams);
+		    ClientResponse response = setRequestHeaderAndMediaTypes(service, addAuthenticationHdrProps(hdrProperties), true, false).delete(ClientResponse.class);
 
-			return setResponse(service, response, null, Status.NO_CONTENT);
+			return setResponse(service, response, null, zone, context, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -282,34 +303,70 @@ public class ClientInterface extends BaseClient
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
 	 */
-	public Response getMany(String relURI, PagingInfo pagingInfo, HeaderProperties hdrProperties, Class<?> returnObjectClass, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public Response getMany(String relURI, PagingInfo pagingInfo, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, Class<?> returnObjectClass, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
 		WebResource service = getService();
 		try
 		{
-			service = buildURI(service, relURI, null, zone, context);
-			if (pagingInfo != null)
-			{
-//				QueryMetadata query = new QueryMetadata();
-//				query.setPagingInfo(pagingInfo);
-//				Map<String, String> queryParameters = query.getQueryParameters();
-			  	Map<String, String> queryParameters = pagingInfo.getRequestValues();
-				for (String key : queryParameters.keySet())
-				{
-				  hdrProperties.setHeaderProperty(key, queryParameters.get(key));
-				  //service = service.queryParam(key, queryParameters.get(key));
-				}
-				
-				//service = service.queryParams(query.getQueryParametersAsMultivaluedMap());
-			}
+			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
+			addPagingInfoToHeaders(pagingInfo, hdrProperties);
 			
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).get(ClientResponse.class);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, addAuthenticationHdrProps(hdrProperties), true, false).get(ClientResponse.class);
 
-			return setResponse(service, response, returnObjectClass, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
+			return setResponse(service, response, returnObjectClass, zone, context, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
 			String errorMsg = "Failed to invoke 'getMany' service (REST GET) on URI " + service.getURI() + ": " + ex.getMessage();
+			logger.error(errorMsg);
+			throw new ServiceInvokationException(errorMsg, ex);
+		}
+	}
+	
+	/**
+	 * Will invoke the REST POST call but with a 'methodOverride' for a 'GET' to enable a payload to be transfered for a
+	 * Query style operation. This method is used for Query By Example requests. All parameters except the 'exampleObject'
+	 * are used in the same manner as with the getMany() method in this class. A list of objects (collection) is returned
+	 * as part of this method. Additional parameters of this method indicate what part of the collection shall be 
+	 * returned (pagingInfo) as well as what zone and context this query shall apply to.
+	 * 
+	 * @param relURI A relative URI to the baseURI given to the constructor of this class. It is appended to the baseURI as is.
+	 * @param exampleObject The example data model object. This must be the single object type.
+	 * @param pagingInfo Page information to be set for the provider to determine which results to return.
+	 * @param hdrProperties Header Properties to be added to the header of the GET request.
+	 * @param returnObjectClass The class type into which the object shall be unmarshalled into. The final object is stored in the
+	 *                          returned Response object.
+	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
+	 * @param context The context for which this operation shall be invoked. Can be null which indicates the DEFAULT context.
+	 * 
+	 * @return Response Object holding appropriate values and results of the call. 
+	 * 
+	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
+	 */
+	public Response getByQBE(String relURI, Object exampleObject, PagingInfo pagingInfo, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, Class<?> returnObjectClass, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	{
+		WebResource service = getService();
+		try
+		{
+			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
+		    String payloadStr = getDataModelMarshaller().marshal(exampleObject, getRequestMediaType());
+
+			addPagingInfoToHeaders(pagingInfo, hdrProperties);
+
+			// Set specific header so that POST method knows that a GET and not an CREATE is required! 
+			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.GET.name());
+
+			if (logger.isDebugEnabled())
+			{
+				logger.debug("getByQBE: Payload to send:\n"+payloadStr);
+			}
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, addAuthenticationHdrProps(hdrProperties), true, true).post(ClientResponse.class, payloadStr);
+
+			return setResponse(service, response, returnObjectClass, zone, context, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
+		}
+		catch (Exception ex)
+		{
+			String errorMsg = "Failed to invoke 'getByQBE' service (REST POST) on URI " + service.getURI() + ": " + ex.getMessage();
 			logger.error(errorMsg);
 			throw new ServiceInvokationException(errorMsg, ex);
 		}
@@ -325,6 +382,9 @@ public class ClientInterface extends BaseClient
 	 * @param payload The payload in its object form. The marshaller given in the constructor of this method is used to convert the 
 	 *                payload to appropriate format (mediaType).
 	 * @param hdrProperties Header Properties to be added to the header of the POST request.
+	 * @param urlQueryParams URL query parameters to be added to the request. It is assumed that these are custom
+	 *                       URL query parameters. They are conveyed to the provider unchanged. URL query parameter
+	 *                       names are case sensitive. This parameter can be null.
 	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
 	 * @param context The context for which this operation shall be invoked. Can be null which indicates the DEFAULT context.
 	 * 
@@ -332,21 +392,21 @@ public class ClientInterface extends BaseClient
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
 	 */
-	public BulkOperationResponse<CreateOperationStatus> createMany(String relURI, Object payload, HeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public BulkOperationResponse<CreateOperationStatus> createMany(String relURI, Object payload, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
 		WebResource service = getService();
 		try
 		{
-			service = buildURI(service, relURI, null, zone, context);
+			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
 		    String payloadStr = getDataModelMarshaller().marshal(payload, getRequestMediaType());
 
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("createMany: Payload to send:\n"+payloadStr);
 			}
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).post(ClientResponse.class, payloadStr);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, addAuthenticationHdrProps(hdrProperties), true, true).post(ClientResponse.class, payloadStr);
 
-			return setCreateBulkResponse(response);
+			return setCreateBulkResponse(response, zone, context);
 		}
 		catch (Exception ex)
 		{
@@ -366,6 +426,9 @@ public class ClientInterface extends BaseClient
 	 * @param payload The payload in its object form. The marshaller given in the constructor of this method is used to convert the 
 	 *                payload to appropriate format (mediaType).
 	 * @param hdrProperties Header Properties to be added to the header of the PUT request.
+	 * @param urlQueryParams URL query parameters to be added to the request. It is assumed that these are custom
+	 *                       URL query parameters. They are conveyed to the provider unchanged. URL query parameter
+	 *                       names are case sensitive. This parameter can be null.
 	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
 	 * @param context The context for which this operation shall be invoked. Can be null which indicates the DEFAULT context.
 	 * 
@@ -373,12 +436,12 @@ public class ClientInterface extends BaseClient
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
 	 */
-	public BulkOperationResponse<OperationStatus> updateMany(String relURI, Object payload, HeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public BulkOperationResponse<OperationStatus> updateMany(String relURI, Object payload, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
 		WebResource service = getService();
 		try
 		{
-			service = buildURI(service, relURI, null, zone, context);
+			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
 
 			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestMediaType());
 			if (logger.isDebugEnabled())
@@ -388,9 +451,9 @@ public class ClientInterface extends BaseClient
 
 			// Set specific header so that PUT method knows that an UPDATE and not a DELETE is required! 
 			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.UPDATE.name());																																			
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true).put(ClientResponse.class, payloadStr);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, addAuthenticationHdrProps(hdrProperties), true, true).put(ClientResponse.class, payloadStr);
 
-			return setUpdateBulkResponse(response);
+			return setUpdateBulkResponse(response, zone, context);
 		}
 		catch (Exception ex)
 		{
@@ -413,6 +476,9 @@ public class ClientInterface extends BaseClient
 	 * @param relURI A relative URI to the baseURI given to the constructor of this class. It is appended to the baseURI as is.
 	 * @param resourceIDs A list of resourceId for the objects to be deleted.
 	 * @param hdrProperties Header Properties to be added to the header of the DELETE request.
+	 * @param urlQueryParams URL query parameters to be added to the request. It is assumed that these are custom
+	 *                       URL query parameters. They are conveyed to the provider unchanged. URL query parameter
+	 *                       names are case sensitive. This parameter can be null.
 	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
 	 * @param context The context for which this operation shall be invoked. Can be null which indicates the DEFAULT context.
 	 * 
@@ -420,12 +486,12 @@ public class ClientInterface extends BaseClient
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
 	 */
-	public BulkOperationResponse<OperationStatus> removeMany(String relURI, List<String> resourceIDs, HeaderProperties hdrProperties, SIFZone zone, SIFContext context) throws ServiceInvokationException
+	public BulkOperationResponse<OperationStatus> removeMany(String relURI, List<String> resourceIDs, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, SIFZone zone, SIFContext context) throws ServiceInvokationException
 	{
 		WebResource service = getService();
 		try
 		{
-			service = buildURI(service, relURI, null, zone, context);
+			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
 			
 			//Convert List of resources to DeletesTypes
 			DeleteRequestType deleteRequest = getInfraObjectFactory().createDeleteRequestType();
@@ -449,9 +515,9 @@ public class ClientInterface extends BaseClient
 			{
 				logger.debug("removeMany: Payload to send:\n"+payloadStr);
 			}
-			ClientResponse cltResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true).put(ClientResponse.class, payloadStr);
+			ClientResponse cltResponse = setRequestHeaderAndMediaTypes(service, addAuthenticationHdrProps(hdrProperties), true, true).put(ClientResponse.class, payloadStr);
 			
-			return setDeleteBulkResponse(cltResponse);
+			return setDeleteBulkResponse(cltResponse, zone, context);
 		}
 		catch (Exception ex)
 		{
@@ -464,10 +530,10 @@ public class ClientInterface extends BaseClient
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-	private BulkOperationResponse<CreateOperationStatus> setCreateBulkResponse(ClientResponse clientResponse)
+	private BulkOperationResponse<CreateOperationStatus> setCreateBulkResponse(ClientResponse clientResponse, SIFZone zone, SIFContext context)
 	{
 		BulkOperationResponse<CreateOperationStatus> response = new BulkOperationResponse<CreateOperationStatus>();
-		setBaseResponseData(response, clientResponse);
+		setBaseResponseData(response, clientResponse, zone, context);
 		if (clientResponse.getClientResponseStatus().getStatusCode() == Status.CREATED.getStatusCode())
 		{
 			if (response.getHasEntity())
@@ -517,10 +583,10 @@ public class ClientInterface extends BaseClient
 		return response;
 	}
 
-	private BulkOperationResponse<OperationStatus> setDeleteBulkResponse(ClientResponse clientResponse)
+	private BulkOperationResponse<OperationStatus> setDeleteBulkResponse(ClientResponse clientResponse, SIFZone zone, SIFContext context)
 	{
 		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
-		setBaseResponseData(response, clientResponse);
+		setBaseResponseData(response, clientResponse, zone, context);
 		if (clientResponse.getClientResponseStatus().getStatusCode() == Status.OK.getStatusCode())
 		{
 			if (response.getHasEntity())
@@ -569,10 +635,10 @@ public class ClientInterface extends BaseClient
 		return response;
 	}
 
-	private BulkOperationResponse<OperationStatus> setUpdateBulkResponse(ClientResponse clientResponse)
+	private BulkOperationResponse<OperationStatus> setUpdateBulkResponse(ClientResponse clientResponse, SIFZone zone, SIFContext context)
 	{
 		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
-		setBaseResponseData(response, clientResponse);
+		setBaseResponseData(response, clientResponse, zone, context);
 		if (clientResponse.getClientResponseStatus().getStatusCode() == Status.OK.getStatusCode())
 		{
 			if (response.getHasEntity())
@@ -620,5 +686,33 @@ public class ClientInterface extends BaseClient
 		}
 		return response;
 	}
-
+	
+	private void addPagingInfoToHeaders(PagingInfo pagingInfo, HeaderProperties hdrProperties)
+	{	
+		if (pagingInfo != null)
+		{
+		  	Map<String, String> queryParameters = pagingInfo.getRequestValues();
+			for (String key : queryParameters.keySet())
+			{
+			  hdrProperties.setHeaderProperty(key, queryParameters.get(key));
+			}
+		}
+	}
+	
+	/*
+	 * This method will add the authentication header properties to the given set of header properties. The final set of header
+	 * properties is then returned.
+	 */
+    private HeaderProperties addAuthenticationHdrProps(HeaderProperties hdrProperties)
+    {
+        if (hdrProperties == null)
+        {
+            hdrProperties = new HeaderProperties();
+        }
+        
+        // Add Authentication info to existing header properties
+        hdrProperties.addHeaderProperties(createAuthenticationHdr(false, null));
+        
+        return hdrProperties;
+    }
 }

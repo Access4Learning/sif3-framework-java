@@ -24,6 +24,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
 
+import sif3.common.CommonConstants;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.exception.UnsupportedQueryException;
@@ -33,6 +34,8 @@ import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.Consumer;
+import sif3.common.interfaces.QueryConsumer;
+import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.QueryPredicate;
@@ -40,6 +43,7 @@ import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
+import sif3.common.model.URLQueryParameter;
 import sif3.common.model.ZoneContextInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.BaseResponse;
@@ -51,8 +55,8 @@ import sif3.common.ws.Response;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.rest.client.ClientInterface;
-import sif3.infra.rest.client.ClientUtils;
 import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.StringUtils;
 import au.com.systemic.framework.utils.Timer;
 
 /**
@@ -68,7 +72,7 @@ import au.com.systemic.framework.utils.Timer;
  * 
  * @author Joerg Huber
  */
-public abstract class AbstractConsumer implements Consumer
+public abstract class AbstractConsumer implements Consumer, QueryConsumer
 {
 	protected final Logger logger = Logger.getLogger(getClass());
 
@@ -141,12 +145,13 @@ public abstract class AbstractConsumer implements Consumer
 	 * By default the following HTTP Header fields are retrieved from the consumer's property file and put in corresponding
 	 * HTTP Header Fields:
 	 * 
-	 * Property               HTTP Header
-	 * ----------------------------------
-	 * adapter.generator.id   generatorId
-	 * env.application.key    applicationKey
-	 * env.userToken          authenticatedUser
-	 * env.mediaType          Content-Type, Accept
+	 * Property                      HTTP Header
+	 * ------------------------------------------------
+	 * adapter.generator.id          generatorId
+	 * env.application.key           applicationKey
+	 * env.userToken                 authenticatedUser
+	 * env.mediaType                 Content-Type, Accept
+	 * adapter.compression.enabled   Content-Encoding, Accept-Encoding
 	 * 
 	 * Only properties that are not null or empty string will be set in the corresponding HTTP Header.
 	 *
@@ -190,17 +195,6 @@ public abstract class AbstractConsumer implements Consumer
 	{
 		return getConsumerEnvironment().getEnvironmentKey().getUserToken();
 	}
-
-//	/**
-//	 * This method returns the value of the env.instanceID property from the consumer's property file. If that
-//	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
-//	 * 
-//	 * @return The env.instanceID property from the consumer's property file
-//	 */
-//	public String getInstanceID()
-//	{
-//		return getConsumerEnvironment().getEnvironmentKey().getInstanceID();
-//	}
 	
 	/**
 	 * This method returns the value of the env.mediaType property from the consumer's property file. If that
@@ -222,6 +216,18 @@ public abstract class AbstractConsumer implements Consumer
 	public MediaType getResponseMediaType()
 	{
 		return getConsumerEnvironment().getMediaType();
+	}
+
+	
+	/**
+	 * This method returns the value of the adapter.compression.enabled property from the consumer's property file. If 
+	 * that needs to be overridden by a specific implementation then the specific sub-class should override this method.
+	 * 
+	 * @return The adapter.compression.enabled property from the consumer's property file
+	 */
+	public boolean getCompressionEnabled()
+	{
+		return getConsumerEnvironment().getCompressionEnabled();
 	}
 
 	/*------------------------------------------------------------------------------------------------------------------------
@@ -264,7 +270,7 @@ public abstract class AbstractConsumer implements Consumer
 	 * @see sif3.common.consumer.Consumer#createMany(java.lang.Object, java.util.List)
 	 */
 	@Override
-	public List<BulkOperationResponse<CreateOperationStatus>> createMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<BulkOperationResponse<CreateOperationStatus>> createMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
 		if (!initOK)
 	  	{
@@ -274,6 +280,7 @@ public abstract class AbstractConsumer implements Consumer
 
 		Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<BulkOperationResponse<CreateOperationStatus>> responses = new ArrayList<BulkOperationResponse<CreateOperationStatus>>();
 		
 		if (!getConsumerEnvironment().getIsConnected())
@@ -282,37 +289,33 @@ public abstract class AbstractConsumer implements Consumer
 			return responses;
 		}
 
-		// List is null or empty which means we attempt to perform action in default Zone/Context of each environment
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = allClientChecks(AccessRight.CREATE, AccessType.APPROVED, null, null, requestType);
-			if (error == null) //all good
+			ErrorDetails error = allClientChecks(AccessRight.CREATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+			if (error == null) //all good => Send request.
 			{
-				responses.add(getClient(getConsumerEnvironment()).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, requestType), null, null));
+				responses.add(getClient(getConsumerEnvironment()).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, requestType, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 			}
-			else  //pretend to have received a 'fake' error Response
+			else //pretend to have received a 'fake' error Response
 			{
 				responses.add(makeBulkErrorResponseForCreates(error));
 			}
-		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = allClientChecks(AccessRight.CREATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
-				if (error == null) //all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, requestType), zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else //pretend to have received a 'fake' error Response
-				{
-					responses.add(makeBulkErrorResponseForCreates(error));
-				}
-			}					
-		}
+		}					
+
 		timer.finish();
 		logger.debug("Time taken to call and process 'createMany' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 		return responses;
+	}
+
+	/*
+	 * Convenience method. The same as above but without the parameter 'customParameters' which is defaulted to null.
+	 */
+	public List<BulkOperationResponse<CreateOperationStatus>> createMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	{
+		return createMany(data, zoneCtxList, requestType, null);
 	}
 
 	/*
@@ -320,16 +323,17 @@ public abstract class AbstractConsumer implements Consumer
 	 * @see sif3.common.consumer.Consumer#createSingle(java.lang.Object, java.util.List)
 	 */
 	@Override
-	public List<Response> createSingle(Object data, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<Response> createSingle(Object data, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-    if (!initOK)
-    {
-      logger.error("Consumer not initialsied properly. See previous error log entries.");
-      return null;
-    }
+	    if (!initOK)
+	    {
+	      logger.error("Consumer not initialsied properly. See previous error log entries.");
+	      return null;
+	    }
 
-    Timer timer = new Timer();
+	    Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<Response> responses = new ArrayList<Response>();
 		
 		if (!getConsumerEnvironment().getIsConnected())
@@ -337,39 +341,36 @@ public abstract class AbstractConsumer implements Consumer
 			logger.error("No connected environment for "+getConsumerEnvironment().getEnvironmentName()+". See previous erro log entries.");
 			return responses;
 		}
-		// List is null or empty which means we perform action in default Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = hasAccess(AccessRight.CREATE, AccessType.APPROVED, null, null);
+			ErrorDetails error = allClientChecks(AccessRight.CREATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).createSingle(getMultiObjectClassInfo().getObjectName()+"/"+getSingleObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, RequestType.IMMEDIATE), getSingleObjectClassInfo().getObjectType(), null, null));
+				responses.add(getClient(getConsumerEnvironment()).createSingle(getMultiObjectClassInfo().getObjectName()+"/"+getSingleObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, RequestType.IMMEDIATE, customParameters), urlQueryParameter, getSingleObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 			}
-			else  //pretend to have received a 'fake' error Response
+			else //pretend to have received a 'fake' error Response
 			{
 				responses.add(createErrorResponse(error));
 			}
-		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = hasAccess(AccessRight.CREATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext());
-				if (error == null) //all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).createSingle(getMultiObjectClassInfo().getObjectName()+"/"+getSingleObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, RequestType.IMMEDIATE), getSingleObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else //pretend to have received a 'fake' error Response
-				{
-					responses.add(createErrorResponse(error));
-				}
-			}					
-		}
+		}					
+
 		timer.finish();
 		logger.debug("Time taken to call and process 'createSingle' for "+getSingleObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 		return responses;
 	}
 
+	/*
+	 * Convenience method. The same as above but without the parameter 'customParameters' which is defaulted to null.
+	 */
+	public List<Response> createSingle(Object data, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	{
+		return createSingle(data, zoneCtxList, null);
+	}
+	
 	/*-----------------------*/
 	/*-- Delete Operations --*/
 	/*-----------------------*/
@@ -379,16 +380,17 @@ public abstract class AbstractConsumer implements Consumer
 	 * @see sif3.common.consumer.Consumer#deleteMany(java.lang.Object, java.util.List)
 	 */
 	@Override
-	public List<BulkOperationResponse<OperationStatus>> deleteMany(List<String> resourceIDs, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<BulkOperationResponse<OperationStatus>> deleteMany(List<String> resourceIDs, List<ZoneContextInfo> zoneCtxList, RequestType requestType, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-    if (!initOK)
-    {
-      logger.error("Consumer not initialsied properly. See previous error log entries.");
-      return null;
-    }
+	    if (!initOK)
+	    {
+	      logger.error("Consumer not initialsied properly. See previous error log entries.");
+	      return null;
+	    }
 
-    Timer timer = new Timer();
+	    Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<BulkOperationResponse<OperationStatus>> responses = new ArrayList<BulkOperationResponse<OperationStatus>>();
 		
 		if (!getConsumerEnvironment().getIsConnected())
@@ -397,54 +399,51 @@ public abstract class AbstractConsumer implements Consumer
 			return responses;
 		}
 
-		// List is null or empty which means we perform action in default Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = allClientChecks(AccessRight.DELETE, AccessType.APPROVED, null, null, requestType);
-			if (error == null) //all good
+			ErrorDetails error = allClientChecks(AccessRight.DELETE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+			if (error == null) //all good => Send request
 			{
-				responses.add(getClient(getConsumerEnvironment()).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(getConsumerEnvironment(), false, requestType), null, null));
+				responses.add(getClient(getConsumerEnvironment()).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 			}
-			else  //pretend to have received a 'fake' error Response
+			else //pretend to have received a 'fake' error Response
 			{
 				responses.add(makeBulkErrorResponse(error));
 			}
 		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = allClientChecks(AccessRight.DELETE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
-				if (error == null) //all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(getConsumerEnvironment(), false, requestType), zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else //pretend to have received a 'fake' error Response
-				{
-					responses.add(makeBulkErrorResponse(error));
-				}
-			}					
-		}
+
 		timer.finish();
 		logger.debug("Time taken to call and process 'removeMany' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 		return responses;
 	}
 
 	/*
+	 * Convenience method. The same as above but without the parameter 'customParameters' which is defaulted to null.
+	 */
+	public List<BulkOperationResponse<OperationStatus>> deleteMany(List<String> resourceIDs, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	{
+		return deleteMany(resourceIDs, zoneCtxList, requestType, null);
+	}
+	
+	/*
 	 * (non-Javadoc)
 	 * @see sif3.common.consumer.Consumer#deleteSingle(java.lang.String, java.util.List)
 	 */
 	@Override
-	public List<Response> deleteSingle(String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<Response> deleteSingle(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-    if (!initOK)
-    {
-      logger.error("Consumer not initialsied properly. See previous error log entries.");
-      return null;
-    }
+	    if (!initOK)
+	    {
+	      logger.error("Consumer not initialsied properly. See previous error log entries.");
+	      return null;
+	    }
 
-    Timer timer = new Timer();
+	    Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<Response> responses = new ArrayList<Response>();
 		
 		if (!getConsumerEnvironment().getIsConnected())
@@ -452,39 +451,36 @@ public abstract class AbstractConsumer implements Consumer
 			logger.error("No connected environment for "+getConsumerEnvironment().getEnvironmentName()+". See previous erro log entries.");
 			return responses;
 		}
-		// List is null or empty which means we perform action in default Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = hasAccess(AccessRight.DELETE, AccessType.APPROVED, null, null);
+			ErrorDetails error = allClientChecks(AccessRight.DELETE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).removeSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE), null, null));
+				responses.add(getClient(getConsumerEnvironment()).removeSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 			}
-			else  //pretend to have received a 'fake' error Response
+			else //pretend to have received a 'fake' error Response
 			{
 				responses.add(createErrorResponse(error));
 			}
-		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = hasAccess(AccessRight.DELETE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext());
-				if (error == null) //all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).removeSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE), zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else //pretend to have received a 'fake' error Response
-				{
-					responses.add(createErrorResponse(error));
-				}
-			}					
-		}
+		}					
+
 		timer.finish();
 		logger.debug("Time taken to call and process 'delete by primary key' for "+getMultiObjectClassInfo().getObjectName()+"/"+resourceID+": "+timer.timeTaken()+"ms");
 		return responses;
 	}
 
+	/*
+	 * Convenience method. The same as above but without the parameter 'customParameters' which is defaulted to null.
+	 */
+	public List<Response> deleteSingle(String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	{
+		return deleteSingle(resourceID, zoneCtxList, null);
+	}
+	
 	/*-------------------------*/
 	/*-- Retrieve Operations --*/
 	/*-------------------------*/
@@ -494,7 +490,7 @@ public abstract class AbstractConsumer implements Consumer
 	 * @see sif3.common.consumer.Consumer#retrievByPrimaryKey(java.lang.String, java.util.List)
 	 */
 	@Override
-	public List<Response> retrievByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<Response> retrievByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
 		if (!initOK)
 		{
@@ -504,6 +500,7 @@ public abstract class AbstractConsumer implements Consumer
 
 		Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<Response> responses = new ArrayList<Response>();
 		
 		if (!getConsumerEnvironment().getIsConnected())
@@ -511,45 +508,42 @@ public abstract class AbstractConsumer implements Consumer
 			logger.error("No connected environment for "+getConsumerEnvironment().getEnvironmentName()+". See previous erro log entries.");
 			return responses;
 		}
-		// List is null or empty which means we perform action in default Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+		
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = hasAccess(AccessRight.QUERY, AccessType.APPROVED, null, null);
+			ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).getSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE), getSingleObjectClassInfo().getObjectType(), null, null));
+				responses.add(getClient(getConsumerEnvironment()).getSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, getSingleObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 			}
-			else  //pretend to have received a 'fake' error Response
+			else //pretend to have received a 'fake' error Response
 			{
 				responses.add(createErrorResponse(error));
 			}
-		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = hasAccess(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext());
-				if (error == null) //all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).getSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE), getSingleObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else //pretend to have received a 'fake' error Response
-				{
-					responses.add(createErrorResponse(error));
-				}
-			}					
-		}
+		}					
+
 		timer.finish();
 		logger.debug("Time taken to call and process 'retrieve by primary key' for "+getSingleObjectClassInfo().getObjectName()+"/"+resourceID+": "+timer.timeTaken()+"ms");
 		return responses;
 	}
 
 	/*
+	 * Convenience method. The same as above but without the parameter 'customParameters' which is defaulted to null.
+	 */
+	public List<Response> retrievByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	{
+		return retrievByPrimaryKey(resourceID, zoneCtxList, null);
+	}
+	
+	/*
 	 * (non-Javadoc)
 	 * @see sif3.common.consumer.Consumer#retrieve(sif3.common.model.PagingInfo, java.util.List)
 	 */
 	@Override
-	public List<Response> retrieve(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+	public List<Response> retrieve(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention, CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
 		if (!initOK)
 		{
@@ -559,6 +553,7 @@ public abstract class AbstractConsumer implements Consumer
 
 		Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<Response> responses = new ArrayList<Response>();
 		
 		if (!getConsumerEnvironment().getIsConnected())
@@ -571,43 +566,27 @@ public abstract class AbstractConsumer implements Consumer
 		queryIntention = (queryIntention == null) ? QueryIntention.ONE_OFF : queryIntention;
 		
 		// Set default set of HTTP Header fields
-		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, requestType);
+		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters);
 		
 		// Add query intention to headers.
 		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION, queryIntention.getHTTPHeaderValue());
 		
-		// List is null or empty which means we perform action in default Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, null, null, requestType);
-			if (error == null)
+			ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+			if (error == null) //all good => Send request
 			{
-				error = requestTypeSupported(requestType);
+				responses.add(getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 			}
-			if (error == null) //all good
-			{
-				responses.add(getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, getMultiObjectClassInfo().getObjectType(), null, null));
-			}
-			else  //pretend to have received a 'fake' error Response
+			else //pretend to have received a 'fake' error Response
 			{
 				responses.add(createErrorResponse(error));
 			}
-		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
-				if (error == null) //all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else //pretend to have received a 'fake' error Response
-				{
-					responses.add(createErrorResponse(error));
-				}
-			}					
-		}
+		}					
+
 		timer.finish();
 		logger.debug("Time taken to call and process 'retrieve all' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 		return responses;
@@ -615,14 +594,19 @@ public abstract class AbstractConsumer implements Consumer
 
 	/*
 	 * See description of retrieve() but without the queryIntention parameter. Since this parameter is not required
-	 * by this method it will be assumed null, which in turn will assume ONE-OFF as per interface definition.
+	 * by this method it will be assumed null, which in turn will assume ONE-OFF as per interface definition. Further
+	 * the customParameters will be set to null.
 	 */
 	public List<Response> retrieve(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
-		return retrieve(pagingInfo, zoneCtxList, requestType, QueryIntention.ONE_OFF);
+		return retrieve(pagingInfo, zoneCtxList, requestType, QueryIntention.ONE_OFF, null);
 	}
 	
-	public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+	/*
+	 * (non-Javadoc)
+	 * @see sif3.common.interfaces.QueryConsumer#retrieveByServicePath(sif3.common.model.QueryCriteria, sif3.common.model.PagingInfo, java.util.List, sif3.common.header.HeaderValues.RequestType, sif3.common.header.HeaderValues.QueryIntention, sif3.common.model.CustomParameters)
+	 */
+	public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention, CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
 		if (!initOK)
 		{
@@ -632,6 +616,7 @@ public abstract class AbstractConsumer implements Consumer
 
 		Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<Response> responses = new ArrayList<Response>();
 
 		if (!getConsumerEnvironment().getIsConnected())
@@ -644,56 +629,111 @@ public abstract class AbstractConsumer implements Consumer
 		queryIntention = (queryIntention == null) ? QueryIntention.ONE_OFF : queryIntention;
 		
 		// Set default set of HTTP Header fields
-		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, requestType, HeaderValues.ServiceType.SERVICEPATH);
+		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, requestType, HeaderValues.ServiceType.SERVICEPATH, customParameters);
 		
 		// Add query intention to headers.
 		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION, queryIntention.getHTTPHeaderValue());
 
-		
-		// List is null or empty which means we perform action in default  Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0))
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, null, null, requestType);
-			if (error == null)
+			ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+			if (error == null) //all good => Send request
 			{
-				error = requestTypeSupported(requestType);
-			}
-			if (error == null) // all good
-			{
-				responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, hdrProps, getMultiObjectClassInfo().getObjectType(), null, null));
+				responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 			}
 			else // pretend to have received a 'fake' error Response
 			{
 				responses.add(createErrorResponse(error));
 			}
 		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
-				if (error == null) // all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, hdrProps, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else // pretend to have received a 'fake' error Response
-				{
-					responses.add(createErrorResponse(error));
-				}
-			}
-		}
+
 	    timer.finish();
 	    logger.debug("Time taken to call and process 'retrieve all' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 	    return responses;
 	}
 	 
 	/*
-	 * See description of retrieveByServicePath() but without the queryIntention parameter. Since this parameter is not required
-	 * by this method it will be assumed null, which in turn will assume ONE-OFF as per interface definition.
+	 * See description of retrieveByServicePath() but without the queryIntention & customParameters parameters. Since this parameter 
+	 * is not required by this method it will be assumed null, which in turn will assume ONE-OFF as per interface definition. Further
+	 * the customParameters will be set to null.
 	 */
 	public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
-		return retrieveByServicePath(queryCriteria, pagingInfo, zoneCtxList, requestType, QueryIntention.ONE_OFF);
+		return retrieveByServicePath(queryCriteria, pagingInfo, zoneCtxList, requestType, QueryIntention.ONE_OFF, null);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see sif3.common.interfaces.QueryConsumer#retrieveByQBE(java.lang.Object, sif3.common.model.PagingInfo, java.util.List, sif3.common.header.HeaderValues.RequestType, sif3.common.header.HeaderValues.QueryIntention, sif3.common.model.CustomParameters)
+	 */
+	public List<Response> retrieveByQBE(Object exampleObject, 
+								        PagingInfo pagingInfo, 
+								        List<ZoneContextInfo> zoneCtxList, 
+								        RequestType requestType, 
+								        QueryIntention queryIntention, 
+								        CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+	{
+		if (!initOK)
+		{
+			logger.error("Consumer not initialsied properly. See previous error log entries.");
+			return null;
+		}
+
+		Timer timer = new Timer();
+		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
+		List<Response> responses = new ArrayList<Response>();
+
+		if (!getConsumerEnvironment().getIsConnected())
+		{
+			logger.error("No connected environment for " + getConsumerEnvironment().getEnvironmentName() + ". See previous erro log entries.");
+			return responses;
+		}
+
+		// Ensure query Intention is not null. if so default to ONE-OFF as per SIF 3.x spec.
+		queryIntention = (queryIntention == null) ? QueryIntention.ONE_OFF : queryIntention;
+		
+		// Set default set of HTTP Header fields
+		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, requestType, HeaderValues.ServiceType.OBJECT, customParameters);
+		
+		// Add query intention to headers.
+		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION, queryIntention.getHTTPHeaderValue());
+
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
+		{
+			ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+			if (error == null) //all good => Send request
+			{
+				responses.add(getClient(getConsumerEnvironment()).getByQBE(getMultiObjectClassInfo().getObjectName(), exampleObject, pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+			}
+			else // pretend to have received a 'fake' error Response
+			{
+				responses.add(createErrorResponse(error));
+			}
+		}
+
+	    timer.finish();
+	    logger.debug("Time taken to call and process 'retrieve all' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
+	    return responses;
+	}
+	
+	/*
+	 * See description of retrieveByServicePath() but without the queryIntention & customParameters parameters. Since this parameter 
+	 * is not required by this method it will be assumed null, which in turn will assume ONE-OFF as per interface definition. Further
+	 * the customParameters will be set to null.
+	 */
+	public Object retrieveByQBE(Object exampleObject, 
+								PagingInfo pagingInfo, 
+								List<ZoneContextInfo> zoneCtxList, 
+								RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+	{
+		return retrieveByQBE(exampleObject, pagingInfo, zoneCtxList, requestType, QueryIntention.ONE_OFF, null);
 	}
 	
 	/*-----------------------*/
@@ -705,7 +745,7 @@ public abstract class AbstractConsumer implements Consumer
 	 * @see sif3.common.consumer.Consumer#updateMany(java.lang.Object, java.util.List)
 	 */
 	@Override
-	public List<BulkOperationResponse<OperationStatus>> updateMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<BulkOperationResponse<OperationStatus>> updateMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
     if (!initOK)
     {
@@ -715,6 +755,7 @@ public abstract class AbstractConsumer implements Consumer
 
     	Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<BulkOperationResponse<OperationStatus>> responses = new ArrayList<BulkOperationResponse<OperationStatus>>();
 		
 		if (!getConsumerEnvironment().getIsConnected())
@@ -722,54 +763,52 @@ public abstract class AbstractConsumer implements Consumer
 			logger.error("No connected environment for "+getConsumerEnvironment().getEnvironmentName()+". See previous erro log entries.");
 			return responses;
 		}
-		// List is null or empty which means we perform action in default Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = allClientChecks(AccessRight.UPDATE, AccessType.APPROVED, null, null, requestType);
-			if (error == null) //all good
+			ErrorDetails error = allClientChecks(AccessRight.UPDATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+			if (error == null) //all good => Send request
 			{
-				responses.add(getClient(getConsumerEnvironment()).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), false, requestType), null, null));
+				responses.add(getClient(getConsumerEnvironment()).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 			}
-			else  //pretend to have received a 'fake' error Response
+			else //pretend to have received a 'fake' error Response
 			{
 				responses.add(makeBulkErrorResponse(error));
 			}
-		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = allClientChecks(AccessRight.UPDATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
-				if (error == null) //all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), false, requestType), zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else //pretend to have received a 'fake' error Response
-				{
-					responses.add(makeBulkErrorResponse(error));
-				}
-			}					
-		}
+		}					
+
 		timer.finish();
 		logger.debug("Time taken to call and process 'updateMany' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
 		return responses;
 	}
 
 	/*
+	 * Convenience method. The same as above but without the parameter 'customParameters' which is defaulted to null.
+	 */
+	public List<BulkOperationResponse<OperationStatus>> updateMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	{
+		return updateMany(data, zoneCtxList, requestType, null);
+	}
+	
+	/*
 	 * (non-Javadoc)
 	 * @see sif3.common.consumer.Consumer#updateSingle(java.lang.Object, java.lang.String, java.util.List)
 	 */
 	@Override
-	public List<Response> updateSingle(Object data, String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<Response> updateSingle(Object data, String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-    if (!initOK)
-    {
-      logger.error("Consumer not initialsied properly. See previous error log entries.");
-      return null;
-    }
+		if (!initOK)
+		{
+			logger.error("Consumer not initialsied properly. See previous error log entries.");
+			return null;
+		}
 
     	Timer timer = new Timer();
 		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<Response> responses = new ArrayList<Response>();
 		
 		if (!getConsumerEnvironment().getIsConnected())
@@ -777,37 +816,34 @@ public abstract class AbstractConsumer implements Consumer
 			logger.error("No connected environment for "+getConsumerEnvironment().getEnvironmentName()+". See previous erro log entries.");
 			return responses;
 		}
-		// List is null or empty which means we perform action in default Zone/Context
-		if ((zoneCtxList == null) || (zoneCtxList.size() == 0)) 
+
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = hasAccess(AccessRight.UPDATE, AccessType.APPROVED, null, null);
+			ErrorDetails error = allClientChecks(AccessRight.UPDATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).updateSingle(getMultiObjectClassInfo().getObjectName(), resourceID, data, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE), null, null));
+				responses.add(getClient(getConsumerEnvironment()).updateSingle(getMultiObjectClassInfo().getObjectName(), resourceID, data, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 			}
-			else  //pretend to have received a 'fake' error Response
+			else //pretend to have received a 'fake' error Response
 			{
 				responses.add(createErrorResponse(error));
 			}
-		}
-		else // Only perform action where environment matches current environment
-		{
-			for (ZoneContextInfo zoneCtx : zoneCtxList)
-			{
-				ErrorDetails error = hasAccess(AccessRight.UPDATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext());
-				if (error == null) //all good
-				{
-					responses.add(getClient(getConsumerEnvironment()).updateSingle(getMultiObjectClassInfo().getObjectName(), resourceID, data, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE), zoneCtx.getZone(), zoneCtx.getContext()));
-				}
-				else //pretend to have received a 'fake' error Response
-				{
-					responses.add(createErrorResponse(error));
-				}
-			}					
-		}
+		}					
+
 		timer.finish();
 		logger.debug("Time taken to call and process 'update by primary key' for "+getMultiObjectClassInfo().getObjectName()+"/"+resourceID+": "+timer.timeTaken()+"ms");
 		return responses;
+	}
+	
+	/*
+	 * Convenience method. The same as above but without the parameter 'customParameters' which is defaulted to null.
+	 */
+	public List<Response> updateSingle(Object data, String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	{
+		return updateSingle(data, resourceID, zoneCtxList, null);
 	}
 	
 	/*
@@ -833,12 +869,14 @@ public abstract class AbstractConsumer implements Consumer
 		}
 		else
 		{
-			return new ClientInterface(envInfo.getConnectorBaseURI(ConsumerEnvironment.ConnectorName.requestsConnector), 
+			return new ClientInterface(ConsumerEnvironmentManager.getInstance(),
+			                           envInfo.getConnectorBaseURI(ConsumerEnvironment.ConnectorName.requestsConnector), 
 	                   				   getRequestMediaType(),
 	                   				   getResponseMediaType(),
 	                   				   getMarshaller(), 
 	                   				   getUnmarshaller(),
-	                   				   envInfo.getSecureConnection());
+	                   				   envInfo.getSecureConnection(),
+	                   				   getCompressionEnabled());
 		}
 	}
 		
@@ -847,13 +885,19 @@ public abstract class AbstractConsumer implements Consumer
 	  return ConsumerEnvironmentManager.getInstance().getSIF3Session();
 	}
 
-	private HeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation, RequestType requestType, HeaderValues.ServiceType serviceType) 
+	private HeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation, RequestType requestType, HeaderValues.ServiceType serviceType, CustomParameters customParameters) 
 	{
 	   HeaderProperties hdrProps = new HeaderProperties();
+	   
+	   // First we add all Custom HTTP Headers. We add SIF defined HTTP header later. This will also ensure that we
+	   // will override custom properties with SIF defined properties.
+	   if ((customParameters != null) && (customParameters.getHttpHeaderParams() != null))
+	   {
+		   hdrProps = customParameters.getHttpHeaderParams();
+	   }
 	    
-	   // First create the properties for the authentication header.
-	   ClientUtils.setAuthenticationHeader(hdrProps, envInfo.getAuthMethod(), getSIF3Session().getSessionToken(), getSIF3Session().getPassword());
-	    
+	   // Now we set SIF defined HTTP headers...
+	   	    
 	   // Set the remaining header fields for this type of request
 	   if (isCreateOperation)
 	   {
@@ -866,21 +910,14 @@ public abstract class AbstractConsumer implements Consumer
 	   // for null, so no need to do this here.
 	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY, getApplicationKey());
 	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTHENTICATED_USER, getAuthentictedUser());
-//	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_INSTANCE_ID, getInstanceID());
 	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, getGeneratorID());
-	   
-//	   String generatorID = getGeneratorID();
-//	   if (StringUtils.notEmpty(generatorID))
-//	   {
-//	      hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, generatorID);
-//	   }
-	    
+	   	    
 	   return hdrProps;
 	}
 	
-	private HeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation, RequestType requestType)
+	private HeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation, RequestType requestType, CustomParameters customParameters)
 	{
-	  return getHeaderProperties(envInfo, isCreateOperation, requestType, HeaderValues.ServiceType.OBJECT);
+	  return getHeaderProperties(envInfo, isCreateOperation, requestType, HeaderValues.ServiceType.OBJECT, customParameters);
 	}
 	
 	private void setErrorDetails(BaseResponse response, ErrorDetails errorDetails)
@@ -896,24 +933,21 @@ public abstract class AbstractConsumer implements Consumer
 	 * Will perform hasAccess() and requestTypeSupported() checks. This is a convenience method, so that not each operation has to
 	 * call the two methods sequentially and manage all the flow.
 	 */
-	private ErrorDetails allClientChecks(AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType) {
+	private ErrorDetails allClientChecks(AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType) 
+	{
 	  return allClientChecks(getMultiObjectClassInfo().getObjectName(), right, accessType, zone, context, requestType);
 	}
 	
 	private ErrorDetails allClientChecks(String serviceName, AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType)
 	{
 		ErrorDetails error = hasAccess(serviceName, right, accessType, zone, context);
-		if (error == null)
+		if ((error == null) && (requestType != null))
 		{
 			error = requestTypeSupported(requestType);
 		}	
 		return error;
 	}
-	
-	private ErrorDetails hasAccess(AccessRight right, AccessType accessType, SIFZone zone, SIFContext context) {
-	  return hasAccess(getMultiObjectClassInfo().getObjectName(), right, accessType, zone, context);
-	}
-	
+		
 	private ErrorDetails hasAccess(String serviceName, AccessRight right, AccessType accessType, SIFZone zone, SIFContext context)
 	{
 		ErrorDetails error = null;
@@ -989,5 +1023,40 @@ public abstract class AbstractConsumer implements Consumer
 		}
 		return result;
 	}
-
+	
+	private List<ZoneContextInfo> getFinalZoneCtxList( List<ZoneContextInfo> zoneCtxList, SIF3Session sif3Session)
+	{
+		List<ZoneContextInfo> finalZoneContextList = null;
+		
+		if (zoneCtxList == null)
+		{
+			finalZoneContextList = new ArrayList<ZoneContextInfo>();
+		}
+		else
+		{
+			finalZoneContextList = zoneCtxList;
+		}
+		
+		if (finalZoneContextList.size() == 0) //add default context and zone
+		{
+			finalZoneContextList.add(new ZoneContextInfo(new SIFZone(sif3Session.getDefaultZone().getId(), true), new SIFContext(CommonConstants.DEFAULT_CONTEXT_NAME, true)));
+		}
+		
+		// Check all entries and if 'null' is used as zone or context then we assign the default.
+		for (ZoneContextInfo zoneCtxInfo : finalZoneContextList)
+		{
+			// If zone or zone ID is null then we set the default zone.
+			if ((zoneCtxInfo.getZone() == null) || StringUtils.isEmpty(zoneCtxInfo.getZone().getId()))
+			{
+				zoneCtxInfo.setZone(new SIFZone(sif3Session.getDefaultZone().getId(), true));
+			}
+			// If zone or zone ID is null then we set the default zone.
+			if ((zoneCtxInfo.getContext() == null) || StringUtils.isEmpty(zoneCtxInfo.getContext().getId()))
+			{
+				zoneCtxInfo.setContext(new SIFContext(CommonConstants.DEFAULT_CONTEXT_NAME, true));
+			}
+		}
+		
+		return finalZoneContextList;
+	}
 }

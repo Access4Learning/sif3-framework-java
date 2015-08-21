@@ -42,8 +42,8 @@ public class TestEnvStore
 		
 		System.out.println("Start Testing EnvironmentStore...");
 		
-		tester.testGetEnvironmentStore("StudentProvider");
-    //tester.testGetEnvironmentStore("StudentConsumer");
+//		tester.testGetEnvironmentStore("StudentProvider");
+    tester.testGetEnvironmentStore("StudentConsumer");
 		
 		System.out.println("End Testing EnvironmentStore.");
 	}
