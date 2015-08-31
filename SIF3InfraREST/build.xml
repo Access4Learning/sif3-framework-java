@@ -211,7 +211,7 @@
         <param name="artifactVersion" value="${sifddversion}" />
       </antcall>   
       <antcall target="maven-install-jar">
-        <param name="filename" value="${lib.root.dir}/${systemic.path}/systemic-framework-20140410.jar" />
+        <param name="filename" value="${lib.root.dir}/${systemic.path}/systemic-framework-${systemic.version}.jar" />
         <param name="artifactId" value="systemic-framework" />
         <param name="artifactVersion" value="1.0" />
       </antcall>
