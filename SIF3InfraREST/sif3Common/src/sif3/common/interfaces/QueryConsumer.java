@@ -66,7 +66,7 @@ public interface QueryConsumer
 	 *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
 	 *                         be null.
 	 * 
-	 * @return A list of responses with one response for each zone/context combination. The data in the response is a ‘collection-type’ style 
+	 * @return A list of responses with one response for each zone/context combination. The data in the response is a "collection-type" style 
 	 *         object as defined in the data model (i.e. StudentPersonals).
 	 *         
 	 * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
@@ -101,7 +101,7 @@ public interface QueryConsumer
 	 *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
 	 *                         be null.
 	 * 
-	 * @return A list of responses with one response for each zone/context combination. The data in the response is a 'collection-type' style 
+	 * @return A list of responses with one response for each zone/context combination. The data in the response is a "collection-type" style 
 	 *         object as defined in the data model (i.e. StudentPersonals).
 	 * 
 	 * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is 
