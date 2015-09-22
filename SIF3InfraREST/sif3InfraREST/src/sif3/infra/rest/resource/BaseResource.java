@@ -106,6 +106,10 @@ public abstract class BaseResource
 {
 	protected final Logger logger = Logger.getLogger(getClass());
 	
+	/* Below variables are for testing purposes only */
+    private static Boolean testMode = null;
+    /* End Testing variables */
+	
 	private enum PostFixMimeType {XML, JSON};
 	
 	/* Name of query parameters for payload free environment creation */
@@ -477,6 +481,14 @@ public abstract class BaseResource
 	{
 		return makeFullResponse(data, Status.OK.getStatusCode(), pagingInfo, isError, ResponseAction.QUERY, marshaller);
 	}
+	
+	/*
+	 * Only used for testing purposes. So we make it protected.
+	 */
+	protected Response makeDelayedAcceptResponse(ResponseAction responseAction)
+	{
+	    return makeFullResponse(null, Status.ACCEPTED.getStatusCode(), null, false, responseAction, null);
+	}
 
 	/**
 	 * This method creates a response to a Bulk Create request. The payload of this response is defined in the SIF3 Specification.
@@ -632,10 +644,13 @@ public abstract class BaseResource
 		// Check if DELAYED requests are supported. Right now this direct environment does not support it.=> Return an error.
 		if (isDirectEnvironment())
 		{
-			if (extractRequestType() == RequestType.DELAYED)
-			{
-				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not supported with this DIRECT Environment");
-			}
+		    if (!isTestMode()) // in test mode we allow DELAYED requests and deal with it at the actual object provider
+		    {
+		        if (extractRequestType() == RequestType.DELAYED) 
+		        {
+	                return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not supported with this DIRECT Environment");		            
+		        }
+		    }
 		}
 		else  // in a Brokered environment only the 'multiple' object operations are supporting delayed.
 		{
@@ -645,11 +660,10 @@ public abstract class BaseResource
     			{
     				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not allowed for this operation");				
     			}
-    			else
-    			{
-    				//TODO: JH - Once delayed is supported then the error below must be removed.
-    				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not supported by this provider.");				
-    			}
+//    			else
+//    			{
+//    				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not supported by this provider.");				
+//    			}
 			}
 		}
 		
@@ -817,6 +831,10 @@ public abstract class BaseResource
 	    	throw new VerifyError("No security service known to validate Bearer Token.");
 	    }
 	}
+
+	/*-------------------------------*/
+    /*-- Protected Utility Methods --*/
+    /*-------------------------------*/
 
 	/*
 	 * This methods attempts to extract some request information that should be passed to the provider. There is a distinct set
@@ -1179,6 +1197,51 @@ public abstract class BaseResource
 
 		responseMediaType = validateAndExtractMimeType(marshaller, responseMediaType, urlPostfixMimeType, useDefaults);
 	}
+	
+    protected boolean isBrokeredEnvironment()
+    {
+        return (getEnvironmentManager().getEnvironmentType() == sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType.BROKERED);
+    }
+
+    protected boolean isDirectEnvironment()
+    {
+        return (getEnvironmentManager().getEnvironmentType() == sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType.DIRECT);
+    }	
+    
+    /*
+     * This is a helper method to test delayed request responses with a direct provider pretending to be able to deal with delayed 
+     * requests. It will only work if resource.testmode=true and env.type=DIRECT in the provider's property file and the HTTP Header 
+     * called RequestType is set to DELAYED. In this case TRUE is returned.
+     */
+    protected boolean pretendDelayed()
+    {
+        if (isDirectEnvironment())
+        {
+            if (isTestMode())
+            {
+                if (extractRequestType() == RequestType.DELAYED)
+                {
+                    return true;
+                }
+            }
+        }
+        
+        return false;    
+    }
+    
+    /*
+     * This method checks if the resource.testmode in the provider's property file is set to TRUE.
+     */
+    protected boolean isTestMode()
+    {
+        if (testMode == null)
+        {
+            AdvancedProperties props = getEnvironmentManager().getServiceProperties();
+            testMode = props.getPropertyAsBool("resource.testmode", false);
+        }
+        return testMode;
+    }
+
 
 	/*---------------------*/
 	/*-- Private Methods --*/
@@ -1326,9 +1389,10 @@ public abstract class BaseResource
 					response = response.header(ResponseHeaderConstants.HDR_CONTENT_LENGTH, payload.length());
 					response = response.header(HttpHeaders.CONTENT_TYPE, finalMediaType);
 				}
-				else
+				else // we have no data
 				{
-					if ((responseAction != null) && (responseAction == ResponseAction.QUERY))
+				    // Special case where we have a query that doesn't return any results.
+					if ((responseAction != null) && (responseAction == ResponseAction.QUERY) && (status != Status.ACCEPTED.getStatusCode()))
 					{
 						// We had a query that returned no data. According to SIF 3.x this must return status of 204 (No Content)
 						response = Response.status(Status.NO_CONTENT);
@@ -1854,15 +1918,5 @@ public abstract class BaseResource
 		// If we get here then all validations and operations succeeded. An environment is created (or existed) and
 		// is now loaded with its associated session.
 		return null;
-	}
-	
-	private boolean isBrokeredEnvironment()
-	{
-		return (getEnvironmentManager().getEnvironmentType() == sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType.BROKERED);
-	}
-
-	private boolean isDirectEnvironment()
-	{
-		return (getEnvironmentManager().getEnvironmentType() == sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType.DIRECT);
 	}
 }

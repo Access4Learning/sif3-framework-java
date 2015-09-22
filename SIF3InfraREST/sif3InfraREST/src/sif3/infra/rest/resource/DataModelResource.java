@@ -338,10 +338,18 @@ public class DataModelResource extends BaseResource
 		PagingInfo pagingInfo = getPaingInfo();
 		try
 		{
-			Object returnObj = QueryProvider.class.cast(provider).retrieveByServicePath(parser.getQueryCriteria(), getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
-			
-			return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
-		}
+            if (pretendDelayed())
+            {
+                // Simply send a response with status of 202
+                return makeDelayedAcceptResponse(ResponseAction.QUERY);
+            }
+            else
+            {
+    			Object returnObj = QueryProvider.class.cast(provider).retrieveByServicePath(parser.getQueryCriteria(), getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
+    			
+    			return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
+	        }
+	    }
 		catch (PersistenceException ex)
 		{
 			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName()  + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
@@ -386,8 +394,16 @@ public class DataModelResource extends BaseResource
 		PagingInfo pagingInfo = getPaingInfo();
 		try
 		{
-			Object returnObj = provider.retrieve(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
-			return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
+		    if (pretendDelayed())
+		    {
+		        // Simply send a response with status of 202
+		        return makeDelayedAcceptResponse(ResponseAction.QUERY);
+		    }
+		    else
+		    {
+		        Object returnObj = provider.retrieve(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
+		        return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
+		    }
 		}
 		catch (PersistenceException ex)
 		{
@@ -646,16 +662,24 @@ public class DataModelResource extends BaseResource
 	{
 	    try
 	    {
-	    	List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
-	      
-	    	if (statusList != null)
-	    	{
-	    		return makeUpdateMultipleResponse(statusList, Status.OK);
-	    	}
-	    	else
-	    	{
-	    		return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.UPDATE);
-	    	}     
+            if (pretendDelayed())
+            {
+                // Simply send a response with status of 202
+                return makeDelayedAcceptResponse(ResponseAction.UPDATE);
+            }
+            else
+            {
+    	    	List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
+    	      
+    	    	if (statusList != null)
+    	    	{
+    	    		return makeUpdateMultipleResponse(statusList, Status.OK);
+    	    	}
+    	    	else
+    	    	{
+    	    		return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.UPDATE);
+    	    	}
+	        }
 	    }
 	    catch (PersistenceException ex)
 	    {
@@ -675,16 +699,24 @@ public class DataModelResource extends BaseResource
 	{
 		try
 		{
-			List<OperationStatus> statusList = provider.deleteMany(getResourceIDsFromDeleteRequest(payload), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
-      
-			if (statusList != null)
-			{
-				return makeDeleteMultipleResponse(statusList, Status.OK);
-			}
-			else
-			{
-				return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getMultiObjectClassInfo().getObjectName() + " (Bulk Operation). Contact your System Administrator."), ResponseAction.DELETE);
-			}
+            if (pretendDelayed())
+            {
+                // Simply send a response with status of 202
+                return makeDelayedAcceptResponse(ResponseAction.DELETE);
+            }
+            else
+            {
+    			List<OperationStatus> statusList = provider.deleteMany(getResourceIDsFromDeleteRequest(payload), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
+          
+    			if (statusList != null)
+    			{
+    				return makeDeleteMultipleResponse(statusList, Status.OK);
+    			}
+    			else
+    			{
+    				return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getMultiObjectClassInfo().getObjectName() + " (Bulk Operation). Contact your System Administrator."), ResponseAction.DELETE);
+    			}
+	        }
 		}
 		catch (PersistenceException ex)
 		{
@@ -704,16 +736,24 @@ public class DataModelResource extends BaseResource
 	{
 		try
 		{
-			List<CreateOperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
-			
-			if (statusList != null)
-			{
-				return makeCreateMultipleResponse(statusList, Status.CREATED);
-			}
-			else
-			{
-				return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.CREATE);
-			}			
+            if (pretendDelayed())
+            {
+                // Simply send a response with status of 202
+                return makeDelayedAcceptResponse(ResponseAction.CREATE);
+            }
+            else
+            {
+    			List<CreateOperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
+    			
+    			if (statusList != null)
+    			{
+    				return makeCreateMultipleResponse(statusList, Status.CREATED);
+    			}
+    			else
+    			{
+    				return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.CREATE);
+    			}	
+	        }
 		}
 		catch (PersistenceException ex)
 		{
@@ -740,9 +780,17 @@ public class DataModelResource extends BaseResource
 
 		try
 		{
-			Object returnObj = QueryProvider.class.cast(provider).retrieveByQBE(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
+            if (pretendDelayed())
+            {
+                // Simply send a response with status of 202
+                return makeDelayedAcceptResponse(ResponseAction.QUERY);
+            }
+            else
+            {
+                Object returnObj = QueryProvider.class.cast(provider).retrieveByQBE(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
 			
-			return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
+                return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
+	        }
 		}
 		catch (PersistenceException ex)
 		{
