@@ -29,7 +29,7 @@ import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
-import sif3.infra.rest.client.ClientInterface;
+import sif3.infra.rest.client.ObjectServiceClient;
 import sif3.infra.rest.consumer.ConsumerLoader;
 
 
@@ -37,7 +37,7 @@ import sif3.infra.rest.consumer.ConsumerLoader;
  * @author Joerg Huber
  *
  */
-public class TestClientInterface
+public class TestObjectServiceClient
 {
   private MarshalFactory marshaller = new InfraMarshalFactory();
   private UnmarshalFactory unmarshaller = new InfraUnmarshalFactory();
@@ -58,7 +58,7 @@ public class TestClientInterface
 		try
 		{
 			System.out.println("Connect to: "+BASE_URL);
-			ClientInterface client = new ClientInterface(ConsumerEnvironmentManager.getInstance(), new URI(BASE_URL), marshaller, unmarshaller, false, false);
+			ObjectServiceClient client = new ObjectServiceClient(ConsumerEnvironmentManager.getInstance(), new URI(BASE_URL), marshaller, unmarshaller, false, false);
 
 			HeaderProperties hdrProps = new HeaderProperties();
 //			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AUTH_TOKEN);
@@ -90,15 +90,15 @@ public class TestClientInterface
 
 	public static void main(String[] args)
 	{
-		TestClientInterface tester = new TestClientInterface();
+		TestObjectServiceClient tester = new TestObjectServiceClient();
 	    
 	    if (ConsumerLoader.initialise(CONSUMER_ID))
 	    {
-	        System.out.println("Start Testing TestClientInterface...");
+	        System.out.println("Start Testing ObjectServiceClient...");
 	    
 	        tester.testGetSingle();
 	    
-	        System.out.println("End Testing TestClientInterface.");
+	        System.out.println("End Testing ObjectServiceClient.");
 	        
 	        ConsumerLoader.shutdown();
 	    }
