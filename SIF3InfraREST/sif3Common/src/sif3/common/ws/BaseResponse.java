@@ -45,8 +45,10 @@ public class BaseResponse implements Serializable
 	private int contentLength = -1;
 	private SIFZone zone;
 	private SIFContext context;
+	private DelayedRequestReceipt delayedReceipt = null;
 
-	/**
+
+    /**
 	 * Get the HTTP status.
 	 * 
 	 * @return See Desc.
@@ -196,12 +198,33 @@ public class BaseResponse implements Serializable
 		return (error != null);
 	}
 
-	@Override
+	
+	   /**
+     * @return the delayedReceipt
+     */
+    public DelayedRequestReceipt getDelayedReceipt()
+    {
+        return delayedReceipt;
+    }
+
+    /**
+     * @param delayedReceipt the delayedReceipt to set
+     */
+    public void setDelayedReceipt(DelayedRequestReceipt delayedReceipt)
+    {
+        this.delayedReceipt = delayedReceipt;
+    }
+
+	/* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
     public String toString()
     {
-	    return "BaseResponse [status=" + this.status + ", statusMessage=" + this.statusMessage
-	            + ", hasEntity=" + this.hasEntity + ", error=" + this.error + ", hdrProperties="
-	            + this.hdrProperties + ", mediaType=" + this.mediaType + ", contentLength="
-	            + this.contentLength + ", zone=" + this.zone + ", context=" + this.context + "]";
+        return "BaseResponse [status=" + status + ", statusMessage=" + statusMessage
+                + ", hasEntity=" + hasEntity + ", error=" + error + ", hdrProperties="
+                + hdrProperties + ", mediaType=" + mediaType + ", contentLength=" + contentLength
+                + ", zone=" + zone + ", context=" + context + ", delayedReceipt=" + delayedReceipt
+                + "]";
     }
 }
