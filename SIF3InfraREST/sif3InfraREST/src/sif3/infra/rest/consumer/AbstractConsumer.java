@@ -32,6 +32,8 @@ import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
 import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
+import sif3.common.header.HeaderValues.ResponseAction;
+import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.Consumer;
 import sif3.common.interfaces.QueryConsumer;
@@ -49,12 +51,13 @@ import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.BaseResponse;
 import sif3.common.ws.BulkOperationResponse;
 import sif3.common.ws.CreateOperationStatus;
+import sif3.common.ws.DelayedRequestReceipt;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.common.ws.Response;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment;
-import sif3.infra.rest.client.ClientInterface;
+import sif3.infra.rest.client.ObjectServiceClient;
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.StringUtils;
 import au.com.systemic.framework.utils.Timer;
@@ -75,6 +78,10 @@ import au.com.systemic.framework.utils.Timer;
 public abstract class AbstractConsumer implements Consumer, QueryConsumer
 {
 	protected final Logger logger = Logger.getLogger(getClass());
+
+	/* Below variables are for testing purposes only */
+    private static Boolean testMode = null;
+    /* End Testing variables */
 
 	private boolean checkACL = true;
 	private boolean initOK = true;
@@ -297,7 +304,11 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			ErrorDetails error = allClientChecks(AccessRight.CREATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 			if (error == null) //all good => Send request.
 			{
-				responses.add(getClient(getConsumerEnvironment()).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, requestType, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
+				BulkOperationResponse<CreateOperationStatus> response = getClient(getConsumerEnvironment()).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+
+				// Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
+				finaliseDelayedReceipt(response.getDelayedReceipt(), getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, ResponseAction.CREATE);
+				responses.add(response);
 			}
 			else //pretend to have received a 'fake' error Response
 			{
@@ -350,7 +361,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			ErrorDetails error = allClientChecks(AccessRight.CREATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).createSingle(getMultiObjectClassInfo().getObjectName()+"/"+getSingleObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, RequestType.IMMEDIATE, customParameters), urlQueryParameter, getSingleObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+				responses.add(getClient(getConsumerEnvironment()).createSingle(getMultiObjectClassInfo().getObjectName()+"/"+getSingleObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), true, customParameters), urlQueryParameter, getSingleObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 			}
 			else //pretend to have received a 'fake' error Response
 			{
@@ -407,7 +418,11 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			ErrorDetails error = allClientChecks(AccessRight.DELETE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 			if (error == null) //all good => Send request
 			{
-				responses.add(getClient(getConsumerEnvironment()).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
+				BulkOperationResponse<OperationStatus> response = getClient(getConsumerEnvironment()).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(getConsumerEnvironment(), false, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+
+				// Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
+				finaliseDelayedReceipt(response.getDelayedReceipt(), getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, ResponseAction.DELETE);
+				responses.add(response);
 			}
 			else //pretend to have received a 'fake' error Response
 			{
@@ -460,7 +475,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			ErrorDetails error = allClientChecks(AccessRight.DELETE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).removeSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
+				responses.add(getClient(getConsumerEnvironment()).removeSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 			}
 			else //pretend to have received a 'fake' error Response
 			{
@@ -517,7 +532,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).getSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, getSingleObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+				responses.add(getClient(getConsumerEnvironment()).getSingle(getMultiObjectClassInfo().getObjectName(), resourceID, getHeaderProperties(getConsumerEnvironment(), false, customParameters), urlQueryParameter, getSingleObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
 			}
 			else //pretend to have received a 'fake' error Response
 			{
@@ -566,7 +581,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 		queryIntention = (queryIntention == null) ? QueryIntention.ONE_OFF : queryIntention;
 		
 		// Set default set of HTTP Header fields
-		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters);
+		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, customParameters);
 		
 		// Add query intention to headers.
 		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION, queryIntention.getHTTPHeaderValue());
@@ -579,7 +594,11 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 			if (error == null) //all good => Send request
 			{
-				responses.add(getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+				Response response = getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+
+				// Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
+				finaliseDelayedReceipt(response.getDelayedReceipt(), getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, ResponseAction.QUERY);
+				responses.add(response);
 			}
 			else //pretend to have received a 'fake' error Response
 			{
@@ -629,7 +648,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 		queryIntention = (queryIntention == null) ? QueryIntention.ONE_OFF : queryIntention;
 		
 		// Set default set of HTTP Header fields
-		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, requestType, HeaderValues.ServiceType.SERVICEPATH, customParameters);
+		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, HeaderValues.ServiceType.SERVICEPATH, customParameters);
 		
 		// Add query intention to headers.
 		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION, queryIntention.getHTTPHeaderValue());
@@ -642,7 +661,11 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 			if (error == null) //all good => Send request
 			{
-				responses.add(getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+				Response response = getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+
+				// Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
+				finaliseDelayedReceipt(response.getDelayedReceipt(), getMultiObjectClassInfo().getObjectName(), ServiceType.SERVICEPATH, ResponseAction.QUERY);
+				responses.add(response);
 			}
 			else // pretend to have received a 'fake' error Response
 			{
@@ -697,7 +720,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 		queryIntention = (queryIntention == null) ? QueryIntention.ONE_OFF : queryIntention;
 		
 		// Set default set of HTTP Header fields
-		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, requestType, HeaderValues.ServiceType.OBJECT, customParameters);
+		HeaderProperties hdrProps = getHeaderProperties(getConsumerEnvironment(), false, HeaderValues.ServiceType.OBJECT, customParameters);
 		
 		// Add query intention to headers.
 		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_QUERY_INTENTION, queryIntention.getHTTPHeaderValue());
@@ -710,7 +733,11 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 			if (error == null) //all good => Send request
 			{
-				responses.add(getClient(getConsumerEnvironment()).getByQBE(getMultiObjectClassInfo().getObjectName(), exampleObject, pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext()));
+				Response response = getClient(getConsumerEnvironment()).getByQBE(getMultiObjectClassInfo().getObjectName(), exampleObject, pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+
+				// Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
+				finaliseDelayedReceipt(response.getDelayedReceipt(), getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, ResponseAction.QUERY);
+				responses.add(response);
 			}
 			else // pretend to have received a 'fake' error Response
 			{
@@ -772,7 +799,11 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			ErrorDetails error = allClientChecks(AccessRight.UPDATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 			if (error == null) //all good => Send request
 			{
-				responses.add(getClient(getConsumerEnvironment()).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), false, requestType, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
+				BulkOperationResponse<OperationStatus> response = getClient(getConsumerEnvironment()).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(getConsumerEnvironment(), false, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+
+				// Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
+				finaliseDelayedReceipt(response.getDelayedReceipt(), getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, ResponseAction.UPDATE);
+				responses.add(response);
 			}
 			else //pretend to have received a 'fake' error Response
 			{
@@ -825,7 +856,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			ErrorDetails error = allClientChecks(AccessRight.UPDATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
 			if (error == null) //all good
 			{
-				responses.add(getClient(getConsumerEnvironment()).updateSingle(getMultiObjectClassInfo().getObjectName(), resourceID, data, getHeaderProperties(getConsumerEnvironment(), false, RequestType.IMMEDIATE, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
+				responses.add(getClient(getConsumerEnvironment()).updateSingle(getMultiObjectClassInfo().getObjectName(), resourceID, data, getHeaderProperties(getConsumerEnvironment(), false, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 			}
 			else //pretend to have received a 'fake' error Response
 			{
@@ -859,7 +890,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-	private ClientInterface getClient(ConsumerEnvironment envInfo)
+	private ObjectServiceClient getClient(ConsumerEnvironment envInfo)
 	{
 		URI baseURI = envInfo.getConnectorBaseURI(ConsumerEnvironment.ConnectorName.requestsConnector);
 		if (baseURI == null)
@@ -869,7 +900,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 		}
 		else
 		{
-			return new ClientInterface(ConsumerEnvironmentManager.getInstance(),
+			return new ObjectServiceClient(ConsumerEnvironmentManager.getInstance(),
 			                           envInfo.getConnectorBaseURI(ConsumerEnvironment.ConnectorName.requestsConnector), 
 	                   				   getRequestMediaType(),
 	                   				   getResponseMediaType(),
@@ -885,7 +916,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 	  return ConsumerEnvironmentManager.getInstance().getSIF3Session();
 	}
 
-	private HeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation, RequestType requestType, HeaderValues.ServiceType serviceType, CustomParameters customParameters) 
+	private HeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation, HeaderValues.ServiceType serviceType, CustomParameters customParameters) 
 	{
 	   HeaderProperties hdrProps = new HeaderProperties();
 	   
@@ -904,8 +935,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 	      hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, (envInfo.getUseAdvisory() ? "true" : "false"));
 	   }
 	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, serviceType.name());
-	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE, requestType.name());
-	    
+	   
 	   // Set values of consumer property file or their overridden value. Note thsetHeaderProperty() method will do the check
 	   // for null, so no need to do this here.
 	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY, getApplicationKey());
@@ -915,9 +945,9 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 	   return hdrProps;
 	}
 	
-	private HeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation, RequestType requestType, CustomParameters customParameters)
+	private HeaderProperties getHeaderProperties(ConsumerEnvironment envInfo, boolean isCreateOperation, CustomParameters customParameters)
 	{
-	  return getHeaderProperties(envInfo, isCreateOperation, requestType, HeaderValues.ServiceType.OBJECT, customParameters);
+	  return getHeaderProperties(envInfo, isCreateOperation, HeaderValues.ServiceType.OBJECT, customParameters);
 	}
 	
 	private void setErrorDetails(BaseResponse response, ErrorDetails errorDetails)
@@ -966,10 +996,16 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 	private ErrorDetails requestTypeSupported(RequestType requestType)
 	{
 		ErrorDetails error = null;
-		if (requestType == RequestType.DELAYED)
+		
+		//TODO: JH - Once delayed is fully implemented the following block can be removed.
+		if (!isTestMode())
 		{
-			error = new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Client side Check: DELAYED requests are not supported, yet.");
+    		if (requestType == RequestType.DELAYED)
+    		{
+    			error = new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Client side Check: DELAYED requests are not supported, yet.");
+    		}
 		}
+		// END: Delayed restriction.
 		return error;
 	}
 
@@ -1059,4 +1095,33 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 		
 		return finalZoneContextList;
 	}
+	
+	/*
+	 * This method sets the remaining properties in the receipt for delayed responses. There are a few fields that cannot be set at the ObjectServiceClient as
+	 * they are not known or cannot be determined in there but are well known in the abstract consumer.
+	 */
+	private void finaliseDelayedReceipt(DelayedRequestReceipt delayedReceipt, String serviceName, ServiceType serviceType, ResponseAction requestedAction)
+	{
+		if (delayedReceipt != null)
+		{
+            //delayedReceipt.setRequestDate(requestDate);
+            delayedReceipt.setServiceName(serviceName);
+            delayedReceipt.setServiceType(serviceType);
+            delayedReceipt.setRequestedAction(requestedAction);
+		}
+	}
+	
+    /*
+     * This method checks if the test.testmode in the consumer's property file is set to TRUE.
+     */
+    private boolean isTestMode()
+    {
+        if (testMode == null)
+        {
+            AdvancedProperties props = getServiceProperties();
+            testMode = props.getPropertyAsBool("test.testmode", false);
+        }
+        return testMode;
+    }
+
 }
