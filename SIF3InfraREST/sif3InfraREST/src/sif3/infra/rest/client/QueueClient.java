@@ -56,7 +56,7 @@ public class QueueClient extends BaseClient
 			HeaderProperties hdrProperties = getHeaderProperties();		
 			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
 
-			return setResponse(service, clientResponse, QueueCollectionType.class, null, null, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
+			return setResponse(service, clientResponse, QueueCollectionType.class, hdrProperties, null, null, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -75,7 +75,7 @@ public class QueueClient extends BaseClient
 			HeaderProperties hdrProperties = getHeaderProperties();		
 			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
 
-			return setResponse(service, clientResponse, QueueType.class, null, null, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
+			return setResponse(service, clientResponse, QueueType.class, hdrProperties, null, null, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -150,7 +150,7 @@ public class QueueClient extends BaseClient
 			HeaderProperties hdrProperties = getHeaderProperties();		
 		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).delete(ClientResponse.class);
 
-			return setResponse(service, clientResponse, null, null, null, Status.NO_CONTENT);
+			return setResponse(service, clientResponse, null, hdrProperties, null, null, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -202,7 +202,7 @@ public class QueueClient extends BaseClient
 				logger.debug("createQueue: Payload to send:\n"+payloadStr);
 			}
 			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true).post(ClientResponse.class, payloadStr);
-			return setResponse(service, clientResponse, QueueType.class, null, null, Status.CREATED, Status.CONFLICT);
+			return setResponse(service, clientResponse, QueueType.class, hdrProperties, null, null, Status.CREATED, Status.CONFLICT);
 		}
 		catch (Exception ex)
 		{

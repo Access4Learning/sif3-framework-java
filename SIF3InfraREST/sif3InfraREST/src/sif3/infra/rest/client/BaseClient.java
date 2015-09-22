@@ -37,6 +37,7 @@ import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
 import sif3.common.header.HeaderValues.MessageType;
+import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.model.AuthenticationInfo;
@@ -51,6 +52,7 @@ import sif3.common.security.AbstractSecurityService;
 import sif3.common.security.BearerSecurityFactory;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.BaseResponse;
+import sif3.common.ws.DelayedRequestReceipt;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
@@ -342,21 +344,23 @@ public abstract class BaseClient
 		return buildURI(svc, relURI, null, null, null, null);
 	}
 		
+	
 	/**
 	 * This method will set the valid/accepted media type for this service. It will then add all header properties given to this
-	 * method to the service. It will also add some "default" header properties such MessageID, timestamp if it is not set yet, and
+	 * method to the service. Further will also add some "default" header properties such MessageID, timestamp if it is not set yet, and
 	 * if required a request ID. For it to be a valid SIF3 service it is expected that the authentication token is already part
 	 * of the given header properties. It WON'T be added as part of this method.
 	 * 
 	 * @param service The service to which media type and header properties shall be added.
 	 * @param hdrProperties A set of defined header properties. Should really hold the authentication related properties!
+	 * @param requestType The request type to be set in the HTTP headers.
 	 * @param includeRequestID TRUE: Add a generated request ID header property
 	 * @hasPayload TRUE: The request will contain a payload. Required for compression header settings
 	 *             FALSE: The request is payload free.
 	 * 
 	 * @return A builder class on which a HTTP operation can be invoked on.
 	 */
-	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, boolean includeRequestID, boolean hasPayload)
+	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, RequestType requestType, boolean includeRequestID, boolean hasPayload)
 	{
 //		System.out.println("Client: Request MediaType: "+getRequestMediaType());
 //		System.out.println("Client Response MediaType: "+getResponseMediaType());
@@ -372,6 +376,9 @@ public abstract class BaseClient
 		// Always set the requestId and messageId.
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_MESSAGE_ID, UUIDGenerator.getUUID());
 		//builder = builder.header(RequestHeaderConstants.HDR_MESSAGE_ID, UUIDGenerator.getUUID());
+		
+		// Set the request type.
+		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE, ((requestType == null) ? RequestType.IMMEDIATE.name() : requestType.name()));
 		
 		// Sometimes the request ID is not required (i.e. events)
 		if (includeRequestID)
@@ -420,8 +427,24 @@ public abstract class BaseClient
 		}
 
 		return builder;
-	}
+	}	
 	
+	/**
+	 * This method is a convenience method to above. It will default the request type to IMMEDATE otherwise it behaves just like above method.
+	 * 
+	 * @param service The service to which media type and header properties shall be added.
+	 * @param hdrProperties A set of defined header properties. Should really hold the authentication related properties!
+	 * @param includeRequestID TRUE: Add a generated request ID header property
+	 * @hasPayload TRUE: The request will contain a payload. Required for compression header settings
+	 *             FALSE: The request is payload free.
+	 * 
+	 * @return A builder class on which a HTTP operation can be invoked on.
+	 */
+	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, boolean includeRequestID, boolean hasPayload)
+	{
+		return setRequestHeaderAndMediaTypes(service, hdrProperties, RequestType.IMMEDIATE, includeRequestID, hasPayload);
+	}
+
 	protected HeaderProperties createAuthenticationHdr(boolean isEnvCreate, SIF3Session pseudoSIF3Session)
 	{
 		AuthenticationInfo authInfo = getAuthenicationInfo(isEnvCreate, pseudoSIF3Session);
@@ -448,10 +471,18 @@ public abstract class BaseClient
 		return hdrProps;
 	}
 	
-	protected Response setResponse(WebResource service, ClientResponse clientResponse, Class<?> returnObjectClass, SIFZone zone, SIFContext context, Status... successStatusCodes)
+	/*
+     * Convenience method for calls that do not support DELAYED request/responses.
+     */
+    protected Response setResponse(WebResource service, ClientResponse clientResponse, Class<?> returnObjectClass, HeaderProperties requestHdrProps, SIFZone zone, SIFContext context, Status... successStatusCodes)
+    {
+        return setResponse(service, clientResponse, returnObjectClass, requestHdrProps, zone, context, RequestType.IMMEDIATE, successStatusCodes);
+    }
+	
+	protected Response setResponse(WebResource service, ClientResponse clientResponse, Class<?> returnObjectClass, HeaderProperties requestHdrProps, SIFZone zone, SIFContext context, RequestType requestType, Status... successStatusCodes)
 	{
 		Response response = new Response();
-		setBaseResponseData(response, clientResponse, zone, context);
+		setBaseResponseData(response, clientResponse, requestHdrProps, zone, context, requestType, service.getURI().toString());
 		response.setResourceURI(service.getURI());
 		response.setDataObjectType(returnObjectClass);
 
@@ -516,8 +547,11 @@ public abstract class BaseClient
 		return response;
 	}
 
-	
-	protected void setBaseResponseData(BaseResponse response, ClientResponse clientResponse, SIFZone zone, SIFContext context)
+	/*
+	 * This method cannot set the serviceName and serviceType in the Delayed Response Receipt property. It must be set by the caller of this method as this
+	 * is the place where the values are known. 
+	 */
+	protected void setBaseResponseData(BaseResponse response, ClientResponse clientResponse, HeaderProperties requestHdrProps, SIFZone zone, SIFContext context, RequestType requestType, String requestURI)
 	{
 		response.setStatus(clientResponse.getClientResponseStatus().getStatusCode());
 		response.setStatusMessage(clientResponse.getClientResponseStatus().getReasonPhrase());
@@ -533,7 +567,23 @@ public abstract class BaseClient
 		{
 			logger.debug("HTTP Headers of Response: "+response.getHdrProperties());
 		}
-		response.setHasEntity(clientResponse.hasEntity() && (clientResponse.getClientResponseStatus().getStatusCode() != Status.NO_CONTENT.getStatusCode()));		
+		response.setHasEntity(clientResponse.hasEntity() && (clientResponse.getClientResponseStatus().getStatusCode() != Status.NO_CONTENT.getStatusCode()) && (clientResponse.getClientResponseStatus().getStatusCode() != Status.ACCEPTED.getStatusCode()));		
+
+		if ((requestType != null) && (requestType == RequestType.DELAYED)) // set delayed receipt info
+		{
+		    DelayedRequestReceipt delayedReceipt = new DelayedRequestReceipt();
+		    delayedReceipt.setContext(context);
+		    delayedReceipt.setZone(zone);
+		    
+		    //Since this framework is being used, we know that the requestID is set in the request header properties.
+		    delayedReceipt.setRequestGUID(requestHdrProps.getHeaderProperty(RequestHeaderConstants.HDR_REQUEST_ID));
+		    delayedReceipt.setRequestDate(new Date());
+		    
+		    // The following three properties are not known at this time: ServiceName &  ServiceType
+		    delayedReceipt.setRequestURI(requestURI);
+		    
+		    response.setDelayedReceipt(delayedReceipt);
+		}
 	}
 	
 	protected void setErrorResponse(BaseResponse response, ClientResponse clientResponse)
