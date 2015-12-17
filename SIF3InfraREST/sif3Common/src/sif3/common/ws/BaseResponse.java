@@ -23,6 +23,7 @@ import javax.ws.rs.core.MediaType;
 import sif3.common.header.HeaderProperties;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.delayed.DelayedRequestReceipt;
 
 /**
  * This is a utility class. All HTTP responses (over REST or SOAP) have a number of fields set. This
