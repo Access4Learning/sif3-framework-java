@@ -24,7 +24,14 @@ import sif.dd.au30.conversion.DataModelMarshalFactory;
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
+import sif3.common.model.PagingInfo;
+import sif3.common.model.QueryCriteria;
+import sif3.common.model.delayed.DelayedResponseReceipt;
 import sif3.common.utils.JAXBUtils;
+import sif3.common.ws.CreateOperationStatus;
+import sif3.common.ws.ErrorDetails;
+import sif3.common.ws.OperationStatus;
+import sif3.common.ws.model.MultiOperationStatusList;
 import sif3.infra.rest.consumer.AbstractConsumer;
 
 /**
@@ -68,5 +75,58 @@ public abstract class AUDataModelConsumer extends AbstractConsumer
     public void shutdown()
     {
 	    // nothing to do at the moment
+    }
+
+
+//	@Override
+//    public ModelObjectInfo getSingleObjectClassInfo()
+//    {
+//	    return null;
+//    }
+//
+//	@Override
+//    public ModelObjectInfo getMultiObjectClassInfo()
+//    {
+//	    return null;
+//    }
+
+	/*----------------------------------------------------------------------------*/
+	/*-- Abstract Consumer Methods: Dummy Implementation - Just log the values. --*/
+	/*----------------------------------------------------------------------------*/
+
+	@Override
+    public void processDelayedCreateMany(MultiOperationStatusList<CreateOperationStatus> statusList, DelayedResponseReceipt receipt)
+    {
+		logger.debug("Received DELAYED CREATE Response:\n"+statusList+"\nDelayed Receipt Details:\n"+receipt);
+    }
+
+	@Override
+    public void processDelayedUpdateMany(MultiOperationStatusList<OperationStatus> statusList, DelayedResponseReceipt receipt)
+    {
+		logger.debug("Received DELAYED UPDATE Response:\n"+statusList+"\nDelayed Receipt Details:\n"+receipt);
+    }
+
+	@Override
+    public void processDelayedDeleteMany(MultiOperationStatusList<OperationStatus> statusList, DelayedResponseReceipt receipt)
+    {
+		logger.debug("Received DELAYED DELETE Response:\n"+statusList+"\nDelayed Receipt Details:\n"+receipt);
+    }
+
+	@Override
+    public void processDelayedQuery(Object dataObject, PagingInfo pagingInfo, DelayedResponseReceipt receipt)
+    {
+		logger.debug("Received DELAYED QUERY Response:\n"+dataObject+"\nPagingInfo:\n"+pagingInfo+"\nDelayed Receipt Details:\n"+receipt);
+    }
+
+	@Override
+    public void processDelayedServicePath(Object dataObject, QueryCriteria queryCriteria, PagingInfo pagingInfo, DelayedResponseReceipt receipt)
+    {
+		logger.debug("Received DELAYED SERVICEPATH Response:\n"+dataObject+"\nQuery Criteria:\n"+queryCriteria+"\nPagingInfo:\n"+pagingInfo+"\nDelayed Receipt Details:\n"+receipt);
+    }
+
+	@Override
+    public void processDelayedError(ErrorDetails error, DelayedResponseReceipt receipt)
+    {
+		logger.debug("Received DELAYED ERROR Response:\n"+error+"\nDelayed Receipt Details:\n"+receipt);
     }
 }

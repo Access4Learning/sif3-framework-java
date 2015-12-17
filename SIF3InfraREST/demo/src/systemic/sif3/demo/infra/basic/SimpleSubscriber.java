@@ -24,7 +24,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import javax.xml.bind.JAXBElement;
 
-import sif.dd.au30.model.StudentCollectionType;
+import sif.dd.au30.model.StudentPersonalCollectionType;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -89,7 +89,7 @@ public class SimpleSubscriber extends BaseDemo
 			String entity = response.getEntity(String.class);
 
 			// Try to put this into the JAXB generates StudentPersonals Object.
-			JAXBElement<StudentCollectionType> elem = (JAXBElement<StudentCollectionType>) unmarshalFromXML(entity, StudentCollectionType.class);
+			JAXBElement<StudentPersonalCollectionType> elem = (JAXBElement<StudentPersonalCollectionType>) unmarshalFromXML(entity, StudentPersonalCollectionType.class);
 			// JAXBElement<StudentCollectionType> elem = (JAXBElement<StudentCollectionType>)unmarshalFromXML(TEST_STRING, StudentCollectionType.class);
 
 			System.out.println("Number of Students: " + elem.getValue().getStudentPersonal().size());

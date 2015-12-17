@@ -18,7 +18,7 @@
 
 package systemic.sif3.demo.rest.consumer;
 
-import sif.dd.au30.model.StudentCollectionType;
+import sif.dd.au30.model.StudentPersonalCollectionType;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.UpdateType;
@@ -29,7 +29,7 @@ import systemic.sif3.demo.rest.ModelObjectConstants;
  * @author Joerg Huber
  *
  */
-public class StudentPersonalConsumer extends AUDataModelEventConsumer<StudentCollectionType> 
+public class StudentPersonalConsumer extends AUDataModelEventConsumer<StudentPersonalCollectionType> 
 {	
     public StudentPersonalConsumer()
     {
@@ -81,14 +81,14 @@ public class StudentPersonalConsumer extends AUDataModelEventConsumer<StudentCol
      * @see sif3.common.interfaces.EventConsumer#createEventObject(java.lang.Object, sif3.common.header.HeaderValues.EventAction, sif3.common.header.HeaderValues.UpdateType)
      */
     @Override
-    public SIFEvent<StudentCollectionType> createEventObject(Object sifObjectList, EventAction eventAction, UpdateType updateType)
+    public SIFEvent<StudentPersonalCollectionType> createEventObject(Object sifObjectList, EventAction eventAction, UpdateType updateType)
     {
     	if (sifObjectList != null)
     	{
-	    	if (sifObjectList instanceof StudentCollectionType)
+	    	if (sifObjectList instanceof StudentPersonalCollectionType)
 	    	{
-	    		int size = ((StudentCollectionType)sifObjectList).getStudentPersonal().size();
-	    		return new SIFEvent<StudentCollectionType>((StudentCollectionType)sifObjectList, eventAction, updateType, size);
+	    		int size = ((StudentPersonalCollectionType)sifObjectList).getStudentPersonal().size();
+	    		return new SIFEvent<StudentPersonalCollectionType>((StudentPersonalCollectionType)sifObjectList, eventAction, updateType, size);
 	    	}
 	    	else
 	    	{
