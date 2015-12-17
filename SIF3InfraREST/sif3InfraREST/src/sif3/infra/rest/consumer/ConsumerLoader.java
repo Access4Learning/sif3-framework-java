@@ -26,16 +26,16 @@ import org.apache.log4j.Logger;
 
 import sif3.common.model.ServiceInfo;
 import sif3.common.persist.common.HibernateUtil;
-import sif3.common.persist.model.SIF3Session;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.interfaces.EnvironmentConnector;
 import sif3.infra.rest.env.connectors.EnvironmentConnectorFactory;
-import sif3.infra.rest.queue.QueueListenerConfigurator;
+import sif3.infra.rest.queue.LocalConsumerQueue;
 import sif3.infra.rest.queue.RemoteMessageQueueReader;
 import sif3.infra.rest.queue.connectors.ConsumerQueueConnector;
 import sif3.infra.rest.queue.connectors.ConsumerSubscriptionConnector;
-import sif3.infra.rest.queue.types.QueueListenerInfo;
+import sif3.infra.rest.queue.types.LocalQueueServiceInfo;
+import sif3.infra.rest.queue.types.QueueInfo;
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.StringUtils;
 
@@ -56,66 +56,67 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class ConsumerLoader
 {
-  protected static final Logger logger = Logger.getLogger(ConsumerLoader.class);
+    protected static final Logger logger = Logger.getLogger(ConsumerLoader.class);
 
-  private static ConsumerLoader instance = null;
+    private static ConsumerLoader instance = null;
   
-  private EnvironmentConnector connector = null;
-  private ConsumerQueueConnector queueConnector = null;
-  private ConsumerSubscriptionConnector subscriptionConnector = null;
-  private List<AbstractEventConsumer<?>> eventConsumers = new ArrayList<AbstractEventConsumer<?>>();
-  private List<AbstractConsumer> crudConsumers = new ArrayList<AbstractConsumer>();
-  private List<ExecutorService> msgReaderServices = new ArrayList<ExecutorService>();
+    private EnvironmentConnector connector = null;
+    private ConsumerQueueConnector queueConnector = null;
+    private ConsumerSubscriptionConnector subscriptionConnector = null;
+    private List<AbstractEventConsumer<?>> eventConsumers = new ArrayList<AbstractEventConsumer<?>>();
+    private List<AbstractConsumer> crudConsumers = new ArrayList<AbstractConsumer>();
   
-  /**
-   * Initialises the consumer based on the given property file. If anything fails to initialise then an error is logged and this method
-   * returns false. The consumer should not really continue in such a case as its behaviour is not defined and most likely will throw
-   * exceptions in many places.
-   *  
-   * @param consumerPropertyFileName
-   */
-  public static synchronized boolean initialise(String consumerPropertyFileName)
-  {
-    if (instance == null)
+    private List<ExecutorService> msgReaderServices = new ArrayList<ExecutorService>();
+  
+    /**
+     * Initialises the consumer based on the given property file. If anything fails to initialise then an error is logged and this method
+     * returns false. The consumer should not really continue in such a case as its behaviour is not defined and most likely will throw
+     * exceptions in many places.
+     *  
+     * @param consumerPropertyFileName
+     */
+    public static synchronized boolean initialise(String consumerPropertyFileName)
     {
-      try
-      {
-        instance = new ConsumerLoader(consumerPropertyFileName);
-      }
-      catch (Exception ex) // error already logged.
-      {
-        instance = null;
-      }
+        if (instance == null)
+        {
+            try
+            {
+                instance = new ConsumerLoader(consumerPropertyFileName);
+            }
+            catch (Exception ex) // error already logged.
+            {
+                instance = null;
+            }
+        }
+
+        return isInitialised();
     }
-    
-    return isInitialised();
-  }
   
-  /**
-   * There are some places in the code where we assume that the initialise of this method has been called. Where this is the case this
-   * method can be called to ensure that indeed the initialise has been called. If the initialise isn't called then it is really a
-   * programming error rather than a runtime error. In many cases the consumer should shut down if the initialise is not called successfully.
-   * 
-   * @return TRUE: Consumer is initialised successfully. FALSE otherwise.
-   */
-  public static synchronized boolean isInitialised()
-  {
-    return instance != null;
-  }
-  
-  public static synchronized void shutdown()
-  {
-    if (isInitialised())
+    /**
+      * There are some places in the code where we assume that the initialise of this method has been called. Where this is the case this
+      * method can be called to ensure that indeed the initialise has been called. If the initialise isn't called then it is really a
+      * programming error rather than a runtime error. In many cases the consumer should shut down if the initialise is not called successfully.
+      * 
+      * @return TRUE: Consumer is initialised successfully. FALSE otherwise.
+      */
+    public static synchronized boolean isInitialised()
     {
-      instance.shutdownConsumer();
-      instance = null;
-      logger.info("Consumer shutdown complete.");
+        return instance != null;
     }
-    else
+
+    public static synchronized void shutdown()
     {
-      logger.info("Consumer was not started successfully. Nothing to shutdown.");
-    }      
-  }
+        if (isInitialised())
+        {
+            instance.shutdownConsumer();
+            instance = null;
+            logger.info("Consumer shutdown complete.");
+        }
+        else
+        {
+            logger.info("Consumer was not started successfully. Nothing to shutdown.");
+        }
+    }
   
 	/*---------------------*/
 	/*-- Private Methods --*/
@@ -164,18 +165,18 @@ public class ConsumerLoader
 		logger.debug("Initialise consumers......");
 		initialiseConsumers(ConsumerEnvironmentManager.getInstance().getServiceProperties());
 
-		if (getConsumerEnvironment().getEventsEnabled() && getConsumerEnvironment().getEventsSupported())
+		if (getConsumerEnvironment().getEventsEnabled() || (getConsumerEnvironment().getDelayedEnabled()))
 		{
-			logger.info("Events are enabled and supported. Event Processing will be started.");
-			if (!initEventProcessor())
+			logger.info("Events and/or Delayed Responses are enabled. Startup async processing ...");
+			if (!initAsyncProcessor())
 			{
 				shutdown();
-				logAndThrowException("Failed to initialise event processing. See previoue error log entries for details.");
+				logAndThrowException("Failed to initialise async processing. See previoue error log entries for details.");
 			}
 		}
 		else
 		{
-			logger.info("Events are not enabled and supported. No event processing has been started.");
+			logger.info("Events and Delayed Responses are not enabled. No event or delayed response processing has been started.");
 		}
 		logger.info("Initialse Consumer sucessful.");
 	}
@@ -204,16 +205,19 @@ public class ConsumerLoader
 			consumer.finalise();
 		}
 
-		logger.debug("Shutdown Subscription Connector...");
-		if (subscriptionConnector != null)
+		if (getConsumerEnvironment().getEventsEnabled() || (getConsumerEnvironment().getDelayedEnabled()))
 		{
-			subscriptionConnector.syncSubscriptionsAtShutDown();
-		}
-
-		logger.debug("Shutdown Queue Connector...");
-		if (queueConnector != null)
-		{
-			queueConnector.syncQueuesAtShutDown();
+    		logger.debug("Shutdown Event Subscription Connector...");
+    		if (subscriptionConnector != null)
+    		{
+    			subscriptionConnector.syncSubscriptionsAtShutDown();
+    		}
+    
+    		logger.debug("Shutdown Queue Connector...");
+    		if (queueConnector != null)
+    		{
+    			queueConnector.syncQueuesAtShutDown();
+    		}
 		}
 
 		logger.debug("Disconnect consumer from Environment Provider...");
@@ -233,66 +237,75 @@ public class ConsumerLoader
 		return (ConsumerEnvironment) ConsumerEnvironmentManager.getInstance().getEnvironmentInfo();
 	}
 
-	private SIF3Session getSIF3Session()
-	{
-		return ConsumerEnvironmentManager.getInstance().getSIF3Session();
-	}
-
 	private void logAndThrowException(String errorText) throws Exception
 	{
 		logger.error(errorText);
 		throw new Exception(errorText);
 	}
 
-	private boolean initEventProcessor()
+	private boolean initAsyncProcessor()
 	{
-		// Get Event Services for all consumer
-		List<ServiceInfo> allServices = new ArrayList<ServiceInfo>();
+		// Get Services for all event consumers
+		List<LocalQueueServiceInfo> allLocalQueueEventServices = new ArrayList<LocalQueueServiceInfo>();
+		List<LocalQueueServiceInfo> allLocalQueueCRUDServices = new ArrayList<LocalQueueServiceInfo>();
+
 		for (AbstractEventConsumer<?> consumer : eventConsumers)
 		{
-			allServices.addAll(consumer.getEventServices());
+		    // Get Event services for this consumer
+			if (getConsumerEnvironment().getEventsEnabled())
+			{
+				addServices(allLocalQueueEventServices, consumer.getEventServices(), consumer.getLocalConsumerQueue());
+			}
+		    
+		    // Get CRUD services for this consumer
+			if (getConsumerEnvironment().getDelayedEnabled())
+			{
+				addServices(allLocalQueueCRUDServices, consumer.getAllApprovedCRUDServices(), consumer.getLocalConsumerQueue());
+			}
+		}
+		
+		// Get all services for all CRUD ONLY consumers
+		if (getConsumerEnvironment().getDelayedEnabled())
+		{
+    		for (AbstractConsumer consumer : crudConsumers)
+    		{
+                addServices(allLocalQueueCRUDServices, consumer.getAllApprovedCRUDServices(), consumer.getLocalConsumerQueue());
+    		}
+		}
+		
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("Final List of Event Services for which subscriptions might be required:\n"+allLocalQueueEventServices);
+			logger.debug("Final List of CRUD Services which might use Delayed Responses:\n"+allLocalQueueCRUDServices);
 		}
 
-		// Sync up Queues and Subscriptions
+		// Sync up Queues according to the queue strategy.
 		logger.debug("Start Queue Connector...");
-		queueConnector = new ConsumerQueueConnector();
-		if (!queueConnector.syncQueuesAtStartup())
-		{
-			return false;
-		}
-		
-		logger.debug("Start Subscription Connector...");
-		subscriptionConnector = new ConsumerSubscriptionConnector();
-		if (!subscriptionConnector.syncSubscriptionsAtStartup(allServices))
-		{
-			return false;
-		}
-		
-		// Initialise Queue Configuration
-		HashMap<String, QueueListenerInfo> queueConfiguration = null;
+		HashMap<String, QueueInfo> queues = null;
 		try
 		{
-			QueueListenerConfigurator queueConfigurator = new QueueListenerConfigurator(getSIF3Session().getEnvironmentID());
-			
-			// Join each event consumer to configurator
-			for (AbstractEventConsumer<?> consumer : eventConsumers)
-			{
-				logger.debug("Set Local Queue Configuration for "+consumer.getClass().getSimpleName());
-				queueConfigurator.joinListener(consumer.getLocalConsumerQueue(), consumer.getEventServices());
-			}
-			queueConfiguration = queueConfigurator.finalise();
+			queueConnector = new ConsumerQueueConnector();
+			queues = queueConnector.syncQueuesAtStartup(allLocalQueueEventServices, allLocalQueueCRUDServices);
 		}
 		catch (Exception ex)
 		{
-			return false; // error already logged
+			// Error should already been logged.
+			return false;
 		}
 		
-		// Start up threads for event processing
-		if ((queueConfiguration != null) && (queueConfiguration.keySet().size() > 0))
+		logger.debug("Start Subscription Connector for Event Services...");
+		subscriptionConnector = new ConsumerSubscriptionConnector();
+		if (!subscriptionConnector.syncSubscriptionsAtStartup(queues))
 		{
-			logger.debug("Event Processing required. Queues and Configuration available...");
+			return false;
+		}
+		
+		//Start up threads for event and delayed response processing.
+		if ((queues != null) && (queues.keySet().size() > 0))
+		{
+			logger.debug("Event Processing or Delayed Processing enabled and required. Queues and Configuration available...");
 			
-			if (!startReadingRemoteQueues(queueConfiguration))
+			if (!startReadingRemoteQueues(queues))
 			{
 				return false;
 			}
@@ -307,12 +320,12 @@ public class ConsumerLoader
 	/*-------------------------------------------------*/
 	/*-- Reflection to Create instances of consumers --*/
 	/*-------------------------------------------------*/
-	private boolean startReadingRemoteQueues(HashMap<String, QueueListenerInfo> queueConfiguration)
+	private boolean startReadingRemoteQueues(HashMap<String, QueueInfo> queuesInfos)
 	{
-		int numThreads = getNumMsgReaderThreads();
-		for (QueueListenerInfo queueListenerInfo : queueConfiguration.values())
+		for (QueueInfo queueInfo : queuesInfos.values())
 		{
-			msgReaderServices.add(startRemoteMessageReaderThreads(queueListenerInfo, numThreads));
+			int numThreads = queueInfo.getRemoteQueueConfig().getNumMsgQueueReaders();
+			msgReaderServices.add(startRemoteMessageReaderThreads(queueInfo, numThreads));
 		}
 		return true;
 	}
@@ -320,9 +333,9 @@ public class ConsumerLoader
 	/*
 	 * Will initialise the threads and add them to the local consumer queue.
 	 */
-	private ExecutorService startRemoteMessageReaderThreads(QueueListenerInfo queueListenerInfo, int numThreads)
+	private ExecutorService startRemoteMessageReaderThreads(QueueInfo queueInfo, int numThreads)
 	{
-		String remoteQueueName = getRemoteQueueName(queueListenerInfo);
+		String remoteQueueName = getRemoteQueueName(queueInfo);
 		logger.debug("Start "+numThreads+" message readers for "+remoteQueueName);
 		logger.debug("Total number of threads before starting message readers for "+remoteQueueName+" "+Thread.activeCount());
 		ExecutorService service = Executors.newFixedThreadPool(numThreads);
@@ -331,7 +344,7 @@ public class ConsumerLoader
 			String readerID = remoteQueueName+" - Reader "+(i+1);
 			try
 			{
-				RemoteMessageQueueReader remoteReader = new RemoteMessageQueueReader(queueListenerInfo, readerID);
+				RemoteMessageQueueReader remoteReader = new RemoteMessageQueueReader(queueInfo, readerID);
 				logger.debug("Start Remote Reader "+readerID);
 				service.execute(remoteReader);
 			}
@@ -361,7 +374,7 @@ public class ConsumerLoader
 
 				// Instantiate class.
 				Object classObj = ct.newInstance();
-
+				
 				// Set properties and add it to correct structure
 				if (classObj instanceof AbstractEventConsumer)
 				{
@@ -370,7 +383,7 @@ public class ConsumerLoader
 				}
 				else if (classObj instanceof AbstractConsumer)
 				{
-					logger.debug("Added " + classObj.getClass().getSimpleName() + " to crudConsumer list");
+					logger.debug("Added " + classObj.getClass().getSimpleName() + " to crudConsumer only list");
 					crudConsumers.add((AbstractConsumer) classObj);
 				}
 				else
@@ -384,19 +397,22 @@ public class ConsumerLoader
 			}
 		}
 	}
+	
+    private void addServices(List<LocalQueueServiceInfo> localQueueServices, List<ServiceInfo> services, LocalConsumerQueue localQueue)
+    {
+        for (ServiceInfo service : services)
+        {
+            localQueueServices.add(new LocalQueueServiceInfo(service, localQueue));
+        }
+    }
 
 	private String makePackageName(String packageName)
 	{
 		return (StringUtils.isEmpty(packageName)) ? "" : packageName.trim() + ".";
 	}
 	
-	private int getNumMsgReaderThreads()
+	private String getRemoteQueueName(QueueInfo queueInfo)
 	{
-		return getConsumerEnvironment().getNumMsgQueueReaders();
-	}
-
-	private String getRemoteQueueName(QueueListenerInfo queueListenerInfo)
-	{
-		return queueListenerInfo.getQueue().getName()+" ("+queueListenerInfo.getQueue().getQueueID()+")";
+		return queueInfo.getQueue().getName()+" ("+queueInfo.getQueue().getQueueID()+")";
 	}
 }

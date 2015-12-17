@@ -18,6 +18,8 @@ package sif3.infra.rest.consumer;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
@@ -36,6 +38,7 @@ import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.Consumer;
+import sif3.common.interfaces.DelayedConsumer;
 import sif3.common.interfaces.QueryConsumer;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
@@ -43,21 +46,26 @@ import sif3.common.model.QueryCriteria;
 import sif3.common.model.QueryPredicate;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.ServiceInfo;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
 import sif3.common.model.URLQueryParameter;
 import sif3.common.model.ZoneContextInfo;
+import sif3.common.model.delayed.DelayedRequestReceipt;
+import sif3.common.model.delayed.DelayedResponseReceipt;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.BaseResponse;
 import sif3.common.ws.BulkOperationResponse;
 import sif3.common.ws.CreateOperationStatus;
-import sif3.common.ws.DelayedRequestReceipt;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.common.ws.Response;
+import sif3.common.ws.model.MultiOperationStatusList;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.rest.client.ObjectServiceClient;
+import sif3.infra.rest.queue.LocalConsumerQueue;
+import sif3.infra.rest.queue.LocalMessageConsumer;
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.StringUtils;
 import au.com.systemic.framework.utils.Timer;
@@ -75,7 +83,7 @@ import au.com.systemic.framework.utils.Timer;
  * 
  * @author Joerg Huber
  */
-public abstract class AbstractConsumer implements Consumer, QueryConsumer
+public abstract class AbstractConsumer implements Consumer, DelayedConsumer, QueryConsumer
 {
 	protected final Logger logger = Logger.getLogger(getClass());
 
@@ -85,12 +93,91 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 
 	private boolean checkACL = true;
 	private boolean initOK = true;
-	
-	/**
+
+	/* The next two properties are used for delayed responses or events */ 
+    private LocalConsumerQueue localConsumerQueue = null;
+    private ExecutorService service = null;
+
+    /*-------------------------------------------------------------*/
+    /* Abstract method relating to general Consumer functionality. */
+    /*-------------------------------------------------------------*/
+
+    /**
 	 * This method is called when a consumer service is shut down. It can be used to free up internally allocated resources
 	 * as well as clean-up other things.
 	 */
 	public abstract void shutdown();
+	
+    /*---------------------------------------------------------------------*/
+    /* Abstract method relating to DELAYED request response functionality. */
+    /*---------------------------------------------------------------------*/
+	
+	/**
+	 * This method is called when a delayed create response is retrieved from the consumer's queue.<br/><br/>
+	 * 
+	 * @see sif3.common.interfaces.DelayedConsumer#onCreateMany(sif3.common.ws.model.MultiOperationStatusList, sif3.common.model.delayed.DelayedResponseReceipt)
+	 * 
+	 * @param statusList See onCreateMany() method in DelayedConsumer class.
+	 * @param receipt See onCreateMany() method in DelayedConsumer class.
+	 */
+	public abstract void processDelayedCreateMany(MultiOperationStatusList<CreateOperationStatus> statusList, DelayedResponseReceipt receipt);
+	
+	/**
+	 * This method is called when a delayed update response is retrieved from the consumer's queue.<br/><br/>
+	 * 
+	 * @see sif3.common.interfaces.DelayedConsumer#onUpdateMany(sif3.common.ws.model.MultiOperationStatusList, sif3.common.model.delayed.DelayedResponseReceipt)
+	 * 
+	 * @param statusList See onUpdateMany() method in DelayedConsumer class.
+	 * @param receipt See onUpdateMany() method in DelayedConsumer class.
+	 */
+	public abstract void processDelayedUpdateMany(MultiOperationStatusList<OperationStatus> statusList, DelayedResponseReceipt receipt);
+	
+	/**
+	 * This method is called when a delayed delete response is retrieved from the consumer's queue.<br/><br/>
+	 * 
+	 * @see sif3.common.interfaces.DelayedConsumer#onDeleteMany(sif3.common.ws.model.MultiOperationStatusList, sif3.common.model.delayed.DelayedResponseReceipt)
+	 * 
+	 * @param statusList See onDeleteMany() method in DelayedConsumer class.
+	 * @param receipt See onDeleteMany() method in DelayedConsumer class.
+	 */
+	public abstract void processDelayedDeleteMany(MultiOperationStatusList<OperationStatus> statusList, DelayedResponseReceipt receipt);
+	
+	/**
+	 * This method is called when a delayed query response is retrieved from the consumer's queue.<br/><br/>
+	 * 
+	 * @see sif3.common.interfaces.DelayedConsumer#onQuery(java.lang.Object, sif3.common.model.PagingInfo, sif3.common.model.delayed.DelayedResponseReceipt)
+	 * 
+	 * @param dataObject See onQuery() method in DelayedConsumer class.
+	 * @param pagingInfo See onQuery() method in DelayedConsumer class.
+	 * @param receipt See onQuery() method in DelayedConsumer class.
+	 */
+	public abstract void processDelayedQuery(Object dataObject, PagingInfo pagingInfo, DelayedResponseReceipt receipt);
+	
+	/**
+	 * This method is called when a delayed service path response is retrieved from the consumer's queue.<br/><br/>
+	 * 
+	 * @see sif3.common.interfaces.DelayedConsumer#onServicePath(java.lang.Object, sif3.common.model.QueryCriteria, sif3.common.model.PagingInfo, sif3.common.model.delayed.DelayedResponseReceipt)
+	 * 
+	 * @param dataObject See onServicePath() method in DelayedConsumer class.
+	 * @param queryCriteria See onServicePath() method in DelayedConsumer class.
+	 * @param pagingInfo See onServicePath() method in DelayedConsumer class.
+	 * @param receipt See onServicePath() method in DelayedConsumer class.
+	 */
+	public abstract void processDelayedServicePath(Object dataObject, QueryCriteria queryCriteria, PagingInfo pagingInfo, DelayedResponseReceipt receipt);
+	
+	/**
+	 * This method is called when a delayed error response is retrieved from the consumer's queue.<br/><br/>
+	 * 
+	 * @see sif3.common.interfaces.DelayedConsumer#onError(sif3.common.ws.ErrorDetails, sif3.common.model.delayed.DelayedResponseReceipt)
+	 * 
+	 * @param error See onError() method in DelayedConsumer class.
+	 * @param receipt See onError() method in DelayedConsumer class.
+	 */
+	public abstract void processDelayedError(ErrorDetails error, DelayedResponseReceipt receipt);
+
+    /*----------------------------------*/
+    /* Consumer Implementation Methods. */
+    /*----------------------------------*/
 
 	/**
 	 * Constructor.
@@ -123,6 +210,16 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			logger.error("Consumer "+getConsumerName()+" has not implemented the getMultiObjectClassInfo() method properly. It returns null which is not valid.");
 			initOK = false;			
 		}
+		
+		if (getConsumerEnvironment().getEventsEnabled() || getConsumerEnvironment().getDelayedEnabled())
+		{
+			logger.debug("Events and/or Delayed Responses enabled => start local consumer queue for "+getConsumerName());
+			createLocalConsumerQueue();
+		}
+		else
+		{
+			logger.debug("Events AND Delayed Responses are disabled. Local consumer queues and threads are not started.");
+		}		
 	}
 
 	/**
@@ -279,7 +376,21 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
     	return getConsumerEnvironment().getAdapterName()+" - " + getConsumerName();
     }
 
-	/*-----------------------*/
+    /*------------------------------*/
+    /* Some Getter & Setter methods */
+    /*------------------------------*/
+    
+    public final LocalConsumerQueue getLocalConsumerQueue()
+    {
+      return localConsumerQueue;
+    }
+
+    public final void setLocalConsumerQueue(LocalConsumerQueue localConsumerQueue)
+    {
+      this.localConsumerQueue = localConsumerQueue;
+    }
+
+    /*-----------------------*/
 	/*-- Create Operations --*/
 	/*-----------------------*/
 	
@@ -315,7 +426,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			ErrorDetails error = allClientChecks(AccessRight.CREATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 			if (error == null) //all good => Send request.
 			{
-				BulkOperationResponse<CreateOperationStatus> response = getClient(getConsumerEnvironment()).createMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(true, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+				BulkOperationResponse<CreateOperationStatus> response = getClient(getConsumerEnvironment()).createMany(getMultiObjectClassInfo().getObjectName(), getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(true, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 
 				// Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
 				finaliseDelayedReceipt(response.getDelayedReceipt(), getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, ResponseAction.CREATE);
@@ -429,7 +540,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			ErrorDetails error = allClientChecks(AccessRight.DELETE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 			if (error == null) //all good => Send request
 			{
-				BulkOperationResponse<OperationStatus> response = getClient(getConsumerEnvironment()).removeMany(getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(false, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+				BulkOperationResponse<OperationStatus> response = getClient(getConsumerEnvironment()).removeMany(getMultiObjectClassInfo().getObjectName(), getMultiObjectClassInfo().getObjectName(), resourceIDs, getHeaderProperties(false, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 
 				// Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
 				finaliseDelayedReceipt(response.getDelayedReceipt(), getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, ResponseAction.DELETE);
@@ -605,7 +716,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 			if (error == null) //all good => Send request
 			{
-				Response response = getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+				Response response = getClient(getConsumerEnvironment()).getMany(getMultiObjectClassInfo().getObjectName(), getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 
 				// Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
 				finaliseDelayedReceipt(response.getDelayedReceipt(), getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, ResponseAction.QUERY);
@@ -666,13 +777,17 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 
 		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
 
+		String serviceName = getServiceName(queryCriteria);
+		String servicePath = getServicePath(queryCriteria);
+		
 		// Request operation in all zone/contexts as listed.
 		for (ZoneContextInfo zoneCtx : finalZoneContextList)
 		{
-			ErrorDetails error = allClientChecks(getServiceName(queryCriteria), AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+			ErrorDetails error = allClientChecks(serviceName, AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 			if (error == null) //all good => Send request
 			{
-				Response response = getClient(getConsumerEnvironment()).getMany(getServicePath(queryCriteria), pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+				
+				Response response = getClient(getConsumerEnvironment()).getMany(servicePath, serviceName, ServiceType.SERVICEPATH, pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 
 				// Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
 				finaliseDelayedReceipt(response.getDelayedReceipt(), getMultiObjectClassInfo().getObjectName(), ServiceType.SERVICEPATH, ResponseAction.QUERY);
@@ -744,7 +859,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 			if (error == null) //all good => Send request
 			{
-				Response response = getClient(getConsumerEnvironment()).getByQBE(getMultiObjectClassInfo().getObjectName(), exampleObject, pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+				Response response = getClient(getConsumerEnvironment()).getByQBE(getMultiObjectClassInfo().getObjectName(), getMultiObjectClassInfo().getObjectName(), exampleObject, pagingInfo, hdrProps, urlQueryParameter, getMultiObjectClassInfo().getObjectType(), zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 
 				// Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
 				finaliseDelayedReceipt(response.getDelayedReceipt(), getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, ResponseAction.QUERY);
@@ -810,7 +925,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 			ErrorDetails error = allClientChecks(AccessRight.UPDATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 			if (error == null) //all good => Send request
 			{
-				BulkOperationResponse<OperationStatus> response = getClient(getConsumerEnvironment()).updateMany(getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(false, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+				BulkOperationResponse<OperationStatus> response = getClient(getConsumerEnvironment()).updateMany(getMultiObjectClassInfo().getObjectName(), getMultiObjectClassInfo().getObjectName(), data, getHeaderProperties(false, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 
 				// Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
 				finaliseDelayedReceipt(response.getDelayedReceipt(), getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, ResponseAction.UPDATE);
@@ -895,9 +1010,173 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 	@Override
     public void finalise()
     {
+	    logger.debug("Shut down Local Consumer Thread Pool for "+getConsumerName());
+	    if (service != null)
+	    {
+	        service.shutdown();
+	        service = null;
+	    }    
+
 	    shutdown();
     }
 
+	/*----------------------------------------------------------*/
+    /*-- Methods for DelayedConsumer Interface implementation --*/
+    /*----------------------------------------------------------*/
+	
+	/*
+	 * (non-Javadoc)
+	 * @see sif3.common.interfaces.DelayedConsumer#onCreateMany(sif3.common.ws.model.MultiOperationStatusList, sif3.common.model.delayed.DelayedResponseReceipt)
+	 */
+	public void onCreateMany(MultiOperationStatusList<CreateOperationStatus> statusList, DelayedResponseReceipt receipt)
+	{
+		processDelayedCreateMany(statusList, receipt);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see sif3.common.interfaces.DelayedConsumer#onUpdateMany(sif3.common.ws.model.MultiOperationStatusList, sif3.common.model.delayed.DelayedResponseReceipt)
+	 */
+	public void onUpdateMany(MultiOperationStatusList<OperationStatus> statusList, DelayedResponseReceipt receipt)
+	{
+		processDelayedUpdateMany(statusList, receipt);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see sif3.common.interfaces.DelayedConsumer#onDeleteMany(sif3.common.ws.model.MultiOperationStatusList, sif3.common.model.delayed.DelayedResponseReceipt)
+	 */
+	public void onDeleteMany(MultiOperationStatusList<OperationStatus> statusList, DelayedResponseReceipt receipt)
+	{
+		processDelayedDeleteMany(statusList, receipt);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see sif3.common.interfaces.DelayedConsumer#onQuery(java.lang.Object, sif3.common.model.PagingInfo, sif3.common.model.delayed.DelayedResponseReceipt)
+	 */
+	public void onQuery(Object dataObject, PagingInfo pagingInfo, DelayedResponseReceipt receipt)
+	{
+		processDelayedQuery(dataObject, pagingInfo, receipt);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see sif3.common.interfaces.DelayedConsumer#onServicePath(java.lang.Object, sif3.common.model.QueryCriteria, sif3.common.model.PagingInfo, sif3.common.model.delayed.DelayedResponseReceipt)
+	 */
+	public void onServicePath(Object dataObject, QueryCriteria queryCriteria, PagingInfo pagingInfo, DelayedResponseReceipt receipt)
+	{
+		processDelayedServicePath(dataObject, queryCriteria, pagingInfo, receipt);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see sif3.common.interfaces.DelayedConsumer#onError(sif3.common.ws.ErrorDetails, sif3.common.model.delayed.DelayedResponseReceipt)
+	 */
+	public void onError(ErrorDetails error, DelayedResponseReceipt receipt)
+	{
+		processDelayedError(error, receipt);
+	}
+	
+	/*------------------------------------------------------------------------------------*/
+    /*-- Methods for Local Queues and Threads for Delayed Response and Event management --*/
+    /*------------------------------------------------------------------------------------*/
+
+	/**
+     * Only creates the local consumer queue if it doesn't already exist. The queue (new or existing) is then returned.
+     * 
+     * @return See desc.
+     */
+    public final LocalConsumerQueue createLocalConsumerQueue()
+    {
+        if (getLocalConsumerQueue() == null)
+        {
+            // Create local queue with the capacity indicated with the consumer config
+            logger.debug("Create Local Queue for "+getConsumerName());
+
+            // Use the local queue as a trigger of threads rather than actual queueing of messages. Use 1 as the minimum
+            setLocalConsumerQueue(new LocalConsumerQueue(1, getClass().getSimpleName() + "LocalQueue", getClass().getSimpleName()));
+            startListenerThreads();
+        }
+        return getLocalConsumerQueue();
+    }
+
+    /*
+     * Will initialise the threads and add them to the local consumer queue.
+     */
+    private void startListenerThreads()
+    {
+        // Start up all consumers for this subscriber.
+        int numThreads = getNumOfConsumerThreads();
+        logger.debug("Start "+numThreads+" "+getConsumerName()+" threads.");
+        logger.debug("Total number of threads before starting Local Queue for "+getConsumerName()+" "+Thread.activeCount());
+        service = Executors.newFixedThreadPool(numThreads);
+        for (int i = 0; i < numThreads; i++)
+        {
+            String consumerID = getConsumerName()+" "+(i+1);
+            logger.debug("Start Consumer "+consumerID);
+            LocalMessageConsumer consumer = new LocalMessageConsumer(getLocalConsumerQueue(), consumerID, this);
+            service.execute(consumer);
+        }
+        logger.debug(numThreads+" "+getConsumerName()+" initilaised and started.");
+        logger.debug("Total number of threads after starting Local Queue for "+getConsumerName()+" "+Thread.activeCount());
+    }
+
+    private final int getNumOfConsumerThreads()
+    {
+        return getServiceProperties().getPropertyAsInt("consumer.local.workerThread", getClass().getSimpleName(), 1);
+    }
+
+    /*----------------------------*/
+    /*-- Other required methods --*/
+    /*----------------------------*/
+    /**
+     * This method is is called when the async processor is initialised. It passes all subscription services for the
+     * given OBJECT & SERVICEPATH service across all zones for the connected environment to this method. It allows the specific
+     * async consumer implementation to remove some of the subscription services it is not interested in. Basically it allows
+     * the implementor to filter out un-needed services before the this consumer subscribes to the local queues. Only
+     * delayed responses for the returned list of service info will then be received by the particular service. Most standard
+     * implementations would not require any overriding of this method. If a specific implementation wishes to filter out
+     * some of the environment provided subscriptions then the sub-class of this class should override this method.
+     * 
+     * @param allServices A list of services for this OBJECT/SERVICEPATH that is allowed to subscribe to events and delayed responses 
+     *                    across the environment of this consumer.
+     * 
+     * @return The final list of services for which this consumer class shall subscribe to.
+     */
+    public List<ServiceInfo> filterApprovedCRUDServices(List<ServiceInfo> allServices)
+    {
+    	return allServices;
+    }
+
+	/*
+	 * Returns all CRUD services for which this consumer has access to. This should be a list of different zones, contexts and service types.
+	 * It returns all OBJECT and SERVICEPATH services where the consumer has CREATE, UPDATE, DELETE or QUERY as approved in the ACL.
+	 */
+	protected final List<ServiceInfo> getAllApprovedCRUDServices()
+	{
+		SIF3Session sif3Session = ConsumerEnvironmentManager.getInstance().getSIF3Session();
+		List<ServiceInfo> allServices = new ArrayList<ServiceInfo>(); 
+		
+		// Get OBJECT Services
+		List<ServiceInfo> services = sif3Session.getServiceInfoForService(getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT);
+		for (ServiceInfo serviceInfo : services)
+		{
+			if (serviceInfo.getRights().hasRight(AccessRight.CREATE, AccessType.APPROVED) ||
+			    serviceInfo.getRights().hasRight(AccessRight.UPDATE, AccessType.APPROVED) ||
+			    serviceInfo.getRights().hasRight(AccessRight.DELETE, AccessType.APPROVED) ||
+			    serviceInfo.getRights().hasRight(AccessRight.QUERY, AccessType.APPROVED) )
+			{
+				allServices.add(serviceInfo);
+			}
+		}
+		
+		// Now get SERVICEPATHs. They are only valid for QUERY permissions. No events or other types.
+		allServices.addAll(sif3Session.getServiceInfoForService(getMultiObjectClassInfo().getObjectName(), ServiceType.SERVICEPATH, AccessRight.QUERY, AccessType.APPROVED));
+		
+		return filterApprovedCRUDServices(allServices);
+	}	
+	
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
@@ -984,7 +1263,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 		ErrorDetails error = hasAccess(serviceName, right, accessType, zone, context);
 		if ((error == null) && (requestType != null))
 		{
-			error = requestTypeSupported(requestType);
+			error = requestTypeEnabled(requestType);
 		}	
 		return error;
 	}
@@ -1004,19 +1283,14 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
 		return error;
 	}
 	
-	private ErrorDetails requestTypeSupported(RequestType requestType)
+	private ErrorDetails requestTypeEnabled(RequestType requestType)
 	{
 		ErrorDetails error = null;
 		
-		//TODO: JH - Once delayed is fully implemented the following block can be removed.
-		if (!isTestMode())
+		if ((requestType == RequestType.DELAYED) && (!getConsumerEnvironment().getDelayedEnabled()))
 		{
-    		if (requestType == RequestType.DELAYED)
-    		{
-    			error = new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Client side Check: DELAYED requests are not supported, yet.");
-    		}
+			error = new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Client side Check: DELAYED requests are not enabled.");
 		}
-		// END: Delayed restriction.
 		return error;
 	}
 
@@ -1125,6 +1399,7 @@ public abstract class AbstractConsumer implements Consumer, QueryConsumer
     /*
      * This method checks if the test.testmode in the consumer's property file is set to TRUE.
      */
+    @SuppressWarnings("unused")
     private boolean isTestMode()
     {
         if (testMode == null)

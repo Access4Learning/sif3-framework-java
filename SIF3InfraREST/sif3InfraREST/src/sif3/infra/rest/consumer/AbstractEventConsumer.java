@@ -19,8 +19,6 @@
 package sif3.infra.rest.consumer;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.interfaces.EventConsumer;
@@ -33,8 +31,6 @@ import sif3.common.model.ServiceRights;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.persist.model.SIF3Session;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
-import sif3.infra.rest.queue.LocalConsumerQueue;
-import sif3.infra.rest.queue.LocalMessageConsumer;
 
 /**
  * This is the core class that a developer will use to implement for a consumer that shall subscribe to events. Each consumer for each object 
@@ -48,8 +44,8 @@ import sif3.infra.rest.queue.LocalMessageConsumer;
  */
 public abstract class AbstractEventConsumer<L> extends AbstractConsumer implements EventConsumer<L>, Runnable
 {
-	private LocalConsumerQueue localConsumerQueue = null;
-	private ExecutorService service = null;
+//	private LocalConsumerQueue localConsumerQueue = null;
+//	private ExecutorService service = null;
   
   	/**
   	 * This method is called when a consumer service has received an event. This class does implement the actual onEvent( method
@@ -71,10 +67,10 @@ public abstract class AbstractEventConsumer<L> extends AbstractConsumer implemen
 	{
 		super();
 		// Only create local queue if event processing is enabled.
-	    if (getConsumerEnvironment().getEventsEnabled() && getConsumerEnvironment().getEventsSupported())
-	    {
-	    	createLocalConsumerQueue();
-	    }
+//	    if (getConsumerEnvironment().getEventsEnabled() && getConsumerEnvironment().getEventsSupported())
+//	    {
+//	    	createLocalConsumerQueue();
+//	    }
 	}
 
 	/*
@@ -97,11 +93,11 @@ public abstract class AbstractEventConsumer<L> extends AbstractConsumer implemen
 	@Override
 	public void finalise()
 	{
-		logger.debug("Shut down Event Consumer Thread Pool for "+getConsumerName());
-		if (service != null)
-		{
-			service.shutdown();
-		}
+//		logger.debug("Shut down Event Consumer Thread Pool for "+getConsumerName());
+//		if (service != null)
+//		{
+//			service.shutdown();
+//		}
 		
 		// Call user defined finalise of the subscriber.
 		super.finalise();
@@ -120,19 +116,19 @@ public abstract class AbstractEventConsumer<L> extends AbstractConsumer implemen
 //      logger.debug("============================\n Start "+getConsumerName()+" worker thread.\n======================================");
     }
     
-    /*------------------------------*/
-    /* Some Getter & Setter methods */
-    /*------------------------------*/
-    
-    public final LocalConsumerQueue getLocalConsumerQueue()
-    {
-      return localConsumerQueue;
-    }
-
-    public final void setLocalConsumerQueue(LocalConsumerQueue localConsumerQueue)
-    {
-      this.localConsumerQueue = localConsumerQueue;
-    }
+//    /*------------------------------*/
+//    /* Some Getter & Setter methods */
+//    /*------------------------------*/
+//    
+//    public final LocalConsumerQueue getLocalConsumerQueue()
+//    {
+//      return localConsumerQueue;
+//    }
+//
+//    public final void setLocalConsumerQueue(LocalConsumerQueue localConsumerQueue)
+//    {
+//      this.localConsumerQueue = localConsumerQueue;
+//    }
     
     /*----------------------------*/
     /*-- Other required methods --*/
@@ -156,37 +152,38 @@ public abstract class AbstractEventConsumer<L> extends AbstractConsumer implemen
     	return envEventServices;
     }
     
-	public final int getNumOfConsumerThreads()
-	{
-		return getServiceProperties().getPropertyAsInt("consumer.local.workerThread", getClass().getSimpleName(), 1);
-	}
-
+    /*
+     * Return all OBJECT services that have the right of SUBSCRIBE is set to APPROVED in the ACL.
+     */
 	protected final List<ServiceInfo> getEventServices()
 	{
 		SIF3Session sif3Session = ConsumerEnvironmentManager.getInstance().getSIF3Session();
 		return filterEventServices(sif3Session.getServiceInfoForService(getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, AccessRight.SUBSCRIBE, ServiceRights.AccessType.APPROVED));
 	}
 
+//	public final int getNumOfConsumerThreads()
+//	{
+//		return getServiceProperties().getPropertyAsInt("consumer.local.workerThread", getClass().getSimpleName(), 1);
+//	}
+
 	/**
 	 * Only creates the local consumer queue if it doesn't already exist. The queue (new or existing) is then returned.
 	 * 
 	 * @return See desc.
 	 */
-	public final LocalConsumerQueue createLocalConsumerQueue()
-	{
-		if (getLocalConsumerQueue() == null)
-		{
-			// Create local queue with the capacity indicated with the consumer config
-//			logger.debug("Create Local Queue for "+getConsumerName()+" with capacity = "+getNumOfConsumerThreads());
-			logger.debug("Create Local Queue for "+getConsumerName());
-//			setLocalConsumerQueue(new LocalConsumerQueue(getNumOfConsumerThreads(), getClass().getSimpleName() + "LocalQueue", getClass().getSimpleName()));
-
-			// Use the local queue as a trigger of threads rather than actual queueing of messages. Use 1 as the minimum
-			setLocalConsumerQueue(new LocalConsumerQueue(1, getClass().getSimpleName() + "LocalQueue", getClass().getSimpleName()));
-			startListenerThreads();
-		}
-		return getLocalConsumerQueue();
-	}
+//	public final LocalConsumerQueue createLocalConsumerQueue()
+//	{
+//		if (getLocalConsumerQueue() == null)
+//		{
+//			// Create local queue with the capacity indicated with the consumer config
+//			logger.debug("Create Local Queue for "+getConsumerName());
+//
+//			// Use the local queue as a trigger of threads rather than actual queueing of messages. Use 1 as the minimum
+//			setLocalConsumerQueue(new LocalConsumerQueue(1, getClass().getSimpleName() + "LocalQueue", getClass().getSimpleName()));
+//			startListenerThreads();
+//		}
+//		return getLocalConsumerQueue();
+//	}
 	
 	/*---------------------*/
 	/*-- Private Methods --*/
@@ -195,21 +192,21 @@ public abstract class AbstractEventConsumer<L> extends AbstractConsumer implemen
 	/*
 	 * Will initialise the threads and add them to the local consumer queue.
 	 */
-	private void startListenerThreads()
-	{
-		// Start up all consumers for this subscriber.
-		int numThreads = getNumOfConsumerThreads();
-		logger.debug("Start "+numThreads+" "+getConsumerName()+" threads.");
-		logger.debug("Total number of threads before starting Local Queue for "+getConsumerName()+" "+Thread.activeCount());
-		service = Executors.newFixedThreadPool(numThreads);
-		for (int i = 0; i < numThreads; i++)
-		{
-			String consumerID = getConsumerName()+" "+(i+1);
-			logger.debug("Start Consumer "+consumerID);
-			LocalMessageConsumer consumer = new LocalMessageConsumer(getLocalConsumerQueue(), consumerID, this);
-			service.execute(consumer);
-		}
-		logger.debug(numThreads+" "+getConsumerName()+" initilaised and started.");
-		logger.debug("Total number of threads after starting Local Queue for "+getConsumerName()+" "+Thread.activeCount());
-	}
+//	private void startListenerThreads()
+//	{
+//		// Start up all consumers for this subscriber.
+//		int numThreads = getNumOfConsumerThreads();
+//		logger.debug("Start "+numThreads+" "+getConsumerName()+" threads.");
+//		logger.debug("Total number of threads before starting Local Queue for "+getConsumerName()+" "+Thread.activeCount());
+//		service = Executors.newFixedThreadPool(numThreads);
+//		for (int i = 0; i < numThreads; i++)
+//		{
+//			String consumerID = getConsumerName()+" "+(i+1);
+//			logger.debug("Start Consumer "+consumerID);
+//			LocalMessageConsumer consumer = new LocalMessageConsumer(getLocalConsumerQueue(), consumerID, this);
+//			service.execute(consumer);
+//		}
+//		logger.debug(numThreads+" "+getConsumerName()+" initilaised and started.");
+//		logger.debug("Total number of threads after starting Local Queue for "+getConsumerName()+" "+Thread.activeCount());
+//	}
 }
