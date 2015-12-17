@@ -16,7 +16,6 @@
 package sif3.infra.rest.client;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,30 +25,24 @@ import javax.ws.rs.core.Response.Status;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.ServiceInvokationException;
-import sif3.common.exception.UnmarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
 import sif3.common.header.HeaderValues.RequestType;
+import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.ServiceInfo;
 import sif3.common.model.URLQueryParameter;
 import sif3.common.ws.BulkOperationResponse;
 import sif3.common.ws.CreateOperationStatus;
-import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.common.ws.Response;
+import sif3.common.ws.model.MultiOperationStatusList;
 import sif3.infra.common.interfaces.ClientEnvironmentManager;
-import sif3.infra.common.model.CreateResponseType;
-import sif3.infra.common.model.CreateType;
 import sif3.infra.common.model.DeleteIdType;
 import sif3.infra.common.model.DeleteRequestType;
-import sif3.infra.common.model.DeleteResponseType;
-import sif3.infra.common.model.DeleteStatus;
-import sif3.infra.common.model.UpdateResponseType;
-import sif3.infra.common.model.UpdateType;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -292,25 +285,30 @@ public class ObjectServiceClient extends BaseClient
 	 * zone and context this query shall apply to.
 	 * 
 	 * @param relURI A relative URI to the baseURI given to the constructor of this class. It is appended to the baseURI as is.
+	 * @param serviceName The "raw" service name. For object services that would be the SIF Object name, for Service Paths this must be
+	 *                    the service path name as in the Environment ACL (i.e. schools/{}/students).
+	 * @param serviceType Currently this should be OBJECT or SERVICPATH.
 	 * @param pagingInfo Page information to be set for the provider to determine which results to return.
 	 * @param hdrProperties Header Properties to be added to the header of the GET request.
 	 * @param returnObjectClass The class type into which the object shall be unmarshalled into. The final object is stored in the
 	 *                          returned Response object.
 	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
 	 * @param context The context for which this operation shall be invoked. Can be null which indicates the DEFAULT context.
+	 * @param requestType Indicating if IMMEDIATE or DELAYED request is desired.
 	 * 
 	 * @return Response Object holding appropriate values and results of the call. 
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
 	 */
-	public Response getMany(String relURI, PagingInfo pagingInfo, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, Class<?> returnObjectClass, SIFZone zone, SIFContext context, RequestType requestType) throws ServiceInvokationException
+	public Response getMany(String relURI, String serviceName, ServiceType serviceType, PagingInfo pagingInfo, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, Class<?> returnObjectClass, SIFZone zone, SIFContext context, RequestType requestType) throws ServiceInvokationException
 	{
 		WebResource service = getService();
 		try
 		{
 			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
-			addPagingInfoToHeaders(pagingInfo, hdrProperties);
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
+			addPagingInfoToHeaders(pagingInfo, hdrProperties);
+			addDelayedInfo(hdrProperties, zone, context, serviceName, serviceType, requestType);
 			
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, false).get(ClientResponse.class);
 
@@ -332,6 +330,7 @@ public class ObjectServiceClient extends BaseClient
 	 * returned (pagingInfo) as well as what zone and context this query shall apply to.
 	 * 
 	 * @param relURI A relative URI to the baseURI given to the constructor of this class. It is appended to the baseURI as is.
+	 * @param serviceName The "raw" service name. This must be the SIF Object name such as StudentPersonals.
 	 * @param exampleObject The example data model object. This must be the single object type.
 	 * @param pagingInfo Page information to be set for the provider to determine which results to return.
 	 * @param hdrProperties Header Properties to be added to the header of the GET request.
@@ -339,12 +338,13 @@ public class ObjectServiceClient extends BaseClient
 	 *                          returned Response object.
 	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
 	 * @param context The context for which this operation shall be invoked. Can be null which indicates the DEFAULT context.
+	 * @param requestType Indicating if IMMEDIATE or DELAYED request is desired.
 	 * 
 	 * @return Response Object holding appropriate values and results of the call. 
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
 	 */
-	public Response getByQBE(String relURI, Object exampleObject, PagingInfo pagingInfo, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, Class<?> returnObjectClass, SIFZone zone, SIFContext context, RequestType requestType) throws ServiceInvokationException
+	public Response getByQBE(String relURI, String serviceName, Object exampleObject, PagingInfo pagingInfo, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, Class<?> returnObjectClass, SIFZone zone, SIFContext context, RequestType requestType) throws ServiceInvokationException
 	{
 		WebResource service = getService();
 		try
@@ -352,7 +352,10 @@ public class ObjectServiceClient extends BaseClient
 			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
 		    String payloadStr = getDataModelMarshaller().marshal(exampleObject, getRequestMediaType());
 
+			hdrProperties = addAuthenticationHdrProps(hdrProperties);
 			addPagingInfoToHeaders(pagingInfo, hdrProperties);
+			addDelayedInfo(hdrProperties, zone, context, serviceName, ServiceType.OBJECT, requestType);
+
 
 			// Set specific header so that POST method knows that a GET and not an CREATE is required! 
 			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.GET.name());
@@ -362,7 +365,6 @@ public class ObjectServiceClient extends BaseClient
 				logger.debug("getByQBE: Payload to send:\n"+payloadStr);
 			}
 			
-			hdrProperties = addAuthenticationHdrProps(hdrProperties);
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, true).post(ClientResponse.class, payloadStr);
 
 			return setResponse(service, response, returnObjectClass, hdrProperties, zone, context, requestType, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT, Status.ACCEPTED);
@@ -382,6 +384,7 @@ public class ObjectServiceClient extends BaseClient
 	 * object in the payload etc.
 	 * 
 	 * @param relURI A relative URI to the baseURI given to the constructor of this class. It is appended to the baseURI as is.
+	 * @param serviceName The "raw" service name. This must be the SIF Object name such as StudentPersonals.
 	 * @param payload The payload in its object form. The marshaller given in the constructor of this method is used to convert the 
 	 *                payload to appropriate format (mediaType).
 	 * @param hdrProperties Header Properties to be added to the header of the POST request.
@@ -390,12 +393,13 @@ public class ObjectServiceClient extends BaseClient
 	 *                       names are case sensitive. This parameter can be null.
 	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
 	 * @param context The context for which this operation shall be invoked. Can be null which indicates the DEFAULT context.
+	 * @param requestType Indicating if IMMEDIATE or DELAYED request is desired.
 	 * 
 	 * @return Response Object holding appropriate values and results of the call. 
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
 	 */
-	public BulkOperationResponse<CreateOperationStatus> createMany(String relURI, Object payload, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, SIFZone zone, SIFContext context, RequestType requestType) throws ServiceInvokationException
+	public BulkOperationResponse<CreateOperationStatus> createMany(String relURI, String serviceName, Object payload, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, SIFZone zone, SIFContext context, RequestType requestType) throws ServiceInvokationException
 	{
 		WebResource service = getService();
 		try
@@ -409,6 +413,7 @@ public class ObjectServiceClient extends BaseClient
 			}
 			
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
+			addDelayedInfo(hdrProperties, zone, context, serviceName, ServiceType.OBJECT, requestType);
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, true).post(ClientResponse.class, payloadStr);
 
 			return setCreateBulkResponse(service, response, zone, context, requestType, hdrProperties);
@@ -428,6 +433,7 @@ public class ObjectServiceClient extends BaseClient
 	 * object in the payload etc.
 	 * 
 	 * @param relURI A relative URI to the baseURI given to the constructor of this class. It is appended to the baseURI as is.
+	 * @param serviceName The "raw" service name. This must be the SIF Object name such as StudentPersonals.
 	 * @param payload The payload in its object form. The marshaller given in the constructor of this method is used to convert the 
 	 *                payload to appropriate format (mediaType).
 	 * @param hdrProperties Header Properties to be added to the header of the PUT request.
@@ -436,12 +442,13 @@ public class ObjectServiceClient extends BaseClient
 	 *                       names are case sensitive. This parameter can be null.
 	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
 	 * @param context The context for which this operation shall be invoked. Can be null which indicates the DEFAULT context.
+	 * @param requestType Indicating if IMMEDIATE or DELAYED request is desired.
 	 * 
 	 * @return Response Object holding appropriate values and results of the call. 
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
 	 */
-	public BulkOperationResponse<OperationStatus> updateMany(String relURI, Object payload, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, SIFZone zone, SIFContext context, RequestType requestType) throws ServiceInvokationException
+	public BulkOperationResponse<OperationStatus> updateMany(String relURI, String serviceName, Object payload, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, SIFZone zone, SIFContext context, RequestType requestType) throws ServiceInvokationException
 	{
 		WebResource service = getService();
 		try
@@ -454,9 +461,13 @@ public class ObjectServiceClient extends BaseClient
 				logger.debug("updateMany: Payload to send:\n"+payloadStr);
 			}
 
+			hdrProperties = addAuthenticationHdrProps(hdrProperties);			
+			addDelayedInfo(hdrProperties, zone, context, serviceName, ServiceType.OBJECT, requestType);
+
 			// Set specific header so that PUT method knows that an UPDATE and not a DELETE is required! 
 			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.UPDATE.name());																																			
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, addAuthenticationHdrProps(hdrProperties), requestType, true, true).put(ClientResponse.class, payloadStr);
+			
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, true).put(ClientResponse.class, payloadStr);
 
 			return setUpdateBulkResponse(service, response, zone, context, requestType, hdrProperties);
 		}
@@ -479,6 +490,7 @@ public class ObjectServiceClient extends BaseClient
 	 * specified in the SIF 3.x specification.
 	 * 
 	 * @param relURI A relative URI to the baseURI given to the constructor of this class. It is appended to the baseURI as is.
+	 * @param serviceName The "raw" service name. This must be the SIF Object name such as StudentPersonals.
 	 * @param resourceIDs A list of resourceId for the objects to be deleted.
 	 * @param hdrProperties Header Properties to be added to the header of the DELETE request.
 	 * @param urlQueryParams URL query parameters to be added to the request. It is assumed that these are custom
@@ -486,12 +498,13 @@ public class ObjectServiceClient extends BaseClient
 	 *                       names are case sensitive. This parameter can be null.
 	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
 	 * @param context The context for which this operation shall be invoked. Can be null which indicates the DEFAULT context.
+	 * @param requestType Indicating if IMMEDIATE or DELAYED request is desired.
 	 * 
 	 * @return Response Object holding appropriate values and results of the call. 
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
 	 */
-	public BulkOperationResponse<OperationStatus> removeMany(String relURI, List<String> resourceIDs, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, SIFZone zone, SIFContext context, RequestType requestType) throws ServiceInvokationException
+	public BulkOperationResponse<OperationStatus> removeMany(String relURI, String serviceName, List<String> resourceIDs, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, SIFZone zone, SIFContext context, RequestType requestType) throws ServiceInvokationException
 	{
 		WebResource service = getService();
 		try
@@ -513,6 +526,9 @@ public class ObjectServiceClient extends BaseClient
 			}
 			String payloadStr = getInfraMarshaller().marshal(deleteRequest, getRequestMediaType());
 			
+			hdrProperties = addAuthenticationHdrProps(hdrProperties);
+			addDelayedInfo(hdrProperties, zone, context, serviceName, ServiceType.OBJECT, requestType);
+
 			// Set specific header so that PUT method knows that a DELETE and not an UPDATE is required! 
 			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.DELETE.name());
 			
@@ -520,7 +536,7 @@ public class ObjectServiceClient extends BaseClient
 			{
 				logger.debug("removeMany: Payload to send:\n"+payloadStr);
 			}
-			ClientResponse cltResponse = setRequestHeaderAndMediaTypes(service, addAuthenticationHdrProps(hdrProperties), requestType, true, true).put(ClientResponse.class, payloadStr);
+			ClientResponse cltResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, true).put(ClientResponse.class, payloadStr);
 			
 			return setDeleteBulkResponse(service, cltResponse, zone, context, requestType, hdrProperties);
 		}
@@ -539,41 +555,47 @@ public class ObjectServiceClient extends BaseClient
 	{
 		BulkOperationResponse<CreateOperationStatus> response = new BulkOperationResponse<CreateOperationStatus>();
 		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, requestType, service.getURI().toString());
-		if ((clientResponse.getClientResponseStatus().getStatusCode() == Status.CREATED.getStatusCode()) || (clientResponse.getClientResponseStatus().getStatusCode() == Status.ACCEPTED.getStatusCode()))
+		if ((clientResponse.getClientResponseStatus().getStatusCode() == Status.CREATED.getStatusCode()) || 
+			(clientResponse.getClientResponseStatus().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
+			(clientResponse.getClientResponseStatus().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
 		{
 			if (response.getHasEntity())
 			{
 				String payload = clientResponse.getEntity(String.class);
-				try
-				{						
-					//Because CreateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-					CreateResponseType createManyResponse = (CreateResponseType)getInfraUnmarshaller().unmarshal(payload, CreateResponseType.class, getResponseMediaType());
-					if (createManyResponse == null)// this is strange. So set the unmarshalled value.
-					{
-						response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));							
-					}
-					else
-					{
-						response.setOperationStatuses(new ArrayList<CreateOperationStatus>());
-						for (CreateType createStatus : createManyResponse.getCreates().getCreate())
-						{
-							CreateOperationStatus opStatus = new CreateOperationStatus();
-							opStatus.setResourceID(createStatus.getId());
-							opStatus.setAdvisoryID(createStatus.getAdvisoryId());
-							opStatus.setStatus(toInt(createStatus.getStatusCode()));
-							opStatus.setError(convertFromErrorType(createStatus.getError()));
-							response.getOperationStatuses().add(opStatus);
-						}
-					}
-				}
-				catch (UnmarshalException ex)
-				{
-					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
-				}
-				catch (UnsupportedMediaTypeExcpetion ex)
-				{
-					response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
-				}
+				MultiOperationStatusList<CreateOperationStatus> statusList = getInfraMapper().toStatusListFromSIFCreateString(payload, getResponseMediaType());
+				response.setError(statusList.getError());
+				response.setOperationStatuses(statusList.getOperationStatuses());
+
+//				try
+//				{						
+//					//Because CreateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
+//					CreateResponseType createManyResponse = (CreateResponseType)getInfraUnmarshaller().unmarshal(payload, CreateResponseType.class, getResponseMediaType());
+//					if (createManyResponse == null)// this is strange. So set the unmarshalled value.
+//					{
+//						response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));							
+//					}
+//					else
+//					{
+//						response.setOperationStatuses(new ArrayList<CreateOperationStatus>());
+//						for (CreateType createStatus : createManyResponse.getCreates().getCreate())
+//						{
+//							CreateOperationStatus opStatus = new CreateOperationStatus();
+//							opStatus.setResourceID(createStatus.getId());
+//							opStatus.setAdvisoryID(createStatus.getAdvisoryId());
+//							opStatus.setStatus(toInt(createStatus.getStatusCode()));
+//							opStatus.setError(convertFromErrorType(createStatus.getError()));
+//							response.getOperationStatuses().add(opStatus);
+//						}
+//					}
+//				}
+//				catch (UnmarshalException ex)
+//				{
+//					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
+//				}
+//				catch (UnsupportedMediaTypeExcpetion ex)
+//				{
+//					response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
+//				}
 			}			
 		}
 		else// We are dealing with an error case.
@@ -592,40 +614,46 @@ public class ObjectServiceClient extends BaseClient
 	{
 		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
 		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, requestType, service.getURI().toString());
-		if ((clientResponse.getClientResponseStatus().getStatusCode() == Status.OK.getStatusCode()) || (clientResponse.getClientResponseStatus().getStatusCode() == Status.ACCEPTED.getStatusCode()))
+		if ((clientResponse.getClientResponseStatus().getStatusCode() == Status.OK.getStatusCode()) || 
+			(clientResponse.getClientResponseStatus().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
+			(clientResponse.getClientResponseStatus().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
 		{
 			if (response.getHasEntity())
 			{
 				String payload = clientResponse.getEntity(String.class);
-				try
-				{						
-					//Because DeleteResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-					DeleteResponseType deleteManyResponse = (DeleteResponseType)getInfraUnmarshaller().unmarshal(payload, DeleteResponseType.class, getResponseMediaType());
-					if (deleteManyResponse == null)// this is strange. So set the unmarshalled value.
-					{
-						response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));							
-					}
-					else
-					{
-						response.setOperationStatuses(new ArrayList<OperationStatus>());
-						for (DeleteStatus deleteStatus : deleteManyResponse.getDeletes().getDelete())
-						{
-							OperationStatus opStatus = new OperationStatus();
-							opStatus.setResourceID(deleteStatus.getId());
-							opStatus.setStatus(toInt(deleteStatus.getStatusCode()));
-							opStatus.setError(convertFromErrorType(deleteStatus.getError()));
-							response.getOperationStatuses().add(opStatus);
-						}
-					}
-				}
-				catch (UnmarshalException ex)
-				{
-					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
-				}
-				catch (UnsupportedMediaTypeExcpetion ex)
-				{
-					response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
-				}
+				MultiOperationStatusList<OperationStatus> statusList = getInfraMapper().toStatusListFromSIFDeleteString(payload, getResponseMediaType());
+				response.setError(statusList.getError());
+				response.setOperationStatuses(statusList.getOperationStatuses());
+				
+//				try
+//				{						
+//					//Because DeleteResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
+//					DeleteResponseType deleteManyResponse = (DeleteResponseType)getInfraUnmarshaller().unmarshal(payload, DeleteResponseType.class, getResponseMediaType());
+//					if (deleteManyResponse == null)// this is strange. So set the unmarshalled value.
+//					{
+//						response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));							
+//					}
+//					else
+//					{
+//						response.setOperationStatuses(new ArrayList<OperationStatus>());
+//						for (DeleteStatus deleteStatus : deleteManyResponse.getDeletes().getDelete())
+//						{
+//							OperationStatus opStatus = new OperationStatus();
+//							opStatus.setResourceID(deleteStatus.getId());
+//							opStatus.setStatus(toInt(deleteStatus.getStatusCode()));
+//							opStatus.setError(convertFromErrorType(deleteStatus.getError()));
+//							response.getOperationStatuses().add(opStatus);
+//						}
+//					}
+//				}
+//				catch (UnmarshalException ex)
+//				{
+//					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
+//				}
+//				catch (UnsupportedMediaTypeExcpetion ex)
+//				{
+//					response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
+//				}
 			}			
 		}
 		else// We are dealing with an error case.
@@ -644,40 +672,46 @@ public class ObjectServiceClient extends BaseClient
 	{
 		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
 		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, requestType, service.getURI().toString());
-		if ((clientResponse.getClientResponseStatus().getStatusCode() == Status.OK.getStatusCode()) || (clientResponse.getClientResponseStatus().getStatusCode() == Status.ACCEPTED.getStatusCode()))
+		if ((clientResponse.getClientResponseStatus().getStatusCode() == Status.OK.getStatusCode()) || 
+			(clientResponse.getClientResponseStatus().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
+			(clientResponse.getClientResponseStatus().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
 		{
 			if (response.getHasEntity())
 			{
 				String payload = clientResponse.getEntity(String.class);
-				try
-				{						
-					//Because UpdateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-					UpdateResponseType updateManyResponse = (UpdateResponseType)getInfraUnmarshaller().unmarshal(payload, UpdateResponseType.class, getResponseMediaType());
-					if (updateManyResponse == null)// this is strange. So set the unmarshalled value.
-					{
-						response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));							
-					}
-					else
-					{
-						response.setOperationStatuses(new ArrayList<OperationStatus>());
-						for (UpdateType updateStatus : updateManyResponse.getUpdates().getUpdate())
-						{
-							OperationStatus opStatus = new OperationStatus();
-							opStatus.setResourceID(updateStatus.getId());
-							opStatus.setStatus(toInt(updateStatus.getStatusCode()));
-							opStatus.setError(convertFromErrorType(updateStatus.getError()));
-							response.getOperationStatuses().add(opStatus);
-						}
-					}
-				}
-				catch (UnmarshalException ex)
-				{
-					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
-				}
-				catch (UnsupportedMediaTypeExcpetion ex)
-				{
-					response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
-				}
+				MultiOperationStatusList<OperationStatus> statusList = getInfraMapper().toStatusListFromSIFUpdateString(payload, getResponseMediaType());
+				response.setError(statusList.getError());
+				response.setOperationStatuses(statusList.getOperationStatuses());
+				
+//				try
+//				{						
+//					//Because UpdateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
+//					UpdateResponseType updateManyResponse = (UpdateResponseType)getInfraUnmarshaller().unmarshal(payload, UpdateResponseType.class, getResponseMediaType());
+//					if (updateManyResponse == null)// this is strange. So set the unmarshalled value.
+//					{
+//						response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));							
+//					}
+//					else
+//					{
+//						response.setOperationStatuses(new ArrayList<OperationStatus>());
+//						for (UpdateType updateStatus : updateManyResponse.getUpdates().getUpdate())
+//						{
+//							OperationStatus opStatus = new OperationStatus();
+//							opStatus.setResourceID(updateStatus.getId());
+//							opStatus.setStatus(toInt(updateStatus.getStatusCode()));
+//							opStatus.setError(convertFromErrorType(updateStatus.getError()));
+//							response.getOperationStatuses().add(opStatus);
+//						}
+//					}
+//				}
+//				catch (UnmarshalException ex)
+//				{
+//					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
+//				}
+//				catch (UnsupportedMediaTypeExcpetion ex)
+//				{
+//					response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
+//				}
 			}			
 		}
 		else// We are dealing with an error case.
@@ -700,6 +734,29 @@ public class ObjectServiceClient extends BaseClient
 			for (String key : queryParameters.keySet())
 			{
 			  hdrProperties.setHeaderProperty(key, queryParameters.get(key));
+			}
+		}
+	}
+	
+	private void addDelayedInfo(HeaderProperties hdrProperties, SIFZone zone, SIFContext context, String serviceName, ServiceType serviceType, RequestType requestType)
+	{
+		if (requestType == RequestType.DELAYED)
+		{
+			ServiceInfo serviceInfo = getSIF3Session().getServiceInfoForService(zone, context, serviceName, serviceType);
+			if (serviceInfo != null)
+			{
+				if ((serviceInfo.getRemoteQueueInfo() != null) && (serviceInfo.getRemoteQueueInfo().getQueueID() != null))
+				{
+					hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_QUEUE_ID, serviceInfo.getRemoteQueueInfo().getQueueID());
+				}
+				else // should not be the case if all is called properly but you never know...
+				{
+					logger.error("No SIF Queue configured environment with Service Name = "+serviceName+", Service Type = "+serviceType+", Zone = "+zone.getId()+" and Context = "+context.getId());
+				}
+			}
+			else // should not be the case if all is called properly but you never know... 
+			{
+				logger.error("No valid service listed in environment ACL for Service Name = "+serviceName+", Service Type = "+serviceType+", Zone = "+zone.getId()+" and Context = "+context.getId());
 			}
 		}
 	}
