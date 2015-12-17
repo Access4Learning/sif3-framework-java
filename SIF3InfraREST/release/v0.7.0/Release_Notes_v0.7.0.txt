@@ -42,6 +42,10 @@ Infrastructure Upgrade
 - Drop the latest framework library into your project's lib directory/directories. Note that the new  
   sif3.1Infra-model-<version>.jar is now also required in your projetc's lib directories. Ensure that you
   remove all jar files with the prefix 'sif3.0.1Infra' since they are replaced with the new jar files.
+- Remove the the following attribute from all environment templates:
+      xmlns="http://www.sifassociation.org/infrastructure/3.0.1"
+  Environment templates are in the sub-directories of the config/environments directory. Removing of this
+  attribute simplifies the use of different SIF Infrastructure versions.
 - Replace systemic-framework-20140410.jar with systemic-framework-20150618.jar in your projetc's lib directories.
 
 ==========================================================================================================================
