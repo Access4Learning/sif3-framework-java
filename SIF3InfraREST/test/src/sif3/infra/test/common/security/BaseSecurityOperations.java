@@ -41,7 +41,7 @@ public class BaseSecurityOperations
     @SuppressWarnings("unused")
     public static TokenInfo createToken(TokenCoreInfo coreInfo, String password)
     {
-        String iso8601Str = "2015-07-28T14:00:00Z";
+        String iso8601Str = "2015-08-06T14:00:00Z";
         String token = coreInfo.getAppUserInfo().getApplicationKey()+":"+iso8601Str;
         token = new String(Base64.encodeBase64(token.getBytes()), Charset.forName("ASCII"));
         TokenInfo newToken = null;
