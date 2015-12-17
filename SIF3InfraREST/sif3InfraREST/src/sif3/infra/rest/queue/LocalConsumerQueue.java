@@ -22,7 +22,7 @@ import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
 
-import sif3.infra.rest.queue.types.EventInfo;
+import sif3.infra.rest.queue.types.QueueMessage;
 import au.com.systemic.framework.utils.StringUtils;
 
 
@@ -45,12 +45,13 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class LocalConsumerQueue
 {	
-	protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = Logger.getLogger(getClass());
 
-	private BlockingQueue<EventInfo> queue = null;
+	private BlockingQueue<QueueMessage> queue = null;
 	
 	/* Properties used in future development once persistence will be implemented. */
     private String localQueueID;
+    
 	@SuppressWarnings("unused")
     private String workingDir;
 	
@@ -70,7 +71,7 @@ public class LocalConsumerQueue
 	{
 		this.localQueueID = StringUtils.isEmpty(localQueueID) ? "LocalConsumerQueue" : localQueueID.replaceAll("\\s+","");
 		this.workingDir = StringUtils.isEmpty(workingDir) ? "" : workingDir.replaceAll("\\s+","");;
-		this.queue = new ArrayBlockingQueue<EventInfo>(capacity);
+		this.queue = new ArrayBlockingQueue<QueueMessage>(capacity);
 	}
 	
 	public String getLocalQueueID()
@@ -84,23 +85,23 @@ public class LocalConsumerQueue
     }
 
 	/**
-	 * This method attempts to put an event from a SIF Message Queue on to the LocalConsumerQueue. If the capacity of 
+	 * This method attempts to put an message from a SIF Message Queue on to the LocalConsumerQueue. If the capacity of 
 	 * the queue is below the threshold defined in the constructor then the messageResponse is put on the queue 
 	 * immediately. If the queue is full this method blocks indefinitely until a 'slot' becomes available 
 	 * (ie. the size of the queue falls below the capacity defined in the constructor). This means a 
 	 * consumer has taken a element off the queue.<p>
 	 * 
-	 * @param event The element to be put on the queue.
+	 * @param message The element to be put on the queue.
 	 */
-	public void blockingPush(EventInfo event)
+	public void blockingPush(QueueMessage message)
 	{
 		try
 		{
-			queue.put(event);
+			queue.put(message);
 		}
 		catch (Exception ex)
 		{
-			logger.error("Failed to push the 'event' on to the LocalConsumerQueue: "+ex.getMessage(),ex);
+			logger.error("Failed to push the 'message' on to the LocalConsumerQueue: "+ex.getMessage(),ex);
 		}
 	}
 	
@@ -111,7 +112,7 @@ public class LocalConsumerQueue
 	 * 
 	 * @return A message of the defined type.
 	 */
-	public EventInfo blockingPull()
+	public QueueMessage blockingPull()
 	{
 		try
 		{
@@ -119,8 +120,17 @@ public class LocalConsumerQueue
 		}
 		catch (Exception ex)
 		{
-			logger.error("Failed to pull a event off the the LocalConsumerQueue: "+ex.getMessage(),ex);
+			logger.error("Failed to pull a message off the the LocalConsumerQueue: "+ex.getMessage(),ex);
 			return null;
 		}
 	}
+	
+	   /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+        return "LocalConsumerQueue [localQueueID=" + localQueueID + "]";
+    }
 }
