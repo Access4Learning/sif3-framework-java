@@ -42,11 +42,21 @@ Infrastructure Upgrade
 - Drop the latest framework library into your project's lib directory/directories. Note that the new  
   sif3.1Infra-model-<version>.jar is now also required in your projetc's lib directories. Ensure that you
   remove all jar files with the prefix 'sif3.0.1Infra' since they are replaced with the new jar files.
+- Replace systemic-framework-20140410.jar with systemic-framework-20150618.jar in your projetc's lib directories.
 - Remove the the following attribute from all environment templates:
       xmlns="http://www.sifassociation.org/infrastructure/3.0.1"
   Environment templates are in the sub-directories of the config/environments directory. Removing of this
   attribute simplifies the use of different SIF Infrastructure versions.
-- Replace systemic-framework-20140410.jar with systemic-framework-20150618.jar in your projetc's lib directories.
+- Add "delayed.<prop_name>" properties to the consumer.properties file(s). Please refer to StudentConsumer.properties
+  in the directory config/consumers for example. Suggested values are:
+      delayed.enabled=false
+      delayed.queue.strategy=ADAPTER_LEVEL
+      delayed.queue.name=
+      delayed.queue.type=IMMEDIATE
+      delayed.queue.subscribers=1
+      delayed.polling.frequency=120
+      delayed.longPolling.timeout=30
+      delayed.subscriptions.removeOnShutdown=false
 
 ==========================================================================================================================
 Providers ONLY: Potential Compilation Error!!
