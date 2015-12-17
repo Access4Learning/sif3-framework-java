@@ -19,7 +19,6 @@
 package sif3.infra.test.rest.consumer;
 
 import sif3.infra.rest.consumer.ConsumerLoader;
-import systemic.sif3.demo.rest.consumer.StudentConsumerService;
 
 /**
  * @author Joerg Huber
@@ -28,10 +27,11 @@ import systemic.sif3.demo.rest.consumer.StudentConsumerService;
 public class TestConsumerLoader
 {
 	// Local
-//	private static final String CONSUMER_ID = "StudentConsumer";
+	private static final String CONSUMER_ID = "StudentConsumer";
 
 	// Broker
-	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
+//	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
+//	private static final String CONSUMER_ID = "QueueTestConsumer";
 
 	
 	  public void stopService(String serviceID)
@@ -40,26 +40,26 @@ public class TestConsumerLoader
 	    ConsumerLoader.shutdown();
 	  }
 	  
-	  public void startService(final String serviceID, String consumerPropFileName) throws Exception
-	  {
-	    System.out.println(serviceID+" startService() called...");
-	    System.out.println(serviceID+": Installing shutdown hook");
-	    final TestConsumerLoader tmpSvc = this;
-	    Runtime.getRuntime().addShutdownHook(new Thread()
-	    {
-	      public void run()
-	      {
-	        tmpSvc.stopService(serviceID);
-	      }
-	    });
-
-	    if (ConsumerLoader.initialise(consumerPropFileName))
-	    {
-	      System.out.println(serviceID+"initialised successfully.");
-	    }
-
-	    System.out.println(serviceID+" is running (Press Ctrl-C to stop)");
-	  }
+//	  public void startService(final String serviceID, String consumerPropFileName) throws Exception
+//	  {
+//	    System.out.println(serviceID+" startService() called...");
+//	    System.out.println(serviceID+": Installing shutdown hook");
+//	    final TestConsumerLoader tmpSvc = this;
+//	    Runtime.getRuntime().addShutdownHook(new Thread()
+//	    {
+//	      public void run()
+//	      {
+//	        tmpSvc.stopService(serviceID);
+//	      }
+//	    });
+//
+//	    if (ConsumerLoader.initialise(consumerPropFileName))
+//	    {
+//	      System.out.println(serviceID+"initialised successfully.");
+//	    }
+//
+//	    System.out.println(serviceID+" is running (Press Ctrl-C to stop)");
+//	  }
 	
 	
 	public static void main(String[] args)
