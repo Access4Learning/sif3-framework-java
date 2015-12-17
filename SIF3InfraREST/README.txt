@@ -27,10 +27,6 @@ developer's guide that can be found in the "documentation/UserGuide" directory.
 There is a set of pre-built framework libraries in the "release" directory. Please refer to the developer's
 guide for more details an the libraries.
 
-NOTE:
-As of May 17, 2014 the framework works for SIF3 with a DIRECT & BROKERED environment and IMMEDIATE responses. It
-doesn't support DELAYED responses, yet. It supports events in a BROKERED environment, though.
-
 #########################################################################################################
 # Version History and Update
 #########################################################################################################
@@ -45,14 +41,14 @@ configuration changes.
 Step 1:
 -------
 Remove all environment XML files in the provider's and consumer's 'workstore' and all XML files in the provider's 
-environment store under the 'any' directory. Please refer to the developer's guide section 5.3.1.2.1 (consumer)
-and 5.3.1.2.2 (provider) for details where the 'workstore' is located for both these components.
+environment store under the 'any' directory. Please refer to the developer's guide section 5.3.1.1.2 (consumer)
+and 5.3.1.1.3 (provider) for details where the 'workstore' is located for both these components.
 
 Step 2:
 -------
 Open all environment XML files in the provider's 'template' directory. Note if you have more than one provider
 configured then you must open the files in all provider's 'template' directories. Please refer to the developer's 
-guide section 5.3.1.2.2 for details about the location of the 'template' directory. Each environment XML file
+guide section 5.3.1.1.3 for details about the location of the 'template' directory. Each environment XML file
 has a section with the name <infrastructureServices>. Replace that entire section with the following XML:
 
    <infrastructureServices>
@@ -63,7 +59,7 @@ has a section with the name <infrastructureServices>. Replace that entire sectio
       <infrastructureService name="subscriptions">subscriptions</infrastructureService>
    </infrastructureServices>
 
-For details about that XML snipped please see section 5.3.1.2.2 in the developer's guide, paragraph with the title
+For details about that XML snipped please see section 5.3.1.1.3 in the developer's guide, paragraph with the title
 'Infrastructure Service URIs'.
 
 Step 3:
@@ -71,12 +67,11 @@ Step 3:
 Open the provider's properties file (i.e. StudentProvider.properties). For each environment the provider supports
 add the following new property:
 
-env.connector.url.<env_name>=<baseURI>
+env.connector.url=<baseURI>
 
-<env_name>: Name of the environment (i.e. devLocal)
 <baseURI>: The base URI of the provider. This is the value that used to be in the  <infrastructureService> node
            of each service. (i.e. http://localhost:9080/SIF3InfraREST/sif3).
-           Also refer to section 5.6.2.1.2 and 5.6.2.3 of the developer's guide for details about this property.
+           Also refer to section 8 and 9 of the developer's guide for details about this property.
 
 =======================
 Version from 10/12/2013
@@ -85,15 +80,13 @@ If you have downloaded the framework before Nov 26, 2013 and get an updated vers
 all the steps listed in the "Version from 26/11/2013" first.
 
 This latest version of the framework has the HTTPS (secured connections) capability added. It is recommended
-that you read section "5.7 Security - HTTPS Connections" of the Developer's Guide first. Also check out section
-5.5.2.1.1, 5.5.2.1.2 and 5.6.2.1.2 of the guide about details what properties must be configured to enable 
-HTTPS for a consumer and provider. 
+that you read section "5.10 Security - HTTPS Configuration" of the Developer's Guide first. 
 
 =======================
 Version from 03/01/2014
 =======================
 Modified some underlying classes to include all header fields as specified in the latest SIF3 specification. Also
-implemented the Bulk Delete which is now managed via a HTTP PUT and an appropriate header fields.
+implemented the Bulk Delete which is now managed via a HTTP PUT and an appropriate header field.
 Also added the functionality for more rigorous ACL checks before any REST calls are made. Before each REST call
 the consumer checks if access to the call is APPROVED (looking up ACLs in the environment XML). To disable or enable
 this ACL check please refer to the Developer's Guide and read up on the 'adapter.checkACL' property for the consumer
@@ -110,7 +103,7 @@ NOTE:
 THIS IS A MAJOR UPDATE TO THE FRAMEWORK. THE JAR FILES IN THE RELEASE DIRECTORY SHOULD HAVE A VERSION OF v0.2-alpha.
 
 You should read through the installation instructions in the Developer's Guide in the directory 
-documentation/UserGuide(SIF3Framework_DevelopersGuide_v0.2.docx). If you have developed some consumer and/or provider 
+documentation/UserGuide(SIF3Framework_DevelopersGuide_v0.6.2.docx). If you have developed some consumer and/or provider 
 classes in the past and you want to use them you may have to change some of the method signatures to fix them up. Also 
 neither the consumer nor the provider constructor take any arguments anymore. The management of environments and their
 templates has changed significantly and may need some re-configuring. Please refer to the Developer's Guide for 
@@ -123,7 +116,7 @@ This version updates the framework from version 0.2 to version 0.3. The latest j
 "release" directory. Also upgrade instructions can be found in the directory "release/v0.3".
 Major Changes in this version include:
 - Bug Fixes (i.e. use header fields for paging information rather than query parameters)
-- Ability for a DIRECT provider to deal with multiple environment templates. For details refer to section 5.3.1.4
+- Ability for a DIRECT provider to deal with multiple environment templates. For details refer to section 5.3.1.3
   in the Developer's Guide.
 - Updated AU 1.3 SIF data model to cater for latest changes to time table objects.
 
@@ -172,11 +165,13 @@ There are additional changes, additions, bug fixes etc. in the latest version of
 to the release notes in the directory "release/v0.6.0" for details.
 
 =============================================================
-Version from July xx, 2015: v0.7.0 - Various changes
+Version from Dec 17, 2015: v0.7.0 - Various changes
 =============================================================
-Version 0.7.0 adds payload compression to all request/responses. This is an optional feature. Further the infrastructure
-data model is now in its own jar file rather than part of the infra-common jar file. Finally support for external
-security services for consumers has been added.
+Version 0.7.0 adds payload compression capabilities to all request/responses. This is an optional feature. 
+Further the infrastructure data model is now in its own jar file rather than part of the infra-common jar file. 
+It has also switched to infrastructure version 3.1. 
+The major change relates to consumers. This framework version supports DELAYED request/responses. 
+Finally support for external security services for consumers has been added as well.
 Please refer to the release notes in the directory "release/v0.7.0" for additional details and upgrade instructions. 
 
 #########################################################################################################
