@@ -23,6 +23,7 @@ import java.net.URI;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
+import sif3.common.CommonConstants;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.RequestHeaderConstants;
@@ -106,7 +107,7 @@ public class MessageClient extends BaseClient
 		{
 			if (useMatrix)
 			{
-				uriBuilder.matrixParam("deleteMessageId", removeMsgID);
+				uriBuilder.matrixParam(CommonConstants.MATRIX_DELETE_MSGID, removeMsgID);
 			}
 			else
 			{
