@@ -19,18 +19,16 @@
 package sif3.infra.rest.queue.connectors;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import sif3.common.CommonConstants.AdapterType;
-import sif3.common.CommonConstants.QueueStrategy;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.ServiceInvokationException;
-import sif3.common.header.HeaderValues.ServiceType;
-import sif3.common.model.SIFContext;
-import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceInfo;
+import sif3.common.model.SubscriptionKey;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
 import sif3.common.persist.model.SIF3Queue;
@@ -45,6 +43,8 @@ import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.SubscriptionCollectionType;
 import sif3.infra.common.model.SubscriptionType;
 import sif3.infra.rest.client.SubscriptionClient;
+import sif3.infra.rest.queue.types.QueueInfo;
+import sif3.infra.rest.queue.types.QueueInfo.QueueType;
 
 /**
  * This class manages subscriptions based on the Queue Strategy. It assumes that queues do already exist on the remote location
@@ -85,9 +85,9 @@ public class ConsumerSubscriptionConnector
 	 * If true is returned then all is fine and events can be received. If false is returned then there is a
 	 * problem in configuring queues and subscriptions and therefore events cannot be retrieved.
 	 * 
-	 * @param consumerSubscriptions A list of subscriptions the given consumer is interested in.
+	 * @param queues A list of queues with their subscriptions according to the ACL.
 	 */
-	public boolean syncSubscriptionsAtStartup(List<ServiceInfo> consumerSubscriptions)
+	public boolean syncSubscriptionsAtStartup(HashMap<String, QueueInfo> queues)
 	{
 		try
 		{
@@ -110,12 +110,20 @@ public class ConsumerSubscriptionConnector
 				logger.debug("No subscriptions exist on remote location.");
 			}
 			
-			// Check if the current consumer has subscriptions active that are no longer allowed according to the ACLs!
-			checkSubscriptionsWithACL();
-			
-			// Create required subscriptions for those that are missing.
-			createMissingSubscriptions(consumerSubscriptions);
-			
+			// At this stage the remote and local (DB) subscription information are in sync. Now we need to ensure that they are updated on the
+			// remote and local (DB) configuration according to the ACLs.
+						
+	        // Configure Subscriptions for Events
+			if (getConsumerEnvInfo().getEventsEnabled())
+			{
+    	        if (!syncSubscriptions(queues))
+    	        {
+    	        	return false;
+    	        }
+			}
+	        
+	        // Delayed Responses do not work on subscriptions so there is nothing to do here for Delayed responses..
+	       
 			return true;
 		}
 		catch (Exception ex)
@@ -133,23 +141,18 @@ public class ConsumerSubscriptionConnector
 	public void syncSubscriptionsAtShutDown()
 	{
 		logger.debug("Sync & Shutdown Remote and Local SIF Subscriptions.");
-		logger.debug("Remove Subscriptions: "+getConsumerEnvInfo().getRemoveSubscribersOnShutdown());
-		if (getConsumerEnvInfo().getRemoveSubscribersOnShutdown())
+		
+		try
+		{	
+			// Check if Event subscriptions need to be removed.
+			if (getConsumerEnvInfo().getEventsEnabled()) // only then we may have subscriptions
+			{
+				removeSubscriptions();
+			}        
+		}
+		catch (Exception ex)
 		{
-			try
-			{
-				logger.debug("Remove subscriptions in DB...");
-				subscriptionService.removeAllSubscriptionsForEnvironment(getSif3Session().getEnvironmentID(), CONSUMER);
-				
-				logger.debug("Remove subscriptions on remote location...");
-				removeRemoteSubscriptions();
-				
-				logger.debug("All subscriptions removed.");
-			}
-			catch (Exception ex)
-			{
-				logger.error("Subscriptions for environment "+ getSif3Session().getEnvironmentID()+" may not fully be removed. Will be re-sync'ed at next startup.");
-			}
+			logger.error("Subscriptions for environment "+ getSif3Session().getEnvironmentID()+" may not fully be removed. Will be re-sync'ed at next startup.");
 		}
 	}
 		
@@ -170,6 +173,45 @@ public class ConsumerSubscriptionConnector
     {
         return (ConsumerEnvironment)getConsumerEvnMgr().getEnvironmentInfo();
     }
+
+
+    private void removeSubscriptions() throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+    {
+		logger.debug("Remove Subscriptions: "+getConsumerEnvInfo().getEventConfig().getRemoveSubscribersOnShutdown());
+		if (getConsumerEnvInfo().getEventConfig().getRemoveSubscribersOnShutdown())
+		{		
+			// Let's get all queues. We need to remove subscriptions to a set of queues. Only EVENT type queues do have subscriptions
+			List<SIF3Queue> dbQueues = queueService.getQueuesForEnvironment(getSif3Session().getEnvironmentID(), CONSUMER);
+			for (SIF3Queue dbQueue : dbQueues)
+			{
+				logger.debug("Remove subscriptions in DB for Queue: "+dbQueue.getName());
+				subscriptionService.removeAllSubscriptionsForQueue(dbQueue.getQueueID(), CONSUMER);
+			
+				logger.debug("Remove subscriptions for queue "+dbQueue.getName()+"("+dbQueue.getQueueID()+") on remote location...");
+				removeRemoteSubscriptions(dbQueue);
+			
+				logger.debug("All subscriptions removed for queue"+dbQueue.getName()+".");
+			}
+		}
+    }
+    
+    private boolean syncSubscriptions(HashMap<String, QueueInfo> queues) throws PersistenceException, ServiceInvokationException
+    {
+    	for (QueueInfo queueInfo : queues.values())
+    	{
+    		// Subscriptions are only required for EvVent queues
+    		if (queueInfo.getQueueType() == QueueInfo.QueueType.EVENT_QUEUE)
+    		{    		
+        		// Check if the current consumer has subscriptions active that are no longer allowed according to the ACLs!
+    			checkSubscriptionsWithACL();
+    			
+    			// Create required subscriptions for those that are missing.
+    			createMissingSubscriptions(queues);
+    		}
+    	}
+    	
+    	return true;
+    }  
 
     private SubscriptionCollectionType getRemoteSubscriptions() throws ServiceInvokationException
 	{
@@ -196,7 +238,7 @@ public class ConsumerSubscriptionConnector
 		}
 	}
 	
-	private void removeRemoteSubscriptions() throws ServiceInvokationException
+	private void removeRemoteSubscriptions(SIF3Queue dbQueue) throws ServiceInvokationException
 	{
 		SubscriptionCollectionType remoteSubscriptions = getRemoteSubscriptions();
 		if (remoteSubscriptions != null)
@@ -204,20 +246,23 @@ public class ConsumerSubscriptionConnector
 			SubscriptionClient subscriptionClient = new SubscriptionClient(getConsumerEvnMgr());
 			for (SubscriptionType subscription : remoteSubscriptions.getSubscription())
 			{
-				subscriptionClient.unsubscribe(subscription.getId());
+				if (dbQueue.getQueueID().equals(subscription.getQueueId()))
+				{
+					subscriptionClient.unsubscribe(subscription.getId());
+				}
 			}
 		}
 	}
 	
-	private SubscriptionType createRemoteSubscription(ServiceInfo service, List<SIF3Queue> dbQueues) throws ServiceInvokationException
+	private SubscriptionType createRemoteSubscription(SubscriptionKey subscriptionKey, QueueInfo queueInfo) throws ServiceInvokationException
 	{
 		SubscriptionClient subscriptionClient = new SubscriptionClient(getConsumerEvnMgr());
 		SubscriptionType subscriptionInfo = new ObjectFactory().createSubscriptionType();
-		subscriptionInfo.setContextId(service.getContext().getId());
-		subscriptionInfo.setZoneId(service.getZone().getId());
-		subscriptionInfo.setServiceName(service.getServiceName());
-		subscriptionInfo.setServiceType(service.getServiceType().name());
-		subscriptionInfo.setQueueId(getQueueID(service, dbQueues));		
+		subscriptionInfo.setContextId(subscriptionKey.getContextID());
+		subscriptionInfo.setZoneId(subscriptionKey.getZoneID());
+		subscriptionInfo.setServiceName(subscriptionKey.getServiceName());
+		subscriptionInfo.setServiceType(subscriptionKey.getServiceType());
+		subscriptionInfo.setQueueId(queueInfo.getQueue().getQueueID());		
 		Response response = subscriptionClient.subscribe(subscriptionInfo);
 		
 	    if (response.hasError())
@@ -259,29 +304,31 @@ public class ConsumerSubscriptionConnector
 	 * only performed if the Check ACL flag is turned on. At this point it is assumed that the DB is fully synced with the
 	 * remote provider.
 	 */
-	public void checkSubscriptionsWithACL()
+    private void checkSubscriptionsWithACL()
 	{
 		try
 		{
 			if (getConsumerEnvInfo().getCheckACL())
 			{
+				// We need to get all subscriptions for this environment and compare it against all services for this session.
 				List<SIF3Subscription> dbSubscriptions = subscriptionService.getSubscriptionsForEnvironment(getSif3Session().getEnvironmentID(), CONSUMER);
 				if ((dbSubscriptions != null) && (dbSubscriptions.size() > 0))
 				{
 					SubscriptionClient subscriptionClient = new SubscriptionClient(getConsumerEvnMgr());
-					for (ServiceInfo service : getSif3Session().getServices())
+					
+					List<ServiceInfo> services = getSif3Session().getServices();
+					
+					// We need to check all subscriptions we are holding in the DB and Remote queues if they are still valid
+					// According to the ACL. If they are not we need to remove them.
+					for (SIF3Subscription subscription : dbSubscriptions)
 					{
-						if (!service.getRights().hasRight(AccessRight.SUBSCRIBE, AccessType.APPROVED))
-						{
-							SIF3Subscription subscription = getSubscriptionFromList(service.getZone(), service.getContext(), service.getServiceName(), service.getServiceType(), dbSubscriptions);
-							if (subscription != null) // we have a subscription for a service where we have no access
-							{
-								logger.debug("The following active subscription has no longer SUBSCRIBE=APPROVED rights according to the ACL. It will be removed:\n"+subscription);
-								subscriptionClient.unsubscribe(subscription.getSubscriptionID());
-								subscriptionService.removeSubscription(subscription.getSubscriptionID(), CONSUMER);
-							}
-						}
-					}
+					    if (!hasAccess(subscription, services))
+					    {
+                            logger.debug("The following active subscription has no longer SUBSCRIBE=APPROVED rights according to the ACL. It will be removed:\n"+subscription);
+                            subscriptionClient.unsubscribe(subscription.getSubscriptionID());
+                            subscriptionService.removeSubscription(subscription.getSubscriptionID(), CONSUMER);					        
+					    }
+					}					
 				}
 			}
 		}
@@ -292,14 +339,31 @@ public class ConsumerSubscriptionConnector
 		}
 	}
 
-	private SIF3Subscription getSubscriptionFromList(SIFZone zone, SIFContext context, String serviceName, ServiceType serviceType, List<SIF3Subscription> dbSubscriptions)
+    private boolean hasAccess(SIF3Subscription subscription, List<ServiceInfo> services)
+    {
+        for (ServiceInfo service : services)
+        {
+            if (subscription.getZoneID().equals(service.getZone().getId()) &&
+                subscription.getContextID().equals(service.getContext().getId()) &&
+                subscription.getServiceName().equals(service.getServiceName()) &&
+                subscription.getServiceType().equals(service.getServiceType().name()))
+            {
+                return service.getRights().hasRight(AccessRight.SUBSCRIBE, AccessType.APPROVED);
+            }
+        }
+        
+        // There is no such service => No right to subscribe
+        return false;
+    }
+    
+	private SIF3Subscription getSubscriptionFromList(SubscriptionKey subscriptionKey, List<SIF3Subscription> dbSubscriptions)
 	{
 		for (SIF3Subscription subscription : dbSubscriptions)
 		{
-			if (subscription.getZoneID().equals(zone.getId()) &&
-                subscription.getContextID().equals(context.getId()) &&
-                subscription.getServiceName().equals(serviceName) &&
-                subscription.getServiceType().equals(serviceType.name()))
+			if (subscription.getZoneID().equals(subscriptionKey.getZoneID()) &&
+                subscription.getContextID().equals(subscriptionKey.getContextID()) &&
+                subscription.getServiceName().equals(subscriptionKey.getServiceName()) &&
+                subscription.getServiceType().equals(subscriptionKey.getServiceType()))
 			{
 				return subscription;
 			}
@@ -312,48 +376,37 @@ public class ConsumerSubscriptionConnector
 	 * interested in. If there are other subscriptions still in place then they must remain since the consumer could have
 	 * been started temporarily with a different assembly. Also check rights if subscription is allowed!
 	 */
-	private void createMissingSubscriptions(List<ServiceInfo> consumerSubscriptions) throws PersistenceException, ServiceInvokationException
+	private void createMissingSubscriptions(HashMap<String, QueueInfo> queues) throws PersistenceException, ServiceInvokationException
 	{
-		if ((consumerSubscriptions != null) && (consumerSubscriptions.size() > 0))
+		if (queues != null)
 		{
-			List<SIF3Subscription> dbSubscriptions = subscriptionService.getSubscriptionsForEnvironment(getSif3Session().getEnvironmentID(), CONSUMER);
-			List<SIF3Queue> dbQueues = queueService.getQueuesForEnvironment(getSif3Session().getEnvironmentID(), CONSUMER);
-			for (ServiceInfo service : consumerSubscriptions)
+			for (QueueInfo queueInfo : queues.values())
 			{
-				// First check if we have SUBSCRIBE permission
-				boolean subscribeAllowed = true;
-				if (getConsumerEnvInfo().getCheckACL())
+				if (queueInfo.getQueueType() == QueueType.EVENT_QUEUE)
 				{
-					ServiceInfo envService = getSif3Session().getServiceInfoForService(service.getZone(), service.getContext(), service.getServiceName(), service.getServiceType());
-					if (envService != null)
+					if (queueInfo.getListeners().keySet() != null)
 					{
-						subscribeAllowed = envService.getRights().hasRight(AccessRight.SUBSCRIBE, AccessType.APPROVED);
+            			List<SIF3Subscription> dbSubscriptions = subscriptionService.getSubscriptionsForQueue(queueInfo.getQueue().getQueueID(), CONSUMER);
+            			for (SubscriptionKey subcriptionKey : queueInfo.getListeners().keySet())
+            			{
+            				// Because the subscription key map is based on the ACL it also means that the subscription must be allowed!
+        					SIF3Subscription dbSubscription = getSubscriptionFromList(subcriptionKey, dbSubscriptions);
+        					if (dbSubscription == null) // does not exist => create subscription
+        					{
+        						logger.debug("The subscription with the following details doesn't exist and will be created:\n"+subcriptionKey);
+        						createSubscription(subcriptionKey, queueInfo);
+        					}
+            			}
 					}
-					else // no such service => No access
-					{
-						subscribeAllowed = false;
-					}
-				}
-				if (subscribeAllowed)	
-				{
-					SIF3Subscription dbSubscription = getSubscriptionFromList(service.getZone(), service.getContext(), service.getServiceName(), service.getServiceType(), dbSubscriptions);
-					if (dbSubscription == null) // does not exist => create subscription
-					{
-						logger.debug("The subscription with the following details doesn't exist and will be created:\n"+service);
-						createSubscription(service, dbQueues);
-					}
-				}
-				else
-				{
-					logger.debug("The subscription with the following details has no SUBSCRIBE=APPROVED rights according to the ACL. It will not be created:\n"+service);
 				}
 			}
+
 		}
 	}
 	
-	private void createSubscription(ServiceInfo service, List<SIF3Queue> dbQueues) throws ServiceInvokationException, PersistenceException
+	private void createSubscription(SubscriptionKey subscriptionKey, QueueInfo queueInfo) throws ServiceInvokationException, PersistenceException
 	{
-		SubscriptionType remoteSubscription = createRemoteSubscription(service, dbQueues);
+		SubscriptionType remoteSubscription = createRemoteSubscription(subscriptionKey, queueInfo);
 		if (remoteSubscription != null)
 		{
 			subscriptionService.saveSubscription(getSubscription(remoteSubscription));
@@ -362,36 +415,5 @@ public class ConsumerSubscriptionConnector
 		{
 			logger.error("Could not create subscription on remote location. See previous error log entries.");
 		}
-	}
-	
-	private String getQueueID(ServiceInfo service, List<SIF3Queue> dbQueues)
-	{
-		switch (QueueStrategy.valueOf(getSif3Session().getQueueStrategy()))
-		{
-			case ADAPTER_LEVEL: // there is only one queue
-				return dbQueues.get(0).getQueueID();
-			case OBJECT_LEVEL: // all criteria must match
-				for (SIF3Queue queue : dbQueues)
-				{
-					if (service.getZone().getId().equals(queue.getZoneID()) &&
-					    service.getContext().getId().equals(queue.getContextID()) &&
-					    service.getServiceName().equals(queue.getServiceName()) &&
-					    service.getServiceType().name().equals(queue.getServiceType()))
-					{
-						return queue.getQueueID();
-					}
-				}
-				break;
-			case ZONE_LEVEL: // only one queue per zone
-				for (SIF3Queue queue : dbQueues)
-				{
-					if (service.getZone().getId().equals(queue.getZoneID()))
-					{
-						return queue.getQueueID();
-					}
-				}
-				break;
-		}
-		return null;
 	}
 }
