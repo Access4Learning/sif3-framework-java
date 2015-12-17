@@ -45,6 +45,7 @@ import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.URLQueryParameter;
+import sif3.common.model.delayed.DelayedRequestReceipt;
 import sif3.common.model.security.TokenCoreInfo;
 import sif3.common.model.security.TokenInfo;
 import sif3.common.persist.model.SIF3Session;
@@ -52,7 +53,6 @@ import sif3.common.security.AbstractSecurityService;
 import sif3.common.security.BearerSecurityFactory;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.BaseResponse;
-import sif3.common.ws.DelayedRequestReceipt;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
@@ -61,6 +61,7 @@ import sif3.infra.common.env.types.EnvironmentInfo;
 import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.ErrorType;
 import sif3.infra.common.model.ObjectFactory;
+import sif3.infra.rest.mapper.InfraDataModelMapper;
 import au.com.systemic.framework.utils.DateUtils;
 import au.com.systemic.framework.utils.StringUtils;
 
@@ -104,6 +105,8 @@ public abstract class BaseClient
 	private ObjectFactory infraObjectFactory = new ObjectFactory();
 	private boolean useCompression = false;
 	private ClientEnvironmentManager clientEnvMgr = null;
+	
+	private InfraDataModelMapper infraMapper = new InfraDataModelMapper();
 
 	/**
      * Constructor<br/>
@@ -185,15 +188,10 @@ public abstract class BaseClient
         return getClientEnvMgr().getSIF3Session();
     }
 
-    /**
-     * @param clientEnvMgr the clientEnvMgr to set
-     */
-    private void setClientEnvMgr(ClientEnvironmentManager clientEnvMgr)
-    {
-        this.clientEnvMgr = clientEnvMgr;
-    }
-
-
+	protected InfraDataModelMapper getInfraMapper()
+	{
+		return infraMapper;
+	}
 
 	public MarshalFactory getDataModelMarshaller()
     {
@@ -304,6 +302,14 @@ public abstract class BaseClient
     	this.useCompression = useCompression;
     }
 
+    /**
+     * @param clientEnvMgr the clientEnvMgr to set
+     */
+    private void setClientEnvMgr(ClientEnvironmentManager clientEnvMgr)
+    {
+        this.clientEnvMgr = clientEnvMgr;
+    }
+
 	/*-----------------------*/
 	/*-- Protected Methods --*/
 	/*-----------------------*/
@@ -362,9 +368,6 @@ public abstract class BaseClient
 	 */
 	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, RequestType requestType, boolean includeRequestID, boolean hasPayload)
 	{
-//		System.out.println("Client: Request MediaType: "+getRequestMediaType());
-//		System.out.println("Client Response MediaType: "+getResponseMediaType());
-		
 		Builder builder = service.type(getRequestMediaType()).accept(getResponseMediaType());
 		
 		// Set some specific SIF HTTP header. First ensure that we have a valid header property structure
@@ -595,36 +598,39 @@ public abstract class BaseClient
 			{
 				logger.debug("Returned Error Payload:\n"+errorStr);
 			}
-			try
-			{
-				//Because ErrorType is a Infrastructure thing we must ensure we use a valid Infrastructure Unmarshaller Media Type
-				ErrorType error = (ErrorType) infraUnmarshaller.unmarshal(errorStr, ErrorType.class, getInfraResponseMediaType(getResponseMediaType()));
-				if (error == null) // this is strange. So set the unmarshalled value.
-				{
-					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload into ErrorType object. See error description for payload details.", errorStr));
-				}
-				else
-				{
-					if (StringUtils.isEmpty(error.getMessage()) && StringUtils.isEmpty(error.getDescription()) && (error.getCode() <= 0))
-					{
-						// It appears that we could not get a useful error from the entity string for whatever reason. Return something hopefully
-						// more useful from the low level response
-						response.setError(new ErrorDetails(clientResponse.getStatus(), clientResponse.getClientResponseStatus().getReasonPhrase()));
-					}
-					else
-					{
-						response.setError(convertFromErrorType(error));
-					}
-				}
-			}
-			catch (UnmarshalException ex)
-			{
-				response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload into ErrorType object: "+ex.getMessage()+". See error description for payload details.", errorStr));
-			}
-			catch (UnsupportedMediaTypeExcpetion ex)
-			{
-				response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload into ErrorType object (unsupported media type): "+ex.getMessage()+". See error description for payload details.", errorStr));
-			}
+			
+			response.setError(getInfraMapper().toErrorFromSIFErrorString(errorStr, getInfraResponseMediaType(getResponseMediaType()), new ErrorDetails(clientResponse.getStatus(), clientResponse.getClientResponseStatus().getReasonPhrase())));
+
+//			try
+//			{
+//				//Because ErrorType is a Infrastructure thing we must ensure we use a valid Infrastructure Unmarshaller Media Type
+//				ErrorType error = (ErrorType) infraUnmarshaller.unmarshal(errorStr, ErrorType.class, getInfraResponseMediaType(getResponseMediaType()));
+//				if (error == null) // this is strange. So set the unmarshalled value.
+//				{
+//					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload into ErrorType object. See error description for payload details.", errorStr));
+//				}
+//				else
+//				{
+//					if (StringUtils.isEmpty(error.getMessage()) && StringUtils.isEmpty(error.getDescription()) && (error.getCode() <= 0))
+//					{
+//						// It appears that we could not get a useful error from the entity string for whatever reason. Return something hopefully
+//						// more useful from the low level response
+//						response.setError(new ErrorDetails(clientResponse.getStatus(), clientResponse.getClientResponseStatus().getReasonPhrase()));
+//					}
+//					else
+//					{
+//						response.setError(convertFromErrorType(error));
+//					}
+//				}
+//			}
+//			catch (UnmarshalException ex)
+//			{
+//				response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload into ErrorType object: "+ex.getMessage()+". See error description for payload details.", errorStr));
+//			}
+//			catch (UnsupportedMediaTypeExcpetion ex)
+//			{
+//				response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload into ErrorType object (unsupported media type): "+ex.getMessage()+". See error description for payload details.", errorStr));
+//			}
 		}
 		else // It appears we have an error but no content. So create an error object with custom message.
 		{
@@ -685,6 +691,7 @@ public abstract class BaseClient
 			return 0;
 		}
 	}
+	
 	/*--------------------------------------------------------------------------------------------------------------*/
 	/*-- Private Setters, so that they can only be set at initialisation of constructor but not overridden later. --*/
 	/*--------------------------------------------------------------------------------------------------------------*/
