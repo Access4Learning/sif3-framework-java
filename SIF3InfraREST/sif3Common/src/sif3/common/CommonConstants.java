@@ -113,12 +113,18 @@ public class CommonConstants
 	 */
 	public enum QueuePollingType {IMMEDIATE, LONG};
 		
-	/*----------------------------------------------------------------------------------*/
-	/* URL Query Parameter names in relation to security (special case for SIF Simple --*/
-	/*----------------------------------------------------------------------------------*/
-	public static final String ACCESS_TOKEN      = "accessToken";
+	/*------------------------------------------------------------------------------------*/
+	/* URL Query Parameter names in relation to security (special case for SIF Express) --*/
+	/*------------------------------------------------------------------------------------*/
+	public static final String ACCESS_TOKEN      = "access_token";
 	public static final String AUTH_METHOD       = "authenticationMethod"; // Indicates the authentication method to use with access token	
 	public static final String ISO8601_TIMESTAMP = "timestamp";	// If SIF_HMACHSHA256 is used a timestamp in ISO8601 has to be provided.
+
+	/*---------------------------*/
+	/* Matrix Parameter names  --*/
+	/*---------------------------*/
+	public static final String MATRIX_DELETE_MSGID = "deleteMessageId"; // For message client.
+	
 
 	/*----------------------------------------------------------------*/
 	/* HTTP Status that are not listed in the Response.Status class --*/
