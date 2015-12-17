@@ -1,5 +1,5 @@
 ==============================================================
-Release Notes for v0.7.0 of SIF3 Framework (July XX, 2015)
+Release Notes for v0.7.0 of SIF3 Framework (December XX, 2015)
 ==============================================================
 
 Bug Fixes
@@ -12,14 +12,17 @@ New Functionality
   in the Developer's Guide. If compression is turned on within the SIF3 Framework for a provider then the library
   pjl-comp-filter-1.8.1.jar in the lib/pjl directory must be copied to the WEB-INF/lib directory of your project.
 - Added external security service capabilities to consumers. See section 5.9.3 in the developer's guide.
+- DELAYED request/response is now fully supported for consumers. Please refer to "Upgrade Instructions" further
+  down as this new functionality affects the implementation of all consumer classes.
 
 
 Changed Functionality
 ---------------------
-- Split sif3.0.1Infra-common-<version>.jar into 2 jars called:  
-  - sif3.0.1Infra-common-<version>.jar
-  - sif3.0.1Infra-model-<version>.jar
-  The sif3.0.1Infra-model-<version>.jar holds the generated SIF Infrastructure data model. Please ensure that you have 
+- Updated infrastructure model to 3.1. All framework jar files have now a 'sif3.1Infra' prefix.
+- Split sif3.1Infra-common-<version>.jar into 2 jars called:  
+  - sif3.1Infra-common-<version>.jar
+  - sif3.1Infra-model-<version>.jar
+  The sif3.1Infra-model-<version>.jar holds the generated SIF Infrastructure data model. Please ensure that you have 
   both these jar files in your project code.  
 - The latest version of the systemic-framework library has been added to the project. There are no changes in that
   library that affect the SIF3 Framework. It has been added to keep the SIF3 Framework up-to-date with the latest version
@@ -37,12 +40,13 @@ Removed Artifacts/Functionality
 Infrastructure Upgrade
 ----------------------
 - Drop the latest framework library into your project's lib directory/directories. Note that the new  
-  sif3.0.1Infra-model-<version>.jar is now also required in your projetc's lib directories.
+  sif3.1Infra-model-<version>.jar is now also required in your projetc's lib directories. Ensure that you
+  remove all jar files with the prefix 'sif3.0.1Infra' since they are replaced with the new jar files.
 - Replace systemic-framework-20140410.jar with systemic-framework-20150618.jar in your projetc's lib directories.
 
-===================================
-NOTE: Potential Compilation Error!!
------
+==========================================================================================================================
+Providers ONLY: Potential Compilation Error!!
+--------------------------------------------------------------------------------------------------------------------------
 If you use external security service functionality in your provider you will get a compilation error with the latest
 SIF3 Framework libraries. To resolve that compilation error, you must implement the following method in your concrete
 implementation of the security class that extends the AbstractSecurityService:
@@ -55,10 +59,51 @@ can be 'nulled' out in your security class:
    public TokenInfo generateToken(TokenCoreInfo coreInfo, String password) {
       return null;
    }
-===================================
+==========================================================================================================================
+
+==========================================================================================================================
+Consumers ONLY: Compilation Error due to DELAYED request/response functionality
+--------------------------------------------------------------------------------------------------------------------------
+This version of the SIF3 Framework has added the functionality of DELAYED request/response. Since this is only visible to
+consumers but not providers, the consumers must implement a few more methods. Each consumer class that extends the 
+AbstractConsumer or AbstractEventConsumer class is forced to implement the following additional methods:
+
+    public void processDelayedCreateMany(MultiOperationStatusList<CreateOperationStatus> statusList, 
+                                         DelayedResponseReceipt receipt);
+	
+    public void processDelayedUpdateMany(MultiOperationStatusList<OperationStatus> statusList, 
+                                         DelayedResponseReceipt receipt);
+	
+    public void processDelayedDeleteMany(MultiOperationStatusList<OperationStatus> statusList, 
+                                         DelayedResponseReceipt receipt);
+	
+    public void processDelayedQuery(Object dataObject, 
+                                    PagingInfo pagingInfo, 
+                                    DelayedResponseReceipt receipt);
+	
+    public void processDelayedServicePath(Object dataObject, 
+                                          QueryCriteria queryCriteria, 
+                                          PagingInfo pagingInfo, 
+                                          DelayedResponseReceipt receipt);
+    
+    public void processDelayedError(ErrorDetails error, 
+                                    DelayedResponseReceipt receipt);
+
+If your consumer or one of the consumer classes does not make use of DELAYED request/response then the above methods
+can be "nulled out" in the consumer class:
+
+    public void processDelayedCreateMany(MultiOperationStatusList<CreateOperationStatus> statusList, 
+                                         DelayedResponseReceipt receipt)
+    {
+    	// nothing to do...
+    }
+    
+For details of each of the above method, please refer to the javadoc of the DelayedConsumer or AbstractConsumer class in 
+this framework or section 5.5.2.2.4 in the Developer's Guide.    
+===========================================================================================================================
 
 
 Data Model Upgrade
 ------------------
-None.
+All test case use SIF AU 3.4 now (sifDataModel_au3.4.jar replaced sifDataModel_au1.3.jar in the WEB-INF/lib directory).
 
