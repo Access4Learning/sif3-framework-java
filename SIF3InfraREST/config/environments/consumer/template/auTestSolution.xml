@@ -1,10 +1,10 @@
-<environment type="DIRECT" xmlns="http://www.sifassociation.org/infrastructure/3.0">
+<environment>
     <solutionId>auTestSolution</solutionId>
     <authenticationMethod>Basic</authenticationMethod>
     <consumerName></consumerName>
     <applicationInfo>
         <applicationKey></applicationKey>
-        <supportedInfrastructureVersion>3.0.1</supportedInfrastructureVersion>
+        <supportedInfrastructureVersion>3.1</supportedInfrastructureVersion>
         <dataModelNamespace>http://www.SIFinfo.org/au/datamodel/1.3</dataModelNamespace>
         <transport>REST</transport>
         <applicationProduct>
