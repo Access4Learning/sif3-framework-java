@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="deletes" type="{http://www.sifassociation.org/infrastructure/3.0.1}deleteStatusCollection"/>
+ *         &lt;element name="deletes" type="{http://www.sifassociation.org/infrastructure/3.1}deleteStatusCollection"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -27,12 +27,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "deleteResponseType", namespace = "http://www.sifassociation.org/infrastructure/3.0.1", propOrder = {
+@XmlType(name = "deleteResponseType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
     "deletes"
 })
 public class DeleteResponseType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
     protected DeleteStatusCollection deletes;
 
     /**

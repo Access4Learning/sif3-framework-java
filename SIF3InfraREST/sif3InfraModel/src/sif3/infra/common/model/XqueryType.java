@@ -74,7 +74,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "xqueryType", namespace = "http://www.sifassociation.org/infrastructure/3.0.1", propOrder = {
+@XmlType(name = "xqueryType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
     "type",
     "status",
     "qualifier",
@@ -84,20 +84,20 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class XqueryType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String type;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
     protected String status;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String qualifier;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String description;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
     protected String script;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true, nillable = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true, nillable = true)
     @XmlSchemaType(name = "anyURI")
     protected String returnType;
     @XmlAttribute(name = "id")

@@ -21,15 +21,16 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="serviceType" type="{http://www.sifassociation.org/infrastructure/3.0.1}serviceTypeType"/>
+ *         &lt;element name="serviceType" type="{http://www.sifassociation.org/infrastructure/3.1}serviceTypeType"/>
  *         &lt;element name="serviceName" type="{http://www.w3.org/2001/XMLSchema}token"/>
  *         &lt;element name="contextId" type="{http://www.w3.org/2001/XMLSchema}token"/>
  *         &lt;element name="zoneId" type="{http://www.w3.org/2001/XMLSchema}token"/>
  *         &lt;element name="providerName" type="{http://www.w3.org/2001/XMLSchema}token"/>
- *         &lt;element name="querySupport" type="{http://www.sifassociation.org/infrastructure/3.0.1}querySupportType"/>
- *         &lt;element name="endPoint" type="{http://www.sifassociation.org/infrastructure/3.0.1}protocolType" minOccurs="0"/>
+ *         &lt;element name="querySupport" type="{http://www.sifassociation.org/infrastructure/3.1}querySupportType"/>
+ *         &lt;element name="mimeTypes" type="{http://www.sifassociation.org/infrastructure/3.1}mediaTypesType" minOccurs="0"/>
+ *         &lt;element name="endPoint" type="{http://www.sifassociation.org/infrastructure/3.1}protocolType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.0.1}uuidType" />
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.1}uuidType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -38,39 +39,42 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "providerType", namespace = "http://www.sifassociation.org/infrastructure/3.0.1", propOrder = {
+@XmlType(name = "providerType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
     "serviceType",
     "serviceName",
     "contextId",
     "zoneId",
     "providerName",
     "querySupport",
+    "mimeTypes",
     "endPoint"
 })
 public class ProviderType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String serviceType;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String serviceName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String contextId;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String zoneId;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String providerName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
     protected QuerySupportType querySupport;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.0.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    protected MediaTypesType mimeTypes;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
     protected ProtocolType endPoint;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -218,6 +222,30 @@ public class ProviderType {
      */
     public void setQuerySupport(QuerySupportType value) {
         this.querySupport = value;
+    }
+
+    /**
+     * Gets the value of the mimeTypes property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link MediaTypesType }
+     *     
+     */
+    public MediaTypesType getMimeTypes() {
+        return mimeTypes;
+    }
+
+    /**
+     * Sets the value of the mimeTypes property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link MediaTypesType }
+     *     
+     */
+    public void setMimeTypes(MediaTypesType value) {
+        this.mimeTypes = value;
     }
 
     /**
