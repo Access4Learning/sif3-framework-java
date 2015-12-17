@@ -157,7 +157,7 @@ public class AdapterEnvironmentStore implements Serializable
 					environment = (isConsumer) ? new ConsumerEnvironment(serviceName) : new ProviderEnvironment(serviceName);
 					environment.setAdapterType(isConsumer ? AdapterType.CONSUMER : AdapterType.PROVIDER);
 					environment.setCheckACL(adapterProperties.getPropertyAsBool("adapter.checkACL", true));
-					environment.setEventsSupported(adapterProperties.getPropertyAsBool("env.events.supported", false));
+//					environment.setEventsSupported(adapterProperties.getPropertyAsBool("env.events.supported", false));
 					environment.setRemoveEnvOnShutdown(adapterProperties.getPropertyAsBool("adapter.deleteEnvironment.onShutdown", false));
 					environment.setGeneratorID(adapterProperties.getPropertyAsString("adapter.generator.id", null));
 					environment.setEnvCreateConflictIsError(adapterProperties.getPropertyAsBool("env.create.conflictIsError", true));
@@ -178,26 +178,6 @@ public class AdapterEnvironmentStore implements Serializable
 						}
 					}
 					
-//					// Application Key
-//			  		environment.getEnvironmentKey().setApplicationKey(adapterProperties.getPropertyAsString("env.application.key", null));
-//			  		if (StringUtils.isEmpty(environment.getEnvironmentKey().getApplicationKey()))
-//			  		{
-//			  			logger.error("Property 'env.application.key' is null or empty in "+getAdapterFileNameWithoutExt()+".properties. Application Key must be set!");
-//			  			errors = true;    			
-//			  		}
-//			  		
-//			  		// Password
-//			  		environment.setPassword(adapterProperties.getPropertyAsString("env.pwd", null));
-//			  		if (StringUtils.isEmpty(environment.getPassword()))
-//			  		{
-//			  			logger.error("Property 'env.pwd' is null or empty in "+getAdapterFileNameWithoutExt()+".properties. Password for this application must be set!");
-//			  			errors = true;    			
-//			  		}
-//		              
-//
-//			  		// Authentication Method
-//			  		environment.setAuthMethod(adapterProperties.getPropertyAsString("env.authentication.method", AuthenticationMethod.Basic.name()));
-
 			  		// Media Type
 			  		environment.setMediaType(convertMediaType(adapterProperties.getPropertyAsString("env.mediaType", null)));
 
@@ -291,9 +271,9 @@ public class AdapterEnvironmentStore implements Serializable
 		}
 	}
 	
-	private QueueStrategy getQueueStrategy(AdvancedProperties props)
+	private QueueStrategy getQueueStrategy(AdvancedProperties props, String configPrefix)
 	{
-		String strategyStr = props.getPropertyAsString("events.queue.strategy", QueueStrategy.ADAPTER_LEVEL.name());
+	    String strategyStr = props.getPropertyAsString(configPrefix+"queue.strategy", QueueStrategy.ADAPTER_LEVEL.name());
 		try
 		{
 			QueueStrategy strategy =  QueueStrategy.valueOf(strategyStr);
@@ -313,9 +293,9 @@ public class AdapterEnvironmentStore implements Serializable
 		}	
 	}
 	
-	private QueuePollingType getQueueType(AdvancedProperties props)
+	private QueuePollingType getQueueType(AdvancedProperties props, String configPrefix)
 	{
-		String value = props.getPropertyAsString("events.queue.type", QueuePollingType.IMMEDIATE.name());
+		String value = props.getPropertyAsString(configPrefix+"queue.type", QueuePollingType.IMMEDIATE.name());
 		try
 		{
 			return  QueuePollingType.valueOf(value);
@@ -460,16 +440,11 @@ public class AdapterEnvironmentStore implements Serializable
   		}
   		  		
 		envInfo.setEventsEnabled(props.getPropertyAsBool("events.enabled", false));
+		loadRemoteQueueConfigData(envInfo.getEventConfig(), props, "events", getDefaultQueueName(envInfo.getAdapterName(), true));
 		
-		// Get queue name. If not provided use adapterName but remove all white spaces.
-		envInfo.setQueueName(props.getPropertyAsString("events.queue.name", envInfo.getAdapterName().replaceAll("\\s+","")));
-		envInfo.setNumMsgQueueReaders(props.getPropertyAsInt("events.queue.subscribers", 1));
-		envInfo.setQueueStrategy(getQueueStrategy(adapterProperties));
-		envInfo.setQueueType(getQueueType(adapterProperties));
-		envInfo.setPollFrequency(props.getPropertyAsInt("events.polling.frequency", CommonConstants.DEFAULT_POLL_FREQ));
-		envInfo.setLongPollTimeOut(props.getPropertyAsInt("events.longPolling.timeout", CommonConstants.DEFAULT_LONGPOLL_WAIT));
-		envInfo.setRemoveSubscribersOnShutdown(adapterProperties.getPropertyAsBool("events.subscriptions.removeOnShutdown", false));
-		
+        envInfo.setDelayedEnabled(props.getPropertyAsBool("delayed.enabled", false));
+        loadRemoteQueueConfigData(envInfo.getDelayedConfig(), props, "delayed", getDefaultQueueName(envInfo.getAdapterName(), false));
+
 		if (errorsFound)
   		{
   			logger.error("Errors found in reading environment information from "+getAdapterFileNameWithoutExt()+".properties. See previous log entries for details and please correct them.");
@@ -481,6 +456,8 @@ public class AdapterEnvironmentStore implements Serializable
     private boolean loadProviderInfo(AdvancedProperties props, ProviderEnvironment envInfo)
     {
     	boolean errorsFound = false;
+
+		envInfo.setEventsSupported(props.getPropertyAsBool("env.events.supported", false));
 
     	// The following properties are required if it is a BROKERED environment. For DIRECT environments these values
     	// are read from the SIF_APP_TEMPLATE table!
@@ -568,7 +545,39 @@ public class AdapterEnvironmentStore implements Serializable
 			logger.error("Errors found in reading environment information from " + getAdapterFileNameWithoutExt() + ".properties. See previous log entries for details and please correct them.");
 		}
 		return errorsFound;
-    } 
+    }
+    
+    /*
+     * This method read the following Consumer Adapter specific properties:
+     * abc.queue.strategy=ADAPTER_LEVEL
+     * abc.queue.name=StudentConsumer
+     * abc.queue.subscribers=3
+     * abc.queue.type=IMMEDIATE
+     * abc.polling.frequency=30
+     * abc.longPolling.timeout=120
+     */
+   private void loadRemoteQueueConfigData(RemoteQueueConfig remoteQueueConfig, AdvancedProperties props, String configPrefix, String defaultQueueName)
+    {
+        configPrefix = configPrefix+".";
+        
+        // Get queue name. If not provided use defaultQueueName.
+        remoteQueueConfig.setQueueName(props.getPropertyAsString(configPrefix+"queue.name", defaultQueueName));
+        remoteQueueConfig.setNumMsgQueueReaders(props.getPropertyAsInt(configPrefix+"queue.subscribers", 1));
+        remoteQueueConfig.setQueueStrategy(getQueueStrategy(props, configPrefix));
+        remoteQueueConfig.setQueueType(getQueueType(props, configPrefix));
+        remoteQueueConfig.setPollFrequency(props.getPropertyAsInt(configPrefix+"polling.frequency", CommonConstants.DEFAULT_POLL_FREQ));
+        remoteQueueConfig.setLongPollTimeOut(props.getPropertyAsInt(configPrefix+"longPolling.timeout", CommonConstants.DEFAULT_LONGPOLL_WAIT));
+        remoteQueueConfig.setRemoveSubscribersOnShutdown(props.getPropertyAsBool(configPrefix+"subscriptions.removeOnShutdown", false));
+    }
+    
+    /*
+     * This uses the adapter name, removes all white spaces and adds a prefix of "EVENT_" (isEventConfig=TRUE) or 
+     * "DELAYED_" (isEventConfig=FLASE) to make it a unique name.
+     */
+    private String getDefaultQueueName(String adapterName, boolean isEventConfig)
+    {
+        return (isEventConfig ? "EVENT_" : "DELAYED_") + adapterName.replaceAll("\\s+","");
+    }
     	
 	private URI cleanURI(String rawURI, String uriName)
 	{

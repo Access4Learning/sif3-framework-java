@@ -57,7 +57,6 @@ public class EnvironmentInfo implements Serializable
     private String adapterName = null; ; // consumerName 
     private EnvironmentKey environmentKey = new EnvironmentKey();
     private String    password              = null;
-    private boolean eventsSupported = false;
     private String generatorID  = null; // Value to be used for the generatorId HTTP Header field. 
     private boolean compressionEnabled = false;
     
@@ -244,16 +243,6 @@ public class EnvironmentInfo implements Serializable
 		connectorBaseURIs = new HashMap<ConnectorName, URI>();
 	}
 
-    public boolean getEventsSupported()
-    {
-    	return this.eventsSupported;
-    }
-
-	public void setEventsSupported(boolean eventsSupported)
-    {
-    	this.eventsSupported = eventsSupported;
-    }
-
 	/**
 	 * Convenience Method. It simply calls the getEnvironmentName form the SIF3Session property.
 	 * 
@@ -332,7 +321,7 @@ public class EnvironmentInfo implements Serializable
 	            + this.environmentType + ", authMethod=" + this.authMethod
 	            + ", removeEnvOnShutdown=" + this.removeEnvOnShutdown + ", adapterName="
 	            + this.adapterName + ", environmentKey=" + this.environmentKey + ", password="
-	            + this.password + ", eventsSupported=" + this.eventsSupported + ", generatorID="
+	            + this.password + ", generatorID="
 	            + this.generatorID + ", compressionEnabled=" + this.compressionEnabled
 	            + ", useExistingEnv=" + this.useExistingEnv + ", existingSessionToken="
 	            + this.existingSessionToken + ", existingEnvURI=" + this.existingEnvURI

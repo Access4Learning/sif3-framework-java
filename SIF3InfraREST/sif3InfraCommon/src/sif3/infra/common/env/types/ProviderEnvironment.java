@@ -38,6 +38,7 @@ public class ProviderEnvironment extends EnvironmentInfo
 	private String               templateXMLFileName    = null;
 	private URI                  secureConnectorBaseURI = null; // Secure URI to connect to Provider 
 	private URI                  connectorBaseURI       = null; // URI to connect to Provider
+	private boolean 			 eventsSupported 		= false;
 	private UpdateType           defaultUpdateType      = UpdateType.FULL; // Default value for update events.
 	private boolean              autoCreateEnvironment  = false;
 	private AuthenticationMethod accessTokenAuthMethod  = AuthenticationMethod.Bearer; // Default Auth Method if accessToke is used.
@@ -104,6 +105,16 @@ public class ProviderEnvironment extends EnvironmentInfo
     {
     	this.connectorBaseURI = connectorBaseURI;
     }
+
+	public boolean getEventsSupported()
+	{
+		return this.eventsSupported;
+	}
+
+	public void setEventsSupported(boolean eventsSupported)
+	{
+		this.eventsSupported = eventsSupported;
+	}
 
 	public void setConnectorBaseURI(String connectorBaseURI)
 	{
