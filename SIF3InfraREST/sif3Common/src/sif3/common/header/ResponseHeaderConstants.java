@@ -43,7 +43,7 @@ public class ResponseHeaderConstants
 	public static final String HDR_DATE_TIME = "timestamp";
 	public static final String HDR_MESSAGE_TYPE = "messageType"; // RESPONSE, EVENT, ERROR
 	public static final String HDR_REQUEST_ID = "requestId";
-	public static final String HDR_RESPONSE_ACTION = "responseAction";
+	public static final String HDR_RESPONSE_ACTION = "responseAction"; // CREATE, UPDATE, DELETE, QUERY
 	public static final String HDR_REL_SERVICE_PATH = "relativeServicePath";
 	public static final String HDR_SERVICE_TYPE = "serviceType"; // OBJECT, FUNCTION, UTILITY, SERVICEPATH, XQUERYTEMPLATE
 

@@ -55,6 +55,8 @@ public class RequestHeaderConstants
 	public static final String HDR_PAGE_SIZE = CommonConstants.PagingRequestProperty.navigationPageSize.name(); //"navigationPageSize";
 	public static final String HDR_PAGE_NO = CommonConstants.PagingRequestProperty.navigationPage.name(); //"navigationPage";
 	public static final String HDR_REQUEST_ID = "requestId";
+    public static final String HDR_REQUEST_ACTION = "requestAction"; // CREATE, UPDATE, DELETE, QUERY
+	
 	public static final String HDR_QUEUE_ID = "queueId";
 	public static final String HDR_ADVISORY = "mustUseAdvisory"; //true, false
 	public static final String HDR_METHOD_OVERRIDE = "methodOverride"; //DELETE, UPDATE
@@ -92,6 +94,7 @@ public class RequestHeaderConstants
 		HDR_PAGE_SIZE,
 		HDR_PAGE_NO,
 		HDR_REQUEST_ID,
+		HDR_REQUEST_ACTION,
 		HDR_QUEUE_ID,
 		HDR_ADVISORY,
 		HDR_METHOD_OVERRIDE,
