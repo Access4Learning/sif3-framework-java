@@ -1,10 +1,11 @@
 ==============================================================
-Release Notes for v0.7.0 of SIF3 Framework (December XX, 2015)
+Release Notes for v0.7.0 of SIF3 Framework (December 29, 2015)
 ==============================================================
 
 Bug Fixes
 ---------
-- None
+- Changed accessToken URL Query Parameter to access_token as per RFC. This will also be reflected in the
+  SIF 3.2 Infrastructure Specification.
 
 New Functionality
 -----------------
