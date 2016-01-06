@@ -59,6 +59,7 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	
 	// The properties below are runtime properties. They are not read or maintained in the DB!
 	private transient SIFZone defaultZone             = null;
+	private transient String defaultContext = CommonConstants.DEFAULT_CONTEXT_NAME;
 	private transient AuthenticationMethod authenticationMethod = AuthenticationMethod.Basic;
 	
 	// List of all services according to the ACL of this session.
@@ -246,6 +247,16 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	public void setDefaultZone(SIFZone defaultZone)
 	{
 		this.defaultZone = defaultZone;
+	}
+
+	public String getDefaultContext()
+	{
+		return this.defaultContext;
+	}
+
+	public void setDefaultContext(String defaultContext)
+	{
+		this.defaultContext = defaultContext;
 	}
 
 	/**

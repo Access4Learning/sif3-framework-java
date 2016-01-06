@@ -15,18 +15,11 @@
  */
 package sif3.infra.rest.consumer;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response.Status;
-
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.Timer;
 import org.apache.log4j.Logger;
-
-import sif3.common.CommonConstants;
+import sif3.common.conversion.MarshalFactory;
+import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.exception.UnsupportedQueryException;
@@ -66,9 +59,14 @@ import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.rest.client.ObjectServiceClient;
 import sif3.infra.rest.queue.LocalConsumerQueue;
 import sif3.infra.rest.queue.LocalMessageConsumer;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.StringUtils;
-import au.com.systemic.framework.utils.Timer;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * This is the core class that a developer will use to implement their consumers. Each consumer for each object type MUST extend this
@@ -92,7 +90,6 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
     /* End Testing variables */
 
 	private boolean checkACL = true;
-	private boolean initOK = true;
 
 	/* The next two properties are used for delayed responses or events */ 
     private LocalConsumerQueue localConsumerQueue = null;
@@ -188,29 +185,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 		
 		// Set some properties at this stage for simplicity reasons.
 		checkACL = getConsumerEnvironment().getCheckACL();
-		
-		//Check a few things to ensure that all core methods are implemented.
-		if (getMarshaller() == null)
-		{
-			logger.error("Consumer "+getConsumerName()+" has not implemented the getMarshaller() method properly. It returns null which is not valid.");
-			initOK = false;
-		}
-		if (getUnmarshaller() == null)
-		{
-			logger.error("Consumer "+getConsumerName()+" has not implemented the getUnmarshaller() method properly. It returns null which is not valid.");
-			initOK = false;
-		}
-		if (getSingleObjectClassInfo() == null)
-		{
-			logger.error("Consumer "+getConsumerName()+" has not implemented the getSingleObjectClassInfo() method properly. It returns null which is not valid.");
-			initOK = false;			
-		}
-		if (getMultiObjectClassInfo() == null)
-		{
-			logger.error("Consumer "+getConsumerName()+" has not implemented the getMultiObjectClassInfo() method properly. It returns null which is not valid.");
-			initOK = false;			
-		}
-		
+
 		if (getConsumerEnvironment().getEventsEnabled() || getConsumerEnvironment().getDelayedEnabled())
 		{
 			logger.debug("Events and/or Delayed Responses enabled => start local consumer queue for "+getConsumerName());
@@ -401,11 +376,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	@Override
 	public List<BulkOperationResponse<CreateOperationStatus>> createMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-		if (!initOK)
-	  	{
-			logger.error("Consumer not initialsied properly. See previous error log entries.");
-			return null;
-	  	}
+		if (getMultiObjectClassInfo() == null) throw new UnsupportedOperationException("getMultiObjectClassInfo not implemented");
 
 		Timer timer = new Timer();
 		timer.start();
@@ -458,11 +429,8 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	@Override
 	public List<Response> createSingle(Object data, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-	    if (!initOK)
-	    {
-	      logger.error("Consumer not initialsied properly. See previous error log entries.");
-	      return null;
-	    }
+		if (getSingleObjectClassInfo() == null) throw new UnsupportedOperationException("getSingleObjectClassInfo not implemented");
+		if (getMultiObjectClassInfo() == null) throw new UnsupportedOperationException("getMultiObjectClassInfo not implemented");
 
 	    Timer timer = new Timer();
 		timer.start();
@@ -515,11 +483,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	@Override
 	public List<BulkOperationResponse<OperationStatus>> deleteMany(List<String> resourceIDs, List<ZoneContextInfo> zoneCtxList, RequestType requestType, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-	    if (!initOK)
-	    {
-	      logger.error("Consumer not initialsied properly. See previous error log entries.");
-	      return null;
-	    }
+		if (getMultiObjectClassInfo() == null) throw new UnsupportedOperationException("getMultiObjectClassInfo not implemented");
 
 	    Timer timer = new Timer();
 		timer.start();
@@ -572,11 +536,9 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	@Override
 	public List<Response> deleteSingle(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-	    if (!initOK)
-	    {
-	      logger.error("Consumer not initialsied properly. See previous error log entries.");
-	      return null;
-	    }
+		if (getSingleObjectClassInfo() == null) throw new UnsupportedOperationException("getSingleObjectClassInfo not implemented");
+		if (getMultiObjectClassInfo() == null) throw new UnsupportedOperationException("getMultiObjectClassInfo not implemented");
+
 
 	    Timer timer = new Timer();
 		timer.start();
@@ -629,11 +591,8 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	@Override
 	public List<Response> retrievByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-		if (!initOK)
-		{
-			logger.error("Consumer not initialsied properly. See previous error log entries.");
-			return null;
-		}
+		if (getSingleObjectClassInfo() == null) throw new UnsupportedOperationException("getSingleObjectClassInfo not implemented");
+		if (getMultiObjectClassInfo() == null) throw new UnsupportedOperationException("getMultiObjectClassInfo not implemented");
 
 		Timer timer = new Timer();
 		timer.start();
@@ -682,11 +641,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	@Override
 	public List<Response> retrieve(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention, CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
-		if (!initOK)
-		{
-			logger.error("Consumer not initialsied properly. See previous error log entries.");
-			return null;
-		}
+		if (getMultiObjectClassInfo() == null) throw new UnsupportedOperationException("getMultiObjectClassInfo not implemented");
 
 		Timer timer = new Timer();
 		timer.start();
@@ -749,11 +704,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	 */
 	public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention, CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
-		if (!initOK)
-		{
-			logger.error("Consumer not initialsied properly. See previous error log entries.");
-			return null;
-		}
+		if (getMultiObjectClassInfo() == null) throw new UnsupportedOperationException("getMultiObjectClassInfo not implemented");
 
 		Timer timer = new Timer();
 		timer.start();
@@ -825,11 +776,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 								        QueryIntention queryIntention, 
 								        CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
-		if (!initOK)
-		{
-			logger.error("Consumer not initialsied properly. See previous error log entries.");
-			return null;
-		}
+		if (getMultiObjectClassInfo() == null) throw new UnsupportedOperationException("getMultiObjectClassInfo not implemented");
 
 		Timer timer = new Timer();
 		timer.start();
@@ -900,11 +847,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	@Override
 	public List<BulkOperationResponse<OperationStatus>> updateMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-    if (!initOK)
-    {
-      logger.error("Consumer not initialsied properly. See previous error log entries.");
-      return null;
-    }
+		if (getMultiObjectClassInfo() == null) throw new UnsupportedOperationException("getMultiObjectClassInfo not implemented");
 
     	Timer timer = new Timer();
 		timer.start();
@@ -957,11 +900,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	@Override
 	public List<Response> updateSingle(Object data, String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-		if (!initOK)
-		{
-			logger.error("Consumer not initialsied properly. See previous error log entries.");
-			return null;
-		}
+		if (getMultiObjectClassInfo() == null) throw new UnsupportedOperationException("getMultiObjectClassInfo not implemented");
 
     	Timer timer = new Timer();
 		timer.start();
@@ -1190,12 +1129,18 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 		}
 		else
 		{
+			MarshalFactory marshaller = getMarshaller();
+			UnmarshalFactory unmarshaller = getUnmarshaller();
+
+			if (marshaller == null) throw new IllegalStateException("getMarshaller() method returned null");
+			if (unmarshaller == null) throw new IllegalStateException("getUnmarshaller() method returned null");
+
 			return new ObjectServiceClient(ConsumerEnvironmentManager.getInstance(),
 			                           envInfo.getConnectorBaseURI(ConsumerEnvironment.ConnectorName.requestsConnector), 
 	                   				   getRequestMediaType(),
 	                   				   getResponseMediaType(),
-	                   				   getMarshaller(), 
-	                   				   getUnmarshaller(),
+	                   				   marshaller,
+	                   				   unmarshaller,
 	                   				   envInfo.getSecureConnection(),
 	                   				   getCompressionEnabled());
 		}
@@ -1360,21 +1305,21 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 		
 		if (finalZoneContextList.size() == 0) //add default context and zone
 		{
-			finalZoneContextList.add(new ZoneContextInfo(new SIFZone(sif3Session.getDefaultZone().getId(), true), new SIFContext(CommonConstants.DEFAULT_CONTEXT_NAME, true)));
+			finalZoneContextList.add(new ZoneContextInfo(new SIFZone(sif3Session.getDefaultZone().getId(), true), new SIFContext(sif3Session.getDefaultContext(), true)));
 		}
 		
 		// Check all entries and if 'null' is used as zone or context then we assign the default.
 		for (ZoneContextInfo zoneCtxInfo : finalZoneContextList)
 		{
 			// If zone or zone ID is null then we set the default zone.
-			if ((zoneCtxInfo.getZone() == null) || StringUtils.isEmpty(zoneCtxInfo.getZone().getId()))
+			if (zoneCtxInfo.getZone() == null)
 			{
 				zoneCtxInfo.setZone(new SIFZone(sif3Session.getDefaultZone().getId(), true));
 			}
 			// If zone or zone ID is null then we set the default zone.
-			if ((zoneCtxInfo.getContext() == null) || StringUtils.isEmpty(zoneCtxInfo.getContext().getId()))
+			if (zoneCtxInfo.getContext() == null)
 			{
-				zoneCtxInfo.setContext(new SIFContext(CommonConstants.DEFAULT_CONTEXT_NAME, true));
+				zoneCtxInfo.setContext(new SIFContext(sif3Session.getDefaultContext(), true));
 			}
 		}
 		
