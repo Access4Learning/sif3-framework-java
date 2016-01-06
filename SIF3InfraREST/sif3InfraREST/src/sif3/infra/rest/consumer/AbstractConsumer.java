@@ -1360,21 +1360,21 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 		
 		if (finalZoneContextList.size() == 0) //add default context and zone
 		{
-			finalZoneContextList.add(new ZoneContextInfo(new SIFZone(sif3Session.getDefaultZone().getId(), true), new SIFContext(CommonConstants.DEFAULT_CONTEXT_NAME, true)));
+			finalZoneContextList.add(new ZoneContextInfo(new SIFZone(sif3Session.getDefaultZone().getId(), true), new SIFContext(sif3Session.getDefaultContext(), true)));
 		}
 		
 		// Check all entries and if 'null' is used as zone or context then we assign the default.
 		for (ZoneContextInfo zoneCtxInfo : finalZoneContextList)
 		{
 			// If zone or zone ID is null then we set the default zone.
-			if ((zoneCtxInfo.getZone() == null) || StringUtils.isEmpty(zoneCtxInfo.getZone().getId()))
+			if (zoneCtxInfo.getZone() == null)
 			{
 				zoneCtxInfo.setZone(new SIFZone(sif3Session.getDefaultZone().getId(), true));
 			}
 			// If zone or zone ID is null then we set the default zone.
-			if ((zoneCtxInfo.getContext() == null) || StringUtils.isEmpty(zoneCtxInfo.getContext().getId()))
+			if (zoneCtxInfo.getContext() == null)
 			{
-				zoneCtxInfo.setContext(new SIFContext(CommonConstants.DEFAULT_CONTEXT_NAME, true));
+				zoneCtxInfo.setContext(new SIFContext(sif3Session.getDefaultContext(), true));
 			}
 		}
 		
