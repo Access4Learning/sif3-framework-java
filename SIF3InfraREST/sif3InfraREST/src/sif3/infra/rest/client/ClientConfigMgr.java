@@ -16,30 +16,33 @@
 
 package sif3.infra.rest.client;
 
-import java.security.GeneralSecurityException;
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.PropertyManager;
+import au.com.systemic.framework.utils.Timer;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
+//TODO: JH - Here we do have some jersey specific classes => Investigate how to replace them with generic classes!
+//Note: These are "client" classes only and the only jar that might be required could be jersey-client-1.17.1.jar which
+//would not conflict with any other JAX-RS implementation.
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.client.urlconnection.HTTPSProperties;
 
 import org.apache.log4j.Logger;
 
 import sif3.common.CommonConstants;
 import sif3.common.security.X509KeystoreManager;
 import sif3.common.security.X509TrustedStoreManager;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.PropertyManager;
-import au.com.systemic.framework.utils.StringUtils;
-import au.com.systemic.framework.utils.Timer;
 
-//TODO: JH - Here we do have some jersey specific classes => Investigate how to replace them with generic classes! 
-//Note: These are "client" classes only and the only jar that might be required could be jersey-client-1.17.1.jar which
-//would not conflict with any other JAX-RS implementation.
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.client.urlconnection.HTTPSProperties;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.security.GeneralSecurityException;
+
 
 /**
  * There are many places where client contexts are required for REST service invocation. The client context can either be a secure 
@@ -82,11 +85,6 @@ public class ClientConfigMgr
 				logger.debug("Loaded keystore name, trusted store name and passwords for keystores.");
 				logger.debug("Keystore Location to use: "+keystoreName);
 				logger.debug("Trusted Store Location to use: "+truststoreName);
-				
-				if (StringUtils.isEmpty(keystoreName) || StringUtils.isEmpty(truststoreName) || StringUtils.isEmpty(keystorePWD) || StringUtils.isEmpty(truststorePWD))
-				{
-					logger.warn("Please note that some of the following properties are not set in the "+CommonConstants.ENV_PROP_FILE_NAME+".properies file and therefore HTTPS may not work: key.store, key.store.password, trust.store, trust.store.password");
-				}
 			}
 			else
 			{
@@ -183,8 +181,39 @@ public class ClientConfigMgr
 
 			try
 			{
-				truststoreMgr = new TrustManager[] { new X509TrustedStoreManager(truststoreName, truststorePWD.toCharArray()) };
-				keystoreMgr = new KeyManager[] { new X509KeystoreManager(keystoreName, keystorePWD.toCharArray()) };
+				if (truststoreName != null)
+				{
+					truststoreMgr = new TrustManager[]{new X509TrustedStoreManager(truststoreName, truststorePWD != null ? truststorePWD.toCharArray() : null)};
+				}
+				else
+				{
+					// create a X509TrustManager that trusts every certificate
+					logger.warn("No Trust Store configured, server certificates will NOT be verified");
+					truststoreMgr = new TrustManager[]{new X509TrustManager()
+					{
+						@Override
+						public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException
+						{
+
+						}
+
+						@Override
+						public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException
+						{
+
+						}
+
+						@Override
+						public X509Certificate[] getAcceptedIssuers()
+						{
+							return new X509Certificate[0];
+						}
+					}};
+				}
+				if (keystoreName != null)
+				{
+					keystoreMgr = new KeyManager[]{new X509KeystoreManager(keystoreName, keystorePWD != null ? keystorePWD.toCharArray() : null)};
+				}
 			}
 			catch (Exception ex)
 			{
