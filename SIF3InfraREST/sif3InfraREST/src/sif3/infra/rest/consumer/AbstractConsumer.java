@@ -26,7 +26,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
 
-import sif3.common.CommonConstants;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.exception.UnsupportedQueryException;
@@ -92,7 +91,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
     /* End Testing variables */
 
 	private boolean checkACL = true;
-	private boolean initOK = true;
+//	private boolean initOK = true;
 
 	/* The next two properties are used for delayed responses or events */ 
     private LocalConsumerQueue localConsumerQueue = null;
@@ -189,6 +188,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 		// Set some properties at this stage for simplicity reasons.
 		checkACL = getConsumerEnvironment().getCheckACL();
 		
+/*		
 		//Check a few things to ensure that all core methods are implemented.
 		if (getMarshaller() == null)
 		{
@@ -210,7 +210,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 			logger.error("Consumer "+getConsumerName()+" has not implemented the getMultiObjectClassInfo() method properly. It returns null which is not valid.");
 			initOK = false;			
 		}
-		
+*/
 		if (getConsumerEnvironment().getEventsEnabled() || getConsumerEnvironment().getDelayedEnabled())
 		{
 			logger.debug("Events and/or Delayed Responses enabled => start local consumer queue for "+getConsumerName());
@@ -401,11 +401,15 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	@Override
 	public List<BulkOperationResponse<CreateOperationStatus>> createMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
+	    nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
+
+/*	    
 		if (!initOK)
 	  	{
-			logger.error("Consumer not initialsied properly. See previous error log entries.");
+			logger.error("Consumer not initialised properly. See previous error log entries.");
 			return null;
 	  	}
+*/	  	
 
 		Timer timer = new Timer();
 		timer.start();
@@ -458,12 +462,15 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	@Override
 	public List<Response> createSingle(Object data, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-	    if (!initOK)
+        nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
+        nullMethodCheck(getSingleObjectClassInfo(), "getSingleObjectClassInfo()");
+/*
+        if (!initOK)
 	    {
-	      logger.error("Consumer not initialsied properly. See previous error log entries.");
+	      logger.error("Consumer not initialised properly. See previous error log entries.");
 	      return null;
 	    }
-
+*/
 	    Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -515,12 +522,14 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	@Override
 	public List<BulkOperationResponse<OperationStatus>> deleteMany(List<String> resourceIDs, List<ZoneContextInfo> zoneCtxList, RequestType requestType, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
+        nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
+/*
 	    if (!initOK)
 	    {
-	      logger.error("Consumer not initialsied properly. See previous error log entries.");
+	      logger.error("Consumer not initialised properly. See previous error log entries.");
 	      return null;
 	    }
-
+*/
 	    Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -572,12 +581,14 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	@Override
 	public List<Response> deleteSingle(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
+        nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
+/*        
 	    if (!initOK)
 	    {
-	      logger.error("Consumer not initialsied properly. See previous error log entries.");
+	      logger.error("Consumer not initialised properly. See previous error log entries.");
 	      return null;
 	    }
-
+*/
 	    Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -629,12 +640,15 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	@Override
 	public List<Response> retrievByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
+        nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
+        nullMethodCheck(getSingleObjectClassInfo(), "getSingleObjectClassInfo()");
+/*        
 		if (!initOK)
 		{
-			logger.error("Consumer not initialsied properly. See previous error log entries.");
+			logger.error("Consumer not initialised properly. See previous error log entries.");
 			return null;
 		}
-
+*/
 		Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -682,12 +696,14 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	@Override
 	public List<Response> retrieve(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention, CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
+        nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
+/*        
 		if (!initOK)
 		{
-			logger.error("Consumer not initialsied properly. See previous error log entries.");
+			logger.error("Consumer not initialised properly. See previous error log entries.");
 			return null;
 		}
-
+*/
 		Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -749,12 +765,14 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	 */
 	public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention, CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
+        nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
+/*        
 		if (!initOK)
 		{
-			logger.error("Consumer not initialsied properly. See previous error log entries.");
+			logger.error("Consumer not initialised properly. See previous error log entries.");
 			return null;
 		}
-
+*/
 		Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -825,12 +843,14 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 								        QueryIntention queryIntention, 
 								        CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
+        nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
+/*        
 		if (!initOK)
 		{
-			logger.error("Consumer not initialsied properly. See previous error log entries.");
+			logger.error("Consumer not initialised properly. See previous error log entries.");
 			return null;
 		}
-
+*/
 		Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -900,12 +920,14 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	@Override
 	public List<BulkOperationResponse<OperationStatus>> updateMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-    if (!initOK)
-    {
-      logger.error("Consumer not initialsied properly. See previous error log entries.");
-      return null;
-    }
-
+        nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
+/*
+        if (!initOK)
+        {
+          logger.error("Consumer not initialised properly. See previous error log entries.");
+          return null;
+        }
+*/
     	Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -957,12 +979,14 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	@Override
 	public List<Response> updateSingle(Object data, String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
+        nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
+/*        
 		if (!initOK)
 		{
-			logger.error("Consumer not initialsied properly. See previous error log entries.");
+			logger.error("Consumer not initialised properly. See previous error log entries.");
 			return null;
 		}
-
+*/
     	Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -1019,6 +1043,63 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 
 	    shutdown();
     }
+	
+	/*---------------------------------------------------*/
+    /*-- HEAD Method Consumer Interface implementation --*/
+    /*---------------------------------------------------*/
+	/*
+	 * (non-Javadoc)
+	 * @see sif3.common.interfaces.Consumer#getServiceInfo(sif3.common.model.PagingInfo, java.util.List, sif3.common.model.CustomParameters)
+	 */
+	@Override
+    public List<Response> getServiceInfo(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+    {
+        nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
+/*
+        if (!initOK)
+		{
+			logger.error("Consumer not initialised properly. See previous error log entries.");
+			return null;
+		}
+*/
+		Timer timer = new Timer();
+		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
+		List<Response> responses = new ArrayList<Response>();
+		
+		if (!getConsumerEnvironment().getIsConnected())
+		{
+			logger.error("No connected environment for "+getConsumerEnvironment().getEnvironmentName()+". See previous erro log entries.");
+			return responses;
+		}
+		
+		// Set default set of HTTP Header fields
+		HeaderProperties hdrProps = getHeaderProperties(false, customParameters);
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList)
+		{
+			ErrorDetails error = allClientChecks(AccessRight.QUERY, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), RequestType.IMMEDIATE);
+			if (error == null) //all good => Send request
+			{
+				Response response = getClient(getConsumerEnvironment()).getServiceInfo(getMultiObjectClassInfo().getObjectName(), getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext());
+
+				// Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
+				finaliseDelayedReceipt(response.getDelayedReceipt(), getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, ResponseAction.QUERY);
+				responses.add(response);
+			}
+			else //pretend to have received a 'fake' error Response
+			{
+				responses.add(createErrorResponse(error));
+			}
+		}					
+
+		timer.finish();
+		logger.debug("Time taken to call and process 'retrieve all' for "+getMultiObjectClassInfo().getObjectName()+": "+timer.timeTaken()+"ms");
+		return responses;
+    }
+
 
 	/*----------------------------------------------------------*/
     /*-- Methods for DelayedConsumer Interface implementation --*/
@@ -1180,7 +1261,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-	private ObjectServiceClient getClient(ConsumerEnvironment envInfo)
+	private ObjectServiceClient getClient(ConsumerEnvironment envInfo) throws IllegalArgumentException
 	{
 		URI baseURI = envInfo.getConnectorBaseURI(ConsumerEnvironment.ConnectorName.requestsConnector);
 		if (baseURI == null)
@@ -1190,6 +1271,9 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 		}
 		else
 		{
+		    nullMethodCheck(getMarshaller(), "getMarshaller()");
+            nullMethodCheck(getUnmarshaller(), "getUnmarshaller()");
+		    
 			return new ObjectServiceClient(ConsumerEnvironmentManager.getInstance(),
 			                           envInfo.getConnectorBaseURI(ConsumerEnvironment.ConnectorName.requestsConnector), 
 	                   				   getRequestMediaType(),
@@ -1360,7 +1444,10 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 		
 		if (finalZoneContextList.size() == 0) //add default context and zone
 		{
-			finalZoneContextList.add(new ZoneContextInfo(new SIFZone(sif3Session.getDefaultZone().getId(), true), new SIFContext(CommonConstants.DEFAULT_CONTEXT_NAME, true)));
+		    // Set zone and context to null which will ensure that the matrix params won't be set and therefore the provider will assume default context & zone
+            finalZoneContextList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
+		    
+//			finalZoneContextList.add(new ZoneContextInfo(new SIFZone(sif3Session.getDefaultZone().getId(), true), new SIFContext(CommonConstants.DEFAULT_CONTEXT_NAME, true)));
 		}
 		
 		// Check all entries and if 'null' is used as zone or context then we assign the default.
@@ -1369,12 +1456,14 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 			// If zone or zone ID is null then we set the default zone.
 			if ((zoneCtxInfo.getZone() == null) || StringUtils.isEmpty(zoneCtxInfo.getZone().getId()))
 			{
-				zoneCtxInfo.setZone(new SIFZone(sif3Session.getDefaultZone().getId(), true));
+                zoneCtxInfo.setZone(null); // won't set matrix parameter which means default zone
+//				zoneCtxInfo.setZone(new SIFZone(sif3Session.getDefaultZone().getId(), true));
 			}
-			// If zone or zone ID is null then we set the default zone.
+			// If context or context ID is null then we set the default zone.
 			if ((zoneCtxInfo.getContext() == null) || StringUtils.isEmpty(zoneCtxInfo.getContext().getId()))
 			{
-				zoneCtxInfo.setContext(new SIFContext(CommonConstants.DEFAULT_CONTEXT_NAME, true));
+				zoneCtxInfo.setContext(null); // won't set matrix parameter which means default context
+//                zoneCtxInfo.setContext(new SIFContext(CommonConstants.DEFAULT_CONTEXT_NAME, true));
 			}
 		}
 		
@@ -1395,6 +1484,16 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
             delayedReceipt.setRequestedAction(requestedAction);
 		}
 	}
+	
+
+	private void nullMethodCheck(Object objectToCheck, String methodName) throws IllegalArgumentException
+	{
+    	if (objectToCheck == null)
+        {
+            throw new IllegalArgumentException(methodName+" method not implemented correctly. Returns null which is invalid.");
+        }
+	}
+
 	
     /*
      * This method checks if the test.testmode in the consumer's property file is set to TRUE.
