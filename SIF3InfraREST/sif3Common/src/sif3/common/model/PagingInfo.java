@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.PagingRequestProperty;
 import sif3.common.CommonConstants.PagingResponseProperty;
 import sif3.common.header.HeaderProperties;
@@ -167,10 +168,10 @@ public class PagingInfo implements Serializable
             }
         }
 
-        // If page size is given but not which page then we assume page 0
+        // If page size is given but not which page then we assume page 'First Page'
         if ((getPageSize() > 0) && (getCurrentPageNo() <= NOT_DEFINED))
         {
-            setCurrentPageNo(0);
+            setCurrentPageNo(CommonConstants.FIRST_PAGE);
         }
 	}
 
