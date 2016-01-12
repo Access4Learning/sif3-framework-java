@@ -89,6 +89,9 @@ public class X509TrustedStoreManager implements X509TrustManager
       catch (CertificateException ex) 
       {
           logger.error("Problem with Trusted Store and Client certififcate check: "+ex.getMessage(), ex);
+          
+          //re-throw the exception to stop client if there is a certificate issue.
+          throw ex;
       }
   }
 
@@ -104,6 +107,9 @@ public class X509TrustedStoreManager implements X509TrustManager
       catch (CertificateException ex) 
       {
           logger.error("Problem with Trusted Store and Sever certififcate check: "+ex.getMessage(), ex);
+          
+          //re-throw the exception to stop server if there is a certificate issue.
+          throw ex;
       }
   }
 
