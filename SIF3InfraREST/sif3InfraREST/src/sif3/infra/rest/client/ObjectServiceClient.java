@@ -548,6 +548,51 @@ public class ObjectServiceClient extends BaseClient
 		}
 	}
 
+	/*-----------------------------------*/
+    /*-- Get Service Infor (HTTP HEAD) --*/
+    /*-----------------------------------*/
+    /**
+     * Will invoke the REST HEAD call. It will not return a payload as per HTTP Specification of the HEAD method. It will
+     * return a number of HTTP Header fields though. These can be retrieved as part of the returned response object. Because
+     * this method almost mirrors the HTTP GET for the root object service all parameters that would make up the getMany()
+     * method in this class are supported. The exception is the returnObjectClass, serviceType and requestType parameter 
+     * that are allowed in the getMany() method. They do not make any sense for this method and are therefore omitted.
+     * 
+     * @param relURI A relative URI to the baseURI given to the constructor of this class. It is appended to the baseURI as is.
+     * @param serviceName The "raw" service name. For object services that would be the SIF Object name, for Service Paths this must be
+     *                    the service path name as in the Environment ACL (i.e. schools/{}/students).
+     * @param pagingInfo Page information to be set for the provider to determine which results to return.
+     * @param hdrProperties Header Properties to be added to the header of the GET request.
+     * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
+     * @param context The context for which this operation shall be invoked. Can be null which indicates the DEFAULT context.
+     * 
+     * @return Response Object holding appropriate values and results of the call. 
+     * 
+     * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
+     */
+    public Response getServiceInfo(String relURI, String serviceName, PagingInfo pagingInfo, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, SIFZone zone, SIFContext context) throws ServiceInvokationException
+    {
+        WebResource service = getService();
+        try
+        {
+            service = buildURI(service, relURI, null, zone, context, urlQueryParams);
+            hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            addPagingInfoToHeaders(pagingInfo, hdrProperties);
+            
+            ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, RequestType.IMMEDIATE, true, false).head();
+
+            return setResponse(service, response, null, hdrProperties, zone, context, RequestType.IMMEDIATE, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT, Status.ACCEPTED);
+        }
+        catch (Exception ex)
+        {
+            String errorMsg = "Failed to invoke 'getServiceInfo' service (REST HEAD) on URI " + service.getURI() + ": " + ex.getMessage();
+            logger.error(errorMsg);
+            throw new ServiceInvokationException(errorMsg, ex);
+        }
+    }
+
+	
+	
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/

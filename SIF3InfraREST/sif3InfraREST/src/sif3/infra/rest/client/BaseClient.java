@@ -556,12 +556,15 @@ public abstract class BaseClient
 	 */
 	protected void setBaseResponseData(BaseResponse response, ClientResponse clientResponse, HeaderProperties requestHdrProps, SIFZone zone, SIFContext context, RequestType requestType, String requestURI)
 	{
+	    SIFZone actualZone = getSIF3Session().getZone(zone);
+	    SIFContext actualContext = getSIF3Session().getContext(context);
+	    
 		response.setStatus(clientResponse.getClientResponseStatus().getStatusCode());
 		response.setStatusMessage(clientResponse.getClientResponseStatus().getReasonPhrase());
 		response.setMediaType(clientResponse.getType());
 		response.setContentLength(clientResponse.getLength());
-		response.setZone(zone);
-		response.setContext(context);
+		response.setZone(actualZone);
+		response.setContext(actualContext);
 
 		// Extract header properties.
 		response.setHdrProperties(extractHeaderInfo(clientResponse));
@@ -575,8 +578,8 @@ public abstract class BaseClient
 		if ((requestType != null) && (requestType == RequestType.DELAYED)) // set delayed receipt info
 		{
 		    DelayedRequestReceipt delayedReceipt = new DelayedRequestReceipt();
-		    delayedReceipt.setContext(context);
-		    delayedReceipt.setZone(zone);
+		    delayedReceipt.setContext(actualContext);
+		    delayedReceipt.setZone(actualZone);
 		    
 		    //Since this framework is being used, we know that the requestID is set in the request header properties.
 		    delayedReceipt.setRequestGUID(requestHdrProps.getHeaderProperty(RequestHeaderConstants.HDR_REQUEST_ID));
@@ -697,7 +700,7 @@ public abstract class BaseClient
 	/*--------------------------------------------------------------------------------------------------------------*/
 	private void createConfig(boolean secureConnection)
 	{
-		ClientConfigMgr cltCfgMgr = new ClientConfigMgr();		
+		ClientConfigMgr cltCfgMgr = new ClientConfigMgr(getClientEnvMgr().getEnvironmentInfo().getNoCertificateCheck());		
 		this.config = cltCfgMgr.getClientConfig(secureConnection);
 	}
 	
