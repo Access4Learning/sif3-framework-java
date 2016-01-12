@@ -39,8 +39,11 @@ import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
+import sif3.common.header.ResponseHeaderConstants;
+import sif3.common.interfaces.ChangesSinceProvider;
 import sif3.common.interfaces.QueryProvider;
 import sif3.common.interfaces.SIFEventIterator;
+import sif3.common.model.ChangedSinceInfo;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.QueryPredicate;
@@ -54,6 +57,7 @@ import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import systemic.sif3.demo.rest.ModelObjectConstants;
 import systemic.sif3.demo.rest.provider.iterators.StudentPersonalIterator;
+import au.com.systemic.framework.utils.DateUtils;
 import au.com.systemic.framework.utils.FileReaderWriter;
 import au.com.systemic.framework.utils.StringUtils;
 
@@ -61,7 +65,7 @@ import au.com.systemic.framework.utils.StringUtils;
  * @author Joerg Huber
  *
  */
-public class StudentPersonalProvider extends AUDataModelProviderWithEvents<StudentPersonalCollectionType> implements QueryProvider
+public class StudentPersonalProvider extends AUDataModelProviderWithEvents<StudentPersonalCollectionType> implements QueryProvider, ChangesSinceProvider
 {
 	private static int numDeletes = 0;
 	private static HashMap<String, StudentPersonalType> students = null; //new HashMap<String, StudentPersonalType>();
@@ -519,6 +523,62 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 			i++;
 		}
 	    return opStatus;
+    }
+
+    /*
+     * Override the method from the AUDataModelProviderWithEvents class and set a few custom headers.
+     * 
+     * (non-Javadoc)
+     * @see systemic.sif3.demo.rest.provider.AUDataModelProviderWithEvents#getCustomServiceInfo(sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo, sif3.common.model.RequestMetadata)
+     */
+    @Override
+    public HeaderProperties getCustomServiceInfo(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+    {
+        HeaderProperties headers = new HeaderProperties();
+        headers.setHeaderProperty("TestHeaderProperty1", "value1");
+        headers.setHeaderProperty(ResponseHeaderConstants.HDR_ENVIRONMENT_URI, "/should/be/overridden");
+        headers.setHeaderProperty(ResponseHeaderConstants.HDR_REQUEST_ID, "123"); // should not be accepted.
+        return headers;
+    }
+    
+    /*--------------------------------------------*/
+    /*-- ChangesSinceProvider Interface Methods --*/
+    /*--------------------------------------------*/
+
+    /*
+     * (non-Javadoc)
+     * @see sif3.common.interfaces.ChangesSinceProvider#changesSinceSupported()
+     */
+    @Override
+    public boolean changesSinceSupported()
+    {
+        return true;
+    }
+
+    /*
+     * For the purpose of illustrating the use of the changes since functionality we assume that changes since are provided by this Object provider
+     * based on date time stamps. Real implementations may look up a table to get the latest value of the opaque marker.
+     * 
+     * (non-Javadoc)
+     * @see sif3.common.interfaces.ChangesSinceProvider#getLatestOpaqueMarker()
+     */
+    @Override
+    public String getLatestOpaqueMarker()
+    {
+        return DateUtils.nowAsISO8601withSecFraction();
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see sif3.common.interfaces.ChangesSinceProvider#getChangesSince(sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo, sif3.common.model.ChangedSinceInfo, sif3.common.model.RequestMetadata)
+     */
+    @Override
+    public Object getChangesSince(SIFZone zone, SIFContext context, PagingInfo pagingInfo, ChangedSinceInfo changedSinceInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+    {
+        // This is not a real implementation. We just fake things here. In a real implementation one would go to a change log to retrieve
+        // Students for the given changedSinceInfo criteria.
+        logger.info("getChangesSince for "+getProviderName()+" called with changes since info: "+changedSinceInfo);
+        return retrieve(zone, context, pagingInfo, metadata);
     }
 
     /*--------------------------------------*/
