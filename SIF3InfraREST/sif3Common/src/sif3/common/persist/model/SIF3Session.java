@@ -362,8 +362,8 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	 * This method returns the service info (zone, context, access rights etc) that matches the given criteria. There should only be one in each 
 	 * environment. If no such service exists then null is returned.
 	 * 
-	 * @param zone  The zone to check for. MUST NOT BE NULL!
-	 * @param context  The context to check for. MUST NOT BE NULL!
+	 * @param zone  The zone to check for. If it is null it will be set to the DEFAULT zone/
+	 * @param context  The context to check for. If it is null it will be set to the DEFAULT Context.
 	 * @param serviceName The serviceName to check for. MUST NOT BE NULL! This is the RAW service name as listed in the environment ACL. In case of a
 	 *                    service path that must be the full service path template (i.e. schools/{}/students). 
 	 * @param serviceType The serviceType to check for. MUST NOT BE NULL!
@@ -378,8 +378,8 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 			{
 				if ((serviceInfo.getServiceName().equals(serviceName) && 
 				    (serviceInfo.getServiceType() == serviceType)) && 
-				    (serviceInfo.getZone().getId().equals(zone.getId())) && 
-				    (serviceInfo.getContext().getId().equals(context.getId())))
+				    (serviceInfo.getZone().getId().equals(getZone(zone).getId())) && 
+				    (serviceInfo.getContext().getId().equals(getContext(context).getId())))
 				{
 						return serviceInfo;
 				}
@@ -387,6 +387,23 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 		}
 		return null; // not found
 	}
+	
+    /*
+     * This method checks if the given zone or zone id null and if so will return the default zone otherwise the passed in zone will be returned.
+     */
+    public SIFZone getZone(SIFZone zone)
+    {
+        return ((zone == null) || (zone.getId() == null)) ? getDefaultZone() : zone;
+    }
+    
+    /*
+     * This method checks if the given context or context id null and if so will return the default context otherwise the passed in context will be returned.
+     */
+    public SIFContext getContext(SIFContext context)
+    {
+        return ((context == null) || (context.getId() == null)) ? CommonConstants.DEFAULT_CONTEXT : context;
+    }
+
 	
 	/* (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -425,6 +442,4 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 		}
 
 	}
-	
-
 }
