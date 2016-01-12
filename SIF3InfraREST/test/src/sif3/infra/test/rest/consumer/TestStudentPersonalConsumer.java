@@ -24,12 +24,14 @@ import sif.dd.au30.model.NameOfRecordType;
 import sif.dd.au30.model.ObjectFactory;
 import sif.dd.au30.model.StudentPersonalCollectionType;
 import sif.dd.au30.model.StudentPersonalType;
+import sif3.common.CommonConstants;
 import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
+import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServicePathPredicate;
 import sif3.common.model.ZoneContextInfo;
@@ -309,11 +311,12 @@ public class TestStudentPersonalConsumer
 			params.addURLQueryParameter("myURLQueryParam", "show in provider");
 
 			List<ZoneContextInfo> envZoneCtxList = null;
-//			envZoneCtxList = new ArrayList<ZoneContextInfo>();
+			envZoneCtxList = new ArrayList<ZoneContextInfo>();
 //			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auRolloverTestingZone"), null));
-//			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auSchoolTestingZone"),  null));
+//			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auSchoolTestingZone"),  (SIFContext)null));
 //			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
 //			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
+//            envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, CommonConstants.DEFAULT_CONTEXT));
 
 //			List<Response> responses = consumer.retrieve(new PagingInfo(10, 0), envZoneCtxList, RequestType.DELAYED, QueryIntention.NO_CACHE, params);
 			List<Response> responses = consumer.retrieve(new PagingInfo(10, 0), envZoneCtxList, RequestType.IMMEDIATE, QueryIntention.NO_CACHE, params);
@@ -452,6 +455,48 @@ public class TestStudentPersonalConsumer
 		System.out.println("End Performance Test with Compression "+(consumer.getCompressionEnabled() ? "ON" : "OFF")+". Time taken: "+timer.timeTaken()+"ms");
 	}
 	
+	private void getServiceInfo(StudentPersonalConsumer consumer, boolean printRepsonse)
+	{
+		if (printRepsonse)
+		{
+			System.out.println("Start 'Get StudentPersonal Service Info (HTTP HEAD)' in all connected environments...");
+		}
+		try
+		{
+			CustomParameters params = new CustomParameters();
+			
+			// Set some HTTP Header fields
+			params.addHTTPHeaderParameter(RequestHeaderConstants.HDR_GENERATOR_ID, "Ignore This");
+			params.addHTTPHeaderParameter("GenID", "This should not be ignored");
+			params.addHTTPHeaderParameter("customHdr", "Go all the way to Provider");
+			
+			// Set some custom URL query Params
+			params.addURLQueryParameter("ChangedSince", "01/05/2015");
+			params.addURLQueryParameter("myURLQueryParam", "show in provider");
+
+			List<ZoneContextInfo> envZoneCtxList = null;
+//			envZoneCtxList = new ArrayList<ZoneContextInfo>();
+//			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auRolloverTestingZone"), null));
+//			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auSchoolTestingZone"),  null));
+//			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
+//			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
+
+			List<Response> responses = consumer.getServiceInfo(new PagingInfo(10, 0), envZoneCtxList, params);
+			if (printRepsonse)
+			{
+				System.out.println("Responses from attempt to Get All Students:");
+				printResponses(responses, consumer);
+			}
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		if (printRepsonse)
+		{
+			System.out.println("Finished 'Get All Students' in all connected environments...");
+		}
+	}
 	
 	public static void main(String[] args)
 	{
@@ -475,6 +520,8 @@ public class TestStudentPersonalConsumer
 //			tester.createStudents(consumer);
 //  		tester.deleteStudents(consumer);
 //  		tester.getStudentsByQBE(consumer);
+			
+//			tester.getServiceInfo(consumer, true);
   		
 //  		tester.performanceTest(consumer);
   
