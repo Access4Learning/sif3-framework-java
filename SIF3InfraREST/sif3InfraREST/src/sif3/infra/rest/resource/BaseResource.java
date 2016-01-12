@@ -122,7 +122,6 @@ public abstract class BaseResource
 
 	private UriInfo uriInfo;
 	private Request request;
-//	private HttpHeaders requestHeaders;
 	private ObjectFactory infraObjectFactory = new ObjectFactory();
 	private InfraMarshalFactory infraMarshaller = new InfraMarshalFactory();
 	private InfraUnmarshalFactory infraUnmarshaller = new InfraUnmarshalFactory();
@@ -177,7 +176,7 @@ public abstract class BaseResource
 		extractAllHTTPHeaderProperties(requestHeaders);
 		extractQueryParameters();
 		setSecure(HTTPS_SCHEMA.equalsIgnoreCase(getUriInfo().getBaseUri().getScheme()));
-		setRelativeServicePath(getUriInfo().getPath(), servicePrefixPath);
+        setRelativeServicePath(getUriInfo().getRequestUri().toString(), getUriInfo().getBaseUri().toString(), servicePrefixPath);
 		extractAuthTokenInfo();
 		
 	    if (StringUtils.notEmpty(zoneID))
@@ -247,16 +246,10 @@ public abstract class BaseResource
 		return relativeServicePath;
 	}
 
-	public void setRelativeServicePath(String relativeServicePath, String servicePrefixPath)
+	public void setRelativeServicePath(String fullURI, String baseURI, String servicePrefixPath)
 	{
-		if (StringUtils.notEmpty(servicePrefixPath))
-		{
-			this.relativeServicePath = relativeServicePath.replaceAll(servicePrefixPath, "");
-		}
-		else
-		{
-			this.relativeServicePath = relativeServicePath;
-		}
+	    String removeURIPart = (StringUtils.notEmpty(servicePrefixPath)) ? baseURI+servicePrefixPath : baseURI;
+	    this.relativeServicePath = fullURI.replaceAll(removeURIPart, "");
 	}
 
 	public boolean isInitialised()
@@ -448,7 +441,7 @@ public abstract class BaseResource
 	 */
 	public Response makeResopnseWithNoContent(boolean isError, ResponseAction responseAction)
 	{
-		return makeFullResponse(null, Status.NO_CONTENT.getStatusCode(), null, isError, responseAction, null);
+		return makeFullResponse(null, Status.NO_CONTENT.getStatusCode(), null, null, isError, responseAction, null);
 	}
 	
 	/**
@@ -463,7 +456,7 @@ public abstract class BaseResource
 	 */
 	public Response makeResponse(Object data, int status, boolean isError, ResponseAction responseAction, MarshalFactory marshaller)
 	{
-		return makeFullResponse(data, status, null, isError, responseAction, marshaller);
+		return makeFullResponse(data, status, null, null, isError, responseAction, marshaller);
 	}
 	
 	/**
@@ -472,14 +465,16 @@ public abstract class BaseResource
 	 * 
 	 * @param data The data (payload) that shall be put into the response.
 	 * @param pagingInfo Paging Information to be added to the response header.
+	 * @param customHeaders Custom HTTP Headers to be returned to the caller. Note some of the headers might be
+	 *                      overwritten as they are 'reserved' values and controlled by the framework (i.e. requestID).
 	 * @param isError Indicator if the response is an error or a standard response.
 	 * @param marshaller The marshaller that converts the 'data' into a valid media type.
 	 * 
 	 * @return A HTTP Response to be sent back to the client.
 	 */
-	public Response makePagedResponse(Object data, PagingInfo pagingInfo, boolean isError, MarshalFactory marshaller)
+	public Response makePagedResponse(Object data, PagingInfo pagingInfo, HeaderProperties customHeaders, boolean isError, MarshalFactory marshaller)
 	{
-		return makeFullResponse(data, Status.OK.getStatusCode(), pagingInfo, isError, ResponseAction.QUERY, marshaller);
+		return makeFullResponse(data, Status.OK.getStatusCode(), pagingInfo, customHeaders, isError, ResponseAction.QUERY, marshaller);
 	}
 	
 	/*
@@ -487,7 +482,7 @@ public abstract class BaseResource
 	 */
 	protected Response makeDelayedAcceptResponse(ResponseAction responseAction)
 	{
-	    return makeFullResponse(null, Status.ACCEPTED.getStatusCode(), null, false, responseAction, null);
+	    return makeFullResponse(null, Status.ACCEPTED.getStatusCode(), null, null, false, responseAction, null);
 	}
 
 	/**
@@ -660,10 +655,6 @@ public abstract class BaseResource
     			{
     				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not allowed for this operation");				
     			}
-//    			else
-//    			{
-//    				return new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Environment Provider: DELAYED requests are not supported by this provider.");				
-//    			}
 			}
 		}
 		
@@ -979,65 +970,55 @@ public abstract class BaseResource
 	 */
 	private void setURLMediaTypeFromPath(String urlPostfixMimeTypeStr)
 	{
-	  if (StringUtils.isEmpty(urlPostfixMimeTypeStr))
-	  {
-//		  urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
-		  urlPostfixMimeType = null;
-	  }
-	  else
-	  {
-		  // get the position of the last '.'.
-		  int pos = urlPostfixMimeTypeStr.lastIndexOf(".");
-		  if ((pos == -1)) // no '.' found, so there is no postfix set! Assume XML
-		  {
-//			  urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
-			  urlPostfixMimeType = null;
-		  }
-		  else
-		  {  
-			  if ((pos > -1) && (pos + 1 < urlPostfixMimeTypeStr.length())) // "." found. Get everything after the "."
-			  {
-				  urlPostfixMimeTypeStr = urlPostfixMimeTypeStr.substring(pos+1);
-			  }
+	    if (StringUtils.isEmpty(urlPostfixMimeTypeStr))
+	    {
+	        urlPostfixMimeType = null;
+	    }
+	    else
+	    {
+	        // get the position of the last '.'.
+	        int pos = urlPostfixMimeTypeStr.lastIndexOf(".");
+	        if ((pos == -1)) // no '.' found, so there is no postfix set! Assume XML
+	        {
+	            urlPostfixMimeType = null;
+	        }
+	        else
+	        {  
+	            if ((pos > -1) && (pos + 1 < urlPostfixMimeTypeStr.length())) // "." found. Get everything after the "."
+	            {
+	                urlPostfixMimeTypeStr = urlPostfixMimeTypeStr.substring(pos+1);
+	            }
 			  
-			  // Start comparing for valid types
-//			  PostFixMimeType mimeType = PostFixMimeType.XML;
-			  PostFixMimeType mimeType = null;
-			  try
-			  {
-			    mimeType = PostFixMimeType.valueOf(urlPostfixMimeTypeStr.trim().toUpperCase());
-			  }
-			  catch (Exception ex)
-			  {
-//			      logger.error("Failed to convert URL Postfix Mime Type '"+urlPostfixMimeTypeStr+"' to XML or JSON. Default to Media Type will be application/xml");
-				  logger.error("Failed to convert URL Postfix Mime Type '"+urlPostfixMimeTypeStr+"' to XML or JSON.");
-//			      mimeType = PostFixMimeType.XML;
-				  mimeType = null;
-			  }
+	            // Start comparing for valid types
+	            PostFixMimeType mimeType = null;
+	            try
+	            {
+	                mimeType = PostFixMimeType.valueOf(urlPostfixMimeTypeStr.trim().toUpperCase());
+	            }
+	            catch (Exception ex)
+	            {
+	                logger.error("Failed to convert URL Postfix Mime Type '"+urlPostfixMimeTypeStr+"' to XML or JSON.");
+	                mimeType = null;
+	            }
 			  
-			  if (mimeType != null)
-			  {
-					switch (mimeType)
-					{
-						case XML:
-						{
-							urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
-							break;
-						}
-						case JSON:
-						{
-							urlPostfixMimeType = MediaType.APPLICATION_JSON_TYPE;
-							break;
-						}
-//						default:
-//						{
-//							urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
-//							break;
-//						}
-    			  }
-			  }
-		  }
-	  }
+	            if (mimeType != null)
+	            {
+	                switch (mimeType)
+	                {
+                        case XML:
+                        {
+                            urlPostfixMimeType = MediaType.APPLICATION_XML_TYPE;
+                            break;
+                        }
+                        case JSON:
+                        {
+                            urlPostfixMimeType = MediaType.APPLICATION_JSON_TYPE;
+                            break;
+                        }
+	                }
+	            }
+	        }
+	    }
 	}
 	
 	/* 
@@ -1350,10 +1331,10 @@ public abstract class BaseResource
 		return sifError;
 	}
 	
-	private Response makeFullResponse(Object data, int status, PagingInfo pagingInfo, boolean isError, ResponseAction responseAction, MarshalFactory marshaller)
+	private Response makeFullResponse(Object data, int status, PagingInfo pagingInfo, HeaderProperties customHeaders, boolean isError, ResponseAction responseAction, MarshalFactory marshaller)
 	{
 		ResponseBuilder response = null;
-		
+		HeaderProperties allHeaders = (customHeaders == null) ? new HeaderProperties() : customHeaders;
 		try
 		{
 			// Special case to avoid infinite loop: We deal with an error and the Status Code is of UNSUPPORTED_MEDIA_TYPE. This means we attempted
@@ -1386,38 +1367,47 @@ public abstract class BaseResource
 					}
 					String payload = marshaller.marshal(data, finalMediaType);
 					response = Response.status(status).entity(payload);
-					response = response.header(ResponseHeaderConstants.HDR_CONTENT_LENGTH, payload.length());
-					response = response.header(HttpHeaders.CONTENT_TYPE, finalMediaType);
+					
+					allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_CONTENT_LENGTH, String.valueOf(payload.length()));
+                    allHeaders.setHeaderProperty(HttpHeaders.CONTENT_TYPE, finalMediaType.toString());
 				}
 				else // we have no data
 				{
-				    // Special case where we have a query that doesn't return any results.
-					if ((responseAction != null) && (responseAction == ResponseAction.QUERY) && (status != Status.ACCEPTED.getStatusCode()))
-					{
-						// We had a query that returned no data. According to SIF 3.x this must return status of 204 (No Content)
-						response = Response.status(Status.NO_CONTENT);
-					}
-					else
-					{
-						response = Response.status(status);
-					}
+				    // For HEAD responses we may have an error code but would not have a body. We must return the error code
+				    if (isError)
+				    {
+				        response = Response.status(status);
+				    }
+				    else // we don't deal with an error.
+				    {
+    				    // Special case where we have a query that doesn't return any results.
+    					if ((responseAction != null) && (responseAction == ResponseAction.QUERY) && (status != Status.ACCEPTED.getStatusCode()))
+    					{
+    						// We had a query that returned no data. According to SIF 3.x this must return status of 204 (No Content)
+    						response = Response.status(Status.NO_CONTENT);
+    					}
+    					else
+    					{
+    						response = Response.status(status);
+    					}
+				    }
 				}
 			}
 			
 			// Date & Time format must be: YYYY-MM-DDTHH:mm:ssZ (i.e. 2013-08-12T12:13:14Z)
-			response = response.header(ResponseHeaderConstants.HDR_DATE_TIME, DateUtils.nowAsISO8601());
-			response = response.header(ResponseHeaderConstants.HDR_PROVIDER_ID, getProviderID());
-			response = response.header(ResponseHeaderConstants.HDR_MESSAGE_TYPE, (isError) ? HeaderValues.MessageType.ERROR.name() : HeaderValues.MessageType.RESPONSE.name());					
-			response = response.header(ResponseHeaderConstants.HDR_RESPONSE_ACTION, responseAction.name());
-			response = response.header(ResponseHeaderConstants.HDR_REL_SERVICE_PATH, getRelativeServicePath());
-			response = response.header(ResponseHeaderConstants.HDR_SERVICE_TYPE, getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE));
+            allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_DATE_TIME, DateUtils.nowAsISO8601());
+            allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_PROVIDER_ID, getProviderID());
+            allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_MESSAGE_TYPE, (isError) ? HeaderValues.MessageType.ERROR.name() : HeaderValues.MessageType.RESPONSE.name());
+            allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_RESPONSE_ACTION, responseAction.name());
+            allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_REL_SERVICE_PATH, getRelativeServicePath());
+            allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_SERVICE_TYPE, getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE));
 
 			if (pagingInfo != null)
 			{
 		        Map<String, String> responseParameters = pagingInfo.getResponseValues();
 		        for (String key : responseParameters.keySet())
 		        {
-		          response = response.header(key, responseParameters.get(key));
+		            allHeaders.setHeaderProperty(key, responseParameters.get(key));
 		        }
 			}
 
@@ -1425,11 +1415,14 @@ public abstract class BaseResource
 			String requestID = getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_REQUEST_ID);
 			if (requestID != null)
 			{
-				response = response.header(ResponseHeaderConstants.HDR_REQUEST_ID, requestID);				
+                allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_REQUEST_ID, requestID);
+			}
+			else // ensure that it is removed as it might be set by the customHeaders and we do not want some faked requestIDs
+			{
+			    allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_REQUEST_ID, null);
 			}
 			
-			// Only for direct environments we return the environmentURL. In brokered environments it is done 
-			// by the broker.
+			// Only for direct environments we return the environmentURL. In brokered environments it is done by the broker.
 			if (isDirectEnvironment())
 			{
 				// Only if we have a session then we can return a environmentURI otherwise we cannot determine
@@ -1440,8 +1433,18 @@ public abstract class BaseResource
 					ProviderEnvironment envInfo = (ProviderEnvironment)getEnvironmentManager().getEnvironmentInfo();
 					String baseURIStr = isSecure() ? envInfo.getSecureConnectorBaseURI().toString() : envInfo.getConnectorBaseURI().toString();
 					StringBuilder envURLStr = new StringBuilder(baseURIStr).append("/environments/").append(sif3Session.getEnvironmentID());
-					response = response.header(ResponseHeaderConstants.HDR_ENVIRONMENT_URI, envURLStr.toString());
+					allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_ENVIRONMENT_URI, envURLStr.toString());
 				}
+			}
+			else // ensure that environmentURI header is not set by customHeaders and fakes some back door.
+			{
+			    allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_ENVIRONMENT_URI, null);
+			}
+			
+			// Set all HTTP Headers
+			for (String headerName : allHeaders.getHeaderProperties().keySet())
+			{
+			    response = response.header(headerName, allHeaders.getHeaderProperty(headerName));
 			}
 			
 			return response.build();		
