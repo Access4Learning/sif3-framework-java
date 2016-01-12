@@ -17,6 +17,7 @@
 
 package sif3.infra.test.common.model;
 
+import au.com.systemic.framework.utils.DateUtils;
 import sif3.common.model.ChangedSinceInfo;
 
 /**
@@ -29,14 +30,10 @@ public class TestChangeSinceInfo
     {
         ChangedSinceInfo changeSince = new ChangedSinceInfo();
         System.out.println("Dafault Constructor: "+changeSince);
-        System.out.println("ISO 8601 Date: "+changeSince.getChangedSinceDateAsISO8601(false));
-        System.out.println("ISO 8601 Date: "+changeSince.getChangedSinceDateAsISO8601(true));
+
+        String opaqueMarker = DateUtils.nowAsISO8601();
+        changeSince.setChangesSinceMarker(opaqueMarker);
         
-        changeSince.setISO8601ChangedSinceDate("2015-09-08T11:24:36.123Z");
-//        changeSince.setISO8601ChangedSinceDate("2015-09-08T11:24:36Z");
-        System.out.println("ISO 8601 Date after setting it: "+changeSince.getChangedSinceDateAsISO8601(true));
-        
-        changeSince.setChangeType("updated ");
-        System.out.println("After setting changeType: "+changeSince.getChangeType().name());
+        System.out.println("After Setting Opaque Marker: "+changeSince);
     }
 }
