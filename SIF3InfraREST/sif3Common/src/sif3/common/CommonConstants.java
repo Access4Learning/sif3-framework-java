@@ -94,6 +94,11 @@ public class CommonConstants
 	 */
 	public static enum PagingResponseProperty {navigationPageSize, navigationPage, navigationCount, navigationLastPage, navigationId};
 	
+	/*
+	 * Value to indicate the first page.
+	 */
+	public static int FIRST_PAGE = 0;
+	
 	/*----------------------------------------------------------*/
 	/* System Wide Enum Types that are not part of any Headers */
 	/*----------------------------------------------------------*/
@@ -119,6 +124,12 @@ public class CommonConstants
 	public static final String ACCESS_TOKEN      = "access_token";
 	public static final String AUTH_METHOD       = "authenticationMethod"; // Indicates the authentication method to use with access token	
 	public static final String ISO8601_TIMESTAMP = "timestamp";	// If SIF_HMACHSHA256 is used a timestamp in ISO8601 has to be provided.
+	
+    /*-------------------------------------------------------------*/
+    /* URL Query Parameter names as defined by SIF Specification --*/
+    /*-------------------------------------------------------------*/
+    public static final String CHANGES_SINCE_MARKER_NAME = "changesSinceMarker";
+	
 
 	/*---------------------------*/
 	/* Matrix Parameter names  --*/

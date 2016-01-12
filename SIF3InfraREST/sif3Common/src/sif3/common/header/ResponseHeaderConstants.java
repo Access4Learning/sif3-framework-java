@@ -54,6 +54,8 @@ public class ResponseHeaderConstants
 	public static final String HDR_TOTAL_ITEMS = CommonConstants.PagingResponseProperty.navigationCount.name(); //"navigationCount";
 	public static final String HDR_LAST_PAGE_NO = CommonConstants.PagingResponseProperty.navigationLastPage.name(); //"navigationLastPage";
 
+	/* Changes Since Header names */
+	public static final String HDR_CHANGES_SINCE_MARKER = CommonConstants.CHANGES_SINCE_MARKER_NAME; // "changesSinceMarker"
 	
 	/*---------------------------------------------------------*/
 	/*-- Name of fields that are specific for Event Requests --*/
@@ -94,6 +96,9 @@ public class ResponseHeaderConstants
 		 HDR_SERVICE_TYPE,
 		 HDR_CONNECTION,
 		 HDR_KEEP_ALIVE,
+		 
+		 //Changes Since fields
+		 HDR_CHANGES_SINCE_MARKER,
 		 
 		// Event & Queue Related Fields
 		HDR_ZONE_ID,
