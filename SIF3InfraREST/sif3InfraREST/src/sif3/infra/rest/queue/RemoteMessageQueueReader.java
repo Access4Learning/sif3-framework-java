@@ -346,8 +346,10 @@ public class RemoteMessageQueueReader implements Runnable
 		baseInfo.setServiceType(pathInfo.getServiceType());
 		baseInfo.setPayload((String)response.getDataObject());
 		baseInfo.setMediaType(response.getMediaType());
-		baseInfo.setZone(getZone(pathInfo.getZone() != null ? pathInfo.getZone().getId() : null));
-		baseInfo.setContext(getContext(pathInfo.getContext()!= null ? pathInfo.getContext().getId() : null));
+		baseInfo.setZone(getSif3Session().getZone(pathInfo.getZone()));
+		baseInfo.setContext(getSif3Session().getContext(pathInfo.getContext()));
+//      baseInfo.setZone(getZone(pathInfo.getZone() != null ? pathInfo.getZone().getId() : null));
+//      baseInfo.setContext(getContext(pathInfo.getContext()!= null ? pathInfo.getContext().getId() : null));
 		baseInfo.setMessageQueueReaderID(getReaderID());
 		baseInfo.setFullRelativeURL(pathInfo.getOriginalURLString());
 		baseInfo.setServiceName(pathInfo.getServiceName());
