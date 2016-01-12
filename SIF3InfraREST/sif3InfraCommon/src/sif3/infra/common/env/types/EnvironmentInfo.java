@@ -59,8 +59,9 @@ public class EnvironmentInfo implements Serializable
     private String    password              = null;
     private String generatorID  = null; // Value to be used for the generatorId HTTP Header field. 
     private boolean compressionEnabled = false;
+    private boolean noCertificateCheck = false; // by default we want certififcates checked.
     
-	// Properties for using an existing environment.
+    // Properties for using an existing environment.
     private boolean useExistingEnv = false;
 	private String existingSessionToken = null;
     private URI existingEnvURI = null;
@@ -151,6 +152,16 @@ public class EnvironmentInfo implements Serializable
 	public void setCompressionEnabled(boolean compressionEnabled)
     {
     	this.compressionEnabled = compressionEnabled;
+    }
+	
+    public boolean getNoCertificateCheck()
+    {
+        return noCertificateCheck;
+    }
+
+    public void setNoCertificateCheck(boolean noCertificateCheck)
+    {
+        this.noCertificateCheck = noCertificateCheck;
     }
 
 	public URI getBaseURI()
@@ -315,17 +326,19 @@ public class EnvironmentInfo implements Serializable
 	@Override
     public String toString()
     {
-	    return "EnvironmentInfo [baseURI=" + this.baseURI + ", secureConnection="
-	            + this.secureConnection + ", mediaType=" + this.mediaType + ", adapterType="
-	            + this.adapterType + ", checkACL=" + this.checkACL + ", environmentType="
-	            + this.environmentType + ", authMethod=" + this.authMethod
-	            + ", removeEnvOnShutdown=" + this.removeEnvOnShutdown + ", adapterName="
-	            + this.adapterName + ", environmentKey=" + this.environmentKey + ", password="
-	            + this.password + ", generatorID="
-	            + this.generatorID + ", compressionEnabled=" + this.compressionEnabled
-	            + ", useExistingEnv=" + this.useExistingEnv + ", existingSessionToken="
-	            + this.existingSessionToken + ", existingEnvURI=" + this.existingEnvURI
-	            + ", envCreateConflictIsError=" + this.envCreateConflictIsError
-	            + ", connectorBaseURIs=" + this.connectorBaseURIs + "]";
+        return "EnvironmentInfo [baseURI=" + baseURI + ", secureConnection="
+                + secureConnection + ", mediaType=" + mediaType
+                + ", adapterType=" + adapterType + ", checkACL=" + checkACL
+                + ", environmentType=" + environmentType + ", authMethod="
+                + authMethod + ", removeEnvOnShutdown=" + removeEnvOnShutdown
+                + ", adapterName=" + adapterName + ", environmentKey="
+                + environmentKey + ", password=" + password + ", generatorID="
+                + generatorID + ", compressionEnabled=" + compressionEnabled
+                + ", noCertificateCheck=" + noCertificateCheck
+                + ", useExistingEnv=" + useExistingEnv
+                + ", existingSessionToken=" + existingSessionToken
+                + ", existingEnvURI=" + existingEnvURI
+                + ", envCreateConflictIsError=" + envCreateConflictIsError
+                + ", connectorBaseURIs=" + connectorBaseURIs + "]";
     }
 }

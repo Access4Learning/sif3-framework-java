@@ -162,6 +162,7 @@ public class AdapterEnvironmentStore implements Serializable
 					environment.setGeneratorID(adapterProperties.getPropertyAsString("adapter.generator.id", null));
 					environment.setEnvCreateConflictIsError(adapterProperties.getPropertyAsBool("env.create.conflictIsError", true));
 					environment.setCompressionEnabled(adapterProperties.getPropertyAsBool("adapter.compression.enabled", false));
+                    environment.setNoCertificateCheck(adapterProperties.getPropertyAsBool("adapter.noCertificateCheck", false));
 					
 					//This is also set for providers in brokered environment
 					environment.setSecureConnection(getSecureConnectionInfo(adapterProperties));
