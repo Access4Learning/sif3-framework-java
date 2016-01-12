@@ -23,6 +23,7 @@ import java.util.List;
 import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnsupportedQueryException;
+import sif3.common.header.HeaderProperties;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.SIFContext;
@@ -199,6 +200,33 @@ public interface Provider extends DataModelLink
 	 */
 	public List<OperationStatus> deleteMany(List<String> resourceIDs, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
 
+
+	/*-----------------------------------------*/
+    /*-- Special Operations (i.e. HTTP HEAD) --*/
+    /*-----------------------------------------*/
+	
+	/**
+	 * This method retrieves information about the root level service (i.e. .../StudentPersonals). The information that is returned is
+	 * put into HTTP Headers in the response. This method is representing the HTTP HEAD functionality. It pretends to be the same
+	 * as the retrieve() method without any payload to be returned, though. It is up to the implementation if an actual paged query shall
+	 * be performed as part of this call. It can but doesn't have to. All standard checks as with the corresponding retrieve() method
+	 * are being performed (i.e. check ACLs, sessionToken etc.).
+	 * 
+     * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
+     * @param context The Context for which the objects shall be returned. Can be Null (default Zone)
+     * @param pagingInfo Page information to determine which results to return. Null = Return all (NOT RECOMMENDED!).
+     * @param metadata Metadata relating to the request. Note that most of the properties might be null.
+     * 
+     * @return Header Properties that shall be returned as HTTP Headers to the caller. Note this can be null or any number of
+     *         custom HTTP headers. Generally one would expect that to be null.
+     * 
+     * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
+     * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
+     *                              message of the exceptions holds some info.
+     * @throws DataTooLargeException If the data that shall be returned is too large due to the values in the paging info.
+	 */
+	public HeaderProperties getServiceInfo(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
+	
 	/*-------------------------------*/
 	/*-- Other required Operations --*/
 	/*-------------------------------*/	
