@@ -1,0 +1,58 @@
+==============================================================
+Release Notes for v0.8.0 of SIF3 Framework (January XX, 2016)
+==============================================================
+
+Bug Fixes
+---------
+- Allow access to keystores that have no password.
+- Allow keystore not to be required at all. Useful where only certificates from trusted issuers are used. 
+
+New Functionality
+-----------------
+- Support for HTTP HEAD method. 
+  a) On the provider this will enforce a new method called getCustomServiceInfo(). Please refer to 'Infrastructure Upgrade'
+     section in this release notes.
+  b) On the Consumer a new method called getServiceInfo() is now available.	
+     For more information and details about this new functionality, please refer to the Developer's Guide section 5.5.2.2.3.
+  
+- Support for "Changes Since" Functionality for providers. This is a SIF 3.2 Infrastructure function. Please refer to
+  section 5.9 of the Developer's Guide for details on how this functionality is used. 
+
+Changed Functionality
+---------------------
+- The HTTP Header called 'relativeservicepath' in the response to a consumer's request holds the full request URL
+  including all URL Query Parameters. Pre SIF 3.2 the URL Query Parameters were not allowed to be part of this HTTP Header.
+- If zone and context is not set by consumers then the matrix parameter in the URI is not set either. In the past it did still
+  set the matrix parameter with the default values. Now they are no longer set at all which indicates default zone and context
+  as per SIF Specification.
+
+Removed Artifacts/Functionality
+-------------------------------
+- None  
+
+--------------------------
+-- Upgrade Instructions --
+--------------------------
+
+Infrastructure Upgrade
+----------------------
+- Drop the latest framework library into your project's lib directory/directories.
+
+==========================================================================================================================
+Providers ONLY: Compilation Error!!
+--------------------------------------------------------------------------------------------------------------------------
+The support of the HTTP HEAD functionality will produce a compilation error on all provider classes. A new method called 
+getCustomServiceInfo() will be enforced. If you do not want to return any custom HTTP Headers to the consumer then this method 
+can simply return null:
+  
+  public HeaderProperties getCustomServiceInfo(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) 
+     throws PersistenceException, UnsupportedQueryException, DataTooLargeException {
+      return null;
+  }
+==========================================================================================================================
+
+
+Data Model Upgrade
+------------------
+None.
+
