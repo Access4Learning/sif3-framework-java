@@ -563,7 +563,7 @@ public abstract class BaseClient
     
     SIFZone actualZone = (sif3Session != null) ? sif3Session.getZone(zone) : zone;
     SIFContext actualContext = (sif3Session != null) ? sif3Session.getContext(context) : context;
-    
+	    
 		response.setStatus(clientResponse.getClientResponseStatus().getStatusCode());
 		response.setStatusMessage(clientResponse.getClientResponseStatus().getReasonPhrase());
 		response.setMediaType(clientResponse.getType());
