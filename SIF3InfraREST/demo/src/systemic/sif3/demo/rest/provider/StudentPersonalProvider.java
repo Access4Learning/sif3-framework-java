@@ -32,6 +32,7 @@ import sif.dd.au30.model.StudentPersonalType;
 import sif.dd.au30.model.TeachingGroupCollectionType;
 import sif.dd.au30.model.TeachingGroupType.StudentList;
 import sif.dd.au30.model.TeachingGroupType.StudentList.TeachingGroupStudent;
+import sif3.common.CommonConstants;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
@@ -325,6 +326,15 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     	if (pagingInfo == null)
     	{
     		throw new DataTooLargeException("No paging info is provided. Please provide navigationPage and navigationPageSize.");
+    	}
+    	else
+    	{
+    	    // We may want to set the navigationID! Here we set it as a GUID but only if we are on the first page because it is expected that in subsequent
+    	    // paged calls that the consumer would provide that id.
+    	    if (pagingInfo.getCurrentPageNo() == CommonConstants.FIRST_PAGE)
+    	    {
+//    	        pagingInfo.setNavigationId(UUIDGenerator.getUUID());
+    	    }
     	}
     	
     	ArrayList<StudentPersonalType> studentList = fetchStudents(students, pagingInfo);
