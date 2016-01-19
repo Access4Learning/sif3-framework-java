@@ -5,7 +5,9 @@ import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
 
 public class HibernateUtil
 {
@@ -19,7 +21,10 @@ public class HibernateUtil
 		Transaction tx = null;
 		try
 		{
-		    sessionFactory = new  Configuration().configure("sif3infra.hibernate.cfg.xml").buildSessionFactory();
+		    
+		    Configuration configuration = new Configuration().configure("sif3infra.hibernate.cfg.xml");
+		    ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties()). build();
+		    sessionFactory = configuration.buildSessionFactory(serviceRegistry);
 		    
 		    //even if the above fails, i.e. cannot allocate a connection then no error is reported and the 
 		    //sessionFactory is created. The only way to find out if it succeeded is by trying to get a connection.
