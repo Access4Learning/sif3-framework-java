@@ -25,6 +25,11 @@ Changed Functionality
 - If zone and context is not set by consumers then the matrix parameter in the URI is not set either. In the past it did still
   set the matrix parameter with the default values. Now they are no longer set at all which indicates default zone and context
   as per SIF Specification.
+- Updated framework to use hibernate 4 (4.3.10.Final). This requires your project to remove existing hibernate 3 libraries and
+  replace them with the new ones. For details see "Upgrade Instructions -> 3rd Party Library Update" below.
+- Updated framework to use jersey 1.19. This requires your project to remove existing jersey libraries and
+  replace them with the new ones. For details see "Upgrade Instructions -> 3rd Party Library Update" below.
+
 
 Removed Artifacts/Functionality
 -------------------------------
@@ -34,8 +39,9 @@ Removed Artifacts/Functionality
 -- Upgrade Instructions --
 --------------------------
 
-Infrastructure Upgrade
-----------------------
+----------------------------
+-- Infrastructure Upgrade --
+----------------------------
 - Drop the latest framework library into your project's lib directory/directories.
 
 ==========================================================================================================================
@@ -51,8 +57,64 @@ can simply return null:
   }
 ==========================================================================================================================
 
-
-Data Model Upgrade
-------------------
+------------------------
+-- Data Model Upgrade --
+------------------------
 None.
 
+------------------------------
+-- 3rd Party Library Update --
+------------------------------
+
+-----------------
+Hibernate 4.3.10:
+-----------------
+The SIF3 Framework has been upgraded to Hibernate 4 (4.3.10 Final). Please ensure that your SIF3 Project uses these libraries as
+well.
+
+Remove the following libraries:
+- c3p0-0.9.1.jar
+- hibernate3.jar
+- hibernate-jpa-2.0-api-1.0.1.Final.jar
+- javassist-3.12.0.GA.jar
+- jta-1.1.jar
+
+Add the following libraries (from lib/hibernate4):
+- antlr-2.7.7.jar
+- c3p0-0.9.2.1.jar
+- hibernate-c3p0-4.3.10.Final.jar
+- hibernate-commons-annotations-4.0.5.Final.jar
+- hibernate-core-4.3.10.Final.jar
+- hibernate-jpa-2.1-api-1.0.0.Final.jar
+- javassist-3.18.1-GA.jar
+- jboss-logging-3.1.3.GA.jar
+- jboss-transaction-api_1.2_spec-1.0.0.Final.jar
+- mchange-commons-java-0.2.3.4.jar
+
+Note: If you use JBoss as your Application server you may have jboss-logging-3.1.3.GA.jar and jboss-transaction-api_1.2_spec-1.0.0.Final.jar
+      or a related version thereof as part of the Application Server. In this case you may not need to add these two libraries to your
+      project.
+      
+------------
+Jersey 1.19:
+------------
+The SIF3 Framework has been upgraded to use jersey 1.19 (release February 2015). Please ensure that your SIF3 Project uses these libraries as
+well.
+
+Remove the following libraries:
+- jersey-client-1.17.1.jar
+- jersey-core-1.17.1.jar
+- jersey-json-1.17.1.jar
+- jersey-servlet-1.17.1.jar
+- jsr311-api-1.1.1.jar
+
+Add the following libraries (from lib/jersey):
+- jersey-client-1.19.jar
+- jersey-core-1.19.jar
+- jersey-server-1.19.jar
+- jersey-servlet-1.19.jar
+- jsr311-api-1.1.1.jar
+
+Note: If you use JBoss as your Application server you do not need jersey-server-1.19.jar & jersey-servlet-1.19.jar since these two libraries have
+      the JAX-RS implementation which already forms part of JBoss' RestEASY.
+       
