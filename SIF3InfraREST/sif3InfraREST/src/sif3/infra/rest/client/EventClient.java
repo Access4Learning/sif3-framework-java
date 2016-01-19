@@ -235,7 +235,7 @@ public class EventClient extends BaseClient
 	
 	private BaseResponse setEventResponse(WebResource service, ClientResponse clientResponse, HeaderProperties requestHdrProps, SIFZone zone, SIFContext context)
 	{
-		return setResponse(service, clientResponse, null, requestHdrProps, getFullZone(zone), getFullContext(context), Status.ACCEPTED);
+		return setResponse(service, clientResponse, null, requestHdrProps, getFullZone(zone), getFullContext(context), true, Status.ACCEPTED);
 	}
 	
 	private SIFZone getFullZone(SIFZone zone)

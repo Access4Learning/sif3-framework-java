@@ -131,7 +131,7 @@ public class ObjectServiceClient extends BaseClient
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
 
-			return setResponse(service, response, returnObjectClass, hdrProperties, zone, context, Status.OK, Status.NOT_MODIFIED);
+			return setResponse(service, response, returnObjectClass, hdrProperties, zone, context, true, Status.OK, Status.NOT_MODIFIED);
 		}
 		catch (Exception ex)
 		{
@@ -179,7 +179,7 @@ public class ObjectServiceClient extends BaseClient
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true).post(ClientResponse.class, payloadStr);
 
-			return setResponse(service, response, returnObjectClass, hdrProperties, zone, context, Status.CREATED, Status.CONFLICT);
+			return setResponse(service, response, returnObjectClass, hdrProperties, zone, context, true, Status.CREATED, Status.CONFLICT);
 		}
 		catch (Exception ex)
 		{
@@ -227,7 +227,7 @@ public class ObjectServiceClient extends BaseClient
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true).put(ClientResponse.class, payloadStr);
 
-			return setResponse(service, response, null, hdrProperties, zone, context, Status.NO_CONTENT);
+			return setResponse(service, response, null, hdrProperties, zone, context, true, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -266,7 +266,7 @@ public class ObjectServiceClient extends BaseClient
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
 		    ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).delete(ClientResponse.class);
 
-			return setResponse(service, response, null, hdrProperties, zone, context, Status.NO_CONTENT);
+			return setResponse(service, response, null, hdrProperties, zone, context, true, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -312,7 +312,7 @@ public class ObjectServiceClient extends BaseClient
 			
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, false).get(ClientResponse.class);
 
-			return setResponse(service, response, returnObjectClass, hdrProperties, zone, context, requestType, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT, Status.ACCEPTED);
+			return setResponse(service, response, returnObjectClass, hdrProperties, zone, context, requestType, true, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT, Status.ACCEPTED);
 		}
 		catch (Exception ex)
 		{
@@ -367,7 +367,7 @@ public class ObjectServiceClient extends BaseClient
 			
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, true).post(ClientResponse.class, payloadStr);
 
-			return setResponse(service, response, returnObjectClass, hdrProperties, zone, context, requestType, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT, Status.ACCEPTED);
+			return setResponse(service, response, returnObjectClass, hdrProperties, zone, context, requestType, true, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT, Status.ACCEPTED);
 		}
 		catch (Exception ex)
 		{
@@ -581,7 +581,7 @@ public class ObjectServiceClient extends BaseClient
             
             ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, RequestType.IMMEDIATE, true, false).head();
 
-            return setResponse(service, response, null, hdrProperties, zone, context, RequestType.IMMEDIATE, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT, Status.ACCEPTED);
+            return setResponse(service, response, null, hdrProperties, zone, context, RequestType.IMMEDIATE, true, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT, Status.ACCEPTED);
         }
         catch (Exception ex)
         {
@@ -599,10 +599,10 @@ public class ObjectServiceClient extends BaseClient
 	private BulkOperationResponse<CreateOperationStatus> setCreateBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
 	{
 		BulkOperationResponse<CreateOperationStatus> response = new BulkOperationResponse<CreateOperationStatus>();
-		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, requestType, service.getURI().toString());
-		if ((clientResponse.getClientResponseStatus().getStatusCode() == Status.CREATED.getStatusCode()) || 
-			(clientResponse.getClientResponseStatus().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
-			(clientResponse.getClientResponseStatus().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
+		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, true, requestType, service.getURI().toString());
+		if ((clientResponse.getStatusInfo().getStatusCode() == Status.CREATED.getStatusCode()) || 
+			(clientResponse.getStatusInfo().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
+			(clientResponse.getStatusInfo().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
 		{
 			if (response.getHasEntity())
 			{
@@ -658,10 +658,10 @@ public class ObjectServiceClient extends BaseClient
 	private BulkOperationResponse<OperationStatus> setDeleteBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
 	{
 		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
-		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, requestType, service.getURI().toString());
-		if ((clientResponse.getClientResponseStatus().getStatusCode() == Status.OK.getStatusCode()) || 
-			(clientResponse.getClientResponseStatus().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
-			(clientResponse.getClientResponseStatus().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
+		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, true, requestType, service.getURI().toString());
+		if ((clientResponse.getStatusInfo().getStatusCode() == Status.OK.getStatusCode()) || 
+			(clientResponse.getStatusInfo().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
+			(clientResponse.getStatusInfo().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
 		{
 			if (response.getHasEntity())
 			{
@@ -716,10 +716,10 @@ public class ObjectServiceClient extends BaseClient
 	private BulkOperationResponse<OperationStatus> setUpdateBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
 	{
 		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
-		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, requestType, service.getURI().toString());
-		if ((clientResponse.getClientResponseStatus().getStatusCode() == Status.OK.getStatusCode()) || 
-			(clientResponse.getClientResponseStatus().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
-			(clientResponse.getClientResponseStatus().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
+		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, true, requestType, service.getURI().toString());
+		if ((clientResponse.getStatusInfo().getStatusCode() == Status.OK.getStatusCode()) || 
+			(clientResponse.getStatusInfo().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
+			(clientResponse.getStatusInfo().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
 		{
 			if (response.getHasEntity())
 			{
@@ -727,36 +727,6 @@ public class ObjectServiceClient extends BaseClient
 				MultiOperationStatusList<OperationStatus> statusList = getInfraMapper().toStatusListFromSIFUpdateString(payload, getResponseMediaType());
 				response.setError(statusList.getError());
 				response.setOperationStatuses(statusList.getOperationStatuses());
-				
-//				try
-//				{						
-//					//Because UpdateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-//					UpdateResponseType updateManyResponse = (UpdateResponseType)getInfraUnmarshaller().unmarshal(payload, UpdateResponseType.class, getResponseMediaType());
-//					if (updateManyResponse == null)// this is strange. So set the unmarshalled value.
-//					{
-//						response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));							
-//					}
-//					else
-//					{
-//						response.setOperationStatuses(new ArrayList<OperationStatus>());
-//						for (UpdateType updateStatus : updateManyResponse.getUpdates().getUpdate())
-//						{
-//							OperationStatus opStatus = new OperationStatus();
-//							opStatus.setResourceID(updateStatus.getId());
-//							opStatus.setStatus(toInt(updateStatus.getStatusCode()));
-//							opStatus.setError(convertFromErrorType(updateStatus.getError()));
-//							response.getOperationStatuses().add(opStatus);
-//						}
-//					}
-//				}
-//				catch (UnmarshalException ex)
-//				{
-//					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
-//				}
-//				catch (UnsupportedMediaTypeExcpetion ex)
-//				{
-//					response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
-//				}
 			}			
 		}
 		else// We are dealing with an error case.

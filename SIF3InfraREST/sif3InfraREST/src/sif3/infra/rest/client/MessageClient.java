@@ -64,7 +64,7 @@ public class MessageClient extends BaseClient
 			logger.debug("HTTP GET Next Message received.");
 		    
 		    //OK: Message Returned, NO_CONTENT: No message on queue: Both are valid returns
-		    return setResponse(service, clientResponse, String.class, hdrProperties, null, null, Status.OK, Status.NO_CONTENT);
+		    return setResponse(service, clientResponse, String.class, hdrProperties, null, null, false, Status.OK, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{
@@ -87,7 +87,7 @@ public class MessageClient extends BaseClient
 			HeaderProperties hdrProperties = getHeaderProperties(consumerInstanceID);
 		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).delete(ClientResponse.class);
 
-			return setResponse(service, clientResponse, null, hdrProperties, null, null, Status.NO_CONTENT);
+			return setResponse(service, clientResponse, null, hdrProperties, null, null, false, Status.NO_CONTENT);
 		}
 		catch (Exception ex)
 		{

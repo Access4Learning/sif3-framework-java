@@ -100,11 +100,11 @@ public class EnvironmentClient extends BaseClient
 
 			if (envInfo.getEnvCreateConflictIsError())
 			{
-				return setResponse(service, response, EnvironmentType.class, requestHdrProps, null, null, Status.CREATED);
+				return setResponse(service, response, EnvironmentType.class, requestHdrProps, null, null, false, Status.CREATED);
 			}
 			else // Allow the 'Conflict' HTTP Status to be treated as a valid behaviour.
 			{
-				return setResponse(service, response, EnvironmentType.class, requestHdrProps, null, null, Status.CREATED, Status.CONFLICT);
+				return setResponse(service, response, EnvironmentType.class, requestHdrProps, null, null, false, Status.CREATED, Status.CONFLICT);
 			}
 		}
 		catch (Exception ex)
@@ -139,7 +139,7 @@ public class EnvironmentClient extends BaseClient
 			HeaderProperties requestHdrProps = createAuthenticationHdr(false, pseudoSIF3Session);
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, requestHdrProps, true, false).get(ClientResponse.class);                
 
-			return setResponse(service, response, EnvironmentType.class, requestHdrProps, null, null, Status.OK, Status.NOT_MODIFIED);
+			return setResponse(service, response, EnvironmentType.class, requestHdrProps, null, null, false, Status.OK, Status.NOT_MODIFIED);
 		}
 		catch (Exception ex)
 		{
@@ -166,7 +166,7 @@ public class EnvironmentClient extends BaseClient
 			HeaderProperties requestHdrProps = createAuthenticationHdr(false, null);
 		    ClientResponse remoteResponse = setRequestHeaderAndMediaTypes(service, requestHdrProps, true, false).delete(ClientResponse.class);
 
-		    Response response = setResponse(service, remoteResponse, null, requestHdrProps, null, null, Status.NO_CONTENT);    
+		    Response response = setResponse(service, remoteResponse, null, requestHdrProps, null, null, false, Status.NO_CONTENT);    
 		    if (response.hasError())
 		    {
 		      logger.error("An error has been returned in removing the environment with ID = " + getSIF3Session().getEnvironmentID() + " form location: " + response.getResourceURI());

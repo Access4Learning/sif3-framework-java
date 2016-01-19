@@ -477,22 +477,22 @@ public abstract class BaseClient
 	/*
      * Convenience method for calls that do not support DELAYED request/responses.
      */
-    protected Response setResponse(WebResource service, ClientResponse clientResponse, Class<?> returnObjectClass, HeaderProperties requestHdrProps, SIFZone zone, SIFContext context, Status... successStatusCodes)
+    protected Response setResponse(WebResource service, ClientResponse clientResponse, Class<?> returnObjectClass, HeaderProperties requestHdrProps, SIFZone zone, SIFContext context, boolean zoneCtxSupported, Status... successStatusCodes)
     {
-        return setResponse(service, clientResponse, returnObjectClass, requestHdrProps, zone, context, RequestType.IMMEDIATE, successStatusCodes);
+        return setResponse(service, clientResponse, returnObjectClass, requestHdrProps, zone, context, RequestType.IMMEDIATE, zoneCtxSupported, successStatusCodes);
     }
 	
-	protected Response setResponse(WebResource service, ClientResponse clientResponse, Class<?> returnObjectClass, HeaderProperties requestHdrProps, SIFZone zone, SIFContext context, RequestType requestType, Status... successStatusCodes)
+	protected Response setResponse(WebResource service, ClientResponse clientResponse, Class<?> returnObjectClass, HeaderProperties requestHdrProps, SIFZone zone, SIFContext context, RequestType requestType, boolean zoneCtxSupported, Status... successStatusCodes)
 	{
 		Response response = new Response();
-		setBaseResponseData(response, clientResponse, requestHdrProps, zone, context, requestType, service.getURI().toString());
+		setBaseResponseData(response, clientResponse, requestHdrProps, zone, context, zoneCtxSupported, requestType, service.getURI().toString());
 		response.setResourceURI(service.getURI());
 		response.setDataObjectType(returnObjectClass);
 
 		// Check if HTTP header messageType == ERROR
 		boolean isErrorMessageType = MessageType.ERROR.name().equals(response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_MESSAGE_TYPE));
 		
-		if (isSuccessStatusCode(clientResponse.getClientResponseStatus().getStatusCode(), successStatusCodes) && !isErrorMessageType)
+		if (isSuccessStatusCode(clientResponse.getStatusInfo().getStatusCode(), successStatusCodes) && !isErrorMessageType)
 		{
 			if (response.getHasEntity())
 			{
@@ -552,15 +552,25 @@ public abstract class BaseClient
 
 	/*
 	 * This method cannot set the serviceName and serviceType in the Delayed Response Receipt property. It must be set by the caller of this method as this
-	 * is the place where the values are known. 
+	 * is the place where the values are known.
+	 * 
+	 *  @param zoneCtxSupported Indicates if the service supports zone and context (i.e. OBJECT and SERVICEPATH but not Infrastructure
+	 *                          services such as environment connector). TRUE = support for Zone and Context FALSE otherwise.
 	 */
-	protected void setBaseResponseData(BaseResponse response, ClientResponse clientResponse, HeaderProperties requestHdrProps, SIFZone zone, SIFContext context, RequestType requestType, String requestURI)
+	protected void setBaseResponseData(BaseResponse response, ClientResponse clientResponse, HeaderProperties requestHdrProps, SIFZone zone, SIFContext context, boolean zoneCtxSupported, RequestType requestType, String requestURI)
 	{
-	    SIFZone actualZone = getSIF3Session().getZone(zone);
-	    SIFContext actualContext = getSIF3Session().getContext(context);
+	    SIF3Session sif3Session = (zoneCtxSupported) ? getSIF3Session() : null;
+	    	    
+	    // Note: sif3Session can be null if we create an environment! In this case we cannot retrieve a default zone or context! It is not required anyway
+	    //       because create an environment is not done for a zone or context.
 	    
-		response.setStatus(clientResponse.getClientResponseStatus().getStatusCode());
-		response.setStatusMessage(clientResponse.getClientResponseStatus().getReasonPhrase());
+	    SIFZone actualZone = (sif3Session != null) ? sif3Session.getZone(zone) : zone;
+	    SIFContext actualContext = (sif3Session != null) ? sif3Session.getContext(context) : context;
+	    
+//		response.setStatus(clientResponse.getClientResponseStatus().getStatusCode());
+        response.setStatus(clientResponse.getStatusInfo().getStatusCode());
+//		response.setStatusMessage(clientResponse.getClientResponseStatus().getReasonPhrase());
+        response.setStatusMessage(clientResponse.getStatusInfo().getReasonPhrase());
 		response.setMediaType(clientResponse.getType());
 		response.setContentLength(clientResponse.getLength());
 		response.setZone(actualZone);
@@ -573,7 +583,7 @@ public abstract class BaseClient
 		{
 			logger.debug("HTTP Headers of Response: "+response.getHdrProperties());
 		}
-		response.setHasEntity(clientResponse.hasEntity() && (clientResponse.getClientResponseStatus().getStatusCode() != Status.NO_CONTENT.getStatusCode()) && (clientResponse.getClientResponseStatus().getStatusCode() != Status.ACCEPTED.getStatusCode()));		
+		response.setHasEntity(clientResponse.hasEntity() && (clientResponse.getStatusInfo().getStatusCode() != Status.NO_CONTENT.getStatusCode()) && (clientResponse.getStatusInfo().getStatusCode() != Status.ACCEPTED.getStatusCode()));		
 
 		if ((requestType != null) && (requestType == RequestType.DELAYED)) // set delayed receipt info
 		{
@@ -602,7 +612,7 @@ public abstract class BaseClient
 				logger.debug("Returned Error Payload:\n"+errorStr);
 			}
 			
-			response.setError(getInfraMapper().toErrorFromSIFErrorString(errorStr, getInfraResponseMediaType(getResponseMediaType()), new ErrorDetails(clientResponse.getStatus(), clientResponse.getClientResponseStatus().getReasonPhrase())));
+			response.setError(getInfraMapper().toErrorFromSIFErrorString(errorStr, getInfraResponseMediaType(getResponseMediaType()), new ErrorDetails(clientResponse.getStatus(), clientResponse.getStatusInfo().getReasonPhrase())));
 
 //			try
 //			{
