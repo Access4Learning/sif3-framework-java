@@ -1,5 +1,5 @@
 #########################################################################################################
-# Copyright 2013-2015 Systemic Pty Ltd
+# Copyright 2013-2016 Systemic Pty Ltd
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -180,7 +180,8 @@ Version from Jan XX, 2016: v0.8.0 - Various changes
 Adding support for some SIF 3.2 Infrastructure functionality: 
  - HTTP HEAD supported for 'root' service (i.e. .../StudentPersonals).
  - "Changes Since" support for Object Providers.
-Please refer to the release notes in the directory "release/v0.8.0" for additional details and upgrade instructions. 
+Please refer to the release notes in the directory "release/v0.8.0" for additional details and upgrade instructions.
+Upgraded some core library to later versions. 
 
 #########################################################################################################
 # Download Instructions
