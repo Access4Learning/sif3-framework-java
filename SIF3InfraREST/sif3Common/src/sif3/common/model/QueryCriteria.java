@@ -43,8 +43,47 @@ public class QueryCriteria implements Serializable
 	 */
 	public QueryCriteria()
 	{
-		this.joinType = QueryJoinType.AND;
-		this.predicates = new ArrayList<QueryPredicate>();
+	    setJoinType(QueryJoinType.AND);
+		setPredicates(new ArrayList<QueryPredicate>());
+	}
+	
+	/**
+	 * This constructor takes a String that represents a service path and converts it into a query criteria. The service path string
+	 * must have the following syntax (EBNF):<br/><br/>
+	 * 
+	 * ServicePath := ObjectName/ObjectID{/ObjectName/ObjectUUID}/ReturnObjectName<br/>
+	 * ObjectName := SIF Object Name (Plural Form)<br/>
+	 * ObjectID := UUID or RefID<br/>
+	 * ReturnObjectName := SIF Object Name (Plural Form)<br/><br/>
+	 * 
+	 * Examples:<br/>
+	 * StudentPersonals/24ed508e-1ed0-4bba-8219-8233efa55859/SchoolInfos/1a47dae9-579b-4aa5-8048-608b06c611cb/DailyAttendances<br/>
+	 * SchoolInfos/1a47dae9-579b-4aa5-8048-608b06c611cb/StudentPersonals<br/>
+	 * 
+	 * @param servicePath The service path to be converted into a query condition.
+	 */
+	public QueryCriteria(String servicePath)
+	{
+	    if (servicePath != null)
+	    {
+	        // Just in case the given servicePath starts with a "/". Remove it
+	        if (servicePath.startsWith("/"))
+	        {
+	            servicePath = servicePath.substring(1);
+	        }
+
+	        String[] segments = servicePath.split("/");
+	        if (segments.length > 2)
+	        {
+	            // That looks like a proper Service Path....
+	            setJoinType(QueryJoinType.AND);
+	            setPredicates(new ArrayList<QueryPredicate>());
+	            for (int i = 0; i < segments.length - 2; i += 2)
+	            {
+	                addPredicate(new QueryPredicate(segments[i], QueryOperator.EQUAL, segments[i+1]));
+	            }
+	        }
+	    }
 	}
 
 	/**

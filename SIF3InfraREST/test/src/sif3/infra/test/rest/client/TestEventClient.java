@@ -24,7 +24,7 @@ import javax.ws.rs.core.MediaType;
 
 import sif.dd.au30.conversion.DataModelMarshalFactory;
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
-import sif.dd.au30.model.StudentCollectionType;
+import sif.dd.au30.model.StudentPersonalCollectionType;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.ServiceInvokationException;
@@ -72,13 +72,13 @@ public class TestEventClient
 	private AdapterEnvironmentStore store = new AdapterEnvironmentStore(PROP_FILE_NAME);
 
 	
-	private StudentCollectionType getStudents()
+	private StudentPersonalCollectionType getStudents()
 	{
 		String inputEnvXML = FileReaderWriter.getFileContent(MULTI_STUDENT_FILE_NAME);
 		//System.out.println("File content:\n" + inputEnvXML);
 		try
 		{
-			return (StudentCollectionType)unmarshaller.unmarshalFromXML(inputEnvXML, StudentCollectionType.class);
+			return (StudentPersonalCollectionType)unmarshaller.unmarshalFromXML(inputEnvXML, StudentPersonalCollectionType.class);
 		}
 		catch (Exception ex)
 		{

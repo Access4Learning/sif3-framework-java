@@ -64,8 +64,8 @@ public interface Consumer extends DataModelLink
 	 *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
 	 *                         be null.
 	 * 
-	 * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then the list of responses holds a response for each 
-	 *         environment this consumer is connected to. The creation of data was in each environment's default zone and context.
+	 * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then only one response will be returned for the
+     *         service in the default zone and context. The object was created in the default zone and context.
 	 * 
 	 * @throws IllegalArgumentException One of the parameters is invalid.
 	 * @throws PersistenceException Some data could not be persisted. An error log entry is performed and the message of the exceptions holds some info.
@@ -89,8 +89,8 @@ public interface Consumer extends DataModelLink
 	 *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
 	 *                         be null.
 	 *                       
-     * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then the list of responses holds a response for each 
-	 *         environment this consumer is connected to. The creation of data was in each environment's default zone and context.
+     * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then only one response will be returned for the
+     *         service in the default zone and context. The object was updated in the default zone and context.
      * 
 	 * @throws IllegalArgumentException One of the parameters is invalid.
 	 * @throws PersistenceException Some data could not be persisted. An error log entry is performed and the message of the exceptions holds some info.
@@ -112,8 +112,8 @@ public interface Consumer extends DataModelLink
 	 *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
 	 *                         be null.
 	 *                       
-	 * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then the list of responses holds a response for each 
-	 *         environment this consumer is connected to. The creation of data was in each environment's default zone and context.
+	 * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then only one response will be returned for the
+     *         service in the default zone and context. The object was deleted in the default zone and context.
 	 * 
 	 * @throws IllegalArgumentException One of the parameters is invalid.
 	 * @throws PersistenceException Some data could not be persisted. An error log entry is performed and the message of the exceptions holds some info.
@@ -141,8 +141,8 @@ public interface Consumer extends DataModelLink
 	 *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
 	 *                         be null.
 	 * 
-	 * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then the list of responses holds a response for each 
-	 *         environment this consumer is connected to. The creation of data was in each environment's default zone and context.
+	 * @return A list of responses corresponding to the List of envZoneCtx.  If the envZoneCtx was null then only one response will be returned for the
+     *         service in the default zone and context. The creation of data was in performed in the default zone and context.
 	 *         
 	 * @throws IllegalArgumentException One of the parameters is invalid.
 	 * @throws PersistenceException Some data could not be persisted. An error log entry is performed and the message of the exceptions holds some info.
@@ -167,8 +167,8 @@ public interface Consumer extends DataModelLink
 	 *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
 	 *                         be null.
 	 *                       
-	 * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then the list of responses holds a response for each 
-	 *         environment this consumer is connected to. The creation of data was in each environment's default zone and context.
+	 * @return A list of responses corresponding to the List of envZoneCtx.  If the envZoneCtx was null then only one response will be returned for the
+     *         service in the default zone and context. The update of data was in performed in the default zone and context.
 	 *         
 	 * @throws IllegalArgumentException One of the parameters is invalid.
 	 * @throws PersistenceException Some data could not be persisted. An error log entry is performed and the message of the exceptions holds some info.
@@ -191,8 +191,8 @@ public interface Consumer extends DataModelLink
 	 *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
 	 *                         be null.
 	 * 
-	 * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then the list of responses holds a response for each 
-	 *         environment this consumer is connected to. The creation of data was in each environment's default zone and context.
+	 * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then only one response will be returned for the
+     *         service in the default zone and context. The deletion of data was in performed in the default zone and context.
 	 *         
 	 * @throws IllegalArgumentException One of the parameters is invalid.
 	 * @throws PersistenceException Some data could not be persisted. An error log entry is performed and the message of the exceptions holds some info.
@@ -218,8 +218,8 @@ public interface Consumer extends DataModelLink
 	 *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
 	 *                         be null.
 	 * 
-	 * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then the list of responses holds a response for each 
-	 *         environment this consumer is connected to. The creation of data was in each environment's default zone and context.
+	 * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then only one response will be returned for the
+     *         service in the default zone and context.
 	 *         
 	 * @throws IllegalArgumentException One of the parameters is invalid.
 	 * @throws PersistenceException Some data could not be persisted. An error log entry is performed and the message of the exceptions holds some info.
@@ -246,11 +246,11 @@ public interface Consumer extends DataModelLink
 	 *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
 	 *                         be null.
 	 * 
-	 * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then the list of responses holds a response for each 
-	 *         environment this consumer is connected to. The creation of data was in each environment's default zone and context.
+	 * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then only one response will be returned for the
+     *         service in the default zone and context.
 	 *         
 	 * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
-	 * @throws PersistenceException Some data could not be persisted. An error log entry is performed and the message of the exceptions holds some info.
+	 * @throws PersistenceException Some data could not be retrieved. An error log entry is performed and the message of the exceptions holds some info.
 	 * @throws ServiceInvokationException Service on provider could not be executed. See error log for details.
 	 * 
 	 */
@@ -259,6 +259,39 @@ public interface Consumer extends DataModelLink
 	/*-------------------------------*/
 	/*-- Other required Operations --*/
 	/*-------------------------------*/
+	
+	/**
+     * Will invoke the REST HEAD call to retrieve some information about a service. It will not return a payload as per HTTP 
+     * Specification of the HEAD method. Besides a status code and an optional status message only a set of HTTP Header properties
+     * will be set in the returned responses. These HTTP Header properties can be retrieved as part of the returned response 
+     * object (response.getHdrProperties()).<br/>
+     * Because this method almost mirrors the HTTP GET for the root object service all parameters that would make up the retrieve() 
+     * method in this class are supported. The exception is the requestType and queryIntention parameter that are allowed in the 
+     * retrieve() method. They do not make any sense for this method and are therefore omitted.
+     * 
+     * @param pagingInfo Page information to be set for the provider to determine which results to return.
+     * @param zoneCtxList If this List is null or empty then it is assumed that the operation is performed for the default Zone and Context for the 
+     *                    connected. If this list is not empty then the action is performed for all Zone and Context listed. If a given 
+     *                    environment has more than one zone and/or context and the operation shall be performed in any number of them 
+     *                    then each combination must be a separate entry in this list.
+     * @param customParameters Custom HTTP Header fields and Custom URL Query parameters that will be added to the request.
+     *                         If any of the HTTP header fields correspond to a SIF pre-defined HTTP header that is managed
+     *                         by this framework then the value in this parameter will be overridden with the internally
+     *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
+     *                         be null.
+     * 
+     * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then only one response will be returned for the
+     *         information from the service in the default zone and context.
+     *         The main bit of useful information returned by this call are the HTTP Header properties that can be retrieved with the
+     *         response.getHdrProperties() method. 
+     *         
+     * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
+     * @throws PersistenceException Some data could not be retrieved. An error log entry is performed and the message of the exceptions holds some info.
+     * @throws ServiceInvokationException Service on provider could not be executed. See error log for details.
+     * 
+     */
+    public List<Response> getServiceInfo(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException;
+
 	
 	/** Call this at shut down time. */
 	public void finalise();

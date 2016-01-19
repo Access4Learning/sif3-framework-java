@@ -22,6 +22,7 @@ import java.util.List;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
 import javax.ws.rs.MatrixParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -43,11 +44,15 @@ import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.exception.UnsupportedQueryException;
+import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.RequestHeaderConstants;
+import sif3.common.header.ResponseHeaderConstants;
+import sif3.common.interfaces.ChangesSinceProvider;
 import sif3.common.interfaces.Provider;
 import sif3.common.interfaces.QueryProvider;
+import sif3.common.model.ChangedSinceInfo;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
@@ -335,13 +340,21 @@ public class DataModelResource extends BaseResource
 			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "The " + parser.getObjectNamePlural() + " provider does not support this ServicePath."), ResponseAction.QUERY);
 		}
 
-		PagingInfo pagingInfo = getPaingInfo();
+		PagingInfo pagingInfo = getPagingInfo();
 		try
 		{
-			Object returnObj = QueryProvider.class.cast(provider).retrieveByServicePath(parser.getQueryCriteria(), getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
-			
-			return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
-		}
+            if (pretendDelayed())
+            {
+                // Simply send a response with status of 202
+                return makeDelayedAcceptResponse(ResponseAction.QUERY);
+            }
+            else
+            {
+    			Object returnObj = QueryProvider.class.cast(provider).retrieveByServicePath(parser.getQueryCriteria(), getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
+    			
+    			return makePagedResponse(returnObj, pagingInfo, null, false, provider.getMarshaller());
+	        }
+	    }
 		catch (PersistenceException ex)
 		{
 			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName()  + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
@@ -383,11 +396,56 @@ public class DataModelResource extends BaseResource
 			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.QUERY);			
 		}
 	
-		PagingInfo pagingInfo = getPaingInfo();
+		PagingInfo pagingInfo = getPagingInfo();
 		try
 		{
-			Object returnObj = provider.retrieve(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
-			return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
+		    if (pretendDelayed())
+		    {
+		        // Simply send a response with status of 202
+		        return makeDelayedAcceptResponse(ResponseAction.QUERY);
+		    }
+		    else
+		    {
+		        // We need to check if the request is for "changes since" functionality. This is the case if the provider implements
+		        // the ChangesSinceProvider and the changesSinceMarker has been provided. If either if these criterias are not met
+		        // then we must assume that a standard request to get a list of objects is required.
+		        ChangesSinceProvider csProvider = getChangesSinceProvider(provider);
+		        String changesSinceMarker = getChangesSinceMarker();
+		        if ((csProvider != null) && (changesSinceMarker != null)) // We have a ChangesSince request and all is in order
+		        {
+		            if (csProvider.changesSinceSupported())
+		            {
+                        //Get new changes since marker if page = first page or no paging info
+		                HeaderProperties customHeaders = null;
+		                if ((pagingInfo == null) || (pagingInfo.getCurrentPageNo() == CommonConstants.FIRST_PAGE))
+		                {
+		                    customHeaders = new HeaderProperties();
+		                    customHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_CHANGES_SINCE_MARKER, csProvider.getLatestOpaqueMarker());
+		                }
+		                
+		                // Return the results.
+                        Object returnObj = csProvider.getChangesSince(getSifZone(), getSifContext(), pagingInfo, new ChangedSinceInfo(changesSinceMarker), getRequestMetadata(getSIF3SessionForRequest(), true));
+                        return makePagedResponse(returnObj, pagingInfo, customHeaders, false, provider.getMarshaller()); 
+		                
+		            }
+		            else // changes since is not supported => Error
+		            {
+                        return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Provider for "+dmObjectNamePlural+" does not support 'ChangesSince' functionality."), ResponseAction.QUERY);                                 		                
+		            }
+		        }
+		        else // It is a standard request and/or provider
+		        {
+		            if (changesSinceMarker != null) // Provider is a standard provider but changesSince marker is provided => Error
+		            {
+		                return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Provider for "+dmObjectNamePlural+" does not support 'ChangesSince' functionality."), ResponseAction.QUERY);          		                
+		            }
+		            else // All good.
+		            {
+		                Object returnObj = provider.retrieve(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
+		                return makePagedResponse(returnObj, pagingInfo, null, false, provider.getMarshaller());	
+		            }
+		        }
+		    }
 		}
 		catch (PersistenceException ex)
 		{
@@ -569,6 +627,119 @@ public class DataModelResource extends BaseResource
 		return makeErrorResponse(error, ResponseAction.DELETE);
 	}
 	
+	
+    /*----------------------------------------------------------------------*/
+    /*-- HEAD Methods: Only the root Object service provides full support --*/
+    /*----------------------------------------------------------------------*/
+	
+	/*
+	 * HEAD Method for root service ie. .../StudentPersonals. This is the only fully supported HEAD method that returns
+	 * all sort of things about the service including custom HTTP headers if set by the provider.
+	 */
+    @HEAD
+    public Response getServiceInfo()
+    {
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Get Service Info (REST HEAD)");
+        }
+    
+        ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED, true);
+        if (error != null) // Not allowed to access!
+        {
+            return makeResponse(null, error.getErrorCode(), true, ResponseAction.QUERY, null);
+        }
+        
+        Provider provider = getProvider();
+        if (provider == null) // error already logged but we must return an error response for the caller
+        {
+            return makeResponse(null, Status.SERVICE_UNAVAILABLE.getStatusCode(), true, ResponseAction.QUERY, null);
+        }
+    
+        PagingInfo pagingInfo = getPagingInfo();
+        try
+        {
+            HeaderProperties customHeaders = provider.getServiceInfo(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
+            if (logger.isDebugEnabled())
+            {
+                logger.debug("Custom headers to be returned from 'getServiceInfo()' method:\n"+customHeaders);
+            }
+
+            //Check if provider supports Changes Since and if so we need to get the latest opaque changes since marker.
+            ChangesSinceProvider csProvider = getChangesSinceProvider(provider);
+            if (csProvider != null)
+            {
+                if (csProvider.changesSinceSupported())
+                {
+                    if (customHeaders == null)
+                    {
+                        customHeaders = new HeaderProperties(); 
+                    }
+                    
+                    customHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_CHANGES_SINCE_MARKER, csProvider.getLatestOpaqueMarker());
+                }
+                
+            }
+
+            return makePagedResponse(null, pagingInfo, customHeaders, false, null);
+        }
+        catch (PersistenceException ex)
+        {
+            return makeResponse(null, Status.INTERNAL_SERVER_ERROR.getStatusCode(), true, ResponseAction.QUERY, null);
+        }
+        catch (IllegalArgumentException ex)
+        {
+            return makeResponse(null, Status.INTERNAL_SERVER_ERROR.getStatusCode(), true, ResponseAction.QUERY, null);
+        }
+        catch (UnsupportedQueryException ex)
+        {
+            return makeResponse(null, Status.BAD_REQUEST.getStatusCode(), true, ResponseAction.QUERY, null);
+        }
+        catch (DataTooLargeException ex)
+        {
+            return makeResponse(null, CommonConstants.RESPONSE_TOO_LARGE, true, ResponseAction.QUERY, null);
+        } 
+    }
+    
+    /*
+     * HEAD Method for service paths: Return basic info only and check ACL.
+     */
+    @HEAD
+    @Path("{resourceId:([^\\./]*)}/{remainingPath:.*}")
+    public Response getServicePathInfo()
+    {
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Get Service Path Info (REST HEAD)");
+        }
+        ErrorDetails error = validClient(parser.getServicePath(), getRight(AccessRight.QUERY), AccessType.APPROVED, true);
+        if (error != null) // Not allowed to access!
+        {
+            return makeResponse(null, error.getErrorCode(), true, ResponseAction.QUERY, null);
+        }
+        return makeResponse(null, Status.NO_CONTENT.getStatusCode(), false, ResponseAction.QUERY, null);
+    }
+
+
+    /*
+     * HEAD Method for single object service: Return basic info only and check ACL.
+     */
+    @HEAD
+    @Path("{resourceID:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
+    public Response getSingleObjectServiceInfo()
+    {
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Get Single Object Service Info (REST HEAD)");
+        }
+        ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED, false);
+        if (error != null) // Not allowed to access!
+        {
+            return makeResponse(null, error.getErrorCode(), true, ResponseAction.QUERY, null);
+        }
+        return makeResponse(null, Status.NO_CONTENT.getStatusCode(), false, ResponseAction.QUERY, null);
+    }
+
 	/*------------------------*/
 	/*-- Overridden Methods --*/
 	/*------------------------*/
@@ -628,7 +799,7 @@ public class DataModelResource extends BaseResource
 		return getProviderEnvironment().getEnvironmentType() == EnvironmentType.DIRECT ? directEnvRight : AccessRight.PROVIDE;
 	}
 	
-	private PagingInfo getPaingInfo()
+	private PagingInfo getPagingInfo()
 	{
 		PagingInfo pagingInfo = new PagingInfo(getSIFHeaderProperties(), getQueryParameters());
 		if (pagingInfo.getPageSize() <= PagingInfo.NOT_DEFINED) // page size not defined. Pass null to provider.
@@ -642,20 +813,53 @@ public class DataModelResource extends BaseResource
 		return pagingInfo;
 	}
 	
+	/*
+	 * Can return null if the changesSinceMarker is not given. In this case we can also assume that the call
+	 * is not for a changeSince request.
+	 */
+	private String getChangesSinceMarker()
+	{
+	    return getQueryParameters().getQueryParam(CommonConstants.CHANGES_SINCE_MARKER_NAME);
+	}
+
+	/*
+	 * If the given provider implements the ChangesSinceProvider then a casted provider is returned otherwise
+	 * null is returned.
+	 */
+	private ChangesSinceProvider getChangesSinceProvider(Provider provider)
+	{
+	    if (ChangesSinceProvider.class.isAssignableFrom(provider.getClass()))
+	    {
+	        return (ChangesSinceProvider)provider;
+	    }
+	    else
+	    {
+	        return null;
+	    }
+	}
+	
 	private Response updateMany(Provider provider, String payload)
 	{
 	    try
 	    {
-	    	List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
-	      
-	    	if (statusList != null)
-	    	{
-	    		return makeUpdateMultipleResponse(statusList, Status.OK);
-	    	}
-	    	else
-	    	{
-	    		return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.UPDATE);
-	    	}     
+            if (pretendDelayed())
+            {
+                // Simply send a response with status of 202
+                return makeDelayedAcceptResponse(ResponseAction.UPDATE);
+            }
+            else
+            {
+    	    	List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
+    	      
+    	    	if (statusList != null)
+    	    	{
+    	    		return makeUpdateMultipleResponse(statusList, Status.OK);
+    	    	}
+    	    	else
+    	    	{
+    	    		return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.UPDATE);
+    	    	}
+	        }
 	    }
 	    catch (PersistenceException ex)
 	    {
@@ -675,16 +879,24 @@ public class DataModelResource extends BaseResource
 	{
 		try
 		{
-			List<OperationStatus> statusList = provider.deleteMany(getResourceIDsFromDeleteRequest(payload), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
-      
-			if (statusList != null)
-			{
-				return makeDeleteMultipleResponse(statusList, Status.OK);
-			}
-			else
-			{
-				return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getMultiObjectClassInfo().getObjectName() + " (Bulk Operation). Contact your System Administrator."), ResponseAction.DELETE);
-			}
+            if (pretendDelayed())
+            {
+                // Simply send a response with status of 202
+                return makeDelayedAcceptResponse(ResponseAction.DELETE);
+            }
+            else
+            {
+    			List<OperationStatus> statusList = provider.deleteMany(getResourceIDsFromDeleteRequest(payload), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
+          
+    			if (statusList != null)
+    			{
+    				return makeDeleteMultipleResponse(statusList, Status.OK);
+    			}
+    			else
+    			{
+    				return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getMultiObjectClassInfo().getObjectName() + " (Bulk Operation). Contact your System Administrator."), ResponseAction.DELETE);
+    			}
+	        }
 		}
 		catch (PersistenceException ex)
 		{
@@ -704,16 +916,24 @@ public class DataModelResource extends BaseResource
 	{
 		try
 		{
-			List<CreateOperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
-			
-			if (statusList != null)
-			{
-				return makeCreateMultipleResponse(statusList, Status.CREATED);
-			}
-			else
-			{
-				return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.CREATE);
-			}			
+            if (pretendDelayed())
+            {
+                // Simply send a response with status of 202
+                return makeDelayedAcceptResponse(ResponseAction.CREATE);
+            }
+            else
+            {
+    			List<CreateOperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
+    			
+    			if (statusList != null)
+    			{
+    				return makeCreateMultipleResponse(statusList, Status.CREATED);
+    			}
+    			else
+    			{
+    				return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.CREATE);
+    			}	
+	        }
 		}
 		catch (PersistenceException ex)
 		{
@@ -731,7 +951,7 @@ public class DataModelResource extends BaseResource
 
 	private Response queryByQBE(Provider provider, String payload)
 	{
-		PagingInfo pagingInfo = getPaingInfo();
+		PagingInfo pagingInfo = getPagingInfo();
 		
 		if (provider == null || !QueryProvider.class.isAssignableFrom(provider.getClass()))
 		{
@@ -740,9 +960,17 @@ public class DataModelResource extends BaseResource
 
 		try
 		{
-			Object returnObj = QueryProvider.class.cast(provider).retrieveByQBE(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
+            if (pretendDelayed())
+            {
+                // Simply send a response with status of 202
+                return makeDelayedAcceptResponse(ResponseAction.QUERY);
+            }
+            else
+            {
+                Object returnObj = QueryProvider.class.cast(provider).retrieveByQBE(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
 			
-			return makePagedResponse(returnObj, pagingInfo, false, provider.getMarshaller());
+                return makePagedResponse(returnObj, pagingInfo, null, false, provider.getMarshaller());
+	        }
 		}
 		catch (PersistenceException ex)
 		{

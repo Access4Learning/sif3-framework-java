@@ -24,6 +24,14 @@ import sif.dd.au30.conversion.DataModelMarshalFactory;
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
+import sif3.common.exception.DataTooLargeException;
+import sif3.common.exception.PersistenceException;
+import sif3.common.exception.UnsupportedQueryException;
+import sif3.common.header.HeaderProperties;
+import sif3.common.model.PagingInfo;
+import sif3.common.model.RequestMetadata;
+import sif3.common.model.SIFContext;
+import sif3.common.model.SIFZone;
 import sif3.common.utils.JAXBUtils;
 import sif3.infra.rest.provider.BaseEventProvider;
 
@@ -74,5 +82,14 @@ public abstract class AUDataModelProviderWithEvents<L> extends BaseEventProvider
 	 */
     public void shutdown()
     {
+    }
+    
+    /* (non-Javadoc)
+     * @see sif3.infra.rest.provider.BaseProvider#getCustomServiceInfo(sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo, sif3.common.model.RequestMetadata)
+     */
+    @Override
+    public HeaderProperties getCustomServiceInfo(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+    {
+        return null;
     }
 }

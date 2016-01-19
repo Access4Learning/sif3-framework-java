@@ -24,8 +24,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import javax.xml.bind.JAXBElement;
 
-import sif.dd.au30.model.StudentCollectionType;
-
+import sif.dd.au30.model.StudentPersonalCollectionType;
 import au.com.systemic.framework.utils.FileReaderWriter;
 
 import com.sun.jersey.api.client.Client;
@@ -63,7 +62,7 @@ public class StudentPersonalsViaSIFRS extends BaseDemo
 			System.out.println("Data written to: "+OUTPUT_ENV_FILE_NAME);
 			
 			// Try to put this into the JAXB generates StudentPersonals Object.
-			JAXBElement<StudentCollectionType> elem = (JAXBElement<StudentCollectionType>) unmarshalFromXML(entity, StudentCollectionType.class);
+			JAXBElement<StudentPersonalCollectionType> elem = (JAXBElement<StudentPersonalCollectionType>) unmarshalFromXML(entity, StudentPersonalCollectionType.class);
 
 			System.out.println("Number of Students: " + elem.getValue().getStudentPersonal().size());
 			for (int i = 0; i < elem.getValue().getStudentPersonal().size(); i++)

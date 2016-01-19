@@ -261,4 +261,13 @@ public class CSVStudentProvider extends  BaseEventProvider<String>
     @Override
     public void shutdown()
     {}
+    
+    /* (non-Javadoc)
+     * @see sif3.infra.rest.provider.BaseProvider#getCustomServiceInfo(sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo, sif3.common.model.RequestMetadata)
+     */
+    @Override
+    public HeaderProperties getCustomServiceInfo(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+    {
+        return null;
+    }
 }

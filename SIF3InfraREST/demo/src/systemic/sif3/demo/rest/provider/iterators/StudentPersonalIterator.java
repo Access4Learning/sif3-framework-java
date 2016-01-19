@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import sif.dd.au30.model.StudentCollectionType;
+import sif.dd.au30.model.StudentPersonalCollectionType;
 import sif.dd.au30.model.StudentPersonalType;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.UpdateType;
@@ -34,7 +34,7 @@ import au.com.systemic.framework.utils.AdvancedProperties;
  * @author Joerg Huber
  *
  */
-public class StudentPersonalIterator implements SIFEventIterator<StudentCollectionType>
+public class StudentPersonalIterator implements SIFEventIterator<StudentPersonalCollectionType>
 {
 	private int currentPos = 0;
 	private int currentCycle = 1;
@@ -61,12 +61,12 @@ public class StudentPersonalIterator implements SIFEventIterator<StudentCollecti
      * @see sif3.common.interfaces.SIFEventIterator#getNextEvents(int)
      */
     @Override
-    public SIFEvent<StudentCollectionType> getNextEvents(int maxListSize)
+    public SIFEvent<StudentPersonalCollectionType> getNextEvents(int maxListSize)
     {
-		SIFEvent<StudentCollectionType> events = null;
+		SIFEvent<StudentPersonalCollectionType> events = null;
 		if (hasNext())
 		{
-			events = new SIFEvent<StudentCollectionType>(new StudentCollectionType(), EventAction.UPDATE, UpdateType.FULL, 0);
+			events = new SIFEvent<StudentPersonalCollectionType>(new StudentPersonalCollectionType(), EventAction.UPDATE, UpdateType.FULL, 0);
 			while ((events.getListSize() < maxListSize) && hasNext())
 			{
 				events.getSIFObjectList().getStudentPersonal().add(studentEvents.get(currentPos));

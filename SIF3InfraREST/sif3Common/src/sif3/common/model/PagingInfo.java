@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.PagingRequestProperty;
 import sif3.common.CommonConstants.PagingResponseProperty;
 import sif3.common.header.HeaderProperties;
@@ -46,7 +47,7 @@ public class PagingInfo implements Serializable
     private int currentPageNo = NOT_DEFINED; // The number of the current page. Starts with 0(!): Response & Request
     private String navigationId = null; // Used for paged requests where consumer wants re-use previous query results: Response & Request
 	
-  public PagingInfo()
+    public PagingInfo()
 	{}
 	
 	/**
@@ -75,21 +76,21 @@ public class PagingInfo implements Serializable
 		setTotalObjects(totalObjects);
 	}
 	
-  /**
-   * Constructor
-   * 
-   * @param pageSize The number of object per page
-   * @param currentPageNo The number/index of the page to be returned. Starts with 0!
-   * @param totalObjects The total number of objects available for the 'query': count(*)
-   * @param navigationId The navogation ID as returned by a provider in the HTTP response. 
-   */
-  public PagingInfo(int pageSize, int currentPageNo, int totalObjects, String navigationId)
-  {
-    setCurrentPageNo(currentPageNo);
-    setPageSize(pageSize);
-    setTotalObjects(totalObjects);
-    setNavigationId(navigationId);
-  }
+    /**
+     * Constructor
+     * 
+     * @param pageSize The number of object per page
+     * @param currentPageNo The number/index of the page to be returned. Starts with 0!
+     * @param totalObjects The total number of objects available for the 'query': count(*)
+     * @param navigationId The navigation ID as returned by a provider in the HTTP response. 
+     */
+    public PagingInfo(int pageSize, int currentPageNo, int totalObjects, String navigationId)
+    {
+        setCurrentPageNo(currentPageNo);
+        setPageSize(pageSize);
+        setTotalObjects(totalObjects);
+        setNavigationId(navigationId);
+    }
 	
 	/**
 	 * This method specifically deals with the "dual" nature that some values can be set either through HTTP header fields (standard) or through
@@ -99,78 +100,79 @@ public class PagingInfo implements Serializable
 	 * - If neither HTTP Header nor URL query parameter is present then it is either set to null or a default value specified in the SIF Spec.<br/><br/>
 	 * 
 	 * For paging info, the values listed in the enumeration on top of this class can be used in the HTTP request header or the URL query parameters.
-	 * These are also the values this constructur will attempt to extract from either parameter according to the rules listed above.   
+	 * These are also the values this constructor will attempt to extract from either parameter according to the rules listed above.   
 	 *     
 	 * @param requestHdrProps HTTP Header Values
 	 * @param queryParams URL Query Parameters.
 	 */
 	public PagingInfo(HeaderProperties requestHdrProps, URLQueryParameter queryParams)
 	{
-	  // To ensure that HTTP Header parameters override URL Query Parameters we use URL parameters first and the override with HTTP header fields
-	  if (queryParams != null)
-	  {
-  	  for (PagingRequestProperty property : PagingRequestProperty.values())
-  	  {
-  	    switch (property)
-  	    {
-  	      case navigationPageSize:
-            String navigationPageSizeStr = queryParams.getQueryParam(PagingRequestProperty.navigationPageSize.name());
-            if (StringUtils.notEmpty(navigationPageSizeStr)) // it is set
-            {
-              setPageSize(toInt(navigationPageSizeStr, DEFAULT_PAGE_SIZE));
-            }
-  	        break;
-          case navigationPage:
-            String navigationPageStr = queryParams.getQueryParam(PagingRequestProperty.navigationPage.name());
-            if (StringUtils.notEmpty(navigationPageStr)) // it is set 
-            {
-              setCurrentPageNo(toInt(queryParams.getQueryParam(PagingRequestProperty.navigationPage.name()), 0));
-            }
-            break;
-          case navigationId:
-            setNavigationId(queryParams.getQueryParam(PagingRequestProperty.navigationId.name()));
-            break;
-  	    }
-  	  }
-	  }
-	  
-	  // Now check the HTTP header
-	  if (requestHdrProps != null)
-	  {
-      for (PagingRequestProperty property : PagingRequestProperty.values())
-      {
-        switch (property)
+        // To ensure that HTTP Header parameters override URL Query Parameters we use URL parameters
+        // first and the override with HTTP header fields
+        if (queryParams != null)
         {
-          case navigationPageSize:
-            String navigationPageSizeStr = requestHdrProps.getHeaderProperty(PagingRequestProperty.navigationPageSize.name());
-            if (StringUtils.notEmpty(navigationPageSizeStr)) // it is set => override
+            for (PagingRequestProperty property : PagingRequestProperty.values())
             {
-              setPageSize(toInt(navigationPageSizeStr, DEFAULT_PAGE_SIZE));
+                switch (property)
+                {
+                case navigationPageSize:
+                    String navigationPageSizeStr = queryParams.getQueryParam(PagingRequestProperty.navigationPageSize.name());
+                    if (StringUtils.notEmpty(navigationPageSizeStr)) // it is set
+                    {
+                        setPageSize(toInt(navigationPageSizeStr, DEFAULT_PAGE_SIZE));
+                    }
+                    break;
+                case navigationPage:
+                    String navigationPageStr = queryParams.getQueryParam(PagingRequestProperty.navigationPage.name());
+                    if (StringUtils.notEmpty(navigationPageStr)) // it is set
+                    {
+                        setCurrentPageNo(toInt(queryParams.getQueryParam(PagingRequestProperty.navigationPage.name()), 0));
+                    }
+                    break;
+                case navigationId:
+                    setNavigationId(queryParams.getQueryParam(PagingRequestProperty.navigationId.name()));
+                    break;
+                }
             }
-            break;
-          case navigationPage:
-            String navigationPageStr = requestHdrProps.getHeaderProperty(PagingRequestProperty.navigationPage.name());
-            if (StringUtils.notEmpty(navigationPageStr)) // it is set => override
-            {
-              setCurrentPageNo(toInt(navigationPageStr, 0));
-            }
-            break;
-          case navigationId:
-            String navigationIdStr = requestHdrProps.getHeaderProperty(PagingRequestProperty.navigationId.name());
-            if (StringUtils.notEmpty(navigationIdStr)) // it is set => override
-            {
-              setNavigationId(navigationIdStr);
-            }
-            break;
         }
-      }	    
-	  }
-	  
-	  // If page size is given but not which page then we assume page 0
-	  if ((getPageSize() > 0) && (getCurrentPageNo() <= NOT_DEFINED))
-	  {
-	    setCurrentPageNo(0);
-	  }
+
+        // Now check the HTTP header
+        if (requestHdrProps != null)
+        {
+            for (PagingRequestProperty property : PagingRequestProperty.values())
+            {
+                switch (property)
+                {
+                case navigationPageSize:
+                    String navigationPageSizeStr = requestHdrProps.getHeaderProperty(PagingRequestProperty.navigationPageSize.name());
+                    if (StringUtils.notEmpty(navigationPageSizeStr)) // it is set => override
+                    {
+                        setPageSize(toInt(navigationPageSizeStr, DEFAULT_PAGE_SIZE));
+                    }
+                    break;
+                case navigationPage:
+                    String navigationPageStr = requestHdrProps.getHeaderProperty(PagingRequestProperty.navigationPage.name());
+                    if (StringUtils.notEmpty(navigationPageStr)) // it is set => override
+                    {
+                        setCurrentPageNo(toInt(navigationPageStr, 0));
+                    }
+                    break;
+                case navigationId:
+                    String navigationIdStr = requestHdrProps.getHeaderProperty(PagingRequestProperty.navigationId.name());
+                    if (StringUtils.notEmpty(navigationIdStr)) // it is set => override
+                    {
+                        setNavigationId(navigationIdStr);
+                    }
+                    break;
+                }
+            }
+        }
+
+        // If page size is given but not which page then we assume page 'First Page'
+        if ((getPageSize() > 0) && (getCurrentPageNo() <= NOT_DEFINED))
+        {
+            setCurrentPageNo(CommonConstants.FIRST_PAGE);
+        }
 	}
 
 	public PagingInfo clone()
@@ -218,15 +220,15 @@ public class PagingInfo implements Serializable
     	this.currentPageNo = currentPageNo;
     }
 	
-  public String getNavigationId()
-  {
-    return navigationId;
-  }
+    public String getNavigationId()
+    {
+        return navigationId;
+    }
 
-  public void setNavigationId(String navigationId)
-  {
-    this.navigationId = navigationId;
-  }
+    public void setNavigationId(String navigationId)
+    {
+        this.navigationId = navigationId;
+    }
 
   /**
    * This method returns the total number of pages based on the page size and the total number objects. If either if these two values is negative
@@ -254,103 +256,102 @@ public class PagingInfo implements Serializable
 	
 	public Map<String, String> getRequestValues()
 	{
-    Map<String, String> params = new HashMap<String, String>();
-    for (PagingRequestProperty property : PagingRequestProperty.values())
-    {
-      switch (property)
-      {
-        case navigationPageSize:
-          if (getPageSize() > NOT_DEFINED)
-          {
-            params.put(PagingRequestProperty.navigationPageSize.name(), String.valueOf(getPageSize()));
-          }
-          break;
-        case navigationPage:
-          if (getCurrentPageNo() > NOT_DEFINED)
-          {
-            params.put(PagingRequestProperty.navigationPage.name(), String.valueOf(getCurrentPageNo()));
-          }
-          break;
-        case navigationId:
-          if (StringUtils.notEmpty(getNavigationId()))
-          {
-            params.put(PagingRequestProperty.navigationId.name(), getNavigationId());
-          }
-          break;
-      }
-    }
-    return params;
+        Map<String, String> params = new HashMap<String, String>();
+        for (PagingRequestProperty property : PagingRequestProperty.values())
+        {
+            switch (property)
+            {
+            case navigationPageSize:
+                if (getPageSize() > NOT_DEFINED)
+                {
+                    params.put(PagingRequestProperty.navigationPageSize.name(), String.valueOf(getPageSize()));
+                }
+                break;
+            case navigationPage:
+                if (getCurrentPageNo() > NOT_DEFINED)
+                {
+                    params.put(PagingRequestProperty.navigationPage.name(), String.valueOf(getCurrentPageNo()));
+                }
+                break;
+            case navigationId:
+                if (StringUtils.notEmpty(getNavigationId()))
+                {
+                    params.put(PagingRequestProperty.navigationId.name(), getNavigationId());
+                }
+                break;
+            }
+        }
+        return params;
 	}
 	
-  public Map<String, String> getResponseValues()
-  {
-    Map<String, String> params = new HashMap<String, String>();
-    for (PagingResponseProperty property : PagingResponseProperty.values())
+    public Map<String, String> getResponseValues()
     {
-      switch (property)
-      {
-        case navigationPageSize:
-          if (getPageSize() > NOT_DEFINED)
-          {
-            params.put(PagingResponseProperty.navigationPageSize.name(), String.valueOf(getPageSize()));
-          }
-          break;
-        case navigationPage:
-          if (getCurrentPageNo() > NOT_DEFINED)
-          {
-            params.put(PagingResponseProperty.navigationPage.name(), String.valueOf(getCurrentPageNo()));
-          }
-          break;
-        case navigationId:
-          if (StringUtils.notEmpty(getNavigationId()))
-          {
-            params.put(PagingResponseProperty.navigationId.name(), getNavigationId());
-          }
-          break;
-        case navigationCount:
-          if (getTotalObjects() > NOT_DEFINED)
-          {
-            params.put(PagingResponseProperty.navigationCount.name(), String.valueOf(getTotalObjects()));
-          }
-          break;
-        case navigationLastPage:
-          if (getMaxPages() > NOT_DEFINED)
-          {
-            params.put(PagingResponseProperty.navigationLastPage.name(), String.valueOf(getMaxPages()));
-          }
-          break;
-      }
+        Map<String, String> params = new HashMap<String, String>();
+        for (PagingResponseProperty property : PagingResponseProperty.values())
+        {
+            switch (property)
+            {
+            case navigationPageSize:
+                if (getPageSize() > NOT_DEFINED)
+                {
+                    params.put(PagingResponseProperty.navigationPageSize.name(), String.valueOf(getPageSize()));
+                }
+                break;
+            case navigationPage:
+                if (getCurrentPageNo() > NOT_DEFINED)
+                {
+                    params.put(PagingResponseProperty.navigationPage.name(), String.valueOf(getCurrentPageNo()));
+                }
+                break;
+            case navigationId:
+                if (StringUtils.notEmpty(getNavigationId()))
+                {
+                    params.put(PagingResponseProperty.navigationId.name(), getNavigationId());
+                }
+                break;
+            case navigationCount:
+                if (getTotalObjects() > NOT_DEFINED)
+                {
+                    params.put(PagingResponseProperty.navigationCount.name(), String.valueOf(getTotalObjects()));
+                }
+                break;
+            case navigationLastPage:
+                if (getMaxPages() > NOT_DEFINED)
+                {
+                    params.put(PagingResponseProperty.navigationLastPage.name(), String.valueOf(getMaxPages()));
+                }
+                break;
+            }
+        }
+        return params;
     }
-    return params;
-  }
-  	
-	
-	@Override
-  public String toString()
-  {
-    return "PagingInfo [currentPageNo=" + currentPageNo + ", navigationId="
-        + navigationId + ", pageSize=" + pageSize + ", totalObjects="
-        + totalObjects + ", getMaxPages()=" + getMaxPages() + "]";
-  }
-	
-	 /*---------------------*/
-  /*-- Private methods --*/
-  /*---------------------*/
-  private Integer toInteger(String value)
-  {
-    try
-    {
-      return Integer.valueOf(value);
-    }
-    catch (Exception ex)
-    {
-      return null;
-    }
-  }
 
-  private int toInt(String value, int defaultValue)
-  {
-    Integer intValue = toInteger(value);
-    return (intValue == null) ? defaultValue : intValue;
-  }
+    @Override
+    public String toString()
+    {
+        return "PagingInfo [currentPageNo=" + currentPageNo + ", navigationId=" + navigationId
+                + ", pageSize=" + pageSize + ", totalObjects=" + totalObjects + ", getMaxPages()="
+                + getMaxPages() + "]";
+    }
+
+    /*---------------------*/
+    /*-- Private methods --*/
+    /*---------------------*/
+    private Integer toInteger(String value)
+    {
+        try
+        {
+            return Integer.valueOf(value);
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+    }
+
+    private int toInt(String value, int defaultValue)
+    {
+        Integer intValue = toInteger(value);
+        return (intValue == null) ? defaultValue : intValue;
+    }
 }

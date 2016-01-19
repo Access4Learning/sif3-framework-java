@@ -29,6 +29,7 @@ import org.apache.log4j.Logger;
 import sif3.common.CommonConstants;
 import sif3.common.security.X509KeystoreManager;
 import sif3.common.security.X509TrustedStoreManager;
+import sif3.common.security.X509TrustedStoreManagerNoCheck;
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.PropertyManager;
 import au.com.systemic.framework.utils.StringUtils;
@@ -60,11 +61,13 @@ public class ClientConfigMgr
 	private static String keystorePWD = null;
 	private static String truststoreName = null;
 	private static String truststorePWD = null;
+	private boolean noCertificateCheck = false;
 	
 	private static SSLContext sslCtx = null;
 
-	public ClientConfigMgr()
+	public ClientConfigMgr(boolean noCertificateCheck)
 	{
+	    this.noCertificateCheck = noCertificateCheck;
 		if (props == null)
 		{
 			PropertyManager propMgr = PropertyManager.getInstance();
@@ -183,8 +186,18 @@ public class ClientConfigMgr
 
 			try
 			{
-				truststoreMgr = new TrustManager[] { new X509TrustedStoreManager(truststoreName, truststorePWD.toCharArray()) };
-				keystoreMgr = new KeyManager[] { new X509KeystoreManager(keystoreName, keystorePWD.toCharArray()) };
+			    if (StringUtils.notEmpty(keystoreName))
+			    {
+			        keystoreMgr = new KeyManager[] { new X509KeystoreManager(keystoreName, keystorePWD != null ? keystorePWD.toCharArray() : null) };
+			    }
+			    if (!noCertificateCheck)
+			    {
+			        truststoreMgr = new TrustManager[] { new X509TrustedStoreManager(truststoreName, truststorePWD != null ? truststorePWD.toCharArray() : null) };
+			    }
+			    else // Use dummy trusted store that doesn't check certificates! DON'T USE IN PROD! 
+			    {
+                    truststoreMgr = new TrustManager[] { new X509TrustedStoreManagerNoCheck() };			        
+			    }
 			}
 			catch (Exception ex)
 			{

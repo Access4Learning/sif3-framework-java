@@ -1,4 +1,4 @@
-<environment xmlns="http://www.sifassociation.org/infrastructure/3.0.1" type="DIRECT">
+<environment type="DIRECT">
     <sessionToken></sessionToken>
     <solutionId>HITS</solutionId>
     <defaultZone id="HITS">

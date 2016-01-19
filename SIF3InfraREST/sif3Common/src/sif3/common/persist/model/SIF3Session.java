@@ -60,6 +60,8 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	// The properties below are runtime properties. They are not read or maintained in the DB!
 	private transient SIFZone defaultZone             = null;
 	private transient AuthenticationMethod authenticationMethod = AuthenticationMethod.Basic;
+	
+	// List of all services according to the ACL of this session.
     private transient ArrayList<ServiceInfo> services = new ArrayList<ServiceInfo>();
 
 	public SIF3Session() {}
@@ -119,25 +121,25 @@ public class SIF3Session extends EnvironmentKey implements Serializable
     	this.environmentID = environmentID;
     }
 	
-  public String getSecurityToken()
-  {
-    return securityToken;
-  }
+	public String getSecurityToken()
+	{
+		return securityToken;
+	}
 
-  public void setSecurityToken(String securityToken)
-  {
-    this.securityToken = securityToken;
-  }
+	public void setSecurityToken(String securityToken)
+	{
+		this.securityToken = securityToken;
+	}
 
-  public Date getSecurityTokenExpiry()
-  {
-    return securityTokenExpiry;
-  }
+	public Date getSecurityTokenExpiry()
+	{
+		return securityTokenExpiry;
+	}
 
-  public void setSecurityTokenExpiry(Date securityTokenExpiry)
-  {
-    this.securityTokenExpiry = securityTokenExpiry;
-  }
+	public void setSecurityTokenExpiry(Date securityTokenExpiry)
+	{
+		this.securityTokenExpiry = securityTokenExpiry;
+	}
 
 	public String getAdapterType()
     {
@@ -217,7 +219,7 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	/*---------------------------------------------------------------------------------------------------------------------------------------*/
 	/*-- This section has utility methods that are only available at runtime and when a SIF3 Session is loaded into memory and linked with --*/
 	/*-- an environment given by the environment provider.                                                                                 --*/
-  /*---------------------------------------------------------------------------------------------------------------------------------------*/
+    /*---------------------------------------------------------------------------------------------------------------------------------------*/
 	
 	/**
 	 * List of services available for this environment. This are OBJECT, SERVICEPATH, UTILITY and FUNCTIONal services. Each service also has an
@@ -298,9 +300,10 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	/**
 	 * This method returns all services (zone, context, access rights etc) that are known for the given serviceName and type. A specific 
 	 * service might be available in more than one zone and/or contexts. If the serviceName and type have no known entry in all existing
-	 * services then an empty list is returned.
+	 * services then an empty list is returned. The serviceName can include service paths that end in that name.
 	 * 
-	 * @param serviceName The serviceName to check for. MUST NOT BE NULL!
+	 * @param serviceName The serviceName to check for. MUST NOT BE NULL! This is the actual service name meaning for service paths it
+	 *                    must be the last segment of the URL (i.e. schools/{}/students => Service Name = 'students'!)
 	 * @param serviceType The serviceType to check for. MUST NOT BE NULL!
 	 * 
 	 * @return See desc.
@@ -312,7 +315,8 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 		{
 			for (ServiceInfo serviceInfo : getServices())
 			{
-				if (serviceInfo.getServiceName().equals(serviceName) && (serviceInfo.getServiceType() == serviceType))
+//				if (serviceInfo.getServiceName().equals(serviceName) && (serviceInfo.getServiceType() == serviceType))
+				if (checkServiceNameAndType(serviceInfo, serviceName, serviceType))
 				{
 					validServices.add(serviceInfo);
 				}
@@ -324,60 +328,82 @@ public class SIF3Session extends EnvironmentKey implements Serializable
   /**
    * This method returns all services (zone, context, access rights etc) that are known for the given serviceName and type for the specified
    * access right and access type. A specific service might be available in more than one zone and/or contexts. If the serviceName and type 
-   * have no known entry in all existing services then an empty list is returned.
+   * have no known entry in all existing services then an empty list is returned. The serviceName can include service paths that end in that name.
    * 
-   * @param serviceName The serviceName to check for. MUST NOT BE NULL!
+   * @param serviceName The serviceName to check for. MUST NOT BE NULL! This is the actual service name meaning for service paths it
+   *                    must be the last segment of the URL (i.e. schools/{}/students => Service Name = 'students'!)
    * @param serviceType The serviceType to check for. MUST NOT BE NULL!
    * @param right The The access right requires (i.e. CREATE, SUBSCRIPE etc). MUST NOT BE NULL!
    * @param accessType The access type required (i.e. APPROVED, REJECTED etc). MUST NOT BE NULL!
    * 
    * @return See desc.
    */
-	 public List<ServiceInfo> getServiceInfoForService(String serviceName, ServiceType serviceType, AccessRight right, AccessType accessType)
-   {
-	    ArrayList<ServiceInfo> validServices = new ArrayList<ServiceInfo>();
-	    if (getServices() != null)
-	    {
-	      for (ServiceInfo serviceInfo : getServices())
-	      {
-	        if (serviceInfo.getServiceName().equals(serviceName) && (serviceInfo.getServiceType() == serviceType))
-	        {
-	          if (serviceInfo.getRights().hasRight(right, accessType))
-	          {
-	            validServices.add(serviceInfo);
-	          }
-	        }
-	      }
-	    }
-	    return validServices;
+	public List<ServiceInfo> getServiceInfoForService(String serviceName, ServiceType serviceType, AccessRight right, AccessType accessType)
+	{
+		ArrayList<ServiceInfo> validServices = new ArrayList<ServiceInfo>();
+		if (getServices() != null)
+		{
+			for (ServiceInfo serviceInfo : getServices())
+			{
+//				if (serviceInfo.getServiceName().equals(serviceName) && (serviceInfo.getServiceType() == serviceType))
+				if (checkServiceNameAndType(serviceInfo, serviceName, serviceType))
+				{
+					if (serviceInfo.getRights().hasRight(right, accessType))
+					{
+						validServices.add(serviceInfo);
+					}
+				}
+			}
+		}
+		return validServices;
 	}
-		
+	
 	/**
-	 * This method returns the services (zone, context, access rights etc) that matches the given criteria. There should only be one in each environment.
-	 * If no such service exists then null is returned.
+	 * This method returns the service info (zone, context, access rights etc) that matches the given criteria. There should only be one in each 
+	 * environment. If no such service exists then null is returned.
 	 * 
-	 * @param zone  The zone to check for. MUST NOT BE NULL!
-	 * @param context  The context to check for. MUST NOT BE NULL!
-	 * @param serviceName The serviceName to check for. MUST NOT BE NULL!
+	 * @param zone  The zone to check for. If it is null it will be set to the DEFAULT zone/
+	 * @param context  The context to check for. If it is null it will be set to the DEFAULT Context.
+	 * @param serviceName The serviceName to check for. MUST NOT BE NULL! This is the RAW service name as listed in the environment ACL. In case of a
+	 *                    service path that must be the full service path template (i.e. schools/{}/students). 
 	 * @param serviceType The serviceType to check for. MUST NOT BE NULL!
 	 * 
 	 * @return See desc.
 	 */
 	public ServiceInfo getServiceInfoForService(SIFZone zone, SIFContext context, String serviceName, ServiceType serviceType)
 	{
-		List<ServiceInfo> validServices = getServiceInfoForService(serviceName, serviceType);
-		if ((validServices != null) && (validServices.size() > 0))
+		if (getServices() != null)
 		{
-			for (ServiceInfo serviceInfo : validServices)
+			for (ServiceInfo serviceInfo : getServices())
 			{
-				if (serviceInfo.getZone().getId().equals(zone.getId()) && serviceInfo.getContext().getId().equals(context.getId()))
+				if ((serviceInfo.getServiceName().equals(serviceName) && 
+				    (serviceInfo.getServiceType() == serviceType)) && 
+				    (serviceInfo.getZone().getId().equals(getZone(zone).getId())) && 
+				    (serviceInfo.getContext().getId().equals(getContext(context).getId())))
 				{
-					return serviceInfo;
+						return serviceInfo;
 				}
 			}
 		}
 		return null; // not found
 	}
+	
+    /*
+     * This method checks if the given zone or zone id null and if so will return the default zone otherwise the passed in zone will be returned.
+     */
+    public SIFZone getZone(SIFZone zone)
+    {
+        return ((zone == null) || (zone.getId() == null)) ? getDefaultZone() : zone;
+    }
+    
+    /*
+     * This method checks if the given context or context id null and if so will return the default context otherwise the passed in context will be returned.
+     */
+    public SIFContext getContext(SIFContext context)
+    {
+        return ((context == null) || (context.getId() == null)) ? CommonConstants.DEFAULT_CONTEXT : context;
+    }
+
 	
 	/* (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -394,4 +420,26 @@ public class SIF3Session extends EnvironmentKey implements Serializable
                 + defaultZone + ", authenticationMethod=" + authenticationMethod + ", services="
                 + services + ", toString()=" + super.toString() + "]";
     }	
+    
+	/*---------------------*/
+	/*-- Private Methods --*/
+	/*---------------------*/
+
+    /*
+	 * This method checks if the given serviceInfo matches the serviceName and serviceType. Special care must be taken for servicePaths
+	 * where the service name is only the 'ending' of the actual serviceName. Service Name of the serviceINfo would be SchoolInfo/{}/StudentPersonals 
+	 * where the serviceName is StudentPersonals.
+	 */
+	private boolean checkServiceNameAndType(ServiceInfo serviceInfo, String serviceName, ServiceType serviceType)
+	{
+		if (serviceType == ServiceType.SERVICEPATH)
+		{
+			return (serviceInfo.getServiceName().endsWith("{}/"+serviceName) && (serviceInfo.getServiceType() == serviceType));
+		}
+		else // assume to only check for service name as is
+		{
+			return (serviceInfo.getServiceName().equals(serviceName) && (serviceInfo.getServiceType() == serviceType));
+		}
+
+	}
 }

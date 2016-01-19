@@ -22,14 +22,16 @@ import java.util.List;
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
 import sif.dd.au30.model.NameOfRecordType;
 import sif.dd.au30.model.ObjectFactory;
-import sif.dd.au30.model.StudentCollectionType;
+import sif.dd.au30.model.StudentPersonalCollectionType;
 import sif.dd.au30.model.StudentPersonalType;
+import sif3.common.CommonConstants;
 import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
+import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServicePathPredicate;
 import sif3.common.model.ZoneContextInfo;
@@ -50,14 +52,16 @@ import au.com.systemic.framework.utils.Timer;
 public class TestStudentPersonalConsumer
 {
 //	private final static String PATH = "/Users/crub/dev/nsip/Users/crub/dev/nsip/sif3-framework-java-dev";
-//	private final static String PATH = "C:/DEV/lunaWorkspace";
-	private final static String PATH = "C:/Development/GitHubRepositories/SIF3InfraRest";
+	private final static String PATH = "C:/DEV/lunaWorkspace";
+//	private final static String PATH = "C:/Development/GitHubRepositories/SIF3InfraRest";
   
 	private final static String SINGLE_STUDENT_FILE_NAME = PATH + "/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
 	private final static String MULTI_STUDENT_FILE_NAME = PATH + "/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
 //	private static final String CONSUMER_ID = "SecureStudentConsumer";
 	private static final String CONSUMER_ID = "StudentConsumer";
 //	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
+//	private static final String CONSUMER_ID = "QueueTestConsumer";
+
 	
 	private static final RequestType REQUEST_TYPE = RequestType.IMMEDIATE;
 	
@@ -83,9 +87,10 @@ public class TestStudentPersonalConsumer
 						{
 							System.out.println("Data Object Response "+i+": "+consumer.getMarshaller().marshal(response.getDataObject(), consumer.getResponseMediaType()));
 						}
-						else
+						else // in delayed we may have delayed receipt
 						{
-							System.out.println("Data Object Response "+i+": No Data Returned. Respnse Status = "+response.getStatus()+" ("+response.getStatusMessage()+")");							
+							System.out.println("Data Object Response "+i+": No Data Returned. Response Status = "+response.getStatus()+" ("+response.getStatusMessage()+")");
+							System.out.println("Delayed Receipt: "+response.getDelayedReceipt());
 						}
 					}
 					i++;
@@ -117,13 +122,13 @@ public class TestStudentPersonalConsumer
 		}
 	}
 
-	private StudentCollectionType getStudents(DataModelUnmarshalFactory unmarshaller)
+	private StudentPersonalCollectionType getStudents(DataModelUnmarshalFactory unmarshaller)
 	{
 		String inputEnvXML = FileReaderWriter.getFileContent(MULTI_STUDENT_FILE_NAME);
 		//System.out.println("File content:\n" + inputEnvXML);
 		try
 		{
-			return (StudentCollectionType)unmarshaller.unmarshalFromXML(inputEnvXML, StudentCollectionType.class);
+			return (StudentPersonalCollectionType)unmarshaller.unmarshalFromXML(inputEnvXML, StudentPersonalCollectionType.class);
 		}
 		catch (Exception ex)
 		{
@@ -160,10 +165,11 @@ public class TestStudentPersonalConsumer
 	private void createStudents(StudentPersonalConsumer consumer)
 	{
 		System.out.println("Start 'Create Students (Multi)' in all connected environments...");
-		StudentCollectionType students = getStudents((DataModelUnmarshalFactory)consumer.getUnmarshaller());
+		StudentPersonalCollectionType students = getStudents((DataModelUnmarshalFactory)consumer.getUnmarshaller());
 		try
 		{
-			List<BulkOperationResponse<CreateOperationStatus>> responses = consumer.createMany(students, null, REQUEST_TYPE);
+            List<BulkOperationResponse<CreateOperationStatus>> responses = consumer.createMany(students, null, RequestType.IMMEDIATE);
+//			List<BulkOperationResponse<CreateOperationStatus>> responses = consumer.createMany(students, null, RequestType.DELAYED);
 			if (responses != null)
 			{
 				int i = 1;
@@ -205,7 +211,9 @@ public class TestStudentPersonalConsumer
 	    
 	    try
 	    {
-	      List<BulkOperationResponse<OperationStatus>> responses = consumer.deleteMany(resourceIDs, null, REQUEST_TYPE);
+//	      List<BulkOperationResponse<OperationStatus>> responses = consumer.deleteMany(resourceIDs, null, REQUEST_TYPE);
+	      List<BulkOperationResponse<OperationStatus>> responses = consumer.deleteMany(resourceIDs, null, RequestType.IMMEDIATE);
+//	      List<BulkOperationResponse<OperationStatus>> responses = consumer.deleteMany(resourceIDs, null, RequestType.DELAYED);
 	      if (responses != null)
 	      {
 	        int i = 1;
@@ -249,10 +257,11 @@ public class TestStudentPersonalConsumer
 	private void updateStudents(StudentPersonalConsumer consumer)
 	{
 	    System.out.println("Start 'Update Students - Bulk Operation' in all connected environments...");
-	    StudentCollectionType students = getStudents((DataModelUnmarshalFactory)consumer.getUnmarshaller());
+	    StudentPersonalCollectionType students = getStudents((DataModelUnmarshalFactory)consumer.getUnmarshaller());
 	    try
 	    {
-	      List<BulkOperationResponse<OperationStatus>> responses = consumer.updateMany(students, null, REQUEST_TYPE);
+	      List<BulkOperationResponse<OperationStatus>> responses = consumer.updateMany(students, null, RequestType.IMMEDIATE);
+//          List<BulkOperationResponse<OperationStatus>> responses = consumer.updateMany(students, null, RequestType.DELAYED);
 	      if (responses != null)
 	      {
 	        int i = 1;
@@ -302,13 +311,16 @@ public class TestStudentPersonalConsumer
 			params.addURLQueryParameter("myURLQueryParam", "show in provider");
 
 			List<ZoneContextInfo> envZoneCtxList = null;
-//			envZoneCtxList = new ArrayList<ZoneContextInfo>();
+			envZoneCtxList = new ArrayList<ZoneContextInfo>();
 //			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auRolloverTestingZone"), null));
-//			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auSchoolTestingZone"),  null));
+//			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auSchoolTestingZone"),  (SIFContext)null));
 //			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
 //			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
+//            envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, CommonConstants.DEFAULT_CONTEXT));
 
-			List<Response> responses = consumer.retrieve(new PagingInfo(500, 0), envZoneCtxList, REQUEST_TYPE, QueryIntention.NO_CACHE, params);
+//			List<Response> responses = consumer.retrieve(new PagingInfo(10, 0), envZoneCtxList, RequestType.DELAYED, QueryIntention.NO_CACHE, params);
+			List<Response> responses = consumer.retrieve(new PagingInfo(10, 0), envZoneCtxList, RequestType.IMMEDIATE, QueryIntention.NO_CACHE, params);
+//            List<Response> responses = consumer.retrieve(new PagingInfo(10, 0), envZoneCtxList, REQUEST_TYPE, QueryIntention.NO_CACHE, params);
 //			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), envZoneCtxList, REQUEST_TYPE);
 //			List<Response> responses = consumer.retrieve(null, envZoneCtxList, REQUEST_TYPE);
 			if (printRepsonse)
@@ -336,6 +348,7 @@ public class TestStudentPersonalConsumer
 		{
 			// Get all students for a service path cirteria. Get 5 students per page (i.e page 1). 
 			List<Response> responses = consumer.retrieveByServicePath(criteria, new PagingInfo(5, 1), null, REQUEST_TYPE, QueryIntention.ALL, null);
+//			List<Response> responses = consumer.retrieveByServicePath(criteria, new PagingInfo(5, 1), null, RequestType.DELAYED, QueryIntention.ALL, null);
 			System.out.println("Responses from attempt to Get All Students for '" + criteria + "': ");
 			printResponses(responses, consumer);
 		}
@@ -377,6 +390,7 @@ public class TestStudentPersonalConsumer
 		{
 			// Get all students by example. Get 5 students per page (i.e page 1). 
 			List<Response> responses = consumer.retrieveByQBE(student, new PagingInfo(5, 1), envZoneCtxList, REQUEST_TYPE, QueryIntention.ALL, params);
+//			List<Response> responses = consumer.retrieveByQBE(student, new PagingInfo(5, 1), envZoneCtxList, RequestType.DELAYED, QueryIntention.ALL, params);
 			System.out.println("Responses from attempt to Get Students By Example': ");
 			printResponses(responses, consumer);
 		}
@@ -441,8 +455,48 @@ public class TestStudentPersonalConsumer
 		System.out.println("End Performance Test with Compression "+(consumer.getCompressionEnabled() ? "ON" : "OFF")+". Time taken: "+timer.timeTaken()+"ms");
 	}
 	
-	
-	
+	private void getServiceInfo(StudentPersonalConsumer consumer, boolean printRepsonse)
+	{
+		if (printRepsonse)
+		{
+			System.out.println("Start 'Get StudentPersonal Service Info (HTTP HEAD)' in all connected environments...");
+		}
+		try
+		{
+			CustomParameters params = new CustomParameters();
+			
+			// Set some HTTP Header fields
+			params.addHTTPHeaderParameter(RequestHeaderConstants.HDR_GENERATOR_ID, "Ignore This");
+			params.addHTTPHeaderParameter("GenID", "This should not be ignored");
+			params.addHTTPHeaderParameter("customHdr", "Go all the way to Provider");
+			
+			// Set some custom URL query Params
+			params.addURLQueryParameter("ChangedSince", "01/05/2015");
+			params.addURLQueryParameter("myURLQueryParam", "show in provider");
+
+			List<ZoneContextInfo> envZoneCtxList = null;
+//			envZoneCtxList = new ArrayList<ZoneContextInfo>();
+//			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auRolloverTestingZone"), null));
+//			envZoneCtxList.add(new ZoneContextInfo(new SIFZone("auSchoolTestingZone"),  null));
+//			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
+//			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
+
+			List<Response> responses = consumer.getServiceInfo(new PagingInfo(10, 0), envZoneCtxList, params);
+			if (printRepsonse)
+			{
+				System.out.println("Responses from attempt to Get All Students:");
+				printResponses(responses, consumer);
+			}
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		if (printRepsonse)
+		{
+			System.out.println("Finished 'Get All Students' in all connected environments...");
+		}
+	}
 	
 	public static void main(String[] args)
 	{
@@ -452,25 +506,46 @@ public class TestStudentPersonalConsumer
 		if (ConsumerLoader.initialise(CONSUMER_ID))
 		{
 		
-  		StudentPersonalConsumer consumer = tester.getConsumer();
+			StudentPersonalConsumer consumer = tester.getConsumer();
   		
-//  		tester.getStudents(consumer, true);
+  		tester.getStudents(consumer, true);
 //  		tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
 //  		tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
 //  		tester.getStudentsByServicePath("RoomInfos", "24ed508e1ed04bba82198233efa55859", consumer);
-//  			tester.createStudent(consumer);
-  //		tester.removeStudent(consumer);
+//  		tester.createStudent(consumer);
+//			tester.removeStudent(consumer);
 //  		tester.getStudent(consumer);
 //  		tester.updateStudent(consumer);
-  //		tester.updateStudents(consumer);
-//  		tester.createStudents(consumer);
+//  		tester.updateStudents(consumer);
+//			tester.createStudents(consumer);
 //  		tester.deleteStudents(consumer);
 //  		tester.getStudentsByQBE(consumer);
+			
+//			tester.getServiceInfo(consumer, true);
   		
-  		tester.performanceTest(consumer);
+//  		tester.performanceTest(consumer);
   
-  		System.out.println("Finalise Consumer (i.e. disconnect and remove environment).");
-  		consumer.finalise();
+			// Put this agent to a blocking wait.....
+			if (true)
+			{
+    			try
+    			{
+    				Object semaphore = new Object();
+    				synchronized (semaphore) // this will block until CTRL-C is pressed.
+    				{
+    					System.out.println("==================================================\nTestStudentPersonalConsumer is running (Press Ctrl-C to stop)\n==================================================");
+    					semaphore.wait();
+    				}
+    			}
+    			catch (Exception ex)
+    			{
+    				System.out.println("Blocking wait in TestStudentPersonalConsumer interrupted: " + ex.getMessage());
+    				ex.printStackTrace();
+    			}
+			}
+
+			System.out.println("Finalise Consumer (i.e. disconnect and remove environment).");
+			consumer.finalise();
 		}
 		
 		ConsumerLoader.shutdown();

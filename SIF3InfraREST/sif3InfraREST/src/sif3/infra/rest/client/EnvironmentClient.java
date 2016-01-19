@@ -24,8 +24,6 @@ import javax.ws.rs.core.Response.Status;
 
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderProperties;
-import sif3.common.header.HeaderValues.RequestType;
-import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.security.TokenInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.Response;
@@ -47,7 +45,6 @@ import com.sun.jersey.api.client.WebResource;
 public class EnvironmentClient extends BaseClient
 {
 	private EnvironmentInfo envInfo = null;
-//	private SIF3Session sif3Session = null;
 	
 	/**
 	 * Creates a client object to deal with environment functions. The environmentURI can have different forms depending on the
@@ -59,14 +56,11 @@ public class EnvironmentClient extends BaseClient
      * @param clientEnvMgr Session manager to access the clients session information.
 	 * @param environmentURI The URI for which one of the methods in this class shall be applied.
 	 * @param envInfo Environment Info
-//	 * @param sif3Session The session for which the methods shall be called. Can be null in case where the environment
-//	 *                    is not yet created. In this case only the methods 'createEnvironment()' will work.
 	 */
 	public EnvironmentClient(ClientEnvironmentManager clientEnvMgr, URI environmentURI, EnvironmentInfo envInfo)
 	{
 		super(clientEnvMgr, environmentURI, envInfo.getMediaType(), envInfo.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), envInfo.getSecureConnection(), envInfo.getCompressionEnabled());
 		this.envInfo = envInfo;
-//		this.sif3Session = clientEnvMgr.getSIF3Session();
 	}
 	
 	/**
@@ -101,15 +95,16 @@ public class EnvironmentClient extends BaseClient
 			    pseudoSIF3Session.setSecurityToken(tokenInfo.getToken());
 			    pseudoSIF3Session.setSecurityTokenExpiry(tokenInfo.getTokenExpiryDate());
 			}
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(true, pseudoSIF3Session), true, true).post(ClientResponse.class, payloadStr);
+			HeaderProperties requestHdrProps = createAuthenticationHdr(true, pseudoSIF3Session);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, requestHdrProps, true, true).post(ClientResponse.class, payloadStr);
 
 			if (envInfo.getEnvCreateConflictIsError())
 			{
-				return setResponse(service, response, EnvironmentType.class, null, null, Status.CREATED);
+				return setResponse(service, response, EnvironmentType.class, requestHdrProps, null, null, Status.CREATED);
 			}
 			else // Allow the 'Conflict' HTTP Status to be treated as a valid behaviour.
 			{
-				return setResponse(service, response, EnvironmentType.class, null, null, Status.CREATED, Status.CONFLICT);
+				return setResponse(service, response, EnvironmentType.class, requestHdrProps, null, null, Status.CREATED, Status.CONFLICT);
 			}
 		}
 		catch (Exception ex)
@@ -141,24 +136,10 @@ public class EnvironmentClient extends BaseClient
 
 			// Since we have a pseudo session we must check if there is a need to pass along a TokenInfo. Only needed if
 			// Authentication method is 'Bearer' which also means that the security token should be set in the pseudo session!
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(false, pseudoSIF3Session), true, false).get(ClientResponse.class);                
+			HeaderProperties requestHdrProps = createAuthenticationHdr(false, pseudoSIF3Session);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, requestHdrProps, true, false).get(ClientResponse.class);                
 
-//			if (StringUtils.notEmpty(sif3Session.getSecurityToken()))
-//			{
-//			    TokenInfo tokeInfo = new TokenInfo(sif3Session.getSecurityToken(), sif3Session.getSecurityTokenExpiry());
-//			    
-//			    // Since we try to get a session that is not known to the consumer but provider we pass the session token to the
-//			    // security token info so that it can be retrieved.
-//			    tokeInfo.setSessionToken(sif3Session.getSessionToken());
-//                response = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(false, tokeInfo), true, false).get(ClientResponse.class);			    
-//			}
-//			else
-//			{
-//			    TokenInfo tokeInfo = new TokenInfo();
-//			    response = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(false, null), true, false).get(ClientResponse.class);
-//			}
-
-			return setResponse(service, response, EnvironmentType.class, null, null, Status.OK, Status.NOT_MODIFIED);
+			return setResponse(service, response, EnvironmentType.class, requestHdrProps, null, null, Status.OK, Status.NOT_MODIFIED);
 		}
 		catch (Exception ex)
 		{
@@ -168,33 +149,6 @@ public class EnvironmentClient extends BaseClient
 		}
 	}
 	
-	/**
-     * Returns the response which should hold an environment based on the URI given to the constructor of this class.
-     * This method should only be called if the consumer does already have an environment in its store but want's to
-     * synchronise it with the latest changes on the environment provider.
-     * 
-     * @return See desc.
-     * 
-     * @throws ServiceInvokationException
-     */
-//    public Response getEnvironment() throws ServiceInvokationException
-//    {
-//        WebResource service = getService();
-//        try
-//        {
-//            service = buildURI(service, null);
-//            ClientResponse response = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(false, null), true, false).get(ClientResponse.class);
-//
-//            return setResponse(service, response, EnvironmentType.class, null, null, Status.OK, Status.NOT_MODIFIED);
-//        }
-//        catch (Exception ex)
-//        {
-//            String errorMsg = "Failed to invoke 'getEnvironment' service (REST GET) on URI " + service.getURI() + ": " + ex.getMessage();
-//            logger.error(errorMsg);
-//            throw new ServiceInvokationException(errorMsg, ex);
-//        }
-//    }
-
 
 	/**
 	 * This method will remove an environment given by the URI in the constructor. If the environment is removed it will return
@@ -209,9 +163,10 @@ public class EnvironmentClient extends BaseClient
 		try
 		{
 			service = buildURI(service, null);
-		    ClientResponse remoteResponse = setRequestHeaderAndMediaTypes(service, getAuthenticationHdr(false, null), true, false).delete(ClientResponse.class);
+			HeaderProperties requestHdrProps = createAuthenticationHdr(false, null);
+		    ClientResponse remoteResponse = setRequestHeaderAndMediaTypes(service, requestHdrProps, true, false).delete(ClientResponse.class);
 
-		    Response response = setResponse(service, remoteResponse, null, null, null, Status.NO_CONTENT);    
+		    Response response = setResponse(service, remoteResponse, null, requestHdrProps, null, null, Status.NO_CONTENT);    
 		    if (response.hasError())
 		    {
 		      logger.error("An error has been returned in removing the environment with ID = " + getSIF3Session().getEnvironmentID() + " form location: " + response.getResourceURI());
@@ -231,18 +186,4 @@ public class EnvironmentClient extends BaseClient
 			return false;
 		}
 	}
-	
-	/*---------------------*/
-	/*-- Private Methods --*/
-	/*---------------------*/
-	private HeaderProperties getAuthenticationHdr(boolean isEnvCreate, SIF3Session pseudoSIF3Session)
-	{
-		HeaderProperties hdrProps = createAuthenticationHdr(isEnvCreate, pseudoSIF3Session);
-		
-		// Set the remaining header fields for this type of request
-		hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE, RequestType.IMMEDIATE.name());
-		
-		return hdrProps;
-	}
-
 }

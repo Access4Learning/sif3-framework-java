@@ -16,11 +16,6 @@
 
 package sif3.infra.common.env.types;
 
-import sif3.common.CommonConstants;
-import sif3.common.CommonConstants.QueuePollingType;
-import sif3.common.CommonConstants.QueueStrategy;
-
-
 /**
  * This class is a sub-class of an environment. It adds properties typical in a consumer environment.
  * 
@@ -39,14 +34,12 @@ public class ConsumerEnvironment extends EnvironmentInfo
 	
 	/* Event, Queue and Subscription related properties */
 	private boolean eventsEnabled = false;
-	private QueueStrategy queueStrategy = QueueStrategy.ADAPTER_LEVEL;
-	private QueuePollingType queueType = QueuePollingType.IMMEDIATE;
-	private int pollFrequency = CommonConstants.DEFAULT_POLL_FREQ;
-	private int longPollTimeOut = CommonConstants.DEFAULT_LONGPOLL_WAIT;
-	private String queueName = null;
-	private int numMsgQueueReaders = 1;
-	private boolean removeSubscribersOnShutdown = false;
-		
+    private RemoteQueueConfig eventConfig = new RemoteQueueConfig();
+	
+    /* Delayed Response, Queue and Subscription related properties */
+    private boolean delayedEnabled = false;
+    private RemoteQueueConfig delayedConfig = new RemoteQueueConfig();
+			
 	/**
 	 * Constructor
 	 * 
@@ -95,95 +88,80 @@ public class ConsumerEnvironment extends EnvironmentInfo
     	this.templateXMLFileName = templateXMLFileName;
     }
 
-	public boolean getEventsEnabled()
+	   /**
+     * @return the eventsEnabled
+     */
+    public boolean getEventsEnabled()
     {
-    	return this.eventsEnabled;
+        return eventsEnabled;
     }
 
-	public void setEventsEnabled(boolean eventsEnabled)
+    /**
+     * @param eventsEnabled the eventsEnabled to set
+     */
+    public void setEventsEnabled(boolean eventsEnabled)
     {
-    	this.eventsEnabled = eventsEnabled;
+        this.eventsEnabled = eventsEnabled;
     }
 
-	public QueueStrategy getQueueStrategy()
+    /**
+     * @return the eventConfig
+     */
+    public RemoteQueueConfig getEventConfig()
     {
-    	return this.queueStrategy;
+        return eventConfig;
     }
 
-	public void setQueueStrategy(QueueStrategy queueStrategy)
+    /**
+     * @param eventConfig the eventConfig to set
+     */
+    public void setEventConfig(RemoteQueueConfig eventConfig)
     {
-    	this.queueStrategy = queueStrategy;
+        this.eventConfig = eventConfig;
     }
 
-	public String getQueueName()
+    /**
+     * @return the delayedEnabled
+     */
+    public boolean getDelayedEnabled()
     {
-    	return this.queueName;
+        return delayedEnabled;
     }
 
-	public void setQueueName(String queueName)
+    /**
+     * @param delayedEnabled the delayedEnabled to set
+     */
+    public void setDelayedEnabled(boolean delayedEnabled)
     {
-    	this.queueName = queueName;
+        this.delayedEnabled = delayedEnabled;
     }
 
-	public int getNumMsgQueueReaders()
+    /**
+     * @return the delayedConfig
+     */
+    public RemoteQueueConfig getDelayedConfig()
     {
-    	return this.numMsgQueueReaders;
+        return delayedConfig;
     }
 
-	public void setNumMsgQueueReaders(int numMsgQueueReaders)
+    /**
+     * @param delayedConfig the delayedConfig to set
+     */
+    public void setDelayedConfig(RemoteQueueConfig delayedConfig)
     {
-    	this.numMsgQueueReaders = numMsgQueueReaders;
+        this.delayedConfig = delayedConfig;
     }
 
-	public QueuePollingType getQueueType()
-    {
-    	return this.queueType;
-    }
-
-	public void setQueueType(QueuePollingType queueType)
-    {
-    	this.queueType = queueType;
-    }
-
-	public int getPollFrequency()
-    {
-    	return this.pollFrequency;
-    }
-
-	public void setPollFrequency(int pollFrequency)
-    {
-    	this.pollFrequency = pollFrequency;
-    }
-
-	public int getLongPollTimeOut()
-    {
-    	return this.longPollTimeOut;
-    }
-
-	public void setLongPollTimeOut(int longPollTimeOut)
-    {
-    	this.longPollTimeOut = longPollTimeOut;
-    }
-
-	public boolean getRemoveSubscribersOnShutdown()
-    {
-    	return this.removeSubscribersOnShutdown;
-    }
-
-	public void setRemoveSubscribersOnShutdown(boolean removeSubscribersOnShutdown)
-    {
-    	this.removeSubscribersOnShutdown = removeSubscribersOnShutdown;
-    }
-
-	@Override
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
     public String toString()
     {
-	    return "ConsumerEnvironment [connected=" + this.connected + ", useAdvisory="
-	            + this.useAdvisory + ", templateXMLFileName=" + this.templateXMLFileName
-	            + ", eventsEnabled=" + this.eventsEnabled + ", queueStrategy=" + this.queueStrategy
-	            + ", queueType=" + this.queueType + ", pollFrequency=" + this.pollFrequency
-	            + ", longPollTimeOut=" + this.longPollTimeOut + ", queueName=" + this.queueName
-	            + ", numMsgQueueReaders=" + this.numMsgQueueReaders + ", removeSubscribersOnShutdown="
-	            + this.removeSubscribersOnShutdown + ", toString()=" + super.toString() + "]";
-    }
+        return "ConsumerEnvironment [connected=" + connected + ", useAdvisory=" + useAdvisory
+                + ", templateXMLFileName=" + templateXMLFileName + ", eventsEnabled="
+                + eventsEnabled + ", eventConfig=" + eventConfig + ", delayedEnabled="
+                + delayedEnabled + ", delayedConfig=" + delayedConfig + ", toString()="
+                + super.toString() + "]";
+    }    
 }

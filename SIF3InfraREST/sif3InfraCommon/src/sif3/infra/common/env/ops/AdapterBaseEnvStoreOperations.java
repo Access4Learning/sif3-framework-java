@@ -235,7 +235,11 @@ public class AdapterBaseEnvStoreOperations
 
 				if (adapterType == AdapterType.CONSUMER) // set queue strategy
 				{
-					sif3Session.setQueueStrategy(((ConsumerEnvironment)getEnvironmentStore().getEnvironment()).getQueueStrategy().name());
+				    //TODO: JH - In future we might allow different queue strategies for events and delayed responses. In this
+				    //           case we need to stor this in the DB separately. For now we only allow ADAPTER so one column
+				    //           is fine.
+				    // Use Event Queue Strategy.
+					sif3Session.setQueueStrategy(((ConsumerEnvironment)getEnvironmentStore().getEnvironment()).getEventConfig().getQueueStrategy().name());
 				}
 			}
 

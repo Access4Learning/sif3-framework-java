@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="SIF3InfraREST">
+        <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/sif3Common/src"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/sif3InfraModel/src"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/sif3InfraCommon/src"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/sif3InfraREST/src"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/demo/src"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/test/src"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/config"/>
+        <property name="context-root" value="SIF3InfraREST"/>
+        <property name="java-output-path" value="/SIF3InfraREST/build/classes"/>
+    </wb-module>
+</project-modules>

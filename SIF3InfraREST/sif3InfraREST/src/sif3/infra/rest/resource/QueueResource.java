@@ -78,7 +78,8 @@ public class QueueResource extends InfraResource
 	
 	/* Below variables are for testing purposes only */
 	private ObjectFactory infraObjectFactory = new ObjectFactory();
-	private static QueueType dummyQueue = null;
+//	private static QueueType dummyQueue = null;
+	private static HashMap<String, QueueType> queues = new HashMap<String, QueueType>();
 	private static int numGetMessages = 0;
 	private static Integer numEventsTillNoMsg  = null;
 	private static HashMap<String, String> messageIDMap = new HashMap<String, String>(); // key=consumerID, value=lastMsgId
@@ -137,12 +138,16 @@ public class QueueResource extends InfraResource
 			{
 				return makeErrorResponse(error, ResponseAction.QUERY);
 			}
-			QueueCollectionType queues = infraObjectFactory.createQueueCollectionType();
-			if ((dummyQueue != null))
+			QueueCollectionType queuesCollection = infraObjectFactory.createQueueCollectionType();
+			for (QueueType queue : queues.values())
 			{
-				queues.getQueue().add(dummyQueue);
+			    queuesCollection.getQueue().add(queue);
 			}
-			return makeResponse(queues, Status.OK.getStatusCode(), false, ResponseAction.QUERY, getInfraMarshaller());				
+//			if ((dummyQueue != null))
+//			{
+//				queues.getQueue().add(dummyQueue);
+//			}
+			return makeResponse(queuesCollection, Status.OK.getStatusCode(), false, ResponseAction.QUERY, getInfraMarshaller());				
 		}
 		else
 		{
@@ -173,9 +178,10 @@ public class QueueResource extends InfraResource
 			{
 				return makeErrorResponse(error, ResponseAction.QUERY);
 			}
-			if ((dummyQueue != null) && (dummyQueue.getId().equals(queueID)))
+			QueueType queue = queues.get(queueID);		
+			if (queue != null)
 			{
-				return makeResponse(dummyQueue, Status.OK.getStatusCode(), false, ResponseAction.QUERY, getInfraMarshaller());				
+				return makeResponse(queue, Status.OK.getStatusCode(), false, ResponseAction.QUERY, getInfraMarshaller());				
 			}
 			else
 			{
@@ -213,6 +219,8 @@ public class QueueResource extends InfraResource
 			{
 				QueueType inputQueue = (QueueType)getInfraUnmarshaller().unmarshal(payload, QueueType.class, getRequestMediaType());
 				QueueType outputQueue = createQueue(inputQueue);
+				
+				queues.put(outputQueue.getId(), outputQueue);
 				
 				return makeResponse(outputQueue, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, getInfraMarshaller());
 			}
@@ -258,9 +266,11 @@ public class QueueResource extends InfraResource
 			{
 				return makeErrorResponse(error, ResponseAction.DELETE);
 			}
-			if ((dummyQueue != null) && (dummyQueue.getId().equals(queueID)))
+	         QueueType queue = queues.get(queueID);      
+
+			if (queue != null)
 			{
-				dummyQueue = null;
+			    queues.remove(queue.getId());
 				numGetMessages = 0;
 				messageIDMap = new HashMap<String, String>();
 				return makeResopnseWithNoContent(false, ResponseAction.DELETE);				
@@ -303,7 +313,10 @@ public class QueueResource extends InfraResource
 			{
 				return makeErrorResponse(error, ResponseAction.QUERY);
 			}
-			if ((dummyQueue != null) && (dummyQueue.getId().equals(queueID)))
+			
+	        QueueType queue = queues.get(queueID);      
+
+			if (queue != null)
 			{
 				// Ensure we request the deletion of the top message
 				if (getDeleteMessageId() != null)
@@ -312,7 +325,7 @@ public class QueueResource extends InfraResource
 					String lastMsgID = messageIDMap.get(consumerID);
 					if (getDeleteMessageId().equals(lastMsgID))
 					{
-					  Response response = getMessage(consumerID);
+					  Response response = getMessage(consumerID, queue);
 					  if (response != null)
 					  {
 						  return response;
@@ -331,7 +344,7 @@ public class QueueResource extends InfraResource
 				}
 				else // deleted Message ID not set. Return next message but don't increase message count
 				{
-					return getMessage(consumerID);
+					return getMessage(consumerID, queue);
 				}
 			}
 			else
@@ -384,21 +397,21 @@ public class QueueResource extends InfraResource
 	{
 		//SIF3Session sif3Session = getEnvironmentManager().getSessionBySessionToken(getTokenFromAuthToken());
 		SIF3Session sif3Session = getSIF3SessionForRequest();
-		dummyQueue = inputQueue;
-		dummyQueue.setCreated(Calendar.getInstance());
-		dummyQueue.setId(UUIDGenerator.getUUID());
-		dummyQueue.setOwnerId(sif3Session.getEnvironmentID());
-		dummyQueue.setLastAccessed(Calendar.getInstance());
-		dummyQueue.setLastModified(Calendar.getInstance());
-		dummyQueue.setIdleTimeout(0L);
-		dummyQueue.setMinWaitTime(30L);
-		dummyQueue.setMessageCount(0L);
-		dummyQueue.setQueueUri(getUriInfo().getBaseUri().toString()+"queues/"+inputQueue.getId()+"/messages");
+		QueueType newQueue = inputQueue;
+		newQueue.setCreated(Calendar.getInstance());
+		newQueue.setId(UUIDGenerator.getUUID());
+		newQueue.setOwnerId(sif3Session.getEnvironmentID());
+		newQueue.setLastAccessed(Calendar.getInstance());
+		newQueue.setLastModified(Calendar.getInstance());
+		newQueue.setIdleTimeout(0L);
+		newQueue.setMinWaitTime(30L);
+		newQueue.setMessageCount(0L);
+		newQueue.setQueueUri(getUriInfo().getBaseUri().toString()+"queues/"+inputQueue.getId()+"/messages");
 		
-		return dummyQueue;
+		return newQueue;
 	}
 	
-	private Response getMessage(String consumerID)
+	private Response getMessage(String consumerID, QueueType queue)
 	{
 		EventMsg event = null;
 		if (events == null)
@@ -433,7 +446,7 @@ public class QueueResource extends InfraResource
 		String lastMsgID = UUIDGenerator.getUUID();
 		messageIDMap.put(consumerID, lastMsgID);
 
-		dummyQueue.setLastAccessed(Calendar.getInstance());
+		queue.setLastAccessed(Calendar.getInstance());
 		String payload = event.getMessage();
 		ResponseBuilder response = null;
 		if (payload != null)

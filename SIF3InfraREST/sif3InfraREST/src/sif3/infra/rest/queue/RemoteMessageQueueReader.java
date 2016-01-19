@@ -27,18 +27,22 @@ import sif3.common.CommonConstants;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.MessageType;
+import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.model.EventMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.URIPathInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.Response;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
-import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.rest.client.MessageClient;
+import sif3.infra.rest.queue.types.DelayedBaseInfo;
+import sif3.infra.rest.queue.types.ErrorInfo;
 import sif3.infra.rest.queue.types.EventInfo;
-import sif3.infra.rest.queue.types.QueueListenerInfo;
+import sif3.infra.rest.queue.types.QueueInfo;
+import sif3.infra.rest.queue.types.ResponseInfo;
 import au.com.systemic.framework.utils.StringUtils;
 
 /**
@@ -58,8 +62,7 @@ public class RemoteMessageQueueReader implements Runnable
 {
 	protected final Logger logger = Logger.getLogger(getClass());
 
-	private QueueListenerInfo queueListenerInfo = null;
-//	private ConsumerEnvironment consumerEnvInfo = null;
+	private QueueInfo queueInfo = null;
     private ConsumerEnvironmentManager consumerEvnMgr = null;
 	private SIF3Session sif3Session = null;
 	private String readerID = null;
@@ -72,28 +75,28 @@ public class RemoteMessageQueueReader implements Runnable
 	 * Constructs a RemoteMessageQueueReader for the queue identified through the queueListenerInfo parameter for the given session and consumer 
 	 * configuration.
 	 * 
-	 * @param queueListenerInfo
+	 * @param queueInfo
 	 *            Holds all the information for this reader to identify what SIF queue to read from and where to distribute messages to.
 	 * @param readerID
 	 *            A string identifying the ID of this reader. Since it is expected that readers are running in multiple threads each 
 	 *            reader should have its own id to identify it for logging purpose.
 	 */
-	public RemoteMessageQueueReader(QueueListenerInfo queueListenerInfo, String readerID) throws ServiceInvokationException
+	public RemoteMessageQueueReader(QueueInfo queueInfo, String readerID) throws ServiceInvokationException
 	{
 		super();
 		try
 		{
-			this.queueListenerInfo = queueListenerInfo;
+			this.queueInfo = queueInfo;
 	        consumerEvnMgr = ConsumerEnvironmentManager.getInstance();
 	        sif3Session = consumerEvnMgr.getSIF3Session();
 			this.readerID = readerID;
 
 			// Get the wait time between get message calls once a no message is returned. Timeout is  the max from what the queue indicates
 			// and what the configuration states.
-			waitTime = Math.max(longToInt(getQueueListenerInfo().getQueue().getWaitTime()), getConsumerEnvInfo().getPollFrequency()) * CommonConstants.MILISEC;
+			waitTime = Math.max(longToInt(getQueueInfo().getQueue().getWaitTime()),  getQueueInfo().getRemoteQueueConfig().getPollFrequency()) * CommonConstants.MILISEC;
 
 			// Initialise message client. Only needs to be done once, so we do this here.
-			client = new MessageClient(getConsumerEvnMgr(), new URI(queueListenerInfo.getQueue().getMessageURI()));
+			client = new MessageClient(getConsumerEvnMgr(), new URI(getQueueInfo().getQueue().getMessageURI()));
 		}
 		catch (Exception ex)
 		{
@@ -106,7 +109,7 @@ public class RemoteMessageQueueReader implements Runnable
 	public void shutdown()
 	{
 		// nothing to do at the moment
-		logger.debug("Shutdown Message Reader wit ID = " + getReaderID() + " for queue = " + getQueueListenerInfo().getQueue().getName());
+		logger.debug("Shutdown Message Reader wit ID = " + getReaderID() + " for queue = " + getQueueInfo().getQueue().getName());
 	}
 	
 	/* (non-Javadoc)
@@ -140,13 +143,13 @@ public class RemoteMessageQueueReader implements Runnable
 					{
 						waitBeforeGetNext(); // Wait until query the queue next time.
 					}
-					else if (isErrorResponse(response))
+					else if (isError(response))
 					{
 						waitBeforeGetNext(); // Wait until query the queue next time.
 					}
 					else
 					{
-						logger.debug("Message Reader '" + getReaderID() + "' (ThreadID:"+Thread.currentThread().getId()+") has receive a message from queue: " + getQueueListenerInfo().getQueue().getName() + ". Message ID = " + getLastMsgeID());
+						logger.debug("Message Reader '" + getReaderID() + "' (ThreadID:"+Thread.currentThread().getId()+") has receive a message from queue: " + getQueueInfo().getQueue().getName() + ". Message ID = " + getLastMsgeID());
 						processMessage(response);
 					}
 				}
@@ -171,17 +174,32 @@ public class RemoteMessageQueueReader implements Runnable
 	}
 
 	/*
-	 * CHecks if an error is returned. If so it will log it, remove the lastMsg id and return true. Otherwise flase is returned.
+	 * Checks if an error is returned. If so it will log it, remove the lastMsg id and return true. Otherwise false is returned.
+	 * An error here means an issue with the actual message connector (i.e. cannot connect, authentication etc). This is different
+	 * to having retrieved an error response message from the queue. The two differ in the following way:
+	 * A proper error message from a queue should have some mandatory HTTP headers. If they are there we can assume it is a proper
+	 * error message from a queue otherwise we assume it is an issue with the message client and its connection. The fields to look
+	 * out for are:
+	 *  - responseaction
+	 *  - relativeservicepath
+	 *  - servicetype
 	 */
-	private boolean isErrorResponse(Response response)
+	private boolean isError(Response response)
 	{
-		if (response.hasError()) // An error message was on the queue. Just report it for the time being
+		if (response.hasError()) // An error message has been received.
 		{
-			logger.error("Error received:\n" + response.getError());
+			if (StringUtils.isEmpty(getHeaderValue(response, ResponseHeaderConstants.HDR_REL_SERVICE_PATH)))
+			{
+				// There is nothing we can do and it appears to be an error with the message client and its comms with the queue (i.e Auth invalid)
+				logger.error("Error received:\n" + response.getError());
+				
+				// We must also set the lastMsgID to null!
+				setMsgIDToNull();
+				return true;
+			}
 			
-			// We must also set the lastMsgID to null!
-			setMsgIDToNull();
-			return true;
+			// We seem to have a relative service path which means the error is a genuine error message from a queue to a delayed request.
+			return false;
 		}
 		return false;
 	}
@@ -199,7 +217,7 @@ public class RemoteMessageQueueReader implements Runnable
 		}
 		catch (Exception ex)
 		{
-			logger.error("Blocking wait in Message Reader '" + getReaderID() + "' for queue: " + getQueueListenerInfo().getQueue().getName() + " interrupted: " + ex.getMessage(), ex);
+			logger.error("Blocking wait in Message Reader '" + getReaderID() + "' for queue: " + getQueueInfo().getQueue().getName() + " interrupted: " + ex.getMessage(), ex);
 		}
 	}
 
@@ -208,7 +226,7 @@ public class RemoteMessageQueueReader implements Runnable
 	 */
 	private void processMessage(Response response)
 	{
-		String responseType = response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_MESSAGE_TYPE);
+		String responseType = getHeaderValue(response, ResponseHeaderConstants.HDR_MESSAGE_TYPE);
 		if (StringUtils.isEmpty(responseType)) // not good!
 		{
 			logger.error("Message received with unknown message type (null or empty). Cannot process response:\n" + response);
@@ -226,40 +244,137 @@ public class RemoteMessageQueueReader implements Runnable
 			logger.error("Message received with unknown message type: '" + responseType + "'. Cannot process response:\n" + response);
 			return; // attempt to process next message
 		}
-		if (messageType == MessageType.EVENT)
+		
+		switch (messageType)
 		{
-			processEvent(response);
+			case EVENT:
+			{
+				processEvent(response);
+				break;
+			}
+			case RESPONSE:
+			{
+				processResponse(response);
+				break; // attempt to process next message
+			}
+			case ERROR:
+			{
+				processError(response);
+				break; // attempt to process next message
+			}
 		}
-		else if (messageType == MessageType.RESPONSE)
+	}
+	
+	private void processResponse(Response response)
+	{
+		try
 		{
-			// TODO: JH - Implement Delayed Responses.
-			logger.info("Delayed Responses not yet supported. Response ignored.:\n" + response);
-			return; // attempt to process next message
+			if (logger.isDebugEnabled())
+			{
+				logger.debug("RESPONSE Message Received:\n"+response);
+			}
+			
+			//Populate ResponseInfo Object with base data.
+			ResponseInfo responseInfo = new ResponseInfo();
+			setResponseBaseData(responseInfo, response, MessageType.RESPONSE);
+			
+			// Is there a subscription for this RESPONSE type
+			LocalConsumerQueue localQueue = getQueueInfo().getLocalConsumerQueue(responseInfo.getZone().getId(), responseInfo.getContext().getId(), responseInfo.getServiceName(), responseInfo.getServiceType().name());
+			
+			if (localQueue == null) // There is a response for which there is no registered consumer.
+			{
+				logger.info("Received a DELAYED Response for which there is no consumer registered. Discard the following RESPONSE:\n" + response);
+			}
+			else // Create event object and send it to eventConsumer
+			{
+				logger.debug(getReaderID()+": Attempts to push DELAYED Response to local queue...");
+				localQueue.blockingPush(responseInfo);
+				logger.debug(getReaderID()+": DELAYED Response successfully pushed to local queue");
+			}	
 		}
-		else
-		// we should not get there because ERROR is the only one left and that has already been handled.
+		catch (Exception ex)
 		{
-			logger.info("Message of type ERROR received but no error details are given. Cannot process response:\n" + response);
-			return; // attempt to process next message
+			logger.error("Error occured during the processing of a DELAYED RESPONSE message from the queue: " + getQueueInfo().getQueue().getName() + ". See previous error log entries for details: " + ex.getMessage(), ex);
 		}
 	}
 
+	
+	private void processError(Response response)
+	{
+		try
+		{
+			if (logger.isDebugEnabled())
+			{
+				logger.debug("ERROR Message Received:\n"+response);
+			}
+
+			//Populate ErrorInfo Object with base data.
+			ErrorInfo errorInfo = new ErrorInfo();
+			setResponseBaseData(errorInfo, response, MessageType.ERROR);
+			
+			// Is there a subscription for this Delayed ERROR type
+			LocalConsumerQueue localQueue = getQueueInfo().getLocalConsumerQueue(errorInfo.getZone().getId(), errorInfo.getContext().getId(), errorInfo.getServiceName(), errorInfo.getServiceType().name());
+			
+			if (localQueue == null) // There is an ERROR for which there is no registered consumer.
+			{
+				logger.info("Received a DELAYED Error for which there is no consumer registered. Discard the following Error:\n" + response);
+			}
+			else // Create event object and send it to eventConsumer
+			{
+				logger.debug(getReaderID()+": Attempts to push DELAYED Error to local queue...");
+				localQueue.blockingPush(errorInfo);
+				logger.debug(getReaderID()+": DELAYED Error successfully pushed to local queue");
+			}	
+		}
+		catch (Exception ex)
+		{
+			logger.error("Error occured during the processing of a DELAYED ERROR message from the queue: " + getQueueInfo().getQueue().getName() + ". See previous error log entries for details: " + ex.getMessage(), ex);
+		}
+	}
+
+
+	/*
+	 * baseInfo must not be null.
+	 */
+	private void setResponseBaseData(DelayedBaseInfo baseInfo, Response response, MessageType messageType)
+	{
+		//First get all the info out from the relativeServicePath
+		URIPathInfo pathInfo = new URIPathInfo(getHeaderValue(response, ResponseHeaderConstants.HDR_REL_SERVICE_PATH));
+		
+		baseInfo.setMessageType(messageType);
+		baseInfo.setRequestGUID(getHeaderValue(response, ResponseHeaderConstants.HDR_REQUEST_ID));
+		baseInfo.setServiceType(pathInfo.getServiceType());
+		baseInfo.setPayload((String)response.getDataObject());
+		baseInfo.setMediaType(response.getMediaType());
+		baseInfo.setZone(getSif3Session().getZone(pathInfo.getZone()));
+		baseInfo.setContext(getSif3Session().getContext(pathInfo.getContext()));
+//      baseInfo.setZone(getZone(pathInfo.getZone() != null ? pathInfo.getZone().getId() : null));
+//      baseInfo.setContext(getContext(pathInfo.getContext()!= null ? pathInfo.getContext().getId() : null));
+		baseInfo.setMessageQueueReaderID(getReaderID());
+		baseInfo.setFullRelativeURL(pathInfo.getOriginalURLString());
+		baseInfo.setServiceName(pathInfo.getServiceName());
+		baseInfo.setUrlService(pathInfo.getUrlService());
+		baseInfo.setResponseAction(getResponseAction(response));
+		baseInfo.setHttpHeaders(response.getHdrProperties());
+		baseInfo.setQueryParameters(pathInfo.getQueryParams());
+	}
+	
+	
 	private void processEvent(Response response)
 	{
 		try
 		{
 			if (logger.isDebugEnabled())
 			{
-				//logger.debug("Header Properties for Event Response:\n"+response.getHdrProperties());
-				logger.debug("Event Message Received:\n"+response);
+				logger.debug("EVENT Message Received:\n"+response);
 			}
 			SIFZone zone = getZone(response);
 			SIFContext context = getContext(response);
-			String serviceName = response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_SERVICE_NAME);
-			String serviceType = response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_SERVICE_TYPE);
+			String serviceName = getHeaderValue(response, ResponseHeaderConstants.HDR_SERVICE_NAME);
+			String serviceType = getHeaderValue(response, ResponseHeaderConstants.HDR_SERVICE_TYPE);
 
 			// Is there a subscription for this event?
-			LocalConsumerQueue localQueue = queueListenerInfo.getLocalConsumerQueue(zone.getId(), context.getId(), serviceName, serviceType);
+			LocalConsumerQueue localQueue = getQueueInfo().getLocalConsumerQueue(zone.getId(), context.getId(), serviceName, serviceType);
 			if (localQueue == null) // There is an event for which there is no registered consumer.
 			{
 				logger.info("Received an event for which there is no consumer registered. Discard the following Event:\n" + response);
@@ -277,7 +392,7 @@ public class RemoteMessageQueueReader implements Runnable
 				EventMetadata metadata = new EventMetadata(response.getHdrProperties());
 				
 				// Set the generator ID in its specific property for easy access.
-				metadata.setGeneratorID(response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_GENERATOR_ID));
+				metadata.setGeneratorID(getHeaderValue(response, ResponseHeaderConstants.HDR_GENERATOR_ID));
 				
 				//TODO: JH - Do we need applicationKey and authenticatedUser HTTP header here?				
 				
@@ -289,13 +404,13 @@ public class RemoteMessageQueueReader implements Runnable
 		}
 		catch (Exception ex)
 		{
-			logger.error("Error occured during the processing of a message from the queue: " + getQueueListenerInfo().getQueue().getName() + ". See previous error log entries for details: " + ex.getMessage(), ex);
+			logger.error("Error occured during the processing of a message from the queue: " + getQueueInfo().getQueue().getName() + ". See previous error log entries for details: " + ex.getMessage(), ex);
 		}
 	}
 
 	private EventAction getEventAction(Response response)
 	{
-		String eventAction = response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_EVENT_ACTION);
+		String eventAction = getHeaderValue(response, ResponseHeaderConstants.HDR_EVENT_ACTION);
 		if (StringUtils.notEmpty(eventAction))
 		{
 			try
@@ -317,7 +432,7 @@ public class RemoteMessageQueueReader implements Runnable
 
 	private UpdateType getUpdateType(Response response)
 	{
-		String updateType = response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_UPDATE_TYPE);
+		String updateType = getHeaderValue(response, ResponseHeaderConstants.HDR_UPDATE_TYPE);
 		if (StringUtils.notEmpty(updateType))
 		{
 			try
@@ -336,10 +451,45 @@ public class RemoteMessageQueueReader implements Runnable
 			return null;
 		}
 	}
+	
+	private ResponseAction getResponseAction(Response response)
+	{
+		String value = getHeaderValue(response, ResponseHeaderConstants.HDR_RESPONSE_ACTION);
+		if (StringUtils.notEmpty(value))
+		{
+			try
+			{
+				return ResponseAction.valueOf(value);
+			}
+			catch (Exception ex)
+			{
+				logger.error("Received an response action with an invalid type: '" + value + "':\n" + response);
+				return null;
+			}
+		}
+		else
+		{
+			logger.error("Received an response without a response action response HTTP header:\n" + response);
+			return null;
+		}
+	}
+	
 
 	private SIFZone getZone(Response response)
 	{
-		String zoneID = response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_ZONE_ID);
+		return getZone(getHeaderValue(response, ResponseHeaderConstants.HDR_ZONE_ID));
+	}
+
+	private SIFContext getContext(Response response)
+	{
+		return getContext(getHeaderValue(response, ResponseHeaderConstants.HDR_CONTEXT_ID));
+	}
+	
+	/*
+	 * Utility method to get the SIF Zone Object based on zone ID. If zoneID is empty then the Default Zone is returned.
+	 */
+	private SIFZone getZone(String zoneID)
+	{
 		if (StringUtils.isEmpty(zoneID)) // use default zone
 		{
 			return getSif3Session().getDefaultZone();
@@ -354,13 +504,15 @@ public class RemoteMessageQueueReader implements Runnable
 			{
 				return new SIFZone(zoneID, false);
 			}
-		}
+		}		
 	}
 
-	private SIFContext getContext(Response response)
+	/*
+	 * Utility method to get the SIF Context Object based on context ID. If contextID is empty then the Default Context is returned.
+	 */
+	private SIFContext getContext(String contextID)
 	{
-		String contextID = response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_CONTEXT_ID);
-		if (StringUtils.isEmpty(contextID)) // use default zone
+		if (StringUtils.isEmpty(contextID)) // use default context
 		{
 			return CommonConstants.DEFAULT_CONTEXT;
 		}
@@ -377,14 +529,22 @@ public class RemoteMessageQueueReader implements Runnable
 		}
 	}
 
+	/*
+	 * returns the value of the HTTP header given by is name or null if it doesn't exist.
+	 */
+	private String getHeaderValue(Response response, String hdrName)
+	{
+		return response.getHdrProperties().getHeaderProperty(hdrName);
+	}
+
 	private int longToInt(Long value)
 	{
 		return (value == null) ? 0 : value.intValue();
 	}
 
-	private QueueListenerInfo getQueueListenerInfo()
+	private QueueInfo getQueueInfo()
 	{
-		return queueListenerInfo;
+		return queueInfo;
 	}
 
     private ConsumerEnvironmentManager getConsumerEvnMgr()
@@ -397,11 +557,6 @@ public class RemoteMessageQueueReader implements Runnable
         return sif3Session;
     }
     
-    private ConsumerEnvironment getConsumerEnvInfo()
-    {
-        return (ConsumerEnvironment)getConsumerEvnMgr().getEnvironmentInfo();
-    }
-
 	private MessageClient getClient()
 	{
 		return client;

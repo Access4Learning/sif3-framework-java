@@ -20,11 +20,10 @@ package sif3.common.model;
 
 import java.io.Serializable;
 
-import au.com.systemic.framework.utils.StringUtils;
-
 import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
+import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class is a POJO for service information as provided by the Environment. Each environment has a list of services and each service 
@@ -41,6 +40,10 @@ public class ServiceInfo extends ZoneContextInfo implements Serializable
 	private String serviceName = null;
     private ServiceType serviceType = ServiceType.OBJECT;
     private ServiceRights rights = new ServiceRights();
+    
+    // For delayed responses services link to queues where the response is put on. Depending on the queue strategy we may have
+    // a different queue for each service, so that value must be held here.
+    private RemoteQueueInfo remoteQueueInfo = null;
     
 	/**
      * Constructor
@@ -123,10 +126,27 @@ public class ServiceInfo extends ZoneContextInfo implements Serializable
 		}
 	}
 
+	public RemoteQueueInfo getRemoteQueueInfo()
+	{
+		return remoteQueueInfo;
+	}
+
+	public void setRemoteQueueInfo(RemoteQueueInfo remoteQueueInfo)
+	{
+		this.remoteQueueInfo = remoteQueueInfo;
+	}
+
+    public SubscriptionKey getSubscriptionKey()
+    {
+        return new SubscriptionKey(getZone().getId(), getContext().getId(), getServiceName(),
+                getServiceType().name());
+    }
+
 	@Override
     public String toString()
     {
-	    return "ServiceInfo [serviceName=" + this.serviceName + ", serviceType=" + this.serviceType
-	            + ", rights=" + this.rights + ", toString()=" + super.toString() + "]";
+	    return "ServiceInfo [serviceName=" + serviceName + ", serviceType="
+	            + serviceType + ", rights=" + rights + ", remoteQueueInfo="
+	            + remoteQueueInfo + ", toString()=" + super.toString() + "]";
     }
 }

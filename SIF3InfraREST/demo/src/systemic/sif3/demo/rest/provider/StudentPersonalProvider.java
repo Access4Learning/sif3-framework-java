@@ -27,7 +27,7 @@ import java.util.List;
 import javax.xml.bind.JAXBElement;
 
 import sif.dd.au30.model.ObjectFactory;
-import sif.dd.au30.model.StudentCollectionType;
+import sif.dd.au30.model.StudentPersonalCollectionType;
 import sif.dd.au30.model.StudentPersonalType;
 import sif.dd.au30.model.TeachingGroupCollectionType;
 import sif.dd.au30.model.TeachingGroupType.StudentList;
@@ -39,8 +39,11 @@ import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
+import sif3.common.header.ResponseHeaderConstants;
+import sif3.common.interfaces.ChangesSinceProvider;
 import sif3.common.interfaces.QueryProvider;
 import sif3.common.interfaces.SIFEventIterator;
+import sif3.common.model.ChangedSinceInfo;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.QueryPredicate;
@@ -54,6 +57,7 @@ import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import systemic.sif3.demo.rest.ModelObjectConstants;
 import systemic.sif3.demo.rest.provider.iterators.StudentPersonalIterator;
+import au.com.systemic.framework.utils.DateUtils;
 import au.com.systemic.framework.utils.FileReaderWriter;
 import au.com.systemic.framework.utils.StringUtils;
 
@@ -61,7 +65,7 @@ import au.com.systemic.framework.utils.StringUtils;
  * @author Joerg Huber
  *
  */
-public class StudentPersonalProvider extends AUDataModelProviderWithEvents<StudentCollectionType> implements QueryProvider
+public class StudentPersonalProvider extends AUDataModelProviderWithEvents<StudentPersonalCollectionType> implements QueryProvider, ChangesSinceProvider
 {
 	private static int numDeletes = 0;
 	private static HashMap<String, StudentPersonalType> students = null; //new HashMap<String, StudentPersonalType>();
@@ -84,7 +88,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 				String inputXML = FileReaderWriter.getFileContent(studentFile);
 				try
 				{
-					StudentCollectionType studentList = (StudentCollectionType) getUnmarshaller().unmarshalFromXML(inputXML, getMultiObjectClassInfo().getObjectType());
+					StudentPersonalCollectionType studentList = (StudentPersonalCollectionType) getUnmarshaller().unmarshalFromXML(inputXML, getMultiObjectClassInfo().getObjectType());
 					if ((studentList != null) && (studentList.getStudentPersonal() != null))
 					{
 						students = new HashMap<String, StudentPersonalType>();
@@ -166,7 +170,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.EventProvider#getSIFEvents()
      */
     @Override
-    public SIFEventIterator<StudentCollectionType> getSIFEvents()
+    public SIFEventIterator<StudentPersonalCollectionType> getSIFEvents()
     {
  	    return new StudentPersonalIterator(getServiceName(), getServiceProperties(), students);
     }
@@ -176,7 +180,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.EventProvider#onEventError(sif3.common.model.SIFEvent, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public void onEventError(SIFEvent<StudentCollectionType> sifEvent, SIFZone zone,SIFContext context)
+    public void onEventError(SIFEvent<StudentPersonalCollectionType> sifEvent, SIFZone zone,SIFContext context)
     {
 	    //We need to deal with the error. At this point in time we just log it.
     	if ((sifEvent != null) && (sifEvent.getSIFObjectList() != null))
@@ -202,7 +206,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.EventProvider#modifyBeforeSent(sif3.common.model.SIFEvent, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public SIFEvent<StudentCollectionType> modifyBeforePublishing(SIFEvent<StudentCollectionType> sifEvent, SIFZone zone, SIFContext context, HeaderProperties customHTTPHeaders)
+    public SIFEvent<StudentPersonalCollectionType> modifyBeforePublishing(SIFEvent<StudentPersonalCollectionType> sifEvent, SIFZone zone, SIFContext context, HeaderProperties customHTTPHeaders)
     {
         // Here we could add some custom HTTP header values but at this time we have no interest to do so.
     	
@@ -325,7 +329,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     	
     	ArrayList<StudentPersonalType> studentList = fetchStudents(students, pagingInfo);
     	
-    	StudentCollectionType studentCollection = dmObjectFactory.createStudentCollectionType();
+    	StudentPersonalCollectionType studentCollection = dmObjectFactory.createStudentPersonalCollectionType();
     	
     	if (studentList != null)
     	{
@@ -366,7 +370,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 		    	logger.debug("Retrieve Students for Teaching Group (class) "+predicates.get(0).getValue()+" for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
 
 		    	ArrayList<StudentPersonalType> studentList = fetchStudents(teachingGroupStudents, pagingInfo);
-		    	StudentCollectionType studentCollection = dmObjectFactory.createStudentCollectionType();
+		    	StudentPersonalCollectionType studentCollection = dmObjectFactory.createStudentPersonalCollectionType();
 		    	if (studentList != null)
 		    	{
 		    		studentCollection.getStudentPersonal().addAll(studentList);
@@ -399,7 +403,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     	if (exampleObject instanceof StudentPersonalType)
     	{
 	    	ArrayList<StudentPersonalType> studentList = fetchStudents(students, pagingInfo);
-	    	StudentCollectionType studentCollection = dmObjectFactory.createStudentCollectionType();
+	    	StudentPersonalCollectionType studentCollection = dmObjectFactory.createStudentPersonalCollectionType();
 	    	if (studentList != null)
 	    	{
 	    		studentCollection.getStudentPersonal().addAll(studentList);
@@ -424,10 +428,10 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     public List<CreateOperationStatus> createMany(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
     {
     	// Must be of type StudentPersonalType
-    	if (data instanceof StudentCollectionType)
+    	if (data instanceof StudentPersonalCollectionType)
     	{
 			logger.debug("Create students (Bulk Operation) for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
-			StudentCollectionType students = (StudentCollectionType) data;
+			StudentPersonalCollectionType students = (StudentPersonalCollectionType) data;
 			ArrayList<CreateOperationStatus> opStatus = new ArrayList<CreateOperationStatus>();
 			int i = 0;
 			for (StudentPersonalType student : students.getStudentPersonal())
@@ -468,10 +472,10 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     public List<OperationStatus> updateMany(Object data, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
     {
     	// Must be of type StudentPersonalType
-    	if (data instanceof StudentCollectionType)
+    	if (data instanceof StudentPersonalCollectionType)
     	{
     		logger.debug("Update students (Bulk Operation) for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
-    		StudentCollectionType students = (StudentCollectionType)data;
+    		StudentPersonalCollectionType students = (StudentPersonalCollectionType)data;
     		ArrayList<OperationStatus> opStatus = new ArrayList<OperationStatus>();
     		int i=0;
     		for (StudentPersonalType student : students.getStudentPersonal())
@@ -519,6 +523,62 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 			i++;
 		}
 	    return opStatus;
+    }
+
+    /*
+     * Override the method from the AUDataModelProviderWithEvents class and set a few custom headers.
+     * 
+     * (non-Javadoc)
+     * @see systemic.sif3.demo.rest.provider.AUDataModelProviderWithEvents#getCustomServiceInfo(sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo, sif3.common.model.RequestMetadata)
+     */
+    @Override
+    public HeaderProperties getCustomServiceInfo(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+    {
+        HeaderProperties headers = new HeaderProperties();
+        headers.setHeaderProperty("TestHeaderProperty1", "value1");
+        headers.setHeaderProperty(ResponseHeaderConstants.HDR_ENVIRONMENT_URI, "/should/be/overridden");
+        headers.setHeaderProperty(ResponseHeaderConstants.HDR_REQUEST_ID, "123"); // should not be accepted.
+        return headers;
+    }
+    
+    /*--------------------------------------------*/
+    /*-- ChangesSinceProvider Interface Methods --*/
+    /*--------------------------------------------*/
+
+    /*
+     * (non-Javadoc)
+     * @see sif3.common.interfaces.ChangesSinceProvider#changesSinceSupported()
+     */
+    @Override
+    public boolean changesSinceSupported()
+    {
+        return true;
+    }
+
+    /*
+     * For the purpose of illustrating the use of the changes since functionality we assume that changes since are provided by this Object provider
+     * based on date time stamps. Real implementations may look up a table to get the latest value of the opaque marker.
+     * 
+     * (non-Javadoc)
+     * @see sif3.common.interfaces.ChangesSinceProvider#getLatestOpaqueMarker()
+     */
+    @Override
+    public String getLatestOpaqueMarker()
+    {
+        return DateUtils.nowAsISO8601withSecFraction();
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see sif3.common.interfaces.ChangesSinceProvider#getChangesSince(sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo, sif3.common.model.ChangedSinceInfo, sif3.common.model.RequestMetadata)
+     */
+    @Override
+    public Object getChangesSince(SIFZone zone, SIFContext context, PagingInfo pagingInfo, ChangedSinceInfo changedSinceInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+    {
+        // This is not a real implementation. We just fake things here. In a real implementation one would go to a change log to retrieve
+        // Students for the given changedSinceInfo criteria.
+        logger.info("getChangesSince for "+getProviderName()+" called with changes since info: "+changedSinceInfo);
+        return retrieve(zone, context, pagingInfo, metadata);
     }
 
     /*--------------------------------------*/

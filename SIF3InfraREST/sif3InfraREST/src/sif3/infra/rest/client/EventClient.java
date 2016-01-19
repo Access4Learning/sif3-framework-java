@@ -155,7 +155,7 @@ public class EventClient extends BaseClient
 				ClientResponse response = builder.post(ClientResponse.class, payloadStr);
 				logger.debug("Receive Event Response Status: "+response.getStatus());
 	
-				return setEventResponse(service, response, zone, context);
+				return setEventResponse(service, response, headerProps, zone, context);
 			}
 			catch (Exception ex)
 			{
@@ -233,9 +233,9 @@ public class EventClient extends BaseClient
 		return hdrProperties;
 	}
 	
-	private BaseResponse setEventResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context)
+	private BaseResponse setEventResponse(WebResource service, ClientResponse clientResponse, HeaderProperties requestHdrProps, SIFZone zone, SIFContext context)
 	{
-		return setResponse(service, clientResponse, null, getFullZone(zone), getFullContext(context), Status.ACCEPTED);
+		return setResponse(service, clientResponse, null, requestHdrProps, getFullZone(zone), getFullContext(context), Status.ACCEPTED);
 	}
 	
 	private SIFZone getFullZone(SIFZone zone)
