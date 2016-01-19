@@ -31,7 +31,7 @@ public class RequestMetadata extends BaseMetadata
     private static final long serialVersionUID = 1477907327110025038L;
     
     private QueryIntention queryIntention = null; // May only be used in HTTP GET requests
-    private String navigationID = null; // May only be used in HTTP GET requests
+//    private String navigationID = null; // May only be used in HTTP GET requests
     
     // Refer to javadoc for the getSourceName() method.
     private String sourceName = null; 
@@ -54,15 +54,15 @@ public class RequestMetadata extends BaseMetadata
     	this.queryIntention = queryIntention;
     }
 	
-	public String getNavigationID()
-    {
-    	return this.navigationID;
-    }
-	
-	public void setNavigationID(String navigationID)
-    {
-    	this.navigationID = navigationID;
-    }
+//	public String getNavigationID()
+//    {
+//    	return this.navigationID;
+//    }
+//	
+//	public void setNavigationID(String navigationID)
+//    {
+//    	this.navigationID = navigationID;
+//    }
 	
 	/**
 	 * IMPORTANT:<br>
@@ -114,8 +114,7 @@ public class RequestMetadata extends BaseMetadata
 	@Override
     public String toString()
     {
-	    return "RequestMetadata [queryIntention=" + this.queryIntention + ", navigationID="
-	            + this.navigationID + ", sourceName=" + this.sourceName + ", environmentID="
+	    return "RequestMetadata [queryIntention=" + this.queryIntention + ", sourceName=" + this.sourceName + ", environmentID="
 	            + this.environmentID + ", toString()=" + super.toString() + "]";
     }
 }
