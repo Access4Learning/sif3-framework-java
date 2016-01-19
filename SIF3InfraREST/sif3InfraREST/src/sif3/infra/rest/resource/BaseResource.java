@@ -845,7 +845,7 @@ public abstract class BaseResource
 		
 		// Get values from HTTP Header.
 		metadata.setGeneratorID(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID));
-		metadata.setNavigationID(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_NAVIGATION_ID));
+//		metadata.setNavigationID(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_NAVIGATION_ID));
 		metadata.setApplicationKey(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY));
 		metadata.setAuthentictedUser(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_AUTHENTICATED_USER));
 
@@ -897,10 +897,10 @@ public abstract class BaseResource
 		{
 			metadata.setGeneratorID(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_GENERATOR_ID));
 		}
-		if (metadata.getNavigationID() == null)
-		{
-			metadata.setNavigationID(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_NAVIGATION_ID));
-		}
+//		if (metadata.getNavigationID() == null)
+//		{
+//			metadata.setNavigationID(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_NAVIGATION_ID));
+//		}
 		
 		if (metadata.getApplicationKey() == null)
 		{
