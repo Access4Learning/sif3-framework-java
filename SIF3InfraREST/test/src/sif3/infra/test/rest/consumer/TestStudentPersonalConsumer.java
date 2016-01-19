@@ -52,8 +52,8 @@ import au.com.systemic.framework.utils.Timer;
 public class TestStudentPersonalConsumer
 {
 //	private final static String PATH = "/Users/crub/dev/nsip/Users/crub/dev/nsip/sif3-framework-java-dev";
-	private final static String PATH = "C:/DEV/lunaWorkspace";
-//	private final static String PATH = "C:/Development/GitHubRepositories/SIF3InfraRest";
+//	private final static String PATH = "C:/DEV/lunaWorkspace";
+	private final static String PATH = "C:/Development/GitHubRepositories/SIF3InfraRest";
   
 	private final static String SINGLE_STUDENT_FILE_NAME = PATH + "/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
 	private final static String MULTI_STUDENT_FILE_NAME = PATH + "/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
@@ -508,22 +508,22 @@ public class TestStudentPersonalConsumer
 		
 			StudentPersonalConsumer consumer = tester.getConsumer();
   		
-  		tester.getStudents(consumer, true);
-//  		tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
-//  		tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
-//  		tester.getStudentsByServicePath("RoomInfos", "24ed508e1ed04bba82198233efa55859", consumer);
-//  		tester.createStudent(consumer);
-//			tester.removeStudent(consumer);
-//  		tester.getStudent(consumer);
-//  		tester.updateStudent(consumer);
-//  		tester.updateStudents(consumer);
-//			tester.createStudents(consumer);
-//  		tester.deleteStudents(consumer);
-//  		tester.getStudentsByQBE(consumer);
-			
-//			tester.getServiceInfo(consumer, true);
-  		
-//  		tester.performanceTest(consumer);
+//            tester.getStudent(consumer);
+            tester.getStudents(consumer, true);
+//            tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
+//            tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
+//            tester.getStudentsByServicePath("RoomInfos", "24ed508e1ed04bba82198233efa55859", consumer);
+//            tester.createStudent(consumer);
+//            tester.createStudents(consumer);
+//            tester.removeStudent(consumer);
+//            tester.deleteStudents(consumer);
+//            tester.updateStudent(consumer);
+//            tester.updateStudents(consumer);
+//            tester.getStudentsByQBE(consumer);
+
+//            tester.getServiceInfo(consumer, true);
+
+//            tester.performanceTest(consumer);
   
 			// Put this agent to a blocking wait.....
 			if (true)
