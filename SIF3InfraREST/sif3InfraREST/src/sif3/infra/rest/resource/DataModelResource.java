@@ -35,6 +35,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.ModelObjectInfo;
@@ -417,14 +418,24 @@ public class DataModelResource extends BaseResource
 		            {
                         //Get new changes since marker if page = first page or no paging info
 		                HeaderProperties customHeaders = null;
+		                String newChangesSinceMarker = null;
 		                if ((pagingInfo == null) || (pagingInfo.getCurrentPageNo() == CommonConstants.FIRST_PAGE))
 		                {
-		                    customHeaders = new HeaderProperties();
-		                    customHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_CHANGES_SINCE_MARKER, csProvider.getLatestOpaqueMarker());
+		                    newChangesSinceMarker = csProvider.getLatestOpaqueMarker();
+                            customHeaders = new HeaderProperties();
+		                    customHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_CHANGES_SINCE_MARKER, newChangesSinceMarker);
 		                }
 		                
 		                // Return the results.
                         Object returnObj = csProvider.getChangesSince(getSifZone(), getSifContext(), pagingInfo, new ChangedSinceInfo(changesSinceMarker), getRequestMetadata(getSIF3SessionForRequest(), true));
+
+                        // Check if we have pagingInfo parameter and if so if the navigationID is set. If it is not set we set it to the value of the
+                        // newChangesSinceMarker. Consumer can use this to identify which query the provider ran in subsequent paged queries.
+                        if ((pagingInfo != null) && (StringUtils.isEmpty(pagingInfo.getNavigationId()) && (newChangesSinceMarker != null)))
+                        {
+                            pagingInfo.setNavigationId(newChangesSinceMarker);
+                        }
+
                         return makePagedResponse(returnObj, pagingInfo, customHeaders, false, provider.getMarshaller()); 
 		                
 		            }
