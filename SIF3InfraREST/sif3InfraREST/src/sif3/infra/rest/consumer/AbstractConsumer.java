@@ -901,10 +901,10 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	 * is not required by this method it will be assumed null, which in turn will assume ONE-OFF as per interface definition. Further
 	 * the customParameters will be set to null.
 	 */
-	public Object retrieveByQBE(Object exampleObject, 
-								PagingInfo pagingInfo, 
-								List<ZoneContextInfo> zoneCtxList, 
-								RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+	public List<Response> retrieveByQBE(Object exampleObject, 
+								        PagingInfo pagingInfo, 
+								        List<ZoneContextInfo> zoneCtxList, 
+								        RequestType requestType) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
 	{
 		return retrieveByQBE(exampleObject, pagingInfo, zoneCtxList, requestType, QueryIntention.ONE_OFF, null);
 	}
@@ -1429,7 +1429,8 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 		return result;
 	}
 	
-	private List<ZoneContextInfo> getFinalZoneCtxList( List<ZoneContextInfo> zoneCtxList, SIF3Session sif3Session)
+	@SuppressWarnings("unused")
+    private List<ZoneContextInfo> getFinalZoneCtxList( List<ZoneContextInfo> zoneCtxList, SIF3Session sif3Session)
 	{
 		List<ZoneContextInfo> finalZoneContextList = null;
 		
