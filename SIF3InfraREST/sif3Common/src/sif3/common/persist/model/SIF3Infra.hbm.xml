@@ -23,7 +23,7 @@
         <property name="securityToken" column="SECURITY_TOKEN" type="string" length="200"/>
         <property name="securityTokenExpiry" column="SECURITY_TOKEN_EXPIRY" type="timestamp"/>
         <property name="adapterType" column="ADAPTER_TYPE" type="string" length="20"/>
-        <property name="environmentXML" column="ENVIRONMENT_XML" type="string"/>
+        <property name="environmentXML" column="ENVIRONMENT_XML" type="text"/>
         <property name="queueStrategy" column="QUEUE_STRATEGY" type="string"/>
         <property name="created" column="CREATED" type="timestamp"/>
         <property name="lastAccessed" column="LAST_ACCESSED" type="timestamp"/>
