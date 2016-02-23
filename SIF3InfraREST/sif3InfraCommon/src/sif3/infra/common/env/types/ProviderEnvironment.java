@@ -41,9 +41,10 @@ public class ProviderEnvironment extends EnvironmentInfo
 	private boolean 			 eventsSupported 		= false;
 	private UpdateType           defaultUpdateType      = UpdateType.FULL; // Default value for update events.
 	private boolean              autoCreateEnvironment  = false;
-	private AuthenticationMethod accessTokenAuthMethod  = AuthenticationMethod.Bearer; // Default Auth Method if accessToke is used.
+	private AuthenticationMethod accessTokenAuthMethod  = AuthenticationMethod.Bearer; // Default Auth Method if accessToken is used.
+	private boolean              allowAuthOnURL         = false;
 	
-	/**
+    /**
 	 * Constructor
 	 * 
 	 * @param serviceName The name of the service/adapter.
@@ -178,14 +179,28 @@ public class ProviderEnvironment extends EnvironmentInfo
 		}
     }
 	
+    public boolean getAllowAuthOnURL()
+    {
+        return allowAuthOnURL;
+    }
+
+    public void setAllowAuthOnURL(boolean allowAuthOnURL)
+    {
+        this.allowAuthOnURL = allowAuthOnURL;
+    }
+
 	@Override
     public String toString()
     {
-	    return "ProviderEnvironment [connected=" + this.connected + ", templateXMLFileName="
-	            + this.templateXMLFileName + ", secureConnectorBaseURI="
-	            + this.secureConnectorBaseURI + ", connectorBaseURI=" + this.connectorBaseURI
-	            + ", defaultUpdateType=" + this.defaultUpdateType + ", autoCreateEnvironment="
-	            + this.autoCreateEnvironment + ", accessTokenAuthMethod="
-	            + this.accessTokenAuthMethod + ", toString()=" + super.toString() + "]";
+        return "ProviderEnvironment [connected=" + connected
+                + ", templateXMLFileName=" + templateXMLFileName
+                + ", secureConnectorBaseURI=" + secureConnectorBaseURI
+                + ", connectorBaseURI=" + connectorBaseURI
+                + ", eventsSupported=" + eventsSupported
+                + ", defaultUpdateType=" + defaultUpdateType
+                + ", autoCreateEnvironment=" + autoCreateEnvironment
+                + ", accessTokenAuthMethod=" + accessTokenAuthMethod
+                + ", allowAuthOnURL=" + allowAuthOnURL + ", toString()="
+                + super.toString() + "]";
     }
 }

@@ -1479,7 +1479,7 @@ public abstract class BaseResource
 		{
 			setAuthInfo(AuthenticationUtils.getPartsFromAuthToken(authToken));
 		}
-		else 	// Ok no header info. Do we have something on the query parameters
+		else if (getProviderEnvironment().getAllowAuthOnURL()) 	// Ok no header info. Do we have something on the query parameters and is it allowed to be on query parameter
 		{
 		  setAuthInfo(getAccessToken());
 		}
