@@ -109,7 +109,7 @@ public class TestStudentPersonalConsumer
 	
 	private StudentPersonalType getStudent(DataModelUnmarshalFactory unmarshaller)
 	{
-		String inputEnvXML = FileReaderWriter.getFileContent(SINGLE_STUDENT_FILE_NAME);
+		String inputEnvXML = FileReaderWriter.getFileContent(SINGLE_STUDENT_FILE_NAME, "UTF-8");
 		//System.out.println("File content:\n" + inputEnvXML);
 		try
 		{
@@ -124,7 +124,7 @@ public class TestStudentPersonalConsumer
 
 	private StudentPersonalCollectionType getStudents(DataModelUnmarshalFactory unmarshaller)
 	{
-		String inputEnvXML = FileReaderWriter.getFileContent(MULTI_STUDENT_FILE_NAME);
+		String inputEnvXML = FileReaderWriter.getFileContent(MULTI_STUDENT_FILE_NAME, "UTF-8");
 		//System.out.println("File content:\n" + inputEnvXML);
 		try
 		{
@@ -149,9 +149,9 @@ public class TestStudentPersonalConsumer
 		try
 		{
 			List<ZoneContextInfo> zoneCtxList = new ArrayList<ZoneContextInfo>();
-			zoneCtxList.add(new ZoneContextInfo(new SIFZone("auRolloverTestingZone"), null));
-//			List<Response> responses = consumer.createSingle(student, envZoneCtxList);
-			List<Response> responses = consumer.createSingle(student, null);
+//			zoneCtxList.add(new ZoneContextInfo(new SIFZone("auRolloverTestingZone"), null));
+			List<Response> responses = consumer.createSingle(student, zoneCtxList);
+//			List<Response> responses = consumer.createSingle(student, null);
 			System.out.println("Responses from attempt to Create Student:");
 			printResponses(responses, consumer);
 		}
@@ -168,8 +168,8 @@ public class TestStudentPersonalConsumer
 		StudentPersonalCollectionType students = getStudents((DataModelUnmarshalFactory)consumer.getUnmarshaller());
 		try
 		{
-            List<BulkOperationResponse<CreateOperationStatus>> responses = consumer.createMany(students, null, RequestType.IMMEDIATE);
-//			List<BulkOperationResponse<CreateOperationStatus>> responses = consumer.createMany(students, null, RequestType.DELAYED);
+//            List<BulkOperationResponse<CreateOperationStatus>> responses = consumer.createMany(students, null, RequestType.IMMEDIATE);
+			List<BulkOperationResponse<CreateOperationStatus>> responses = consumer.createMany(students, null, RequestType.DELAYED);
 			if (responses != null)
 			{
 				int i = 1;
@@ -413,7 +413,9 @@ public class TestStudentPersonalConsumer
 //			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
 //      	envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
 			
-			List<Response> responses = consumer.retrievByPrimaryKey("24ed508e1ed04bba82198233efa55859", envZoneCtxList);
+            List<Response> responses = consumer.retrievByPrimaryKey("24ed508e1ed04bba82198233efa55859", envZoneCtxList);
+//            List<Response> responses = consumer.retrievByPrimaryKey("164da5d9bcbf4cf8a058ba0b0efde9ba", envZoneCtxList);
+			
 //			List<Response> responses = consumer.retrievByPrimaryKey("24ed508e1ed04bba82198233efa55859", null);
 			System.out.println("Responses from attempt to Get Student:");
 			printResponses(responses, consumer);
@@ -508,8 +510,8 @@ public class TestStudentPersonalConsumer
 		
 			StudentPersonalConsumer consumer = tester.getConsumer();
   		
-//            tester.getStudent(consumer);
-            tester.getStudents(consumer, true);
+            tester.getStudent(consumer);
+//            tester.getStudents(consumer, true);
 //            tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
 //            tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
 //            tester.getStudentsByServicePath("RoomInfos", "24ed508e1ed04bba82198233efa55859", consumer);
