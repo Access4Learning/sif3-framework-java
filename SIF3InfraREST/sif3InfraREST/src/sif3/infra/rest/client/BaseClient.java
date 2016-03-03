@@ -368,7 +368,8 @@ public abstract class BaseClient
 	 */
 	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, RequestType requestType, boolean includeRequestID, boolean hasPayload)
 	{
-		Builder builder = service.type(getRequestMediaType()).accept(getResponseMediaType());
+	    String charEncoding = getClientEnvMgr().getEnvironmentInfo().getCharsetEncoding();
+		Builder builder = service.type(addEncoding(getRequestMediaType(), charEncoding)).accept(addEncoding(getResponseMediaType(), charEncoding));
 		
 		// Set some specific SIF HTTP header. First ensure that we have a valid header property structure
 		if (hdrProperties == null)
@@ -495,7 +496,7 @@ public abstract class BaseClient
 		if (isSuccessStatusCode(clientResponse.getStatusInfo().getStatusCode(), successStatusCodes) && !isErrorMessageType)
 		{
 			if (response.getHasEntity())
-			{
+			{			    
 				String payload = clientResponse.getEntity(String.class);
 				if (logger.isDebugEnabled())
 				{
@@ -613,37 +614,6 @@ public abstract class BaseClient
 			}
 			
 			response.setError(getInfraMapper().toErrorFromSIFErrorString(errorStr, getInfraResponseMediaType(getResponseMediaType()), new ErrorDetails(clientResponse.getStatus(), clientResponse.getStatusInfo().getReasonPhrase())));
-
-//			try
-//			{
-//				//Because ErrorType is a Infrastructure thing we must ensure we use a valid Infrastructure Unmarshaller Media Type
-//				ErrorType error = (ErrorType) infraUnmarshaller.unmarshal(errorStr, ErrorType.class, getInfraResponseMediaType(getResponseMediaType()));
-//				if (error == null) // this is strange. So set the unmarshalled value.
-//				{
-//					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload into ErrorType object. See error description for payload details.", errorStr));
-//				}
-//				else
-//				{
-//					if (StringUtils.isEmpty(error.getMessage()) && StringUtils.isEmpty(error.getDescription()) && (error.getCode() <= 0))
-//					{
-//						// It appears that we could not get a useful error from the entity string for whatever reason. Return something hopefully
-//						// more useful from the low level response
-//						response.setError(new ErrorDetails(clientResponse.getStatus(), clientResponse.getClientResponseStatus().getReasonPhrase()));
-//					}
-//					else
-//					{
-//						response.setError(convertFromErrorType(error));
-//					}
-//				}
-//			}
-//			catch (UnmarshalException ex)
-//			{
-//				response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload into ErrorType object: "+ex.getMessage()+". See error description for payload details.", errorStr));
-//			}
-//			catch (UnsupportedMediaTypeExcpetion ex)
-//			{
-//				response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload into ErrorType object (unsupported media type): "+ex.getMessage()+". See error description for payload details.", errorStr));
-//			}
 		}
 		else // It appears we have an error but no content. So create an error object with custom message.
 		{
@@ -741,6 +711,18 @@ public abstract class BaseClient
 	private MediaType getInfraResponseMediaType(MediaType indicatedMediaType)
 	{
 		return getInfraUnmarshaller().isSupported(indicatedMediaType) ? indicatedMediaType : getInfraUnmarshaller().getDefault();
+	}
+	
+	private MediaType addEncoding(MediaType mediaType, String charEncoding)
+	{
+	    if (StringUtils.notEmpty(charEncoding))
+	    {
+	       return MediaType.valueOf(mediaType.toString()+"; charset="+charEncoding);
+	    }
+	    else // no charEncoding desired.
+	    {
+	        return mediaType;
+	    }
 	}
 
 	/*
