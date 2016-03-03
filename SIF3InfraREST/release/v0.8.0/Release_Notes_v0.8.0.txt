@@ -1,11 +1,13 @@
 ==============================================================
-Release Notes for v0.8.0 of SIF3 Framework (January XX, 2016)
+Release Notes for v0.8.0 of SIF3 Framework (March XX, 2016)
 ==============================================================
 
 Bug Fixes
 ---------
 - Allow access to keystores that have no password.
-- Allow keystore not to be required at all. Useful where only certificates from trusted issuers are used. 
+- Allow keystore not to be required at all. Useful where only certificates from trusted issuers are used.
+- Removed Content-Length HTTP Header from responses as it caused issues with Unicode strings if not calculated
+  correctly. This header is not really required, so removing it does not have any negative impact. 
 
 New Functionality
 -----------------
@@ -65,6 +67,7 @@ None.
 ------------------------------
 -- 3rd Party Library Update --
 ------------------------------
+Updated systemic-framework-20150618.jar to systemic-framework-20160229.jar.
 
 -----------------
 Hibernate 4.3.10:
