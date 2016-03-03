@@ -118,7 +118,6 @@ public class JAXBUtils
 			// Format output nicely
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 
-			// marshaller.marshal(personInfo, sw);
 			synchronized(marshaller)
 			{
 				marshaller.marshal(object, sw);
@@ -160,7 +159,7 @@ public class JAXBUtils
 		if (logger.isDebugEnabled())
 		{
 			timer.finish();
-			logger.debug("Time taken to unmarshal " + clazz.getSimpleName() + " from XML: " + timer.timeTaken() + "ms");
+			logger.debug("Time taken to unmarshal " + clazz.getSimpleName() + " from JSON: " + timer.timeTaken() + "ms");
 		}
 
 		return (elem != null) ? elem.getValue() : null;
@@ -184,9 +183,10 @@ public class JAXBUtils
 			timer.start();
 		}
 		StringWriter sw = new StringWriter();
+
 		try
 		{
-			Class<?> clazz = object.getValue().getClass();
+	        Class<?> clazz = object.getValue().getClass();
 			Marshaller marshaller = getContext(clazz).createMarshaller();
 
 			synchronized (marshaller)
@@ -196,13 +196,13 @@ public class JAXBUtils
 		}
 		catch (JAXBException ex)
 		{
-			throw new MarshalException("Failed to marshal to XML: " + ex.getMessage(), ex);
+			throw new MarshalException("Failed to marshal to JSON: " + ex.getMessage(), ex);
 		}
 
 		if (logger.isDebugEnabled())
 		{
 			timer.finish();
-			logger.debug("Time taken to marshal " + object.getValue().getClass().getSimpleName()+ " to XML: " + timer.timeTaken() + "ms");
+			logger.debug("Time taken to marshal " + object.getValue().getClass().getSimpleName()+ " to JSON: " + timer.timeTaken() + "ms");
 		}
 
 		return sw.toString();
