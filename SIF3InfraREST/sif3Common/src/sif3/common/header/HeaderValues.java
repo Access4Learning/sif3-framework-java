@@ -44,7 +44,7 @@ public class HeaderValues
 	/**
 	 * Valid Response Types. These values will be used in the "responseAction" response header field.
 	 */
-	public enum ResponseAction {CREATE, UPDATE, DELETE, QUERY};
+	public enum ResponseAction {CREATE, UPDATE, DELETE, QUERY, HEAD};
 	
 	/**
 	 * Valid values for the "methodOverride" header field in the PUT (Update) or POST (Create) request.
