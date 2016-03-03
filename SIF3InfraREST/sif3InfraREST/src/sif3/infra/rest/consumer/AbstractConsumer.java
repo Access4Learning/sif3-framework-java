@@ -1086,7 +1086,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 				Response response = getClient(getConsumerEnvironment()).getServiceInfo(getMultiObjectClassInfo().getObjectName(), getMultiObjectClassInfo().getObjectName(), pagingInfo, hdrProps, urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext());
 
 				// Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
-				finaliseDelayedReceipt(response.getDelayedReceipt(), getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, ResponseAction.QUERY);
+				finaliseDelayedReceipt(response.getDelayedReceipt(), getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, ResponseAction.HEAD);
 				responses.add(response);
 			}
 			else //pretend to have received a 'fake' error Response

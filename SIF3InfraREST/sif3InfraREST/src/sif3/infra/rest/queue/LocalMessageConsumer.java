@@ -219,6 +219,10 @@ public class LocalMessageConsumer implements Runnable
         		}
         		break;
         	}
+            case HEAD:
+            {
+                logger.error("Received a Delayed HEAD Response. That is not yet supported with this framework. Ignore message:\n"+responseInfo);                
+            }
         }
     }
 
