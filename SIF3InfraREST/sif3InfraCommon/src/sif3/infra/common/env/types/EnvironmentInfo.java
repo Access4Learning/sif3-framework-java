@@ -49,7 +49,8 @@ public class EnvironmentInfo implements Serializable
     private URI       baseURI                = null; // URI to broker
     private boolean   secureConnection      = false;
    	private MediaType mediaType             = MediaType.APPLICATION_XML_TYPE;
-	private AdapterType adapterType         = null;
+   	private String charsetEncoding          = null;
+    private AdapterType adapterType         = null;
     private boolean checkACL                = true;
     private EnvironmentType environmentType = null;
     private AuthenticationMethod authMethod = AuthenticationMethod.Basic;
@@ -228,6 +229,16 @@ public class EnvironmentInfo implements Serializable
 	{
 		this.mediaType = mediaType;
 	}
+	
+    public String getCharsetEncoding()
+    {
+        return charsetEncoding;
+    }
+
+    public void setCharsetEncoding(String charsetEncoding)
+    {
+        this.charsetEncoding = charsetEncoding;
+    }
 
 	public boolean getRemoveEnvOnShutdown()
 	{
@@ -328,9 +339,10 @@ public class EnvironmentInfo implements Serializable
     {
         return "EnvironmentInfo [baseURI=" + baseURI + ", secureConnection="
                 + secureConnection + ", mediaType=" + mediaType
-                + ", adapterType=" + adapterType + ", checkACL=" + checkACL
-                + ", environmentType=" + environmentType + ", authMethod="
-                + authMethod + ", removeEnvOnShutdown=" + removeEnvOnShutdown
+                + ", charsetEncoding=" + charsetEncoding + ", adapterType="
+                + adapterType + ", checkACL=" + checkACL + ", environmentType="
+                + environmentType + ", authMethod=" + authMethod
+                + ", removeEnvOnShutdown=" + removeEnvOnShutdown
                 + ", adapterName=" + adapterName + ", environmentKey="
                 + environmentKey + ", password=" + password + ", generatorID="
                 + generatorID + ", compressionEnabled=" + compressionEnabled

@@ -181,6 +181,9 @@ public class AdapterEnvironmentStore implements Serializable
 					
 			  		// Media Type
 			  		environment.setMediaType(convertMediaType(adapterProperties.getPropertyAsString("env.mediaType", null)));
+			  		
+			  		// Charset Encoding to be used with media type
+                    environment.setCharsetEncoding(adapterProperties.getPropertyAsString("env.mediaType.charset", null));
 
 			  		if (!loadExistingEnvInfo(adapterProperties))
 			  		{
