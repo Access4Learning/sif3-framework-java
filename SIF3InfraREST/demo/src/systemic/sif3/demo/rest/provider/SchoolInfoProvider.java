@@ -66,7 +66,7 @@ public class SchoolInfoProvider extends AUDataModelProvider
 			{
 				try
 				{
-					String inputXML = FileReaderWriter.getFileContent(schoolFile);
+					String inputXML = FileReaderWriter.getFileContent(schoolFile, ModelObjectConstants.UTF_8);
 					SchoolInfoCollectionType schoolList = (SchoolInfoCollectionType) getUnmarshaller().unmarshalFromXML(inputXML, getMultiObjectClassInfo().getObjectType());
 					if ((schoolList != null) && (schoolList.getSchoolInfo() != null))
 					{

@@ -86,7 +86,8 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 			String studentFile = getServiceProperties().getPropertyAsString("provider.student.file.location", null);
 			if (studentFile != null)
 			{
-				String inputXML = FileReaderWriter.getFileContent(studentFile);
+//				String inputXML = FileReaderWriter.getFileContent(studentFile, getProviderEnvironment().getCharsetEncoding());
+                String inputXML = FileReaderWriter.getFileContent(studentFile, ModelObjectConstants.UTF_8);
 				try
 				{
 					StudentPersonalCollectionType studentList = (StudentPersonalCollectionType) getUnmarshaller().unmarshalFromXML(inputXML, getMultiObjectClassInfo().getObjectType());
@@ -120,7 +121,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 			String fileName = getServiceProperties().getPropertyAsString("provider.teachinggroup.file.location", null);
 			if (fileName != null)
 			{
-				String inputXML = FileReaderWriter.getFileContent(fileName);
+				String inputXML = FileReaderWriter.getFileContent(fileName, ModelObjectConstants.UTF_8);
 				try
 				{
 					TeachingGroupCollectionType classes = (TeachingGroupCollectionType) getUnmarshaller().unmarshalFromXML(inputXML, ModelObjectConstants.TEACHING_GROUPS.getObjectType());
@@ -233,7 +234,10 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     	
     	logger.debug("Retrieve student with Resoucre ID = "+resourceID+", "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	
-    	return students.get(resourceID);
+    	StudentPersonalType student = students.get(resourceID);
+//    	logger.debug("Student to return: "+((student != null) ? student.getPersonInfo().getName().getGivenName().getValue() : student));
+    	
+    	return student;
     }
 
 	/* (non-Javadoc)
