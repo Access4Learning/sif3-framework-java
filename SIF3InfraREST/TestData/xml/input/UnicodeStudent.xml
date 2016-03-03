@@ -1,0 +1,13 @@
+<StudentPersonal RefId="24ed508e1ed04bba82198233efa55859">
+	<LocalId>98765</LocalId>
+	<PersonInfo>
+		<Name Type="LGL">
+			<FamilyName>Huber</FamilyName>
+			<GivenName>JŒRG</GivenName>
+		</Name>
+	</PersonInfo>
+	<MostRecent>
+		<SchoolLocalId></SchoolLocalId>
+		<YearLevel></YearLevel>
+	</MostRecent>
+</StudentPersonal> 

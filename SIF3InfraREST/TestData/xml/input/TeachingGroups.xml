@@ -1,4 +1,4 @@
-<TeachingGroups>
+<TeachingGroups xmlns="http://www.sifassociation.org/au/datamodel/3.4">
   <TeachingGroup RefId="64A309DA063A2E35B359D75101A8C3D1">
     <SchoolYear>2008</SchoolYear>
     <LocalId>20087ASPN</LocalId>
