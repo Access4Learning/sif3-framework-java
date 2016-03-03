@@ -1366,9 +1366,15 @@ public abstract class BaseResource
 						finalMediaType = (marshaller.isSupported(finalMediaType)) ?  finalMediaType : marshaller.getDefault();
 					}
 					String payload = marshaller.marshal(data, finalMediaType);
+					//System.out.println("==============================\nRespopnse Payload:\n"+payload+"\nSize String= "+payload.length()+"\nSize Bytes = "+payload.getBytes("UTF-8").length+"\n==============================");				
+					
+					//May want to reconsider if we really care about the content length...
+//                    byte[] content = (getProviderEnvironment().getCharsetEncoding() != null) ? payload.getBytes(getProviderEnvironment().getCharsetEncoding()) : payload.getBytes();
+//                    response = Response.status(status).entity(content);
+//                    allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_CONTENT_LENGTH, String.valueOf(content.length));
+
 					response = Response.status(status).entity(payload);
 					
-					allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_CONTENT_LENGTH, String.valueOf(payload.length()));
                     allHeaders.setHeaderProperty(HttpHeaders.CONTENT_TYPE, finalMediaType.toString());
 				}
 				else // we have no data
@@ -1457,6 +1463,10 @@ public abstract class BaseResource
 		{
 			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+" into unsupported media type '"+getResponseMediaType()+"'."), responseAction);
 		}
+//        catch (UnsupportedEncodingException ex)
+//        {
+//            return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+" into unsupported media type encoding '"+getResponseMediaType()+"'."), responseAction);
+//        }
 	}
 		
 	/*----------------------------------------------------------*/

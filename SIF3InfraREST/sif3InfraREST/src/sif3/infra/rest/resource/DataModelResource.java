@@ -658,13 +658,13 @@ public class DataModelResource extends BaseResource
         ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED, true);
         if (error != null) // Not allowed to access!
         {
-            return makeResponse(null, error.getErrorCode(), true, ResponseAction.QUERY, null);
+            return makeResponse(null, error.getErrorCode(), true, ResponseAction.HEAD, null);
         }
         
         Provider provider = getProvider();
         if (provider == null) // error already logged but we must return an error response for the caller
         {
-            return makeResponse(null, Status.SERVICE_UNAVAILABLE.getStatusCode(), true, ResponseAction.QUERY, null);
+            return makeResponse(null, Status.SERVICE_UNAVAILABLE.getStatusCode(), true, ResponseAction.HEAD, null);
         }
     
         PagingInfo pagingInfo = getPagingInfo();
@@ -696,19 +696,19 @@ public class DataModelResource extends BaseResource
         }
         catch (PersistenceException ex)
         {
-            return makeResponse(null, Status.INTERNAL_SERVER_ERROR.getStatusCode(), true, ResponseAction.QUERY, null);
+            return makeResponse(null, Status.INTERNAL_SERVER_ERROR.getStatusCode(), true, ResponseAction.HEAD, null);
         }
         catch (IllegalArgumentException ex)
         {
-            return makeResponse(null, Status.INTERNAL_SERVER_ERROR.getStatusCode(), true, ResponseAction.QUERY, null);
+            return makeResponse(null, Status.INTERNAL_SERVER_ERROR.getStatusCode(), true, ResponseAction.HEAD, null);
         }
         catch (UnsupportedQueryException ex)
         {
-            return makeResponse(null, Status.BAD_REQUEST.getStatusCode(), true, ResponseAction.QUERY, null);
+            return makeResponse(null, Status.BAD_REQUEST.getStatusCode(), true, ResponseAction.HEAD, null);
         }
         catch (DataTooLargeException ex)
         {
-            return makeResponse(null, CommonConstants.RESPONSE_TOO_LARGE, true, ResponseAction.QUERY, null);
+            return makeResponse(null, CommonConstants.RESPONSE_TOO_LARGE, true, ResponseAction.HEAD, null);
         } 
     }
     

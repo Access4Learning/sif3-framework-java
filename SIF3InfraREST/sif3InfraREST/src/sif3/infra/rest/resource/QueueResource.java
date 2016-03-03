@@ -18,6 +18,7 @@
 
 package sif3.infra.rest.resource;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -447,12 +448,23 @@ public class QueueResource extends InfraResource
 		messageIDMap.put(consumerID, lastMsgID);
 
 		queue.setLastAccessed(Calendar.getInstance());
-		String payload = event.getMessage();
+		byte[] payload = null;
+        try
+        {
+            payload = event.getMessage().getBytes("UTF-8");
+        }
+        catch (UnsupportedEncodingException ex)
+        {
+            logger.error("Failed to convert payload to UTF-8: "+ex.getMessage()+". No data set in payload.", ex);
+            payload = null;
+        }
 		ResponseBuilder response = null;
 		if (payload != null)
 		{
 			response = Response.status(Status.OK).entity(payload);
-			response = response.header(ResponseHeaderConstants.HDR_CONTENT_LENGTH, payload.length());
+			
+            //Setting the content-length seems to cause an issue with UTF-8 etc. For the time being we remove that header.
+			response = response.header(ResponseHeaderConstants.HDR_CONTENT_LENGTH, payload.length);
 			response = response.header(ResponseHeaderConstants.HDR_MESSAGE_TYPE, HeaderValues.MessageType.EVENT.name());
 			response = response.header(ResponseHeaderConstants.HDR_EVENT_ACTION, EventAction.UPDATE.name());
 			response = response.header(ResponseHeaderConstants.HDR_UPDATE_TYPE, UpdateType.FULL.name());
