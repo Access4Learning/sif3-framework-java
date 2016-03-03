@@ -42,7 +42,7 @@
 		<filter-name>CompressingFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>    
-    
+     
     <!-- *********************************************************************************************** -->
     <!-- Context listener: Used to initialise (start-up) and free (shut-down) resources of this servlet. -->
     <!-- *********************************************************************************************** -->
