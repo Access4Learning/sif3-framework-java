@@ -20,6 +20,7 @@ package sif3.infra.test.common.utils;
 
 import javax.xml.bind.JAXBElement;
 
+import sif.dd.au30.model.StudentPersonalType;
 import sif3.common.exception.MarshalException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.utils.JAXBUtils;
@@ -40,39 +41,56 @@ public class TestJAXBUtils
 {
 	private ObjectFactory objFactory = new ObjectFactory();
 	
-	private final static String INPUT_ENV_FILE_NAME_XML  = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/environment_large.xml";
-	private final static String OUTPUT_ENV_FILE_NAME_XML = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/output/environment_large.xml";
-  private final static String INPUT_ENV_FILE_NAME_JSON  = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/input/environment_large.json";
-  private final static String OUTPUT_ENV_FILE_NAME_JSON = "C:/DEV/eclipseWorkspace/SIF3InfraREST/TestData/xml/output/environment_large.json";
-
-//	private final static String INPUT_ENV_FILE_NAME_XML   = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/environment_large.xml";
-//	private final static String OUTPUT_ENV_FILE_NAME_XML  = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/output/environment_large.xml";	
-//  private final static String INPUT_ENV_FILE_NAME_JSON  = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input/environment_large.json";
-//  private final static String OUTPUT_ENV_FILE_NAME_JSON = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/output/environment_large.json";
+//	private final static String BASE_PATH = "C:/DEV/lunaWorkspace/SIF3InfraREST";
+    private final static String BASE_PATH = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST";
+	
+	private final static String INPUT_ENV_FILE_NAME_XML  = BASE_PATH + "/TestData/xml/input/environment_large.xml";
+	private final static String OUTPUT_ENV_FILE_NAME_XML = BASE_PATH + "/TestData/xml/output/environment_large.xml";
+	private final static String INPUT_ENV_FILE_NAME_JSON  = BASE_PATH + "/TestData/xml/input/environment_large.json";
+	private final static String OUTPUT_ENV_FILE_NAME_JSON = BASE_PATH + "/TestData/xml/output/environment_large.json";
+    
+    private final static String INPUT_STUDENT_FILE_NAME_XML  = BASE_PATH + "/TestData/xml/input/UnicodeStudent.xml";
+	private final static String OUTPUT_STUDENT_FILE_NAME_JSON = BASE_PATH + "/TestData/xml/output/UnicodeStudent.xml";
+	
+	
+	private final static String TEST_STUDENT =
+	"<StudentPersonal RefId=\"24ed508e1ed04bba82198233efa55859\">" +
+	  "<LocalId>98765</LocalId>" +  
+	  "<PersonInfo>" +     
+	    "<Name Type=\"LGL\">" + 
+	        "<FamilyName>Huber</FamilyName>" + 
+	        "<GivenName>JŒRG</GivenName>" + 
+	     "</Name>" + 
+	   "</PersonInfo>" + 
+	   "<MostRecent>" + 
+	       "<SchoolLocalId></SchoolLocalId>" + 
+	       "<YearLevel></YearLevel>" +   
+	  "</MostRecent>" + 
+	"</StudentPersonal>";
 
 	private void printEnvironment(EnvironmentType env)
 	{
-    System.out.println("Environment Object unmarshalled:");
-    System.out.println("   ID           : " + env.getId());
-    System.out.println("   Type         : " + env.getType());
-    System.out.println("   Session Token: " + env.getSessionToken());
-    System.out.println("   SolutionID   : " + env.getSolutionId());
-    System.out.println("   Default Zone : " + env.getDefaultZone());
-    System.out.println("   Auth Method  : " + env.getAuthenticationMethod());
-    System.out.println("   Consumer Name: " + env.getConsumerName());
-    System.out.println("   AppInfo: ");
-    System.out.println("      App Key      : " + env.getApplicationInfo().getApplicationKey());
-    System.out.println("      Infra Version: " + env.getApplicationInfo().getSupportedInfrastructureVersion());
-    System.out.println("      Data Model   : " + env.getApplicationInfo().getDataModelNamespace());
-//    System.out.println("      DM Version   : " + env.getApplicationInfo().getSupportedDataModelVersion());
-    System.out.println("      Transport    : " + env.getApplicationInfo().getTransport());
-    if (env.getApplicationInfo().getApplicationProduct() != null)
-    {
-      System.out.println("      App Product: ");      
-      System.out.println("         Vendor Name    : " + env.getApplicationInfo().getApplicationProduct().getVendorName());      
-      System.out.println("         Product Name   : " + env.getApplicationInfo().getApplicationProduct().getProductName());      
-      System.out.println("         Product Version: " + env.getApplicationInfo().getApplicationProduct().getProductVersion());      
-    }
+	    System.out.println("Environment Object unmarshalled:");
+	    System.out.println("   ID           : " + env.getId());
+	    System.out.println("   Type         : " + env.getType());
+	    System.out.println("   Session Token: " + env.getSessionToken());
+	    System.out.println("   SolutionID   : " + env.getSolutionId());
+	    System.out.println("   Default Zone : " + env.getDefaultZone());
+	    System.out.println("   Auth Method  : " + env.getAuthenticationMethod());
+	    System.out.println("   Consumer Name: " + env.getConsumerName());
+	    System.out.println("   AppInfo: ");
+	    System.out.println("      App Key      : " + env.getApplicationInfo().getApplicationKey());
+	    System.out.println("      Infra Version: " + env.getApplicationInfo().getSupportedInfrastructureVersion());
+	    System.out.println("      Data Model   : " + env.getApplicationInfo().getDataModelNamespace());
+//      System.out.println("      DM Version   : " + env.getApplicationInfo().getSupportedDataModelVersion());
+	    System.out.println("      Transport    : " + env.getApplicationInfo().getTransport());
+	    if (env.getApplicationInfo().getApplicationProduct() != null)
+	    {
+	        System.out.println("      App Product: ");      
+	        System.out.println("         Vendor Name    : " + env.getApplicationInfo().getApplicationProduct().getVendorName());      
+	        System.out.println("         Product Name   : " + env.getApplicationInfo().getApplicationProduct().getProductName());      
+	        System.out.println("         Product Version: " + env.getApplicationInfo().getApplicationProduct().getProductVersion());      
+	    }
     
 //    <infrastructureServices>
 //      <infrastructureService name="environment">http://rest3api.sifassociation.org/api/solutions/auTestSolution/environments/5b72f2d4-7a83-4297-a71f-8b5fb26cbf14</infrastructureService>
@@ -135,20 +153,20 @@ public class TestJAXBUtils
     return (EnvironmentType) JAXBUtils.unmarshalFromXMLIntoObject(getEnvironmentXMLFile(), EnvironmentType.class);
   }
   
-  private void writeEnvironmentToXMLFile(EnvironmentType environment) throws MarshalException
-  {
-    writeEnvironmentToFile(JAXBUtils.marshalToXML(objFactory.createEnvironment(environment)), OUTPUT_ENV_FILE_NAME_XML);
-  }
+    private void writeEnvironmentToXMLFile(EnvironmentType environment) throws MarshalException
+    {
+        writeEnvironmentToFile(JAXBUtils.marshalToXML(objFactory.createEnvironment(environment)), OUTPUT_ENV_FILE_NAME_XML);
+    }
 
   private EnvironmentType getEnvironmentFromJSONFile() throws UnmarshalException
   {
     return (EnvironmentType) JAXBUtils.unmarshalFromJSONIntoObject(getEnvironmentJSONFile(), EnvironmentType.class);
   }
 
-  private void writeEnvironmentToJSONFile(EnvironmentType environment) throws MarshalException
-  {
-    writeEnvironmentToFile(JAXBUtils.marshalToJSON(objFactory.createEnvironment(environment)), OUTPUT_ENV_FILE_NAME_JSON);
-  }
+    private void writeEnvironmentToJSONFile(EnvironmentType environment) throws MarshalException
+    {
+        writeEnvironmentToFile(JAXBUtils.marshalToJSON(objFactory.createEnvironment(environment)), OUTPUT_ENV_FILE_NAME_JSON);
+    }
   
 	private void testLists() throws MarshalException
 	{
@@ -218,11 +236,11 @@ public class TestJAXBUtils
 //	  }
 			
 	
-	private void testXMLToObjectToXML() throws UnmarshalException, MarshalException
-	{
-	  EnvironmentType env = getEnvironmentFromXMLFile(); // get environment from file and converts it to object
-	  writeEnvironmentToXMLFile(env); // converts environment object to XML and writes it to a file.
-	}
+    private void testXMLToObjectToXML() throws UnmarshalException, MarshalException
+    {
+        EnvironmentType env = getEnvironmentFromXMLFile(); // get environment from file and converts it to object
+        writeEnvironmentToXMLFile(env); // converts environment object to XML and writes it to a file.
+    }
 	
 	private void testJSONToObjectToJSON() throws UnmarshalException, MarshalException
 	{
@@ -232,15 +250,30 @@ public class TestJAXBUtils
 
 	private void testXMLToObjectToJSON() throws UnmarshalException, MarshalException
 	{
-    EnvironmentType env = getEnvironmentFromXMLFile(); // get environment from file and converts it to object
-    writeEnvironmentToJSONFile(env); //  converts environment object to JSON and writes it to a file.    
+	    EnvironmentType env = getEnvironmentFromXMLFile(); // get environment from file and converts it to object
+	    writeEnvironmentToJSONFile(env); //  converts environment object to JSON and writes it to a file.    
 	}
 
-  private void testJSONToObjectToXML() throws UnmarshalException, MarshalException
-  {
-    EnvironmentType env = getEnvironmentFromJSONFile(); // get environment from file and converts it to object
-    writeEnvironmentToXMLFile(env); // converts environment object to XML and writes it to a file.
+    private void testJSONToObjectToXML() throws UnmarshalException, MarshalException
+    {
+        EnvironmentType env = getEnvironmentFromJSONFile(); // get environment from file and converts it to object
+        writeEnvironmentToXMLFile(env); // converts environment object to XML and writes it to a  file.
+    }  
+
+	private void testStudentUnicodeString() throws UnmarshalException, MarshalException
+	{
+	    StudentPersonalType student = (StudentPersonalType)JAXBUtils.unmarshalFromXMLIntoObject(TEST_STUDENT, StudentPersonalType.class);
+	    System.out.println("Student Name: " + student.getPersonInfo().getName().getGivenName().getValue());
 	}
+
+    private void testStudentUnicodeFile() throws UnmarshalException, MarshalException
+    {
+        String inputStudentXML = FileReaderWriter.getFileContent(INPUT_STUDENT_FILE_NAME_XML, "UTF-8");
+        System.out.println("File content:\n"+inputStudentXML);
+        
+        StudentPersonalType student = (StudentPersonalType) JAXBUtils.unmarshalFromXMLIntoObject(inputStudentXML, StudentPersonalType.class);
+        System.out.println("Student Name: "+ student.getPersonInfo().getName().getGivenName().getValue());
+    }
 	
 	public static void main(String[] args)
 	{
@@ -262,9 +295,11 @@ public class TestJAXBUtils
 		  
 		  
 //		  tester.testXMLToObjectToXML();
-		  tester.testXMLToObjectToJSON();
+//		  tester.testXMLToObjectToJSON();
 //			tester.testJSONToObjectToJSON();
-			tester.testJSONToObjectToXML();
+//			tester.testJSONToObjectToXML();
+//		  tester.testStudentUnicodeString();
+		  tester.testStudentUnicodeFile();
 		}
 		catch (Exception ex)
 		{
