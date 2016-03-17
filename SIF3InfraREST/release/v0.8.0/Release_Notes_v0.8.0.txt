@@ -1,5 +1,5 @@
 ==============================================================
-Release Notes for v0.8.0 of SIF3 Framework (March XX, 2016)
+Release Notes for v0.8.0 of SIF3 Framework (March 17, 2016)
 ==============================================================
 
 Bug Fixes
@@ -16,7 +16,6 @@ New Functionality
      section in this release notes.
   b) On the Consumer a new method called getServiceInfo() is now available.	
      For more information and details about this new functionality, please refer to the Developer's Guide section 5.5.2.2.3.
-  
 - Support for "Changes Since" Functionality for providers. This is a SIF 3.2 Infrastructure function. Please refer to
   section 5.9 of the Developer's Guide for details on how this functionality is used. 
 

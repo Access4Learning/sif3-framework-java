@@ -175,10 +175,10 @@ Finally support for external security services for consumers has been added as w
 Please refer to the release notes in the directory "release/v0.7.0" for additional details and upgrade instructions. 
 
 =============================================================
-Version from Jan XX, 2016: v0.8.0 - Various changes
+Version from Mar 17, 2016: v0.8.0 - Various changes
 =============================================================
 Adding support for some SIF 3.2 Infrastructure functionality: 
- - HTTP HEAD supported for 'root' service (i.e. .../StudentPersonals).
+ - HTTP HEAD supported for 'root' object service (i.e. .../StudentPersonals).
  - "Changes Since" support for Object Providers.
 Please refer to the release notes in the directory "release/v0.8.0" for additional details and upgrade instructions.
 Upgraded some core library to later versions. 
