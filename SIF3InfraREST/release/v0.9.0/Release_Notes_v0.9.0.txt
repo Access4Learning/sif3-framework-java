@@ -1,0 +1,62 @@
+==============================================================
+Release Notes for v0.9.0 of SIF3 Framework (Mon DD, 2016)
+==============================================================
+
+Bug Fixes
+---------
+- None
+
+New Functionality
+-----------------
+- Allow hibernate properties to be injected programmatically to the hibernate startup of the framework. This
+  is an optional feature. See Developer's Guide section 5.13 for details on how to use this feature. 
+
+Changed Functionality
+---------------------
+- Added the following parameters to the getLatestOpaqueMarker() method of the ChangesSinceProvider Interface:
+    SIFZone, SIFContext, PagingInfo and RequestMetadata
+  This change means that the same parameters must be added to all classes that implement the ChangesSinceProvider
+  Interface. See Infrastructure Upgrade below section for more details.
+
+Removed Artifacts/Functionality
+-------------------------------
+- None  
+
+--------------------------
+-- Upgrade Instructions --
+--------------------------
+
+----------------------------
+-- Infrastructure Upgrade --
+----------------------------
+- Drop the latest framework library into your project's lib directory/directories.
+
+==========================================================================================================================
+Providers ONLY: Compilation Error if your provider implements the ChangesSinceProvider interface
+--------------------------------------------------------------------------------------------------------------------------
+Due to additional parameters required for the getLatestOpaqueMarker() method your provider class may throw a compile
+error. The fix is to change the signature of the method from:
+
+  public String getLatestOpaqueMarker()
+  {
+     ...
+  }
+
+to:
+
+  public String getLatestOpaqueMarker(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata)
+  {
+     ...
+  }
+
+==========================================================================================================================
+
+------------------------
+-- Data Model Upgrade --
+------------------------
+None.
+
+------------------------------
+-- 3rd Party Library Update --
+------------------------------
+None.
