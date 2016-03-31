@@ -24,7 +24,10 @@ import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 
+import sif3.common.exception.PersistenceException;
+import sif3.common.interfaces.HibernateProperties;
 import sif3.common.model.ServiceInfo;
+import sif3.common.persist.common.HibernateHelper;
 import sif3.common.persist.common.HibernateUtil;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment;
@@ -128,9 +131,20 @@ public class ConsumerLoader
 		{
 			logAndThrowException("Consumer Property File name is null or empty. Cannot initialse consumer.");
 		}
-
+		
+		HibernateHelper hbrHelper = new HibernateHelper();
+		HibernateProperties hbrProps = null;
+		try
+		{
+		    hbrProps = hbrHelper.getHiberbnateProperties(consumerPropertyFileName);
+		}
+		catch (PersistenceException ex)
+		{
+            logAndThrowException(ex.getMessage());
+		}
+	
 		logger.debug("Initialise DB Connection Pool....");
-		if (HibernateUtil.getSessionFactory() == null)
+		if (!HibernateUtil.initialise((hbrProps != null) ? hbrProps.getProperties() : null))
 		{
 			logAndThrowException("Failed to initialise DB connection pool.");
 		}
@@ -414,5 +428,5 @@ public class ConsumerLoader
 	private String getRemoteQueueName(QueueInfo queueInfo)
 	{
 		return queueInfo.getQueue().getName()+" ("+queueInfo.getQueue().getQueueID()+")";
-	}
+	}	
 }
