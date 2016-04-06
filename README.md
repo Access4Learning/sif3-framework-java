@@ -39,6 +39,7 @@ touches on web-service functionality must be tested with the follwoing versions 
 - Tomcat v7
 - JBoss 6 (Free or Licenced version)
 - Optionally Jetty 8
+
 The list above mentions a minimum version number. It must be ensured that the code you provide runs on these versions.
 Of course it is fine if it runs on newer versions as well :smiley:. 
 
@@ -52,6 +53,7 @@ both components are in the 'sif3Common' and 'sif3InfraCommon' source directories
 There are a number of test and demo classes that from part of the framework. Their intention s two fold:
 - Test functionality
 - Provide Demo Code on how to use the framework
+
 It is important to note that these test and demo classes are based around the SIF AU Data Model. This doesn't mean that the
 framework is tied to that data model at all. None of the classes yoused in and source directory starting with 'sif3' make
 any assumption about a data model. Only classes in the directories with a pre-fix 'sif3' form the framework code.
