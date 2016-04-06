@@ -4,8 +4,8 @@ It lists some core constraints as well as some common policies and uses of the S
 There is a more detailed readme.txt at the root level of the project code that holds information about
 version history and upgrade instructions between different versions.
 
-Generally standard Git practices for forks, branches, pull requests etc. do apply. if you are not familiar
-with these terms and practices you can read up on it appropriate GitHub documentation. It is out of the scope
+Generally standard Git practices for forks, branches, pull requests etc. do apply. If you are not familiar
+with these terms and practices you can read up on it on appropriate GitHub documentation. It is out of the scope
 of this readme to repeat those procedures.
 
 ## What do I need to consider if I want to provide code to this SIF3 Framework Repository?
@@ -37,7 +37,13 @@ The SIF3 Framework has been used with a number of Java web- and/or application s
 all of them there is a sub-set we take into account in our tests. Code that is provided to the framework that
 touches on web-service functionality must be tested with the follwoing versions of web- and/or application servers:
 - Tomcat v7
-- JBoss 6 (Free and Licenced version)
+- JBoss 6 (Free or Licenced version)
 - Optionally Jetty 8
 The list above mentions a minimum version number. It must be ensured that the code you provide runs on these versions.
 Of course it is fine if it runs on newer versions as well :-). 
+
+### Components of the Framework
+The SIF3 Framework has two core components. One relates to consumers (client side) and once relates to providers (server side).
+Many classes are common to both and changes in these classes affect both components. When altering the code base in any way
+you must always consider and test the impact for consumers and providers. The prime candidates of classes that are used in
+both components are in the 'sif3Common' and 'sif3InfraCommon' source directories.
