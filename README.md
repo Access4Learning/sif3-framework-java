@@ -50,7 +50,7 @@ you must always consider and test the impact for consumers and providers. The pr
 both components are in the '**sif3Common**' and '**sif3InfraCommon**' source directories.
 
 ### Test Classes and Data Model
-There are a number of test and demo classes that from part of the framework. Their intention is two fold:
+There are a number of test and demo classes that form part of the framework. Their intention is two fold:
 - Test functionality
 - Provide Demo Code on how to use the framework
 
