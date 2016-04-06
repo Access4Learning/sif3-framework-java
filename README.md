@@ -57,4 +57,10 @@ framework is tied to that data model at all. None of the classes yoused in and s
 any assumption about a data model. Only classes in the directories with a pre-fix 'sif3' form the framework code.
 
 ### Source Code dependencies
-
+The SIF3 Framework has a hierarchy of source directories. It determines which package can import classes from which other 
+package. You can verify that the import dependencies aren't broken by running the appropriate ant task. Run them in the
+following order to ensure that no package hierarchy is violated:
+1. 02-clean
+2. 03-jar-components
+If you get no compilation errors that relate to imports then your depenendcy hierarchy is correct. Generally the hierarchy is:
+> sif3Common<-sif3InfraModel<-sif3InfraCommon<-sif3InfraREST.
