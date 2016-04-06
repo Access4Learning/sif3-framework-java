@@ -47,16 +47,16 @@ Of course it is fine if it runs on newer versions as well :smiley:.
 The SIF3 Framework has two core components. One relates to consumers (client side) and one relates to providers (server side).
 Many classes are common to both and changes in these classes affect both components. When altering the code base in any way
 you must always consider and test the impact for consumers and providers. The prime candidates of classes that are used in
-both components are in the 'sif3Common' and 'sif3InfraCommon' source directories.
+both components are in the '**sif3Common**' and '**sif3InfraCommon**' source directories.
 
 ### Test Classes and Data Model
-There are a number of test and demo classes that from part of the framework. Their intention s two fold:
+There are a number of test and demo classes that from part of the framework. Their intention is two fold:
 - Test functionality
 - Provide Demo Code on how to use the framework
 
 It is important to note that these test and demo classes are based around the SIF AU Data Model. This doesn't mean that the
-framework is tied to that data model at all. None of the classes yoused in and source directory starting with 'sif3' make
-any assumption about a data model. Only classes in the directories with a pre-fix 'sif3' form the framework code.
+framework is tied to that data model at all. None of the classes used in any source directory starting with 'sif3' make
+any assumptions about a data model. Only classes in the directories with a pre-fix 'sif3' form the framework code.
 
 ### Source Code dependencies
 The SIF3 Framework has a hierarchy of source directories. It determines which package can import classes from which other 
