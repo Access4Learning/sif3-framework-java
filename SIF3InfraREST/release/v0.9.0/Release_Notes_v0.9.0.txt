@@ -4,7 +4,7 @@ Release Notes for v0.9.0 of SIF3 Framework (Mon DD, 2016)
 
 Bug Fixes
 ---------
-- None
+- Use 1 as first page for navigationPage throughout the framework. This is according to the SIF3 specification.
 
 New Functionality
 -----------------
