@@ -186,6 +186,12 @@ Upgraded some core library to later versions.
 =============================================================
 Version from Mon DD, 2016: v0.9.0 - Various changes
 =============================================================
+
+****************************************************************************************************
+* AS OF THIS VERSION ALL FRAMEWORK LIBRARIES ARE COMPILED WITH JAVA 7. THE FRAMEWORK MAY NO LONGER *
+* SUPPORT OR RUN ON JAVA 6 ENVIRONMENTS.                                                           *
+****************************************************************************************************
+
 - Made some method for "Changes Since" functionality more flexible.
 - Allow hibernate properties to be "injected".
 Please refer to the release notes in the directory "release/v0.9.0" for additional details and upgrade instructions.

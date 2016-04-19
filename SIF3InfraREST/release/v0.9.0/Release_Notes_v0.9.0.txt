@@ -2,6 +2,11 @@
 Release Notes for v0.9.0 of SIF3 Framework (Mon DD, 2016)
 ==============================================================
 
+****************************************************************************************************
+* AS OF THIS VERSION ALL FRAMEWORK LIBRARIES ARE COMPILED WITH JAVA 7. THE FRAMEWORK MAY NO LONGER *
+* SUPPORT OR RUN ON JAVA 6 ENVIRONMENTS.                                                           *
+****************************************************************************************************
+
 Bug Fixes
 ---------
 - Use 1 as first page for navigationPage throughout the framework. This is according to the SIF3 specification.
