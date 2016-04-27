@@ -635,10 +635,10 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	
 	/*
 	 * (non-Javadoc)
-	 * @see sif3.common.consumer.Consumer#retrievByPrimaryKey(java.lang.String, java.util.List)
+	 * @see sif3.common.consumer.Consumer#retrieveByPrimaryKey(java.lang.String, java.util.List)
 	 */
 	@Override
-	public List<Response> retrievByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<Response> retrieveByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
         nullMethodCheck(getSingleObjectClassInfo(), "getSingleObjectClassInfo()");
@@ -684,9 +684,9 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	/*
 	 * Convenience method. The same as above but without the parameter 'customParameters' which is defaulted to null.
 	 */
-	public List<Response> retrievByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<Response> retrieveByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-		return retrievByPrimaryKey(resourceID, zoneCtxList, null);
+		return retrieveByPrimaryKey(resourceID, zoneCtxList, null);
 	}
 	
 	/*
