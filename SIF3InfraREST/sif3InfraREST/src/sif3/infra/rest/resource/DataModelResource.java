@@ -292,7 +292,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			Object returnObj = provider.retrievByPrimaryKey(resourceID, getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
+			Object returnObj = provider.retrieveByPrimaryKey(resourceID, getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
 			
 			if (returnObj != null)
 			{
