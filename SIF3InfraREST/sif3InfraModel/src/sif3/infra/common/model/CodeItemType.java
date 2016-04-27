@@ -30,8 +30,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.1}uriType"/>
- *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.1}uriType"/>
+ *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.2}uriType"/>
+ *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.2}uriType"/>
  *         &lt;element name="value">
  *           &lt;simpleType>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -56,7 +56,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="aliases" type="{http://www.sifassociation.org/infrastructure/3.1}aliasesType" minOccurs="0"/>
+ *         &lt;element name="aliases" type="{http://www.sifassociation.org/infrastructure/3.2}aliasesType" minOccurs="0"/>
  *         &lt;element name="action">
  *           &lt;simpleType>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
@@ -77,7 +77,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "codeItemType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "codeItemType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "code",
     "source",
     "namespace",

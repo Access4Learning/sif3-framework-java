@@ -22,8 +22,8 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="paged" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
  *         &lt;element name="maxPageSize" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *         &lt;element name="totalCount" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="applicationProduct" type="{http://www.sifassociation.org/infrastructure/3.1}productIdentityType" minOccurs="0"/>
- *         &lt;element name="adapterProduct" type="{http://www.sifassociation.org/infrastructure/3.1}productIdentityType" minOccurs="0"/>
+ *         &lt;element name="applicationProduct" type="{http://www.sifassociation.org/infrastructure/3.2}productIdentityType" minOccurs="0"/>
+ *         &lt;element name="adapterProduct" type="{http://www.sifassociation.org/infrastructure/3.2}productIdentityType" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "querySupportType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "querySupportType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "dynamicQuery",
     "paged",
     "maxPageSize",
@@ -43,18 +43,18 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class QuerySupportType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected boolean dynamicQuery;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected boolean paged;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlSchemaType(name = "unsignedInt")
     protected Long maxPageSize;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected Boolean totalCount;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected ProductIdentityType applicationProduct;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected ProductIdentityType adapterProduct;
 
     /**
