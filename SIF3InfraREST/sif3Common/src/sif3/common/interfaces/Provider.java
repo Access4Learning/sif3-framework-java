@@ -69,7 +69,7 @@ public interface Provider extends DataModelLink
 	 * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
 	 *                              message of the exceptions holds some info.
 	 */
-	public Object retrievByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
+	public Object retrieveByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
 
 	/**
 	 * This method creates the given object with the data provided in the given zone and context. If the object cannot be created then either
