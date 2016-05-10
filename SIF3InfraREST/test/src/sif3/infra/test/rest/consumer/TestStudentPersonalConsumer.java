@@ -59,6 +59,7 @@ public class TestStudentPersonalConsumer
 	private final static String MULTI_STUDENT_FILE_NAME = PATH + "/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
 //	private static final String CONSUMER_ID = "SecureStudentConsumer";
 	private static final String CONSUMER_ID = "StudentConsumer";
+//    private static final String CONSUMER_ID = "HITSStudentConsumer";
 //	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
 //	private static final String CONSUMER_ID = "QueueTestConsumer";
 
@@ -511,7 +512,7 @@ public class TestStudentPersonalConsumer
 			StudentPersonalConsumer consumer = tester.getConsumer();
   		
             tester.getStudent(consumer);
-//            tester.getStudents(consumer, true);
+            tester.getStudents(consumer, true);
 //            tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
 //            tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
 //            tester.getStudentsByServicePath("RoomInfos", "24ed508e1ed04bba82198233efa55859", consumer);
