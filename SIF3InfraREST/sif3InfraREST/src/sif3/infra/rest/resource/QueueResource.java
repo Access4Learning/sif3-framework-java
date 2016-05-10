@@ -36,18 +36,22 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.DateUtils;
+import au.com.systemic.framework.utils.FileReaderWriter;
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.exception.UnmarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.header.HeaderValues;
-import sif3.common.header.RequestHeaderConstants;
-import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.HeaderValues.UpdateType;
+import sif3.common.header.RequestHeaderConstants;
+import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.ErrorDetails;
@@ -56,10 +60,6 @@ import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.QueueCollectionType;
 import sif3.infra.common.model.QueueType;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.DateUtils;
-import au.com.systemic.framework.utils.FileReaderWriter;
-import au.com.systemic.framework.utils.StringUtils;
 
 /*
  * http://localhost:9080/SIF3InfraREST/sif3/queues/69df9d79-8e01-43e8-825f-d0dc1775761b
@@ -231,7 +231,7 @@ public class QueueResource extends InfraResource
 				logger.error("Queue Payload: "+ payload);
 				return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal queue payload: "+ ex.getMessage()), ResponseAction.CREATE);
 			}
-			catch (UnsupportedMediaTypeExcpetion ex)
+			catch (UnsupportedMediaTypeException ex)
 			{
 				logger.error("Failed to unmarshal payload into an QueueType: "+ ex.getMessage(), ex);
 				logger.error("Queue Payload: "+ payload);

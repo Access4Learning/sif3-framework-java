@@ -81,7 +81,7 @@
 	<!-- ***************** -->
 	<!-- Environment setup -->
 	<!-- ***************** -->
-	<target name="init">
+	<target name="init" depends="02-clean">
 		<mkdir dir="${class.dir}"/>
 		<mkdir dir="${dist.dir}"/>
 	</target>
@@ -91,15 +91,16 @@
 	<!-- ******************************* -->
 
 	<!-- Main Compile Target -->
-	<target name="compile-all" depends="init" description="Compile all sources">
+	<target name="compile-all" description="Compile all sources">
 
 		<!-- Compile Inrastructure components -->
 		<foreach list="${srcs}" target="compile-src" param="elem" trim="true" />
 
 		<!-- Compile Demo Stuff -->
 		<echo message="Compile: SIF3 Demo Classes"/>
-		<javac destdir="${class.dir}" debug="on" verbose="false">
+		<javac destdir="${class.dir}" debug="on" verbose="false" includeantruntime="false">
 			<compilerarg value="-Xbootclasspath/p:${toString:classpath}"/>
+			<compilerarg value="-Xlint:deprecation"/>
 			<src path="${project.basedir}/demo/${src.dir}" />
 		</javac>
 
@@ -109,9 +110,10 @@
 		<echo message="Compile: ${project.basedir}/${elem}/${src.dir}"/>
 
 		<!-- Compile source -->
-		<javac destdir="${class.dir}" debug="on">
+		<javac destdir="${class.dir}" debug="on" includeantruntime="false" >
 			<!-- Ensure project jars are first. -->
 			<compilerarg value="-Xbootclasspath/p:${toString:classpath}"/>
+			<compilerarg value="-Xlint:deprecation"/>
 			<src path="${project.basedir}/${elem}/${src.dir}" />
 		</javac>
 
@@ -124,7 +126,7 @@
 	</target>
 
 	<!-- Main Jar Target -->
-	<target name="03-jar-components" depends="compile-all" description="Create JAR files for all components">
+	<target name="03-jar-components" depends="init, compile-all" description="Create JAR files for all components">
 		
 		<!-- jar Common: Classes and resources -->
 		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar"/>
@@ -178,7 +180,29 @@
             	<include name="basicsis/spring/*"/>
             </fileset>
 		</jar>
-  -->
+  		-->
+		
+		<!-- get all config files -->
+		<copy todir="${class.dir}" flatten="true">
+			<fileset dir="${config.dir}">
+				<include name="*.properties"/>
+				<include name="hibernate/*.*"/>
+				<include name="providers/*.*"/>
+			</fileset>
+		</copy>
+		<!-- Looks like we can't use these if in the jar with existing code
+		<copy todir="${class.dir}/environments">
+			<fileset dir="${config.dir}/environments" />
+		</copy>
+		-->
+		
+		<jar destfile="${dist.dir}/config.jar" >
+            <fileset dir="${class.dir}">
+            	<include name="**/*.properties" />
+            	<include name="**/*.xml" />
+            	<exclude name="sif3/**/*.xml" />
+            </fileset>
+		</jar>
 	</target>
 
 	<!-- *************** -->
@@ -186,8 +210,19 @@
 	<!-- *************** -->
 	<target name="80-build-war" depends="03-jar-components, jar-config" description="Package WAR for distribution">
 		<delete file="${dist.dir}/${app.name}.war}"/>
-
+		
+		<!-- clear out any old jars -->
+		<delete dir="${web.lib.root.dir}"/>
+		<mkdir dir="${web.lib.root.dir}"/>
+		
 		<!-- get all jar files -->
+		<copy todir="${web.lib.root.dir}" flatten="true">
+			<fileset dir="${lib.root.dir}">
+				<include name="**/*.jar" />
+				<exclude name="**/servlet-api-*.jar" />
+			</fileset>
+		</copy>
+		
 		<copy todir="${web.lib.root.dir}">
 			<fileset dir="${dist.dir}" includes="*.jar"/>
 		</copy>

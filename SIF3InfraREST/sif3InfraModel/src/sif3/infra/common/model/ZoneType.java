@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -38,8 +39,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "description",
     "properties"
 })
-public class ZoneType {
+public class ZoneType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
@@ -75,6 +79,10 @@ public class ZoneType {
         this.description = value;
     }
 
+    public boolean isSetDescription() {
+        return (this.description!= null);
+    }
+
     /**
      * Gets the value of the properties property.
      * 
@@ -99,6 +107,10 @@ public class ZoneType {
         this.properties = value;
     }
 
+    public boolean isSetProperties() {
+        return (this.properties!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -121,6 +133,10 @@ public class ZoneType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

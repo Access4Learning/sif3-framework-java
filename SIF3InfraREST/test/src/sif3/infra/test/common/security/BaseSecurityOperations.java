@@ -19,14 +19,13 @@ package sif3.infra.test.common.security;
 
 import java.nio.charset.Charset;
 import java.text.ParseException;
-import java.util.Date;
 
 import org.apache.commons.codec.binary.Base64;
 
+import au.com.systemic.framework.utils.DateUtils;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.model.security.TokenCoreInfo;
 import sif3.common.model.security.TokenInfo;
-import au.com.systemic.framework.utils.DateUtils;
 
 /**
  * This is just a dummy implementation on how a token could be generated. It uses the applicationKey and a timestamp.

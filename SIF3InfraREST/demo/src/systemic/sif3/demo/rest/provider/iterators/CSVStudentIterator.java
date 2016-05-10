@@ -18,11 +18,11 @@
 
 package systemic.sif3.demo.rest.provider.iterators;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.SIFEvent;
-import au.com.systemic.framework.utils.AdvancedProperties;
 
 /**
  * @author Joerg Huber

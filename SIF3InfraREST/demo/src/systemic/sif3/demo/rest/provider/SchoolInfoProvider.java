@@ -24,9 +24,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import sif.dd.au30.model.ObjectFactory;
-import sif.dd.au30.model.SchoolInfoCollectionType;
-import sif.dd.au30.model.SchoolInfoType;
+import au.com.systemic.framework.utils.FileReaderWriter;
+import au.com.systemic.framework.utils.StringUtils;
+import sif.dd.au34.model.ObjectFactory;
+import sif.dd.au34.model.SchoolInfoCollectionType;
+import sif.dd.au34.model.SchoolInfoType;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
@@ -40,8 +42,6 @@ import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import systemic.sif3.demo.rest.ModelObjectConstants;
-import au.com.systemic.framework.utils.FileReaderWriter;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * @author Joerg Huber
@@ -94,10 +94,10 @@ public class SchoolInfoProvider extends AUDataModelProvider
    }
 
 	/* (non-Javadoc)
-     * @see sif3.common.interfaces.Provider#retrievByPrimaryKey(java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
+     * @see sif3.common.interfaces.Provider#retrieveByPrimaryKey(java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public Object retrievByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public Object retrieveByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
     {
     	if (StringUtils.isEmpty(resourceID))
     	{

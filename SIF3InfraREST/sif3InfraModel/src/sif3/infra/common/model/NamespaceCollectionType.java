@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -32,8 +33,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "namespaceCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "namespace"
 })
-public class NamespaceCollectionType {
+public class NamespaceCollectionType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected List<NamespaceType> namespace;
 
@@ -64,6 +68,14 @@ public class NamespaceCollectionType {
             namespace = new ArrayList<NamespaceType>();
         }
         return this.namespace;
+    }
+
+    public boolean isSetNamespace() {
+        return ((this.namespace!= null)&&(!this.namespace.isEmpty()));
+    }
+
+    public void unsetNamespace() {
+        this.namespace = null;
     }
 
 }

@@ -20,6 +20,7 @@ package sif3.infra.test.rest.client;
 
 import java.net.URI;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
@@ -29,7 +30,6 @@ import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.SubscriptionType;
 import sif3.infra.rest.client.SubscriptionClient;
 import sif3.infra.rest.consumer.ConsumerLoader;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * @author Joerg Huber

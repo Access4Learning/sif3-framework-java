@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -43,8 +44,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(name = "rightType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "value"
 })
-public class RightType {
+public class RightType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlValue
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String value;
@@ -76,6 +80,10 @@ public class RightType {
         this.value = value;
     }
 
+    public boolean isSetValue() {
+        return (this.value!= null);
+    }
+
     /**
      * Gets the value of the type property.
      * 
@@ -98,6 +106,10 @@ public class RightType {
      */
     public void setType(String value) {
         this.type = value;
+    }
+
+    public boolean isSetType() {
+        return (this.type!= null);
     }
 
 }

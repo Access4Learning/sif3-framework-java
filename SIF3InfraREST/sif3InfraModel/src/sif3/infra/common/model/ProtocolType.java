@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -35,8 +36,11 @@ import javax.xml.bind.annotation.XmlType;
     "location",
     "properties"
 })
-public class ProtocolType {
+public class ProtocolType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlSchemaType(name = "anyURI")
     protected String location;
@@ -67,6 +71,10 @@ public class ProtocolType {
         this.location = value;
     }
 
+    public boolean isSetLocation() {
+        return (this.location!= null);
+    }
+
     /**
      * Gets the value of the properties property.
      * 
@@ -94,6 +102,14 @@ public class ProtocolType {
             properties = new ArrayList<PropertiesType>();
         }
         return this.properties;
+    }
+
+    public boolean isSetProperties() {
+        return ((this.properties!= null)&&(!this.properties.isEmpty()));
+    }
+
+    public void unsetProperties() {
+        this.properties = null;
     }
 
 }

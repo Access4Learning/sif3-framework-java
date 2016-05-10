@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -32,8 +33,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "provisionedZonesType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "provisionedZone"
 })
-public class ProvisionedZonesType {
+public class ProvisionedZonesType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected List<ProvisionedZoneType> provisionedZone;
 
@@ -64,6 +68,14 @@ public class ProvisionedZonesType {
             provisionedZone = new ArrayList<ProvisionedZoneType>();
         }
         return this.provisionedZone;
+    }
+
+    public boolean isSetProvisionedZone() {
+        return ((this.provisionedZone!= null)&&(!this.provisionedZone.isEmpty()));
+    }
+
+    public void unsetProvisionedZone() {
+        this.provisionedZone = null;
     }
 
 }

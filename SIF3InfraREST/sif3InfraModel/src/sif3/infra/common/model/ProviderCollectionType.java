@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -32,8 +33,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "providerCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "provider"
 })
-public class ProviderCollectionType {
+public class ProviderCollectionType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected List<ProviderType> provider;
 
@@ -64,6 +68,14 @@ public class ProviderCollectionType {
             provider = new ArrayList<ProviderType>();
         }
         return this.provider;
+    }
+
+    public boolean isSetProvider() {
+        return ((this.provider!= null)&&(!this.provider.isEmpty()));
+    }
+
+    public void unsetProvider() {
+        this.provider = null;
     }
 
 }

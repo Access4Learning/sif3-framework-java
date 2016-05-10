@@ -20,7 +20,8 @@ package sif3.infra.test.common.utils;
 
 import javax.xml.bind.JAXBElement;
 
-import sif.dd.au30.model.StudentPersonalType;
+import au.com.systemic.framework.utils.FileReaderWriter;
+import sif.dd.au34.model.StudentPersonalType;
 import sif3.common.exception.MarshalException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.utils.JAXBUtils;
@@ -31,7 +32,6 @@ import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.common.model.EnvironmentTypeType;
 import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.ProductIdentityType;
-import au.com.systemic.framework.utils.FileReaderWriter;
 
 /**
  * @author Joerg Huber

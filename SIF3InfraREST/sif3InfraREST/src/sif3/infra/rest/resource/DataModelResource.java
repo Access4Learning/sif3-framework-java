@@ -43,7 +43,7 @@ import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
@@ -220,7 +220,7 @@ public class DataModelResource extends BaseResource
 		{
 			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE);			
 		}
-		catch (UnsupportedMediaTypeExcpetion ex)
+		catch (UnsupportedMediaTypeException ex)
 		{
 			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE);     
 		}
@@ -275,7 +275,7 @@ public class DataModelResource extends BaseResource
 	{
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Get Resource by Resoucre ID (REST GET - Single): "+resourceID+" and URL Postfix mimeType = '"+mimeType+"'");
+			logger.debug("Get Resource by Resource ID (REST GET - Single): "+resourceID+" and URL Postfix mimeType = '"+mimeType+"'");
 		}
 		
 		ErrorDetails error = validClient(dmObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED, false);
@@ -527,7 +527,7 @@ public class DataModelResource extends BaseResource
 		{
 			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);			
 		}
-	    catch (UnsupportedMediaTypeExcpetion ex)
+	    catch (UnsupportedMediaTypeException ex)
 	    {
 	      return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);     
 	    }
@@ -880,7 +880,7 @@ public class DataModelResource extends BaseResource
 	    {
 	    	return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getMultiObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);      
 	    }
-	    catch (UnsupportedMediaTypeExcpetion ex)
+	    catch (UnsupportedMediaTypeException ex)
 	    {
 	    	return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE);     
 	    }
@@ -917,7 +917,7 @@ public class DataModelResource extends BaseResource
 		{
 			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to DeleteRequestType. Problem reported: " + ex.getMessage()), ResponseAction.DELETE);
 		}
-		catch (UnsupportedMediaTypeExcpetion ex)
+		catch (UnsupportedMediaTypeException ex)
 		{
 			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to DeleteRequestType. Problem reported: " + ex.getMessage()), ResponseAction.DELETE);
 		}
@@ -954,7 +954,7 @@ public class DataModelResource extends BaseResource
 		{
 			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getMultiObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE);			
 		}
-		catch (UnsupportedMediaTypeExcpetion ex)
+		catch (UnsupportedMediaTypeException ex)
 		{
 			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE);     
 		}
@@ -1003,7 +1003,7 @@ public class DataModelResource extends BaseResource
 		{
 			return makeErrorResponse(new ErrorDetails(CommonConstants.RESPONSE_TOO_LARGE, "(QBE) Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
 		}
-		catch (UnsupportedMediaTypeExcpetion ex)
+		catch (UnsupportedMediaTypeException ex)
 		{
 			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "(QBE) Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY);     
 		}

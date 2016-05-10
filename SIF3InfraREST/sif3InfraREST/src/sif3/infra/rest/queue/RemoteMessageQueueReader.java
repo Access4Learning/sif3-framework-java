@@ -23,6 +23,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderValues.EventAction;
@@ -43,7 +44,6 @@ import sif3.infra.rest.queue.types.ErrorInfo;
 import sif3.infra.rest.queue.types.EventInfo;
 import sif3.infra.rest.queue.types.QueueInfo;
 import sif3.infra.rest.queue.types.ResponseInfo;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class is the actual reader on the remote SIF Queue. It deals with all the logic that applies to SIF Message Queues and how

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+	<!-- ************************* -->
+	<!-- SIF3_REFIDOBJECT          -->
+	<!-- ************************* -->
+	<class name="sif3.infra.common.persist.model.RefIdObject" table="SIF3_REFIDOBJECT">
+        <id name="id" type="java.lang.String" column="ID">
+            <generator class="uuid2" />
+        </id>
+        <property name="xml" type="java.lang.String" column="XML" />
+    </class>
+</hibernate-mapping>

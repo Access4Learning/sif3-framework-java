@@ -18,26 +18,26 @@
 
 package sif3.common.exception;
 
-public class UnsupportedMediaTypeExcpetion extends Exception
+public class UnsupportedMediaTypeException extends SIF3Exception
 {
   private static final long serialVersionUID = 749070962345457L;
 
-  public UnsupportedMediaTypeExcpetion()
+  public UnsupportedMediaTypeException()
   {
       super();
   }
 
-  public UnsupportedMediaTypeExcpetion(String msg)
+  public UnsupportedMediaTypeException(String msg)
   {
       super(msg);
   }
 
-  public UnsupportedMediaTypeExcpetion(String msg, Throwable ex)
+  public UnsupportedMediaTypeException(String msg, Throwable ex)
   {
       super(msg, ex);
   }
 
-  public UnsupportedMediaTypeExcpetion(Throwable ex)
+  public UnsupportedMediaTypeException(Throwable ex)
   {
       super(ex);
   }

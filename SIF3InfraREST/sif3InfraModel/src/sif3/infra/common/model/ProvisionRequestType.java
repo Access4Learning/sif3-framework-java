@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -43,8 +44,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(name = "provisionRequestType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "provisionedZones"
 })
-public class ProvisionRequestType {
+public class ProvisionRequestType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected ProvisionedZonesType provisionedZones;
     @XmlAttribute(name = "id")
@@ -78,6 +82,10 @@ public class ProvisionRequestType {
         this.provisionedZones = value;
     }
 
+    public boolean isSetProvisionedZones() {
+        return (this.provisionedZones!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -102,6 +110,10 @@ public class ProvisionRequestType {
         this.id = value;
     }
 
+    public boolean isSetId() {
+        return (this.id!= null);
+    }
+
     /**
      * Gets the value of the completionStatus property.
      * 
@@ -124,6 +136,10 @@ public class ProvisionRequestType {
      */
     public void setCompletionStatus(String value) {
         this.completionStatus = value;
+    }
+
+    public boolean isSetCompletionStatus() {
+        return (this.completionStatus!= null);
     }
 
 }

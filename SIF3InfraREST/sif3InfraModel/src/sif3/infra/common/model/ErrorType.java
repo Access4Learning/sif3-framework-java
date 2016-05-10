@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -53,8 +54,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "message",
     "description"
 })
-public class ErrorType {
+public class ErrorType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlSchemaType(name = "unsignedInt")
     protected long code;
@@ -85,6 +89,10 @@ public class ErrorType {
         this.code = value;
     }
 
+    public boolean isSetCode() {
+        return true;
+    }
+
     /**
      * Gets the value of the scope property.
      * 
@@ -107,6 +115,10 @@ public class ErrorType {
      */
     public void setScope(String value) {
         this.scope = value;
+    }
+
+    public boolean isSetScope() {
+        return (this.scope!= null);
     }
 
     /**
@@ -133,6 +145,10 @@ public class ErrorType {
         this.message = value;
     }
 
+    public boolean isSetMessage() {
+        return (this.message!= null);
+    }
+
     /**
      * Gets the value of the description property.
      * 
@@ -157,6 +173,10 @@ public class ErrorType {
         this.description = value;
     }
 
+    public boolean isSetDescription() {
+        return (this.description!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -179,6 +199,10 @@ public class ErrorType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

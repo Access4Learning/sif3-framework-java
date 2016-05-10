@@ -18,8 +18,8 @@
 
 package sif3.infra.test.common.persist.service;
 
-import sif3.common.persist.common.HibernateUtil;
 import au.com.systemic.framework.utils.FileReaderWriter;
+import sif3.common.persist.common.HibernateUtil;
 
 
 /**

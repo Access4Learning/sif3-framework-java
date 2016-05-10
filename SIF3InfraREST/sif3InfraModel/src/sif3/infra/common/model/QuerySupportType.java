@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -41,8 +42,11 @@ import javax.xml.bind.annotation.XmlType;
     "applicationProduct",
     "adapterProduct"
 })
-public class QuerySupportType {
+public class QuerySupportType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected boolean dynamicQuery;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
@@ -73,6 +77,10 @@ public class QuerySupportType {
         this.dynamicQuery = value;
     }
 
+    public boolean isSetDynamicQuery() {
+        return true;
+    }
+
     /**
      * Gets the value of the paged property.
      * 
@@ -87,6 +95,10 @@ public class QuerySupportType {
      */
     public void setPaged(boolean value) {
         this.paged = value;
+    }
+
+    public boolean isSetPaged() {
+        return true;
     }
 
     /**
@@ -113,6 +125,10 @@ public class QuerySupportType {
         this.maxPageSize = value;
     }
 
+    public boolean isSetMaxPageSize() {
+        return (this.maxPageSize!= null);
+    }
+
     /**
      * Gets the value of the totalCount property.
      * 
@@ -135,6 +151,10 @@ public class QuerySupportType {
      */
     public void setTotalCount(Boolean value) {
         this.totalCount = value;
+    }
+
+    public boolean isSetTotalCount() {
+        return (this.totalCount!= null);
     }
 
     /**
@@ -161,6 +181,10 @@ public class QuerySupportType {
         this.applicationProduct = value;
     }
 
+    public boolean isSetApplicationProduct() {
+        return (this.applicationProduct!= null);
+    }
+
     /**
      * Gets the value of the adapterProduct property.
      * 
@@ -183,6 +207,10 @@ public class QuerySupportType {
      */
     public void setAdapterProduct(ProductIdentityType value) {
         this.adapterProduct = value;
+    }
+
+    public boolean isSetAdapterProduct() {
+        return (this.adapterProduct!= null);
     }
 
 }

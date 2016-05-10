@@ -1,0 +1,40 @@
+==============================================================
+Release Notes for v0.9.0 of SIF3 Framework (MMMM dd, 2016)
+==============================================================
+
+Bug Fixes
+---------
+- Fixed spelling of retrievByPrimaryKey to retrieveByPrimaryKey
+
+New Functionality
+-----------------
+- Support for UK data model (version 2.0)
+- Support for functional services
+- Config directory now automatically compiles to a config.jar for easy use
+
+Changed Functionality
+---------------------
+- None
+
+Removed Artifacts/Functionality
+-------------------------------
+- None  
+
+--------------------------
+-- Upgrade Instructions --
+--------------------------
+
+----------------------------
+-- Infrastructure Upgrade --
+----------------------------
+- Drop the latest framework library into your project's lib directory/directories.
+
+------------------------
+-- Data Model Upgrade --
+------------------------
+- Inclusion of UK data model (version 1.2)
+
+------------------------------
+-- 3rd Party Library Update --
+------------------------------
+- None

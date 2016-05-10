@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -30,8 +31,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "createResponseType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "creates"
 })
-public class CreateResponseType {
+public class CreateResponseType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected CreatesType creates;
 
@@ -57,6 +61,10 @@ public class CreateResponseType {
      */
     public void setCreates(CreatesType value) {
         this.creates = value;
+    }
+
+    public boolean isSetCreates() {
+        return (this.creates!= null);
     }
 
 }

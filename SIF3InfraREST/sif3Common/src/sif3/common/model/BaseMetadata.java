@@ -134,6 +134,16 @@ public class BaseMetadata implements Serializable
     }
     
     /**
+     * This method returns all HTTP headers.
+     * 
+     * @return See desc.
+     */
+    public HeaderProperties getHTTPParameters()
+    {
+    	return requestParameters.getHttpHeaderParams();
+    }
+    
+    /**
      * This method returns the value of the given parameter as a String. This value can either be in a HTTP header field 
      * or a URL query parameter. If a value exists in both (URL query parameter and HTTP header) then the HTTP header will
      * take precedence and be returned. If the parameter does not exist then null is returned.

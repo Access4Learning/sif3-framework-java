@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -35,8 +36,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "path",
     "namespaces"
 })
-public class XpathType {
+public class XpathType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -68,6 +72,10 @@ public class XpathType {
         this.path = value;
     }
 
+    public boolean isSetPath() {
+        return (this.path!= null);
+    }
+
     /**
      * Gets the value of the namespaces property.
      * 
@@ -90,6 +98,10 @@ public class XpathType {
      */
     public void setNamespaces(NamespaceQualifiersType value) {
         this.namespaces = value;
+    }
+
+    public boolean isSetNamespaces() {
+        return (this.namespaces!= null);
     }
 
 }

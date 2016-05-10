@@ -19,20 +19,19 @@ package sif3.infra.test.rest.consumer;
 import java.util.ArrayList;
 import java.util.List;
 
-import sif.dd.au30.conversion.DataModelUnmarshalFactory;
-import sif.dd.au30.model.NameOfRecordType;
-import sif.dd.au30.model.ObjectFactory;
-import sif.dd.au30.model.StudentPersonalCollectionType;
-import sif.dd.au30.model.StudentPersonalType;
-import sif3.common.CommonConstants;
+import au.com.systemic.framework.utils.FileReaderWriter;
+import au.com.systemic.framework.utils.Timer;
+import sif.dd.au34.model.NameOfRecordType;
+import sif.dd.au34.model.ObjectFactory;
+import sif.dd.au34.model.StudentPersonalCollectionType;
+import sif.dd.au34.model.StudentPersonalType;
+import sif.dd.conversion.DataModelUnmarshalFactory;
 import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
-import sif3.common.model.SIFContext;
-import sif3.common.model.SIFZone;
 import sif3.common.model.ServicePathPredicate;
 import sif3.common.model.ZoneContextInfo;
 import sif3.common.utils.UUIDGenerator;
@@ -42,8 +41,6 @@ import sif3.common.ws.OperationStatus;
 import sif3.common.ws.Response;
 import sif3.infra.rest.consumer.ConsumerLoader;
 import systemic.sif3.demo.rest.consumer.StudentPersonalConsumer;
-import au.com.systemic.framework.utils.FileReaderWriter;
-import au.com.systemic.framework.utils.Timer;
 
 /**
  * @author Joerg Huber
@@ -413,10 +410,10 @@ public class TestStudentPersonalConsumer
 //			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
 //      	envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
 			
-            List<Response> responses = consumer.retrievByPrimaryKey("24ed508e1ed04bba82198233efa55859", envZoneCtxList);
-//            List<Response> responses = consumer.retrievByPrimaryKey("164da5d9bcbf4cf8a058ba0b0efde9ba", envZoneCtxList);
+            List<Response> responses = consumer.retrieveByPrimaryKey("24ed508e1ed04bba82198233efa55859", envZoneCtxList);
+//            List<Response> responses = consumer.retrieveByPrimaryKey("164da5d9bcbf4cf8a058ba0b0efde9ba", envZoneCtxList);
 			
-//			List<Response> responses = consumer.retrievByPrimaryKey("24ed508e1ed04bba82198233efa55859", null);
+//			List<Response> responses = consumer.retrieveByPrimaryKey("24ed508e1ed04bba82198233efa55859", null);
 			System.out.println("Responses from attempt to Get Student:");
 			printResponses(responses, consumer);
 		}

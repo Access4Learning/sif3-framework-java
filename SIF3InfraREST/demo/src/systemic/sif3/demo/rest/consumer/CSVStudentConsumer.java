@@ -22,6 +22,7 @@ import java.util.Date;
 
 import javax.ws.rs.core.MediaType;
 
+import au.com.systemic.framework.utils.DateUtils;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.conversion.UnmarshalFactory;
@@ -41,7 +42,6 @@ import sif3.common.ws.model.MultiOperationStatusList;
 import sif3.infra.rest.consumer.AbstractEventConsumer;
 import systemic.sif3.demo.rest.conversion.CSVMarshaller;
 import systemic.sif3.demo.rest.conversion.CSVUnmarshaller;
-import au.com.systemic.framework.utils.DateUtils;
 
 /**
  * @author Joerg Huber

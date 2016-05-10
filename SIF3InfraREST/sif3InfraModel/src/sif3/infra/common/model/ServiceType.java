@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -37,8 +38,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(name = "serviceType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "rights"
 })
-public class ServiceType {
+public class ServiceType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected RightsType rights;
     @XmlAttribute(name = "name", required = true)
@@ -75,6 +79,10 @@ public class ServiceType {
         this.rights = value;
     }
 
+    public boolean isSetRights() {
+        return (this.rights!= null);
+    }
+
     /**
      * Gets the value of the name property.
      * 
@@ -97,6 +105,10 @@ public class ServiceType {
      */
     public void setName(String value) {
         this.name = value;
+    }
+
+    public boolean isSetName() {
+        return (this.name!= null);
     }
 
     /**
@@ -123,6 +135,10 @@ public class ServiceType {
         this.contextId = value;
     }
 
+    public boolean isSetContextId() {
+        return (this.contextId!= null);
+    }
+
     /**
      * Gets the value of the type property.
      * 
@@ -145,6 +161,10 @@ public class ServiceType {
      */
     public void setType(String value) {
         this.type = value;
+    }
+
+    public boolean isSetType() {
+        return (this.type!= null);
     }
 
 }

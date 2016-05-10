@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -43,8 +44,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "serviceName",
     "queueId"
 })
-public class SubscriptionType {
+public class SubscriptionType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -92,6 +96,10 @@ public class SubscriptionType {
         this.zoneId = value;
     }
 
+    public boolean isSetZoneId() {
+        return (this.zoneId!= null);
+    }
+
     /**
      * Gets the value of the contextId property.
      * 
@@ -114,6 +122,10 @@ public class SubscriptionType {
      */
     public void setContextId(String value) {
         this.contextId = value;
+    }
+
+    public boolean isSetContextId() {
+        return (this.contextId!= null);
     }
 
     /**
@@ -140,6 +152,10 @@ public class SubscriptionType {
         this.serviceType = value;
     }
 
+    public boolean isSetServiceType() {
+        return (this.serviceType!= null);
+    }
+
     /**
      * Gets the value of the serviceName property.
      * 
@@ -162,6 +178,10 @@ public class SubscriptionType {
      */
     public void setServiceName(String value) {
         this.serviceName = value;
+    }
+
+    public boolean isSetServiceName() {
+        return (this.serviceName!= null);
     }
 
     /**
@@ -188,6 +208,10 @@ public class SubscriptionType {
         this.queueId = value;
     }
 
+    public boolean isSetQueueId() {
+        return (this.queueId!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -210,6 +234,10 @@ public class SubscriptionType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

@@ -27,14 +27,14 @@ import javax.servlet.ServletContextListener;
 
 import org.apache.log4j.Logger;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.persist.common.HibernateUtil;
 import sif3.infra.common.env.mgr.ProviderManagerFactory;
 import sif3.infra.common.interfaces.EnvironmentConnector;
 import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.rest.env.connectors.EnvironmentConnectorFactory;
 import sif3.infra.rest.provider.ProviderFactory;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class is to initialise the provider at startup and clean up resources at shutdown.

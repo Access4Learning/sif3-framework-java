@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -30,8 +31,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "codeItemsType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "codeItem"
 })
-public class CodeItemsType {
+public class CodeItemsType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(required = true)
     protected CodeItemType codeItem;
 
@@ -57,6 +61,10 @@ public class CodeItemsType {
      */
     public void setCodeItem(CodeItemType value) {
         this.codeItem = value;
+    }
+
+    public boolean isSetCodeItem() {
+        return (this.codeItem!= null);
     }
 
 }

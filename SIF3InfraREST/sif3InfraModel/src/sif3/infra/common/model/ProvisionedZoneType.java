@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -32,8 +33,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "provisionedZoneType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "services"
 })
-public class ProvisionedZoneType {
+public class ProvisionedZoneType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected ServicesType services;
     @XmlAttribute(name = "id", required = true)
@@ -63,6 +67,10 @@ public class ProvisionedZoneType {
         this.services = value;
     }
 
+    public boolean isSetServices() {
+        return (this.services!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -85,6 +93,10 @@ public class ProvisionedZoneType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -53,8 +54,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "source",
     "codeItems"
 })
-public class CodeSetType {
+public class CodeSetType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -96,6 +100,10 @@ public class CodeSetType {
         this.zone = value;
     }
 
+    public boolean isSetZone() {
+        return (this.zone!= null);
+    }
+
     /**
      * Gets the value of the version property.
      * 
@@ -118,6 +126,10 @@ public class CodeSetType {
      */
     public void setVersion(String value) {
         this.version = value;
+    }
+
+    public boolean isSetVersion() {
+        return (this.version!= null);
     }
 
     /**
@@ -144,6 +156,10 @@ public class CodeSetType {
         this.timestamp = value;
     }
 
+    public boolean isSetTimestamp() {
+        return (this.timestamp!= null);
+    }
+
     /**
      * Gets the value of the source property.
      * 
@@ -166,6 +182,10 @@ public class CodeSetType {
      */
     public void setSource(String value) {
         this.source = value;
+    }
+
+    public boolean isSetSource() {
+        return (this.source!= null);
     }
 
     /**
@@ -192,6 +212,10 @@ public class CodeSetType {
         this.codeItems = value;
     }
 
+    public boolean isSetCodeItems() {
+        return (this.codeItems!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -214,6 +238,10 @@ public class CodeSetType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

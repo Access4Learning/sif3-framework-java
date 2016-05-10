@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -32,8 +33,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "alertCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "alert"
 })
-public class AlertCollectionType {
+public class AlertCollectionType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected List<AlertType> alert;
 
@@ -64,6 +68,14 @@ public class AlertCollectionType {
             alert = new ArrayList<AlertType>();
         }
         return this.alert;
+    }
+
+    public boolean isSetAlert() {
+        return ((this.alert!= null)&&(!this.alert.isEmpty()));
+    }
+
+    public void unsetAlert() {
+        this.alert = null;
     }
 
 }

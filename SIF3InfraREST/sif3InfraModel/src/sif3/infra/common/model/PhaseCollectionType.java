@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -32,8 +33,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "phaseCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "phase"
 })
-public class PhaseCollectionType {
+public class PhaseCollectionType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected List<PhaseType> phase;
 
@@ -64,6 +68,14 @@ public class PhaseCollectionType {
             phase = new ArrayList<PhaseType>();
         }
         return this.phase;
+    }
+
+    public boolean isSetPhase() {
+        return ((this.phase!= null)&&(!this.phase.isEmpty()));
+    }
+
+    public void unsetPhase() {
+        this.phase = null;
     }
 
 }

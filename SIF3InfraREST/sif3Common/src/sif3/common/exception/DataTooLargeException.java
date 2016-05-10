@@ -16,7 +16,7 @@
 
 package sif3.common.exception;
 
-public class DataTooLargeException extends Exception
+public class DataTooLargeException extends SIF3Exception
 {
 	private static final long serialVersionUID = 8201196298932433571L;
 

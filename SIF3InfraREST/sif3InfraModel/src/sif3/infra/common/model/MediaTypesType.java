@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -35,8 +36,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(name = "mediaTypesType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "mediaType"
 })
-public class MediaTypesType {
+public class MediaTypesType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -69,6 +73,14 @@ public class MediaTypesType {
             mediaType = new ArrayList<String>();
         }
         return this.mediaType;
+    }
+
+    public boolean isSetMediaType() {
+        return ((this.mediaType!= null)&&(!this.mediaType.isEmpty()));
+    }
+
+    public void unsetMediaType() {
+        this.mediaType = null;
     }
 
 }

@@ -22,8 +22,8 @@ import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
 
-import sif3.infra.rest.queue.types.QueueMessage;
 import au.com.systemic.framework.utils.StringUtils;
+import sif3.infra.rest.queue.types.QueueMessage;
 
 
 /**

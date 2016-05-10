@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -32,8 +33,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "updatesType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "update"
 })
-public class UpdatesType {
+public class UpdatesType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected List<UpdateType> update;
 
@@ -64,6 +68,14 @@ public class UpdatesType {
             update = new ArrayList<UpdateType>();
         }
         return this.update;
+    }
+
+    public boolean isSetUpdate() {
+        return ((this.update!= null)&&(!this.update.isEmpty()));
+    }
+
+    public void unsetUpdate() {
+        this.update = null;
     }
 
 }

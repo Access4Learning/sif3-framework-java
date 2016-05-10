@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -42,8 +43,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(name = "updateType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "error"
 })
-public class UpdateType {
+public class UpdateType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected ErrorType error;
     @XmlAttribute(name = "id")
@@ -78,6 +82,10 @@ public class UpdateType {
         this.error = value;
     }
 
+    public boolean isSetError() {
+        return (this.error!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -102,6 +110,10 @@ public class UpdateType {
         this.id = value;
     }
 
+    public boolean isSetId() {
+        return (this.id!= null);
+    }
+
     /**
      * Gets the value of the statusCode property.
      * 
@@ -124,6 +136,10 @@ public class UpdateType {
      */
     public void setStatusCode(String value) {
         this.statusCode = value;
+    }
+
+    public boolean isSetStatusCode() {
+        return (this.statusCode!= null);
     }
 
 }

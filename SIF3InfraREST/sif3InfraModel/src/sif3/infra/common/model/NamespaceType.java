@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -51,8 +52,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "uri",
     "url"
 })
-public class NamespaceType {
+public class NamespaceType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -89,6 +93,10 @@ public class NamespaceType {
         this.zone = value;
     }
 
+    public boolean isSetZone() {
+        return (this.zone!= null);
+    }
+
     /**
      * Gets the value of the uri property.
      * 
@@ -111,6 +119,10 @@ public class NamespaceType {
      */
     public void setUri(String value) {
         this.uri = value;
+    }
+
+    public boolean isSetUri() {
+        return (this.uri!= null);
     }
 
     /**
@@ -137,6 +149,10 @@ public class NamespaceType {
         this.url = value;
     }
 
+    public boolean isSetUrl() {
+        return (this.url!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -159,6 +175,10 @@ public class NamespaceType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

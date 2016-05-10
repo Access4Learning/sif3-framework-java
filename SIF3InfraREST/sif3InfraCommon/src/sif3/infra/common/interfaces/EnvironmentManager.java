@@ -20,10 +20,10 @@ package sif3.infra.common.interfaces;
 
 import java.util.Date;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
 import sif3.common.persist.model.SIF3Session;
 import sif3.infra.common.env.types.EnvironmentInfo;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
-import au.com.systemic.framework.utils.AdvancedProperties;
 
 /**
  * This interface defines all methods required by this framework in relation to any environment managers (consumer, provider, direct,

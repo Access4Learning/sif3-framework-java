@@ -44,9 +44,9 @@ import org.codehaus.jettison.mapped.MappedXMLStreamReader;
 import org.codehaus.jettison.mapped.MappedXMLStreamWriter;
 import org.codehaus.jettison.mapped.SimpleConverter;
 
+import au.com.systemic.framework.utils.Timer;
 import sif3.common.exception.MarshalException;
 import sif3.common.exception.UnmarshalException;
-import au.com.systemic.framework.utils.Timer;
 
 /**
  * @author Joerg Huber

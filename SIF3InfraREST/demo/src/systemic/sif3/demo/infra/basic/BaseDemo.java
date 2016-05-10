@@ -52,14 +52,14 @@ public class BaseDemo
 	public static boolean printClientResponse(ClientResponse response)
 	{
 		System.out.println("Status: " + response.getStatus());
-		System.out.println("Client Response Status Code: " + response.getClientResponseStatus().getStatusCode());
-		System.out.println("Client Response Status Message: " + response.getClientResponseStatus().getReasonPhrase());
+		System.out.println("Client Response Status Code: " + response.getStatusInfo().getStatusCode());
+		System.out.println("Client Response Status Message: " + response.getStatusInfo().getReasonPhrase());
 		System.out.println("Media Type: " + response.getType());
 		System.out.println("Content Length: " + response.getLength());
 		System.out.println("Has Entity: " + response.hasEntity());
 		System.out.println("Headers: " + response.getHeaders());
 		
-		return response.hasEntity() && (response.getClientResponseStatus().getStatusCode()!=Status.NO_CONTENT.getStatusCode());
+		return response.hasEntity() && (response.getStatusInfo().getStatusCode()!=Status.NO_CONTENT.getStatusCode());
 	}
 	
 	public static Builder setRequestHeader(WebResource service, String authToken)

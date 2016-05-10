@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -82,8 +83,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "script",
     "returnType"
 })
-public class XqueryType {
+public class XqueryType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String type;
@@ -129,6 +133,10 @@ public class XqueryType {
         this.type = value;
     }
 
+    public boolean isSetType() {
+        return (this.type!= null);
+    }
+
     /**
      * Gets the value of the status property.
      * 
@@ -151,6 +159,10 @@ public class XqueryType {
      */
     public void setStatus(String value) {
         this.status = value;
+    }
+
+    public boolean isSetStatus() {
+        return (this.status!= null);
     }
 
     /**
@@ -177,6 +189,10 @@ public class XqueryType {
         this.qualifier = value;
     }
 
+    public boolean isSetQualifier() {
+        return (this.qualifier!= null);
+    }
+
     /**
      * Gets the value of the description property.
      * 
@@ -199,6 +215,10 @@ public class XqueryType {
      */
     public void setDescription(String value) {
         this.description = value;
+    }
+
+    public boolean isSetDescription() {
+        return (this.description!= null);
     }
 
     /**
@@ -225,6 +245,10 @@ public class XqueryType {
         this.script = value;
     }
 
+    public boolean isSetScript() {
+        return (this.script!= null);
+    }
+
     /**
      * Gets the value of the returnType property.
      * 
@@ -249,6 +273,10 @@ public class XqueryType {
         this.returnType = value;
     }
 
+    public boolean isSetReturnType() {
+        return (this.returnType!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -271,6 +299,10 @@ public class XqueryType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

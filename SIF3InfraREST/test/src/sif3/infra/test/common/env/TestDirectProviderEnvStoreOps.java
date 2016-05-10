@@ -22,7 +22,7 @@ import java.util.Date;
 
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.MarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.persist.service.SIF3SessionService;
 import sif3.infra.common.conversion.InfraMarshalFactory;
@@ -81,7 +81,7 @@ public class TestDirectProviderEnvStoreOps
 			{
 				ex.printStackTrace();
 			}
-      catch (UnsupportedMediaTypeExcpetion ex)
+      catch (UnsupportedMediaTypeException ex)
       {
         ex.printStackTrace();
       }

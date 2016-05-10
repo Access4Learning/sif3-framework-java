@@ -20,8 +20,9 @@ package systemic.sif3.demo.rest.consumer;
 
 import org.apache.log4j.Logger;
 
-import sif.dd.au30.conversion.DataModelMarshalFactory;
-import sif.dd.au30.conversion.DataModelUnmarshalFactory;
+import sif.dd.au34.model.ObjectFactory;
+import sif.dd.conversion.DataModelMarshalFactory;
+import sif.dd.conversion.DataModelUnmarshalFactory;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.model.PagingInfo;
@@ -43,7 +44,7 @@ public abstract class AUDataModelConsumer extends AbstractConsumer
 	protected final Logger logger = Logger.getLogger(getClass());
 
 	private static DataModelUnmarshalFactory unmarshaller = new DataModelUnmarshalFactory();
-	private static DataModelMarshalFactory marshaller = new DataModelMarshalFactory();
+	private static DataModelMarshalFactory marshaller = new DataModelMarshalFactory(ObjectFactory.class);
 
 	public AUDataModelConsumer()
 	{

@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -43,8 +44,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(name = "createType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "error"
 })
-public class CreateType {
+public class CreateType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected ErrorType error;
     @XmlAttribute(name = "id")
@@ -83,6 +87,10 @@ public class CreateType {
         this.error = value;
     }
 
+    public boolean isSetError() {
+        return (this.error!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -105,6 +113,10 @@ public class CreateType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
     /**
@@ -131,6 +143,10 @@ public class CreateType {
         this.advisoryId = value;
     }
 
+    public boolean isSetAdvisoryId() {
+        return (this.advisoryId!= null);
+    }
+
     /**
      * Gets the value of the statusCode property.
      * 
@@ -153,6 +169,10 @@ public class CreateType {
      */
     public void setStatusCode(String value) {
         this.statusCode = value;
+    }
+
+    public boolean isSetStatusCode() {
+        return (this.statusCode!= null);
     }
 
 }

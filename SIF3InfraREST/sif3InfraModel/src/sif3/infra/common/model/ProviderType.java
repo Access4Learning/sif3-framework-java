@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -49,8 +50,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "mimeTypes",
     "endPoint"
 })
-public class ProviderType {
+public class ProviderType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String serviceType;
@@ -104,6 +108,10 @@ public class ProviderType {
         this.serviceType = value;
     }
 
+    public boolean isSetServiceType() {
+        return (this.serviceType!= null);
+    }
+
     /**
      * Gets the value of the serviceName property.
      * 
@@ -126,6 +134,10 @@ public class ProviderType {
      */
     public void setServiceName(String value) {
         this.serviceName = value;
+    }
+
+    public boolean isSetServiceName() {
+        return (this.serviceName!= null);
     }
 
     /**
@@ -152,6 +164,10 @@ public class ProviderType {
         this.contextId = value;
     }
 
+    public boolean isSetContextId() {
+        return (this.contextId!= null);
+    }
+
     /**
      * Gets the value of the zoneId property.
      * 
@@ -174,6 +190,10 @@ public class ProviderType {
      */
     public void setZoneId(String value) {
         this.zoneId = value;
+    }
+
+    public boolean isSetZoneId() {
+        return (this.zoneId!= null);
     }
 
     /**
@@ -200,6 +220,10 @@ public class ProviderType {
         this.providerName = value;
     }
 
+    public boolean isSetProviderName() {
+        return (this.providerName!= null);
+    }
+
     /**
      * Gets the value of the querySupport property.
      * 
@@ -222,6 +246,10 @@ public class ProviderType {
      */
     public void setQuerySupport(QuerySupportType value) {
         this.querySupport = value;
+    }
+
+    public boolean isSetQuerySupport() {
+        return (this.querySupport!= null);
     }
 
     /**
@@ -248,6 +276,10 @@ public class ProviderType {
         this.mimeTypes = value;
     }
 
+    public boolean isSetMimeTypes() {
+        return (this.mimeTypes!= null);
+    }
+
     /**
      * Gets the value of the endPoint property.
      * 
@@ -272,6 +304,10 @@ public class ProviderType {
         this.endPoint = value;
     }
 
+    public boolean isSetEndPoint() {
+        return (this.endPoint!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -294,6 +330,10 @@ public class ProviderType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

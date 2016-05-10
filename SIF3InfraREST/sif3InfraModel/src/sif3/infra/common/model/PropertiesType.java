@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -32,8 +33,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "propertiesType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "property"
 })
-public class PropertiesType {
+public class PropertiesType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected List<PropertyType> property;
 
@@ -64,6 +68,14 @@ public class PropertiesType {
             property = new ArrayList<PropertyType>();
         }
         return this.property;
+    }
+
+    public boolean isSetProperty() {
+        return ((this.property!= null)&&(!this.property.isEmpty()));
+    }
+
+    public void unsetProperty() {
+        this.property = null;
     }
 
 }

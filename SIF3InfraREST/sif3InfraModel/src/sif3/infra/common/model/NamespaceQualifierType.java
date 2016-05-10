@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -41,8 +42,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "startsWith",
     "regularExpression"
 })
-public class NamespaceQualifierType {
+public class NamespaceQualifierType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true, nillable = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -81,6 +85,10 @@ public class NamespaceQualifierType {
         this.prefix = value;
     }
 
+    public boolean isSetPrefix() {
+        return (this.prefix!= null);
+    }
+
     /**
      * Gets the value of the static property.
      * 
@@ -103,6 +111,10 @@ public class NamespaceQualifierType {
      */
     public void setStatic(String value) {
         this._static = value;
+    }
+
+    public boolean isSetStatic() {
+        return (this._static!= null);
     }
 
     /**
@@ -129,6 +141,10 @@ public class NamespaceQualifierType {
         this.startsWith = value;
     }
 
+    public boolean isSetStartsWith() {
+        return (this.startsWith!= null);
+    }
+
     /**
      * Gets the value of the regularExpression property.
      * 
@@ -151,6 +167,10 @@ public class NamespaceQualifierType {
      */
     public void setRegularExpression(String value) {
         this.regularExpression = value;
+    }
+
+    public boolean isSetRegularExpression() {
+        return (this.regularExpression!= null);
     }
 
 }

@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -54,8 +55,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "infrastructureServices",
     "provisionedZones"
 })
-public class EnvironmentType {
+public class EnvironmentType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -114,6 +118,10 @@ public class EnvironmentType {
         this.sessionToken = value;
     }
 
+    public boolean isSetSessionToken() {
+        return (this.sessionToken!= null);
+    }
+
     /**
      * Gets the value of the solutionId property.
      * 
@@ -136,6 +144,10 @@ public class EnvironmentType {
      */
     public void setSolutionId(String value) {
         this.solutionId = value;
+    }
+
+    public boolean isSetSolutionId() {
+        return (this.solutionId!= null);
     }
 
     /**
@@ -162,6 +174,10 @@ public class EnvironmentType {
         this.defaultZone = value;
     }
 
+    public boolean isSetDefaultZone() {
+        return (this.defaultZone!= null);
+    }
+
     /**
      * Gets the value of the authenticationMethod property.
      * 
@@ -184,6 +200,10 @@ public class EnvironmentType {
      */
     public void setAuthenticationMethod(String value) {
         this.authenticationMethod = value;
+    }
+
+    public boolean isSetAuthenticationMethod() {
+        return (this.authenticationMethod!= null);
     }
 
     /**
@@ -210,6 +230,10 @@ public class EnvironmentType {
         this.instanceId = value;
     }
 
+    public boolean isSetInstanceId() {
+        return (this.instanceId!= null);
+    }
+
     /**
      * Gets the value of the userToken property.
      * 
@@ -232,6 +256,10 @@ public class EnvironmentType {
      */
     public void setUserToken(String value) {
         this.userToken = value;
+    }
+
+    public boolean isSetUserToken() {
+        return (this.userToken!= null);
     }
 
     /**
@@ -258,6 +286,10 @@ public class EnvironmentType {
         this.consumerName = value;
     }
 
+    public boolean isSetConsumerName() {
+        return (this.consumerName!= null);
+    }
+
     /**
      * Gets the value of the applicationInfo property.
      * 
@@ -280,6 +312,10 @@ public class EnvironmentType {
      */
     public void setApplicationInfo(ApplicationInfoType value) {
         this.applicationInfo = value;
+    }
+
+    public boolean isSetApplicationInfo() {
+        return (this.applicationInfo!= null);
     }
 
     /**
@@ -306,6 +342,10 @@ public class EnvironmentType {
         this.infrastructureServices = value;
     }
 
+    public boolean isSetInfrastructureServices() {
+        return (this.infrastructureServices!= null);
+    }
+
     /**
      * Gets the value of the provisionedZones property.
      * 
@@ -328,6 +368,10 @@ public class EnvironmentType {
      */
     public void setProvisionedZones(ProvisionedZonesType value) {
         this.provisionedZones = value;
+    }
+
+    public boolean isSetProvisionedZones() {
+        return (this.provisionedZones!= null);
     }
 
     /**
@@ -354,6 +398,10 @@ public class EnvironmentType {
         this.type = value;
     }
 
+    public boolean isSetType() {
+        return (this.type!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -376,6 +424,10 @@ public class EnvironmentType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

@@ -23,6 +23,7 @@ import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
 import sif3.common.CommonConstants;
 import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
@@ -37,7 +38,6 @@ import sif3.common.model.SIFZone;
 import sif3.infra.common.env.mgr.ProviderManagerFactory;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
 import sif3.infra.common.env.types.ProviderEnvironment;
-import au.com.systemic.framework.utils.AdvancedProperties;
 
 /**
  * This is the main class each specific provider of a given SIF Object type must extends to implement the CRUD operation as defined

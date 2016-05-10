@@ -22,6 +22,9 @@ import java.net.URI;
 
 import javax.ws.rs.core.Response.Status;
 
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.model.security.TokenInfo;
@@ -32,9 +35,6 @@ import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.env.types.EnvironmentInfo;
 import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.EnvironmentType;
-
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 
 /**
  * This class implements the REST client for the environment connector as defined in the SIF3 Spec.

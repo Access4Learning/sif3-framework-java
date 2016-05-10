@@ -24,15 +24,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import javax.xml.bind.JAXBElement;
 
-import sif.dd.au30.model.StudentPersonalCollectionType;
-import au.com.systemic.framework.utils.FileReaderWriter;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.LoggingFilter;
+
+import au.com.systemic.framework.utils.FileReaderWriter;
+import sif.dd.au34.model.StudentPersonalCollectionType;
 
 /**
  * @author Joerg Huber

@@ -21,11 +21,12 @@ package sif3.infra.common.env.ops;
 import java.util.Date;
 import java.util.List;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.PersistenceException;
-import sif3.common.model.EnvironmentKey;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
+import sif3.common.model.EnvironmentKey;
 import sif3.common.model.security.TokenInfo;
 import sif3.common.persist.model.AppEnvironmentTemplate;
 import sif3.common.persist.model.SIF3Session;
@@ -37,7 +38,6 @@ import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.common.model.EnvironmentTypeType;
 import sif3.infra.common.model.InfrastructureServiceType;
 import sif3.infra.common.model.InfrastructureServicesType;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class implements operations required by a direct environment provider. They are quite distinct and therefore warrant having its own

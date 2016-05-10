@@ -21,6 +21,8 @@ import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.exception.PersistenceException;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.model.security.TokenInfo;
@@ -31,8 +33,6 @@ import sif3.infra.common.env.types.EnvironmentInfo;
 import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.common.utils.SIFSessionUtils;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class deals with the main functions relating to the environments that need to be managed by the environment provider. 

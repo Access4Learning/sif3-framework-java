@@ -22,7 +22,7 @@ package sif3.common.exception;
  * @author Joerg Huber
  *
  */
-public class MarshalException extends Exception
+public class MarshalException extends SIF3Exception
 {
     private static final long serialVersionUID = -3389084634923281L;
 

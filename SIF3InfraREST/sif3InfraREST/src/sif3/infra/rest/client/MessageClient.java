@@ -23,6 +23,10 @@ import java.net.URI;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderProperties;
@@ -31,10 +35,6 @@ import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.interfaces.ClientEnvironmentManager;
-import au.com.systemic.framework.utils.StringUtils;
-
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 
 /**
  * This class implements the REST client for the queue connector but only for the "message" related operations. The implementation meets SIF3 Spec.

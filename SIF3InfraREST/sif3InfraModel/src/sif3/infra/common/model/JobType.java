@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -48,8 +49,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "lastModified",
     "phases"
 })
-public class JobType {
+public class JobType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -99,6 +103,10 @@ public class JobType {
         this.name = value;
     }
 
+    public boolean isSetName() {
+        return (this.name!= null);
+    }
+
     /**
      * Gets the value of the description property.
      * 
@@ -121,6 +129,10 @@ public class JobType {
      */
     public void setDescription(String value) {
         this.description = value;
+    }
+
+    public boolean isSetDescription() {
+        return (this.description!= null);
     }
 
     /**
@@ -147,6 +159,10 @@ public class JobType {
         this.state = value;
     }
 
+    public boolean isSetState() {
+        return (this.state!= null);
+    }
+
     /**
      * Gets the value of the stateDescription property.
      * 
@@ -169,6 +185,10 @@ public class JobType {
      */
     public void setStateDescription(String value) {
         this.stateDescription = value;
+    }
+
+    public boolean isSetStateDescription() {
+        return (this.stateDescription!= null);
     }
 
     /**
@@ -195,6 +215,10 @@ public class JobType {
         this.created = value;
     }
 
+    public boolean isSetCreated() {
+        return (this.created!= null);
+    }
+
     /**
      * Gets the value of the lastModified property.
      * 
@@ -217,6 +241,10 @@ public class JobType {
      */
     public void setLastModified(Calendar value) {
         this.lastModified = value;
+    }
+
+    public boolean isSetLastModified() {
+        return (this.lastModified!= null);
     }
 
     /**
@@ -243,6 +271,10 @@ public class JobType {
         this.phases = value;
     }
 
+    public boolean isSetPhases() {
+        return (this.phases!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -265,6 +297,10 @@ public class JobType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

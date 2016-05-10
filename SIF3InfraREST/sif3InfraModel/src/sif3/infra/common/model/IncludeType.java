@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -32,8 +33,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "includeType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "xpath"
 })
-public class IncludeType {
+public class IncludeType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected List<XpathType> xpath;
 
@@ -64,6 +68,14 @@ public class IncludeType {
             xpath = new ArrayList<XpathType>();
         }
         return this.xpath;
+    }
+
+    public boolean isSetXpath() {
+        return ((this.xpath!= null)&&(!this.xpath.isEmpty()));
+    }
+
+    public void unsetXpath() {
+        this.xpath = null;
     }
 
 }

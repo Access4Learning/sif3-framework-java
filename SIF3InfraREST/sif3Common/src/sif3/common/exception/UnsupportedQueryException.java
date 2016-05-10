@@ -18,7 +18,7 @@
 
 package sif3.common.exception;
 
-public class UnsupportedQueryException extends Exception
+public class UnsupportedQueryException extends SIF3Exception
 {
   private static final long serialVersionUID = 907365345457L;
 

@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -39,8 +40,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "required",
     "rights"
 })
-public class PhaseType {
+public class PhaseType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -76,6 +80,10 @@ public class PhaseType {
         this.name = value;
     }
 
+    public boolean isSetName() {
+        return (this.name!= null);
+    }
+
     /**
      * Gets the value of the states property.
      * 
@@ -100,6 +108,10 @@ public class PhaseType {
         this.states = value;
     }
 
+    public boolean isSetStates() {
+        return (this.states!= null);
+    }
+
     /**
      * Gets the value of the required property.
      * 
@@ -114,6 +126,10 @@ public class PhaseType {
      */
     public void setRequired(boolean value) {
         this.required = value;
+    }
+
+    public boolean isSetRequired() {
+        return true;
     }
 
     /**
@@ -138,6 +154,10 @@ public class PhaseType {
      */
     public void setRights(RightsType value) {
         this.rights = value;
+    }
+
+    public boolean isSetRights() {
+        return (this.rights!= null);
     }
 
 }
