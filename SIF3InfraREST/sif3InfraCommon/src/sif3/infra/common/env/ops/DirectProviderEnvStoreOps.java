@@ -34,6 +34,7 @@ import sif3.common.persist.service.AppEnvironmentService;
 import sif3.common.persist.service.SIF3SessionService;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.env.types.ProviderEnvironment;
+import sif3.infra.common.interfaces.ClientEnvStoreOperations;
 import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.common.model.EnvironmentTypeType;
 import sif3.infra.common.model.InfrastructureServiceType;
@@ -46,7 +47,7 @@ import sif3.infra.common.model.InfrastructureServicesType;
  * @author Joerg Huber
  *
  */
-public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
+public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations implements ClientEnvStoreOperations
 {
 	private SIF3SessionService service = new SIF3SessionService();
 	private AppEnvironmentService appEnvService = new AppEnvironmentService();
@@ -626,5 +627,15 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 	private void reloadServiceInfo(EnvironmentType environment, EnvironmentType templEnv)
 	{
 		environment.setProvisionedZones(templEnv.getProvisionedZones());
+	}
+
+	@Override
+	public SIF3Session loadSession(EnvironmentKey environmentKey) {
+		return loadSession(environmentKey, AdapterType.PROVIDER, service);
+	}
+
+	@Override
+	public SIF3Session createOrUpdateSession(EnvironmentType inputEnv, TokenInfo tokenInfo) {
+		return createOrUpdateSession(inputEnv, tokenInfo, AdapterType.PROVIDER, service);
 	}
 }
