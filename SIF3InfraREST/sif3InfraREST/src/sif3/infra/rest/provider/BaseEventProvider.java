@@ -194,7 +194,7 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 		// If there are no services for this provider defined then we don't need to get any events at all.
 		if ((servicesForProvider == null) || (servicesForProvider.size() == 0))
 		{
-			logger.info("This emvironment does not have any zones and contexts defined for the "+getMultiObjectClassInfo().getObjectName() + " service. No events can be sent.");
+			logger.info("This environment does not have any zones and contexts defined for the "+getMultiObjectClassInfo().getObjectName() + " service. No events can be sent.");
 			return;
 		}		
 		try

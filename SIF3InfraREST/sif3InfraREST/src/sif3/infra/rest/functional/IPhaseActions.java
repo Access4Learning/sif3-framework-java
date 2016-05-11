@@ -17,16 +17,18 @@ import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.exception.UnsupportedQueryException;
+import sif3.common.model.SIFContext;
+import sif3.common.model.SIFZone;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.PhaseType;
 
 public interface IPhaseActions {
 
-	String create(JobType job, PhaseType phase, String data, MediaType requestMediaType, MediaType responseMediaType) throws IllegalArgumentException, PersistenceException, UnmarshalException, UnsupportedMediaTypeException, UnsupportedQueryException;
+	String create(JobType job, PhaseType phase, String payload, MediaType requestMediaType, MediaType responseMediaType, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException, UnmarshalException, UnsupportedMediaTypeException, UnsupportedQueryException;
 
-	String retrieve(JobType job, PhaseType phase, MediaType responseMediaType) throws IllegalArgumentException, PersistenceException, UnsupportedMediaTypeException, UnsupportedQueryException;
+	String retrieve(JobType job, PhaseType phase, String payload, MediaType requestMediaType, MediaType responseMediaType, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException, UnsupportedMediaTypeException, UnsupportedQueryException;
 
-	String update(JobType job, PhaseType phase, String data, MediaType requestMediaType, MediaType responseMediaType) throws IllegalArgumentException, PersistenceException, UnmarshalException, UnsupportedMediaTypeException, UnsupportedQueryException;
+	String update(JobType job, PhaseType phase, String payload, MediaType requestMediaType, MediaType responseMediaType, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException, UnmarshalException, UnsupportedMediaTypeException, UnsupportedQueryException;
 
-	String delete(JobType job, PhaseType phase, String data, MediaType requestMediaType, MediaType responseMediaType) throws IllegalArgumentException, PersistenceException, UnmarshalException, UnsupportedMediaTypeException, UnsupportedQueryException;
+	String delete(JobType job, PhaseType phase, String payload, MediaType requestMediaType, MediaType responseMediaType, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException, UnmarshalException, UnsupportedMediaTypeException, UnsupportedQueryException;
 }

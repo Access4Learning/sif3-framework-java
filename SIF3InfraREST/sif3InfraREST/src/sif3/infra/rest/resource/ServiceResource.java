@@ -159,7 +159,7 @@ public class ServiceResource extends InfraObjectResource {
 
 	@GET
 	@Path("{resourceID:([^\\.]*)}/phases/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
-	public Response retrieveToPhase(@PathParam("resourceID") String resourceID, @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType) {
+	public Response retrieveToPhase(String payload, @PathParam("resourceID") String resourceID, @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Get phase " + phaseName + " by Job ID (REST GET): " + resourceID + " and URL Postfix mimeType = '" + mimeType + "'");
 		}
@@ -179,7 +179,7 @@ public class ServiceResource extends InfraObjectResource {
 		determineMediaTypes(null, null, false);
 
 		try {
-			Object returnObj = provider.retrieveToPhase(resourceID, phaseName, getResponseMediaType(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
+			Object returnObj = provider.retrieveToPhase(resourceID, phaseName, payload, getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
 			if (returnObj != null) {
 				return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.QUERY, null);
 			} else {

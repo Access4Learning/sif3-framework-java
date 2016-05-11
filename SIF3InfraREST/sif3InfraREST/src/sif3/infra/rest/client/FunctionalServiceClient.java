@@ -15,6 +15,8 @@ import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderProperties;
+import sif3.common.header.HeaderValues;
+import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.URLQueryParameter;
@@ -66,12 +68,15 @@ public class FunctionalServiceClient extends ObjectServiceClient {
 		}
 	}
 
-	public Response retrieveToPhase(String relURI, String resourceID, String phaseName, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, SIFZone zone, SIFContext context) throws ServiceInvokationException {
+	public Response retrieveToPhase(String relURI, String resourceID, String phaseName, String payload, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, SIFZone zone, SIFContext context) throws ServiceInvokationException {
 		WebResource service = getService();
 		try {
 			service = buildURI(service, relURI, resourceID, phaseName, zone, context, urlQueryParams);
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
+
+			//ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
+			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.GET.name());
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).post(ClientResponse.class, payload);
 
 			return setResponse(service, response, String.class, hdrProperties, zone, context, true, Status.OK, Status.NOT_MODIFIED);
 		} catch (Exception ex) {

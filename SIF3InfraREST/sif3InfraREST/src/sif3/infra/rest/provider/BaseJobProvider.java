@@ -22,6 +22,7 @@ import sif3.common.exception.SIF3Exception;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues.EventAction;
+import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
@@ -45,6 +46,8 @@ import sif3.infra.common.persist.service.SIF3JobService;
 import sif3.infra.common.utils.ServiceUtils;
 import sif3.infra.rest.functional.IPhaseActions;
 import sif3.infra.rest.functional.JobEvent;
+import sif3.infra.rest.functional.JobEvents;
+import sif3.infra.rest.functional.JobIterator;
 
 // TODO Check all methods to ensure they do what is expected rather than
 // returning fake data
@@ -61,8 +64,7 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 	private String serviceName;
 	protected HashMap<String, IPhaseActions> phaseActions;
 
-	// FIXME is this right?
-	private static List<JobEvent> jobEvents = null;
+	private static JobEvents sifevents = null;
 
 	public BaseJobProvider(String serviceName) {
 		super();
@@ -73,9 +75,9 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 		JAXBUtils.initCtx(getMultiObjectClassInfo().getObjectType());
 		JAXBUtils.initCtx(getSingleObjectClassInfo().getObjectType());
 
-		if (jobEvents == null) {
+		if (sifevents == null) {
 			logger.debug("Constructor for AbstractJobProvider called for the first time...");
-			jobEvents = new ArrayList<JobEvent>();
+			sifevents = new JobEvents();
 		}
 	}
 
@@ -103,8 +105,10 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 	 */
 	@Override
 	public SIFEventIterator<JobCollectionType> getSIFEvents() {
-		JobIterator itr = new JobIterator(getServiceName(), getServiceProperties(), jobEvents);
-		jobEvents = new ArrayList<JobEvent>();
+		if(sifevents.isEmpty()) {
+			return null;
+		}
+		JobIterator itr = new JobIterator(getServiceName(), getServiceProperties(), sifevents.getAllEvents());
 		return itr;
 	}
 
@@ -136,7 +140,23 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 	 */
 	@Override
 	public SIFEvent<JobCollectionType> modifyBeforePublishing(SIFEvent<JobCollectionType> sifEvent, SIFZone zone, SIFContext context, HeaderProperties customHTTPHeaders) {
-		// Just send as is...
+		JobEvent jobEvent = sifevents.get(sifEvent);
+		if(jobEvent == null) {
+			// Don't know anything about this event
+			return null;
+		}
+		
+		if(!jobEvent.getZone().equals(zone)) {
+			// Not the right zone to send this to
+			return null;
+		}
+		
+		if(!jobEvent.getContext().equals(context)) {
+			// Not the right context to send this to
+			return null;
+		}
+		
+		// Looks ok
 		return sifEvent;
 	}
 
@@ -184,19 +204,7 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 
 			sif3JobService.save(job);
 
-			jobEvents.add(new JobEvent(job, EventAction.CREATE));
-			broadcastEvents();
-			/*
-			try {
-				EventClient evtClient = new EventClient((ClientEnvironmentManager) ProviderManagerFactory.getEnvironmentManager(), getRequestMediaType(), getResponseMediaType(), getServiceName(), getMarshaller(), getCompressionEnabled());
-				SIFEvent<JobCollectionType> event = new SIFEvent<JobCollectionType>(new JobCollectionType(), EventAction.CREATE, UpdateType.FULL, 0);
-				event.getSIFObjectList().getJob().add(job);
-				event.setListSize(1);
-				sendEvents(evtClient, event, zone, context, null);
-			} catch (Exception e) {
-				logger.error("\n\nError sending event: " + e.getMessage() + "\n\n", e);
-			}
-			*/
+			sendJobEvent(job, EventAction.CREATE, zone, context);
 
 			return job;
 		} else {
@@ -272,8 +280,9 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 		}
 
 		sif3JobService.removeJobById(resourceID);
-		jobEvents.add(new JobEvent(job, EventAction.DELETE));
-		broadcastEvents();
+		
+		sendJobEvent(job, EventAction.DELETE, zone, context);
+		
 		return true;
 	}
 
@@ -361,14 +370,14 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 			throw new IllegalArgumentException("Unexpected error, phase is known (" + job.getId() + "/" + phase.getName() + "), but has no actions can be found");
 		}
 
-		String result = actions.create(job, phase, payload, requestMediaType, responseMediaType);
+		String result = actions.create(job, phase, payload, requestMediaType, responseMediaType, zone, context);
+		
 		sif3JobService.save(job);
-		jobEvents.add(new JobEvent(job, EventAction.UPDATE));
-		broadcastEvents();
+		
 		return result;
 	}
 
-	public String retrieveToPhase(String resourceID, String phaseName, MediaType responseMediaType, SIFZone zone, SIFContext context, RequestMetadata metadata) throws SIF3Exception {
+	public String retrieveToPhase(String resourceID, String phaseName, String payload, MediaType requestMediaType, MediaType responseMediaType, SIFZone zone, SIFContext context, RequestMetadata metadata) throws SIF3Exception {
 		logger.debug("Retrieve to phase " + resourceID + "/" + phaseName + " in " + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 
 		JobType job = (JobType) retrieveByPrimaryKey(resourceID, zone, context, metadata);
@@ -390,10 +399,11 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 			throw new IllegalArgumentException("Unexpected error, phase is known (" + job.getId() + "/" + phase.getName() + "), but has no actions can be found");
 		}
 
-		String result = actions.retrieve(job, phase, responseMediaType);
+		String result = actions.retrieve(job, phase, payload, requestMediaType, responseMediaType, zone, context);
+
 		// A get to a phase may have potentially modified the job state
 		sif3JobService.save(job);
-		broadcastEvents();
+		
 		return result;
 	}
 
@@ -419,10 +429,10 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 			throw new IllegalArgumentException("Unexpected error, phase is known (" + job.getId() + "/" + phase.getName() + "), but has no actions can be found");
 		}
 
-		String result = actions.update(job, phase, payload, requestMediaType, responseMediaType);
+		String result = actions.update(job, phase, payload, requestMediaType, responseMediaType, zone, context);
+		
 		sif3JobService.save(job);
-		jobEvents.add(new JobEvent(job, EventAction.UPDATE));
-		broadcastEvents();
+		
 		return result;
 	}
 
@@ -448,10 +458,10 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 			throw new IllegalArgumentException("Unexpected error, phase is known (" + job.getId() + "/" + phase.getName() + "), but has no actions can be found");
 		}
 
-		String result = actions.delete(job, phase, payload, requestMediaType, responseMediaType);
+		String result = actions.delete(job, phase, payload, requestMediaType, responseMediaType, zone, context);
+		
 		sif3JobService.save(job);
-		jobEvents.add(new JobEvent(job, EventAction.UPDATE));
-		broadcastEvents();
+		
 		return result;
 	}
 
@@ -462,6 +472,22 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 	@Override
 	public HeaderProperties getCustomServiceInfo(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException {
 		return metadata.getHTTPParameters();
+	}
+	
+	/*----------------------*/
+	/*--  Phase Eventing  --*/
+	/*----------------------*/
+	
+	public void sendJobEvent(JobType job, EventAction action, SIFZone zone, SIFContext context) {
+		SIFEvent<JobCollectionType> event = new SIFEvent<JobCollectionType>(new JobCollectionType(), action, UpdateType.FULL, 1);
+		event.getSIFObjectList().getJob().add(job);
+		sifevents.add(new JobEvent(event, zone, context));
+	}
+	
+	public void sendJobEvent(JobType job, String phaseName, EventAction action, SIFZone zone, SIFContext context) {
+		SIFEvent<JobCollectionType> event = new SIFEvent<JobCollectionType>(new JobCollectionType(), action, UpdateType.PARTIAL, 1);
+		event.getSIFObjectList().getJob().add(filter(job, phaseName));
+		sifevents.add(new JobEvent(event, zone, context));
 	}
 
 	/*--------------------------------------*/
@@ -507,11 +533,19 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 
 		return output;
 	}
-
-	/*
-	 * private String mapToString(Map<?, ?> map) { ByteArrayOutputStream bos = new
-	 * ByteArrayOutputStream(); XMLEncoder xmlEncoder = new XMLEncoder(bos);
-	 * xmlEncoder.writeObject(map); xmlEncoder.flush(); String output =
-	 * bos.toString(); xmlEncoder.close(); return output; }
-	 */
+	
+	private JobType filter(JobType job, String phaseName) {
+		JobType newJob = objectFactory.createJobType();
+		newJob.setId(job.getId());
+		newJob.setName(job.getName());
+		/*
+		newJob.setDescription(job.getDescription());
+		newJob.setCreated(job.getCreated());
+		newJob.setLastModified(job.getLastModified());
+		newJob.setState(job.getState());
+		*/
+		newJob.setPhases(objectFactory.createPhaseCollectionType());
+		newJob.getPhases().getPhase().add(ServiceUtils.getPhase(job, phaseName));
+		return newJob;
+	}
 }

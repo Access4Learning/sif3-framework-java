@@ -14,9 +14,9 @@ public class PayloadProvider extends BaseJobProvider {
 	public PayloadProvider() {
 		super("Payload");
 		
-		phaseActions.put("default", new DefaultActions());
-    phaseActions.put("xml", new XmlActions());
-    phaseActions.put("json", new JsonActions());
+		phaseActions.put("default", new DefaultActions(this));
+    phaseActions.put("xml", new XmlActions(this));
+    phaseActions.put("json", new JsonActions(this));
 	}
 	
 	@Override

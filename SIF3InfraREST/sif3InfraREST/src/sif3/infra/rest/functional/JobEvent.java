@@ -1,38 +1,73 @@
 
 package sif3.infra.rest.functional;
 
-import sif3.common.header.HeaderValues.EventAction;
-import sif3.infra.common.model.JobType;
+import sif3.common.model.SIFContext;
+import sif3.common.model.SIFEvent;
+import sif3.common.model.SIFZone;
+import sif3.infra.common.model.JobCollectionType;
 
 public class JobEvent {
+	private SIFEvent<JobCollectionType> event;
+	private SIFZone zone;
+	private SIFContext context;
 
-	// SIFZone zone;
-	// SIFContext context;
-	JobType job;
-	EventAction action;
-
-	// public JobEvent(JobType job, EventAction action, SIFZone zone, SIFContext
-	// context) {
-	public JobEvent(JobType job, EventAction action) {
-		this.job = job;
-		this.action = action;
-		// this.zone = zone;
-		// this.context = context;
+	public JobEvent() {
+		super();
+	}
+	
+	public JobEvent(SIFEvent<JobCollectionType> event) {
+		this();
+		this.event = event;
+	}
+	
+	public JobEvent(SIFEvent<JobCollectionType> event, SIFZone zone, SIFContext context) {
+		this(event);
+		this.zone = zone;
+		this.context = context;
+	}
+	
+	/**
+	 * @return the event
+	 */
+	public SIFEvent<JobCollectionType> getEvent() {
+		return event;
 	}
 
-	public JobType getJob() {
-		return job;
+	
+	/**
+	 * @param event the event to set
+	 */
+	public void setEvent(SIFEvent<JobCollectionType> event) {
+		this.event = event;
 	}
 
-	public EventAction getEventAction() {
-		return action;
+	/**
+	 * @return the zone
+	 */
+	public SIFZone getZone() {
+		return zone;
 	}
 
-	// public SIFZone getZone() {
-	// return zone;
-	// }
+	/**
+	 * @param zone
+	 *          the zone to set
+	 */
+	public void setZone(SIFZone zone) {
+		this.zone = zone;
+	}
 
-	// public SIFContext getContext() {
-	// return context;
-	// }
+	/**
+	 * @return the context
+	 */
+	public SIFContext getContext() {
+		return context;
+	}
+
+	/**
+	 * @param context
+	 *          the context to set
+	 */
+	public void setContext(SIFContext context) {
+		this.context = context;
+	}
 }

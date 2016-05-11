@@ -12,7 +12,7 @@ if not defined JAVA_HOME (
 
 set SERVICE_ID=%1%
 set PROP_FILE_NAME=%2%
-set FULLY_QUALIFIED_CLASS_NAME=systemic.sif3.demo.au.rest.consumer.StudentConsumerService
+set FULLY_QUALIFIED_CLASS_NAME=systemic.sif3.demo.rest.consumer.StudentConsumerService
 set EXE_JAR_PATH=..\release
 shift & shift
 

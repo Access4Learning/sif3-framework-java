@@ -155,7 +155,7 @@ public abstract class AbstractJobConsumer extends AbstractEventConsumer<JobColle
 		return responses;
 	}
 	
-	public List<Response> retrieveToPhase(String resourceID, String phaseName, MediaType responseMediaType, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException {
+	public List<Response> retrieveToPhase(String resourceID, String phaseName, String payload, MediaType requestMediaType, MediaType responseMediaType, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException {
     nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
     nullMethodCheck(getSingleObjectClassInfo(), "getSingleObjectClassInfo()");
     
@@ -179,8 +179,9 @@ public abstract class AbstractJobConsumer extends AbstractEventConsumer<JobColle
 			if (error == null) {
 				// all good
 				FunctionalServiceClient client = getClient(getConsumerEnvironment());
+				client.setRequestMediaType(requestMediaType, getMarshaller());
 				client.setResponseMediaType(responseMediaType, getUnmarshaller());
-				responses.add(client.retrieveToPhase(getMultiObjectClassInfo().getObjectName(), resourceID, phaseName, getHeaderProperties(false, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
+				responses.add(client.retrieveToPhase(getMultiObjectClassInfo().getObjectName(), resourceID, phaseName, payload, getHeaderProperties(false, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
 			}
 			else {
 				// pretend to have received a 'fake' error Response

@@ -260,31 +260,31 @@ public class PayloadConsumer extends AbstractJobConsumer {
 	
 	@Override
 	public void processDelayedCreateMany(MultiOperationStatusList<CreateOperationStatus> statusList, DelayedResponseReceipt receipt) {
-		logResult("Received DELAYED CREATE Response:\n" + statusList + "\nDelayed Receipt Details:\n" + receipt);
+		logger.debug("Received DELAYED CREATE Response:\n" + statusList + "\nDelayed Receipt Details:\n" + receipt);
 	}
 
 	@Override
 	public void processDelayedUpdateMany(MultiOperationStatusList<OperationStatus> statusList, DelayedResponseReceipt receipt) {
-		logResult("Received DELAYED UPDATE Response:\n" + statusList + "\nDelayed Receipt Details:\n" + receipt);
+		logger.debug("Received DELAYED UPDATE Response:\n" + statusList + "\nDelayed Receipt Details:\n" + receipt);
 	}
 
 	@Override
 	public void processDelayedDeleteMany(MultiOperationStatusList<OperationStatus> statusList, DelayedResponseReceipt receipt) {
-		logResult("Received DELAYED DELETE Response:\n" + statusList + "\nDelayed Receipt Details:\n" + receipt);
+		logger.debug("Received DELAYED DELETE Response:\n" + statusList + "\nDelayed Receipt Details:\n" + receipt);
 	}
 
 	@Override
 	public void processDelayedQuery(Object dataObject, PagingInfo pagingInfo, DelayedResponseReceipt receipt) {
-		logResult("Received DELAYED QUERY Response:\n" + dataObject + "\nPagingInfo:\n" + pagingInfo + "\nDelayed Receipt Details:\n" + receipt);
+		logger.debug("Received DELAYED QUERY Response:\n" + dataObject + "\nPagingInfo:\n" + pagingInfo + "\nDelayed Receipt Details:\n" + receipt);
 	}
 
 	@Override
 	public void processDelayedServicePath(Object dataObject, QueryCriteria queryCriteria, PagingInfo pagingInfo, DelayedResponseReceipt receipt) {
-		logResult("Received DELAYED SERVICEPATH Response:\n" + dataObject + "\nQuery Criteria:\n" + queryCriteria + "\nPagingInfo:\n" + pagingInfo + "\nDelayed Receipt Details:\n" + receipt);
+		logger.debug("Received DELAYED SERVICEPATH Response:\n" + dataObject + "\nQuery Criteria:\n" + queryCriteria + "\nPagingInfo:\n" + pagingInfo + "\nDelayed Receipt Details:\n" + receipt);
 	}
 
 	@Override
 	public void processDelayedError(ErrorDetails error, DelayedResponseReceipt receipt) {
-		logResult("Received DELAYED ERROR Response:\n" + error + "\nDelayed Receipt Details:\n" + receipt);
+		logger.debug("Received DELAYED ERROR Response:\n" + error + "\nDelayed Receipt Details:\n" + receipt);
 	}
 }

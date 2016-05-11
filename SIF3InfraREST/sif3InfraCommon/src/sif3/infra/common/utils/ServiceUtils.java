@@ -30,7 +30,10 @@ public class ServiceUtils {
 	}
 	
 	public static StateType getLastPhaseState(JobType job, String phaseName) {
-		PhaseType phase = getPhase(job, phaseName);
+		return getLastPhaseState(getPhase(job, phaseName));
+	}
+
+	public static StateType getLastPhaseState(PhaseType phase) {
 		if(phase == null) {
 			return null;
 		}

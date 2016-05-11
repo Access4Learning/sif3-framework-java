@@ -25,16 +25,24 @@ import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.exception.UnsupportedQueryException;
+import sif3.common.header.HeaderValues.EventAction;
+import sif3.common.model.SIFContext;
+import sif3.common.model.SIFZone;
 import sif3.infra.common.ServiceStatus.JobState;
 import sif3.infra.common.ServiceStatus.PhaseState;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.PhaseType;
 import sif3.infra.common.utils.ServiceUtils;
 import sif3.infra.rest.functional.BasePhaseActions;
+import sif3.infra.rest.provider.BaseJobProvider;
 
 public class XmlActions extends BasePhaseActions {
+	public XmlActions(BaseJobProvider provider) {
+		super(provider);
+	}
+	
 	@Override
-	public String update(JobType job, PhaseType phase, String data, MediaType requestMediaType, MediaType responseMediaType) throws IllegalArgumentException, PersistenceException, UnmarshalException, UnsupportedMediaTypeException, UnsupportedQueryException {
+	public String update(JobType job, PhaseType phase, String payload, MediaType requestMediaType, MediaType responseMediaType, SIFZone zone, SIFContext context) throws IllegalArgumentException, PersistenceException, UnmarshalException, UnsupportedMediaTypeException, UnsupportedQueryException {
 		ServiceUtils.changeJobState(job, JobState.INPROGRESS, "UPDATE to " + phase.getName());
 		
     String response;
@@ -45,10 +53,13 @@ public class XmlActions extends BasePhaseActions {
         throw new IllegalArgumentException(response);
     }
 
-    LearnerPersonalType learner = (LearnerPersonalType)new DataModelUnmarshalFactory().unmarshalFromXML(data, LearnerPersonalType.class);
+    LearnerPersonalType learner = (LearnerPersonalType)new DataModelUnmarshalFactory().unmarshalFromXML(payload, LearnerPersonalType.class);
 
     NameType name = learner.getPersonalInformation().getName();
     ServiceUtils.changePhaseState(job, phase, PhaseState.COMPLETED, "UPDATE");
+    
+    getProvider().sendJobEvent(job, phase.getName(), EventAction.UPDATE, zone, context);
+    
     return "Got UPDATE message for " + phase.getName() + "@" + job.getId() + " with content type " + requestMediaType.toString() + " and accept " + responseMediaType.toString() + ".\nGot record for learner:" + name.getGivenName().getValue() + " " + name.getFamilyName().getValue();
 	}
 }
