@@ -67,24 +67,24 @@ public class ProviderFactory
 	 */
 	public static synchronized ProviderFactory createFactory(AdvancedProperties adapterProps)
 	{
-	  synchronized (locked)
-	  {
-        logger.debug("Total Threads running before initialising provider Factory: " +Thread.activeCount()+" threads.");
-  	    if (factory == null)
-  	    {
-  	    	try
-  	    	{
-  	    		factory = new ProviderFactory(adapterProps);
-  	    	}
-  			catch (Exception ex)
-  			{
-  				logger.error("Failed to initialise provider factory. Provider won't run.", ex);
-  				factory = null;
-  			}
-  	    }
-          logger.debug("Total Threads running after initialising Provider Factory: " +Thread.activeCount()+" threads.");
-  	    return factory;
-	  }
+        synchronized (locked)
+        {
+            logger.debug("Total Threads running before initialising provider Factory: " + Thread.activeCount() + " threads.");
+            if (factory == null)
+            {
+                try
+                {
+                    factory = new ProviderFactory(adapterProps);
+                }
+                catch (Exception ex)
+                {
+                    logger.error("Failed to initialise provider factory. Provider won't run.", ex);
+                    factory = null;
+                }
+            }
+            logger.debug("Total Threads running after initialising Provider Factory: " + Thread.activeCount() + " threads.");
+            return factory;
+        }
 	}
 	
 	/**
@@ -92,30 +92,33 @@ public class ProviderFactory
 	 */
 	public static synchronized void shutdown()
 	{
-	  synchronized (locked)
-	  {
-	    if (factory != null)
-	    {
-    		for (BaseProvider provider : factory.eventProviders.values())
-    		{
-    	    	try
-    	    	{
-    	    	  logger.debug("Finalise provider "+provider.getMultiObjectClassInfo().getObjectName()+"...");
-    	    		provider.finalise();
-    	    	}
-    	    	catch (Exception ex)
-    	    	{
-    	    		// nothing we can really do. We are shutting down anyway...
-    	    	}
-    		}
-    		
-    		// Shut down provider threads.
-    		logger.debug("Shut Down Provider Thread Pool...");
-    		factory.providerService.shutdownNow();
-    		logger.debug("Shut Down Provider Thread Pool: Done");
-	    }
-      logger.info("All providers are shut down.");
-	  }
+        synchronized (locked)
+        {
+            if (factory != null)
+            {
+                for (BaseProvider provider : factory.eventProviders.values())
+                {
+                    try
+                    {
+                        logger.debug("Finalise provider " + provider.getMultiObjectClassInfo().getObjectName() + "...");
+                        provider.finalise();
+                    }
+                    catch (Exception ex)
+                    {
+                        // nothing we can really do. We are shutting down anyway...
+                    }
+                }
+
+                // Shut down provider threads.
+                logger.debug("Shut Down Provider Thread Pool...");
+                if (factory.providerService != null)
+                {
+                    factory.providerService.shutdownNow();
+                }
+                logger.debug("Shut Down Provider Thread Pool: Done");
+            }
+            logger.info("All providers are shut down.");
+        }
 	}
 	
 	/**
@@ -138,37 +141,37 @@ public class ProviderFactory
 	 */
 	public Provider getProvider(ModelObjectInfo objectInfo)
 	{
-		if ((objectInfo != null) && (StringUtils.notEmpty(objectInfo.getObjectName())))
-		{
-		  ProviderClassInfo providerClassInfo = providerClasses.get(objectInfo);
-		  if (providerClassInfo != null)
-		  {
-		    try
-		    {
-		      return (BaseProvider)providerClassInfo.getClassInstance(null);
-		    }
-		    catch (Exception ex)
-		    {
-		      logger.error("Failed to instantiate a provider for "+objectInfo.getObjectName()+": "+ex.getMessage(), ex);
-		      return null;
-		    }
-		  }
-		  else // no known provider for the given Object Type
-		  {
-		    return null;
-		  }
-		}
-		else
-		{
-			logger.error("The ModelObjectInfo parameter is either null or does not have the ObjectName property set. This is required! No Provider returned.");
-			return null;
-		}
+        if ((objectInfo != null) && (StringUtils.notEmpty(objectInfo.getObjectName())))
+        {
+            ProviderClassInfo providerClassInfo = providerClasses.get(objectInfo);
+            if (providerClassInfo != null)
+            {
+                try
+                {
+                    return (BaseProvider) providerClassInfo.getClassInstance(null);
+                }
+                catch (Exception ex)
+                {
+                    logger.error("Failed to instantiate a provider for " + objectInfo.getObjectName() + ": " + ex.getMessage(), ex);
+                    return null;
+                }
+            }
+            else // no known provider for the given Object Type
+            {
+                return null;
+            }
+        }
+        else
+        {
+            logger.error("The ModelObjectInfo parameter is either null or does not have the ObjectName property set. This is required! No Provider returned.");
+            return null;
+        }
 	}
 	
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-  private ProviderFactory(AdvancedProperties adapterProps) throws Exception
+	private ProviderFactory(AdvancedProperties adapterProps) throws Exception
 	{
 		super();
 		
@@ -177,48 +180,48 @@ public class ProviderFactory
 		startProviders(adapterProps);
 	}
 	
-  private void initialiseProviders(AdvancedProperties adapterProps)
+	private void initialiseProviders(AdvancedProperties adapterProps)
 	{
-	    List<String> classList = adapterProps.getFromCommaSeparated("provider.classes");
-	    String basePackageName = makePackageName(adapterProps.getPropertyAsString("provider.basePackageName", ""));
-	    for (String className : classList)
-	    {
-	        logger.debug("Provider class to initialse: " + className);
-	        try
-	        {
-            Class<?> clazz = Class.forName(basePackageName + className);
-	          ProviderClassInfo providerClassInfo = new ProviderClassInfo(clazz, new Class[] {});
-	          
-	          Object classObj = providerClassInfo.getClassInstance(null);
-	          
-	          // Set properties and add it to correct structure
-            if (classObj instanceof BaseProvider)
+        List<String> classList = adapterProps.getFromCommaSeparated("provider.classes");
+        String basePackageName = makePackageName(adapterProps.getPropertyAsString("provider.basePackageName", ""));
+        for (String className : classList)
+        {
+            logger.debug("Provider class to initialse: " + className);
+            try
             {
-              BaseProvider provider = (BaseProvider)classObj;
-              ModelObjectInfo objectInfo = provider.getMultiObjectClassInfo();
-              if ((objectInfo != null) && (StringUtils.notEmpty(objectInfo.getObjectName())))
-              {
-                // First add it to the standard request/response hashmap
-                providerClasses.put(objectInfo, providerClassInfo);
-                
-                // Add it to hasmap for background threads
-                eventProviders.put(objectInfo, provider);
-              }
-              else
-              {
-                logger.error("The ModelObjectInfo parameter is either null or does not have the ObjectName property set. This is required! Provider '"+provider.getClass().getSimpleName()+" not added to provider factory.");
-              }
+                Class<?> clazz = Class.forName(basePackageName + className);
+                ProviderClassInfo providerClassInfo = new ProviderClassInfo(clazz, new Class[] {});
+
+                Object classObj = providerClassInfo.getClassInstance(null);
+
+                // Set properties and add it to correct structure
+                if (classObj instanceof BaseProvider)
+                {
+                    BaseProvider provider = (BaseProvider) classObj;
+                    ModelObjectInfo objectInfo = provider.getMultiObjectClassInfo();
+                    if ((objectInfo != null) && (StringUtils.notEmpty(objectInfo.getObjectName())))
+                    {
+                        // First add it to the standard request/response hashmap
+                        providerClasses.put(objectInfo, providerClassInfo);
+
+                        // Add it to hasmap for background threads
+                        eventProviders.put(objectInfo, provider);
+                    }
+                    else
+                    {
+                        logger.error("The ModelObjectInfo parameter is either null or does not have the ObjectName property set. This is required! Provider '" + provider.getClass().getSimpleName() + " not added to provider factory.");
+                    }
+                }
+                else
+                {
+                    logger.error("Provider class " + className + " doesn't extend BaseProvider. Cannot initialse the Provider.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                logger.error("Provider class " + className + " doesn't extend BaseProvider. Cannot initialse the Provider.");
+                logger.error("Cannot create Provider Class " + basePackageName + className + ": " + ex.getMessage(), ex);
             }
-	        }
-	        catch (Exception ex)
-	        {
-	            logger.error("Cannot create Provider Class " + basePackageName + className + ": " + ex.getMessage(), ex);
-	        }
-	    }
+        }
 	}
 	
     private String makePackageName(String packageName)
@@ -240,7 +243,7 @@ public class ProviderFactory
 			// Ensure there is 10 seconds between the start of each publisher so that they don't hammer
 			// the system at the same time during startup. Startup thread on thread pool.
 			providerService.schedule(provider, i*delay, TimeUnit.SECONDS);
-	    i++;
+			i++;
 		}	
 	}
 }

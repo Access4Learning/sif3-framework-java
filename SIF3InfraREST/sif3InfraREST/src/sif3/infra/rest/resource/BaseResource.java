@@ -1170,8 +1170,8 @@ public abstract class BaseResource
 		
 		requestMediaType = validateAndExtractMimeType(unmarshaller, requestMediaType, urlPostfixMimeType, useDefaults);
 
-		// set it to the value of the request if it is not set
-		if (responseMediaType == null) 
+		// set it to the value of the request if it is not set or wildcard
+		if ((responseMediaType == null) || (responseMediaType.isWildcardType()))
 		{
 			responseMediaType = requestMediaType;
 		}

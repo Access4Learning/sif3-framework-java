@@ -139,6 +139,10 @@ public class DataModelResource extends BaseResource
 	    {
 	    	determineMediaTypes(provider.getMarshaller(), provider.getUnmarshaller(), false);
 	    }
+	    else
+	    {
+	        determineMediaTypes(null, null, false);
+	    }
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Request Media Type : " + getRequestMediaType());
