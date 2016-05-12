@@ -10,6 +10,9 @@ Release Notes for v0.9.0 of SIF3 Framework (Mon DD, 2016)
 Bug Fixes
 ---------
 - Use 1 as first page for navigationPage throughout the framework. This is according to the SIF3 specification.
+- Null-Pointer error in shutdown of provider if no provider classes were defined.
+- Respond with correct mime-type for services without access if invalid token is provided and mime type is set
+  on URL rather than in the HTTP Header. 
 
 New Functionality
 -----------------
