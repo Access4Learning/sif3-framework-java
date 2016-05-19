@@ -13,6 +13,8 @@ Bug Fixes
 - Null-Pointer error in shutdown of provider if no provider classes were defined.
 - Respond with correct mime-type for services without access if invalid token is provided and mime type is set
   on URL rather than in the HTTP Header. 
+- Fixed issue whit external security services where access tokens weren't updated correctly in the security token
+  cache if token changed for an existing session.
 
 New Functionality
 -----------------
