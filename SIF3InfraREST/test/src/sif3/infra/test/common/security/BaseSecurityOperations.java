@@ -41,7 +41,7 @@ public class BaseSecurityOperations
     @SuppressWarnings("unused")
     public static TokenInfo createToken(TokenCoreInfo coreInfo, String password)
     {
-        String iso8601Str = "2015-08-06T14:00:00Z";
+        String iso8601Str = "2016-05-17T14:01:00Z";
         String token = coreInfo.getAppUserInfo().getApplicationKey()+":"+iso8601Str;
         token = new String(Base64.encodeBase64(token.getBytes()), Charset.forName("ASCII"));
         TokenInfo newToken = null;
@@ -74,7 +74,8 @@ public class BaseSecurityOperations
         int pos = decodedToken.indexOf(":");
         String appKey = decodedToken.substring(0, pos);
         String expDate = decodedToken.substring(pos+1);
-        newToken.setAppUserInfo(new EnvironmentKey(null, appKey));
+//        newToken.setAppUserInfo(new EnvironmentKey(null, appKey));
+        newToken.setAppUserInfo(new EnvironmentKey("test", appKey));
         try
         {
             newToken.setTokenExpiryDate(DateUtils.stringToDate(expDate, DateUtils.ISO_8601));
@@ -86,5 +87,15 @@ public class BaseSecurityOperations
         }
         
         return newToken;
+    }
+    
+    public static void main(String[] args)
+    {
+        TokenCoreInfo coreInfo = new TokenCoreInfo();
+        coreInfo.setAppUserInfo(new EnvironmentKey(null, "BearerTest"));
+        TokenInfo tokenInfo = createToken(coreInfo, "test");
+        System.out.println("Created Token: "+tokenInfo);
+        
+        System.out.println("Extracted token info: "+getTokenInfo(tokenInfo.getToken()));
     }
 }
