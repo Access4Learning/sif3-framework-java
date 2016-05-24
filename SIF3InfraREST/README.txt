@@ -184,7 +184,7 @@ Please refer to the release notes in the directory "release/v0.8.0" for addition
 Upgraded some core library to later versions. 
 
 =============================================================
-Version from Mon DD, 2016: v0.9.0 - Various changes
+Version from May 24, 2016: v0.9.0 - Various changes
 =============================================================
 
 ****************************************************************************************************
