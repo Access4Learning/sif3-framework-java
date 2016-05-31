@@ -20,6 +20,7 @@ package sif3.infra.common.env.types;
 
 import java.net.URI;
 
+import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 
@@ -43,6 +44,7 @@ public class ProviderEnvironment extends EnvironmentInfo
 	private boolean              autoCreateEnvironment  = false;
 	private AuthenticationMethod accessTokenAuthMethod  = AuthenticationMethod.Bearer; // Default Auth Method if accessToken is used.
 	private boolean              allowAuthOnURL         = false;
+	private HeaderProperties     customResponseHeaders  = new HeaderProperties(); 
 	
     /**
 	 * Constructor
@@ -189,6 +191,29 @@ public class ProviderEnvironment extends EnvironmentInfo
         this.allowAuthOnURL = allowAuthOnURL;
     }
 
+    /**
+     * To ensure no accidental override of these default values when adding stuff to potentially copies of this property we
+     * create a true copy of the HeaderProperties rather than a shallow copy as the default getter would be.
+     *  
+     * @return TRUE copy of Custom Response Header properties from the provider propert file. 
+     */
+    public HeaderProperties getCustomResponseHeaders()
+    {
+        return (customResponseHeaders == null) ? new HeaderProperties() : new HeaderProperties(customResponseHeaders.getHeaderProperties());
+    }
+
+    public void setCustomResponseHeaders(HeaderProperties customResponseHeaders)
+    {
+        if (customResponseHeaders == null)
+        {
+            this.customResponseHeaders = new HeaderProperties();
+        }
+        else
+        {
+            this.customResponseHeaders = customResponseHeaders;
+        }
+    }
+
 	@Override
     public String toString()
     {
@@ -200,7 +225,8 @@ public class ProviderEnvironment extends EnvironmentInfo
                 + ", defaultUpdateType=" + defaultUpdateType
                 + ", autoCreateEnvironment=" + autoCreateEnvironment
                 + ", accessTokenAuthMethod=" + accessTokenAuthMethod
-                + ", allowAuthOnURL=" + allowAuthOnURL + ", toString()="
-                + super.toString() + "]";
+                + ", allowAuthOnURL=" + allowAuthOnURL
+                + ", customResponseHeaders=" + customResponseHeaders
+                + ", toString()=" + super.toString() + "]";
     }
 }
