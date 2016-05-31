@@ -23,6 +23,7 @@ import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.model.ChangedSinceInfo;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
+import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 
@@ -79,6 +80,10 @@ public interface ChangesSinceProvider
      * @param changedSinceInfo Data required to determine the changes to be returned. This must hold the opaque changes since value that was
      *                         given to the consumer at some stage via the getLatestOpaqueMarker() method of this class. 
      * @param metadata Metadata relating to the request. Note that most of the properties might be null.
+     * @param customResponseParams Values to be returned as part of the response. These are generally just HTTP Header fields. If a developer
+     *                             sets the HTTP Header of a well defined SIF3 HTTP Header (i.e. providerId, timestamp) then the framework
+     *                             may override these with its own value to ensure the correct use and workings of the framework. It is the
+     *                             developer who will populate the object. When it is passed to this method it not null but empty.
      * 
      * @throws UnsupportedQueryException The query provided with this request is not supported. This would be returned if this method is called
      *                                   without a value (null or empty) for the changedSinceInfo.changesSinceMarker.
@@ -86,6 +91,11 @@ public interface ChangesSinceProvider
      *                              message of the exceptions holds some info.
      * @throws DataTooLargeException If the data that shall be returned is too large due to the values in the paging info.
      */
-    public Object getChangesSince(SIFZone zone, SIFContext context, PagingInfo pagingInfo, ChangedSinceInfo changedSinceInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
+    public Object getChangesSince(SIFZone zone, 
+                                  SIFContext context, 
+                                  PagingInfo pagingInfo, 
+                                  ChangedSinceInfo changedSinceInfo, 
+                                  RequestMetadata metadata, 
+                                  ResponseParameters customResponseParams) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
  
 }

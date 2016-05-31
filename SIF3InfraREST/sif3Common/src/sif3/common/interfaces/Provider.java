@@ -26,6 +26,7 @@ import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
+import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.ws.CreateOperationStatus;
@@ -62,6 +63,10 @@ public interface Provider extends DataModelLink
 	 * @param zone Can be Null (default Zone)
 	 * @param context Can be Null (default Context)
 	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
+	 * @param customResponseParams Values to be returned as part of the response. These are generally just HTTP Header fields. If a developer
+	 *                             sets the HTTP Header of a well defined SIF3 HTTP Header (i.e. providerId, timestamp) then the framework
+	 *                             may override these with its own value to ensure the correct use and workings of the framework. It is the
+	 *                             developer who will populate the object. When it is passed to this method it not null but empty.
 	 * 
 	 * @return The entity for this resourceID. Null if entity with given resourceID does not exist.
 	 * 
@@ -69,7 +74,7 @@ public interface Provider extends DataModelLink
 	 * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
 	 *                              message of the exceptions holds some info.
 	 */
-	public Object retrievByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
+	public Object retrievByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException;
 
 	/**
 	 * This method creates the given object with the data provided in the given zone and context. If the object cannot be created then either
@@ -81,14 +86,18 @@ public interface Provider extends DataModelLink
 	 * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
 	 * @param context The Context for which the object shall be created. Can be Null (default Zone)
 	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
-	 * 
+     * @param customResponseParams Values to be returned as part of the response. These are generally just HTTP Header fields. If a developer
+     *                             sets the HTTP Header of a well defined SIF3 HTTP Header (i.e. providerId, timestamp) then the framework
+     *                             may override these with its own value to ensure the correct use and workings of the framework. It is the
+     *                             developer who will populate the object. When it is passed to this method it not null but empty.
+     * 
 	 * @return The object that is created. It may hold additional data than the one provided.
 	 * 
      * @throws IllegalArgumentException One of the parameters is invalid.
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
 	 */
-	public Object createSingle(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
+	public Object createSingle(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException;
 
 	/**
      * This method updates the object given by its resourceID in the given zone for the given context.
@@ -99,6 +108,10 @@ public interface Provider extends DataModelLink
      * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
      * @param context The Context for which the object shall be updated. Can be Null (default Zone)
 	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
+     * @param customResponseParams Values to be returned as part of the response. These are generally just HTTP Header fields. If a developer
+     *                             sets the HTTP Header of a well defined SIF3 HTTP Header (i.e. providerId, timestamp) then the framework
+     *                             may override these with its own value to ensure the correct use and workings of the framework. It is the
+     *                             developer who will populate the object. When it is passed to this method it not null but empty.
 	 * 
 	 * @return TRUE: Entity is updated. FALSE: Entity does not exist.
 	 * 
@@ -106,7 +119,7 @@ public interface Provider extends DataModelLink
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
 	 */
-	public boolean updateSingle(Object data, String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
+	public boolean updateSingle(Object data, String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException;
 
 	/**
      * Removed the object with the given resourceId in the given zone for the given context.
@@ -115,6 +128,10 @@ public interface Provider extends DataModelLink
      * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
      * @param context The Context for which the object shall be removed. Can be Null (default Zone)
 	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
+     * @param customResponseParams Values to be returned as part of the response. These are generally just HTTP Header fields. If a developer
+     *                             sets the HTTP Header of a well defined SIF3 HTTP Header (i.e. providerId, timestamp) then the framework
+     *                             may override these with its own value to ensure the correct use and workings of the framework. It is the
+     *                             developer who will populate the object. When it is passed to this method it not null but empty.
 	 * 
 	 * @return TRUE: Entity is removed. FALSE: Entity does not exist.
 	 * 
@@ -122,7 +139,7 @@ public interface Provider extends DataModelLink
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
 	 */
-	public boolean deleteSingle(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
+	public boolean deleteSingle(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException;
 
 	/*----------------------------*/
 	/*-- Bulk Object Operations --*/
@@ -140,13 +157,17 @@ public interface Provider extends DataModelLink
      * @param context The Context for which the objects shall be returned. Can be Null (default Zone)
      * @param pagingInfo Page information to determine which results to return. Null = Return all (NOT RECOMMENDED!).
 	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
+     * @param customResponseParams Values to be returned as part of the response. These are generally just HTTP Header fields. If a developer
+     *                             sets the HTTP Header of a well defined SIF3 HTTP Header (i.e. providerId, timestamp) then the framework
+     *                             may override these with its own value to ensure the correct use and workings of the framework. It is the
+     *                             developer who will populate the object. When it is passed to this method it not null but empty.
      * 
      * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
 	 * @throws DataTooLargeException If the data that shall be returned is too large due to the values in the paging info.
 	 */
-	public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
+	public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata, ResponseParameters customResponseParams) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
 	
 	/**
      * This method will create many objects in one call. The 'data' parameter is a collection-style object that is defined in the data
@@ -157,6 +178,10 @@ public interface Provider extends DataModelLink
      * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
      * @param context The Context for which the objects shall be created. Can be Null (default Zone)
 	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
+     * @param customResponseParams Values to be returned as part of the response. These are generally just HTTP Header fields. If a developer
+     *                             sets the HTTP Header of a well defined SIF3 HTTP Header (i.e. providerId, timestamp) then the framework
+     *                             may override these with its own value to ensure the correct use and workings of the framework. It is the
+     *                             developer who will populate the object. When it is passed to this method it not null but empty.
 	 * 
 	 * @return List with Status and IDs for each created object, or Status and Error for each object. Null if there was an unknown error. 
 	 * 
@@ -164,7 +189,7 @@ public interface Provider extends DataModelLink
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
 	 */
-	public List<CreateOperationStatus> createMany(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
+	public List<CreateOperationStatus> createMany(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException;
 
 	/**
      * This method will update many objects in one call. The 'data' parameter is a collection-style object that is defined in the data
@@ -175,6 +200,10 @@ public interface Provider extends DataModelLink
      * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
      * @param context The Context for which the objects shall be updated. Can be Null (default Zone)
 	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
+     * @param customResponseParams Values to be returned as part of the response. These are generally just HTTP Header fields. If a developer
+     *                             sets the HTTP Header of a well defined SIF3 HTTP Header (i.e. providerId, timestamp) then the framework
+     *                             may override these with its own value to ensure the correct use and workings of the framework. It is the
+     *                             developer who will populate the object. When it is passed to this method it not null but empty.
 	 * 
      * @return List with Status and IDs for each updated object, or Status and Error for each object. Null if there was an unknown error. 
 	 * 
@@ -182,7 +211,7 @@ public interface Provider extends DataModelLink
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
 	 */
-	public List<OperationStatus> updateMany(Object data, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
+	public List<OperationStatus> updateMany(Object data, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException;
 
 	/**
      * This method removes all objects in the resourceIDs list in one hit.
@@ -191,6 +220,10 @@ public interface Provider extends DataModelLink
      * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
      * @param context The Context for which the objects shall be removed. Can be Null (default Zone)
 	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
+     * @param customResponseParams Values to be returned as part of the response. These are generally just HTTP Header fields. If a developer
+     *                             sets the HTTP Header of a well defined SIF3 HTTP Header (i.e. providerId, timestamp) then the framework
+     *                             may override these with its own value to ensure the correct use and workings of the framework. It is the
+     *                             developer who will populate the object. When it is passed to this method it not null but empty.
 	 * 
      * @return List with Status and IDs for each removed object, or Status and Error for each object. Null if there was an unknown error. 
 	 * 
@@ -198,7 +231,7 @@ public interface Provider extends DataModelLink
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
 	 */
-	public List<OperationStatus> deleteMany(List<String> resourceIDs, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException;
+	public List<OperationStatus> deleteMany(List<String> resourceIDs, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException;
 
 
 	/*-----------------------------------------*/
