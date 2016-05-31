@@ -49,6 +49,7 @@ import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.QueryPredicate;
 import sif3.common.model.RequestMetadata;
+import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
@@ -225,7 +226,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.Provider#retrievByPrimaryKey(java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public Object retrievByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public Object retrievByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	if (StringUtils.isEmpty(resourceID))
     	{
@@ -244,10 +245,10 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.Provider#createSingle(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public Object createSingle(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public Object createSingle(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	logger.debug("Create Single Student for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
-
+    	    	
 //    	return null; // test return null value
     	
     	// Must be of type StudentPersonalType
@@ -278,7 +279,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.Provider#updateSingle(java.lang.Object, java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public boolean updateSingle(Object data, String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public boolean updateSingle(Object data, String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	if (StringUtils.isEmpty(resourceID))
     	{
@@ -303,7 +304,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.Provider#deleteSingle(java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public boolean deleteSingle(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public boolean deleteSingle(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	if (StringUtils.isEmpty(resourceID))
     	{
@@ -321,12 +322,21 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.Provider#retrive(sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo)
      */
     @Override
-    public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+    public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata, ResponseParameters customResponseParams) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
     {
     	logger.debug("Retrieve Students for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	logger.debug("ChangedSince Date: "+metadata.getRequestParameter("ChangedSince"));
     	logger.debug("Custom HTTP Header (customHdr): "+metadata.getHTTPParameter("customHdr"));
-    	
+
+        // Should go all the way to consumer
+        customResponseParams.addHTTPHeaderParameter("testHTTPResponseParam", "testValue");
+
+        // Should override a default from the provider properties file.
+        customResponseParams.addHTTPHeaderParameter("test", "providerPropertyFileOverride");
+
+        // Should be overridden by framework
+        customResponseParams.addHTTPHeaderParameter(ResponseHeaderConstants.HDR_DATE_TIME, "ignore this date/time");
+
     	if (pagingInfo == null)
     	{
     		throw new DataTooLargeException("No paging info is provided. Please provide navigationPage and navigationPageSize.");
@@ -361,7 +371,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.QueryProvider#retrieveByServicePath(sif3.common.model.QueryCriteria, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo, sif3.common.model.RequestMetadata)
      */
     @Override
-	public Object retrieveByServicePath(QueryCriteria queryCriteria, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) 
+	public Object retrieveByServicePath(QueryCriteria queryCriteria, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata, ResponseParameters customResponseParams) 
     	throws PersistenceException, UnsupportedQueryException, DataTooLargeException
 	{
 		logger.debug("Performing query by service path.");
@@ -377,7 +387,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 			if ("SchoolInfos".equals(predicates.get(0).getSubject()))
 			{
 				// Assume all students known from the file are at the same school.
-				return retrieve(zone, context, pagingInfo, metadata);
+				return retrieve(zone, context, pagingInfo, metadata, customResponseParams);
 			}
 			else if ("TeachingGroups".equals(predicates.get(0).getSubject()))
 			{
@@ -410,7 +420,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * (non-Javadoc)
      * @see sif3.common.interfaces.QueryProvider#retrieveByQBE(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo, sif3.common.model.RequestMetadata)
      */
-    public Object retrieveByQBE(Object exampleObject, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) 
+    public Object retrieveByQBE(Object exampleObject, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata, ResponseParameters customResponseParams) 
     	throws PersistenceException, UnsupportedQueryException, DataTooLargeException
 	{
 		logger.debug("Performing QBE query for: "+exampleObject);
@@ -439,7 +449,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.Provider#createMany(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public List<CreateOperationStatus> createMany(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public List<CreateOperationStatus> createMany(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	// Must be of type StudentPersonalType
     	if (data instanceof StudentPersonalCollectionType)
@@ -483,7 +493,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.Provider#updateMany(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public List<OperationStatus> updateMany(Object data, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public List<OperationStatus> updateMany(Object data, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	// Must be of type StudentPersonalType
     	if (data instanceof StudentPersonalCollectionType)
@@ -517,7 +527,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.Provider#deleteMany(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public List<OperationStatus> deleteMany(List<String> resourceIDs, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public List<OperationStatus> deleteMany(List<String> resourceIDs, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	logger.debug("Delete Students (Bulk Operation) for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
 
@@ -587,12 +597,12 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.ChangesSinceProvider#getChangesSince(sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo, sif3.common.model.ChangedSinceInfo, sif3.common.model.RequestMetadata)
      */
     @Override
-    public Object getChangesSince(SIFZone zone, SIFContext context, PagingInfo pagingInfo, ChangedSinceInfo changedSinceInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+    public Object getChangesSince(SIFZone zone, SIFContext context, PagingInfo pagingInfo, ChangedSinceInfo changedSinceInfo, RequestMetadata metadata, ResponseParameters customResponseParams) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
     {
         // This is not a real implementation. We just fake things here. In a real implementation one would go to a change log to retrieve
         // Students for the given changedSinceInfo criteria.
         logger.info("getChangesSince for "+getProviderName()+" called with changes since info: "+changedSinceInfo);
-        return retrieve(zone, context, pagingInfo, metadata);
+        return retrieve(zone, context, pagingInfo, metadata, customResponseParams);
     }
 
     /*--------------------------------------*/
