@@ -353,9 +353,10 @@ public class DataModelResource extends BaseResource
 			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "The " + parser.getObjectNamePlural() + " provider does not support this ServicePath."), ResponseAction.QUERY, responseParam);
 		}
 
-		PagingInfo pagingInfo = getPagingInfo();
+		PagingInfo pagingInfo = null;
 		try
 		{
+	        pagingInfo = getPagingInfo();
             if (pretendDelayed())
             {
                 // Simply send a response with status of 202
@@ -411,9 +412,10 @@ public class DataModelResource extends BaseResource
 			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.QUERY, responseParam);			
 		}
 	
-		PagingInfo pagingInfo = getPagingInfo();
+		PagingInfo pagingInfo = null;
 		try
 		{
+	        pagingInfo = getPagingInfo();
 		    if (pretendDelayed())
 		    {
 		        // Simply send a response with status of 202
@@ -685,9 +687,10 @@ public class DataModelResource extends BaseResource
             return makeResponse(null, Status.SERVICE_UNAVAILABLE.getStatusCode(), true, ResponseAction.HEAD, getInitialCustomResponseParameters(), null);
         }
     
-        PagingInfo pagingInfo = getPagingInfo();
+        PagingInfo pagingInfo = null;
         try
         {
+            pagingInfo = getPagingInfo();
             HeaderProperties defaultCustomHeaders = getInitialCustomResponseParameters().getHttpHeaderParams();
             HeaderProperties customHeaders = provider.getServiceInfo(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
             if (customHeaders != null)
@@ -831,12 +834,19 @@ public class DataModelResource extends BaseResource
 		return getProviderEnvironment().getEnvironmentType() == EnvironmentType.DIRECT ? directEnvRight : AccessRight.PROVIDE;
 	}
 	
-	private PagingInfo getPagingInfo()
+	/*
+	 * IllegalArgumentException if page number is <=0 which is not valid.
+	 */
+	private PagingInfo getPagingInfo() throws IllegalArgumentException
 	{
 		PagingInfo pagingInfo = new PagingInfo(getSIFHeaderProperties(), getQueryParameters());
 		if (pagingInfo.getPageSize() <= PagingInfo.NOT_DEFINED) // page size not defined. Pass null to provider.
 		{
 			pagingInfo = null;
+		}
+		else if (pagingInfo.getCurrentPageNo() <= 0)
+		{
+		    throw new IllegalArgumentException("Page Number to be returned was set to "+pagingInfo.getCurrentPageNo()+". Must be "+CommonConstants.FIRST_PAGE+" or higher.");
 		}
 		else
 		{
@@ -987,15 +997,16 @@ public class DataModelResource extends BaseResource
 	private Response queryByQBE(Provider provider, String payload)
 	{
         ResponseParameters responseParam = getInitialCustomResponseParameters();
-		PagingInfo pagingInfo = getPagingInfo();
 		
 		if (provider == null || !QueryProvider.class.isAssignableFrom(provider.getClass()))
 		{
 			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "The " + provider.getMultiObjectClassInfo().getObjectName() + " does not support QBE style queries."), ResponseAction.QUERY, responseParam);
 		}
 
+        PagingInfo pagingInfo = null;
 		try
 		{
+	        pagingInfo = getPagingInfo();
             if (pretendDelayed())
             {
                 // Simply send a response with status of 202
