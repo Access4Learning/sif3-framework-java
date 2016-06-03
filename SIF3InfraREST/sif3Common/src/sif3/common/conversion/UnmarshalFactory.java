@@ -21,7 +21,7 @@ package sif3.common.conversion;
 import javax.ws.rs.core.MediaType;
 
 import sif3.common.exception.UnmarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.exception.UnsupportedMediaTypeException;
 
 /**
  * This class provides the interface for the Unmarshal Factories. Because the SIF3 infrastructure is independent from the data model
@@ -44,9 +44,9 @@ public interface UnmarshalFactory extends MediaTypeOperations
 	 * @return See description.
 	 * 
 	 * @throws UnmarshalException Failure to unmarshal the given XML string into an object.
-	 * @throws UnsupportedMediaTypeExcpetion If XML is not a supported format.
+	 * @throws UnsupportedMediaTypeException If XML is not a supported format.
 	 */
-	public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion;
+	public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeException;
 	
 	/**
 	 * Unmarshal the given JSON string into an object of type Class<?>. If anything goes wrong with that unmarshal method then
@@ -58,9 +58,9 @@ public interface UnmarshalFactory extends MediaTypeOperations
 	 * @return See description.
 	 * 
 	 * @throws UnmarshalException Failure to unmarshal the given JSON string into an object.
-	 * @throws UnsupportedMediaTypeExcpetion If JSON is not a supported format.
+	 * @throws UnsupportedMediaTypeException If JSON is not a supported format.
 	 */
-	public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion;
+	public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeException;
 	
 	/**
 	 * Wrapper Method for the above two methods. This method can be called if the MediaType is known and based on what the input string
@@ -73,7 +73,7 @@ public interface UnmarshalFactory extends MediaTypeOperations
 	 * @return See description.
 	 * 
 	 * @throws UnmarshalException Failure to unmarshal the given string into an object.
-	 * @throws UnsupportedMediaTypeExcpetion If the media type requested is not a supported format.
+	 * @throws UnsupportedMediaTypeException If the media type requested is not a supported format.
 	 */
-	public Object unmarshal(String payload, Class<?> clazz, MediaType mediaType) throws UnmarshalException, UnsupportedMediaTypeExcpetion;
+	public Object unmarshal(String payload, Class<?> clazz, MediaType mediaType) throws UnmarshalException, UnsupportedMediaTypeException;
 }

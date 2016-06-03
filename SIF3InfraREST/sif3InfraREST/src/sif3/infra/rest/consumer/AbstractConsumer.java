@@ -26,6 +26,9 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.log4j.Logger;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.StringUtils;
+import au.com.systemic.framework.utils.Timer;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.exception.UnsupportedQueryException;
@@ -65,9 +68,6 @@ import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.rest.client.ObjectServiceClient;
 import sif3.infra.rest.queue.LocalConsumerQueue;
 import sif3.infra.rest.queue.LocalMessageConsumer;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.StringUtils;
-import au.com.systemic.framework.utils.Timer;
 
 /**
  * This is the core class that a developer will use to implement their consumers. Each consumer for each object type MUST extend this
@@ -635,10 +635,10 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	
 	/*
 	 * (non-Javadoc)
-	 * @see sif3.common.consumer.Consumer#retrievByPrimaryKey(java.lang.String, java.util.List)
+	 * @see sif3.common.consumer.Consumer#retrieveByPrimaryKey(java.lang.String, java.util.List)
 	 */
 	@Override
-	public List<Response> retrievByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<Response> retrieveByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
         nullMethodCheck(getSingleObjectClassInfo(), "getSingleObjectClassInfo()");
@@ -684,9 +684,9 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	/*
 	 * Convenience method. The same as above but without the parameter 'customParameters' which is defaulted to null.
 	 */
-	public List<Response> retrievByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+	public List<Response> retrieveByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
-		return retrievByPrimaryKey(resourceID, zoneCtxList, null);
+		return retrieveByPrimaryKey(resourceID, zoneCtxList, null);
 	}
 	
 	/*
@@ -1261,7 +1261,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-	private ObjectServiceClient getClient(ConsumerEnvironment envInfo) throws IllegalArgumentException
+	protected ObjectServiceClient getClient(ConsumerEnvironment envInfo) throws IllegalArgumentException
 	{
 		URI baseURI = envInfo.getConnectorBaseURI(ConsumerEnvironment.ConnectorName.requestsConnector);
 		if (baseURI == null)
@@ -1285,12 +1285,12 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 		}
 	}
 		
-	private SIF3Session getSIF3Session()
+	protected SIF3Session getSIF3Session()
 	{
 	  return ConsumerEnvironmentManager.getInstance().getSIF3Session();
 	}
 
-	private HeaderProperties getHeaderProperties(boolean isCreateOperation, HeaderValues.ServiceType serviceType, CustomParameters customParameters) 
+	protected HeaderProperties getHeaderProperties(boolean isCreateOperation, HeaderValues.ServiceType serviceType, CustomParameters customParameters) 
 	{
 	   HeaderProperties hdrProps = new HeaderProperties();
 	   
@@ -1319,12 +1319,16 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	   return hdrProps;
 	}
 	
-	private HeaderProperties getHeaderProperties(boolean isCreateOperation, CustomParameters customParameters)
+	protected HeaderProperties getHeaderProperties(boolean isCreateOperation, CustomParameters customParameters)
 	{
-	  return getHeaderProperties(isCreateOperation, HeaderValues.ServiceType.OBJECT, customParameters);
+	  return getHeaderProperties(isCreateOperation, getServiceType(), customParameters);
 	}
 	
-	private void setErrorDetails(BaseResponse response, ErrorDetails errorDetails)
+	protected HeaderValues.ServiceType getServiceType() {
+		return HeaderValues.ServiceType.OBJECT;
+	}
+	
+	protected void setErrorDetails(BaseResponse response, ErrorDetails errorDetails)
 	{
 		response.setStatus(errorDetails.getErrorCode());
 		response.setStatusMessage(errorDetails.getMessage());
@@ -1337,12 +1341,12 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	 * Will perform hasAccess() and requestTypeSupported() checks. This is a convenience method, so that not each operation has to
 	 * call the two methods sequentially and manage all the flow.
 	 */
-	private ErrorDetails allClientChecks(AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType) 
+	protected ErrorDetails allClientChecks(AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType) 
 	{
 	  return allClientChecks(getMultiObjectClassInfo().getObjectName(), right, accessType, zone, context, requestType);
 	}
 	
-	private ErrorDetails allClientChecks(String serviceName, AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType)
+	protected ErrorDetails allClientChecks(String serviceName, AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType)
 	{
 		ErrorDetails error = hasAccess(serviceName, right, accessType, zone, context);
 		if ((error == null) && (requestType != null))
@@ -1352,7 +1356,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 		return error;
 	}
 		
-	private ErrorDetails hasAccess(String serviceName, AccessRight right, AccessType accessType, SIFZone zone, SIFContext context)
+	protected ErrorDetails hasAccess(String serviceName, AccessRight right, AccessType accessType, SIFZone zone, SIFContext context)
 	{
 		ErrorDetails error = null;
 		if (checkACL)
@@ -1367,7 +1371,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 		return error;
 	}
 	
-	private ErrorDetails requestTypeEnabled(RequestType requestType)
+	protected ErrorDetails requestTypeEnabled(RequestType requestType)
 	{
 		ErrorDetails error = null;
 		
@@ -1378,28 +1382,28 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 		return error;
 	}
 
-	private Response createErrorResponse(ErrorDetails error)
+	protected Response createErrorResponse(ErrorDetails error)
 	{
 		Response response = new Response();
 		setErrorDetails(response, error);
 		return response;	
 	}
 	
-	private BulkOperationResponse<CreateOperationStatus> makeBulkErrorResponseForCreates(ErrorDetails error)
+	protected BulkOperationResponse<CreateOperationStatus> makeBulkErrorResponseForCreates(ErrorDetails error)
 	{
 		BulkOperationResponse<CreateOperationStatus> response = new BulkOperationResponse<CreateOperationStatus>();
 		setErrorDetails(response, error);
 		return response;	
 	}
 	
-	private BulkOperationResponse<OperationStatus> makeBulkErrorResponse(ErrorDetails error)
+	protected BulkOperationResponse<OperationStatus> makeBulkErrorResponse(ErrorDetails error)
 	{
 		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
 		setErrorDetails(response, error);
 		return response;	
 	}
 	
-	private String getServiceName(QueryCriteria queryCriteria)
+	protected String getServiceName(QueryCriteria queryCriteria)
 	{
 		String result = null;
 		if (queryCriteria != null && queryCriteria.getPredicates() != null)
@@ -1414,7 +1418,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 		return result;
 	}
 
-	private String getServicePath(QueryCriteria queryCriteria)
+	protected String getServicePath(QueryCriteria queryCriteria)
 	{
 		String result = null;
 		if (queryCriteria != null && queryCriteria.getPredicates() != null)
@@ -1430,7 +1434,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	}
 	
 	@SuppressWarnings("unused")
-    private List<ZoneContextInfo> getFinalZoneCtxList( List<ZoneContextInfo> zoneCtxList, SIF3Session sif3Session)
+    protected List<ZoneContextInfo> getFinalZoneCtxList( List<ZoneContextInfo> zoneCtxList, SIF3Session sif3Session)
 	{
 		List<ZoneContextInfo> finalZoneContextList = null;
 		
@@ -1475,7 +1479,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	 * This method sets the remaining properties in the receipt for delayed responses. There are a few fields that cannot be set at the ObjectServiceClient as
 	 * they are not known or cannot be determined in there but are well known in the abstract consumer.
 	 */
-	private void finaliseDelayedReceipt(DelayedRequestReceipt delayedReceipt, String serviceName, ServiceType serviceType, ResponseAction requestedAction)
+	protected void finaliseDelayedReceipt(DelayedRequestReceipt delayedReceipt, String serviceName, ServiceType serviceType, ResponseAction requestedAction)
 	{
 		if (delayedReceipt != null)
 		{
@@ -1487,7 +1491,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 	}
 	
 
-	private void nullMethodCheck(Object objectToCheck, String methodName) throws IllegalArgumentException
+	protected void nullMethodCheck(Object objectToCheck, String methodName) throws IllegalArgumentException
 	{
     	if (objectToCheck == null)
         {
@@ -1500,7 +1504,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
      * This method checks if the test.testmode in the consumer's property file is set to TRUE.
      */
     @SuppressWarnings("unused")
-    private boolean isTestMode()
+    protected boolean isTestMode()
     {
         if (testMode == null)
         {

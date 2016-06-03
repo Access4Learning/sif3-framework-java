@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -21,16 +22,16 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="serviceType" type="{http://www.sifassociation.org/infrastructure/3.1}serviceTypeType"/>
+ *         &lt;element name="serviceType" type="{http://www.sifassociation.org/infrastructure/3.2}serviceTypeType"/>
  *         &lt;element name="serviceName" type="{http://www.w3.org/2001/XMLSchema}token"/>
  *         &lt;element name="contextId" type="{http://www.w3.org/2001/XMLSchema}token"/>
  *         &lt;element name="zoneId" type="{http://www.w3.org/2001/XMLSchema}token"/>
  *         &lt;element name="providerName" type="{http://www.w3.org/2001/XMLSchema}token"/>
- *         &lt;element name="querySupport" type="{http://www.sifassociation.org/infrastructure/3.1}querySupportType"/>
- *         &lt;element name="mimeTypes" type="{http://www.sifassociation.org/infrastructure/3.1}mediaTypesType" minOccurs="0"/>
- *         &lt;element name="endPoint" type="{http://www.sifassociation.org/infrastructure/3.1}protocolType" minOccurs="0"/>
+ *         &lt;element name="querySupport" type="{http://www.sifassociation.org/infrastructure/3.2}querySupportType"/>
+ *         &lt;element name="mimeTypes" type="{http://www.sifassociation.org/infrastructure/3.2}mediaTypesType" minOccurs="0"/>
+ *         &lt;element name="endPoint" type="{http://www.sifassociation.org/infrastructure/3.2}protocolType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.1}uuidType" />
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.2}uuidType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -39,7 +40,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "providerType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "providerType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "serviceType",
     "serviceName",
     "contextId",
@@ -49,32 +50,35 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "mimeTypes",
     "endPoint"
 })
-public class ProviderType {
+public class ProviderType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String serviceType;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String serviceName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String contextId;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String zoneId;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String providerName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected QuerySupportType querySupport;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected MediaTypesType mimeTypes;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected ProtocolType endPoint;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -104,6 +108,10 @@ public class ProviderType {
         this.serviceType = value;
     }
 
+    public boolean isSetServiceType() {
+        return (this.serviceType!= null);
+    }
+
     /**
      * Gets the value of the serviceName property.
      * 
@@ -126,6 +134,10 @@ public class ProviderType {
      */
     public void setServiceName(String value) {
         this.serviceName = value;
+    }
+
+    public boolean isSetServiceName() {
+        return (this.serviceName!= null);
     }
 
     /**
@@ -152,6 +164,10 @@ public class ProviderType {
         this.contextId = value;
     }
 
+    public boolean isSetContextId() {
+        return (this.contextId!= null);
+    }
+
     /**
      * Gets the value of the zoneId property.
      * 
@@ -174,6 +190,10 @@ public class ProviderType {
      */
     public void setZoneId(String value) {
         this.zoneId = value;
+    }
+
+    public boolean isSetZoneId() {
+        return (this.zoneId!= null);
     }
 
     /**
@@ -200,6 +220,10 @@ public class ProviderType {
         this.providerName = value;
     }
 
+    public boolean isSetProviderName() {
+        return (this.providerName!= null);
+    }
+
     /**
      * Gets the value of the querySupport property.
      * 
@@ -222,6 +246,10 @@ public class ProviderType {
      */
     public void setQuerySupport(QuerySupportType value) {
         this.querySupport = value;
+    }
+
+    public boolean isSetQuerySupport() {
+        return (this.querySupport!= null);
     }
 
     /**
@@ -248,6 +276,10 @@ public class ProviderType {
         this.mimeTypes = value;
     }
 
+    public boolean isSetMimeTypes() {
+        return (this.mimeTypes!= null);
+    }
+
     /**
      * Gets the value of the endPoint property.
      * 
@@ -272,6 +304,10 @@ public class ProviderType {
         this.endPoint = value;
     }
 
+    public boolean isSetEndPoint() {
+        return (this.endPoint!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -294,6 +330,10 @@ public class ProviderType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

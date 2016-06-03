@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -47,22 +48,25 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "errorType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "errorType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "code",
     "scope",
     "message",
     "description"
 })
-public class ErrorType {
+public class ErrorType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlSchemaType(name = "unsignedInt")
     protected long code;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected String scope;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected String message;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected String description;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -83,6 +87,10 @@ public class ErrorType {
      */
     public void setCode(long value) {
         this.code = value;
+    }
+
+    public boolean isSetCode() {
+        return true;
     }
 
     /**
@@ -109,6 +117,10 @@ public class ErrorType {
         this.scope = value;
     }
 
+    public boolean isSetScope() {
+        return (this.scope!= null);
+    }
+
     /**
      * Gets the value of the message property.
      * 
@@ -131,6 +143,10 @@ public class ErrorType {
      */
     public void setMessage(String value) {
         this.message = value;
+    }
+
+    public boolean isSetMessage() {
+        return (this.message!= null);
     }
 
     /**
@@ -157,6 +173,10 @@ public class ErrorType {
         this.description = value;
     }
 
+    public boolean isSetDescription() {
+        return (this.description!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -179,6 +199,10 @@ public class ErrorType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

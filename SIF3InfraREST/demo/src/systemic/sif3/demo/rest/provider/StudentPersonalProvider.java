@@ -26,18 +26,21 @@ import java.util.List;
 
 import javax.xml.bind.JAXBElement;
 
-import sif.dd.au30.model.ObjectFactory;
-import sif.dd.au30.model.StudentPersonalCollectionType;
-import sif.dd.au30.model.StudentPersonalType;
-import sif.dd.au30.model.TeachingGroupCollectionType;
-import sif.dd.au30.model.TeachingGroupType.StudentList;
-import sif.dd.au30.model.TeachingGroupType.StudentList.TeachingGroupStudent;
+import au.com.systemic.framework.utils.DateUtils;
+import au.com.systemic.framework.utils.FileReaderWriter;
+import au.com.systemic.framework.utils.StringUtils;
+import sif.dd.au34.model.ObjectFactory;
+import sif.dd.au34.model.StudentPersonalCollectionType;
+import sif.dd.au34.model.StudentPersonalType;
+import sif.dd.au34.model.TeachingGroupCollectionType;
+import sif.dd.au34.model.TeachingGroupType.StudentList;
+import sif.dd.au34.model.TeachingGroupType.StudentList.TeachingGroupStudent;
 import sif3.common.CommonConstants;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.ResponseHeaderConstants;
@@ -58,9 +61,6 @@ import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import systemic.sif3.demo.rest.ModelObjectConstants;
 import systemic.sif3.demo.rest.provider.iterators.StudentPersonalIterator;
-import au.com.systemic.framework.utils.DateUtils;
-import au.com.systemic.framework.utils.FileReaderWriter;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * @author Joerg Huber
@@ -106,7 +106,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 				{
 					ex.printStackTrace();
 				}
-				catch (UnsupportedMediaTypeExcpetion ex)
+				catch (UnsupportedMediaTypeException ex)
 				{
 					ex.printStackTrace();
 				}
@@ -145,7 +145,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 				{
 					ex.printStackTrace();
 				}
-				catch (UnsupportedMediaTypeExcpetion ex)
+				catch (UnsupportedMediaTypeException ex)
 				{
 					ex.printStackTrace();
 				}
@@ -222,10 +222,10 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     /*--------------------------------*/
 
     /* (non-Javadoc)
-     * @see sif3.common.interfaces.Provider#retrievByPrimaryKey(java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
+     * @see sif3.common.interfaces.Provider#retrieveByPrimaryKey(java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public Object retrievByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public Object retrieveByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
     {
     	if (StringUtils.isEmpty(resourceID))
     	{

@@ -35,13 +35,16 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.log4j.Logger;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.DateUtils;
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.MediaTypeOperations;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.MarshalException;
 import sif3.common.exception.UnmarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
 import sif3.common.header.HeaderValues.QueryIntention;
@@ -89,9 +92,6 @@ import sif3.infra.common.model.UpdateResponseType;
 import sif3.infra.common.model.UpdateType;
 import sif3.infra.common.model.UpdatesType;
 import sif3.infra.rest.resource.audit.AuditableResource;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.DateUtils;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This is a utility class. All REST resource style class should extend this class. It provides many common functions that are
@@ -590,9 +590,9 @@ public abstract class BaseResource
 	 * @return A list of ID that are requested to be deleted.
 	 * 
 	 * @throws UnmarshalException If the payload is invalid and cannot be marshaled into its predefined structure.
-	 * @throws UnsupportedMediaTypeExcpetion 
+	 * @throws UnsupportedMediaTypeException 
 	 */
-	protected List<String> getResourceIDsFromDeleteRequest(String deletePayload) throws UnmarshalException, UnsupportedMediaTypeExcpetion
+	protected List<String> getResourceIDsFromDeleteRequest(String deletePayload) throws UnmarshalException, UnsupportedMediaTypeException
 	{
 	    List<String> resourceIDs = new ArrayList<String>();
 	    if (deletePayload != null)
@@ -1365,7 +1365,14 @@ public abstract class BaseResource
 						// and hope the client can recover, is to use the marshaller's default media type.
 						finalMediaType = (marshaller.isSupported(finalMediaType)) ?  finalMediaType : marshaller.getDefault();
 					}
-					String payload = marshaller.marshal(data, finalMediaType);
+					
+					String payload = null;
+					if(marshaller != null) {
+						payload = marshaller.marshal(data, finalMediaType);
+					}  else {
+						// pass it as a string
+						payload = (String)data;
+					}
 					//System.out.println("==============================\nRespopnse Payload:\n"+payload+"\nSize String= "+payload.length()+"\nSize Bytes = "+payload.getBytes("UTF-8").length+"\n==============================");				
 					
 					//May want to reconsider if we really care about the content length...
@@ -1459,7 +1466,7 @@ public abstract class BaseResource
 		{
 			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+": "+ex.getMessage()), responseAction);
 		}
-		catch (UnsupportedMediaTypeExcpetion ex)
+		catch (UnsupportedMediaTypeException ex)
 		{
 			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+" into unsupported media type '"+getResponseMediaType()+"'."), responseAction);
 		}

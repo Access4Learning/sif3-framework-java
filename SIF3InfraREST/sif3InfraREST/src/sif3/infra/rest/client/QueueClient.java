@@ -20,6 +20,9 @@ package sif3.infra.rest.client;
 
 import javax.ws.rs.core.Response.Status;
 
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+
 import sif3.common.CommonConstants.QueuePollingType;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderProperties;
@@ -30,9 +33,6 @@ import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.QueueCollectionType;
 import sif3.infra.common.model.QueueType;
-
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 
 /**
  * This class implements the REST client for the queue connector excluding the "message" related operations. The implementation meets SIF3 Spec.

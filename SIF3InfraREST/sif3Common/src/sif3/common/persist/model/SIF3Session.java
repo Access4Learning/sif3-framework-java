@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
@@ -32,7 +33,6 @@ import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceInfo;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * POJO to encapsulate SIF3 Session Information and configuration.

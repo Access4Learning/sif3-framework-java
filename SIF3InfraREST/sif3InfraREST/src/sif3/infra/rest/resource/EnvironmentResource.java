@@ -33,8 +33,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.exception.UnmarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.model.AuthenticationInfo;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
@@ -48,7 +49,6 @@ import sif3.infra.common.env.mgr.ProviderManagerFactory;
 import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.common.model.EnvironmentType;
-import au.com.systemic.framework.utils.StringUtils;
 
 /*
  * http://localhost:9080/SIF3InfraREST/sif3/environments/69df9d79-8e01-43e8-825f-d0dc1775761b
@@ -221,7 +221,7 @@ public class EnvironmentResource extends InfraResource
 			logger.error("Environment Payload: "+ payload);
 			return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal environment payload: "+ ex.getMessage()), ResponseAction.CREATE);
 		}
-	    catch (UnsupportedMediaTypeExcpetion ex)
+	    catch (UnsupportedMediaTypeException ex)
 	    {
 	    	logger.error("Failed to unmarshal payload into an environment: "+ ex.getMessage(), ex);
 	    	logger.error("Environment Payload: "+ payload);

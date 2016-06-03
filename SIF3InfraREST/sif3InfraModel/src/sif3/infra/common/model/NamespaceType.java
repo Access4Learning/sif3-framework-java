@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -37,7 +38,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *           &lt;/simpleType>
  *         &lt;/element>
  *       &lt;/sequence>
- *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.1}uuidType" />
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.2}uuidType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -46,20 +47,23 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "namespaceType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "namespaceType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "zone",
     "uri",
     "url"
 })
-public class NamespaceType {
+public class NamespaceType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String zone;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected String uri;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected String url;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -89,6 +93,10 @@ public class NamespaceType {
         this.zone = value;
     }
 
+    public boolean isSetZone() {
+        return (this.zone!= null);
+    }
+
     /**
      * Gets the value of the uri property.
      * 
@@ -111,6 +119,10 @@ public class NamespaceType {
      */
     public void setUri(String value) {
         this.uri = value;
+    }
+
+    public boolean isSetUri() {
+        return (this.uri!= null);
     }
 
     /**
@@ -137,6 +149,10 @@ public class NamespaceType {
         this.url = value;
     }
 
+    public boolean isSetUrl() {
+        return (this.url!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -159,6 +175,10 @@ public class NamespaceType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

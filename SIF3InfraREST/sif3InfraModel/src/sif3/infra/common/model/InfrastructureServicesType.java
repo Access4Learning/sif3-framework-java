@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -19,7 +20,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="infrastructureService" type="{http://www.sifassociation.org/infrastructure/3.1}infrastructureServiceType" maxOccurs="unbounded" minOccurs="2"/>
+ *         &lt;element name="infrastructureService" type="{http://www.sifassociation.org/infrastructure/3.2}infrastructureServiceType" maxOccurs="unbounded" minOccurs="2"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +30,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "infrastructureServicesType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "infrastructureServicesType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "infrastructureService"
 })
-public class InfrastructureServicesType {
+public class InfrastructureServicesType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected List<InfrastructureServiceType> infrastructureService;
 
     /**
@@ -64,6 +68,14 @@ public class InfrastructureServicesType {
             infrastructureService = new ArrayList<InfrastructureServiceType>();
         }
         return this.infrastructureService;
+    }
+
+    public boolean isSetInfrastructureService() {
+        return ((this.infrastructureService!= null)&&(!this.infrastructureService.isEmpty()));
+    }
+
+    public void unsetInfrastructureService() {
+        this.infrastructureService = null;
     }
 
 }

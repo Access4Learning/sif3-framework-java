@@ -128,6 +128,16 @@ CREATE INDEX IDX_APP_TMPLT_TO_ENV_TMPLT ON SIF3_APP_TEMPLATE (ENV_TEMPLATE_ID AS
 
 
 -- -----------------------------------------------------
+-- Table SIF3_REFIDOBJECT
+-- -----------------------------------------------------
+CREATE  TABLE SIF3_REFIDOBJECT (
+  ID VARCHAR2(36),
+  XML TEXT NULL,
+  PRIMARY KEY (ID));
+
+CREATE INDEX ID_IDX ON SIF3_REFIDOBJECT (ID ASC);
+
+-- -----------------------------------------------------
 -- Sequence for AUTO_INCREMENT
 -- -----------------------------------------------------
 CREATE SEQUENCE HIBERNATE_SEQUENCE MINVALUE 1 MAXVALUE 999999999999999999999999999 INCREMENT BY 1 START WITH 1000 CACHE 10 NOORDER  NOCYCLE;

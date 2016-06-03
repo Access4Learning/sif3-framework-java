@@ -22,11 +22,11 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.PagingRequestProperty;
 import sif3.common.CommonConstants.PagingResponseProperty;
 import sif3.common.header.HeaderProperties;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * When retrieving large data sets from providers it is deemed unacceptable to return all data every time. This class is used to provide

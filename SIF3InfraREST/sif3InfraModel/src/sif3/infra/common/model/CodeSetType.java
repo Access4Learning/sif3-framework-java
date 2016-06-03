@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -23,11 +24,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="zone" type="{http://www.w3.org/2001/XMLSchema}token"/>
- *         &lt;element name="version" type="{http://www.sifassociation.org/infrastructure/3.1}versionType"/>
+ *         &lt;element name="version" type="{http://www.sifassociation.org/infrastructure/3.2}versionType"/>
  *         &lt;element name="timestamp" type="{http://www.w3.org/2001/XMLSchema}dateTime"/>
  *         &lt;choice>
- *           &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.1}uriType" minOccurs="0"/>
- *           &lt;element name="codeItems" type="{http://www.sifassociation.org/infrastructure/3.1}codeItemsType" minOccurs="0"/>
+ *           &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.2}uriType" minOccurs="0"/>
+ *           &lt;element name="codeItems" type="{http://www.sifassociation.org/infrastructure/3.2}codeItemsType" minOccurs="0"/>
  *         &lt;/choice>
  *       &lt;/sequence>
  *       &lt;attribute name="id">
@@ -46,15 +47,18 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "codeSetType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "codeSetType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "zone",
     "version",
     "timestamp",
     "source",
     "codeItems"
 })
-public class CodeSetType {
+public class CodeSetType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -96,6 +100,10 @@ public class CodeSetType {
         this.zone = value;
     }
 
+    public boolean isSetZone() {
+        return (this.zone!= null);
+    }
+
     /**
      * Gets the value of the version property.
      * 
@@ -118,6 +126,10 @@ public class CodeSetType {
      */
     public void setVersion(String value) {
         this.version = value;
+    }
+
+    public boolean isSetVersion() {
+        return (this.version!= null);
     }
 
     /**
@@ -144,6 +156,10 @@ public class CodeSetType {
         this.timestamp = value;
     }
 
+    public boolean isSetTimestamp() {
+        return (this.timestamp!= null);
+    }
+
     /**
      * Gets the value of the source property.
      * 
@@ -166,6 +182,10 @@ public class CodeSetType {
      */
     public void setSource(String value) {
         this.source = value;
+    }
+
+    public boolean isSetSource() {
+        return (this.source!= null);
     }
 
     /**
@@ -192,6 +212,10 @@ public class CodeSetType {
         this.codeItems = value;
     }
 
+    public boolean isSetCodeItems() {
+        return (this.codeItems!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -214,6 +238,10 @@ public class CodeSetType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

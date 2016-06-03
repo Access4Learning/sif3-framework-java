@@ -1,0 +1,44 @@
+<LearnerPersonal RefId="53E6F4C0109FDE4DC7E11DB9C0100163" xmlns="http://www.sifassociation.org/datamodel/uk/2.0">
+    <LocalId>032134</LocalId>
+    <PersonalInformation>
+        <Name Type="B">
+            <FamilyName>Harris</FamilyName>
+            <GivenName>Sonya</GivenName>
+            <PreferredFamilyName>Harris</PreferredFamilyName>
+            <PreferredGivenName>Sonya</PreferredGivenName>
+        </Name>
+        <Demographics>
+            <EthnicityList>
+                <Ethnicity/>
+            </EthnicityList>
+            <Gender>F</Gender>
+            <BirthDate>1990-06-23</BirthDate>
+            <LanguageList/>
+        </Demographics>
+        <Email Type="School">sonya.harris@myschool.co.uk</Email>
+        <Address Type="Current">
+            <PAON/>
+            <Street>Bushmaster Close</Street>
+            <Town>Castle Vale</Town>
+            <AdministrativeArea>Birmingham</AdministrativeArea>
+            <PostCode>B35 7PH</PostCode>
+            <Country>GBR</Country>
+        </Address>
+    </PersonalInformation>
+    <UPN>F330950043367</UPN>
+    <UPNAllocationDate>2001-08-27</UPNAllocationDate>
+    <FormerUPNList/>
+    <ULN>1234567890</ULN>
+    <FamilyStructure>A</FamilyStructure>
+    <InCare/>
+    <ConnexionsAgreement>Yes</ConnexionsAgreement>
+    <ChildProtectionRegister/>
+    <GiftedTalented>No</GiftedTalented>
+    <HomeLA>330</HomeLA>
+    <LearnerIdentity>ENG</LearnerIdentity>
+    <Pregnant>No</Pregnant>
+    <SiblingList/>
+    <UniformAllowance>No</UniformAllowance>
+    <CurrentSchoolEnrolment LearnerSchoolEnrolmentRefId="010C6038DC7E11DB9C010016353E6F4C"/>
+    <PreviousEstablishmentList/>
+</LearnerPersonal>

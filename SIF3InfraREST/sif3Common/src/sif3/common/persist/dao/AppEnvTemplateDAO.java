@@ -24,11 +24,11 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.criterion.Restrictions;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.exception.PersistenceException;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.persist.common.BasicTransaction;
 import sif3.common.persist.model.AppEnvironmentTemplate;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * Implements some low level DB operations relating to the environment templates and their application relationship.

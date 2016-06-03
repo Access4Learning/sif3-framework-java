@@ -26,9 +26,9 @@ import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.model.AuthenticationInfo;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class provides a few useful methods for SIF3 specific authentication functions. If the authentication method is 'Basic' or 

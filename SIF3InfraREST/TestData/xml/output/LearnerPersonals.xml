@@ -1,0 +1,13 @@
+<LearnerPersonals xmlns="http://www.sifassociation.org/uk/datamodel/2.0">
+	
+<LearnerPersonal RefId="164da5d9bcbf4cf8a058ba0b0efde9ba" xmlns="http://www.sifassociation.org/uk/datamodel/2.0">
+  <LocalId>98765</LocalId>  
+  <PersonalInformation>     
+    <Name Type="C">       
+        <FamilyName>DAVEY</FamilyName>      
+        <GivenName>Tim</GivenName>       
+     </Name> 
+   </PersonalInformation>
+</LearnerPersonal> 
+
+</LearnerPersonals>

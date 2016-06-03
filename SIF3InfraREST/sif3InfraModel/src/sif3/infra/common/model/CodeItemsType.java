@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -17,7 +18,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="codeItem" type="{http://www.sifassociation.org/infrastructure/3.1}codeItemType"/>
+ *         &lt;element name="codeItem" type="{http://www.sifassociation.org/infrastructure/3.2}codeItemType"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -27,11 +28,14 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "codeItemsType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "codeItemsType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "codeItem"
 })
-public class CodeItemsType {
+public class CodeItemsType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(required = true)
     protected CodeItemType codeItem;
 
@@ -57,6 +61,10 @@ public class CodeItemsType {
      */
     public void setCodeItem(CodeItemType value) {
         this.codeItem = value;
+    }
+
+    public boolean isSetCodeItem() {
+        return (this.codeItem!= null);
     }
 
 }

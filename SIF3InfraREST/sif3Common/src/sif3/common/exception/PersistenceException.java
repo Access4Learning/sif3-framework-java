@@ -18,7 +18,7 @@
 
 package sif3.common.exception;
 
-public class PersistenceException extends Exception
+public class PersistenceException extends SIF3Exception
 {
   private static final long serialVersionUID = 1294192906545296557L;
 

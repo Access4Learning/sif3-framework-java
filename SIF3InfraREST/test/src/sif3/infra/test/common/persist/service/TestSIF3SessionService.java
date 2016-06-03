@@ -18,11 +18,11 @@
 
 package sif3.infra.test.common.persist.service;
 
+import au.com.systemic.framework.utils.FileReaderWriter;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.persist.service.SIF3SessionService;
-import au.com.systemic.framework.utils.FileReaderWriter;
 
 /**
  * @author Joerg Huber

@@ -22,6 +22,9 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.ServiceInvokationException;
@@ -43,9 +46,6 @@ import sif3.common.ws.model.MultiOperationStatusList;
 import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.DeleteIdType;
 import sif3.infra.common.model.DeleteRequestType;
-
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 
 /**
  * This class is a core client class for all Object Services and their CRUD operations (request connector) for SIF3. It takes care of 
@@ -594,9 +594,9 @@ public class ObjectServiceClient extends BaseClient
 	
 	
 	/*---------------------*/
-	/*-- Private Methods --*/
+	/*-- protected Methods --*/
 	/*---------------------*/
-	private BulkOperationResponse<CreateOperationStatus> setCreateBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
+	protected BulkOperationResponse<CreateOperationStatus> setCreateBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
 	{
 		BulkOperationResponse<CreateOperationStatus> response = new BulkOperationResponse<CreateOperationStatus>();
 		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, true, requestType, service.getURI().toString());
@@ -637,7 +637,7 @@ public class ObjectServiceClient extends BaseClient
 //				{
 //					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
 //				}
-//				catch (UnsupportedMediaTypeExcpetion ex)
+//				catch (UnsupportedMediaTypeException ex)
 //				{
 //					response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
 //				}
@@ -655,7 +655,7 @@ public class ObjectServiceClient extends BaseClient
 		return response;
 	}
 
-	private BulkOperationResponse<OperationStatus> setDeleteBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
+	protected BulkOperationResponse<OperationStatus> setDeleteBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
 	{
 		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
 		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, true, requestType, service.getURI().toString());
@@ -695,7 +695,7 @@ public class ObjectServiceClient extends BaseClient
 //				{
 //					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
 //				}
-//				catch (UnsupportedMediaTypeExcpetion ex)
+//				catch (UnsupportedMediaTypeException ex)
 //				{
 //					response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
 //				}
@@ -713,7 +713,7 @@ public class ObjectServiceClient extends BaseClient
 		return response;
 	}
 
-	private BulkOperationResponse<OperationStatus> setUpdateBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
+	protected BulkOperationResponse<OperationStatus> setUpdateBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
 	{
 		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
 		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, true, requestType, service.getURI().toString());
@@ -741,7 +741,7 @@ public class ObjectServiceClient extends BaseClient
 		return response;
 	}
 	
-	private void addPagingInfoToHeaders(PagingInfo pagingInfo, HeaderProperties hdrProperties)
+	protected void addPagingInfoToHeaders(PagingInfo pagingInfo, HeaderProperties hdrProperties)
 	{	
 		if (pagingInfo != null)
 		{
@@ -753,7 +753,7 @@ public class ObjectServiceClient extends BaseClient
 		}
 	}
 	
-	private void addDelayedInfo(HeaderProperties hdrProperties, SIFZone zone, SIFContext context, String serviceName, ServiceType serviceType, RequestType requestType)
+	protected void addDelayedInfo(HeaderProperties hdrProperties, SIFZone zone, SIFContext context, String serviceName, ServiceType serviceType, RequestType requestType)
 	{
 		if (requestType == RequestType.DELAYED)
 		{
@@ -780,7 +780,7 @@ public class ObjectServiceClient extends BaseClient
 	 * This method will add the authentication header properties to the given set of header properties. The final set of header
 	 * properties is then returned.
 	 */
-    private HeaderProperties addAuthenticationHdrProps(HeaderProperties hdrProperties)
+    protected HeaderProperties addAuthenticationHdrProps(HeaderProperties hdrProperties)
     {
         if (hdrProperties == null)
         {
@@ -797,7 +797,7 @@ public class ObjectServiceClient extends BaseClient
 //     * Caller MUST ensure that the requestHdrProperties are not null. They really shouldn't since this class is only called
 //     * by the AbstractConsumer which must set a few header properties anyway.
 //     */
-//    private boolean isDelayedRequest(HeaderProperties requestHdrProperties)
+//    protected boolean isDelayedRequest(HeaderProperties requestHdrProperties)
 //    {
 //        String requestType = requestHdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE);
 //    
@@ -814,7 +814,7 @@ public class ObjectServiceClient extends BaseClient
 //     * Caller MUST ensure that the requestHdrProperties are not null. They really shouldn't since this class is only called
 //     * by the AbstractConsumer which must set a few header properties anyway.
 //     */
-//    private ServiceType getServiceTypeFromRequestHeaders(HeaderProperties requestHdrProperties)
+//    protected ServiceType getServiceTypeFromRequestHeaders(HeaderProperties requestHdrProperties)
 //    {
 //        String serviceType = requestHdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_SERVICE_NAME);
 //        

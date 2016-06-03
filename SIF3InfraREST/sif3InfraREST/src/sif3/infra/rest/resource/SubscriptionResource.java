@@ -31,11 +31,11 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import sif3.common.exception.UnmarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.ErrorDetails;
@@ -198,7 +198,7 @@ public class SubscriptionResource extends InfraResource
 				logger.error("Subscription Payload: "+ payload);
 				return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal subscription payload: "+ ex.getMessage()), ResponseAction.CREATE);
 			}
-			catch (UnsupportedMediaTypeExcpetion ex)
+			catch (UnsupportedMediaTypeException ex)
 			{
 				logger.error("Failed to unmarshal payload into an SubscriptionType: "+ ex.getMessage(), ex);
 				logger.error("Subscription Payload: "+ payload);

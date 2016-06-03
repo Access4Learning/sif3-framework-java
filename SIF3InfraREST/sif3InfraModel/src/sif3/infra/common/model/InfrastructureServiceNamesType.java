@@ -17,6 +17,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="environment"/>
  *     &lt;enumeration value="provisionRequests"/>
  *     &lt;enumeration value="requestsConnector"/>
+ *     &lt;enumeration value="servicesConnector"/>
  *     &lt;enumeration value="eventsConnector"/>
  *     &lt;enumeration value="queues"/>
  *     &lt;enumeration value="subscriptions"/>
@@ -25,7 +26,7 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  * 
  */
-@XmlType(name = "infrastructureServiceNamesType", namespace = "http://www.sifassociation.org/infrastructure/3.1")
+@XmlType(name = "infrastructureServiceNamesType", namespace = "http://www.sifassociation.org/infrastructure/3.2")
 @XmlEnum
 public enum InfrastructureServiceNamesType {
 
@@ -35,6 +36,8 @@ public enum InfrastructureServiceNamesType {
     PROVISION_REQUESTS("provisionRequests"),
     @XmlEnumValue("requestsConnector")
     REQUESTS_CONNECTOR("requestsConnector"),
+    @XmlEnumValue("servicesConnector")
+    SERVICES_CONNECTOR("servicesConnector"),
     @XmlEnumValue("eventsConnector")
     EVENTS_CONNECTOR("eventsConnector"),
     @XmlEnumValue("queues")

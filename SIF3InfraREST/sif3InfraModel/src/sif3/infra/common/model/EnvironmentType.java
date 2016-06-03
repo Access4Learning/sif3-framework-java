@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -23,17 +24,17 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *       &lt;sequence>
  *         &lt;element name="sessionToken" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
  *         &lt;element name="solutionId" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
- *         &lt;element name="defaultZone" type="{http://www.sifassociation.org/infrastructure/3.1}zoneType" minOccurs="0"/>
+ *         &lt;element name="defaultZone" type="{http://www.sifassociation.org/infrastructure/3.2}zoneType" minOccurs="0"/>
  *         &lt;element name="authenticationMethod" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
  *         &lt;element name="instanceId" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
  *         &lt;element name="userToken" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="consumerName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="applicationInfo" type="{http://www.sifassociation.org/infrastructure/3.1}applicationInfoType" minOccurs="0"/>
- *         &lt;element name="infrastructureServices" type="{http://www.sifassociation.org/infrastructure/3.1}infrastructureServicesType" minOccurs="0"/>
- *         &lt;element name="provisionedZones" type="{http://www.sifassociation.org/infrastructure/3.1}provisionedZonesType" minOccurs="0"/>
+ *         &lt;element name="applicationInfo" type="{http://www.sifassociation.org/infrastructure/3.2}applicationInfoType" minOccurs="0"/>
+ *         &lt;element name="infrastructureServices" type="{http://www.sifassociation.org/infrastructure/3.2}infrastructureServicesType" minOccurs="0"/>
+ *         &lt;element name="provisionedZones" type="{http://www.sifassociation.org/infrastructure/3.2}provisionedZonesType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="type" type="{http://www.sifassociation.org/infrastructure/3.1}environmentTypeType" />
- *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.1}uuidType" />
+ *       &lt;attribute name="type" type="{http://www.sifassociation.org/infrastructure/3.2}environmentTypeType" />
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.2}uuidType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -42,7 +43,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "environmentType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "environmentType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "sessionToken",
     "solutionId",
     "defaultZone",
@@ -54,35 +55,38 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "infrastructureServices",
     "provisionedZones"
 })
-public class EnvironmentType {
+public class EnvironmentType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String sessionToken;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String solutionId;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected ZoneType defaultZone;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String authenticationMethod;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String instanceId;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected String userToken;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected String consumerName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected ApplicationInfoType applicationInfo;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected InfrastructureServicesType infrastructureServices;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected ProvisionedZonesType provisionedZones;
     @XmlAttribute(name = "type")
     protected EnvironmentTypeType type;
@@ -114,6 +118,10 @@ public class EnvironmentType {
         this.sessionToken = value;
     }
 
+    public boolean isSetSessionToken() {
+        return (this.sessionToken!= null);
+    }
+
     /**
      * Gets the value of the solutionId property.
      * 
@@ -136,6 +144,10 @@ public class EnvironmentType {
      */
     public void setSolutionId(String value) {
         this.solutionId = value;
+    }
+
+    public boolean isSetSolutionId() {
+        return (this.solutionId!= null);
     }
 
     /**
@@ -162,6 +174,10 @@ public class EnvironmentType {
         this.defaultZone = value;
     }
 
+    public boolean isSetDefaultZone() {
+        return (this.defaultZone!= null);
+    }
+
     /**
      * Gets the value of the authenticationMethod property.
      * 
@@ -184,6 +200,10 @@ public class EnvironmentType {
      */
     public void setAuthenticationMethod(String value) {
         this.authenticationMethod = value;
+    }
+
+    public boolean isSetAuthenticationMethod() {
+        return (this.authenticationMethod!= null);
     }
 
     /**
@@ -210,6 +230,10 @@ public class EnvironmentType {
         this.instanceId = value;
     }
 
+    public boolean isSetInstanceId() {
+        return (this.instanceId!= null);
+    }
+
     /**
      * Gets the value of the userToken property.
      * 
@@ -232,6 +256,10 @@ public class EnvironmentType {
      */
     public void setUserToken(String value) {
         this.userToken = value;
+    }
+
+    public boolean isSetUserToken() {
+        return (this.userToken!= null);
     }
 
     /**
@@ -258,6 +286,10 @@ public class EnvironmentType {
         this.consumerName = value;
     }
 
+    public boolean isSetConsumerName() {
+        return (this.consumerName!= null);
+    }
+
     /**
      * Gets the value of the applicationInfo property.
      * 
@@ -280,6 +312,10 @@ public class EnvironmentType {
      */
     public void setApplicationInfo(ApplicationInfoType value) {
         this.applicationInfo = value;
+    }
+
+    public boolean isSetApplicationInfo() {
+        return (this.applicationInfo!= null);
     }
 
     /**
@@ -306,6 +342,10 @@ public class EnvironmentType {
         this.infrastructureServices = value;
     }
 
+    public boolean isSetInfrastructureServices() {
+        return (this.infrastructureServices!= null);
+    }
+
     /**
      * Gets the value of the provisionedZones property.
      * 
@@ -328,6 +368,10 @@ public class EnvironmentType {
      */
     public void setProvisionedZones(ProvisionedZonesType value) {
         this.provisionedZones = value;
+    }
+
+    public boolean isSetProvisionedZones() {
+        return (this.provisionedZones!= null);
     }
 
     /**
@@ -354,6 +398,10 @@ public class EnvironmentType {
         this.type = value;
     }
 
+    public boolean isSetType() {
+        return (this.type!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -376,6 +424,10 @@ public class EnvironmentType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

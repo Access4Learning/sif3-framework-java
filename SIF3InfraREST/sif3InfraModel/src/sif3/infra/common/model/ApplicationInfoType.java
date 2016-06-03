@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -22,8 +23,8 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="supportedInfrastructureVersion" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="dataModelNamespace" type="{http://www.w3.org/2001/XMLSchema}anyURI" minOccurs="0"/>
  *         &lt;element name="transport" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="applicationProduct" type="{http://www.sifassociation.org/infrastructure/3.1}productIdentityType" minOccurs="0"/>
- *         &lt;element name="adapterProduct" type="{http://www.sifassociation.org/infrastructure/3.1}productIdentityType" minOccurs="0"/>
+ *         &lt;element name="applicationProduct" type="{http://www.sifassociation.org/infrastructure/3.2}productIdentityType" minOccurs="0"/>
+ *         &lt;element name="adapterProduct" type="{http://www.sifassociation.org/infrastructure/3.2}productIdentityType" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -33,7 +34,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "applicationInfoType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "applicationInfoType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "applicationKey",
     "supportedInfrastructureVersion",
     "dataModelNamespace",
@@ -41,20 +42,23 @@ import javax.xml.bind.annotation.XmlType;
     "applicationProduct",
     "adapterProduct"
 })
-public class ApplicationInfoType {
+public class ApplicationInfoType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected String applicationKey;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected String supportedInfrastructureVersion;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlSchemaType(name = "anyURI")
     protected String dataModelNamespace;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected String transport;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected ProductIdentityType applicationProduct;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected ProductIdentityType adapterProduct;
 
     /**
@@ -81,6 +85,10 @@ public class ApplicationInfoType {
         this.applicationKey = value;
     }
 
+    public boolean isSetApplicationKey() {
+        return (this.applicationKey!= null);
+    }
+
     /**
      * Gets the value of the supportedInfrastructureVersion property.
      * 
@@ -103,6 +111,10 @@ public class ApplicationInfoType {
      */
     public void setSupportedInfrastructureVersion(String value) {
         this.supportedInfrastructureVersion = value;
+    }
+
+    public boolean isSetSupportedInfrastructureVersion() {
+        return (this.supportedInfrastructureVersion!= null);
     }
 
     /**
@@ -129,6 +141,10 @@ public class ApplicationInfoType {
         this.dataModelNamespace = value;
     }
 
+    public boolean isSetDataModelNamespace() {
+        return (this.dataModelNamespace!= null);
+    }
+
     /**
      * Gets the value of the transport property.
      * 
@@ -151,6 +167,10 @@ public class ApplicationInfoType {
      */
     public void setTransport(String value) {
         this.transport = value;
+    }
+
+    public boolean isSetTransport() {
+        return (this.transport!= null);
     }
 
     /**
@@ -177,6 +197,10 @@ public class ApplicationInfoType {
         this.applicationProduct = value;
     }
 
+    public boolean isSetApplicationProduct() {
+        return (this.applicationProduct!= null);
+    }
+
     /**
      * Gets the value of the adapterProduct property.
      * 
@@ -199,6 +223,10 @@ public class ApplicationInfoType {
      */
     public void setAdapterProduct(ProductIdentityType value) {
         this.adapterProduct = value;
+    }
+
+    public boolean isSetAdapterProduct() {
+        return (this.adapterProduct!= null);
     }
 
 }

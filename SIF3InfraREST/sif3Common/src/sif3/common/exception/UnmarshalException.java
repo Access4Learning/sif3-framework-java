@@ -22,7 +22,7 @@ package sif3.common.exception;
  * @author Joerg Huber
  *
  */
-public class UnmarshalException extends Exception
+public class UnmarshalException extends SIF3Exception
 {
     private static final long serialVersionUID = -2789084765271923281L;
 

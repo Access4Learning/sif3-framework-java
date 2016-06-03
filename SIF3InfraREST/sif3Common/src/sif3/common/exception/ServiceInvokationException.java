@@ -1,6 +1,6 @@
 package sif3.common.exception;
 
-public class ServiceInvokationException extends Exception
+public class ServiceInvokationException extends SIF3Exception
 {
   private static final long serialVersionUID = -7309084634964371L;
 

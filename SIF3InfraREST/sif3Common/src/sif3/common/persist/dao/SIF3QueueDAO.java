@@ -26,12 +26,12 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.criterion.Restrictions;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.PersistenceException;
 import sif3.common.persist.common.BasicTransaction;
 import sif3.common.persist.model.SIF3Queue;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * Implements some low level DB operations relating to the SIF Queue Information that must be stored locally.

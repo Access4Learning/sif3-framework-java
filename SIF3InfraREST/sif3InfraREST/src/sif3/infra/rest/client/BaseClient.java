@@ -30,10 +30,18 @@ import javax.ws.rs.core.UriBuilder;
 
 import org.apache.log4j.Logger;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.WebResource.Builder;
+import com.sun.jersey.api.client.config.ClientConfig;
+
+import au.com.systemic.framework.utils.DateUtils;
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.UnmarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
 import sif3.common.header.HeaderValues.MessageType;
@@ -62,14 +70,6 @@ import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.ErrorType;
 import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.rest.mapper.InfraDataModelMapper;
-import au.com.systemic.framework.utils.DateUtils;
-import au.com.systemic.framework.utils.StringUtils;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.WebResource.Builder;
-import com.sun.jersey.api.client.config.ClientConfig;
 
 /**
  * This class is a core client class to deal with REST clients for SIF3. It takes care of all the little things that define the
@@ -149,7 +149,7 @@ public abstract class BaseClient
 		setRequestMediaType(requestMediaType, dmMarshaller);
 		setResponseMediaType(responseMediaType, dmUnmarshaller);
 		setUseCompression(useCompression);
-		configureClienService(baseURI, secureConnection, getUseCompression());
+		configureClientService(baseURI, secureConnection, getUseCompression());
 		
 		logger.debug("Base URI for Call is: "+getBaseURI().toASCIIString());
 	}
@@ -284,7 +284,7 @@ public abstract class BaseClient
     	this.dmMarshaller = dmMarshaller;
     }
 	
-	protected void configureClienService(URI baseURI, boolean secureConnection, boolean useCompression)
+	protected void configureClientService(URI baseURI, boolean secureConnection, boolean useCompression)
 	{
 		createConfig(secureConnection);
 
@@ -368,7 +368,7 @@ public abstract class BaseClient
 	 */
 	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, RequestType requestType, boolean includeRequestID, boolean hasPayload)
 	{
-	    String charEncoding = getClientEnvMgr().getEnvironmentInfo().getCharsetEncoding();
+	  String charEncoding = getClientEnvMgr().getEnvironmentInfo().getCharsetEncoding();
 		Builder builder = service.type(addEncoding(getRequestMediaType(), charEncoding)).accept(addEncoding(getResponseMediaType(), charEncoding));
 		
 		// Set some specific SIF HTTP header. First ensure that we have a valid header property structure
@@ -444,8 +444,7 @@ public abstract class BaseClient
 	 * 
 	 * @return A builder class on which a HTTP operation can be invoked on.
 	 */
-	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, boolean includeRequestID, boolean hasPayload)
-	{
+	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, boolean includeRequestID, boolean hasPayload) {
 		return setRequestHeaderAndMediaTypes(service, hdrProperties, RequestType.IMMEDIATE, includeRequestID, hasPayload);
 	}
 
@@ -514,7 +513,6 @@ public abstract class BaseClient
 					{
 						try
 						{
-							// We must use the actual data model response type in the unmarshaller.
 							response.setDataObject(getDataModelUnmarshaller().unmarshal(payload, returnObjectClass, getResponseMediaType()));
 							if (response.getDataObject() == null)// this is strange. So set the unmarshalled value.
 							{
@@ -525,7 +523,7 @@ public abstract class BaseClient
 						{
 							response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
 						}
-						catch (UnsupportedMediaTypeExcpetion ex)
+						catch (UnsupportedMediaTypeException ex)
 						{
 							response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
 						}
@@ -560,19 +558,17 @@ public abstract class BaseClient
 	 */
 	protected void setBaseResponseData(BaseResponse response, ClientResponse clientResponse, HeaderProperties requestHdrProps, SIFZone zone, SIFContext context, boolean zoneCtxSupported, RequestType requestType, String requestURI)
 	{
-	    SIF3Session sif3Session = (zoneCtxSupported) ? getSIF3Session() : null;
-	    	    
-	    // Note: sif3Session can be null if we create an environment! In this case we cannot retrieve a default zone or context! It is not required anyway
-	    //       because create an environment is not done for a zone or context.
-	    
-	    SIFZone actualZone = (sif3Session != null) ? sif3Session.getZone(zone) : zone;
-	    SIFContext actualContext = (sif3Session != null) ? sif3Session.getContext(context) : context;
-	    
-//		response.setStatus(clientResponse.getClientResponseStatus().getStatusCode());
-        response.setStatus(clientResponse.getStatusInfo().getStatusCode());
-//		response.setStatusMessage(clientResponse.getClientResponseStatus().getReasonPhrase());
-        response.setStatusMessage(clientResponse.getStatusInfo().getReasonPhrase());
-		response.setMediaType(clientResponse.getType());
+    SIF3Session sif3Session = (zoneCtxSupported) ? getSIF3Session() : null;
+    	    
+    // Note: sif3Session can be null if we create an environment! In this case we cannot retrieve a default zone or context! It is not required anyway
+    //       because create an environment is not done for a zone or context.
+    
+    SIFZone actualZone = (sif3Session != null) ? sif3Session.getZone(zone) : zone;
+    SIFContext actualContext = (sif3Session != null) ? sif3Session.getContext(context) : context;
+    
+    response.setStatus(clientResponse.getStatusInfo().getStatusCode());
+    response.setStatusMessage(clientResponse.getStatusInfo().getReasonPhrase());
+    response.setMediaType(clientResponse.getType());
 		response.setContentLength(clientResponse.getLength());
 		response.setZone(actualZone);
 		response.setContext(actualContext);

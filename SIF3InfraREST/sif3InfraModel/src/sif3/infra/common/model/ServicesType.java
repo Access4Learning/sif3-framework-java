@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -19,7 +20,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="service" type="{http://www.sifassociation.org/infrastructure/3.1}serviceType" maxOccurs="unbounded"/>
+ *         &lt;element name="service" type="{http://www.sifassociation.org/infrastructure/3.2}serviceType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +30,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "servicesType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "servicesType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "service"
 })
-public class ServicesType {
+public class ServicesType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected List<ServiceType> service;
 
     /**
@@ -64,6 +68,14 @@ public class ServicesType {
             service = new ArrayList<ServiceType>();
         }
         return this.service;
+    }
+
+    public boolean isSetService() {
+        return ((this.service!= null)&&(!this.service.isEmpty()));
+    }
+
+    public void unsetService() {
+        this.service = null;
     }
 
 }

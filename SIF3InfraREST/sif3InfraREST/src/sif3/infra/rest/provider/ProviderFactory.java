@@ -26,10 +26,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
-import sif3.common.conversion.ModelObjectInfo;
-import sif3.common.interfaces.Provider;
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.conversion.ModelObjectInfo;
+import sif3.common.interfaces.Provider;
 
 /**
  * This is the provider factory. Each provider deals with a number of objects (i.e. StudentPersonal, SchoolInfo etc). 
@@ -158,6 +158,7 @@ public class ProviderFactory
             }
             else // no known provider for the given Object Type
             {
+				logger.error("No known provider for "+objectInfo.getObjectName());
                 return null;
             }
         }
@@ -201,6 +202,8 @@ public class ProviderFactory
                     ModelObjectInfo objectInfo = provider.getMultiObjectClassInfo();
                     if ((objectInfo != null) && (StringUtils.notEmpty(objectInfo.getObjectName())))
                     {
+						logger.info("Adding provider for '" + objectInfo.getObjectName() + "', using provider class '"+provider.getClass().getCanonicalName()+"'.");
+						
                         // First add it to the standard request/response hashmap
                         providerClasses.put(objectInfo, providerClassInfo);
 

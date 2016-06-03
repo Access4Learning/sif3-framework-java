@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -19,7 +20,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.1}namespaceType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.2}namespaceType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +30,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "namespaceCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "namespaceCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "namespace"
 })
-public class NamespaceCollectionType {
+public class NamespaceCollectionType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected List<NamespaceType> namespace;
 
     /**
@@ -64,6 +68,14 @@ public class NamespaceCollectionType {
             namespace = new ArrayList<NamespaceType>();
         }
         return this.namespace;
+    }
+
+    public boolean isSetNamespace() {
+        return ((this.namespace!= null)&&(!this.namespace.isEmpty()));
+    }
+
+    public void unsetNamespace() {
+        this.namespace = null;
     }
 
 }

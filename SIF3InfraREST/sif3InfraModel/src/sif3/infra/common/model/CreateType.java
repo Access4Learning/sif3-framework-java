@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -21,7 +22,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="error" type="{http://www.sifassociation.org/infrastructure/3.1}errorType" minOccurs="0"/>
+ *         &lt;element name="error" type="{http://www.sifassociation.org/infrastructure/3.2}errorType" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}token" />
  *       &lt;attribute name="advisoryId" type="{http://www.w3.org/2001/XMLSchema}token" />
@@ -40,12 +41,15 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "createType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "createType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "error"
 })
-public class CreateType {
+public class CreateType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected ErrorType error;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
@@ -83,6 +87,10 @@ public class CreateType {
         this.error = value;
     }
 
+    public boolean isSetError() {
+        return (this.error!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -105,6 +113,10 @@ public class CreateType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
     /**
@@ -131,6 +143,10 @@ public class CreateType {
         this.advisoryId = value;
     }
 
+    public boolean isSetAdvisoryId() {
+        return (this.advisoryId!= null);
+    }
+
     /**
      * Gets the value of the statusCode property.
      * 
@@ -153,6 +169,10 @@ public class CreateType {
      */
     public void setStatusCode(String value) {
         this.statusCode = value;
+    }
+
+    public boolean isSetStatusCode() {
+        return (this.statusCode!= null);
     }
 
 }

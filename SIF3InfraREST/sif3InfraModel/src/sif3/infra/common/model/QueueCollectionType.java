@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -19,7 +20,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="queue" type="{http://www.sifassociation.org/infrastructure/3.1}queueType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="queue" type="{http://www.sifassociation.org/infrastructure/3.2}queueType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +30,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "queueCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "queueCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "queue"
 })
-public class QueueCollectionType {
+public class QueueCollectionType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected List<QueueType> queue;
 
     /**
@@ -64,6 +68,14 @@ public class QueueCollectionType {
             queue = new ArrayList<QueueType>();
         }
         return this.queue;
+    }
+
+    public boolean isSetQueue() {
+        return ((this.queue!= null)&&(!this.queue.isEmpty()));
+    }
+
+    public void unsetQueue() {
+        this.queue = null;
     }
 
 }

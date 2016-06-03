@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -20,7 +21,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * &lt;complexType name="infrastructureServiceType">
  *   &lt;simpleContent>
  *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>token">
- *       &lt;attribute name="name" type="{http://www.sifassociation.org/infrastructure/3.1}infrastructureServiceNamesType" />
+ *       &lt;attribute name="name" type="{http://www.sifassociation.org/infrastructure/3.2}infrastructureServiceNamesType" />
  *     &lt;/extension>
  *   &lt;/simpleContent>
  * &lt;/complexType>
@@ -29,11 +30,14 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "infrastructureServiceType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "infrastructureServiceType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "value"
 })
-public class InfrastructureServiceType {
+public class InfrastructureServiceType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlValue
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -65,6 +69,10 @@ public class InfrastructureServiceType {
         this.value = value;
     }
 
+    public boolean isSetValue() {
+        return (this.value!= null);
+    }
+
     /**
      * Gets the value of the name property.
      * 
@@ -87,6 +95,10 @@ public class InfrastructureServiceType {
      */
     public void setName(InfrastructureServiceNamesType value) {
         this.name = value;
+    }
+
+    public boolean isSetName() {
+        return (this.name!= null);
     }
 
 }

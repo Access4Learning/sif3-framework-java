@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -17,7 +18,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="deletes" type="{http://www.sifassociation.org/infrastructure/3.1}deleteIdCollection"/>
+ *         &lt;element name="deletes" type="{http://www.sifassociation.org/infrastructure/3.2}deleteIdCollection"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -27,12 +28,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "deleteRequestType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "deleteRequestType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "deletes"
 })
-public class DeleteRequestType {
+public class DeleteRequestType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected DeleteIdCollection deletes;
 
     /**
@@ -57,6 +61,10 @@ public class DeleteRequestType {
      */
     public void setDeletes(DeleteIdCollection value) {
         this.deletes = value;
+    }
+
+    public boolean isSetDeletes() {
+        return (this.deletes!= null);
     }
 
 }

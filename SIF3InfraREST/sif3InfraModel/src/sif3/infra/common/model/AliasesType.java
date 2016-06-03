@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -19,7 +20,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="alias" type="{http://www.sifassociation.org/infrastructure/3.1}aliasType" maxOccurs="unbounded"/>
+ *         &lt;element name="alias" type="{http://www.sifassociation.org/infrastructure/3.2}aliasType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,11 +30,14 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "aliasesType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "aliasesType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "alias"
 })
-public class AliasesType {
+public class AliasesType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     @XmlElement(required = true)
     protected List<AliasType> alias;
 
@@ -64,6 +68,14 @@ public class AliasesType {
             alias = new ArrayList<AliasType>();
         }
         return this.alias;
+    }
+
+    public boolean isSetAlias() {
+        return ((this.alias!= null)&&(!this.alias.isEmpty()));
+    }
+
+    public void unsetAlias() {
+        this.alias = null;
     }
 
 }

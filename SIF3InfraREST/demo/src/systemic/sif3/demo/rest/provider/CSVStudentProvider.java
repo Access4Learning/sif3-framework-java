@@ -59,10 +59,10 @@ public class CSVStudentProvider extends  BaseEventProvider<String>
     /*--------------------------------*/
 
     /* (non-Javadoc)
-     * @see sif3.common.interfaces.Provider#retrievByPrimaryKey(java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
+     * @see sif3.common.interfaces.Provider#retrieveByPrimaryKey(java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public Object retrievByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public Object retrieveByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
     {
     	logger.debug("Retrieve By Primary Key Resoucre ID = "+resourceID+", "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	throw new IllegalArgumentException("Not implemented for CSV Provider.");

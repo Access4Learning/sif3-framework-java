@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -21,7 +22,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="location" type="{http://www.w3.org/2001/XMLSchema}anyURI"/>
- *         &lt;element name="properties" type="{http://www.sifassociation.org/infrastructure/3.1}propertiesType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="properties" type="{http://www.sifassociation.org/infrastructure/3.2}propertiesType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -31,16 +32,19 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "protocolType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "protocolType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "location",
     "properties"
 })
-public class ProtocolType {
+public class ProtocolType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlSchemaType(name = "anyURI")
     protected String location;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected List<PropertiesType> properties;
 
     /**
@@ -65,6 +69,10 @@ public class ProtocolType {
      */
     public void setLocation(String value) {
         this.location = value;
+    }
+
+    public boolean isSetLocation() {
+        return (this.location!= null);
     }
 
     /**
@@ -94,6 +102,14 @@ public class ProtocolType {
             properties = new ArrayList<PropertiesType>();
         }
         return this.properties;
+    }
+
+    public boolean isSetProperties() {
+        return ((this.properties!= null)&&(!this.properties.isEmpty()));
+    }
+
+    public void unsetProperties() {
+        this.properties = null;
     }
 
 }

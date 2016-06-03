@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -51,24 +52,27 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "productIdentityType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "productIdentityType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "vendorName",
     "productName",
     "productVersion",
     "iconURI"
 })
-public class ProductIdentityType {
+public class ProductIdentityType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String vendorName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String productName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String productVersion;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlSchemaType(name = "anyURI")
     protected String iconURI;
 
@@ -96,6 +100,10 @@ public class ProductIdentityType {
         this.vendorName = value;
     }
 
+    public boolean isSetVendorName() {
+        return (this.vendorName!= null);
+    }
+
     /**
      * Gets the value of the productName property.
      * 
@@ -118,6 +126,10 @@ public class ProductIdentityType {
      */
     public void setProductName(String value) {
         this.productName = value;
+    }
+
+    public boolean isSetProductName() {
+        return (this.productName!= null);
     }
 
     /**
@@ -144,6 +156,10 @@ public class ProductIdentityType {
         this.productVersion = value;
     }
 
+    public boolean isSetProductVersion() {
+        return (this.productVersion!= null);
+    }
+
     /**
      * Gets the value of the iconURI property.
      * 
@@ -166,6 +182,10 @@ public class ProductIdentityType {
      */
     public void setIconURI(String value) {
         this.iconURI = value;
+    }
+
+    public boolean isSetIconURI() {
+        return (this.iconURI!= null);
     }
 
 }

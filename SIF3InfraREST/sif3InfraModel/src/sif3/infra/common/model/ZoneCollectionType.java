@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -19,7 +20,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="zone" type="{http://www.sifassociation.org/infrastructure/3.1}zoneType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="zone" type="{http://www.sifassociation.org/infrastructure/3.2}zoneType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +30,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "zoneCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "zoneCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "zone"
 })
-public class ZoneCollectionType {
+public class ZoneCollectionType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected List<ZoneType> zone;
 
     /**
@@ -64,6 +68,14 @@ public class ZoneCollectionType {
             zone = new ArrayList<ZoneType>();
         }
         return this.zone;
+    }
+
+    public boolean isSetZone() {
+        return ((this.zone!= null)&&(!this.zone.isEmpty()));
+    }
+
+    public void unsetZone() {
+        this.zone = null;
     }
 
 }

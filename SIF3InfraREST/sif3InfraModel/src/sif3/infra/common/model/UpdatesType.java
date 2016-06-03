@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -19,7 +20,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="update" type="{http://www.sifassociation.org/infrastructure/3.1}updateType" maxOccurs="unbounded"/>
+ *         &lt;element name="update" type="{http://www.sifassociation.org/infrastructure/3.2}updateType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +30,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "updatesType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "updatesType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "update"
 })
-public class UpdatesType {
+public class UpdatesType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected List<UpdateType> update;
 
     /**
@@ -64,6 +68,14 @@ public class UpdatesType {
             update = new ArrayList<UpdateType>();
         }
         return this.update;
+    }
+
+    public boolean isSetUpdate() {
+        return ((this.update!= null)&&(!this.update.isEmpty()));
+    }
+
+    public void unsetUpdate() {
+        this.update = null;
     }
 
 }

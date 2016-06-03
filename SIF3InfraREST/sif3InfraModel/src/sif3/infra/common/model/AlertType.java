@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -54,7 +55,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="code" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *         &lt;element name="internal" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.1}uuidType" />
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.2}uuidType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -63,7 +64,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "alertType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "alertType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "reporter",
     "cause",
     "exchange",
@@ -77,45 +78,48 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "code",
     "internal"
 })
-public class AlertType {
+public class AlertType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String reporter;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String cause;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String exchange;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String level;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String description;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String messageID;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected String body;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected String error;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")
     protected String xpath;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlSchemaType(name = "unsignedInt")
     protected Long category;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlSchemaType(name = "unsignedInt")
     protected Long code;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String internal;
@@ -147,6 +151,10 @@ public class AlertType {
         this.reporter = value;
     }
 
+    public boolean isSetReporter() {
+        return (this.reporter!= null);
+    }
+
     /**
      * Gets the value of the cause property.
      * 
@@ -169,6 +177,10 @@ public class AlertType {
      */
     public void setCause(String value) {
         this.cause = value;
+    }
+
+    public boolean isSetCause() {
+        return (this.cause!= null);
     }
 
     /**
@@ -195,6 +207,10 @@ public class AlertType {
         this.exchange = value;
     }
 
+    public boolean isSetExchange() {
+        return (this.exchange!= null);
+    }
+
     /**
      * Gets the value of the level property.
      * 
@@ -217,6 +233,10 @@ public class AlertType {
      */
     public void setLevel(String value) {
         this.level = value;
+    }
+
+    public boolean isSetLevel() {
+        return (this.level!= null);
     }
 
     /**
@@ -243,6 +263,10 @@ public class AlertType {
         this.description = value;
     }
 
+    public boolean isSetDescription() {
+        return (this.description!= null);
+    }
+
     /**
      * Gets the value of the messageID property.
      * 
@@ -265,6 +289,10 @@ public class AlertType {
      */
     public void setMessageID(String value) {
         this.messageID = value;
+    }
+
+    public boolean isSetMessageID() {
+        return (this.messageID!= null);
     }
 
     /**
@@ -291,6 +319,10 @@ public class AlertType {
         this.body = value;
     }
 
+    public boolean isSetBody() {
+        return (this.body!= null);
+    }
+
     /**
      * Gets the value of the error property.
      * 
@@ -313,6 +345,10 @@ public class AlertType {
      */
     public void setError(String value) {
         this.error = value;
+    }
+
+    public boolean isSetError() {
+        return (this.error!= null);
     }
 
     /**
@@ -339,6 +375,10 @@ public class AlertType {
         this.xpath = value;
     }
 
+    public boolean isSetXpath() {
+        return (this.xpath!= null);
+    }
+
     /**
      * Gets the value of the category property.
      * 
@@ -361,6 +401,10 @@ public class AlertType {
      */
     public void setCategory(Long value) {
         this.category = value;
+    }
+
+    public boolean isSetCategory() {
+        return (this.category!= null);
     }
 
     /**
@@ -387,6 +431,10 @@ public class AlertType {
         this.code = value;
     }
 
+    public boolean isSetCode() {
+        return (this.code!= null);
+    }
+
     /**
      * Gets the value of the internal property.
      * 
@@ -411,6 +459,10 @@ public class AlertType {
         this.internal = value;
     }
 
+    public boolean isSetInternal() {
+        return (this.internal!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -433,6 +485,10 @@ public class AlertType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

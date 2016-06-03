@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -23,11 +24,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *       &lt;sequence>
  *         &lt;element name="zoneId" type="{http://www.w3.org/2001/XMLSchema}token"/>
  *         &lt;element name="contextId" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
- *         &lt;element name="serviceType" type="{http://www.sifassociation.org/infrastructure/3.1}serviceTypeType"/>
+ *         &lt;element name="serviceType" type="{http://www.sifassociation.org/infrastructure/3.2}serviceTypeType"/>
  *         &lt;element name="serviceName" type="{http://www.w3.org/2001/XMLSchema}token"/>
  *         &lt;element name="queueId" type="{http://www.w3.org/2001/XMLSchema}token"/>
  *       &lt;/sequence>
- *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.1}uuidType" />
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.2}uuidType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -36,31 +37,34 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "subscriptionType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "subscriptionType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "zoneId",
     "contextId",
     "serviceType",
     "serviceName",
     "queueId"
 })
-public class SubscriptionType {
+public class SubscriptionType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String zoneId;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String contextId;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String serviceType;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String serviceName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String queueId;
@@ -92,6 +96,10 @@ public class SubscriptionType {
         this.zoneId = value;
     }
 
+    public boolean isSetZoneId() {
+        return (this.zoneId!= null);
+    }
+
     /**
      * Gets the value of the contextId property.
      * 
@@ -114,6 +122,10 @@ public class SubscriptionType {
      */
     public void setContextId(String value) {
         this.contextId = value;
+    }
+
+    public boolean isSetContextId() {
+        return (this.contextId!= null);
     }
 
     /**
@@ -140,6 +152,10 @@ public class SubscriptionType {
         this.serviceType = value;
     }
 
+    public boolean isSetServiceType() {
+        return (this.serviceType!= null);
+    }
+
     /**
      * Gets the value of the serviceName property.
      * 
@@ -162,6 +178,10 @@ public class SubscriptionType {
      */
     public void setServiceName(String value) {
         this.serviceName = value;
+    }
+
+    public boolean isSetServiceName() {
+        return (this.serviceName!= null);
     }
 
     /**
@@ -188,6 +208,10 @@ public class SubscriptionType {
         this.queueId = value;
     }
 
+    public boolean isSetQueueId() {
+        return (this.queueId!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -210,6 +234,10 @@ public class SubscriptionType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

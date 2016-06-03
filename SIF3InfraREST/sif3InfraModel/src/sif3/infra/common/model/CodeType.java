@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -38,13 +39,16 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "codeType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "codeType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "old",
     "official",
     "value"
 })
-public class CodeType {
+public class CodeType
+    implements Serializable
+{
 
+    private final static long serialVersionUID = 1L;
     protected boolean old;
     protected boolean official;
     @XmlElement(required = true)
@@ -67,6 +71,10 @@ public class CodeType {
         this.old = value;
     }
 
+    public boolean isSetOld() {
+        return true;
+    }
+
     /**
      * Gets the value of the official property.
      * 
@@ -81,6 +89,10 @@ public class CodeType {
      */
     public void setOfficial(boolean value) {
         this.official = value;
+    }
+
+    public boolean isSetOfficial() {
+        return true;
     }
 
     /**
@@ -105,6 +117,10 @@ public class CodeType {
      */
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public boolean isSetValue() {
+        return (this.value!= null);
     }
 
 }

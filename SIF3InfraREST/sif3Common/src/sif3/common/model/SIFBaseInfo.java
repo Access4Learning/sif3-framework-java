@@ -85,4 +85,12 @@ public class SIFBaseInfo implements Serializable
     {
 	    return "SIFBaseInfo [id=" + this.id + ", uniqueName=" + this.uniqueName + ", isDefault=" + this.isDefault + "]";
     }
+	
+	@Override
+  public boolean equals(Object obj) {
+  	if(obj instanceof SIFBaseInfo) {
+  		return this.toString().equals(obj.toString());
+  	}
+  	return super.equals(obj);
+  }
 }

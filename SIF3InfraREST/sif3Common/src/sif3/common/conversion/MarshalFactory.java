@@ -21,7 +21,7 @@ package sif3.common.conversion;
 import javax.ws.rs.core.MediaType;
 
 import sif3.common.exception.MarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.exception.UnsupportedMediaTypeException;
 
 /**
  * This class provides the interface for the Marshal Factories. Because the SIF3 infrastructure is independent from the data model
@@ -43,9 +43,9 @@ public interface MarshalFactory extends MediaTypeOperations
 	 * @return See description.
 	 * 
 	 * @throws MarshalException Failure to marshal the object to XML.
-	 * @throws UnsupportedMediaTypeExcpetion If XML is not a supported format.
+	 * @throws UnsupportedMediaTypeException If XML is not a supported format.
 	 */
-	public String marshalToXML(Object obj) throws MarshalException, UnsupportedMediaTypeExcpetion;
+	public String marshalToXML(Object obj) throws MarshalException, UnsupportedMediaTypeException;
 	
 	/**
 	 * Marshal the given object to JSON and returns the resulting JSON as a String. If anything goes wrong with that marshal method then
@@ -56,9 +56,9 @@ public interface MarshalFactory extends MediaTypeOperations
 	 * @return See description.
 	 * 
 	 * @throws MarshalException Failure to marshal the object to JSON.
-   * @throws UnsupportedMediaTypeExcpetion If JSON is not a supported format.
+   * @throws UnsupportedMediaTypeException If JSON is not a supported format.
 	 */
-	public String marshalToJSON(Object obj) throws MarshalException, UnsupportedMediaTypeExcpetion;
+	public String marshalToJSON(Object obj) throws MarshalException, UnsupportedMediaTypeException;
 	
 	/**
 	 * Wrapper Method for the above two methods. This method can be called if the MediaType is known and based on which either XML or
@@ -70,7 +70,7 @@ public interface MarshalFactory extends MediaTypeOperations
 	 * @return The String representation of the object.
 	 * 
 	 * @throws MarshalException Failure to marshal the object.
-   * @throws UnsupportedMediaTypeExcpetion If the media type requested is not a supported format.
+   * @throws UnsupportedMediaTypeException If the media type requested is not a supported format.
 	 */
-	public String marshal(Object obj, MediaType mediaType) throws MarshalException, UnsupportedMediaTypeExcpetion;
+	public String marshal(Object obj, MediaType mediaType) throws MarshalException, UnsupportedMediaTypeException;
 }

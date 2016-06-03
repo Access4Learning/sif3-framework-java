@@ -1,6 +1,7 @@
 
 package sif3.infra.common.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -19,7 +20,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="subscription" type="{http://www.sifassociation.org/infrastructure/3.1}subscriptionType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="subscription" type="{http://www.sifassociation.org/infrastructure/3.2}subscriptionType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +30,15 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "subscriptionCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "subscriptionCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "subscription"
 })
-public class SubscriptionCollectionType {
+public class SubscriptionCollectionType
+    implements Serializable
+{
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    private final static long serialVersionUID = 1L;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected List<SubscriptionType> subscription;
 
     /**
@@ -64,6 +68,14 @@ public class SubscriptionCollectionType {
             subscription = new ArrayList<SubscriptionType>();
         }
         return this.subscription;
+    }
+
+    public boolean isSetSubscription() {
+        return ((this.subscription!= null)&&(!this.subscription.isEmpty()));
+    }
+
+    public void unsetSubscription() {
+        this.subscription = null;
     }
 
 }
