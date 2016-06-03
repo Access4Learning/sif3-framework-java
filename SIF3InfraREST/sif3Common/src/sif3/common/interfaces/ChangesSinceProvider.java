@@ -54,9 +54,14 @@ public interface ChangesSinceProvider
      * empty if the changesSinceSupported() method returns true, indication that changes since is supported. If the changesSinceSupported() returns false 
      * then this method can return null as it will never be called by the SIF3 Framework. 
      * 
+     * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
+     * @param context The Context for which the opaque marker shall be returned. Can be Null (default Context)
+     * @param pagingInfo Purely informative. Might be useful to determine some relationship for the marker to be returned.
+     * @param metadata Metadata relating to the request. Note that most of the properties might be null.
+     * 
      * @return See description.
      */
-    public String getLatestOpaqueMarker();
+    public String getLatestOpaqueMarker(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata);
     
     /**
      * This method is used to retrieve a list of changed SIF Objects. The returned object must be a "Collection" style SIF Object (i.e. 

@@ -27,6 +27,9 @@ import javax.servlet.ServletContextListener;
 
 import org.apache.log4j.Logger;
 
+import sif3.common.exception.PersistenceException;
+import sif3.common.interfaces.HibernateProperties;
+import sif3.common.persist.common.HibernateHelper;
 import sif3.common.persist.common.HibernateUtil;
 import sif3.infra.common.env.mgr.ProviderManagerFactory;
 import sif3.infra.common.interfaces.EnvironmentConnector;
@@ -59,55 +62,70 @@ public class ProviderServletContext implements ServletContextListener
     {
     	boolean allOK = true;
 		logger.info("Initialise Provider: start");
-		logger.debug("Initialise DB Connection Pool....");
-		if (HibernateUtil.getSessionFactory() == null)
-		{
-			logger.error("Failed to initialise DB connection pool.");
-			allOK = false;
-		}
-		else
-		{
-			String propertyFileName = servletCtxEvent.getServletContext().getInitParameter(SERVICE_PROPERTY_FILE_TAG);
-			logger.info("Provider property file to use: " + propertyFileName + ".properties");
-	
-			// Check if we need to initialise the service properties. This should only happens once.
-			if (StringUtils.notEmpty(propertyFileName))
-			{				
-				logger.debug("Initialise Provider Environment Manager and Session Store...");
-				EnvironmentManager envMgr = ProviderManagerFactory.initialse(propertyFileName);
+		
+        String propertyFileName = servletCtxEvent.getServletContext().getInitParameter(SERVICE_PROPERTY_FILE_TAG);
+        logger.info("Provider property file to use: " + propertyFileName + ".properties");
+        
+        // Check if we have a property file. If not then we should stop....
+        if (StringUtils.notEmpty(propertyFileName))
+        {
+            // Initialise Hibernate...
+            HibernateHelper hbrHelper = new HibernateHelper();
+            HibernateProperties hbrProps = null;
+            try
+            {
+                hbrProps = hbrHelper.getHiberbnateProperties(propertyFileName);
+                logger.debug("Initialise DB Connection Pool....");
+                if (!HibernateUtil.initialise((hbrProps != null) ? hbrProps.getProperties() : null))
+                {
+                    logger.error("Failed to initialise DB connection pool.");
+                    allOK = false;
+                }
+            }
+            catch (PersistenceException ex)
+            {
+                logger.error("Failed to retrieve hibernate properties: "+ex.getMessage());
+                allOK = false;
+            }
+        }
+        else
+        {
+            logger.error("Can not retrieve the Service Property File name from web.xml");
+            allOK = false;
+        }
+
+        // Only continue if all is fine up to here.
+        if (allOK)
+        {
+			logger.debug("Initialise Provider Environment Manager and Session Store...");
+			EnvironmentManager envMgr = ProviderManagerFactory.initialse(propertyFileName);
 				
-				logger.debug("Attempt to connect to Environment Provider...");
-				connector = EnvironmentConnectorFactory.getEnvironmentConnector(envMgr);
-				if (connector != null)
+			logger.debug("Attempt to connect to Environment Provider...");
+			connector = EnvironmentConnectorFactory.getEnvironmentConnector(envMgr);
+			if (connector != null)
+			{
+				if (connector.connect())
 				{
-					if (connector.connect())
-					{
-						logger.debug("Initialise Provider Factory...");
-						if (ProviderFactory.createFactory(envMgr.getServiceProperties()) == null)
-					    {
-							logger.error("Failed to initialise Provider Factory. See prveious error logs for details.");
-							allOK = false;
-					    }					
-					}
-					else
-					{
-						allOK = false; // error already logged.
-					}
+					logger.debug("Initialise Provider Factory...");
+					if (ProviderFactory.createFactory(envMgr.getServiceProperties()) == null)
+				    {
+						logger.error("Failed to initialise Provider Factory. See prveious error logs for details.");
+						allOK = false;
+				    }					
 				}
 				else
 				{
-					logger.error("Failed to establish connection with Environment Provider. See prveious error logs for details.");
-					allOK = false;
+					allOK = false; // error already logged.
 				}
-				
-				// If all is good till now we try to install the Auditor Filter
-				installAuditorFilter(servletCtxEvent, envMgr.getServiceProperties());
 			}
 			else
 			{
-				logger.error("Can not retrieve the Service Property File name from web.xml");
+				logger.error("Failed to establish connection with Environment Provider. See prveious error logs for details.");
 				allOK = false;
 			}
+			
+			// If all is good till now we try to install the Auditor Filter
+			installAuditorFilter(servletCtxEvent, envMgr.getServiceProperties());
 		}
 		logger.info("Initialise Provider sucessful: "+allOK);
 		

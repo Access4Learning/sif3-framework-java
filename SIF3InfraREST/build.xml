@@ -52,6 +52,8 @@
 	
 	<!-- print some varaibles -->
 	<target name="00-env" description="Show Ant variables">
+		<echo message="Java/JVM version: ${ant.java.version}"/> 
+		<echo message="Java/JVM detail version: ${java.version}"/> 
 		<echo message="project.basedir: ${project.basedir}"/>
 		<echo message="app.name: ${app.name}"/>
 		<echo message="build.dir: ${build.dir}"/>
@@ -64,7 +66,7 @@
 		<echo message="config.dir: ${config.dir}"/>
 		<echo message="deploy.install.dir: ${deploy.install.dir}"/>
 		<echo message="frameworkversion: ${frameworkversion}"/>
-		<echo message="javaversion: ${javaversion}"/>
+		<!--echo message="javaversion: ${javaversion}"/-->
 		<echo message="jarprefix: ${jarprefix}"/>
 		<echo message="classpath: ${toString:classpath}"/>
 	</target>
@@ -92,6 +94,8 @@
 
 	<!-- Main Compile Target -->
 	<target name="compile-all" depends="init" description="Compile all sources">
+		<echo message="Ant uses Java/JVM version: ${ant.java.version}"/> 
+		<echo message="Detailed Java/JVM version: ${java.version}"/> 
 
 		<!-- Compile Inrastructure components -->
 		<foreach list="${srcs}" target="compile-src" param="elem" trim="true" />

@@ -139,6 +139,10 @@ public class DataModelResource extends BaseResource
 	    {
 	    	determineMediaTypes(provider.getMarshaller(), provider.getUnmarshaller(), false);
 	    }
+	    else
+	    {
+	        determineMediaTypes(null, null, false);
+	    }
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("Request Media Type : " + getRequestMediaType());
@@ -421,7 +425,7 @@ public class DataModelResource extends BaseResource
 		                String newChangesSinceMarker = null;
 		                if ((pagingInfo == null) || (pagingInfo.getCurrentPageNo() == CommonConstants.FIRST_PAGE))
 		                {
-		                    newChangesSinceMarker = csProvider.getLatestOpaqueMarker();
+		                    newChangesSinceMarker = csProvider.getLatestOpaqueMarker(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
                             customHeaders = new HeaderProperties();
 		                    customHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_CHANGES_SINCE_MARKER, newChangesSinceMarker);
 		                }
@@ -687,7 +691,7 @@ public class DataModelResource extends BaseResource
                         customHeaders = new HeaderProperties(); 
                     }
                     
-                    customHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_CHANGES_SINCE_MARKER, csProvider.getLatestOpaqueMarker());
+                    customHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_CHANGES_SINCE_MARKER, csProvider.getLatestOpaqueMarker(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true)));
                 }
                 
             }

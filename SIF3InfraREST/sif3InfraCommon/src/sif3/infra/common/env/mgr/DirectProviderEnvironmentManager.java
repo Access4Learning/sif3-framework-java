@@ -450,9 +450,20 @@ public class DirectProviderEnvironmentManager implements EnvironmentManager
 
 			// XML no longer needed.
 			sif3Session.setEnvironmentXML(null);
-
-			// add to session Store
+			
+			// Ok here we have to be careful. If external security services are used there is the possibility that new tokens are used for each
+			// separate access. This means that we need to check first if there is a security token, although different, already linked to a session.
+			SIF3Session currentSIF3Session = sessions.get(sif3Session.getSessionToken()); 
+			
+			//now we can add/replace the current session in session store
 			sessions.put(sif3Session.getSessionToken(), sif3Session);
+
+			// Check if we had a session and if it had a security token
+			if ((currentSIF3Session != null) && (StringUtils.notEmpty(currentSIF3Session.getSecurityToken())))
+			{
+			    // remove this
+			    secTokenSession.remove(currentSIF3Session.getSecurityToken());
+			}
 			
 			// link session to security token if it is available
 			if (StringUtils.notEmpty(sif3Session.getSecurityToken()))

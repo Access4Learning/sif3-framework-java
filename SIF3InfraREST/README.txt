@@ -183,6 +183,20 @@ Adding support for some SIF 3.2 Infrastructure functionality:
 Please refer to the release notes in the directory "release/v0.8.0" for additional details and upgrade instructions.
 Upgraded some core library to later versions. 
 
+=============================================================
+Version from May 24, 2016: v0.9.0 - Various changes
+=============================================================
+
+****************************************************************************************************
+* AS OF THIS VERSION ALL FRAMEWORK LIBRARIES ARE COMPILED WITH JAVA 7. THE FRAMEWORK MAY NO LONGER *
+* SUPPORT OR RUN ON JAVA 6 ENVIRONMENTS.                                                           *
+****************************************************************************************************
+
+- Made some method for "Changes Since" functionality more flexible.
+- Allow hibernate properties to be "injected".
+Please refer to the release notes in the directory "release/v0.9.0" for additional details and upgrade instructions.
+
+
 #########################################################################################################
 # Download Instructions
 #########################################################################################################

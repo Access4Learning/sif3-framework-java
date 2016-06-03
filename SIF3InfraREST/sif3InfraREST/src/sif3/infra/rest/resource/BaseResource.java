@@ -1170,8 +1170,8 @@ public abstract class BaseResource
 		
 		requestMediaType = validateAndExtractMimeType(unmarshaller, requestMediaType, urlPostfixMimeType, useDefaults);
 
-		// set it to the value of the request if it is not set
-		if (responseMediaType == null) 
+		// set it to the value of the request if it is not set or wildcard
+		if ((responseMediaType == null) || (responseMediaType.isWildcardType()))
 		{
 			responseMediaType = requestMediaType;
 		}
@@ -1564,14 +1564,18 @@ public abstract class BaseResource
 	 *           - If it is for a different session then we have to ??? (not sure what to do here yet)
 	 * - If there is no session then we assume that there is no environment associated with the given security 
 	 *   token. Now we do the following:
-	 *      - If we have autoCreate = true (i.e. automatically create environment)
-	 *           - Validate security token with security server.
-	 *           - if valid then
+	 *      - Check if there is an already existing session available for the securityToken. We need to access the
+	 *        DB for that.
+	 *        - if there is one then update the DB with the latest securityToken info and we are done 
+	 *        - if there isn't then
+	 *           - If we have autoCreate = true (i.e. automatically create environment)
+	 *             - Validate security token with security server.
+	 *             - if valid then
 	 *                - Get latest token info from security server
 	 *                - At this point we should get some environment key information from the token and 
 	 *                  use it to create environment
-	 *           - if not valid => return error (not authorised)
-	 *      - If autoCreate = false then we return error (not authorised)
+	 *             - if not valid => return error (not authorised)
+	 *           - If autoCreate = false then we return error (not authorised)
 	 * 
 	 * At the end of this method we either have returned an error or a sif3 session is now in the
 	 * workstore (DB) AND the cache.
@@ -1600,25 +1604,21 @@ public abstract class BaseResource
 			    {
 			    	TokenInfo tokenInfo = new TokenInfo(authInfo.getUserToken());
 			    	EnvironmentType environment = envMgr.reloadEnvironmentForSecurityToken(tokenInfo, isSecure());
-			    	if (environment == null) // no environment seems to exist
+			    	
+			    	// If there is no environment then there are two potential reasons:
+			    	// 1) It really does not exist
+			    	// 2) There is an environment but for a different bearer token because a previous one has expired or was
+			    	//    re-generated! To cover this case we must get the info for the token and then attempt to reload it that
+			    	//    way. Only if it still doesn't exist we can say for sure that there is no environment for the bearer token.
+			    	if (environment == null)
 			    	{
-			    		if (getProviderEnvironment().getAutoCreateEnvironment())
-			    		{
-			    			logger.debug("Attempt to automatically create environment for security token: "+authInfo.getUserToken());
-			    			tokenInfo = getBearerTokenInfo(authInfo);
-			    			
-			    			ErrorDetails errors = createOrLoadEnvByTokenInfo(tokenInfo, envMgr);
-			    			if (errors != null)
-			    			{
-			    				return errors;
-			    			}
-			    		}
-			    		else // don't create environment automatically
-			    		{
-			    			errorStr = "No environment exits for the given security token = "+authInfo.getUserToken()+". Ensure that environment is created first.";
-					    	logger.error(errorStr);
-					    	return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, errorStr);
-			    		}
+			    	    logger.debug("No envionment found yet => Attempt get bearer token info and reload environment from there...");
+                        tokenInfo = getBearerTokenInfo(authInfo);
+                        ErrorDetails errors = createOrLoadEnvByTokenInfo(tokenInfo, envMgr, getProviderEnvironment().getAutoCreateEnvironment());
+                        if (errors != null)
+                        {
+                            return errors;
+                        }
 			    	}
 			    }
 			    catch (VerifyError ex)
@@ -1877,7 +1877,7 @@ public abstract class BaseResource
 	 *     - If one is found all is good and we don't need to create one and return null
 	 *   - appUserInfo is not available => log error and return ErrorDetails 
 	 */
-	private ErrorDetails createOrLoadEnvByTokenInfo(TokenInfo tokenInfo, DirectProviderEnvironmentManager envMgr)
+	private ErrorDetails createOrLoadEnvByTokenInfo(TokenInfo tokenInfo, DirectProviderEnvironmentManager envMgr, boolean allowCreate)
 	{
 		if (tokenInfo == null) // should not be the case but for robustness...
 		{
@@ -1914,12 +1914,22 @@ public abstract class BaseResource
 				environment = envMgr.getEnvironmentByEnvKey(tokenInfo.getAppUserInfo(), tokenInfo, isSecure());
 				if (environment == null) // try to create it
 				{
-					EnvironmentType inputEnvironment = makeEnvironmentForBearerToken(null, tokenInfo);
-					environment = envMgr.createOrUpdateEnvironment(inputEnvironment, tokenInfo, isSecure());
-					if (environment == null) // failed to create environment
-					{
-				        return new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create environment for '"+tokenInfo.getAppUserInfo()+"' for consumer '"+tokenInfo.getConsumerName()+"'.", "Internal System error. Please contact your system administrator.");
-					}
+				    if (allowCreate) 
+				    {
+                        logger.debug("Attempt to automatically create environment for security token: "+authInfo.getUserToken());
+                        EnvironmentType inputEnvironment = makeEnvironmentForBearerToken(null, tokenInfo);
+                        environment = envMgr.createOrUpdateEnvironment(inputEnvironment, tokenInfo, isSecure());
+                        if (environment == null) // failed to create environment
+                        {
+                            return new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create environment for '"+tokenInfo.getAppUserInfo()+"' for consumer '"+tokenInfo.getConsumerName()+"'.", "Internal System error. Please contact your system administrator.");
+                        }
+				    }
+				    else // don't create environment automatically
+				    {
+	                    String errorStr = "No environment exits for the given security token = "+authInfo.getUserToken()+". Ensure that environment is created first.";
+	                    logger.error(errorStr);
+	                    return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, errorStr);
+				    }
 				}
 			}
 		}

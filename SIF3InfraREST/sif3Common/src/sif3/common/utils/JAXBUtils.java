@@ -329,12 +329,14 @@ public class JAXBUtils
 
     private synchronized static JAXBContext getContext(Class<?> clazz) throws JAXBException
     {
-    	JAXBContext ctx = jaxbCtx.get(clazz.getSimpleName());
+//    	JAXBContext ctx = jaxbCtx.get(clazz.getSimpleName());
+        String className = clazz.getName();
+        JAXBContext ctx = jaxbCtx.get(className);
 		if (ctx == null)
 		{
-			logger.debug("No context for "+clazz.getSimpleName()+" exists yet. Create and add it to context map.");
+			logger.debug("No context for "+className+" exists yet. Create and add it to context map.");
 			ctx = JAXBContext.newInstance(clazz);
-			jaxbCtx.put(clazz.getSimpleName(), ctx);
+			jaxbCtx.put(className, ctx);
 		}
 		
 		return ctx;

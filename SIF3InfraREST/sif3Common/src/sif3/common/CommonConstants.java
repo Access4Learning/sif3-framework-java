@@ -97,7 +97,7 @@ public class CommonConstants
 	/*
 	 * Value to indicate the first page.
 	 */
-	public static int FIRST_PAGE = 0;
+	public static int FIRST_PAGE = 1;
 	
 	/*----------------------------------------------------------*/
 	/* System Wide Enum Types that are not part of any Headers */
