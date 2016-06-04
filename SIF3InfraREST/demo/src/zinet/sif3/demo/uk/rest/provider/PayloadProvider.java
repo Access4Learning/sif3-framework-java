@@ -12,11 +12,11 @@ import zinet.sif3.demo.uk.rest.provider.actions.XmlActions;
 
 public class PayloadProvider extends BaseJobProvider {
 	public PayloadProvider() {
-		super("Payload");
+		super("Payloads");
 		
 		phaseActions.put("default", new DefaultActions(this));
-    phaseActions.put("xml", new XmlActions(this));
-    phaseActions.put("json", new JsonActions(this));
+		phaseActions.put("xml", new XmlActions(this));
+		phaseActions.put("json", new JsonActions(this));
 	}
 	
 	@Override
