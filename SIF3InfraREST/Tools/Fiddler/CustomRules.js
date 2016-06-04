@@ -164,17 +164,16 @@ class Handlers
 	static function OnBeforeRequest(oSession: Session) {
 		/*
 		:: BEGIN SIF RULES
-		Ports used in the demo applications:
-			62921 - Sif.Framework.EnvironmentProvider
-			50617 - Sif.Framework.Demo.Au.Provider
-			53180 - Sif.Framework.Demo.Us.Provider
-			51424 - Sif.Framework.Demo.Uk.Provider
+		
+		In the 3.1 specification there is no mandatory header property in all requests, responses and events. This does a best guess to identify SIF messages.
 		*/
 		if (m_focusSIF) {
-			if (oSession.port!="62921" &&
-				oSession.port!="50617" &&
-				oSession.port!="53180" &&
-				oSession.port!="51424"){
+			if (!(oSession.oRequest.headers.Exists("messageid") ||
+					oSession.oRequest.headers.Exists("requestid") ||
+					oSession.oRequest.headers.Exists("connectionid") ||
+					oSession.oRequest.headers.Exists("applicationkey") ||
+					oSession.oRequest.headers.Exists("accesstoken") ||
+					oSession.oRequest.headers.Exists("authorization"))){
 				oSession["ui-hide"] = "true";
 			}
 			// Color POST, GET, PUT, DELETE (CRUD) requests
