@@ -29,6 +29,7 @@ import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
+import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.interfaces.EventProvider;
 import sif3.common.interfaces.Provider;
 import sif3.common.model.PagingInfo;
@@ -154,7 +155,14 @@ public abstract class BaseProvider implements Provider, Runnable
     {
     	return getMultiObjectClassInfo().getObjectName();
     }
-
+	
+    /**
+     * This method returns the service type (e.g. OBJECT or FUNCTIONAL). 
+     * @return See Desc.
+     */
+  	public ServiceType getServiceType() {
+  		return ServiceType.OBJECT;
+  	}
     
     /**
      * (non-Javadoc)

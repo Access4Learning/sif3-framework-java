@@ -22,6 +22,7 @@ import sif3.common.exception.SIF3Exception;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues.EventAction;
+import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.PagingInfo;
@@ -93,8 +94,14 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 		return unmarshaller;
 	}
 
+	@override
 	public String getServiceName() {
 		return serviceName;
+	}
+	
+	@Override
+	public ServiceType getServiceType() {
+		return ServiceType.FUNCTIONAL;
 	}
 
 	/*-------------------------------------*/
