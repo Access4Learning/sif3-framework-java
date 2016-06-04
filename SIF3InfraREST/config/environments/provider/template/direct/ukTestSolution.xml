@@ -12,6 +12,7 @@
         <infrastructureService name="servicesConnector">services</infrastructureService>
         <infrastructureService name="provisionRequests">provision</infrastructureService>
         <infrastructureService name="queues">queues</infrastructureService>
+		<infrastructureService name="eventsConnector">eventsConnector</infrastructureService>
         <infrastructureService name="subscriptions">subscriptions</infrastructureService>
     </infrastructureServices>
     <provisionedZones>
@@ -56,7 +57,7 @@
                     <right type="CREATE">APPROVED</right>
                     <right type="UPDATE">APPROVED</right>
                     <right type="DELETE">APPROVED</right>
-                    <right type="PROVIDE">REJECTED</right>
+                    <right type="PROVIDE">APPROVED</right>
                     <right type="SUBSCRIBE">SUPPORTED</right>
                     <right type="ADMIN">REJECTED</right>
                   </rights>
