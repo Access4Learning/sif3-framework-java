@@ -91,7 +91,7 @@ public class SIFSessionUtils
 								}
 								catch (Exception ex) // log error and assume it is OBJECT
 								{
-									logger.warn("The service '"+service.getName()+"' for environment '"+sif3Session.getEnvironmentName()+"' has an invalid 'type' of '"+service.getType().trim()+"' set. Valid values are: OBJECT, FUNCTION, UTILITY, SERVICEPATH and XQUERYTEMPLATE.");
+									logger.warn("The service '"+service.getName()+"' for environment '"+sif3Session.getEnvironmentName()+"' has an invalid 'type' of '"+service.getType().trim()+"' set. Valid values are: OBJECT, FUNCTIONAL, UTILITY, SERVICEPATH and XQUERYTEMPLATE.");
 									serviceType = ServiceType.OBJECT;
 								}
 							}
@@ -104,6 +104,7 @@ public class SIFSessionUtils
 								isDefaultCtx = CommonConstants.DEFAULT_CONTEXT_NAME.equalsIgnoreCase(service.getContextId().trim());
 							}
 							
+							logger.info("Found a " + serviceType + " service called '"+service.getName()+"'.");
 							ServiceInfo serviceInfo = new ServiceInfo(service.getName().trim(), serviceType);
 							serviceInfo.setContext(new SIFContext((isDefaultCtx) ? CommonConstants.DEFAULT_CONTEXT_NAME : service.getContextId().trim(), isDefaultCtx));
 							serviceInfo.setZone(zone);
