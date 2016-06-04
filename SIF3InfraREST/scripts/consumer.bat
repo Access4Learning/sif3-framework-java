@@ -40,7 +40,7 @@ rem ####################################
 rem set JVM_SETTINGS=%JVM_SETTINGS% -Dhttp.proxyHost=<IP ADDRESS> -Dhttp.proxyPort=<PORT> -Dhttps.proxyHost=<IP ADDRESS> -Dhttps.proxyPort=<PORT>
 
 rem Default proxy set up for Fiddler (works without Fiddler running):
-set NO_PROXY=-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=8888 -DproxySet=true -DproxyHost=127.0.0.1 -DproxyPort=8888
+set JVM_SETTINGS=%JVM_SETTINGS% -DproxySet=true -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=8888 -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=8888
 
 rem ####################################
 rem # JVM settings for ignore proxy IPs
