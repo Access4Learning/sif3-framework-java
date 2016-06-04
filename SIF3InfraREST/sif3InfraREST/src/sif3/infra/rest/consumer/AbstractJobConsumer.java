@@ -226,7 +226,7 @@ public abstract class AbstractJobConsumer extends AbstractEventConsumer<JobColle
 		}
 
 		timer.finish();
-		logger.debug("Time taken to call and process 'deleteToPhase' for " + getMultiObjectClassInfo().getObjectName() + "/" + resourceID + "/phases/" + phaseName + ": " + timer.timeTaken() + "ms");
+		logger.debug("Time taken to call and process 'updateToPhase' for " + getMultiObjectClassInfo().getObjectName() + "/" + resourceID + "/phases/" + phaseName + ": " + timer.timeTaken() + "ms");
 		return responses;
 	}
 	

@@ -445,7 +445,7 @@ public class LearnerPersonalProvider extends UKDataModelProviderWithEvents<Learn
 	 * @see sif3.common.interfaces.ChangesSinceProvider#getLatestOpaqueMarker()
 	 */
 	@Override
-	public String getLatestOpaqueMarker() {
+	public String getLatestOpaqueMarker(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) {
 		return DateUtils.nowAsISO8601withSecFraction();
 	}
 
