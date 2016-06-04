@@ -255,9 +255,9 @@ public class EnvironmentInfo implements Serializable
 		connectorBaseURIs.put(connectorName, connectorURI);
 	}
 	
-	public URI getConnectorBaseURI(ConnectorName conectorName)
+	public URI getConnectorBaseURI(ConnectorName connectorName)
 	{
-		return connectorBaseURIs.get(conectorName);
+		return connectorBaseURIs.get(connectorName);
 	}
 	
 	public void clearConnectorBaseURIs()
