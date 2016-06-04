@@ -18,6 +18,8 @@
 
 package sif3.common.exception;
 
+import javax.ws.rs.core.Response.Status;
+
 /**
  * @author Joerg Huber
  *
@@ -57,4 +59,9 @@ public class UnmarshalException extends SIF3Exception
     {
         super(cause);
     }
+	
+	@Override
+  public Status getStatus() {
+    return Status.BAD_REQUEST;
+  }
 }

@@ -18,6 +18,8 @@
 
 package sif3.common.exception;
 
+import javax.ws.rs.core.Response.Status;
+
 public class PersistenceException extends SIF3Exception
 {
   private static final long serialVersionUID = 1294192906545296557L;
@@ -41,5 +43,9 @@ public class PersistenceException extends SIF3Exception
   {
       super(ex);
   }
-
+  
+  @Override
+  public Status getStatus() {
+    return Status.INTERNAL_SERVER_ERROR;
+  }
 }

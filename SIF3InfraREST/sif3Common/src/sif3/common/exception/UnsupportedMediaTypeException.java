@@ -18,6 +18,8 @@
 
 package sif3.common.exception;
 
+import javax.ws.rs.core.Response.Status;
+
 public class UnsupportedMediaTypeException extends SIF3Exception
 {
   private static final long serialVersionUID = 749070962345457L;
@@ -40,5 +42,10 @@ public class UnsupportedMediaTypeException extends SIF3Exception
   public UnsupportedMediaTypeException(Throwable ex)
   {
       super(ex);
+  }
+  
+  @Override
+  public Status getStatus() {
+    return Status.UNSUPPORTED_MEDIA_TYPE;
   }
 }

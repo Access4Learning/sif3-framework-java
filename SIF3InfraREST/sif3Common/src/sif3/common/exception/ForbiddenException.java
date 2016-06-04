@@ -18,6 +18,8 @@
 
 package sif3.common.exception;
 
+import javax.ws.rs.core.Response.Status;
+
 public class ForbiddenException extends SIF3Exception
 {
   private static final long serialVersionUID = 907365345457L;
@@ -41,4 +43,9 @@ public class ForbiddenException extends SIF3Exception
 	{
 		super(ex);
 	}
+	
+	@Override
+  public Status getStatus() {
+    return Status.FORBIDDEN;
+  }
 }

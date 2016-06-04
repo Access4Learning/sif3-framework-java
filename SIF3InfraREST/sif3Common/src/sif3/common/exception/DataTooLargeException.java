@@ -16,6 +16,8 @@
 
 package sif3.common.exception;
 
+import javax.ws.rs.core.Response.Status;
+
 public class DataTooLargeException extends SIF3Exception
 {
 	private static final long serialVersionUID = 8201196298932433571L;
@@ -39,4 +41,9 @@ public class DataTooLargeException extends SIF3Exception
 	{
 		super(ex);
 	}
+	
+	@Override
+  public Status getStatus() {
+    return Status.BAD_REQUEST;
+  }
 }

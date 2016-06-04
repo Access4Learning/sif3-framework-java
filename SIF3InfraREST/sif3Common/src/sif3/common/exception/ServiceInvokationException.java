@@ -1,5 +1,7 @@
 package sif3.common.exception;
 
+import javax.ws.rs.core.Response.Status;
+
 public class ServiceInvokationException extends SIF3Exception
 {
   private static final long serialVersionUID = -7309084634964371L;
@@ -35,5 +37,9 @@ public class ServiceInvokationException extends SIF3Exception
   {
       super(cause);
   }
-
+  
+  @Override
+  public Status getStatus() {
+    return Status.BAD_REQUEST;
+  }
 }
