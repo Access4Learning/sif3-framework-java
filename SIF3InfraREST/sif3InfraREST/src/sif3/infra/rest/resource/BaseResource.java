@@ -53,6 +53,7 @@ import sif3.common.model.AuthenticationInfo;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
+import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceRights.AccessRight;
@@ -372,9 +373,13 @@ public abstract class BaseResource
 	 * This method combines the validSession() and validateBearerSession() method into a higher level, so that the caller doesn't have to know
 	 * which one to invoke, rather have the code here to determine it automatically as it is possible in most cases.
 	 * 
+     * @param autoCreateAllowed There are times where a environment must not be created automatically even if the 
+     *                          provider's property would allow this. A typical case is where we attempt to retrieve
+     *                          an environment by its ID. In such case we do not create it if it doesn't exist.
+     *
 	 * @return Null if all is fine, ErrorDetails otherwise.
 	 */
-	protected ErrorDetails validateSession()
+	protected ErrorDetails validateSession(boolean autoCreateAllowed)
 	{
 	    AuthenticationInfo authInfo = getAuthInfo();
 		if ((authInfo == null) || (authInfo.getUserToken() == null))
@@ -387,7 +392,7 @@ public abstract class BaseResource
 	    }
 	    else
 	    {
-	    	return validateBearerSession(authInfo);
+	    	return validateBearerSession(authInfo, autoCreateAllowed);
 	    }
 	}
 	
@@ -424,12 +429,14 @@ public abstract class BaseResource
 	 * Converts the ErrorDetails into a REST Response according to the SIF3 Specification. 
 	 * 
 	 * @param error Error Information to be put into the REST Response.
+	 * @param responseAction Action to be set in the appropriate HTTP header.
+     * @param customResponseParams headers that might be added to the response. Can be null.
 	 * 
 	 * @return REST Response Object.
 	 */
-	public Response makeErrorResponse(ErrorDetails error, ResponseAction responseAction)
+	public Response makeErrorResponse(ErrorDetails error, ResponseAction responseAction, ResponseParameters customResponseParams)
 	{
-		return makeResponse(makeError(error), error.getErrorCode(), true, responseAction, infraMarshaller);	
+		return makeResponse(makeError(error), error.getErrorCode(), true, responseAction, customResponseParams, infraMarshaller);	
 	}
 	
 	/**
@@ -439,9 +446,9 @@ public abstract class BaseResource
 	 * 
 	 * @return A HTTP Response to be sent back to the client.
 	 */
-	public Response makeResopnseWithNoContent(boolean isError, ResponseAction responseAction)
+	public Response makeResopnseWithNoContent(boolean isError, ResponseAction responseAction, ResponseParameters customResponseParams)
 	{
-		return makeFullResponse(null, Status.NO_CONTENT.getStatusCode(), null, null, isError, responseAction, null);
+		return makeFullResponse(null, Status.NO_CONTENT.getStatusCode(), null, isError, responseAction, customResponseParams, null);
 	}
 	
 	/**
@@ -454,9 +461,9 @@ public abstract class BaseResource
 	 * 
 	 * @return A HTTP Response to be sent back to the client.
 	 */
-	public Response makeResponse(Object data, int status, boolean isError, ResponseAction responseAction, MarshalFactory marshaller)
+	public Response makeResponse(Object data, int status, boolean isError, ResponseAction responseAction, ResponseParameters customResponseParams, MarshalFactory marshaller)
 	{
-		return makeFullResponse(data, status, null, null, isError, responseAction, marshaller);
+		return makeFullResponse(data, status, null, isError, responseAction, customResponseParams, marshaller);
 	}
 	
 	/**
@@ -465,16 +472,15 @@ public abstract class BaseResource
 	 * 
 	 * @param data The data (payload) that shall be put into the response.
 	 * @param pagingInfo Paging Information to be added to the response header.
-	 * @param customHeaders Custom HTTP Headers to be returned to the caller. Note some of the headers might be
-	 *                      overwritten as they are 'reserved' values and controlled by the framework (i.e. requestID).
 	 * @param isError Indicator if the response is an error or a standard response.
+     * @param customResponseParams Set of custom http headers to be added to the response.
 	 * @param marshaller The marshaller that converts the 'data' into a valid media type.
 	 * 
 	 * @return A HTTP Response to be sent back to the client.
 	 */
-	public Response makePagedResponse(Object data, PagingInfo pagingInfo, HeaderProperties customHeaders, boolean isError, MarshalFactory marshaller)
+    public Response makePagedResponse(Object data, PagingInfo pagingInfo, boolean isError, ResponseParameters customResponseParams, MarshalFactory marshaller)
 	{
-		return makeFullResponse(data, Status.OK.getStatusCode(), pagingInfo, customHeaders, isError, ResponseAction.QUERY, marshaller);
+		return makeFullResponse(data, Status.OK.getStatusCode(), pagingInfo, isError, ResponseAction.QUERY, customResponseParams, marshaller);
 	}
 	
 	/*
@@ -482,7 +488,7 @@ public abstract class BaseResource
 	 */
 	protected Response makeDelayedAcceptResponse(ResponseAction responseAction)
 	{
-	    return makeFullResponse(null, Status.ACCEPTED.getStatusCode(), null, null, false, responseAction, null);
+	    return makeFullResponse(null, Status.ACCEPTED.getStatusCode(), null, false, responseAction, null, null);
 	}
 
 	/**
@@ -494,7 +500,7 @@ public abstract class BaseResource
 	 * 
 	 * @return A HTTP Response to be sent back to the client.
 	 */
-	public Response makeCreateMultipleResponse(List<CreateOperationStatus> operationStatusList, Status overallStatus)
+	public Response makeCreateMultipleResponse(List<CreateOperationStatus> operationStatusList, Status overallStatus, ResponseParameters customResponseParams)
 	{
 		CreateResponseType createManyResponse = infraObjectFactory.createCreateResponseType();
 		createManyResponse.setCreates(new CreatesType());
@@ -512,7 +518,7 @@ public abstract class BaseResource
 			}	
 			creates.add(createType);
 		}
-		return makeResponse(createManyResponse, overallStatus.getStatusCode(), false, ResponseAction.CREATE, infraMarshaller);
+		return makeResponse(createManyResponse, overallStatus.getStatusCode(), false, ResponseAction.CREATE, customResponseParams, infraMarshaller);
 	}
 	
 	/**
@@ -524,7 +530,7 @@ public abstract class BaseResource
 	 * 
 	 * @return A HTTP Response to be sent back to the client.
 	 */
-	public Response makeUpdateMultipleResponse(List<OperationStatus> operationStatusList, Status overallStatus)
+	public Response makeUpdateMultipleResponse(List<OperationStatus> operationStatusList, Status overallStatus, ResponseParameters customResponseParams)
 	{
 		UpdateResponseType updateManyResponse = infraObjectFactory.createUpdateResponseType();
 		updateManyResponse.setUpdates(new UpdatesType());
@@ -541,7 +547,7 @@ public abstract class BaseResource
 			}	
 			updates.add(updateType);
 		}
-		return makeResponse(updateManyResponse, overallStatus.getStatusCode(), false, ResponseAction.UPDATE, infraMarshaller);
+		return makeResponse(updateManyResponse, overallStatus.getStatusCode(), false, ResponseAction.UPDATE, customResponseParams, infraMarshaller);
 	}
 
 	/**
@@ -553,7 +559,7 @@ public abstract class BaseResource
 	 * 
 	 * @return A HTTP Response to be sent back to the client.
 	 */
-	public Response makeDeleteMultipleResponse(List<OperationStatus> operationStatusList, Status overallStatus)
+	public Response makeDeleteMultipleResponse(List<OperationStatus> operationStatusList, Status overallStatus, ResponseParameters customResponseParams)
 	{
 		DeleteResponseType deleteManyResponse = infraObjectFactory.createDeleteResponseType();
 		deleteManyResponse.setDeletes(new DeleteStatusCollection());
@@ -570,7 +576,7 @@ public abstract class BaseResource
 			}	
 			deletes.add(deleteStatus);
 		}
-		return makeResponse(deleteManyResponse, overallStatus.getStatusCode(), false, ResponseAction.DELETE, infraMarshaller);
+		return makeResponse(deleteManyResponse, overallStatus.getStatusCode(), false, ResponseAction.DELETE, customResponseParams, infraMarshaller);
 	}
 
 	/*-----------------------*/
@@ -609,6 +615,17 @@ public abstract class BaseResource
 	    return resourceIDs;
 	}
 	
+	/**
+	 * This method returns a default ResponseParamtere object. It has the httpHeaderParams property defaulted to the values listed
+	 * in the "adapter.custom.response.headers" property of the providers property file. This method will never return null.
+	 * 
+	 * @return S
+	 */
+	protected ResponseParameters getInitialCustomResponseParameters()
+	{
+	    return new ResponseParameters(getProviderEnvironment().getCustomResponseHeaders());
+	}   
+
 	/*---------------------------------*/
 	/*-- Security Validation Methods --*/
 	/*---------------------------------*/
@@ -622,12 +639,15 @@ public abstract class BaseResource
 	 * @param accessType The access level (SUPPORTED, APPROVED, etc) that must be met for the given service and right.
 	 * @param allowDelayed TRUE then the request operation allows delayed requests. In a DIRECT environment it is not supported at
 	 *                     all and this parameter will be ignored. FALSE if delayed requests are not allowed.
+     * @param autoCreateAllowed There are times where a environment must not be created automatically even if the 
+     *                          provider's property would allow this. A typical case is where we attempt to retrieve
+     *                          an environment by its ID. In such case we do not create it if it doesn't exist.
 	 * 
 	 * @return See desc
 	 */
-	protected ErrorDetails validClient(String serviceName, AccessRight right, AccessType accessType, boolean allowDelayed)
+	protected ErrorDetails validClient(String serviceName, AccessRight right, AccessType accessType, boolean allowDelayed, boolean autoCreateAllowed)
 	{
-	    ErrorDetails error = validateSession();
+	    ErrorDetails error = validateSession(autoCreateAllowed);
 		if (error != null)
 		{
 			return error;
@@ -1331,10 +1351,10 @@ public abstract class BaseResource
 		return sifError;
 	}
 	
-	private Response makeFullResponse(Object data, int status, PagingInfo pagingInfo, HeaderProperties customHeaders, boolean isError, ResponseAction responseAction, MarshalFactory marshaller)
+	private Response makeFullResponse(Object data, int status, PagingInfo pagingInfo, boolean isError, ResponseAction responseAction, ResponseParameters customResponseParams, MarshalFactory marshaller)
 	{
 		ResponseBuilder response = null;
-		HeaderProperties allHeaders = (customHeaders == null) ? new HeaderProperties() : customHeaders;
+		HeaderProperties allHeaders = ((customResponseParams != null) && (customResponseParams.getHttpHeaderParams() != null)) ? customResponseParams.getHttpHeaderParams() : new HeaderProperties();   
 		try
 		{
 			// Special case to avoid infinite loop: We deal with an error and the Status Code is of UNSUPPORTED_MEDIA_TYPE. This means we attempted
@@ -1457,11 +1477,11 @@ public abstract class BaseResource
 		}
 		catch (MarshalException ex)
 		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+": "+ex.getMessage()), responseAction);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+": "+ex.getMessage()), responseAction, customResponseParams);
 		}
 		catch (UnsupportedMediaTypeExcpetion ex)
 		{
-			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+" into unsupported media type '"+getResponseMediaType()+"'."), responseAction);
+			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+" into unsupported media type '"+getResponseMediaType()+"'."), responseAction, customResponseParams);
 		}
 //        catch (UnsupportedEncodingException ex)
 //        {
@@ -1579,8 +1599,12 @@ public abstract class BaseResource
 	 * 
 	 * At the end of this method we either have returned an error or a sif3 session is now in the
 	 * workstore (DB) AND the cache.
+	 * 
+	 * @param autoCreateAllowed There are times where a environment must not be created automatically even if the 
+	 *                          provider's property would allow this. A typical case is where we attempt to retrieve
+	 *                          an environment by its ID. In such case we do not create it if it doesn't exist.
 	 */
-	private ErrorDetails validateBearerSession(AuthenticationInfo authInfo)
+	private ErrorDetails validateBearerSession(AuthenticationInfo authInfo, boolean autoCreateAllowed)
 	{
 		String errorStr = null;
 		SIF3Session sif3Session = getSIF3SessionForRequest();
@@ -1614,7 +1638,7 @@ public abstract class BaseResource
 			    	{
 			    	    logger.debug("No envionment found yet => Attempt get bearer token info and reload environment from there...");
                         tokenInfo = getBearerTokenInfo(authInfo);
-                        ErrorDetails errors = createOrLoadEnvByTokenInfo(tokenInfo, envMgr, getProviderEnvironment().getAutoCreateEnvironment());
+                        ErrorDetails errors = createOrLoadEnvByTokenInfo(tokenInfo, envMgr, (autoCreateAllowed && getProviderEnvironment().getAutoCreateEnvironment()));
                         if (errors != null)
                         {
                             return errors;

@@ -196,6 +196,16 @@ Version from May 24, 2016: v0.9.0 - Various changes
 - Allow hibernate properties to be "injected".
 Please refer to the release notes in the directory "release/v0.9.0" for additional details and upgrade instructions.
 
+=============================================================
+Version from MM DD, 2016: v0.10.0 - Various changes
+=============================================================
+
+- Some small bug fixes in relation to external security services.
+- Added new parameter called customResponseParams to ALL provider side interface methods. THIS WILL BREAK YOUR CODE.
+  There is a very easy change to your code to fix the compile errors. See Relaese_Notes_v0.10.0.txt in the release/v0.10.0
+  directory.
+Please refer to the release notes in the directory "release/v0.10.0" for additional details and upgrade instructions.
+
 
 #########################################################################################################
 # Download Instructions

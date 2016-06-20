@@ -67,7 +67,7 @@ public class HeaderProperties
 	}
 
 	/**
-	 * Stores all values of the hashmap. 
+	 * Stores all values of the hashmap. It will fully replace the existing header properties.
 	 * 
 	 * @param hdrProperties Hashmap with the KEY=Property Name; VALUE=Property Value
 	 */

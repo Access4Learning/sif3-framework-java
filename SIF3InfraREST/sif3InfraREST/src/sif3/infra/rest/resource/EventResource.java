@@ -85,7 +85,7 @@ public class EventResource extends BaseResource
 			logger.debug("Create Event (REST POST) with input data: " + eventPayload);
 		}
 		
-		return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Events not supported.", "This DIRECT Environment implementation does not support events, yet."), ResponseAction.CREATE);
+		return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Events not supported.", "This DIRECT Environment implementation does not support events, yet."), ResponseAction.CREATE, null);
 	}
 
 	@Override

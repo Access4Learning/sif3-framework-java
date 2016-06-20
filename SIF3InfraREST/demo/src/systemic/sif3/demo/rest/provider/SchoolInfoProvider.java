@@ -33,6 +33,7 @@ import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
+import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.utils.UUIDGenerator;
@@ -97,7 +98,7 @@ public class SchoolInfoProvider extends AUDataModelProvider
      * @see sif3.common.interfaces.Provider#retrievByPrimaryKey(java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public Object retrievByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public Object retrievByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	if (StringUtils.isEmpty(resourceID))
     	{
@@ -113,7 +114,7 @@ public class SchoolInfoProvider extends AUDataModelProvider
      * @see sif3.common.interfaces.Provider#createSingle(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public Object createSingle(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public Object createSingle(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	logger.debug("Create Single School for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
 
@@ -145,7 +146,7 @@ public class SchoolInfoProvider extends AUDataModelProvider
      * @see sif3.common.interfaces.Provider#updateSingle(java.lang.Object, java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public boolean updateSingle(Object data, String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public boolean updateSingle(Object data, String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	if (StringUtils.isEmpty(resourceID))
     	{
@@ -170,7 +171,7 @@ public class SchoolInfoProvider extends AUDataModelProvider
      * @see sif3.common.interfaces.Provider#deleteSingle(java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public boolean deleteSingle(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public boolean deleteSingle(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	if (StringUtils.isEmpty(resourceID))
     	{
@@ -188,7 +189,7 @@ public class SchoolInfoProvider extends AUDataModelProvider
      * @see sif3.common.interfaces.Provider#retrive(sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo)
      */
     @Override
-    public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+    public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata, ResponseParameters customResponseParams) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
     {
     	logger.debug("Retrieve schools for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	ArrayList<SchoolInfoType> schoolList = new ArrayList<SchoolInfoType>();
@@ -229,7 +230,7 @@ public class SchoolInfoProvider extends AUDataModelProvider
      * @see sif3.common.interfaces.Provider#createMany(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public List<CreateOperationStatus> createMany(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public List<CreateOperationStatus> createMany(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	// Must be of type StudentPersonalType
     	if (data instanceof SchoolInfoCollectionType)
@@ -272,7 +273,7 @@ public class SchoolInfoProvider extends AUDataModelProvider
      * @see sif3.common.interfaces.Provider#updateMany(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public List<OperationStatus> updateMany(Object data, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public List<OperationStatus> updateMany(Object data, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	// Must be of type StudentPersonalType
     	if (data instanceof SchoolInfoCollectionType)
@@ -306,7 +307,7 @@ public class SchoolInfoProvider extends AUDataModelProvider
      * @see sif3.common.interfaces.Provider#deleteMany(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public List<OperationStatus> deleteMany(List<String> resourceIDs, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public List<OperationStatus> deleteMany(List<String> resourceIDs, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	logger.debug("Delete Students (Bulk Operation) for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
 

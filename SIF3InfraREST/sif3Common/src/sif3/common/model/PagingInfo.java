@@ -126,7 +126,7 @@ public class PagingInfo implements Serializable
                     String navigationPageStr = queryParams.getQueryParam(PagingRequestProperty.navigationPage.name());
                     if (StringUtils.notEmpty(navigationPageStr)) // it is set
                     {
-                        setCurrentPageNo(toInt(queryParams.getQueryParam(PagingRequestProperty.navigationPage.name()), 0));
+                        setCurrentPageNo(toInt(queryParams.getQueryParam(PagingRequestProperty.navigationPage.name()), CommonConstants.FIRST_PAGE));
                     }
                     break;
                 case navigationId:
@@ -154,7 +154,7 @@ public class PagingInfo implements Serializable
                     String navigationPageStr = requestHdrProps.getHeaderProperty(PagingRequestProperty.navigationPage.name());
                     if (StringUtils.notEmpty(navigationPageStr)) // it is set => override
                     {
-                        setCurrentPageNo(toInt(navigationPageStr, 0));
+                        setCurrentPageNo(toInt(navigationPageStr, CommonConstants.FIRST_PAGE));
                     }
                     break;
                 case navigationId:
@@ -169,7 +169,7 @@ public class PagingInfo implements Serializable
         }
 
         // If page size is given but not which page then we assume page 'First Page'
-        if ((getPageSize() > 0) && (getCurrentPageNo() <= NOT_DEFINED))
+        if ((getPageSize() > 0) && (getCurrentPageNo() == NOT_DEFINED))
         {
             setCurrentPageNo(CommonConstants.FIRST_PAGE);
         }
