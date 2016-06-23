@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -14,6 +13,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * Alerts form a system wide log that can be protected, as it may contain sensitive data. Ideally an Alert should contain as much identifying information about the problem being reported as possible.
+ * 
  * <p>Java class for alertType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -78,11 +79,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "code",
     "internal"
 })
-public class AlertType
-    implements Serializable
-{
+public class AlertType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")

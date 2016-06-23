@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -36,11 +35,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "path",
     "namespaces"
 })
-public class XpathType
-    implements Serializable
-{
+public class XpathType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")

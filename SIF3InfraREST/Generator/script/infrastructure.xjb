@@ -3,8 +3,8 @@
                version="2.0">
     <!-- <jaxb:globalBindings localScoping="toplevel"/> -->
     
-    <jaxb:globalBindings generateIsSetMethod="true">
-    <!-- <jaxb:globalBindings generateIsSetMethod="true" typesafeEnumBase="xsd:token"> -->
+    <!-- <jaxb:globalBindings generateIsSetMethod="true"> -->
+   	<jaxb:globalBindings generateIsSetMethod="true" typesafeEnumBase="xsd:token">
     	
         <!-- Use java.util.Calendar instead of javax.xml.datatype.XMLGregorianCalendar for xs:dateTime -->
         <jaxb:javaType name="java.util.Calendar" xmlType="xs:dateTime"

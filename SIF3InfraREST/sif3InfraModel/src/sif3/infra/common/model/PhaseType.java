@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -25,6 +24,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="states" type="{http://www.sifassociation.org/infrastructure/3.2}stateCollectionType"/>
  *         &lt;element name="required" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
  *         &lt;element name="rights" type="{http://www.sifassociation.org/infrastructure/3.2}rightsType"/>
+ *         &lt;element name="statesRights" type="{http://www.sifassociation.org/infrastructure/3.2}rightsType"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -38,13 +38,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "name",
     "states",
     "required",
-    "rights"
+    "rights",
+    "statesRights"
 })
-public class PhaseType
-    implements Serializable
-{
+public class PhaseType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -55,6 +53,8 @@ public class PhaseType
     protected boolean required;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected RightsType rights;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
+    protected RightsType statesRights;
 
     /**
      * Gets the value of the name property.
@@ -158,6 +158,34 @@ public class PhaseType
 
     public boolean isSetRights() {
         return (this.rights!= null);
+    }
+
+    /**
+     * Gets the value of the statesRights property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link RightsType }
+     *     
+     */
+    public RightsType getStatesRights() {
+        return statesRights;
+    }
+
+    /**
+     * Sets the value of the statesRights property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link RightsType }
+     *     
+     */
+    public void setStatesRights(RightsType value) {
+        this.statesRights = value;
+    }
+
+    public boolean isSetStatesRights() {
+        return (this.statesRights!= null);
     }
 
 }

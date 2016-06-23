@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -31,11 +30,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "namespaceQualifiersType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "namespace"
 })
-public class NamespaceQualifiersType
-    implements Serializable
-{
+public class NamespaceQualifiersType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected NamespaceQualifierType namespace;
 

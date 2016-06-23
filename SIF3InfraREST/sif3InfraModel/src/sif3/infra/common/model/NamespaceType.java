@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -13,6 +12,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * The Namespaces Registry contains the set of XML namespace URIs and their corresponding schema location URLs that are currently valid within the Environment.
+ * 
  * <p>Java class for namespaceType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -52,11 +53,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "uri",
     "url"
 })
-public class NamespaceType
-    implements Serializable
-{
+public class NamespaceType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")

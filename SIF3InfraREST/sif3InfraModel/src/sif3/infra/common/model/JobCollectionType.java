@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -20,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="job" type="{http://www.sifassociation.org/infrastructure/3.2}jobType" maxOccurs="unbounded"/>
+ *         &lt;element name="job" type="{http://www.sifassociation.org/infrastructure/3.2}jobType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -33,12 +32,9 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "jobCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "job"
 })
-public class JobCollectionType
-    implements Serializable
-{
+public class JobCollectionType {
 
-    private final static long serialVersionUID = 1L;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected List<JobType> job;
 
     /**

@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -39,11 +38,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(name = "propertyType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "value"
 })
-public class PropertyType
-    implements Serializable
-{
+public class PropertyType {
 
-    private final static long serialVersionUID = 1L;
     @XmlValue
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")

@@ -17,10 +17,10 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="environment"/>
  *     &lt;enumeration value="provisionRequests"/>
  *     &lt;enumeration value="requestsConnector"/>
- *     &lt;enumeration value="servicesConnector"/>
  *     &lt;enumeration value="eventsConnector"/>
  *     &lt;enumeration value="queues"/>
  *     &lt;enumeration value="subscriptions"/>
+ *     &lt;enumeration value="servicesConnector"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
@@ -36,14 +36,14 @@ public enum InfrastructureServiceNamesType {
     PROVISION_REQUESTS("provisionRequests"),
     @XmlEnumValue("requestsConnector")
     REQUESTS_CONNECTOR("requestsConnector"),
-    @XmlEnumValue("servicesConnector")
-    SERVICES_CONNECTOR("servicesConnector"),
     @XmlEnumValue("eventsConnector")
     EVENTS_CONNECTOR("eventsConnector"),
     @XmlEnumValue("queues")
     QUEUES("queues"),
     @XmlEnumValue("subscriptions")
-    SUBSCRIPTIONS("subscriptions");
+    SUBSCRIPTIONS("subscriptions"),
+    @XmlEnumValue("servicesConnector")
+    SERVICES_CONNECTOR("servicesConnector");
     private final String value;
 
     InfrastructureServiceNamesType(String v) {

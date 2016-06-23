@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -33,11 +32,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "xqueryCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "xquery"
 })
-public class XqueryCollectionType
-    implements Serializable
-{
+public class XqueryCollectionType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected List<XqueryType> xquery;
 

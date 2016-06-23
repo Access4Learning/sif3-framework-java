@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -42,11 +41,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "startsWith",
     "regularExpression"
 })
-public class NamespaceQualifierType
-    implements Serializable
-{
+public class NamespaceQualifierType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true, nillable = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")

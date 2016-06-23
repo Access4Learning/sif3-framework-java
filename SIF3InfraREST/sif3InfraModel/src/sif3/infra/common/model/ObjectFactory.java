@@ -27,8 +27,8 @@ public class ObjectFactory {
     private final static QName _Job_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "job");
     private final static QName _Xquerys_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "xquerys");
     private final static QName _Namespaces_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "namespaces");
-    private final static QName _Providers_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "providers");
     private final static QName _Queue_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "queue");
+    private final static QName _Providers_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "providers");
     private final static QName _DeleteRequest_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "deleteRequest");
     private final static QName _UpdateResponse_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "updateResponse");
     private final static QName _ProvisionRequest_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "provisionRequest");
@@ -41,12 +41,14 @@ public class ObjectFactory {
     private final static QName _Xquery_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "xquery");
     private final static QName _Jobs_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "jobs");
     private final static QName _CodeSets_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "codeSets");
+    private final static QName _State_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "state");
+    private final static QName _Alert_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "alert");
     private final static QName _Provider_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "provider");
     private final static QName _Zone_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "zone");
-    private final static QName _Alert_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "alert");
     private final static QName _DeleteResponse_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "deleteResponse");
     private final static QName _CodeSet_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "codeSet");
     private final static QName _Error_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "error");
+    private final static QName _States_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "states");
     private final static QName _Subscription_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "subscription");
     private final static QName _Environments_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "environments");
     private final static QName _Subscriptions_QNAME = new QName("http://www.sifassociation.org/infrastructure/3.2", "subscriptions");
@@ -56,6 +58,22 @@ public class ObjectFactory {
      * 
      */
     public ObjectFactory() {
+    }
+
+    /**
+     * Create an instance of {@link ParameterType }
+     * 
+     */
+    public ParameterType createParameterType() {
+        return new ParameterType();
+    }
+
+    /**
+     * Create an instance of {@link XqueryType }
+     * 
+     */
+    public XqueryType createXqueryType() {
+        return new XqueryType();
     }
 
     /**
@@ -91,6 +109,22 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link StateCollectionType }
+     * 
+     */
+    public StateCollectionType createStateCollectionType() {
+        return new StateCollectionType();
+    }
+
+    /**
+     * Create an instance of {@link AlertType }
+     * 
+     */
+    public AlertType createAlertType() {
+        return new AlertType();
+    }
+
+    /**
      * Create an instance of {@link ProviderType }
      * 
      */
@@ -104,14 +138,6 @@ public class ObjectFactory {
      */
     public ZoneType createZoneType() {
         return new ZoneType();
-    }
-
-    /**
-     * Create an instance of {@link AlertType }
-     * 
-     */
-    public AlertType createAlertType() {
-        return new AlertType();
     }
 
     /**
@@ -131,19 +157,19 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link StateType }
+     * 
+     */
+    public StateType createStateType() {
+        return new StateType();
+    }
+
+    /**
      * Create an instance of {@link CodeSetCollectionType }
      * 
      */
     public CodeSetCollectionType createCodeSetCollectionType() {
         return new CodeSetCollectionType();
-    }
-
-    /**
-     * Create an instance of {@link XqueryType }
-     * 
-     */
-    public XqueryType createXqueryType() {
-        return new XqueryType();
     }
 
     /**
@@ -227,19 +253,19 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link ProviderCollectionType }
-     * 
-     */
-    public ProviderCollectionType createProviderCollectionType() {
-        return new ProviderCollectionType();
-    }
-
-    /**
      * Create an instance of {@link QueueType }
      * 
      */
     public QueueType createQueueType() {
         return new QueueType();
+    }
+
+    /**
+     * Create an instance of {@link ProviderCollectionType }
+     * 
+     */
+    public ProviderCollectionType createProviderCollectionType() {
+        return new ProviderCollectionType();
     }
 
     /**
@@ -315,11 +341,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link StateCollectionType }
+     * Create an instance of {@link RangeType }
      * 
      */
-    public StateCollectionType createStateCollectionType() {
-        return new StateCollectionType();
+    public RangeType createRangeType() {
+        return new RangeType();
     }
 
     /**
@@ -384,14 +410,6 @@ public class ObjectFactory {
      */
     public PhaseCollectionType createPhaseCollectionType() {
         return new PhaseCollectionType();
-    }
-
-    /**
-     * Create an instance of {@link StateType }
-     * 
-     */
-    public StateType createStateType() {
-        return new StateType();
     }
 
     /**
@@ -539,6 +557,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link EnumerationType }
+     * 
+     */
+    public EnumerationType createEnumerationType() {
+        return new EnumerationType();
+    }
+
+    /**
      * Create an instance of {@link UpdatesType }
      * 
      */
@@ -552,6 +578,22 @@ public class ObjectFactory {
      */
     public UpdateType createUpdateType() {
         return new UpdateType();
+    }
+
+    /**
+     * Create an instance of {@link ParameterType.Enumerations }
+     * 
+     */
+    public ParameterType.Enumerations createParameterTypeEnumerations() {
+        return new ParameterType.Enumerations();
+    }
+
+    /**
+     * Create an instance of {@link XqueryType.Parameters }
+     * 
+     */
+    public XqueryType.Parameters createXqueryTypeParameters() {
+        return new XqueryType.Parameters();
     }
 
     /**
@@ -582,21 +624,21 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link ProviderCollectionType }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.2", name = "providers")
-    public JAXBElement<ProviderCollectionType> createProviders(ProviderCollectionType value) {
-        return new JAXBElement<ProviderCollectionType>(_Providers_QNAME, ProviderCollectionType.class, null, value);
-    }
-
-    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link QueueType }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.2", name = "queue")
     public JAXBElement<QueueType> createQueue(QueueType value) {
         return new JAXBElement<QueueType>(_Queue_QNAME, QueueType.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link ProviderCollectionType }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.2", name = "providers")
+    public JAXBElement<ProviderCollectionType> createProviders(ProviderCollectionType value) {
+        return new JAXBElement<ProviderCollectionType>(_Providers_QNAME, ProviderCollectionType.class, null, value);
     }
 
     /**
@@ -708,6 +750,24 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link StateType }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.2", name = "state")
+    public JAXBElement<StateType> createState(StateType value) {
+        return new JAXBElement<StateType>(_State_QNAME, StateType.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link AlertType }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.2", name = "alert")
+    public JAXBElement<AlertType> createAlert(AlertType value) {
+        return new JAXBElement<AlertType>(_Alert_QNAME, AlertType.class, null, value);
+    }
+
+    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link ProviderType }{@code >}}
      * 
      */
@@ -723,15 +783,6 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.2", name = "zone")
     public JAXBElement<ZoneType> createZone(ZoneType value) {
         return new JAXBElement<ZoneType>(_Zone_QNAME, ZoneType.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link AlertType }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.2", name = "alert")
-    public JAXBElement<AlertType> createAlert(AlertType value) {
-        return new JAXBElement<AlertType>(_Alert_QNAME, AlertType.class, null, value);
     }
 
     /**
@@ -759,6 +810,15 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.2", name = "error")
     public JAXBElement<ErrorType> createError(ErrorType value) {
         return new JAXBElement<ErrorType>(_Error_QNAME, ErrorType.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link StateCollectionType }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://www.sifassociation.org/infrastructure/3.2", name = "states")
+    public JAXBElement<StateCollectionType> createStates(StateCollectionType value) {
+        return new JAXBElement<StateCollectionType>(_States_QNAME, StateCollectionType.class, null, value);
     }
 
     /**

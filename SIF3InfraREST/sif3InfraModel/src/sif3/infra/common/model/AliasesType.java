@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -33,11 +32,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "aliasesType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "alias"
 })
-public class AliasesType
-    implements Serializable
-{
+public class AliasesType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(required = true)
     protected List<AliasType> alias;
 

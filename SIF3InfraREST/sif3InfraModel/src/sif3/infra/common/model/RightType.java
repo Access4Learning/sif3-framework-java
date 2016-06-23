@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -23,13 +22,13 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *       &lt;attribute name="type" use="required">
  *         &lt;simpleType>
  *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
- *             &lt;pattern value="QUERY"/>
- *             &lt;pattern value="CREATE"/>
- *             &lt;pattern value="UPDATE"/>
- *             &lt;pattern value="DELETE"/>
- *             &lt;pattern value="PROVIDE"/>
- *             &lt;pattern value="SUBSCRIBE"/>
- *             &lt;pattern value="ADMIN"/>
+ *             &lt;enumeration value="QUERY"/>
+ *             &lt;enumeration value="CREATE"/>
+ *             &lt;enumeration value="UPDATE"/>
+ *             &lt;enumeration value="DELETE"/>
+ *             &lt;enumeration value="PROVIDE"/>
+ *             &lt;enumeration value="SUBSCRIBE"/>
+ *             &lt;enumeration value="ADMIN"/>
  *           &lt;/restriction>
  *         &lt;/simpleType>
  *       &lt;/attribute>
@@ -44,14 +43,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(name = "rightType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "value"
 })
-public class RightType
-    implements Serializable
-{
+public class RightType {
 
-    private final static long serialVersionUID = 1L;
     @XmlValue
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-    protected String value;
+    protected RightValueType value;
     @XmlAttribute(name = "type", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String type;
@@ -61,10 +56,10 @@ public class RightType
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link RightValueType }
      *     
      */
-    public String getValue() {
+    public RightValueType getValue() {
         return value;
     }
 
@@ -73,10 +68,10 @@ public class RightType
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link RightValueType }
      *     
      */
-    public void setValue(String value) {
+    public void setValue(RightValueType value) {
         this.value = value;
     }
 

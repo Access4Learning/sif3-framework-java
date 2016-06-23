@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -9,6 +8,8 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
+ * A “deleteRequest” element, which consists of multiple, “delete” object ids. Since REST conventions do not support payloads on HTTP DELETE messages, all multi-object Delete Requests are conveyed via an HTTP PUT message containing an additional HTTP Header Field value of methodOverride set to DELETE.
+ * 
  * <p>Java class for deleteRequestType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -31,11 +32,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "deleteRequestType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "deletes"
 })
-public class DeleteRequestType
-    implements Serializable
-{
+public class DeleteRequestType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected DeleteIdCollection deletes;
 

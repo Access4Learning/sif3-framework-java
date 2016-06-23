@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -13,6 +12,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * The Consumer Environment Service is the gateway to all other services. It scopes the Consumer’s possible interactions with the infrastructure and any Provider Services accessible from it.  The Environment Service provides the set of (possibly customized) information the Application needs to interoperate successfully.
+ * 
  * <p>Java class for environmentType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -55,11 +56,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "infrastructureServices",
     "provisionedZones"
 })
-public class EnvironmentType
-    implements Serializable
-{
+public class EnvironmentType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")

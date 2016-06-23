@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -19,8 +18,10 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="dynamicQuery" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="paged" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
+ *         &lt;element name="dynamicQuery" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="queryByExample" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="changesSinceMarker" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="paged" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="maxPageSize" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *         &lt;element name="totalCount" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="applicationProduct" type="{http://www.sifassociation.org/infrastructure/3.2}productIdentityType" minOccurs="0"/>
@@ -36,21 +37,24 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "querySupportType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "dynamicQuery",
+    "queryByExample",
+    "changesSinceMarker",
     "paged",
     "maxPageSize",
     "totalCount",
     "applicationProduct",
     "adapterProduct"
 })
-public class QuerySupportType
-    implements Serializable
-{
+public class QuerySupportType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
-    protected boolean dynamicQuery;
+    protected Boolean dynamicQuery;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
-    protected boolean paged;
+    protected Boolean queryByExample;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
+    protected Boolean changesSinceMarker;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
+    protected Boolean paged;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlSchemaType(name = "unsignedInt")
     protected Long maxPageSize;
@@ -64,41 +68,113 @@ public class QuerySupportType
     /**
      * Gets the value of the dynamicQuery property.
      * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
      */
-    public boolean isDynamicQuery() {
+    public Boolean isDynamicQuery() {
         return dynamicQuery;
     }
 
     /**
      * Sets the value of the dynamicQuery property.
      * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
      */
-    public void setDynamicQuery(boolean value) {
+    public void setDynamicQuery(Boolean value) {
         this.dynamicQuery = value;
     }
 
     public boolean isSetDynamicQuery() {
-        return true;
+        return (this.dynamicQuery!= null);
+    }
+
+    /**
+     * Gets the value of the queryByExample property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isQueryByExample() {
+        return queryByExample;
+    }
+
+    /**
+     * Sets the value of the queryByExample property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setQueryByExample(Boolean value) {
+        this.queryByExample = value;
+    }
+
+    public boolean isSetQueryByExample() {
+        return (this.queryByExample!= null);
+    }
+
+    /**
+     * Gets the value of the changesSinceMarker property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isChangesSinceMarker() {
+        return changesSinceMarker;
+    }
+
+    /**
+     * Sets the value of the changesSinceMarker property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setChangesSinceMarker(Boolean value) {
+        this.changesSinceMarker = value;
+    }
+
+    public boolean isSetChangesSinceMarker() {
+        return (this.changesSinceMarker!= null);
     }
 
     /**
      * Gets the value of the paged property.
      * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
      */
-    public boolean isPaged() {
+    public Boolean isPaged() {
         return paged;
     }
 
     /**
      * Sets the value of the paged property.
      * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
      */
-    public void setPaged(boolean value) {
+    public void setPaged(Boolean value) {
         this.paged = value;
     }
 
     public boolean isSetPaged() {
-        return true;
+        return (this.paged!= null);
     }
 
     /**

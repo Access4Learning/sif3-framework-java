@@ -23,6 +23,12 @@
 			<fileset dir="${jaxb.lib.root.dir}" includes="*.jar" />
 		</classpath>
 	</taskdef>
+	
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="${basedir}/../../lib/ant-contrib-1.0b3/ant-contrib-1.0b3.jar"/>
+		</classpath>
+	</taskdef>
 
 	<!-- print some varaibles -->
 	<target name="00-env" description="Show Ant variables">
@@ -51,13 +57,25 @@
 	<target name="generate-infrastructure" depends="02-clean,init" description="Create all Infrastructure POJOs based on XSD Directory">
 		<echo message="Generate Pojos using JAXB for SIF Infrastructure using all XSDs in one go..." />
 		<mkdir dir="${output.base.name}/${xsd.dir}" />
-		<xjc destdir="${output.base.name}/${xsd.dir}" package="sif3.infra.common.model" extension="true" header="false" source="2.0">
-			<!-- must exclude the infrastructurecommontypes.xsd so that it all works. It will still create the classes of that -->
-			<!-- XSD because it is used as an include rather than import.                                                      -->
-			<schema dir="${input.base.dir}/${xsd.dir}" includes="*.xsd" excludes="infrastructurecommontypes.xsd" />
-			<binding dir="${basedir}" includes="infrastructure.xjb" />
-			<arg value="-npa" />
-		</xjc>
+		<if>
+			<available file="${input.base.dir}/${xsd.dir}/collections.xsd"/>
+			<then>
+				<xjc destdir="${output.base.name}/${xsd.dir}" package="sif3.infra.common.model" extension="true" header="false" source="2.0">
+					<schema dir="${input.base.dir}/${xsd.dir}" includes="collections.xsd" casesensitive="false" />
+					<binding dir="${basedir}" includes="infrastructure.xjb" />
+					<arg value="-npa" />
+				</xjc>
+			</then>
+			<else>
+				<xjc destdir="${output.base.name}/${xsd.dir}" package="sif3.infra.common.model" extension="true" header="false" source="2.0">
+					<!-- must exclude the infrastructurecommontypes.xsd so that it all works. It will still create the classes of that -->
+					<!-- XSD because it is used as an include rather than import.                                                      -->
+					<schema dir="${input.base.dir}/${xsd.dir}" includes="*.xsd" excludes="infrastructurecommontypes.xsd" casesensitive="false" />
+					<binding dir="${basedir}" includes="infrastructure.xjb" />
+					<arg value="-npa" />
+				</xjc>
+			</else>
+		</if>
 		<delete dir="${Sif3InfraModel.model}" />
 		<copy todir="${Sif3InfraModel}">
 			<fileset dir="${output.base.name}/${xsd.dir}" />

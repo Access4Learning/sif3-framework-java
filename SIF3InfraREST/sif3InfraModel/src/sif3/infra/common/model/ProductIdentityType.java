@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -28,7 +27,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="productName" minOccurs="0">
+ *         &lt;element name="productName">
  *           &lt;simpleType>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
  *               &lt;maxLength value="256"/>
@@ -58,15 +57,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "productVersion",
     "iconURI"
 })
-public class ProductIdentityType
-    implements Serializable
-{
+public class ProductIdentityType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String vendorName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String productName;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")

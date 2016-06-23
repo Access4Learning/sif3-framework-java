@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -13,6 +12,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * The Service Provider returns a SIF Error Message to a Consumer issuing an erroneous Request.
+ * 
  * <p>Java class for errorType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -54,11 +55,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "message",
     "description"
 })
-public class ErrorType
-    implements Serializable
-{
+public class ErrorType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlSchemaType(name = "unsignedInt")
     protected long code;

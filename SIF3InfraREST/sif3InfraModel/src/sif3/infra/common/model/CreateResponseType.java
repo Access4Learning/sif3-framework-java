@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -9,6 +8,8 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
+ * An HTTP Response with a status of 200 and a payload consisting of a single “createResponse” element. This includes, for each requested object successfully created, an internal status of 201 and the service-assigned refId. Any requested object that failed to be created is indicated by an error statusCode and a corresponding error payload.
+ * 
  * <p>Java class for createResponseType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -31,11 +32,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "createResponseType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "creates"
 })
-public class CreateResponseType
-    implements Serializable
-{
+public class CreateResponseType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected CreatesType creates;
 

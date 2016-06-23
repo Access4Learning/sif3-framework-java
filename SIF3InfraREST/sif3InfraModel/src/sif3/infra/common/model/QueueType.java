@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import java.util.Calendar;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -14,6 +13,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * The Queues Service supports creation, deletion and querying of Queue (Instance) / Queue Messages Service pairs.
+ * 
  * <p>Java class for queueType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -72,11 +73,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "lastModified",
     "messageCount"
 })
-public class QueueType
-    implements Serializable
-{
+public class QueueType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected String polling;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")

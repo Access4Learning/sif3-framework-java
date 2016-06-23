@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -14,6 +13,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * Zone identifiers are chosen by the administrator and can follow any convention that best meets the needs of the deploying organization. The Zone in which the Service is to be found always qualifies every Consumer request for any Provider Service. Each Service Consumer is assigned a “default” Zone at Registration time, which is used whenever a specific Zone is not explicitly included in one of its Provider Service Requests.
+ * 
  * <p>Java class for zoneType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -39,11 +40,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "description",
     "properties"
 })
-public class ZoneType
-    implements Serializable
-{
+public class ZoneType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     @XmlSchemaType(name = "normalizedString")

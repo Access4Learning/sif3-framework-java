@@ -1,15 +1,12 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
@@ -38,11 +35,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(name = "serviceType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "rights"
 })
-public class ServiceType
-    implements Serializable
-{
+public class ServiceType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected RightsType rights;
     @XmlAttribute(name = "name", required = true)
@@ -52,8 +46,7 @@ public class ServiceType
     @XmlSchemaType(name = "anySimpleType")
     protected String contextId;
     @XmlAttribute(name = "type", required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-    protected String type;
+    protected ServiceTypeType type;
 
     /**
      * Gets the value of the rights property.
@@ -144,10 +137,10 @@ public class ServiceType
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link ServiceTypeType }
      *     
      */
-    public String getType() {
+    public ServiceTypeType getType() {
         return type;
     }
 
@@ -156,10 +149,10 @@ public class ServiceType
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link ServiceTypeType }
      *     
      */
-    public void setType(String value) {
+    public void setType(ServiceTypeType value) {
         this.type = value;
     }
 

@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -33,11 +32,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "infrastructureServicesType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "infrastructureService"
 })
-public class InfrastructureServicesType
-    implements Serializable
-{
+public class InfrastructureServicesType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected List<InfrastructureServiceType> infrastructureService;
 

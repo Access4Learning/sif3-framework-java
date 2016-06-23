@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -12,6 +11,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * If an Environment supports self-provisioning Consumers than either this section must initially contain all the rights the Consumer has to all Services in all Zones, or the provisionRequests Infrastructure Service must be present in the Consumer’s Environment to allow additional rights to be obtained.
+ * 
  * <p>Java class for provisionRequestType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -44,11 +45,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(name = "provisionRequestType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "provisionedZones"
 })
-public class ProvisionRequestType
-    implements Serializable
-{
+public class ProvisionRequestType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected ProvisionedZonesType provisionedZones;
     @XmlAttribute(name = "id")

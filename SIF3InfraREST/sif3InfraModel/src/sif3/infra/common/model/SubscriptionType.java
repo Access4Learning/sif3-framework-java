@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -13,6 +12,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * A Consumer uses the Subscriptions Infrastructure Service to subscribe to Events published by one or more Service Providers.
+ * 
  * <p>Java class for subscriptionType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -44,11 +45,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "serviceName",
     "queueId"
 })
-public class SubscriptionType
-    implements Serializable
-{
+public class SubscriptionType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -58,8 +56,7 @@ public class SubscriptionType
     @XmlSchemaType(name = "token")
     protected String contextId;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-    protected String serviceType;
+    protected ServiceTypeType serviceType;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -133,10 +130,10 @@ public class SubscriptionType
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link ServiceTypeType }
      *     
      */
-    public String getServiceType() {
+    public ServiceTypeType getServiceType() {
         return serviceType;
     }
 
@@ -145,10 +142,10 @@ public class SubscriptionType
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link ServiceTypeType }
      *     
      */
-    public void setServiceType(String value) {
+    public void setServiceType(ServiceTypeType value) {
         this.serviceType = value;
     }
 

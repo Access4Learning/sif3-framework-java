@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import java.util.Calendar;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -11,9 +10,12 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.datatype.Duration;
 
 
 /**
+ * All functional services must use this object design to track state. While Events may be published back to the objects creator, they must not be published to the Consumer when the event was generated based on its request (since results were included in the response). Each functional service should define the expectations of how management of the job is managed for both the Consumer and Provider. For instance, certain optional fields may need to be included in-order-to successfully cause a job to be created.
+ * 
  * <p>Java class for jobType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -29,6 +31,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="stateDescription" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="created" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
  *         &lt;element name="lastModified" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
+ *         &lt;element name="timeout" type="{http://www.w3.org/2001/XMLSchema}duration" minOccurs="0"/>
  *         &lt;element name="phases" type="{http://www.sifassociation.org/infrastructure/3.2}phaseCollectionType" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.2}uuidType" />
@@ -47,13 +50,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "stateDescription",
     "created",
     "lastModified",
+    "timeout",
     "phases"
 })
-public class JobType
-    implements Serializable
-{
+public class JobType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
@@ -61,8 +62,7 @@ public class JobType
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected String description;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-    protected String state;
+    protected JobStateType state;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected String stateDescription;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", type = String.class)
@@ -73,6 +73,8 @@ public class JobType
     @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
     protected Calendar lastModified;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
+    protected Duration timeout;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected PhaseCollectionType phases;
     @XmlAttribute(name = "id")
@@ -140,10 +142,10 @@ public class JobType
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link JobStateType }
      *     
      */
-    public String getState() {
+    public JobStateType getState() {
         return state;
     }
 
@@ -152,10 +154,10 @@ public class JobType
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link JobStateType }
      *     
      */
-    public void setState(String value) {
+    public void setState(JobStateType value) {
         this.state = value;
     }
 
@@ -245,6 +247,34 @@ public class JobType
 
     public boolean isSetLastModified() {
         return (this.lastModified!= null);
+    }
+
+    /**
+     * Gets the value of the timeout property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Duration }
+     *     
+     */
+    public Duration getTimeout() {
+        return timeout;
+    }
+
+    /**
+     * Sets the value of the timeout property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Duration }
+     *     
+     */
+    public void setTimeout(Duration value) {
+        this.timeout = value;
+    }
+
+    public boolean isSetTimeout() {
+        return (this.timeout!= null);
     }
 
     /**

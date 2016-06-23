@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import java.util.Calendar;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -89,11 +88,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "action",
     "timestamp"
 })
-public class CodeItemType
-    implements Serializable
-{
+public class CodeItemType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String code;

@@ -1,7 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -44,11 +43,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "official",
     "value"
 })
-public class CodeType
-    implements Serializable
-{
+public class CodeType {
 
-    private final static long serialVersionUID = 1L;
     protected boolean old;
     protected boolean official;
     @XmlElement(required = true)

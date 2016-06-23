@@ -1,10 +1,10 @@
 
 package sif3.infra.common.model;
 
-import java.io.Serializable;
 import java.util.Calendar;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
@@ -13,6 +13,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * For states updatable by the Consumer, it creates a new state much like it would a single object. The actual result (state or error) is included in the response. Each functional service should define the expectations for which Adaptor is responsible for updating the phase status. NOTE: The "states" collection represented here is reserved for future capabilities.
+ * 
  * <p>Java class for stateType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -27,6 +29,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="lastModified" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *       &lt;/sequence>
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.2}uuidType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -41,14 +44,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "lastModified",
     "description"
 })
-public class StateType
-    implements Serializable
-{
+public class StateType {
 
-    private final static long serialVersionUID = 1L;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-    protected String type;
+    protected PhaseStateType type;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", type = String.class)
     @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
@@ -59,16 +58,19 @@ public class StateType
     protected Calendar lastModified;
     @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected String description;
+    @XmlAttribute(name = "id")
+    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    protected String id;
 
     /**
      * Gets the value of the type property.
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link PhaseStateType }
      *     
      */
-    public String getType() {
+    public PhaseStateType getType() {
         return type;
     }
 
@@ -77,10 +79,10 @@ public class StateType
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link PhaseStateType }
      *     
      */
-    public void setType(String value) {
+    public void setType(PhaseStateType value) {
         this.type = value;
     }
 
@@ -170,6 +172,34 @@ public class StateType
 
     public boolean isSetDescription() {
         return (this.description!= null);
+    }
+
+    /**
+     * Gets the value of the id property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Sets the value of the id property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setId(String value) {
+        this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }
