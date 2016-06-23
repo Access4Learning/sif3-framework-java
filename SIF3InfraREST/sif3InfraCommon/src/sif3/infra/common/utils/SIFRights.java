@@ -10,6 +10,7 @@ import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
 import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.RightType;
+import sif3.infra.common.model.RightValueType;
 import sif3.infra.common.model.RightsType;
 
 public class SIFRights {
@@ -28,7 +29,7 @@ public class SIFRights {
 		for (AccessRight right : rights.keySet()) {
 			RightType r = objectFactory.createRightType();
 			r.setType(right.name());
-			r.setValue(rights.get(right).name());
+			r.setValue(RightValueType.valueOf(rights.get(right).name()));
 			list.add(r);
 		}
 		return list;
@@ -44,7 +45,7 @@ public class SIFRights {
 	public SIFRights setRights(List<RightType> list) {
 		if (list != null) {
 			for (RightType r : list) {
-				rights.put(AccessRight.valueOf(r.getType()), AccessType.valueOf(r.getValue()));
+				rights.put(AccessRight.valueOf(r.getType()), AccessType.valueOf(r.getValue().name()));
 			}
 		}
 		return this;

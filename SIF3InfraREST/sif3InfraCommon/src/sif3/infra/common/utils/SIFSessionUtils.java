@@ -83,15 +83,22 @@ public class SIFSessionUtils
 							ServiceType serviceType = ServiceType.OBJECT;
 							boolean isDefaultCtx = false;
 							
-							if (StringUtils.notEmpty(service.getType()))
+							if (service.getType() != null)
 							{
 								try
 								{
-									serviceType = ServiceType.valueOf(service.getType().trim().toUpperCase());
+									logger.debug("Service:      " + (service != null));
+									logger.debug("Service type: " + (service.getType() != null));
+									logger.debug("Service type: " + service.getType().name());
+									logger.debug("Service name: " + service.getName());
+									logger.debug("Sif3Session:  " + (sif3Session != null));
+									logger.debug("Environment:  " + sif3Session.getEnvironmentName());
+									
+									serviceType = ServiceType.valueOf(service.getType().name());
 								}
 								catch (Exception ex) // log error and assume it is OBJECT
 								{
-									logger.warn("The service '"+service.getName()+"' for environment '"+sif3Session.getEnvironmentName()+"' has an invalid 'type' of '"+service.getType().trim()+"' set. Valid values are: OBJECT, FUNCTIONAL, UTILITY, SERVICEPATH and XQUERYTEMPLATE.");
+									logger.warn("The service '"+service.getName()+"' for environment '"+sif3Session.getEnvironmentName()+"' has an invalid 'type' of '"+service.getType().name()+"' set. Valid values are: OBJECT, FUNCTIONAL, UTILITY, SERVICEPATH and XQUERYTEMPLATE.");
 									serviceType = ServiceType.OBJECT;
 								}
 							}
@@ -114,7 +121,7 @@ public class SIFSessionUtils
 							{
 								for (RightType right : service.getRights().getRight())
 								{
-									if (!serviceInfo.setRight(right.getType(), right.getValue()))
+									if (!serviceInfo.setRight(right.getType(), right.getValue().name()))
 									{
 										logger.error("The service '"+service.getName()+"' for environment '"+sif3Session.getEnvironmentName()+"' has an invalid Acces Right type or value: Type = '"+ right.getType() +"' Value = '"+right.getValue()+"'. Contact your environment provider for details.");	
 									}

@@ -111,7 +111,7 @@ public class SubscriptionClient extends BaseClient
 			{
 				throw new IllegalArgumentException("Property serviceName in subscriptioninfo for method subscribe is empty or null.");
 			}			
-			if (StringUtils.isEmpty(subscriptionInfo.getServiceType()))
+			if (subscriptionInfo.getServiceType() == null)
 			{
 				throw new IllegalArgumentException("Property serviceType in subscriptioninfo for method subscribe is empty or null. Must be of value 'OBJECT', 'FUNCTION' or 'UTILITY'");
 			}

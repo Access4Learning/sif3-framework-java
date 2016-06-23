@@ -214,13 +214,13 @@ public class EnvironmentResource extends InfraResource
 		      
 		    //if we get here then all is fine and we can return the environment.
 		    return createEnvResponse(environment, Status.CREATED.getStatusCode(), ResponseAction.CREATE);
-		}
-		catch (UnmarshalException ex)
-		{
-			logger.error("Failed to unmarshal payload into an environment: "+ ex.getMessage(), ex);
-			logger.error("Environment Payload: "+ payload);
-			return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal environment payload: "+ ex.getMessage()), ResponseAction.CREATE);
-		}
+			}
+			catch (UnmarshalException ex)
+			{
+				logger.error("Failed to unmarshal payload into an environment: "+ ex.getMessage(), ex);
+				logger.error("Environment Payload: "+ payload);
+				return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal environment payload: "+ ex.getMessage()), ResponseAction.CREATE);
+			}
 	    catch (UnsupportedMediaTypeException ex)
 	    {
 	    	logger.error("Failed to unmarshal payload into an environment: "+ ex.getMessage(), ex);

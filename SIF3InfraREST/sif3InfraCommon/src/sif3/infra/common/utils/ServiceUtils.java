@@ -8,8 +8,10 @@ import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
 import sif3.infra.common.ServiceStatus.JobState;
 import sif3.infra.common.ServiceStatus.PhaseState;
+import sif3.infra.common.model.JobStateType;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.ObjectFactory;
+import sif3.infra.common.model.PhaseStateType;
 import sif3.infra.common.model.PhaseType;
 import sif3.infra.common.model.RightType;
 import sif3.infra.common.model.StateType;
@@ -82,7 +84,7 @@ public class ServiceUtils {
   {
 		job.setLastModified(Calendar.getInstance(TimeZone.getTimeZone("UTC")));
 		job.setStateDescription(description);
-		job.setState(state.name());
+		job.setState(JobStateType.valueOf(state.name()));
   }
 	
 	public static StateType changePhaseState(JobType job, PhaseType phase, PhaseState state, String description)
@@ -103,7 +105,7 @@ public class ServiceUtils {
     if(current == null || !current.getType().equals(state))
     {
     	current = objectFactory.createStateType();
-    	current.setType(state.name());
+    	current.setType(PhaseStateType.valueOf(state.name()));
     	current.setCreated(time);
     	phase.getStates().getState().add(current);
     }

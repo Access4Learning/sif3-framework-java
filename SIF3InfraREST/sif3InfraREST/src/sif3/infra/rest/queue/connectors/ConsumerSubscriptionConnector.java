@@ -40,6 +40,7 @@ import sif3.common.ws.Response;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.model.ObjectFactory;
+import sif3.infra.common.model.ServiceTypeType;
 import sif3.infra.common.model.SubscriptionCollectionType;
 import sif3.infra.common.model.SubscriptionType;
 import sif3.infra.rest.client.SubscriptionClient;
@@ -261,7 +262,7 @@ public class ConsumerSubscriptionConnector
 		subscriptionInfo.setContextId(subscriptionKey.getContextID());
 		subscriptionInfo.setZoneId(subscriptionKey.getZoneID());
 		subscriptionInfo.setServiceName(subscriptionKey.getServiceName());
-		subscriptionInfo.setServiceType(subscriptionKey.getServiceType());
+		subscriptionInfo.setServiceType(ServiceTypeType.valueOf(subscriptionKey.getServiceType()));
 		subscriptionInfo.setQueueId(queueInfo.getQueue().getQueueID());		
 		Response response = subscriptionClient.subscribe(subscriptionInfo);
 		
@@ -287,7 +288,7 @@ public class ConsumerSubscriptionConnector
 			dbSubscription.setLastAccessed(new Date());
 			dbSubscription.setQueueID(subscription.getQueueId());
 			dbSubscription.setServiceName(subscription.getServiceName());
-			dbSubscription.setServiceType(subscription.getServiceType());
+			dbSubscription.setServiceType(subscription.getServiceType().name());
 			dbSubscription.setSubscriptionID(subscription.getId());
 			dbSubscription.setZoneID(subscription.getZoneId());
 			
