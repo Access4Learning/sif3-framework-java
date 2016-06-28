@@ -1,13 +1,3 @@
-/*
- * DataModelResource.java Created: 24/09/2013 Copyright 2013 Systemic Pty Ltd
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by
- * applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
- * OF ANY KIND, either express or implied. See the License for the specific
- * language governing permissions and limitations under the License.
- */
 
 package sif3.infra.rest.resource;
 
@@ -64,7 +54,8 @@ import sif3.common.ws.OperationStatus;
 import sif3.infra.common.env.mgr.ProviderManagerFactory;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
 import sif3.infra.common.interfaces.EnvironmentManager;
-import sif3.infra.rest.provider.BaseJobProvider;
+import sif3.infra.common.model.StateType;
+import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
 import sif3.infra.rest.provider.ProviderFactory;
 
 /**
@@ -106,7 +97,7 @@ public class ServiceResource extends InfraResource {
 	 */
 	public ServiceResource(@Context UriInfo uriInfo, @Context HttpHeaders requestHeaders, @Context Request request, @PathParam("infraObjectNamePlural") String infraObjectNamePlural, @PathParam("mimeType") String mimeType, @MatrixParam("zoneId") String zoneID, @MatrixParam("contextId") String contextID) {
 		super(uriInfo, requestHeaders, request, "services", zoneID, contextID);
-		
+
 		this.infraObjectNamePlural = infraObjectNamePlural;
 
 		if (logger.isDebugEnabled()) {
@@ -363,9 +354,37 @@ public class ServiceResource extends InfraResource {
 
 	@PUT
 	public Response updateMany(String payload) {
-		throw new UnsupportedOperationException("Update operations not supported on functional services");
-	}
+		// Check what is really required: DELETE or UPDATE
+		boolean doDelete = HeaderValues.MethodType.DELETE.name().equalsIgnoreCase(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE));
+	  
+		if (logger.isDebugEnabled())
+		{
+			if (doDelete)
+			{
+				logger.debug("Delete Collection "+infraObjectNamePlural+" (REST PUT, method OVERRODE=DELETE) with input data: " + payload);
+			}
+			else
+			{
+				logger.debug("Update Collection "+infraObjectNamePlural+" (REST PUT) with input data: " + payload);		    
+			}
+		}
+		
+		ErrorDetails error = validClient(infraObjectNamePlural, ((doDelete) ? getRight(AccessRight.DELETE) : getRight(AccessRight.UPDATE)), AccessType.APPROVED, true);
+		if (error != null) // Not allowed to access!
+		{
+			logger.debug("Error Found: "+error);
+			return makeErrorResponse(error, ((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE));
+		}
+
+		Provider provider = getProvider();
+		if (provider == null) // error already logged but we must return an error response for the caller
+		{
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+infraObjectNamePlural+" available."), ((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE));			
+		}
 	
+		return (doDelete) ? deleteMany(provider, payload) : updateMany(provider, payload);
+	}
+
 	// -------------------------------------------------------------//
 	// -- DELETE Section: This is the D(elete) in CRUD for Lists. --//
 	// -------------------------------------------------------------//
@@ -686,7 +705,7 @@ public class ServiceResource extends InfraResource {
 	// -- Phases -- //
 	// ------------ //
 	@POST
-	@Path("{resourceID:([^\\.]*)}/phases/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
+	@Path("{resourceID:([^\\.]*)}/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
 	public Response createToPhase(String payload, @PathParam("resourceID") String resourceID, @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Create to phase " + phaseName + " (REST POST) with URL Postfix mimeType = '" + mimeType + "' and input data: " + payload);
@@ -697,7 +716,7 @@ public class ServiceResource extends InfraResource {
 			return makeErrorResponse(error, ResponseAction.CREATE);
 		}
 
-		BaseJobProvider provider = (BaseJobProvider) getProvider();
+		BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) getProvider();
 		if (provider == null) {
 			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE);
 		}
@@ -727,7 +746,7 @@ public class ServiceResource extends InfraResource {
 	}
 
 	@GET
-	@Path("{resourceID:([^\\.]*)}/phases/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
+	@Path("{resourceID:([^\\.]*)}/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
 	public Response retrieveToPhase(String payload, @PathParam("resourceID") String resourceID, @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Get phase " + phaseName + " by Job ID (REST GET): " + resourceID + " and URL Postfix mimeType = '" + mimeType + "'");
@@ -738,7 +757,7 @@ public class ServiceResource extends InfraResource {
 			return makeErrorResponse(error, ResponseAction.QUERY);
 		}
 
-		BaseJobProvider provider = (BaseJobProvider) getProvider();
+		BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) getProvider();
 		if (provider == null) {
 			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE);
 		}
@@ -766,7 +785,7 @@ public class ServiceResource extends InfraResource {
 	}
 
 	@PUT
-	@Path("{resourceID:([^\\.]*)}/phases/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
+	@Path("{resourceID:([^\\.]*)}/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
 	public Response updateToPhase(String payload, @PathParam("resourceID") String resourceID, @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Update to phase " + phaseName + " (REST POST) with URL Postfix mimeType = '" + mimeType + "' and input data: " + payload);
@@ -777,7 +796,7 @@ public class ServiceResource extends InfraResource {
 			return makeErrorResponse(error, ResponseAction.UPDATE);
 		}
 
-		BaseJobProvider provider = (BaseJobProvider) getProvider();
+		BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) getProvider();
 		if (provider == null) {
 			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE);
 		}
@@ -805,7 +824,7 @@ public class ServiceResource extends InfraResource {
 	}
 
 	@DELETE
-	@Path("{resourceID:([^\\.]*)}/phases/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
+	@Path("{resourceID:([^\\.]*)}/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
 	public Response deleteToPhase(String payload, @PathParam("resourceID") String resourceID, @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Delete to phase " + phaseName + " (REST POST) with URL Postfix mimeType = '" + mimeType + "' and input data: " + payload);
@@ -816,7 +835,7 @@ public class ServiceResource extends InfraResource {
 			return makeErrorResponse(error, ResponseAction.DELETE);
 		}
 
-		BaseJobProvider provider = (BaseJobProvider) getProvider();
+		BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) getProvider();
 		if (provider == null) {
 			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE);
 		}
@@ -836,6 +855,41 @@ public class ServiceResource extends InfraResource {
 			return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(), "Consumer is not authorized to issue the requested operation.", AccessRight.CREATE.name() + " access is not set to " + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural + " functional service", "Provider side check."), ResponseAction.DELETE);
 		} catch (SIF3Exception ex) {
 			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.DELETE);
+		}
+	}
+
+	// ------------ //
+	// -- States -- //
+	// ------------ //
+	@POST
+	@Path("{resourceID:([^\\.]*)}/{phaseName:([^\\.]*)}/states/state{mimeType:(\\.[^/]*?)?}")
+	public Response createToState(String payload, @PathParam("resourceID") String resourceID, @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Create to state on " + phaseName + " (REST POST) with URL Postfix mimeType = '" + mimeType + "' and input data: " + payload);
+		}
+
+		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.UPDATE), AccessType.APPROVED, false);
+		if (error != null) {
+			return makeErrorResponse(error, ResponseAction.CREATE);
+		}
+
+		BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) getProvider();
+		if (provider == null) {
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE);
+		}
+
+		try {
+			StateType state = provider.createToState(resourceID, phaseName, provider.getUnmarshaller().unmarshal(payload, StateType.class, getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
+
+			return makeResponse(state, Status.OK.getStatusCode(), false, ResponseAction.CREATE, provider.getMarshaller());
+		} catch (PersistenceException ex) {
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create State object. Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+		} catch (UnmarshalException ex) {
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal data. Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+		} catch (UnsupportedMediaTypeException ex) {
+			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal data due to unsupported media type. Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+		} catch (SIF3Exception ex) {
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Unexpected error. Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
 		}
 	}
 }

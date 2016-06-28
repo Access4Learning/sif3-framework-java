@@ -208,7 +208,7 @@ public abstract class BaseProvider implements Provider, Runnable
 	 * defined in there is used to determine how often this thread is run.
 	 */
     @Override
-    public final synchronized void run()
+    public synchronized void run()
     {
     	String providerName = getProviderName();
     	boolean checkEnvType = getServiceProperties().getPropertyAsBool("provider.check.envType", true);

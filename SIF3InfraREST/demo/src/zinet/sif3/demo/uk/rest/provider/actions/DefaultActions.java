@@ -15,10 +15,10 @@ import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.PhaseType;
 import sif3.infra.common.utils.ServiceUtils;
 import sif3.infra.rest.functional.BasePhaseActions;
-import sif3.infra.rest.provider.BaseJobProvider;
+import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
 
 public class DefaultActions extends BasePhaseActions {
-	public DefaultActions(BaseJobProvider provider) {
+	public DefaultActions(BaseFunctionalServiceProvider provider) {
 		super(provider);
 	}
 	

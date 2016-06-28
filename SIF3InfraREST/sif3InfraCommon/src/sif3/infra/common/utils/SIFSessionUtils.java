@@ -87,13 +87,14 @@ public class SIFSessionUtils
 							{
 								try
 								{
+									/*
 									logger.debug("Service:      " + (service != null));
 									logger.debug("Service type: " + (service.getType() != null));
 									logger.debug("Service type: " + service.getType().name());
 									logger.debug("Service name: " + service.getName());
 									logger.debug("Sif3Session:  " + (sif3Session != null));
 									logger.debug("Environment:  " + sif3Session.getEnvironmentName());
-									
+									*/
 									serviceType = ServiceType.valueOf(service.getType().name());
 								}
 								catch (Exception ex) // log error and assume it is OBJECT

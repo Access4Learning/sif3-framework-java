@@ -34,10 +34,10 @@ import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.PhaseType;
 import sif3.infra.common.utils.ServiceUtils;
 import sif3.infra.rest.functional.BasePhaseActions;
-import sif3.infra.rest.provider.BaseJobProvider;
+import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
 
 public class JsonActions extends BasePhaseActions {
-	public JsonActions(BaseJobProvider provider) {
+	public JsonActions(BaseFunctionalServiceProvider provider) {
 		super(provider);
 	}
 	

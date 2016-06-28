@@ -11,14 +11,14 @@ import sif3.common.model.SIFZone;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.PhaseType;
-import sif3.infra.rest.provider.BaseJobProvider;
+import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
 
 
 public class BasePhaseActions implements IPhaseActions {
 	protected ObjectFactory objectFactory = new ObjectFactory();
-	private BaseJobProvider provider;
+	private BaseFunctionalServiceProvider provider;
 	
-	public BasePhaseActions(BaseJobProvider provider) {
+	public BasePhaseActions(BaseFunctionalServiceProvider provider) {
 		this.provider = provider;
 	}
 	
@@ -46,7 +46,7 @@ public class BasePhaseActions implements IPhaseActions {
 	/**
 	 * @return the provider
 	 */
-	public BaseJobProvider getProvider() {
+	public BaseFunctionalServiceProvider getProvider() {
 		return provider;
 	}
 }

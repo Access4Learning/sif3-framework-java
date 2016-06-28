@@ -1,16 +1,19 @@
 package zinet.sif3.demo.uk.rest.provider;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.utils.ServiceUtils;
-import sif3.infra.rest.provider.BaseJobProvider;
+import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
 import sif3.infra.common.utils.SIFRights;
 import zinet.sif3.demo.uk.rest.PayloadConstants;
 import zinet.sif3.demo.uk.rest.provider.actions.DefaultActions;
 import zinet.sif3.demo.uk.rest.provider.actions.JsonActions;
 import zinet.sif3.demo.uk.rest.provider.actions.XmlActions;
 
-public class PayloadProvider extends BaseJobProvider {
+public class PayloadProvider extends BaseFunctionalServiceProvider {
 	public PayloadProvider() {
 		super("Payloads");
 		
@@ -20,10 +23,20 @@ public class PayloadProvider extends BaseJobProvider {
 	}
 	
 	@Override
-	protected void addPhases(JobType job) {
-		ServiceUtils.addPhase(job, "default", true, new SIFRights().create().query().update().getRights());
-		ServiceUtils.addPhase(job, "xml", true, new SIFRights().create().query().update().getRights());
-		ServiceUtils.addPhase(job, "json", true, new SIFRights().create().query().update().getRights());
+	protected void configure(JobType job) {
+		DatatypeFactory f;
+		try {
+			f = DatatypeFactory.newInstance();
+		} catch (DatatypeConfigurationException e) {
+			logger.error("Failed to configure job due to error: " + e.getMessage(), e);
+			return;
+		}
+		
+		ServiceUtils.addPhase(job, "default", true, new SIFRights().create().query().update().getRights(), new SIFRights().create().getRights());
+		ServiceUtils.addPhase(job, "xml", true, new SIFRights().create().query().update().getRights(), new SIFRights().create().getRights());
+		ServiceUtils.addPhase(job, "json", true, new SIFRights().create().query().update().getRights(), new SIFRights().create().getRights());
+		
+		job.setTimeout(f.newDuration(true, 0, 0, 0, 0, 0, 30));
 	}
 	
 	@Override

@@ -34,10 +34,10 @@ import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.PhaseType;
 import sif3.infra.common.utils.ServiceUtils;
 import sif3.infra.rest.functional.BasePhaseActions;
-import sif3.infra.rest.provider.BaseJobProvider;
+import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
 
 public class XmlActions extends BasePhaseActions {
-	public XmlActions(BaseJobProvider provider) {
+	public XmlActions(BaseFunctionalServiceProvider provider) {
 		super(provider);
 	}
 	

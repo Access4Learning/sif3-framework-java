@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
 import sif3.infra.common.ServiceStatus.JobState;
@@ -20,6 +21,14 @@ public class ServiceUtils {
 	private static ObjectFactory objectFactory = new ObjectFactory();
 	
 	public static PhaseType getPhase(JobType job, String phaseName) {
+		if(job == null) {
+			throw new IllegalArgumentException("Cannot get phase " + phaseName + " from a job that's null.");
+		}
+		
+		if(StringUtils.isEmpty(phaseName)) {
+			throw new IllegalArgumentException("Cannot get empty phase from job (" + job.getId() + ").");
+		}
+		
 		if(job.getPhases() == null) {
 			job.setPhases(objectFactory.createPhaseCollectionType());
 		}
@@ -28,7 +37,7 @@ public class ServiceUtils {
 				return phase;
 			}
 		}
-		return null;
+		throw new IllegalArgumentException("Could not find phase " + phaseName + " in " + job.getName() + " job (" + job.getId() + ").");
 	}
 	
 	public static StateType getLastPhaseState(JobType job, String phaseName) {
@@ -49,15 +58,15 @@ public class ServiceUtils {
 		return states.get(states.size()-1);
 	}
 	
-	public static PhaseType addPhase(JobType job, String phaseName, boolean required, List<RightType> rights) {
-		return addPhase(job, phaseName, required, rights, PhaseState.NOTSTARTED, null);
+	public static PhaseType addPhase(JobType job, String phaseName, boolean required, List<RightType> rights, List<RightType> statesRights) {
+		return addPhase(job, phaseName, required, rights, statesRights, PhaseState.NOTSTARTED, null);
 	}
 	
-	public static PhaseType addPhase(JobType job, String phaseName, boolean required, List<RightType> rights, PhaseState state) {
-		return addPhase(job, phaseName, required, rights, state, null);
+	public static PhaseType addPhase(JobType job, String phaseName, boolean required, List<RightType> rights, List<RightType> statesRights, PhaseState state) {
+		return addPhase(job, phaseName, required, rights, statesRights, state, null);
 	}
 
-	public static PhaseType addPhase(JobType job, String phaseName, boolean required, List<RightType> rights, PhaseState state, String stateDescription) {
+	public static PhaseType addPhase(JobType job, String phaseName, boolean required, List<RightType> rights, List<RightType> statesRights, PhaseState state, String stateDescription) {
 		if(job.getPhases() == null) {
 			job.setPhases(objectFactory.createPhaseCollectionType());
 		}
@@ -65,8 +74,12 @@ public class ServiceUtils {
 		phase.setName(phaseName);
 		phase.setRequired(required);
 		phase.setStates(objectFactory.createStateCollectionType());
+		
 		phase.setRights(objectFactory.createRightsType());
 		phase.getRights().getRight().addAll(rights);
+		
+		phase.setStatesRights(objectFactory.createRightsType());
+		phase.getStatesRights().getRight().addAll(statesRights);
 		
 		job.getPhases().getPhase().add(phase);
 		

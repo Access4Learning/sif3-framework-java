@@ -2,9 +2,15 @@
 package sif3.infra.rest.provider;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import javax.ws.rs.core.MediaType;
 
@@ -37,12 +43,14 @@ import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
+import sif3.infra.common.ServiceStatus.PhaseState;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.model.JobCollectionType;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.PhaseType;
+import sif3.infra.common.model.StateType;
 import sif3.infra.common.persist.service.SIF3JobService;
 import sif3.infra.common.utils.ServiceUtils;
 import sif3.infra.rest.functional.IPhaseActions;
@@ -50,9 +58,7 @@ import sif3.infra.rest.functional.JobEvent;
 import sif3.infra.rest.functional.JobEvents;
 import sif3.infra.rest.functional.JobIterator;
 
-// TODO Check all methods to ensure they do what is expected rather than
-// returning fake data
-public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionType> {
+public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<JobCollectionType> {
 
 	protected final Logger logger = Logger.getLogger(getClass());
 
@@ -67,7 +73,10 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 
 	private static JobEvents sifevents = null;
 
-	public BaseJobProvider(String serviceName) {
+	private Timer jobTimeoutTimer = null;
+	private TimerTask jobTimeoutTask = null;
+
+	public BaseFunctionalServiceProvider(String serviceName) {
 		super();
 
 		this.serviceName = serviceName;
@@ -82,7 +91,7 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 		}
 	}
 
-	protected abstract void addPhases(JobType job);
+	protected abstract void configure(JobType job);
 
 	protected abstract void shutdownJob(JobType job);
 
@@ -98,10 +107,96 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 	public String getServiceName() {
 		return serviceName;
 	}
-	
+
 	@Override
 	public ServiceType getServiceType() {
 		return ServiceType.FUNCTIONAL;
+	}
+
+	/**
+	 * (non-Javadoc)
+	 * 
+	 * @see sif3.common.interfaces.Provider#finalise()
+	 */
+	@Override
+	public void finalise() {
+		super.finalise();
+		// Shut down event timer & task - thread
+		if (jobTimeoutTask != null) {
+			logger.debug("Shut Down event task for: " + getProviderName());
+			jobTimeoutTask.cancel();
+			jobTimeoutTask = null;
+		}
+		if (jobTimeoutTimer != null) {
+			logger.debug("Shut Down event timer for: " + getProviderName());
+			jobTimeoutTimer.cancel();
+			jobTimeoutTimer.purge();
+			jobTimeoutTimer = null;
+		}
+
+		// Call finalise on sub-class.
+	}
+
+	@Override
+	public void run() {
+		super.run();
+		int frequencyInSec = 20;// getEventFrequency(providerName);
+		int period = frequencyInSec * CommonConstants.MILISEC;
+
+		logger.info("Job timout frequency " + frequencyInSec + " secs (" + period + ").");
+		if (jobTimeoutTask == null) {
+			jobTimeoutTask = new TimerTask() {
+
+				public void run() {
+					logger.debug("++++++++++++++++++++++++++++++ Starting job timout task for " + getProviderName() + ".");
+
+					try {
+						sif3JobService.getJobs().stream().filter(new Predicate<JobType>() {
+							@Override
+							public boolean test(JobType job) {
+								Calendar now = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+								Calendar then = (Calendar) job.getCreated().clone();
+	
+								job.getTimeout().addTo(then);
+	
+								return acceptJob(job) && job.getTimeout().getTimeInMillis(Calendar.getInstance()) > 0 && now.after(then);
+							}
+						}).forEach(new Consumer<JobType>() {
+							@Override
+							public void accept(JobType job) {
+								logger.debug("Job " + job.getId() + " has timed out, requesting its deletion.");
+								try {
+									deleteSingle(job.getId(), null, null, null);
+								} catch (Exception e) {
+									logger.error("Failed to delete timed out job with id " + job.getId() + " due to error: " + e.getMessage(), e);
+								}
+							}
+						});
+					} catch (Exception e) {
+						logger.error("Failed to retrieve jobs to process timeout due to error: " + e.getMessage(), e);
+					}
+					logger.debug("++++++++++++++++++++++++++++++ Finished job timout task for " + getProviderName() + ".");
+				}
+			};
+
+			jobTimeoutTimer = new Timer(true);
+			jobTimeoutTimer.scheduleAtFixedRate(jobTimeoutTask, 0, period);
+		}
+	}
+
+	public boolean acceptJob(JobType job) {
+		return acceptJob(job.getName());
+	}
+
+	public boolean acceptJob(String jobName) {
+		return acceptJob(getServiceName(), jobName);
+	}
+
+	public boolean acceptJob(String serviceName, String jobName) {
+		if (StringUtils.isEmpty(getServiceName()) || StringUtils.isEmpty(serviceName) || StringUtils.isEmpty(jobName)) {
+			return false;
+		}
+		return getServiceName().equals(serviceName) && getServiceName().equals(jobName + "s");
 	}
 
 	/*-------------------------------------*/
@@ -112,7 +207,7 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 	 */
 	@Override
 	public SIFEventIterator<JobCollectionType> getSIFEvents() {
-		if(sifevents.isEmpty()) {
+		if (sifevents.isEmpty()) {
 			return null;
 		}
 		JobIterator itr = new JobIterator(getServiceName(), getServiceProperties(), sifevents.getAllEvents());
@@ -148,21 +243,21 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 	@Override
 	public SIFEvent<JobCollectionType> modifyBeforePublishing(SIFEvent<JobCollectionType> sifEvent, SIFZone zone, SIFContext context, HeaderProperties customHTTPHeaders) {
 		JobEvent jobEvent = sifevents.get(sifEvent);
-		if(jobEvent == null) {
+		if (jobEvent == null) {
 			// Don't know anything about this event
 			return null;
 		}
-		
-		if(!jobEvent.getZone().equals(zone)) {
+
+		if (!jobEvent.getZone().equals(zone)) {
 			// Not the right zone to send this to
 			return null;
 		}
-		
-		if(!jobEvent.getContext().equals(context)) {
+
+		if (!jobEvent.getContext().equals(context)) {
 			// Not the right context to send this to
 			return null;
 		}
-		
+
 		// Looks ok
 		return sifEvent;
 	}
@@ -199,17 +294,17 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 		if (data instanceof JobType) {
 			JobType job = (JobType) data;
 
-			addPhases(job);
+			configure(job);
 
 			if (!useAdvisory) {
 				job.setId(null);
-			} else {
-				if (StringUtils.isEmpty(job.getId())) {
-					logger.debug("UseAdvisory is true, but no advisory refid provided.");
-				}
 			}
 
-			sif3JobService.save(job);
+			if (useAdvisory && StringUtils.isEmpty(job.getId())) {
+				logger.debug("UseAdvisory is true, but no advisory refid provided.");
+			}
+
+			job = sif3JobService.save(job);
 
 			sendJobEvent(job, EventAction.CREATE, zone, context);
 
@@ -278,7 +373,13 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 
 		logger.debug("Remove job with Resource ID = " + resourceID + ", " + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 
-		JobType job = (JobType) retrieveByPrimaryKey(resourceID, zone, context, metadata);
+		JobType job = (JobType) sif3JobService.getJobById(resourceID);
+		
+		if(job == null) {
+			logger.error("Attempted to delete job with id " + resourceID + ", but no such job exists");
+			return false;
+		}
+		
 		try {
 			shutdownJob(job);
 		} catch (Exception e) {
@@ -287,9 +388,9 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 		}
 
 		sif3JobService.removeJobById(resourceID);
-		
+
 		sendJobEvent(job, EventAction.DELETE, zone, context);
-		
+
 		return true;
 	}
 
@@ -378,9 +479,9 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 		}
 
 		String result = actions.create(job, phase, payload, requestMediaType, responseMediaType, zone, context);
-		
+
 		sif3JobService.save(job);
-		
+
 		return result;
 	}
 
@@ -410,7 +511,7 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 
 		// A get to a phase may have potentially modified the job state
 		sif3JobService.save(job);
-		
+
 		return result;
 	}
 
@@ -437,9 +538,9 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 		}
 
 		String result = actions.update(job, phase, payload, requestMediaType, responseMediaType, zone, context);
-		
+
 		sif3JobService.save(job);
-		
+
 		return result;
 	}
 
@@ -466,10 +567,52 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 		}
 
 		String result = actions.delete(job, phase, payload, requestMediaType, responseMediaType, zone, context);
-		
+
 		sif3JobService.save(job);
-		
+
 		return result;
+	}
+
+	/*----------------------*/
+	/*-- State Operations --*/
+	/*----------------------*/
+	public StateType createToState(String resourceID, String phaseName, Object data, SIFZone zone, SIFContext context, RequestMetadata metadata) throws SIF3Exception {
+		logger.debug("Create to state for phase " + resourceID + "/" + phaseName + " in " + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
+
+		if (!(data instanceof StateType)) {
+			throw new IllegalArgumentException("Expected Object Type = StateType. Received Object Type = " + data.getClass().getSimpleName());
+		}
+		StateType state = (StateType)data;
+		
+		JobType job = sif3JobService.getJobById(resourceID);
+		
+		if(job == null) {
+			throw new IllegalArgumentException("No job found with id " + resourceID + ".");
+		}
+		
+		PhaseType phase = ServiceUtils.getPhase(job, phaseName);
+		
+		if(phase == null) {
+			throw new IllegalArgumentException("No phase found called " + phaseName + " on job with id " + resourceID + ".");
+		}
+		
+		ServiceUtils.changePhaseState(job, phase, PhaseState.valueOf(state.getType().name()), state.getDescription());
+		
+		job = sif3JobService.save(job);
+		
+		if(job == null) {
+			throw new IllegalArgumentException("Failed to save job with id " + resourceID + ".");
+		}
+		
+		sendJobEvent(job, EventAction.UPDATE, zone, context);
+
+		state = ServiceUtils.getLastPhaseState(job, phaseName);
+		
+		if(state == null) {
+			throw new IllegalArgumentException("Could not find the most recent state in phase " + phaseName + " on job with id " + resourceID + ".");
+		}
+		
+		return state;
 	}
 
 	/*----------------------*/
@@ -480,17 +623,17 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 	public HeaderProperties getCustomServiceInfo(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException {
 		return metadata.getHTTPParameters();
 	}
-	
+
 	/*----------------------*/
 	/*--  Phase Eventing  --*/
 	/*----------------------*/
-	
+
 	public void sendJobEvent(JobType job, EventAction action, SIFZone zone, SIFContext context) {
 		SIFEvent<JobCollectionType> event = new SIFEvent<JobCollectionType>(new JobCollectionType(), action, UpdateType.FULL, 1);
 		event.getSIFObjectList().getJob().add(job);
 		sifevents.add(new JobEvent(event, zone, context));
 	}
-	
+
 	public void sendJobEvent(JobType job, String phaseName, EventAction action, SIFZone zone, SIFContext context) {
 		SIFEvent<JobCollectionType> event = new SIFEvent<JobCollectionType>(new JobCollectionType(), action, UpdateType.PARTIAL, 1);
 		event.getSIFObjectList().getJob().add(filter(job, phaseName));
@@ -540,17 +683,17 @@ public abstract class BaseJobProvider extends BaseEventProvider<JobCollectionTyp
 
 		return output;
 	}
-	
+
 	private JobType filter(JobType job, String phaseName) {
 		JobType newJob = objectFactory.createJobType();
 		newJob.setId(job.getId());
 		newJob.setName(job.getName());
 		/*
-		newJob.setDescription(job.getDescription());
-		newJob.setCreated(job.getCreated());
-		newJob.setLastModified(job.getLastModified());
-		newJob.setState(job.getState());
-		*/
+		 * newJob.setDescription(job.getDescription());
+		 * newJob.setCreated(job.getCreated());
+		 * newJob.setLastModified(job.getLastModified());
+		 * newJob.setState(job.getState());
+		 */
 		newJob.setPhases(objectFactory.createPhaseCollectionType());
 		newJob.getPhases().getPhase().add(ServiceUtils.getPhase(job, phaseName));
 		return newJob;

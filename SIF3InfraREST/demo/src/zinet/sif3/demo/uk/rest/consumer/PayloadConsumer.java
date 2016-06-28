@@ -1,12 +1,15 @@
 
 package zinet.sif3.demo.uk.rest.consumer;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.ws.rs.core.MediaType;
 
+import au.com.systemic.framework.utils.GUIDGenerator;
 import sif.dd.conversion.DataModelMarshalFactory;
 import sif.dd.uk20.model.LearnerPersonalType;
 import sif.dd.uk20.model.NameType;
@@ -19,6 +22,7 @@ import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
 import sif3.common.model.delayed.DelayedResponseReceipt;
+import sif3.common.ws.BulkOperationResponse;
 import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
@@ -28,6 +32,7 @@ import sif3.infra.common.ServiceStatus.PhaseState;
 import sif3.infra.common.model.JobCollectionType;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.ObjectFactory;
+import sif3.infra.common.model.PhaseStateType;
 import sif3.infra.common.model.StateType;
 import sif3.infra.common.utils.ServiceUtils;
 import sif3.infra.rest.consumer.AbstractJobConsumer;
@@ -36,8 +41,8 @@ import zinet.sif3.demo.uk.rest.PayloadConstants;
 public class PayloadConsumer extends AbstractJobConsumer {
 
 	public PayloadConsumer() {
-		super("Payload");
-
+		super();
+		
 		// Emulate an external actor issuing consumer actions
 		new Timer().schedule(new TimerTask() {
 
@@ -175,6 +180,51 @@ public class PayloadConsumer extends AbstractJobConsumer {
 					}
 					logResult("Phase responded with data with mime type: " + r.getMediaType() + " and data:\n" + r.getDataObject());
 
+					// Change state of phase "json".
+					logTestHeading("Executing CREATE to the state of phase 'json'.");
+					StateType failed = new StateType();
+					failed.setType(PhaseStateType.FAILED);
+					failed.setDescription("Because I want it to");
+          responses = createToState(job.getId(), "json", failed, null, null);  
+          r = responses.isEmpty() ? null : responses.get(0);
+					if (r == null) {
+						logger.error("Didn't get a response when calling create to state on a phase");
+					}
+					state = (StateType) r.getDataObject();
+					if(state == null) {
+						logResult("Got UNEXPECTED result, no state object!");
+					} else {
+	          if (state.getType().equals(PhaseState.FAILED.name()))
+	          {
+	          	logResult("Got EXPECTED result, last modified at " + state.getLastModified().getTime());
+	          }
+	          else
+	          {
+	          	logResult("Got UNEXPECTED result " + state.getType() + ", last modified at " + state.getLastModified().getTime());
+	          }
+					}
+					
+				// Query phase "json", expecting FAILED
+					logTestHeading("Check state of phase 'json', expecting FAILED.");
+					responses = retrieveByPrimaryKey(job.getId(), null);
+					r = responses.isEmpty() ? null : responses.get(0);
+					if (r == null) {
+						logger.error("Didn't get a response when retrieving a job");
+					}
+					job = (JobType) r.getDataObject();
+					state = ServiceUtils.getLastPhaseState(job, "json");
+					if(state == null) {
+						logResult("Got UNEXPECTED result, no state object!");
+					} else {
+	          if (state.getType().equals(PhaseState.FAILED.name()))
+	          {
+	          	logResult("Got EXPECTED result, last modified at " + state.getLastModified().getTime());
+	          }
+	          else
+	          {
+	          	logResult("Got UNEXPECTED result " + state.getType() + ", last modified at " + state.getLastModified().getTime());
+	          }
+					}
 					
 					// Delete a job
           logTestHeading("Deleting created job with ID " + job.getId());
@@ -194,6 +244,60 @@ public class PayloadConsumer extends AbstractJobConsumer {
 					} else {
 						logResult("FAILED TO DELETE JOB");
 					}
+					
+					// Create many jobs
+          logTestHeading("Creating many jobs");
+          JobCollectionType collection = new JobCollectionType();
+          for(int i = 0; i < 5; i++) {
+          	JobType j = new JobType();
+          	j.setName("Payload");
+          	collection.getJob().add(j);
+          }
+          
+          List<BulkOperationResponse<CreateOperationStatus>> creates = createMany(collection, null, null);
+
+          logger.info("Processing multiple job creation:");
+          List<String> ids = new ArrayList<String>();
+          for(BulkOperationResponse<CreateOperationStatus> op : creates) {
+          	if(op.hasError()) {
+          		logger.error("Error creating jobs: " + op.getError().getMessage() + "(" + op.getError().getErrorCode() + ")");
+          	} else {
+          		for(CreateOperationStatus status : op.getOperationStatuses()) {
+              	if(status.getStatus() >= 200 && status.getStatus() < 300) {
+              		logger.info("++ " + status.getResourceID() + " created (" + status.getStatus() + ")");
+              		ids.add(status.getResourceID());
+              	} else {
+              		ErrorDetails e = status.getError();
+              		logger.error("-- " + e.getMessage() + "(" + e.getErrorCode() + ")");
+              	}
+              }
+          	}
+          }
+
+					// Delete many jobs
+          logTestHeading("Deleting many jobs");
+          // Change a random job's id, which will result in:
+          // 1) The missing job will be removed by the timeout
+          // 2) We expect a single job to have an error when being removed
+          ids.set(new Random().nextInt(ids.size()), GUIDGenerator.getRandomGUID());
+
+          logger.info("Processing multiple job deletion:");
+          List<BulkOperationResponse<OperationStatus>> deletes = deleteMany(ids, null, null);
+          for(BulkOperationResponse<OperationStatus> op : deletes) {
+          	if(op.hasError()) {
+          		logger.error("Error deleting jobs: " + op.getError().getMessage() + "(" + op.getError().getErrorCode() + ")");
+          	} else {
+          		for(OperationStatus status : op.getOperationStatuses()) {
+          			if(status.getStatus() >= 200 && status.getStatus() < 300) {
+              		logger.info("++ " + status.getResourceID() + " deleted (" + status.getStatus() + ")");
+              		ids.add(status.getResourceID());
+              	} else {
+              		ErrorDetails e = status.getError();
+              		logger.error("-- " + e.getMessage() + "(" + e.getErrorCode() + ")");
+              	}
+              }
+          	}
+          }
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}

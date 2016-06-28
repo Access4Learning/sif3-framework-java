@@ -31,6 +31,7 @@ import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.model.JobCollectionType;
+import sif3.infra.common.model.StateType;
 import sif3.infra.rest.client.FunctionalServiceClient;
 
 public abstract class AbstractJobConsumer extends AbstractEventConsumer<JobCollectionType> {
@@ -40,12 +41,8 @@ public abstract class AbstractJobConsumer extends AbstractEventConsumer<JobColle
 	private static InfraUnmarshalFactory unmarshaller = new InfraUnmarshalFactory();
 	private static InfraMarshalFactory marshaller = new InfraMarshalFactory();
 
-	private String serviceName;
-
-	public AbstractJobConsumer(String serviceName) {
+	public AbstractJobConsumer() {
 		super();
-
-		this.serviceName = serviceName;
 
 		JAXBUtils.initCtx(getMultiObjectClassInfo().getObjectType());
 		JAXBUtils.initCtx(getSingleObjectClassInfo().getObjectType());
@@ -54,11 +51,6 @@ public abstract class AbstractJobConsumer extends AbstractEventConsumer<JobColle
 	@Override
 	protected HeaderValues.ServiceType getServiceType() {
 		return HeaderValues.ServiceType.FUNCTIONAL;
-	}
-
-	@Override
-	public String getServiceName() {
-		return this.serviceName;
 	}
 
 	/*
@@ -137,7 +129,7 @@ public abstract class AbstractJobConsumer extends AbstractEventConsumer<JobColle
 
 		// Request operation in all zone/contexts as listed.
 		for (ZoneContextInfo zoneCtx : finalZoneContextList) {
-			ErrorDetails error = allClientChecks(AccessRight.CREATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
+			ErrorDetails error = allClientChecks(AccessRight.UPDATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
 			if (error == null) {
 				// all good
 				FunctionalServiceClient client = getClient(getConsumerEnvironment());
@@ -248,7 +240,7 @@ public abstract class AbstractJobConsumer extends AbstractEventConsumer<JobColle
 
 		// Request operation in all zone/contexts as listed.
 		for (ZoneContextInfo zoneCtx : finalZoneContextList) {
-			ErrorDetails error = allClientChecks(AccessRight.DELETE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
+			ErrorDetails error = allClientChecks(AccessRight.UPDATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
 			if (error == null) {
 				// all good
 				FunctionalServiceClient client = getClient(getConsumerEnvironment());
@@ -263,6 +255,40 @@ public abstract class AbstractJobConsumer extends AbstractEventConsumer<JobColle
 
 		timer.finish();
 		logger.debug("Time taken to call and process 'deleteToPhase' for " + getMultiObjectClassInfo().getObjectName() + "/" + resourceID + "/phases/" + phaseName + ": " + timer.timeTaken() + "ms");
+		return responses;
+	}
+	
+	public List<Response> createToState(String resourceID, String phaseName, StateType data, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException {
+		nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
+		nullMethodCheck(getSingleObjectClassInfo(), "getSingleObjectClassInfo()");
+
+		Timer timer = new Timer();
+		timer.start();
+		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
+		List<Response> responses = new ArrayList<Response>();
+
+		if (!getConsumerEnvironment().getIsConnected()) {
+			logger.error("No connected environment for " + getConsumerEnvironment().getEnvironmentName() + ". See previous erro log entries.");
+			return responses;
+		}
+
+		List<ZoneContextInfo> finalZoneContextList = getFinalZoneCtxList(zoneCtxList, getSIF3Session());
+
+		// Request operation in all zone/contexts as listed.
+		for (ZoneContextInfo zoneCtx : finalZoneContextList) {
+			ErrorDetails error = allClientChecks(AccessRight.UPDATE, AccessType.APPROVED, zoneCtx.getZone(), zoneCtx.getContext(), null);
+			if (error == null) {
+				// all good
+				FunctionalServiceClient client = getClient(getConsumerEnvironment());
+				responses.add(client.createToState(getMultiObjectClassInfo().getObjectName(), resourceID, phaseName, data, getHeaderProperties(true, customParameters), urlQueryParameter, zoneCtx.getZone(), zoneCtx.getContext()));
+			} else {
+				// pretend to have received a 'fake' error Response
+				responses.add(createErrorResponse(error));
+			}
+		}
+
+		timer.finish();
+		logger.debug("Time taken to call and process 'createToPhase' for " + getSingleObjectClassInfo().getObjectName() + "/" + resourceID + "/phases/" + phaseName + ": " + timer.timeTaken() + "ms");
 		return responses;
 	}
 }
