@@ -23,6 +23,7 @@ import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.RequestMetadata;
+import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 
@@ -47,6 +48,10 @@ public interface QueryProvider extends Provider
 	 * @param context The Context for which the objects shall be returned. Can be Null (default Zone)
 	 * @param pagingInfo Page information to determine which results to return. Null = Return all (NOT RECOMMENDED!).
 	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
+     * @param customResponseParams Values to be returned as part of the response. These are generally just HTTP Header fields. If a developer
+     *                             sets the HTTP Header of a well defined SIF3 HTTP Header (i.e. providerId, timestamp) then the framework
+     *                             may override these with its own value to ensure the correct use and workings of the framework. It is the
+     *                             developer who will populate the object. When it is passed to this method it not null but empty.
 	 * 
 	 * @return Object Plural Type containing list of objects
 	 * 
@@ -60,7 +65,8 @@ public interface QueryProvider extends Provider
 			                            SIFZone zone, 
 			                            SIFContext context, 
 			                            PagingInfo pagingInfo, 
-			                            RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
+			                            RequestMetadata metadata, 
+			                            ResponseParameters customResponseParams) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
 
 	/**
 	 * This method is used to retrieve data based on the 'Query By Example' (QBE) concept. All objects that match the
@@ -73,6 +79,10 @@ public interface QueryProvider extends Provider
 	 * @param context The Context for which the objects shall be returned. Can be Null (default Zone)
 	 * @param pagingInfo Page information to determine which results to return. Null = Return all (NOT RECOMMENDED!).
 	 * @param metadata Metadata relating to the request. Note that most of the properties might be null.
+     * @param customResponseParams Values to be returned as part of the response. These are generally just HTTP Header fields. If a developer
+     *                             sets the HTTP Header of a well defined SIF3 HTTP Header (i.e. providerId, timestamp) then the framework
+     *                             may override these with its own value to ensure the correct use and workings of the framework. It is the
+     *                             developer who will populate the object. When it is passed to this method it not null but empty.
 	 * 
 	 * @return Object Plural Type containing list of objects.
 	 * 
@@ -86,5 +96,6 @@ public interface QueryProvider extends Provider
             					SIFZone zone, 
             					SIFContext context, 
             					PagingInfo pagingInfo, 
-            					RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
+            					RequestMetadata metadata,
+            					ResponseParameters customResponseParams) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
 }

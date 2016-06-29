@@ -1,20 +1,27 @@
+<<<<<<< HEAD
 ==============================================================
-Release Notes for v0.10.0 of SIF3 Framework (MMMM dd, 2016)
+Release Notes for v0.10.0 of SIF3 Framework (MM DD, 2016)
 ==============================================================
 
 Bug Fixes
 ---------
+- Fixed issue on provider with external security services and the environment resource class. External tokens are
+  now dealt with correctly if a token is renewed with a different value.
+- Provider reports proper error to consumer if navigationPage is <=0.
 - Fixed spelling of retrievByPrimaryKey to retrieveByPrimaryKey
 
 New Functionality
 -----------------
 - Support for UK data model (version 2.0)
-- Support for functional services
+- Support for functional services, including job event int and timeouts
 - Config directory now automatically compiles to a config.jar for easy use
 
 Changed Functionality
 ---------------------
-- None
+- Added new parameter called customResponseParams to ALL provider side interface methods, namely the Provider.java,
+  QueryProvider.java and ChangesSinceProvider.java interfaces.
+  THIS WILL BREAK YOUR CODE if you implement a provider.
+  See Infrastructure Upgrade below section for more details.
 
 Removed Artifacts/Functionality
 -------------------------------
@@ -29,10 +36,48 @@ Removed Artifacts/Functionality
 ----------------------------
 - Drop the latest framework library into your project's lib directory/directories.
 
+==========================================================================================================================
+Providers ONLY: Compilation Error due to new parameter in all provider interfaces methods.
+--------------------------------------------------------------------------------------------------------------------------
+Due to an additional parameters required in all methods of any provider style class you need to add a new parameter to all 
+the methods that indicate a compile error. Please note only the additional parameter must be added to rectify the compile
+error. You wont't need to do anything else.
+
+Name & Type of Parameter: ResponseParameters customResponseParams
+
+Add the above to all methods that throw an error after the upgrade. For example the method 'retrieve()' in any of your
+classes that extend the BaseProvider or BaseEventProvider<L> will change from:
+
+  public Object retrieve(SIFZone zone, 
+                         SIFContext context, 
+                         PagingInfo pagingInfo, 
+                         RequestMetadata metadata) 
+         throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+  {
+    ...
+  }
+
+to
+  public Object retrieve(SIFZone zone, 
+                         SIFContext context, 
+                         PagingInfo pagingInfo, 
+                         RequestMetadata metadata, 
+                         ResponseParameters customResponseParams) // <== NOTE NEW PARAMETER
+          throws PersistenceException, UnsupportedQueryException, DataTooLargeException 
+  {
+    ...
+  }
+
+An identical change will be required to all methods from the QueryProvider and ChangesSinceProvider interfaces if your 
+provider classes implement any of these two interfaces. If you wish to know more about this new parameter please refer
+to the Developer's Guide in the appropriate section where the methods are documented.
+
+==========================================================================================================================
+
 ------------------------
 -- Data Model Upgrade --
 ------------------------
-- Inclusion of UK data model (version 1.2)
+- Inclusion of UK data model (version 2.0)
 
 ------------------------------
 -- 3rd Party Library Update --

@@ -28,7 +28,6 @@ import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.common.ws.Response;
 import sif3.common.ws.model.MultiOperationStatusList;
-import sif3.infra.common.ServiceStatus.PhaseState;
 import sif3.infra.common.model.JobCollectionType;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.ObjectFactory;
@@ -55,7 +54,7 @@ public class PayloadConsumer extends AbstractJobConsumer {
 
 				try {
 					// Create a job
-					logTestHeading("Creating Payload job");
+					logger.info(makeHeading("Creating Payload job"));
 					job = factory.createJobType();
 					job.setName("Payload");
 					job.setDescription("testing");
@@ -66,32 +65,32 @@ public class PayloadConsumer extends AbstractJobConsumer {
 					}
 					// logger.debug(r.toString());
 					job = (JobType) r.getDataObject();
-					logResult("Job created and given ID " + job.getId());
+					logger.info(makeResult("Job created and given ID " + job.getId()));
 
 					
 					// Get a job
-					logTestHeading("Fetching job " + job.getId());
+					logger.info(makeHeading("Fetching job " + job.getId()));
 					responses = retrieveByPrimaryKey(job.getId(), null);
 					r = responses.isEmpty() ? null : responses.get(0);
 					if (r == null) {
 						logger.error("Didn't get a response when retrieving a job");
 					}
 					job = (JobType) r.getDataObject();
-					logResult("Fetched " + job.getName() + " (" + job.getId() + ")");
+					logger.info(makeResult("Fetched " + job.getName() + " (" + job.getId() + ")"));
 
 					
 					// Create message to phase default
-					logTestHeading("Create message to phase 'default'.");
+					logger.info(makeHeading("Create message to phase 'default'."));
 					responses = createToPhase(job.getId(), "default", "Sending CREATE", MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_PLAIN_TYPE, null, null);
 					r = responses.isEmpty() ? null : responses.get(0);
 					if (r == null) {
 						logger.error("Didn't get a response when calling create on a phase");
 					}
-					logResult("Phase responded with data with mime type: " + r.getMediaType() + " and data:\n" + r.getDataObject());
+					logger.info(makeResult("Phase responded with data with mime type: " + r.getMediaType() + " and data:\n" + r.getDataObject()));
 
 					
 					// Query phase "default", expecting INPROGRESS
-					logTestHeading("Check state of phase 'default', expecting INPROGRESS.");
+					logger.info(makeHeading("Check state of phase 'default', expecting INPROGRESS."));
 					responses = retrieveByPrimaryKey(job.getId(), null);
 					r = responses.isEmpty() ? null : responses.get(0);
 					if (r == null) {
@@ -100,31 +99,31 @@ public class PayloadConsumer extends AbstractJobConsumer {
 					job = (JobType) r.getDataObject();
 					state = ServiceUtils.getLastPhaseState(job, "default");
 					if(state == null) {
-						logResult("Got UNEXPECTED result, no state object!");
+						logger.info(makeResult("Got UNEXPECTED result, no state object!"));
 					} else {
-	          if (state.getType().equals(PhaseState.INPROGRESS.name()))
+	          if (state.getType().equals(PhaseStateType.INPROGRESS))
 	          {
-	          	logResult("Got EXPECTED result, last modified at " + state.getLastModified().getTime());
+	          	logger.info(makeResult("Got EXPECTED result, last modified at " + state.getLastModified().getTime()));
 	          }
 	          else
 	          {
-	          	logResult("Got UNEXPECTED result " + state.getType() + ", last modified at " + state.getLastModified().getTime());
+	          	logger.info(makeResult("Got UNEXPECTED result " + state.getType() + ", last modified at " + state.getLastModified().getTime()));
 	          }
 					}
 					
 					
           // Execute UPDATE to phase "default".
-          logTestHeading("Executing UPDATE to phase 'default'.");
+					logger.info(makeHeading("Executing UPDATE to phase 'default'."));
           responses = updateToPhase(job.getId(), "default", "Sending UPDATE", MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_PLAIN_TYPE, null, null);
 					r = responses.isEmpty() ? null : responses.get(0);
 					if (r == null) {
 						logger.error("Didn't get a response when calling update on a phase");
 					}
-					logResult("Phase responded with data with mime type: " + r.getMediaType() + " and data:\n" + r.getDataObject());
+					logger.info(makeResult("Phase responded with data with mime type: " + r.getMediaType() + " and data:\n" + r.getDataObject()));
           
 
 					// Query phase "default", expecting COMPLETED
-					logTestHeading("Check state of phase 'default', expecting COMPLETED.");
+					logger.info(makeHeading("Check state of phase 'default', expecting COMPLETED."));
 					responses = retrieveByPrimaryKey(job.getId(), null);
 					r = responses.isEmpty() ? null : responses.get(0);
 					if (r == null) {
@@ -133,55 +132,55 @@ public class PayloadConsumer extends AbstractJobConsumer {
 					job = (JobType) r.getDataObject();
 					state = ServiceUtils.getLastPhaseState(job, "default");
 					if(state == null) {
-						logResult("Got UNEXPECTED result, no state object!");
+						logger.info(makeResult("Got UNEXPECTED result, no state object!"));
 					} else {
-	          if (state.getType().equals(PhaseState.COMPLETED.name()))
+	          if (state.getType().equals(PhaseStateType.COMPLETED))
 	          {
-	          	logResult("Got EXPECTED result, last modified at " + state.getLastModified().getTime());
+	          	logger.info(makeResult("Got EXPECTED result, last modified at " + state.getLastModified().getTime()));
 	          }
 	          else
 	          {
-	          	logResult("Got UNEXPECTED result " + state.getType() + ", last modified at " + state.getLastModified().getTime());
+	          	logger.info(makeResult("Got UNEXPECTED result " + state.getType() + ", last modified at " + state.getLastModified().getTime()));
 	          }
 					}
 
           // Execute DELETE to phase "default".
-          logTestHeading("Executing DELETE to phase 'default'.");
+					logger.info(makeHeading("Executing DELETE to phase 'default'."));
           responses = deleteToPhase(job.getId(), "default", "Sending DELETE", MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_PLAIN_TYPE, null, null);
 					r = responses.isEmpty() ? null : responses.get(0);
 					if (r == null) {
 						logger.error("Didn't get a response when calling delete on a phase");
 					}
 					if(r.hasError()) {
-						logResult("EXPECTED error obtained (HTTP:" + r.getStatus() + "), provider responded with:\nCode: "+r.getError().getErrorCode()+"\nMessage: "+r.getError().getMessage()+"\nDescription: "+r.getError().getDescription());
+						logger.info(makeResult("EXPECTED error obtained (HTTP:" + r.getStatus() + "), provider responded with:\nCode: "+r.getError().getErrorCode()+"\nMessage: "+r.getError().getMessage()+"\nDescription: "+r.getError().getDescription()));
 					} else {
-						logResult("UNEXPECTED - no error obtained!");
+						logger.info(makeResult("UNEXPECTED - no error obtained!"));
 					}
 
 					
           // Execute UPDATE to phase "xml".
-          logTestHeading("Executing UPDATE to phase 'xml'.");
+					logger.info(makeHeading("Executing UPDATE to phase 'xml'."));
           String xml = new DataModelMarshalFactory(sif.dd.uk20.model.ObjectFactory.class).marshalToXML(getBruceWayne());
           responses = updateToPhase(job.getId(), "xml", xml, MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_PLAIN_TYPE, null, null);
 					r = responses.isEmpty() ? null : responses.get(0);
 					if (r == null) {
 						logger.error("Didn't get a response when calling create on a phase");
 					}
-					logResult("Phase responded with data with mime type: " + r.getMediaType() + " and data:\n" + r.getDataObject());
+					logger.info(makeResult("Phase responded with data with mime type: " + r.getMediaType() + " and data:\n" + r.getDataObject()));
           
 
           // Execute UPDATE to phase "json".
-          logTestHeading("Executing UPDATE to phase 'json'.");
+					logger.info(makeHeading("Executing UPDATE to phase 'json'."));
           String json = new DataModelMarshalFactory(sif.dd.uk20.model.ObjectFactory.class).marshalToJSON(getBruceWayne());
           responses = updateToPhase(job.getId(), "json", json, MediaType.APPLICATION_JSON_TYPE, MediaType.TEXT_PLAIN_TYPE, null, null);
 					r = responses.isEmpty() ? null : responses.get(0);
 					if (r == null) {
 						logger.error("Didn't get a response when calling create on a phase");
 					}
-					logResult("Phase responded with data with mime type: " + r.getMediaType() + " and data:\n" + r.getDataObject());
+					logger.info(makeResult("Phase responded with data with mime type: " + r.getMediaType() + " and data:\n" + r.getDataObject()));
 
 					// Change state of phase "json".
-					logTestHeading("Executing CREATE to the state of phase 'json'.");
+					logger.info(makeHeading("Executing CREATE to the state of phase 'json'."));
 					StateType failed = new StateType();
 					failed.setType(PhaseStateType.FAILED);
 					failed.setDescription("Because I want it to");
@@ -192,20 +191,25 @@ public class PayloadConsumer extends AbstractJobConsumer {
 					}
 					state = (StateType) r.getDataObject();
 					if(state == null) {
-						logResult("Got UNEXPECTED result, no state object!");
+						logger.info(makeResult("Got UNEXPECTED result, no state object!"));
+						if(r.hasError()) {
+							logger.info("State object being turned into an error object? : " + r.getError().getDescription());
+						}
+						
+						logger.info(r.getError().getScope());
 					} else {
-	          if (state.getType().equals(PhaseState.FAILED.name()))
+	          if (state.getType().equals(PhaseStateType.FAILED))
 	          {
-	          	logResult("Got EXPECTED result, last modified at " + state.getLastModified().getTime());
+	          	logger.info(makeResult("Got EXPECTED result, last modified at " + state.getLastModified().getTime()));
 	          }
 	          else
 	          {
-	          	logResult("Got UNEXPECTED result " + state.getType() + ", last modified at " + state.getLastModified().getTime());
+	          	logger.info(makeResult("Got UNEXPECTED result " + state.getType() + ", last modified at " + state.getLastModified().getTime()));
 	          }
 					}
 					
 				// Query phase "json", expecting FAILED
-					logTestHeading("Check state of phase 'json', expecting FAILED.");
+					logger.info(makeHeading("Check state of phase 'json', expecting FAILED."));
 					responses = retrieveByPrimaryKey(job.getId(), null);
 					r = responses.isEmpty() ? null : responses.get(0);
 					if (r == null) {
@@ -214,20 +218,20 @@ public class PayloadConsumer extends AbstractJobConsumer {
 					job = (JobType) r.getDataObject();
 					state = ServiceUtils.getLastPhaseState(job, "json");
 					if(state == null) {
-						logResult("Got UNEXPECTED result, no state object!");
+						logger.info(makeResult("Got UNEXPECTED result, no state object!"));
 					} else {
-	          if (state.getType().equals(PhaseState.FAILED.name()))
+	          if (state.getType().equals(PhaseStateType.FAILED))
 	          {
-	          	logResult("Got EXPECTED result, last modified at " + state.getLastModified().getTime());
+	          	logger.info(makeResult("Got EXPECTED result, last modified at " + state.getLastModified().getTime()));
 	          }
 	          else
 	          {
-	          	logResult("Got UNEXPECTED result " + state.getType() + ", last modified at " + state.getLastModified().getTime());
+	          	logger.info(makeResult("Got UNEXPECTED result " + state.getType() + ", last modified at " + state.getLastModified().getTime()));
 	          }
 					}
 					
 					// Delete a job
-          logTestHeading("Deleting created job with ID " + job.getId());
+					logger.info(makeHeading("Deleting created job with ID " + job.getId()));
 					responses = deleteSingle(job.getId(), null);
 					r = responses.isEmpty() ? null : responses.get(0);
 					if (r == null) {
@@ -240,13 +244,13 @@ public class PayloadConsumer extends AbstractJobConsumer {
 					}
 					job = (JobType)r.getDataObject();
 					if(job == null) {
-						logResult("Job deleted successfully");
+						logger.info(makeResult("Job deleted successfully"));
 					} else {
-						logResult("FAILED TO DELETE JOB");
+						logger.info(makeResult("FAILED TO DELETE JOB"));
 					}
 					
 					// Create many jobs
-          logTestHeading("Creating many jobs");
+					logger.info(makeHeading("Creating many jobs"));
           JobCollectionType collection = new JobCollectionType();
           for(int i = 0; i < 5; i++) {
           	JobType j = new JobType();
@@ -275,7 +279,7 @@ public class PayloadConsumer extends AbstractJobConsumer {
           }
 
 					// Delete many jobs
-          logTestHeading("Deleting many jobs");
+          logger.info(makeHeading("Deleting many jobs"));
           // Change a random job's id, which will result in:
           // 1) The missing job will be removed by the timeout
           // 2) We expect a single job to have an error when being removed
@@ -304,15 +308,15 @@ public class PayloadConsumer extends AbstractJobConsumer {
 			}
 		}, 5000);
 	}
-	
-	private void logTestHeading(String message) {
-		logger.info("\n\n*** " + message + "\n");
+
+	private String makeHeading(String message) {
+		return "\n\n*** " + message + "\n";
 	}
 	
-	private void logResult(String message) {
-		logger.info("\n\n+++ " + message + "\n");
+	private String makeResult(String message) {
+		return "\n\n+++ " + message + "\n";
 	}
-	
+
 	private LearnerPersonalType getBruceWayne() {
 		sif.dd.uk20.model.ObjectFactory factory = new sif.dd.uk20.model.ObjectFactory();
 		LearnerPersonalType bruce = factory.createLearnerPersonalType();
@@ -359,7 +363,7 @@ public class PayloadConsumer extends AbstractJobConsumer {
 	@Override
 	public void processEvent(SIFEvent<JobCollectionType> sifEvent, SIFZone zone, SIFContext context, EventMetadata metadata, String msgReadID, String consumerID) {
 		String consumerName = getPrettyName() + "(QueueID:" + msgReadID + "; ConsumerID: " + consumerID + ")";
-		logResult(consumerName + " received an event from Zone = " + zone.getId() + ", Context = " + context.getId() + " and Event Metadata = " + metadata);
+		logger.info(makeResult(consumerName + " received an event from Zone = " + zone.getId() + ", Context = " + context.getId() + " and Event Metadata = " + metadata));
 	}
 	
 	@Override

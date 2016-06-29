@@ -33,6 +33,7 @@ import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
+import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
@@ -166,7 +167,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
 							public void accept(JobType job) {
 								logger.debug("Job " + job.getId() + " has timed out, requesting its deletion.");
 								try {
-									deleteSingle(job.getId(), null, null, null);
+									deleteSingle(job.getId(), null, null, null, null);
 								} catch (Exception e) {
 									logger.error("Failed to delete timed out job with id " + job.getId() + " due to error: " + e.getMessage(), e);
 								}
@@ -272,7 +273,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
 	 * sif3.common.model.SIFZone, sif3.common.model.SIFContext)
 	 */
 	@Override
-	public Object retrieveByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException {
+	public Object retrieveByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException {
 		if (StringUtils.isEmpty(resourceID)) {
 			throw new IllegalArgumentException("Resource ID is null or empty. It must be provided to retrieve an entity.");
 		}
@@ -282,13 +283,8 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
 		return sif3JobService.getJobById(resourceID);
 	}
 
-	/*
-	 * (non-Javadoc) @see
-	 * sif3.common.interfaces.Provider#createSingle(java.lang.Object,
-	 * sif3.common.model.SIFZone, sif3.common.model.SIFContext)
-	 */
 	@Override
-	public Object createSingle(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException {
+	public Object createSingle(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException {
 		logger.debug("Create single job for " + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 
 		if (data instanceof JobType) {
@@ -306,6 +302,8 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
 
 			job = sif3JobService.save(job);
 
+			customResponseParams.addHTTPHeaderParameter("jobId", job.getId());
+			
 			sendJobEvent(job, EventAction.CREATE, zone, context);
 
 			return job;
@@ -314,13 +312,8 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
 		}
 	}
 
-	/*
-	 * (non-Javadoc) @see
-	 * sif3.common.interfaces.Provider#retrive(sif3.common.model.SIFZone,
-	 * sif3.common.model.SIFContext, sif3.common.model.PagingInfo)
-	 */
 	@Override
-	public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException {
+	public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata, ResponseParameters customResponseParams) throws PersistenceException, UnsupportedQueryException, DataTooLargeException {
 		logger.debug("Retrieve jobs for " + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 		logger.debug("ChangedSince Date: " + metadata.getRequestParameter("ChangedSince"));
 		logger.debug("Custom HTTP Header (customHdr): " + metadata.getHTTPParameter("customHdr"));
@@ -340,33 +333,13 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
 		return jobCollection;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see sif3.common.interfaces.QueryProvider#retrieveByQBE(java.lang.Object,
-	 * sif3.common.model.SIFZone, sif3.common.model.SIFContext,
-	 * sif3.common.model.PagingInfo, sif3.common.model.RequestMetadata)
-	 */
-	public Object retrieveByQBE(Object exampleObject, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException {
-		throw new UnsupportedQueryException("QBE not supported for Jobs");
-	}
-
-	/*
-	 * (non-Javadoc) @see
-	 * sif3.common.interfaces.Provider#updateSingle(java.lang.Object,
-	 * java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
-	 */
 	@Override
-	public boolean updateSingle(Object data, String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException {
+	public boolean updateSingle(Object data, String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException {
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc) @see
-	 * sif3.common.interfaces.Provider#deleteSingle(java.lang.String,
-	 * sif3.common.model.SIFZone, sif3.common.model.SIFContext)
-	 */
 	@Override
-	public boolean deleteSingle(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException {
+	public boolean deleteSingle(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException {
 		if (StringUtils.isEmpty(resourceID)) {
 			throw new IllegalArgumentException("Resource ID is null or empty. It must be provided to delete an entity.");
 		}
@@ -394,13 +367,8 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see sif3.common.interfaces.Provider#createMany(java.lang.Object,
-	 * sif3.common.model.SIFZone, sif3.common.model.SIFContext)
-	 */
 	@Override
-	public List<CreateOperationStatus> createMany(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException {
+	public List<CreateOperationStatus> createMany(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException {
 		if (data instanceof JobCollectionType) {
 			logger.debug("Create jobs (Bulk Operation) for " + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 			JobCollectionType jobCollection = (JobCollectionType) data;
@@ -409,7 +377,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
 			String advisoryId = null;
 			for (JobType job : jobCollection.getJob()) {
 				advisoryId = job.getId();
-				created = createSingle(job, useAdvisory, zone, context, metadata);
+				created = createSingle(job, useAdvisory, zone, context, metadata, customResponseParams);
 				if (created == null) {
 					opStatus.add(new CreateOperationStatus(advisoryId, advisoryId, 404, new ErrorDetails(400, "Data not good.")));
 				} else {
@@ -428,7 +396,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
 	 * sif3.common.model.SIFZone, sif3.common.model.SIFContext)
 	 */
 	@Override
-	public List<OperationStatus> updateMany(Object data, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException {
+	public List<OperationStatus> updateMany(Object data, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException {
 		return new ArrayList<OperationStatus>();
 	}
 
@@ -438,12 +406,12 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
 	 * sif3.common.model.SIFZone, sif3.common.model.SIFContext)
 	 */
 	@Override
-	public List<OperationStatus> deleteMany(List<String> resourceIDs, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException {
+	public List<OperationStatus> deleteMany(List<String> resourceIDs, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException {
 		logger.debug("Delete Jobs (Bulk Operation) for " + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 
 		ArrayList<OperationStatus> opStatus = new ArrayList<OperationStatus>();
 		for (String resourceID : resourceIDs) {
-			if (deleteSingle(resourceID, zone, context, metadata)) {
+			if (deleteSingle(resourceID, zone, context, metadata, customResponseParams)) {
 				opStatus.add(new OperationStatus(resourceID, 200));
 			} else {
 				opStatus.add(new OperationStatus(resourceID, 404, new ErrorDetails(404, "Job with GUID = " + resourceID + " does not exist.")));
@@ -456,10 +424,10 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
 	/*-- Phase Operations --*/
 	/*----------------------*/
 
-	public String createToPhase(String resourceID, String phaseName, String payload, MediaType requestMediaType, MediaType responseMediaType, SIFZone zone, SIFContext context, RequestMetadata metadata) throws SIF3Exception {
+	public String createToPhase(String resourceID, String phaseName, String payload, MediaType requestMediaType, MediaType responseMediaType, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws SIF3Exception {
 		logger.debug("Create to phase " + resourceID + "/" + phaseName + " in " + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 
-		JobType job = (JobType) retrieveByPrimaryKey(resourceID, zone, context, metadata);
+		JobType job = (JobType) retrieveByPrimaryKey(resourceID, zone, context, metadata, customResponseParams);
 		if (job == null) {
 			throw new BadRequestException("No job found with refid " + resourceID);
 		}
@@ -485,10 +453,10 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
 		return result;
 	}
 
-	public String retrieveToPhase(String resourceID, String phaseName, String payload, MediaType requestMediaType, MediaType responseMediaType, SIFZone zone, SIFContext context, RequestMetadata metadata) throws SIF3Exception {
+	public String retrieveToPhase(String resourceID, String phaseName, String payload, MediaType requestMediaType, MediaType responseMediaType, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws SIF3Exception {
 		logger.debug("Retrieve to phase " + resourceID + "/" + phaseName + " in " + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 
-		JobType job = (JobType) retrieveByPrimaryKey(resourceID, zone, context, metadata);
+		JobType job = (JobType) retrieveByPrimaryKey(resourceID, zone, context, metadata, customResponseParams);
 		if (job == null) {
 			throw new BadRequestException("No job found with refid " + resourceID);
 		}
@@ -515,10 +483,10 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
 		return result;
 	}
 
-	public String updateToPhase(String resourceID, String phaseName, String payload, MediaType requestMediaType, MediaType responseMediaType, SIFZone zone, SIFContext context, RequestMetadata metadata) throws SIF3Exception {
+	public String updateToPhase(String resourceID, String phaseName, String payload, MediaType requestMediaType, MediaType responseMediaType, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws SIF3Exception {
 		logger.debug("Update to phase " + resourceID + "/" + phaseName + " in " + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 
-		JobType job = (JobType) retrieveByPrimaryKey(resourceID, zone, context, metadata);
+		JobType job = (JobType) retrieveByPrimaryKey(resourceID, zone, context, metadata, customResponseParams);
 		if (job == null) {
 			throw new BadRequestException("No job found with refid " + resourceID);
 		}
@@ -544,10 +512,10 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
 		return result;
 	}
 
-	public String deleteToPhase(String resourceID, String phaseName, String payload, MediaType requestMediaType, MediaType responseMediaType, SIFZone zone, SIFContext context, RequestMetadata metadata) throws SIF3Exception {
+	public String deleteToPhase(String resourceID, String phaseName, String payload, MediaType requestMediaType, MediaType responseMediaType, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws SIF3Exception {
 		logger.debug("Delete to phase " + resourceID + "/" + phaseName + " in " + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 
-		JobType job = (JobType) retrieveByPrimaryKey(resourceID, zone, context, metadata);
+		JobType job = (JobType) retrieveByPrimaryKey(resourceID, zone, context, metadata, customResponseParams);
 		if (job == null) {
 			throw new BadRequestException("No job found with refid " + resourceID);
 		}
@@ -576,7 +544,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
 	/*----------------------*/
 	/*-- State Operations --*/
 	/*----------------------*/
-	public StateType createToState(String resourceID, String phaseName, Object data, SIFZone zone, SIFContext context, RequestMetadata metadata) throws SIF3Exception {
+	public StateType createToState(String resourceID, String phaseName, Object data, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws SIF3Exception {
 		logger.debug("Create to state for phase " + resourceID + "/" + phaseName + " in " + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 
 		if (!(data instanceof StateType)) {

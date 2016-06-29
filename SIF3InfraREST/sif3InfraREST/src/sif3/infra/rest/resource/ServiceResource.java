@@ -16,11 +16,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
-import au.com.systemic.framework.utils.StringUtils;
-
 import javax.ws.rs.core.UriInfo;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.ModelObjectInfo;
@@ -35,14 +33,15 @@ import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
+import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.ResponseHeaderConstants;
-import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.interfaces.ChangesSinceProvider;
 import sif3.common.interfaces.Provider;
 import sif3.common.interfaces.QueryProvider;
 import sif3.common.model.ChangedSinceInfo;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceRights.AccessRight;
@@ -155,29 +154,31 @@ public class ServiceResource extends InfraResource {
 			logger.debug("Create Single " + infraObjectNameSingle + " (REST POST) with URL Postfix mimeType = '" + mimeType + "' and input data: " + payload);
 		}
 
-		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.CREATE), AccessType.APPROVED, false);
+		ResponseParameters responseParam = getInitialCustomResponseParameters();
+		
+		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.CREATE), AccessType.APPROVED, false, false);
 		if (error != null) // Not allowed to access!
 		{
-			return makeErrorResponse(error, ResponseAction.CREATE);
+			return makeErrorResponse(error, ResponseAction.CREATE, responseParam);
 		}
 
 		Provider provider = getProvider();
 		if (provider == null) // error already logged but we must return an error
 													 // response for the caller
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE, responseParam);
 		}
 
 		try {
-			Object returnObj = provider.createSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
-
-			return makeResponse(returnObj, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, provider.getMarshaller());
+			Object returnObj = provider.createSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+			
+			return makeResponse(returnObj, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, responseParam, provider.getMarshaller());
 		} catch (PersistenceException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create " + provider.getSingleObjectClassInfo().getObjectName() + ". Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create " + provider.getSingleObjectClassInfo().getObjectName() + ". Problem reported: " + ex.getMessage()), ResponseAction.CREATE, responseParam);
 		} catch (UnmarshalException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName() + ". Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName() + ". Problem reported: " + ex.getMessage()), ResponseAction.CREATE, responseParam);
 		} catch (UnsupportedMediaTypeException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName() + ". Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName() + ". Problem reported: " + ex.getMessage()), ResponseAction.CREATE, responseParam);
 		}
 	}
 
@@ -194,19 +195,21 @@ public class ServiceResource extends InfraResource {
 				logger.debug("Create Many " + infraObjectNamePlural + " (REST POST) with input data: " + payload);
 			}
 		}
+		
+		ResponseParameters responseParam = getInitialCustomResponseParameters();
 
-		ErrorDetails error = validClient(infraObjectNamePlural, ((isQBE) ? getRight(AccessRight.QUERY) : getRight(AccessRight.CREATE)), AccessType.APPROVED, true);
+		ErrorDetails error = validClient(infraObjectNamePlural, ((isQBE) ? getRight(AccessRight.QUERY) : getRight(AccessRight.CREATE)), AccessType.APPROVED, true, true);
 		if (error != null) // Not allowed to access!
 		{
 			logger.debug("Error Found: " + error);
-			return makeErrorResponse(error, ((isQBE) ? ResponseAction.QUERY : ResponseAction.CREATE));
+			return makeErrorResponse(error, ((isQBE) ? ResponseAction.QUERY : ResponseAction.CREATE), responseParam);
 		}
 
 		Provider provider = getProvider();
 		if (provider == null) // error already logged but we must return an error
 													 // response for the caller
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ((isQBE) ? ResponseAction.QUERY : ResponseAction.CREATE));
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ((isQBE) ? ResponseAction.QUERY : ResponseAction.CREATE), responseParam);
 		}
 
 		return (isQBE) ? queryByQBE(provider, payload) : createMany(provider, payload);
@@ -221,32 +224,34 @@ public class ServiceResource extends InfraResource {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Get Resource by Resource ID (REST GET - Single): " + resourceID + " and URL Postfix mimeType = '" + mimeType + "'");
 		}
+		
+		ResponseParameters responseParam = getInitialCustomResponseParameters();
 
-		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED, false);
+		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED, false, true);
 		if (error != null) // Not allowed to access!
 		{
-			return makeErrorResponse(error, ResponseAction.QUERY);
+			return makeErrorResponse(error, ResponseAction.QUERY, responseParam);
 		}
 
 		Provider provider = getProvider();
 		if (provider == null) // error already logged but we must return an error
 													 // response for the caller
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.QUERY);
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.QUERY, responseParam);
 		}
 
 		try {
-			Object returnObj = provider.retrieveByPrimaryKey(resourceID, getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
+			Object returnObj = provider.retrieveByPrimaryKey(resourceID, getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
 
 			if (returnObj != null) {
-				return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.QUERY, provider.getMarshaller());
+				return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.QUERY, responseParam, provider.getMarshaller());
 			} else {
-				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + " does not exist."), ResponseAction.QUERY);
+				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + " does not exist."), ResponseAction.QUERY, responseParam);
 			}
 		} catch (PersistenceException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve " + provider.getSingleObjectClassInfo().getObjectName() + " for resource ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve " + provider.getSingleObjectClassInfo().getObjectName() + " for resource ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY, responseParam);
 		} catch (IllegalArgumentException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY, responseParam);
 		}
 	}
 
@@ -255,91 +260,98 @@ public class ServiceResource extends InfraResource {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Get List (REST GET - Plural)");
 		}
+		
+		ResponseParameters responseParam = getInitialCustomResponseParameters();
 
-		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED, true);
+		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED, true, true);
 		if (error != null) // Not allowed to access!
 		{
-			return makeErrorResponse(error, ResponseAction.QUERY);
+			return makeErrorResponse(error, ResponseAction.QUERY, responseParam);
 		}
 
 		Provider provider = getProvider();
-		if (provider == null) // error already logged but we must return an error
-													 // response for the caller
+		if (provider == null) // error already logged but we must return an error response for the caller
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.QUERY);
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.QUERY, responseParam);
 		}
 
-		PagingInfo pagingInfo = getPagingInfo();
-		try {
-			if (pretendDelayed()) {
-				// Simply send a response with status of 202
-				return makeDelayedAcceptResponse(ResponseAction.QUERY);
-			} else {
-				// We need to check if the request is for "changes since" functionality.
-				// This is the case if the provider implements
-				// the ChangesSinceProvider and the changesSinceMarker has been
-				// provided. If either if these criterias are not met
-				// then we must assume that a standard request to get a list of objects
-				// is required.
-				ChangesSinceProvider csProvider = getChangesSinceProvider(provider);
-				String changesSinceMarker = getChangesSinceMarker();
-				if ((csProvider != null) && (changesSinceMarker != null)) // We have a
-																																	 // ChangesSince
-																																	 // request
-																																	 // and all is
-																																	 // in order
-				{
-					if (csProvider.changesSinceSupported()) {
-						// Get new changes since marker if page = first page or no paging
-						// info
-						HeaderProperties customHeaders = null;
-						String newChangesSinceMarker = null;
-						if ((pagingInfo == null) || (pagingInfo.getCurrentPageNo() == CommonConstants.FIRST_PAGE)) {
-							newChangesSinceMarker = csProvider.getLatestOpaqueMarker(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
-							customHeaders = new HeaderProperties();
-							customHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_CHANGES_SINCE_MARKER, newChangesSinceMarker);
-						}
+		PagingInfo pagingInfo = null;
+		try
+		{
+	        pagingInfo = getPagingInfo();
+		    if (pretendDelayed())
+		    {
+		        // Simply send a response with status of 202
+		        return makeDelayedAcceptResponse(ResponseAction.QUERY);
+		    }
+		    else
+		    {
+		        // We need to check if the request is for "changes since" functionality. This is the case if the provider implements
+		        // the ChangesSinceProvider and the changesSinceMarker has been provided. If either if these criterias are not met
+		        // then we must assume that a standard request to get a list of objects is required.
+		        ChangesSinceProvider csProvider = getChangesSinceProvider(provider);
+		        String changesSinceMarker = getChangesSinceMarker();
+		        if ((csProvider != null) && (changesSinceMarker != null)) // We have a ChangesSince request and all is in order
+		        {
+		            if (csProvider.changesSinceSupported())
+		            {
+                        //Get new changes since marker if page = first page or no paging info
+		                HeaderProperties customHeaders = null;
+		                String newChangesSinceMarker = null;
+		                if ((pagingInfo == null) || (pagingInfo.getCurrentPageNo() == CommonConstants.FIRST_PAGE))
+		                {
+		                    newChangesSinceMarker = csProvider.getLatestOpaqueMarker(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
+                            customHeaders = new HeaderProperties();
+		                    customHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_CHANGES_SINCE_MARKER, newChangesSinceMarker);
+		                }
+		                
+		                // Return the results.
+                        Object returnObj = csProvider.getChangesSince(getSifZone(), getSifContext(), pagingInfo, new ChangedSinceInfo(changesSinceMarker), getRequestMetadata(getSIF3SessionForRequest(), true), responseParam);
 
-						// Return the results.
-						Object returnObj = csProvider.getChangesSince(getSifZone(), getSifContext(), pagingInfo, new ChangedSinceInfo(changesSinceMarker), getRequestMetadata(getSIF3SessionForRequest(), true));
+                        // Check if we have pagingInfo parameter and if so if the navigationID is set. If it is not set we set it to the value of the
+                        // newChangesSinceMarker. Consumer can use this to identify which query the provider ran in subsequent paged queries.
+                        if ((pagingInfo != null) && (StringUtils.isEmpty(pagingInfo.getNavigationId()) && (newChangesSinceMarker != null)))
+                        {
+                            pagingInfo.setNavigationId(newChangesSinceMarker);
+                        }
 
-						// Check if we have pagingInfo parameter and if so if the
-						// navigationID is set. If it is not set we set it to the value of
-						// the
-						// newChangesSinceMarker. Consumer can use this to identify which
-						// query the provider ran in subsequent paged queries.
-						if ((pagingInfo != null) && (StringUtils.isEmpty(pagingInfo.getNavigationId()) && (newChangesSinceMarker != null))) {
-							pagingInfo.setNavigationId(newChangesSinceMarker);
-						}
-
-						return makePagedResponse(returnObj, pagingInfo, customHeaders, false, provider.getMarshaller());
-
-					} else // changes since is not supported => Error
-					{
-						return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Provider for " + infraObjectNamePlural + " does not support 'ChangesSince' functionality."), ResponseAction.QUERY);
-					}
-				} else // It is a standard request and/or provider
-				{
-					if (changesSinceMarker != null) // Provider is a standard provider but
-																					 // changesSince marker is provided =>
-																					 // Error
-					{
-						return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Provider for " + infraObjectNamePlural + " does not support 'ChangesSince' functionality."), ResponseAction.QUERY);
-					} else // All good.
-					{
-						Object returnObj = provider.retrieve(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
-						return makePagedResponse(returnObj, pagingInfo, null, false, provider.getMarshaller());
-					}
-				}
-			}
-		} catch (PersistenceException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
-		} catch (IllegalArgumentException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
-		} catch (UnsupportedQueryException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
-		} catch (DataTooLargeException ex) {
-			return makeErrorResponse(new ErrorDetails(CommonConstants.RESPONSE_TOO_LARGE, "Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+                        return makePagedResponse(returnObj, pagingInfo, false, responseParam, provider.getMarshaller()); 
+		                
+		            }
+		            else // changes since is not supported => Error
+		            {
+                        return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Provider for "+infraObjectNamePlural+" does not support 'ChangesSince' functionality."), ResponseAction.QUERY, responseParam);                                 		                
+		            }
+		        }
+		        else // It is a standard request and/or provider
+		        {
+		            if (changesSinceMarker != null) // Provider is a standard provider but changesSince marker is provided => Error
+		            {
+		                return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Provider for "+infraObjectNamePlural+" does not support 'ChangesSince' functionality."), ResponseAction.QUERY, responseParam);          		                
+		            }
+		            else // All good.
+		            {
+		                Object returnObj = provider.retrieve(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true), responseParam);
+		                return makePagedResponse(returnObj, pagingInfo, false, responseParam, provider.getMarshaller());	
+		            }
+		        }
+		    }
+		}
+		catch (PersistenceException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "+provider.getMultiObjectClassInfo().getObjectName()+" with Paging Information: "+pagingInfo+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY, responseParam);			
+		}
+		catch (IllegalArgumentException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "+provider.getMultiObjectClassInfo().getObjectName()+" with Paging Information: "+pagingInfo+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY, responseParam);			
+		}
+		catch (UnsupportedQueryException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Failed to retrieve "+provider.getMultiObjectClassInfo().getObjectName()+" with Paging Information: "+pagingInfo+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY, responseParam);			
+		}
+		catch (DataTooLargeException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(CommonConstants.RESPONSE_TOO_LARGE, "Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY, responseParam);
 		}
 	}
 
@@ -361,7 +373,7 @@ public class ServiceResource extends InfraResource {
 		{
 			if (doDelete)
 			{
-				logger.debug("Delete Collection "+infraObjectNamePlural+" (REST PUT, method OVERRODE=DELETE) with input data: " + payload);
+				logger.debug("Delete Collection "+infraObjectNamePlural+" (REST PUT, method OVERRIDE=DELETE) with input data: " + payload);
 			}
 			else
 			{
@@ -369,17 +381,19 @@ public class ServiceResource extends InfraResource {
 			}
 		}
 		
-		ErrorDetails error = validClient(infraObjectNamePlural, ((doDelete) ? getRight(AccessRight.DELETE) : getRight(AccessRight.UPDATE)), AccessType.APPROVED, true);
+		ResponseParameters responseParam = getInitialCustomResponseParameters();
+		
+		ErrorDetails error = validClient(infraObjectNamePlural, ((doDelete) ? getRight(AccessRight.DELETE) : getRight(AccessRight.UPDATE)), AccessType.APPROVED, true, true);
 		if (error != null) // Not allowed to access!
 		{
 			logger.debug("Error Found: "+error);
-			return makeErrorResponse(error, ((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE));
+			return makeErrorResponse(error, ((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE), responseParam);
 		}
 
 		Provider provider = getProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+infraObjectNamePlural+" available."), ((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE));			
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+infraObjectNamePlural+" available."), ((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE), responseParam);			
 		}
 	
 		return (doDelete) ? deleteMany(provider, payload) : updateMany(provider, payload);
@@ -394,41 +408,45 @@ public class ServiceResource extends InfraResource {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Remove Single " + infraObjectNamePlural + " (REST DELETE) with resourceID = " + resourceID + " and URL Postfix mimeType = '" + mimeType + "'.");
 		}
+		
+		ResponseParameters responseParam = getInitialCustomResponseParameters();
 
-		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.DELETE), AccessType.APPROVED, false);
+		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.DELETE), AccessType.APPROVED, false, true);
 		if (error != null) // Not allowed to access!
 		{
 			logger.debug("Error Found: " + error);
-			return makeErrorResponse(error, ResponseAction.DELETE);
+			return makeErrorResponse(error, ResponseAction.DELETE, responseParam);
 		}
 
 		Provider provider = getProvider();
 		if (provider == null) // error already logged but we must return an error
 													 // response for the caller
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.DELETE);
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.DELETE, responseParam);
 		}
 
 		try {
-			if (provider.deleteSingle(resourceID, getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false))) {
-				return makeResopnseWithNoContent(false, ResponseAction.DELETE);
+			if (provider.deleteSingle(resourceID, getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam)) {
+				return makeResopnseWithNoContent(false, ResponseAction.DELETE, responseParam);
 			} else {
-				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + " does not exist."), ResponseAction.DELETE);
+				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + " does not exist."), ResponseAction.DELETE, responseParam);
 			}
 		} catch (PersistenceException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.DELETE);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.DELETE, responseParam);
 		} catch (IllegalArgumentException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.DELETE);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.DELETE, responseParam);
 		}
 	}
 
 	@DELETE
-	public Response removeMany(String payload) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Delete Collection " + infraObjectNamePlural + " (REST DELETE) with input data: " + payload);
+	public Response removeMany(String payload)
+	{
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("Delete Collection "+infraObjectNamePlural+" (REST DELETE) with input data: " + payload);
 		}
-		ErrorDetails error = new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Operation not supported.", "Use HTTP PUT with header field '" + RequestHeaderConstants.HDR_METHOD_OVERRIDE + "' set to " + HeaderValues.MethodType.DELETE.name() + " instead.");
-		return makeErrorResponse(error, ResponseAction.DELETE);
+		ErrorDetails error = new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Operation not supported.", "Use HTTP PUT with header field '"+RequestHeaderConstants.HDR_METHOD_OVERRIDE+"' set to "+HeaderValues.MethodType.DELETE.name()+" instead.");
+		return makeErrorResponse(error, ResponseAction.DELETE, getInitialCustomResponseParameters());
 	}
 
 	/*----------------------------------------------------------------------*/
@@ -440,56 +458,73 @@ public class ServiceResource extends InfraResource {
 	 * service including custom HTTP headers if set by the provider.
 	 */
 	@HEAD
-	public Response getServiceInfo() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Get Service Info (REST HEAD)");
-		}
+  public Response getServiceInfo()
+  {
+      if (logger.isDebugEnabled())
+      {
+          logger.debug("Get Service Info (REST HEAD)");
+      }
+  
+      ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED, true, true);
+      if (error != null) // Not allowed to access!
+      {
+          return makeResponse(null, error.getErrorCode(), true, ResponseAction.HEAD, getInitialCustomResponseParameters(), null);
+      }
+      
+      Provider provider = getProvider();
+      if (provider == null) // error already logged but we must return an error response for the caller
+      {
+          return makeResponse(null, Status.SERVICE_UNAVAILABLE.getStatusCode(), true, ResponseAction.HEAD, getInitialCustomResponseParameters(), null);
+      }
+  
+      PagingInfo pagingInfo = null;
+      try
+      {
+          pagingInfo = getPagingInfo();
+          HeaderProperties defaultCustomHeaders = getInitialCustomResponseParameters().getHttpHeaderParams();
+          HeaderProperties customHeaders = provider.getServiceInfo(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
+          if (customHeaders != null)
+          {
+              // Copy customHeaders to defaultCustomHeaders to ensure the correct override order.
+              defaultCustomHeaders.addHeaderProperties(customHeaders);
+          }
+          
+          if (logger.isDebugEnabled())
+          {
+              logger.debug("Custom headers to be returned from 'getServiceInfo()' method:\n"+customHeaders);
+          }
 
-		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED, true);
-		if (error != null) // Not allowed to access!
-		{
-			return makeResponse(null, error.getErrorCode(), true, ResponseAction.HEAD, null);
-		}
+          //Check if provider supports Changes Since and if so we need to get the latest opaque changes since marker.
+          ChangesSinceProvider csProvider = getChangesSinceProvider(provider);
+          if (csProvider != null)
+          {
+              if (csProvider.changesSinceSupported())
+              {
+                  defaultCustomHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_CHANGES_SINCE_MARKER, csProvider.getLatestOpaqueMarker(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true)));
+              }
+              
+          }
 
-		Provider provider = getProvider();
-		if (provider == null) // error already logged but we must return an error
-													 // response for the caller
-		{
-			return makeResponse(null, Status.SERVICE_UNAVAILABLE.getStatusCode(), true, ResponseAction.HEAD, null);
-		}
-
-		PagingInfo pagingInfo = getPagingInfo();
-		try {
-			HeaderProperties customHeaders = provider.getServiceInfo(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
-			if (logger.isDebugEnabled()) {
-				logger.debug("Custom headers to be returned from 'getServiceInfo()' method:\n" + customHeaders);
-			}
-
-			// Check if provider supports Changes Since and if so we need to get the
-			// latest opaque changes since marker.
-			ChangesSinceProvider csProvider = getChangesSinceProvider(provider);
-			if (csProvider != null) {
-				if (csProvider.changesSinceSupported()) {
-					if (customHeaders == null) {
-						customHeaders = new HeaderProperties();
-					}
-
-					customHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_CHANGES_SINCE_MARKER, csProvider.getLatestOpaqueMarker(getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true)));
-				}
-
-			}
-
-			return makePagedResponse(null, pagingInfo, customHeaders, false, null);
-		} catch (PersistenceException ex) {
-			return makeResponse(null, Status.INTERNAL_SERVER_ERROR.getStatusCode(), true, ResponseAction.HEAD, null);
-		} catch (IllegalArgumentException ex) {
-			return makeResponse(null, Status.INTERNAL_SERVER_ERROR.getStatusCode(), true, ResponseAction.HEAD, null);
-		} catch (UnsupportedQueryException ex) {
-			return makeResponse(null, Status.BAD_REQUEST.getStatusCode(), true, ResponseAction.HEAD, null);
-		} catch (DataTooLargeException ex) {
-			return makeResponse(null, CommonConstants.RESPONSE_TOO_LARGE, true, ResponseAction.HEAD, null);
-		}
-	}
+          ResponseParameters responseParams = new ResponseParameters(defaultCustomHeaders);
+          return makePagedResponse(null, pagingInfo, false, responseParams, null);
+      }
+      catch (PersistenceException ex)
+      {
+          return makeResponse(null, Status.INTERNAL_SERVER_ERROR.getStatusCode(), true, ResponseAction.HEAD, getInitialCustomResponseParameters(), null);
+      }
+      catch (IllegalArgumentException ex)
+      {
+          return makeResponse(null, Status.INTERNAL_SERVER_ERROR.getStatusCode(), true, ResponseAction.HEAD, getInitialCustomResponseParameters(), null);
+      }
+      catch (UnsupportedQueryException ex)
+      {
+          return makeResponse(null, Status.BAD_REQUEST.getStatusCode(), true, ResponseAction.HEAD, getInitialCustomResponseParameters(), null);
+      }
+      catch (DataTooLargeException ex)
+      {
+          return makeResponse(null, CommonConstants.RESPONSE_TOO_LARGE, true, ResponseAction.HEAD, getInitialCustomResponseParameters(), null);
+      } 
+  }
 
 	/*
 	 * HEAD Method for single object service: Return basic info only and check
@@ -497,17 +532,19 @@ public class ServiceResource extends InfraResource {
 	 */
 	@HEAD
 	@Path("{resourceID:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
-	public Response getSingleObjectServiceInfo() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Get Single Object Service Info (REST HEAD)");
-		}
-		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED, false);
-		if (error != null) // Not allowed to access!
-		{
-			return makeResponse(null, error.getErrorCode(), true, ResponseAction.QUERY, null);
-		}
-		return makeResponse(null, Status.NO_CONTENT.getStatusCode(), false, ResponseAction.QUERY, null);
-	}
+  public Response getSingleObjectServiceInfo()
+  {
+      if (logger.isDebugEnabled())
+      {
+          logger.debug("Get Single Object Service Info (REST HEAD)");
+      }
+      ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED, false, true);
+      if (error != null) // Not allowed to access!
+      {
+          return makeResponse(null, error.getErrorCode(), true, ResponseAction.QUERY, getInitialCustomResponseParameters(), null);
+      }
+      return makeResponse(null, Status.NO_CONTENT.getStatusCode(), false, ResponseAction.QUERY, getInitialCustomResponseParameters(), null);
+  }
 
 	/*------------------------*/
 	/*-- Overridden Methods --*/
@@ -601,103 +638,168 @@ public class ServiceResource extends InfraResource {
 		}
 	}
 
-	protected Response updateMany(Provider provider, String payload) {
-		try {
-			if (pretendDelayed()) {
-				// Simply send a response with status of 202
-				return makeDelayedAcceptResponse(ResponseAction.UPDATE);
-			} else {
-				List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
+	private Response updateMany(Provider provider, String payload)
+	{
+        ResponseParameters responseParam = getInitialCustomResponseParameters();
+	    try
+	    {
+            if (pretendDelayed())
+            {
+                // Simply send a response with status of 202
+                return makeDelayedAcceptResponse(ResponseAction.UPDATE);
+            }
+            else
+            {
+    	    	List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+    	      
+    	    	if (statusList != null)
+    	    	{
+    	    		return makeUpdateMultipleResponse(statusList, Status.OK, responseParam);
+    	    	}
+    	    	else
+    	    	{
+    	    		return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.UPDATE, responseParam);
+    	    	}
+	        }
+	    }
+	    catch (PersistenceException ex)
+	    {
+	    	return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Problem reported: "+ex.getMessage()), ResponseAction.UPDATE, responseParam);      
+	    }
+	    catch (UnmarshalException ex)
+	    {
+	    	return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getMultiObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE, responseParam);      
+	    }
+	    catch (UnsupportedMediaTypeException ex)
+	    {
+	    	return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.UPDATE, responseParam);     
+	    }
+	}
 
-				if (statusList != null) {
-					return makeUpdateMultipleResponse(statusList, Status.OK);
-				} else {
-					return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update " + provider.getMultiObjectClassInfo().getObjectName() + " (Bulk Operation). Contact your System Administrator."), ResponseAction.UPDATE);
-				}
-			}
-		} catch (PersistenceException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update " + provider.getMultiObjectClassInfo().getObjectName() + " (Bulk Operation). Problem reported: " + ex.getMessage()), ResponseAction.UPDATE);
-		} catch (UnmarshalException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to " + provider.getMultiObjectClassInfo().getObjectName() + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE);
-		} catch (UnsupportedMediaTypeException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName() + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE);
+	private Response deleteMany(Provider provider, String payload)
+	{
+        ResponseParameters responseParam = getInitialCustomResponseParameters();
+		try
+		{
+            if (pretendDelayed())
+            {
+                // Simply send a response with status of 202
+                return makeDelayedAcceptResponse(ResponseAction.DELETE);
+            }
+            else
+            {
+    			List<OperationStatus> statusList = provider.deleteMany(getResourceIDsFromDeleteRequest(payload), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+          
+    			if (statusList != null)
+    			{
+    				return makeDeleteMultipleResponse(statusList, Status.OK, responseParam);
+    			}
+    			else
+    			{
+    				return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getMultiObjectClassInfo().getObjectName() + " (Bulk Operation). Contact your System Administrator."), ResponseAction.DELETE, responseParam);
+    			}
+	        }
+		}
+		catch (PersistenceException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),  "Failed to delete " + provider.getMultiObjectClassInfo().getObjectName()  + " (Bulk Operation). Problem reported: " + ex.getMessage()), ResponseAction.DELETE, responseParam);
+		}
+		catch (UnmarshalException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to DeleteRequestType. Problem reported: " + ex.getMessage()), ResponseAction.DELETE, responseParam);
+		}
+		catch (UnsupportedMediaTypeException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to DeleteRequestType. Problem reported: " + ex.getMessage()), ResponseAction.DELETE, responseParam);
+		}
+	}
+	
+	private Response createMany(Provider provider, String payload)
+	{
+        ResponseParameters responseParam = getInitialCustomResponseParameters();
+		try
+		{
+            if (pretendDelayed())
+            {
+                // Simply send a response with status of 202
+                return makeDelayedAcceptResponse(ResponseAction.CREATE);
+            }
+            else
+            {
+    			List<CreateOperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+    			
+    			if (statusList != null)
+    			{
+    				return makeCreateMultipleResponse(statusList, Status.CREATED, responseParam);
+    			}
+    			else
+    			{
+    				return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Contact your System Administrator."), ResponseAction.CREATE, responseParam);
+    			}	
+	        }
+		}
+		catch (PersistenceException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create "+provider.getMultiObjectClassInfo().getObjectName()+" (Bulk Operation). Problem reported: "+ex.getMessage()), ResponseAction.CREATE, responseParam);			
+		}
+		catch (UnmarshalException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to "+provider.getMultiObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE, responseParam);			
+		}
+		catch (UnsupportedMediaTypeException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.CREATE, responseParam);     
 		}
 	}
 
-	protected Response deleteMany(Provider provider, String payload) {
-		try {
-			if (pretendDelayed()) {
-				// Simply send a response with status of 202
-				return makeDelayedAcceptResponse(ResponseAction.DELETE);
-			} else {
-				List<OperationStatus> statusList = provider.deleteMany(getResourceIDsFromDeleteRequest(payload), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
-
-				if (statusList != null) {
-					return makeDeleteMultipleResponse(statusList, Status.OK);
-				} else {
-					return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getMultiObjectClassInfo().getObjectName() + " (Bulk Operation). Contact your System Administrator."), ResponseAction.DELETE);
-				}
-			}
-		} catch (PersistenceException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getMultiObjectClassInfo().getObjectName() + " (Bulk Operation). Problem reported: " + ex.getMessage()), ResponseAction.DELETE);
-		} catch (UnmarshalException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to DeleteRequestType. Problem reported: " + ex.getMessage()), ResponseAction.DELETE);
-		} catch (UnsupportedMediaTypeException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to DeleteRequestType. Problem reported: " + ex.getMessage()), ResponseAction.DELETE);
-		}
-	}
-
-	protected Response createMany(Provider provider, String payload) {
-		try {
-			if (pretendDelayed()) {
-				// Simply send a response with status of 202
-				return makeDelayedAcceptResponse(ResponseAction.CREATE);
-			} else {
-				List<CreateOperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType()), getAdvisory(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
-
-				if (statusList != null) {
-					return makeCreateMultipleResponse(statusList, Status.CREATED);
-				} else {
-					return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create " + provider.getMultiObjectClassInfo().getObjectName() + " (Bulk Operation). Contact your System Administrator."), ResponseAction.CREATE);
-				}
-			}
-		} catch (PersistenceException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create " + provider.getMultiObjectClassInfo().getObjectName() + " (Bulk Operation). Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
-		} catch (UnmarshalException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to " + provider.getMultiObjectClassInfo().getObjectName() + ". Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
-		} catch (UnsupportedMediaTypeException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName() + ". Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
-		}
-	}
-
-	protected Response queryByQBE(Provider provider, String payload) {
-		PagingInfo pagingInfo = getPagingInfo();
-
-		if (provider == null || !QueryProvider.class.isAssignableFrom(provider.getClass())) {
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "The " + provider.getMultiObjectClassInfo().getObjectName() + " does not support QBE style queries."), ResponseAction.QUERY);
+	private Response queryByQBE(Provider provider, String payload)
+	{
+        ResponseParameters responseParam = getInitialCustomResponseParameters();
+		
+		if (provider == null || !QueryProvider.class.isAssignableFrom(provider.getClass()))
+		{
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "The " + provider.getMultiObjectClassInfo().getObjectName() + " does not support QBE style queries."), ResponseAction.QUERY, responseParam);
 		}
 
-		try {
-			if (pretendDelayed()) {
-				// Simply send a response with status of 202
-				return makeDelayedAcceptResponse(ResponseAction.QUERY);
-			} else {
-				Object returnObj = QueryProvider.class.cast(provider).retrieveByQBE(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true));
-
-				return makePagedResponse(returnObj, pagingInfo, null, false, provider.getMarshaller());
-			}
-		} catch (PersistenceException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "(QBE) Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
-		} catch (UnmarshalException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "(QBE) Could not unmarshal the given data to payload. Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
-		} catch (IllegalArgumentException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "(QBE) Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
-		} catch (UnsupportedQueryException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "(QBE) Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
-		} catch (DataTooLargeException ex) {
-			return makeErrorResponse(new ErrorDetails(CommonConstants.RESPONSE_TOO_LARGE, "(QBE) Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
-		} catch (UnsupportedMediaTypeException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "(QBE) Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName() + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+        PagingInfo pagingInfo = null;
+		try
+		{
+	        pagingInfo = getPagingInfo();
+            if (pretendDelayed())
+            {
+                // Simply send a response with status of 202
+                return makeDelayedAcceptResponse(ResponseAction.QUERY);
+            }
+            else
+            {
+                Object returnObj = QueryProvider.class.cast(provider).retrieveByQBE(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestMediaType()), getSifZone(), getSifContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true), responseParam);
+			
+                return makePagedResponse(returnObj, pagingInfo, false, responseParam, provider.getMarshaller());
+	        }
+		}
+		catch (PersistenceException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "(QBE) Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName()  + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY, responseParam);
+		}
+		catch (UnmarshalException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "(QBE) Could not unmarshal the given data to payload. Problem reported: " + ex.getMessage()), ResponseAction.QUERY, responseParam);
+		}
+		catch (IllegalArgumentException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "(QBE) Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY, responseParam);
+		}
+		catch (UnsupportedQueryException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "(QBE) Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY, responseParam);
+		}
+		catch (DataTooLargeException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(CommonConstants.RESPONSE_TOO_LARGE, "(QBE) Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName() + " with Paging Information: " + pagingInfo + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY, responseParam);
+		}
+		catch (UnsupportedMediaTypeException ex)
+		{
+			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "(QBE) Could not unmarshal the given data to "+provider.getSingleObjectClassInfo().getObjectName()+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY, responseParam);     
 		}
 	}
 
@@ -710,15 +812,17 @@ public class ServiceResource extends InfraResource {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Create to phase " + phaseName + " (REST POST) with URL Postfix mimeType = '" + mimeType + "' and input data: " + payload);
 		}
+		
+		ResponseParameters responseParam = getInitialCustomResponseParameters();
 
-		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.CREATE), AccessType.APPROVED, false);
+		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.CREATE), AccessType.APPROVED, false, false);
 		if (error != null) {
-			return makeErrorResponse(error, ResponseAction.CREATE);
+			return makeErrorResponse(error, ResponseAction.CREATE, responseParam);
 		}
 
 		BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) getProvider();
 		if (provider == null) {
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE, responseParam);
 		}
 
 		// Ignore the marshaller/unmarshaller - just reflect the contentType and
@@ -726,22 +830,22 @@ public class ServiceResource extends InfraResource {
 		determineMediaTypes(null, null, false);
 
 		try {
-			String returnPayload = provider.createToPhase(resourceID, phaseName, payload, getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
-			return makeResponse(returnPayload, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, null);
+			String returnPayload = provider.createToPhase(resourceID, phaseName, payload, getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+			return makeResponse(returnPayload, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, responseParam, null);
 		} catch (PersistenceException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create phase for job " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create phase for job " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.CREATE, responseParam);
 		} catch (UnmarshalException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the data. Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the data. Problem reported: " + ex.getMessage()), ResponseAction.CREATE, responseParam);
 		} catch (UnsupportedMediaTypeException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the data. Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the data. Problem reported: " + ex.getMessage()), ResponseAction.CREATE, responseParam);
 		} catch (UnsupportedQueryException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Unsupported operation. Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Unsupported operation. Problem reported: " + ex.getMessage()), ResponseAction.CREATE, responseParam);
 		} catch (BadRequestException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Bad request. Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Bad request. Problem reported: " + ex.getMessage()), ResponseAction.CREATE, responseParam);
 		} catch (ForbiddenException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(), "Consumer is not authorized to issue the requested operation.", AccessRight.CREATE.name() + " access is not set to " + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural + " functional service", "Provider side check."), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(), "Consumer is not authorized to issue the requested operation.", AccessRight.CREATE.name() + " access is not set to " + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural + " functional service", "Provider side check."), ResponseAction.CREATE, responseParam);
 		} catch (SIF3Exception ex) {
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Unexpected error. Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Unexpected error. Problem reported: " + ex.getMessage()), ResponseAction.CREATE, responseParam);
 		}
 	}
 
@@ -751,15 +855,17 @@ public class ServiceResource extends InfraResource {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Get phase " + phaseName + " by Job ID (REST GET): " + resourceID + " and URL Postfix mimeType = '" + mimeType + "'");
 		}
+		
+		ResponseParameters responseParam = getInitialCustomResponseParameters();
 
-		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED, false);
+		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.QUERY), AccessType.APPROVED, false, false);
 		if (error != null) {
-			return makeErrorResponse(error, ResponseAction.QUERY);
+			return makeErrorResponse(error, ResponseAction.QUERY, responseParam);
 		}
 
 		BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) getProvider();
 		if (provider == null) {
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE, responseParam);
 		}
 
 		// Ignore the marshaller/unmarshaller - just reflect the contentType and
@@ -767,20 +873,20 @@ public class ServiceResource extends InfraResource {
 		determineMediaTypes(null, null, false);
 
 		try {
-			Object returnObj = provider.retrieveToPhase(resourceID, phaseName, payload, getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
+			Object returnObj = provider.retrieveToPhase(resourceID, phaseName, payload, getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
 			if (returnObj != null) {
-				return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.QUERY, null);
+				return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.QUERY, responseParam, null);
 			} else {
-				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + " does not exist."), ResponseAction.QUERY);
+				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + " does not exist."), ResponseAction.QUERY, responseParam);
 			}
 		} catch (PersistenceException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve " + provider.getSingleObjectClassInfo().getObjectName() + " for resource ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve " + provider.getSingleObjectClassInfo().getObjectName() + " for resource ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY, responseParam);
 		} catch (IllegalArgumentException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY, responseParam);
 		} catch (ForbiddenException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(), "Consumer is not authorized to issue the requested operation.", AccessRight.CREATE.name() + " access is not set to " + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural + " functional service", "Provider side check."), ResponseAction.QUERY);
+			return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(), "Consumer is not authorized to issue the requested operation.", AccessRight.CREATE.name() + " access is not set to " + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural + " functional service", "Provider side check."), ResponseAction.QUERY, responseParam);
 		} catch (SIF3Exception ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.QUERY, responseParam);
 		}
 	}
 
@@ -790,15 +896,17 @@ public class ServiceResource extends InfraResource {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Update to phase " + phaseName + " (REST POST) with URL Postfix mimeType = '" + mimeType + "' and input data: " + payload);
 		}
+		
+		ResponseParameters responseParam = getInitialCustomResponseParameters();
 
-		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.UPDATE), AccessType.APPROVED, false);
+		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.UPDATE), AccessType.APPROVED, false, false);
 		if (error != null) {
-			return makeErrorResponse(error, ResponseAction.UPDATE);
+			return makeErrorResponse(error, ResponseAction.UPDATE, responseParam);
 		}
 
 		BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) getProvider();
 		if (provider == null) {
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE, responseParam);
 		}
 
 		// Ignore the marshaller/unmarshaller - just reflect the contentType and
@@ -806,20 +914,20 @@ public class ServiceResource extends InfraResource {
 		determineMediaTypes(null, null, false);
 
 		try {
-			String returnObj = provider.updateToPhase(resourceID, phaseName, payload, getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
-			return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.UPDATE, null);
+			String returnObj = provider.updateToPhase(resourceID, phaseName, payload, getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+			return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.UPDATE, responseParam, null);
 		} catch (PersistenceException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE, responseParam);
 		} catch (IllegalArgumentException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE, responseParam);
 		} catch (UnmarshalException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName() + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE);
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName() + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE, responseParam);
 		} catch (UnsupportedMediaTypeException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName() + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE);
+			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal the given data to " + provider.getSingleObjectClassInfo().getObjectName() + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE, responseParam);
 		} catch (ForbiddenException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(), "Consumer is not authorized to issue the requested operation.", AccessRight.CREATE.name() + " access is not set to " + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural + " functional service", "Provider side check."), ResponseAction.UPDATE);
+			return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(), "Consumer is not authorized to issue the requested operation.", AccessRight.CREATE.name() + " access is not set to " + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural + " functional service", "Provider side check."), ResponseAction.UPDATE, responseParam);
 		} catch (SIF3Exception ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to update " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.UPDATE, responseParam);
 		}
 	}
 
@@ -829,15 +937,17 @@ public class ServiceResource extends InfraResource {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Delete to phase " + phaseName + " (REST POST) with URL Postfix mimeType = '" + mimeType + "' and input data: " + payload);
 		}
+		
+		ResponseParameters responseParam = getInitialCustomResponseParameters();
 
-		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.DELETE), AccessType.APPROVED, false);
+		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.DELETE), AccessType.APPROVED, false, false);
 		if (error != null) {
-			return makeErrorResponse(error, ResponseAction.DELETE);
+			return makeErrorResponse(error, ResponseAction.DELETE, responseParam);
 		}
 
 		BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) getProvider();
 		if (provider == null) {
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE, responseParam);
 		}
 
 		// Ignore the marshaller/unmarshaller - just reflect the contentType and
@@ -845,16 +955,16 @@ public class ServiceResource extends InfraResource {
 		determineMediaTypes(null, null, false);
 
 		try {
-			String returnObj = provider.deleteToPhase(resourceID, phaseName, payload, getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
-			return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.UPDATE, null);
+			String returnObj = provider.deleteToPhase(resourceID, phaseName, payload, getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+			return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.UPDATE, responseParam, null);
 		} catch (PersistenceException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.DELETE);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.DELETE, responseParam);
 		} catch (IllegalArgumentException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.DELETE);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.DELETE, responseParam);
 		} catch (ForbiddenException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(), "Consumer is not authorized to issue the requested operation.", AccessRight.CREATE.name() + " access is not set to " + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural + " functional service", "Provider side check."), ResponseAction.DELETE);
+			return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(), "Consumer is not authorized to issue the requested operation.", AccessRight.CREATE.name() + " access is not set to " + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural + " functional service", "Provider side check."), ResponseAction.DELETE, responseParam);
 		} catch (SIF3Exception ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.DELETE);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to delete " + provider.getSingleObjectClassInfo().getObjectName() + " with resouce ID = " + resourceID + ". Problem reported: " + ex.getMessage()), ResponseAction.DELETE, responseParam);
 		}
 	}
 
@@ -867,29 +977,31 @@ public class ServiceResource extends InfraResource {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Create to state on " + phaseName + " (REST POST) with URL Postfix mimeType = '" + mimeType + "' and input data: " + payload);
 		}
+		
+		ResponseParameters responseParam = getInitialCustomResponseParameters();
 
-		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.UPDATE), AccessType.APPROVED, false);
+		ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.UPDATE), AccessType.APPROVED, false, false);
 		if (error != null) {
-			return makeErrorResponse(error, ResponseAction.CREATE);
+			return makeErrorResponse(error, ResponseAction.CREATE, responseParam);
 		}
 
 		BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) getProvider();
 		if (provider == null) {
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for " + infraObjectNamePlural + " available."), ResponseAction.CREATE, responseParam);
 		}
 
 		try {
-			StateType state = provider.createToState(resourceID, phaseName, provider.getUnmarshaller().unmarshal(payload, StateType.class, getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false));
+			StateType state = provider.createToState(resourceID, phaseName, provider.getUnmarshaller().unmarshal(payload, StateType.class, getRequestMediaType()), getSifZone(), getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
 
-			return makeResponse(state, Status.OK.getStatusCode(), false, ResponseAction.CREATE, provider.getMarshaller());
+			return makeResponse(state, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, responseParam, provider.getMarshaller());
 		} catch (PersistenceException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create State object. Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to create State object. Problem reported: " + ex.getMessage()), ResponseAction.CREATE, responseParam);
 		} catch (UnmarshalException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal data. Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not unmarshal data. Problem reported: " + ex.getMessage()), ResponseAction.CREATE, responseParam);
 		} catch (UnsupportedMediaTypeException ex) {
-			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal data due to unsupported media type. Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal data due to unsupported media type. Problem reported: " + ex.getMessage()), ResponseAction.CREATE, responseParam);
 		} catch (SIF3Exception ex) {
-			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Unexpected error. Problem reported: " + ex.getMessage()), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Unexpected error. Problem reported: " + ex.getMessage()), ResponseAction.CREATE, responseParam);
 		}
 	}
 }
