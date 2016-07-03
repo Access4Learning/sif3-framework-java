@@ -25,7 +25,6 @@ import javax.ws.rs.core.MediaType;
 import sif3.common.CommonConstants;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues.EventAction;
-import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.EventProvider;
 import sif3.common.interfaces.SIFEventIterator;
@@ -364,7 +363,7 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
     {
     	if (sif3Session != null)
     	{
-    		return sif3Session.getServiceInfoForService(getServiceName(), ServiceType.OBJECT);
+    		return sif3Session.getServiceInfoForService(getServiceName(), getServiceType());
     	}
     	
     	return null;
