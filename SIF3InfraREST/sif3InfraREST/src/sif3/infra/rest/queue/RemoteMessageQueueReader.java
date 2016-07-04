@@ -61,16 +61,17 @@ import sif3.infra.rest.queue.types.ResponseInfo;
  */
 public class RemoteMessageQueueReader implements Runnable
 {
-    protected final Logger             logger         = Logger.getLogger(getClass());
+    protected final Logger             logger          = Logger.getLogger(getClass());
 
-    private QueueInfo                  queueInfo      = null;
-    private ConsumerEnvironmentManager consumerEvnMgr = null;
-    private SIF3Session                sif3Session    = null;
-    private String                     readerID       = null;
-    private String                     lastMsgeID     = null;
-    private int                        waitTime       = 0;                           // milliseconds
+    private QueueInfo                  queueInfo       = null;
+    private ConsumerEnvironmentManager consumerEvnMgr  = null;
+    private SIF3Session                sif3Session     = null;
+    private int                        readerID        = 0;
+    private String                     remoteQueueName = null;
+    private String                     lastMsgeID      = null;
+    private int                        waitTime        = 0;                           // milliseconds
 
-    private MessageClient              client         = null;
+    private MessageClient              client          = null;
 
     /**
      * Constructs a RemoteMessageQueueReader for the queue identified through the queueListenerInfo
@@ -80,11 +81,12 @@ public class RemoteMessageQueueReader implements Runnable
      *            Holds all the information for this reader to identify what SIF queue to read from
      *            and where to distribute messages to.
      * @param readerID
-     *            A string identifying the ID of this reader. Since it is expected that readers are
-     *            running in multiple threads each reader should have its own id to identify it for
-     *            logging purpose.
+     *            A string identifying the ID of this reader, and forms the value used in the
+     *            connectionid header parameter. Since it is expected that readers are running in
+     *            multiple threads each reader should have its own id to identify it for logging
+     *            purpose.
      */
-    public RemoteMessageQueueReader(QueueInfo queueInfo, String readerID)
+    public RemoteMessageQueueReader(QueueInfo queueInfo, int readerID)
             throws ServiceInvokationException
     {
         super();
@@ -94,6 +96,8 @@ public class RemoteMessageQueueReader implements Runnable
             consumerEvnMgr = ConsumerEnvironmentManager.getInstance();
             sif3Session = consumerEvnMgr.getSIF3Session();
             this.readerID = readerID;
+            this.remoteQueueName = queueInfo.getQueue().getName() + " ("
+                    + queueInfo.getQueue().getQueueID() + ")";
 
             // Get the wait time between get message calls once a no message is returned. Timeout is
             // the max from what the queue indicates
@@ -117,7 +121,7 @@ public class RemoteMessageQueueReader implements Runnable
     public void shutdown()
     {
         // nothing to do at the moment
-        logger.debug("Shutdown Message Reader wit ID = " + getReaderID() + " for queue = "
+        logger.debug("Shutdown Message Reader with ID = " + getReaderID() + " for queue = "
                 + getQueueInfo().getQueue().getName());
     }
 
@@ -129,7 +133,7 @@ public class RemoteMessageQueueReader implements Runnable
     @Override
     public void run()
     {
-        logger.debug("Message Queue Reader " + getReaderID() + " starts reading messages...");
+        logger.debug("Message Queue Reader " + getReaderName() + " starts reading messages...");
         startReading();
     }
 
@@ -148,7 +152,7 @@ public class RemoteMessageQueueReader implements Runnable
             {
                 try
                 {
-                    Response response = getClient().getMessage(getLastMsgeID(), getReaderID());
+                    Response response = getClient().getMessage(getLastMsgeID(), String.valueOf(getReaderID()));
                     setLastMsgeID(response); // ensure that the next loop iteration we will remove
                                              // the current message
 
@@ -162,7 +166,7 @@ public class RemoteMessageQueueReader implements Runnable
                     }
                     else
                     {
-                        logger.debug("Message Reader '" + getReaderID() + "' (ThreadID:"
+                        logger.debug("Message Reader '" + getReaderName() + "' (ThreadID:"
                                 + Thread.currentThread().getId()
                                 + ") has receive a message from queue: "
                                 + getQueueInfo().getQueue().getName() + ". Message ID = "
@@ -225,7 +229,7 @@ public class RemoteMessageQueueReader implements Runnable
 
     private void waitBeforeGetNext()
     {
-        logger.debug("\n==========================\n" + getReaderID() + " will wait for "
+        logger.debug("\n==========================\n" + getReaderName() + " will wait for "
                 + getWaitTime() / CommonConstants.MILISEC
                 + " seconds before attempting to get next message."
                 + "\n==========================");
@@ -239,7 +243,7 @@ public class RemoteMessageQueueReader implements Runnable
         }
         catch (Exception ex)
         {
-            logger.error("Blocking wait in Message Reader '" + getReaderID() + "' for queue: "
+            logger.error("Blocking wait in Message Reader '" + getReaderName() + "' for queue: "
                     + getQueueInfo().getQueue().getName() + " interrupted: " + ex.getMessage(), ex);
         }
     }
@@ -319,10 +323,10 @@ public class RemoteMessageQueueReader implements Runnable
             else // Create event object and send it to eventConsumer
             {
                 logger.debug(
-                        getReaderID() + ": Attempts to push DELAYED Response to local queue...");
+                        getReaderName() + ": Attempts to push DELAYED Response to local queue...");
                 localQueue.blockingPush(responseInfo);
                 logger.debug(
-                        getReaderID() + ": DELAYED Response successfully pushed to local queue");
+                        getReaderName() + ": DELAYED Response successfully pushed to local queue");
             }
         }
         catch (Exception ex)
@@ -361,9 +365,11 @@ public class RemoteMessageQueueReader implements Runnable
             }
             else // Create event object and send it to eventConsumer
             {
-                logger.debug(getReaderID() + ": Attempts to push DELAYED Error to local queue...");
+                logger.debug(
+                        getReaderName() + ": Attempts to push DELAYED Error to local queue...");
                 localQueue.blockingPush(errorInfo);
-                logger.debug(getReaderID() + ": DELAYED Error successfully pushed to local queue");
+                logger.debug(
+                        getReaderName() + ": DELAYED Error successfully pushed to local queue");
             }
         }
         catch (Exception ex)
@@ -397,7 +403,7 @@ public class RemoteMessageQueueReader implements Runnable
         // null));
         // baseInfo.setContext(getContext(pathInfo.getContext()!= null ?
         // pathInfo.getContext().getId() : null));
-        baseInfo.setMessageQueueReaderID(getReaderID());
+        baseInfo.setMessageQueueReaderID(String.valueOf(getReaderID()));
         baseInfo.setFullRelativeURL(pathInfo.getOriginalURLString());
         baseInfo.setServiceName(pathInfo.getServiceName());
         baseInfo.setUrlService(pathInfo.getUrlService());
@@ -447,10 +453,10 @@ public class RemoteMessageQueueReader implements Runnable
                 // TODO: JH - Do we need applicationKey and authenticatedUser HTTP header here?
 
                 EventInfo eventInfo = new EventInfo(eventPayload, response.getMediaType(),
-                        eventAction, updateType, zone, context, metadata, getReaderID());
-                logger.debug(getReaderID() + ": Attempts to push Event to local queue...");
+                        eventAction, updateType, zone, context, metadata, String.valueOf(getReaderID()));
+                logger.debug(getReaderName() + ": Attempts to push Event to local queue...");
                 localQueue.blockingPush(eventInfo);
-                logger.debug(getReaderID() + ": Event successfully pushed to local queue");
+                logger.debug(getReaderName() + ": Event successfully pushed to local queue");
             }
         }
         catch (Exception ex)
@@ -625,9 +631,19 @@ public class RemoteMessageQueueReader implements Runnable
         return client;
     }
 
-    private String getReaderID()
+    private int getReaderID()
     {
         return readerID;
+    }
+
+    private String getRemoteQueueName()
+    {
+        return remoteQueueName;
+    }
+
+    private String getReaderName()
+    {
+        return getRemoteQueueName() + " - Reader " + getReaderID();
     }
 
     private String getLastMsgeID()
