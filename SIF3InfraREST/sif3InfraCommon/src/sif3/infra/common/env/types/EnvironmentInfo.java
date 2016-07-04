@@ -53,7 +53,7 @@ public class EnvironmentInfo implements Serializable
     private AdapterType adapterType         = null;
     private boolean checkACL                = true;
     private EnvironmentType environmentType = null;
-    private AuthenticationMethod authMethod = AuthenticationMethod.Basic;
+    private AuthenticationMethod authMethod = AuthenticationMethod.BASIC;
     private boolean removeEnvOnShutdown = false;
     private String adapterName = null; ; // consumerName 
     private EnvironmentKey environmentKey = new EnvironmentKey();
@@ -216,7 +216,7 @@ public class EnvironmentInfo implements Serializable
 		}
 		catch (Exception ex)
 		{
-			this.authMethod = AuthenticationMethod.Basic;
+			this.authMethod = AuthenticationMethod.BASIC;
 		}
     }
 

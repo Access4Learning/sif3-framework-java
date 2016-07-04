@@ -60,7 +60,8 @@ public class AuthenticationUtils
 	 */
 	public static String getBasicAuthToken(String username, String password)
 	{
-		return AuthenticationMethod.Basic.name()+" "+base64Encode(username, password);
+		//return AuthenticationMethod.BASIC.name()+" "+base64Encode(username, password);
+	    return "Basic "+base64Encode(username, password);
 	}
 
 	/**
@@ -197,7 +198,7 @@ public class AuthenticationUtils
 	
 	/**
 	 * Extracts the token from the full authentication token. The full authentication token is the security token with the prefix of 
-	 * Basic, SIF_HMACSHA256 or Bearer separated by a blank. If the fullToken is null or empty then null is returned. Also if there is 
+	 * BASIC, SIF_HMACSHA256 or Bearer separated by a blank. If the fullToken is null or empty then null is returned. Also if there is 
 	 * no " " found (which separates the method from the token) then the fullToken is returned.
 	 * 
 	 * @param fullToken The full token including the prefix of 'Basic', 'SIF_HMACSHA256' or 'Bearer'
@@ -217,7 +218,7 @@ public class AuthenticationUtils
 	
 	/**
 	 * This method extracts the authentication method from the full authentication token. The full authentication token is the security 
-	 * token with the prefix of Basic, SIF_HMACSHA256 or Bearer separated by a blank. If the fullToken is null or empty then null is returned. 
+	 * token with the prefix of BASIC, SIF_HMACSHA256 or Bearer separated by a blank. If the fullToken is null or empty then null is returned. 
 	 * Also if there is no " " found (which separates the method from the token) then null is returned.
 	 * 
 	 * @param fullToken The full token including the prefix of 'Basic', 'SIF_HMACSHA256' or 'Bearer'. (See AuthenticationMethod enum)
@@ -238,7 +239,7 @@ public class AuthenticationUtils
 			}
 			catch (Exception ex)
 			{
-				logger.error(authMethodStr+" is an invalid authentication method. Valid values are Basic, SIF_HMACSHA256 and Bearer.");
+				logger.error(authMethodStr+" is an invalid authentication method. Valid values are BASIC, SIF_HMACSHA256 and Bearer.");
 				return null;
 			}
 		}

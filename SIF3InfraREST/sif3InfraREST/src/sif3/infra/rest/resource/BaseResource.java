@@ -412,7 +412,7 @@ public abstract class BaseResource
 			{
 				return getEnvironmentManager().getSessionBySecurityToken(token);
 			}
-			else // Basic, SIF_HMACSHA256
+			else // BASIC, SIF_HMACSHA256
 			{
 				return getEnvironmentManager().getSessionBySessionToken(token);
 			}
@@ -780,7 +780,7 @@ public abstract class BaseResource
 	{
 		if (getAuthInfo().getAuthMethod() == null)
 		{
-			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No Authentication Method set.", "Choose between Basic, SIF_HMACSHA256 or Bearer as Authentication Method. Refer to SIF3 Specification for details.");
+			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No Authentication Method set.", "Choose between BASIC, SIF_HMACSHA256 or Bearer as Authentication Method. Refer to SIF3 Specification for details.");
 		}
 
 		if ((getAuthInfo().getAuthMethod() == AuthenticationInfo.AuthenticationMethod.Bearer))
@@ -797,7 +797,7 @@ public abstract class BaseResource
 	    String authToken = AuthenticationUtils.getFullBase64Token(getAuthInfo());
 	    String newAuthToken = null;
 	    
-	    if (getAuthInfo().getAuthMethod() == AuthenticationInfo.AuthenticationMethod.Basic)
+	    if (getAuthInfo().getAuthMethod() == AuthenticationInfo.AuthenticationMethod.BASIC)
 	    {
 	    	// Create authentication token and compare if it matches
 	    	newAuthToken = AuthenticationUtils.getBasicAuthToken(userToken, password);      
@@ -1539,7 +1539,7 @@ public abstract class BaseResource
 	{
 		if (getAuthInfo().getAuthMethod() == null)
 		{
-			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Choose between Basic, SIF_HMACSHA256 or Bearer as Authentication Method. Refer to SIF3 Specification for details.");
+			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Choose between BASIC, SIF_HMACSHA256 or Bearer as Authentication Method. Refer to SIF3 Specification for details.");
 		}
 
 		// Check if the Authentication Method matches the session's mandated authentication method.

@@ -43,7 +43,7 @@ public class ClientUtils
 	{
 		switch (authenticationMethod)
 		{
-			case Basic:
+			case BASIC:
 			{
 				hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AuthenticationUtils.getBasicAuthToken(username, password));
 				break;

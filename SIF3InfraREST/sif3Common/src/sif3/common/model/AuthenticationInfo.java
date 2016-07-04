@@ -37,16 +37,16 @@ public class AuthenticationInfo implements Serializable
 	private static final long serialVersionUID = -8736784141972585133L;
 
 	/* Defines valid authentication methods for SIF 3.0 */
-	public enum AuthenticationMethod {Basic, SIF_HMACSHA256, Bearer};
+	public enum AuthenticationMethod {BASIC, SIF_HMACSHA256, Bearer};
 
-	private AuthenticationMethod authMethod = AuthenticationMethod.Basic;
+	private AuthenticationMethod authMethod = AuthenticationMethod.BASIC;
 	private String               userToken  = null;
 	private String               password   = null;
 	private Date                 expireDate = null; // date when token expires.
 
 	public AuthenticationInfo()
 	{
-		this(AuthenticationMethod.Basic, null, null, null);
+		this(AuthenticationMethod.BASIC, null, null, null);
 	}
 
 
@@ -89,7 +89,7 @@ public class AuthenticationInfo implements Serializable
 		}
 		catch (Exception ex)
 		{
-			this.authMethod = AuthenticationMethod.Basic;
+			this.authMethod = AuthenticationMethod.BASIC;
 		}
 	}
 

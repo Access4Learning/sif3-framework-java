@@ -59,7 +59,7 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	
 	// The properties below are runtime properties. They are not read or maintained in the DB!
 	private transient SIFZone defaultZone             = null;
-	private transient AuthenticationMethod authenticationMethod = AuthenticationMethod.Basic;
+	private transient AuthenticationMethod authenticationMethod = AuthenticationMethod.BASIC;
 	
 	// List of all services according to the ACL of this session.
     private transient ArrayList<ServiceInfo> services = new ArrayList<ServiceInfo>();
@@ -208,12 +208,12 @@ public class SIF3Session extends EnvironmentKey implements Serializable
      */
     public void setAuthenticationMethod(AuthenticationMethod authenticationMethod)
     {
-        this.authenticationMethod = (authenticationMethod == null) ? AuthenticationMethod.Basic : authenticationMethod;
+        this.authenticationMethod = (authenticationMethod == null) ? AuthenticationMethod.BASIC : authenticationMethod;
     }
     
     public void setAuthenticationMethod(String authenticationMethod)
     {
-        this.authenticationMethod = StringUtils.isEmpty(authenticationMethod) ? AuthenticationMethod.Basic : AuthenticationMethod.valueOf(authenticationMethod);
+        this.authenticationMethod = StringUtils.isEmpty(authenticationMethod) ? AuthenticationMethod.BASIC : AuthenticationMethod.valueOf(authenticationMethod);
     }
 	
 	/*---------------------------------------------------------------------------------------------------------------------------------------*/

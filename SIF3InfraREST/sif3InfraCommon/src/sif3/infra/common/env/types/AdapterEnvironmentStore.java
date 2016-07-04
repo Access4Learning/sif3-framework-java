@@ -422,7 +422,7 @@ public class AdapterEnvironmentStore implements Serializable
   		}
           
   		// Authentication Method
-  		envInfo.setAuthMethod(adapterProperties.getPropertyAsString("env.authentication.method", AuthenticationMethod.Basic.name()));
+  		envInfo.setAuthMethod(adapterProperties.getPropertyAsString("env.authentication.method", AuthenticationMethod.BASIC.name()));
  		
 		envInfo.getEnvironmentKey().setUserToken(props.getPropertyAsString("env.userToken", null));
 		envInfo.getEnvironmentKey().setInstanceID(props.getPropertyAsString("env.instanceID", null));
@@ -485,7 +485,7 @@ public class AdapterEnvironmentStore implements Serializable
 	  		}
 	          
 	  		// Authentication Method
-	  		envInfo.setAuthMethod(adapterProperties.getPropertyAsString("env.authentication.method", AuthenticationMethod.Basic.name()));
+	  		envInfo.setAuthMethod(adapterProperties.getPropertyAsString("env.authentication.method", AuthenticationMethod.BASIC.name()));
 	  			  		
 	  		envInfo.setTemplateXMLFileName(props.getPropertyAsString("env.xml.file.name", null));
 	  		if (StringUtils.isEmpty(envInfo.getTemplateXMLFileName()))

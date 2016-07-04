@@ -423,7 +423,7 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations imp
 		        }
 		        else if (StringUtils.isEmpty(environment.getAuthenticationMethod())) // if empty in env.xml set to Basic
 		        {
-		          environment.setAuthenticationMethod(AuthenticationMethod.Basic.name());
+		          environment.setAuthenticationMethod(AuthenticationMethod.BASIC.name());
 		        }
 		        
 		        // Set Authentication Method is sif3 Session.
@@ -528,7 +528,7 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations imp
 						}
 						else // assume Basic
 						{
-							environment.setAuthenticationMethod(AuthenticationMethod.Basic.name());
+							environment.setAuthenticationMethod(AuthenticationMethod.BASIC.name());
 						}
 						
                         // Set authentication method it in the session.
