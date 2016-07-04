@@ -47,10 +47,10 @@ import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.PhaseStateType;
 import sif3.infra.common.model.StateType;
 import sif3.infra.common.utils.ServiceUtils;
-import sif3.infra.rest.consumer.AbstractJobConsumer;
+import sif3.infra.rest.consumer.AbstractFunctionalServiceConsumer;
 import zinet.sif3.demo.uk.rest.PayloadConstants;
 
-public class PayloadConsumer extends AbstractJobConsumer
+public class PayloadConsumer extends AbstractFunctionalServiceConsumer
 {
 
     public PayloadConsumer()

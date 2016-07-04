@@ -48,7 +48,7 @@ import sif3.infra.common.model.JobCollectionType;
 import sif3.infra.common.model.StateType;
 import sif3.infra.rest.client.FunctionalServiceClient;
 
-public abstract class AbstractJobConsumer extends AbstractEventConsumer<JobCollectionType>
+public abstract class AbstractFunctionalServiceConsumer extends AbstractEventConsumer<JobCollectionType>
 {
 
     protected final Logger               logger       = Logger.getLogger(getClass());
@@ -59,7 +59,7 @@ public abstract class AbstractJobConsumer extends AbstractEventConsumer<JobColle
     /**
      * Constructor
      */
-    public AbstractJobConsumer()
+    public AbstractFunctionalServiceConsumer()
     {
         super();
 
