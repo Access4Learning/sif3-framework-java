@@ -386,7 +386,7 @@ public abstract class BaseResource
 		{
 			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No or invalid Authorization Token provided");				
 		}
-	    if (authInfo.getAuthMethod() != AuthenticationMethod.Bearer) // Basic or SIF_HMACSHA256
+	    if (authInfo.getAuthMethod() != AuthenticationMethod.Bearer) // BASIC or SIF_HMACSHA256
 	    {
 	    	return validSession(authInfo, false, null);
 	    }
@@ -820,6 +820,7 @@ public abstract class BaseResource
 	    //System.out.println("Auth Token To Compare with: "+newAuthToken);  
 	    if (!authToken.equals(newAuthToken))
 	    {
+	        //logger.error("Expecting authorisation token '" + authToken + "', but got '" + newAuthToken + "'.");
 	    	return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Authorization token in request doesn't match expected authorization token in session.");
 	    }
 

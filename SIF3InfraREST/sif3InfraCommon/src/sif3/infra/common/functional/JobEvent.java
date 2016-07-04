@@ -67,6 +67,7 @@ public class JobEvent
 
     /**
      * Gets the event instance
+     * 
      * @return The SIFEvent instance
      */
     public SIFEvent<JobCollectionType> getEvent()
@@ -76,6 +77,7 @@ public class JobEvent
 
     /**
      * Sets the SIFEvent instance
+     * 
      * @param event
      *            the event to set
      */
@@ -86,6 +88,7 @@ public class JobEvent
 
     /**
      * Gets the zone
+     * 
      * @return the zone
      */
     public SIFZone getZone()
@@ -95,6 +98,7 @@ public class JobEvent
 
     /**
      * Sets the zone
+     * 
      * @param zone
      *            the zone to set
      */
@@ -104,7 +108,27 @@ public class JobEvent
     }
 
     /**
+     * Checks if the given zone is specified in this event
+     * 
+     * @param zone
+     *            The zone to check
+     * @return True if the zone in this JobEvent and arguments are equal or both null.
+     */
+    public boolean hasZone(SIFZone zone)
+    {
+        if (getZone() == null)
+        {
+            return zone == null;
+        }
+        else
+        {
+            return getZone().equals(zone);
+        }
+    }
+
+    /**
      * Gets the context
+     * 
      * @return the context
      */
     public SIFContext getContext()
@@ -114,11 +138,35 @@ public class JobEvent
 
     /**
      * Sets the context
+     * 
      * @param context
      *            the context to set
      */
     public void setContext(SIFContext context)
     {
         this.context = context;
+    }
+
+    /**
+     * Checks if the given context is specified in this event
+     * 
+     * @param context
+     *            The context to check
+     * @return True if the context in this JobEvent and arguments are equal or both null.
+     */
+    public boolean hasContext(SIFContext context)
+    {
+        if (getContext() == null)
+        {
+            return context == null;
+        }
+        else
+        {
+            // TODO Investigate why the contexts that end up here have the right IDs but the
+            // isDefault values differ. Since equality of SIFContext objects depends on their
+            // toString() this gives an unexpected result. Instead we will rely on just the ID
+            // instead.
+            return context == null ? false : getContext().getId().equals(context.getId());
+        }
     }
 }

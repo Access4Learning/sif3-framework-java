@@ -368,22 +368,27 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         if (jobEvent == null)
         {
             // Don't know anything about this event
+            logger.info("Dropping event, could not get the job event");
             return null;
         }
 
-        if (!jobEvent.getZone().equals(zone))
+        if (!jobEvent.hasZone(zone))
         {
             // Not the right zone to send this to
+            logger.info("Dropping event, zone is not one we expect");
+            logger.debug("Expecting: '" + jobEvent.getZone() + "', but got: '" + zone + "'");
             return null;
         }
 
-        if (!jobEvent.getContext().equals(context))
+        if (!jobEvent.hasContext(context))
         {
             // Not the right context to send this to
+            logger.info("Dropping event, context is not one we expect");
+            logger.debug("Expecting: '" + jobEvent.getContext() + "', but got: '" + context + "'");
             return null;
         }
 
-        // Looks ok
+        logger.info("SIFEvent being sent unmodified.");
         return sifEvent;
     }
 
