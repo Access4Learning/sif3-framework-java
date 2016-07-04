@@ -670,6 +670,455 @@ public class ServiceResource extends InfraResource
                 getInitialCustomResponseParameters());
     }
 
+    // ------------ //
+    // -- Phases -- //
+    // ------------ //
+    @POST
+    @Path("{resourceID:([^\\.]*)}/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
+    public Response createToPhase(String payload, @PathParam("resourceID") String resourceID,
+            @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType)
+    {
+        if (logger.isDebugEnabled())
+        {
+            logger.debug(
+                    "Create to phase " + phaseName + " (REST POST) with URL Postfix mimeType = '"
+                            + mimeType + "' and input data: " + payload);
+        }
+
+        ResponseParameters responseParam = getInitialCustomResponseParameters();
+
+        ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.CREATE),
+                AccessType.APPROVED, false, false);
+        if (error != null)
+        {
+            return makeErrorResponse(error, ResponseAction.CREATE, responseParam);
+        }
+
+        FunctionalServiceProvider provider = (FunctionalServiceProvider) getProvider();
+        if (provider == null)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
+                            "No Provider for " + infraObjectNamePlural + " available."),
+                    ResponseAction.CREATE, responseParam);
+        }
+
+        // Ignore the marshaller/unmarshaller - just reflect the contentType and
+        // accept header information
+        determineMediaTypes(null, null, false);
+
+        try
+        {
+            String returnPayload = provider.createToPhase(resourceID, phaseName, payload,
+                    getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(),
+                    getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+            return makeResponse(returnPayload, Status.CREATED.getStatusCode(), false,
+                    ResponseAction.CREATE, responseParam, null);
+        }
+        catch (PersistenceException ex)
+        {
+            return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                    "Failed to create phase for job " + resourceID + ". Problem reported: "
+                            + ex.getMessage()),
+                    ResponseAction.CREATE, responseParam);
+        }
+        catch (UnmarshalException ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+                            "Could not unmarshal the data. Problem reported: " + ex.getMessage()),
+                    ResponseAction.CREATE, responseParam);
+        }
+        catch (UnsupportedMediaTypeException ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(),
+                            "Could not unmarshal the data. Problem reported: " + ex.getMessage()),
+                    ResponseAction.CREATE, responseParam);
+        }
+        catch (UnsupportedQueryException ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+                            "Unsupported operation. Problem reported: " + ex.getMessage()),
+                    ResponseAction.CREATE, responseParam);
+        }
+        catch (BadRequestException ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+                            "Bad request. Problem reported: " + ex.getMessage()),
+                    ResponseAction.CREATE, responseParam);
+        }
+        catch (ForbiddenException ex)
+        {
+            return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(),
+                    "Consumer is not authorized to issue the requested operation.",
+                    AccessRight.CREATE.name() + " access is not set to "
+                            + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural
+                            + " functional service",
+                    "Provider side check."), ResponseAction.CREATE, responseParam);
+        }
+        catch (SIF3Exception ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+                            "Unexpected error. Problem reported: " + ex.getMessage()),
+                    ResponseAction.CREATE, responseParam);
+        }
+    }
+
+    @GET
+    @Path("{resourceID:([^\\.]*)}/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
+    public Response retrieveToPhase(String payload, @PathParam("resourceID") String resourceID,
+            @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType)
+    {
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Get phase " + phaseName + " by Job ID (REST GET): " + resourceID
+                    + " and URL Postfix mimeType = '" + mimeType + "'");
+        }
+
+        ResponseParameters responseParam = getInitialCustomResponseParameters();
+
+        ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.QUERY),
+                AccessType.APPROVED, false, false);
+        if (error != null)
+        {
+            return makeErrorResponse(error, ResponseAction.QUERY, responseParam);
+        }
+
+        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) getProvider();
+        if (provider == null)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
+                            "No Provider for " + infraObjectNamePlural + " available."),
+                    ResponseAction.CREATE, responseParam);
+        }
+
+        // Ignore the marshaller/unmarshaller - just reflect the contentType and
+        // accept header information
+        determineMediaTypes(null, null, false);
+
+        try
+        {
+            Object returnObj = provider.retrieveToPhase(resourceID, phaseName, payload,
+                    getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(),
+                    getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+            if (returnObj != null)
+            {
+                return makeResponse(returnObj, Status.OK.getStatusCode(), false,
+                        ResponseAction.QUERY, responseParam, null);
+            }
+            else
+            {
+                return makeErrorResponse(
+                        new ErrorDetails(Status.NOT_FOUND.getStatusCode(),
+                                provider.getSingleObjectClassInfo().getObjectName()
+                                        + " with resouce ID = " + resourceID + " does not exist."),
+                        ResponseAction.QUERY, responseParam);
+            }
+        }
+        catch (PersistenceException ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                            "Failed to retrieve "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + " for resource ID = " + resourceID + ". Problem reported: "
+                                    + ex.getMessage()),
+                    ResponseAction.QUERY, responseParam);
+        }
+        catch (IllegalArgumentException ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                            "Failed to retrieve "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + " with resouce ID = " + resourceID + ". Problem reported: "
+                                    + ex.getMessage()),
+                    ResponseAction.QUERY, responseParam);
+        }
+        catch (ForbiddenException ex)
+        {
+            return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(),
+                    "Consumer is not authorized to issue the requested operation.",
+                    AccessRight.CREATE.name() + " access is not set to "
+                            + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural
+                            + " functional service",
+                    "Provider side check."), ResponseAction.QUERY, responseParam);
+        }
+        catch (SIF3Exception ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                            "Failed to retrieve "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + " with resouce ID = " + resourceID + ". Problem reported: "
+                                    + ex.getMessage()),
+                    ResponseAction.QUERY, responseParam);
+        }
+    }
+
+    @PUT
+    @Path("{resourceID:([^\\.]*)}/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
+    public Response updateToPhase(String payload, @PathParam("resourceID") String resourceID,
+            @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType)
+    {
+        if (logger.isDebugEnabled())
+        {
+            logger.debug(
+                    "Update to phase " + phaseName + " (REST POST) with URL Postfix mimeType = '"
+                            + mimeType + "' and input data: " + payload);
+        }
+
+        ResponseParameters responseParam = getInitialCustomResponseParameters();
+
+        ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.UPDATE),
+                AccessType.APPROVED, false, false);
+        if (error != null)
+        {
+            return makeErrorResponse(error, ResponseAction.UPDATE, responseParam);
+        }
+
+        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) getProvider();
+        if (provider == null)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
+                            "No Provider for " + infraObjectNamePlural + " available."),
+                    ResponseAction.CREATE, responseParam);
+        }
+
+        // Ignore the marshaller/unmarshaller - just reflect the contentType and
+        // accept header information
+        determineMediaTypes(null, null, false);
+
+        try
+        {
+            String returnObj = provider.updateToPhase(resourceID, phaseName, payload,
+                    getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(),
+                    getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+            return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.UPDATE,
+                    responseParam, null);
+        }
+        catch (PersistenceException ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                            "Failed to update "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + " with resouce ID = " + resourceID + ". Problem reported: "
+                                    + ex.getMessage()),
+                    ResponseAction.UPDATE, responseParam);
+        }
+        catch (IllegalArgumentException ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                            "Failed to update "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + " with resouce ID = " + resourceID + ". Problem reported: "
+                                    + ex.getMessage()),
+                    ResponseAction.UPDATE, responseParam);
+        }
+        catch (UnmarshalException ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+                            "Could not unmarshal the given data to "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + ". Problem reported: " + ex.getMessage()),
+                    ResponseAction.UPDATE, responseParam);
+        }
+        catch (UnsupportedMediaTypeException ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(),
+                            "Could not unmarshal the given data to "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + ". Problem reported: " + ex.getMessage()),
+                    ResponseAction.UPDATE, responseParam);
+        }
+        catch (ForbiddenException ex)
+        {
+            return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(),
+                    "Consumer is not authorized to issue the requested operation.",
+                    AccessRight.CREATE.name() + " access is not set to "
+                            + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural
+                            + " functional service",
+                    "Provider side check."), ResponseAction.UPDATE, responseParam);
+        }
+        catch (SIF3Exception ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                            "Failed to update "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + " with resouce ID = " + resourceID + ". Problem reported: "
+                                    + ex.getMessage()),
+                    ResponseAction.UPDATE, responseParam);
+        }
+    }
+
+    @DELETE
+    @Path("{resourceID:([^\\.]*)}/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
+    public Response deleteToPhase(String payload, @PathParam("resourceID") String resourceID,
+            @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType)
+    {
+        if (logger.isDebugEnabled())
+        {
+            logger.debug(
+                    "Delete to phase " + phaseName + " (REST POST) with URL Postfix mimeType = '"
+                            + mimeType + "' and input data: " + payload);
+        }
+
+        ResponseParameters responseParam = getInitialCustomResponseParameters();
+
+        ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.DELETE),
+                AccessType.APPROVED, false, false);
+        if (error != null)
+        {
+            return makeErrorResponse(error, ResponseAction.DELETE, responseParam);
+        }
+
+        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) getProvider();
+        if (provider == null)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
+                            "No Provider for " + infraObjectNamePlural + " available."),
+                    ResponseAction.CREATE, responseParam);
+        }
+
+        // Ignore the marshaller/unmarshaller - just reflect the contentType and
+        // accept header information
+        determineMediaTypes(null, null, false);
+
+        try
+        {
+            String returnObj = provider.deleteToPhase(resourceID, phaseName, payload,
+                    getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(),
+                    getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+            return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.UPDATE,
+                    responseParam, null);
+        }
+        catch (PersistenceException ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                            "Failed to delete "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + " with resouce ID = " + resourceID + ". Problem reported: "
+                                    + ex.getMessage()),
+                    ResponseAction.DELETE, responseParam);
+        }
+        catch (IllegalArgumentException ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                            "Failed to delete "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + " with resouce ID = " + resourceID + ". Problem reported: "
+                                    + ex.getMessage()),
+                    ResponseAction.DELETE, responseParam);
+        }
+        catch (ForbiddenException ex)
+        {
+            return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(),
+                    "Consumer is not authorized to issue the requested operation.",
+                    AccessRight.CREATE.name() + " access is not set to "
+                            + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural
+                            + " functional service",
+                    "Provider side check."), ResponseAction.DELETE, responseParam);
+        }
+        catch (SIF3Exception ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                            "Failed to delete "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + " with resouce ID = " + resourceID + ". Problem reported: "
+                                    + ex.getMessage()),
+                    ResponseAction.DELETE, responseParam);
+        }
+    }
+
+    // ------------ //
+    // -- States -- //
+    // ------------ //
+    @POST
+    @Path("{resourceID:([^\\.]*)}/{phaseName:([^\\.]*)}/states/state{mimeType:(\\.[^/]*?)?}")
+    public Response createToState(String payload, @PathParam("resourceID") String resourceID,
+            @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType)
+    {
+        if (logger.isDebugEnabled())
+        {
+            logger.debug(
+                    "Create to state on " + phaseName + " (REST POST) with URL Postfix mimeType = '"
+                            + mimeType + "' and input data: " + payload);
+        }
+
+        ResponseParameters responseParam = getInitialCustomResponseParameters();
+
+        ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.UPDATE),
+                AccessType.APPROVED, false, false);
+        if (error != null)
+        {
+            return makeErrorResponse(error, ResponseAction.CREATE, responseParam);
+        }
+
+        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) getProvider();
+        if (provider == null)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
+                            "No Provider for " + infraObjectNamePlural + " available."),
+                    ResponseAction.CREATE, responseParam);
+        }
+
+        try
+        {
+            StateType state = provider.createToState(resourceID, phaseName,
+                    provider.getUnmarshaller().unmarshal(payload, StateType.class,
+                            getRequestMediaType()),
+                    getSifZone(), getSifContext(),
+                    getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+
+            return makeResponse(state, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE,
+                    responseParam, provider.getMarshaller());
+        }
+        catch (PersistenceException ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                            "Failed to create State object. Problem reported: " + ex.getMessage()),
+                    ResponseAction.CREATE, responseParam);
+        }
+        catch (UnmarshalException ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+                            "Could not unmarshal data. Problem reported: " + ex.getMessage()),
+                    ResponseAction.CREATE, responseParam);
+        }
+        catch (UnsupportedMediaTypeException ex)
+        {
+            return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(),
+                    "Could not unmarshal data due to unsupported media type. Problem reported: "
+                            + ex.getMessage()),
+                    ResponseAction.CREATE, responseParam);
+        }
+        catch (SIF3Exception ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+                            "Unexpected error. Problem reported: " + ex.getMessage()),
+                    ResponseAction.CREATE, responseParam);
+        }
+    }
+    
     /*----------------------------------------------------------------------*/
     /*-- HEAD Methods: Only the root Object service provides full support --*/
     /*----------------------------------------------------------------------*/
@@ -1154,455 +1603,6 @@ public class ServiceResource extends InfraResource
                                     + provider.getSingleObjectClassInfo().getObjectName()
                                     + ". Problem reported: " + ex.getMessage()),
                     ResponseAction.QUERY, responseParam);
-        }
-    }
-
-    // ------------ //
-    // -- Phases -- //
-    // ------------ //
-    @POST
-    @Path("{resourceID:([^\\.]*)}/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
-    public Response createToPhase(String payload, @PathParam("resourceID") String resourceID,
-            @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType)
-    {
-        if (logger.isDebugEnabled())
-        {
-            logger.debug(
-                    "Create to phase " + phaseName + " (REST POST) with URL Postfix mimeType = '"
-                            + mimeType + "' and input data: " + payload);
-        }
-
-        ResponseParameters responseParam = getInitialCustomResponseParameters();
-
-        ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.CREATE),
-                AccessType.APPROVED, false, false);
-        if (error != null)
-        {
-            return makeErrorResponse(error, ResponseAction.CREATE, responseParam);
-        }
-
-        FunctionalServiceProvider provider = (FunctionalServiceProvider) getProvider();
-        if (provider == null)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
-                            "No Provider for " + infraObjectNamePlural + " available."),
-                    ResponseAction.CREATE, responseParam);
-        }
-
-        // Ignore the marshaller/unmarshaller - just reflect the contentType and
-        // accept header information
-        determineMediaTypes(null, null, false);
-
-        try
-        {
-            String returnPayload = provider.createToPhase(resourceID, phaseName, payload,
-                    getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(),
-                    getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
-            return makeResponse(returnPayload, Status.CREATED.getStatusCode(), false,
-                    ResponseAction.CREATE, responseParam, null);
-        }
-        catch (PersistenceException ex)
-        {
-            return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                    "Failed to create phase for job " + resourceID + ". Problem reported: "
-                            + ex.getMessage()),
-                    ResponseAction.CREATE, responseParam);
-        }
-        catch (UnmarshalException ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
-                            "Could not unmarshal the data. Problem reported: " + ex.getMessage()),
-                    ResponseAction.CREATE, responseParam);
-        }
-        catch (UnsupportedMediaTypeException ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(),
-                            "Could not unmarshal the data. Problem reported: " + ex.getMessage()),
-                    ResponseAction.CREATE, responseParam);
-        }
-        catch (UnsupportedQueryException ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
-                            "Unsupported operation. Problem reported: " + ex.getMessage()),
-                    ResponseAction.CREATE, responseParam);
-        }
-        catch (BadRequestException ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
-                            "Bad request. Problem reported: " + ex.getMessage()),
-                    ResponseAction.CREATE, responseParam);
-        }
-        catch (ForbiddenException ex)
-        {
-            return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(),
-                    "Consumer is not authorized to issue the requested operation.",
-                    AccessRight.CREATE.name() + " access is not set to "
-                            + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural
-                            + " functional service",
-                    "Provider side check."), ResponseAction.CREATE, responseParam);
-        }
-        catch (SIF3Exception ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
-                            "Unexpected error. Problem reported: " + ex.getMessage()),
-                    ResponseAction.CREATE, responseParam);
-        }
-    }
-
-    @GET
-    @Path("{resourceID:([^\\.]*)}/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
-    public Response retrieveToPhase(String payload, @PathParam("resourceID") String resourceID,
-            @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType)
-    {
-        if (logger.isDebugEnabled())
-        {
-            logger.debug("Get phase " + phaseName + " by Job ID (REST GET): " + resourceID
-                    + " and URL Postfix mimeType = '" + mimeType + "'");
-        }
-
-        ResponseParameters responseParam = getInitialCustomResponseParameters();
-
-        ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.QUERY),
-                AccessType.APPROVED, false, false);
-        if (error != null)
-        {
-            return makeErrorResponse(error, ResponseAction.QUERY, responseParam);
-        }
-
-        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) getProvider();
-        if (provider == null)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
-                            "No Provider for " + infraObjectNamePlural + " available."),
-                    ResponseAction.CREATE, responseParam);
-        }
-
-        // Ignore the marshaller/unmarshaller - just reflect the contentType and
-        // accept header information
-        determineMediaTypes(null, null, false);
-
-        try
-        {
-            Object returnObj = provider.retrieveToPhase(resourceID, phaseName, payload,
-                    getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(),
-                    getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
-            if (returnObj != null)
-            {
-                return makeResponse(returnObj, Status.OK.getStatusCode(), false,
-                        ResponseAction.QUERY, responseParam, null);
-            }
-            else
-            {
-                return makeErrorResponse(
-                        new ErrorDetails(Status.NOT_FOUND.getStatusCode(),
-                                provider.getSingleObjectClassInfo().getObjectName()
-                                        + " with resouce ID = " + resourceID + " does not exist."),
-                        ResponseAction.QUERY, responseParam);
-            }
-        }
-        catch (PersistenceException ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                            "Failed to retrieve "
-                                    + provider.getSingleObjectClassInfo().getObjectName()
-                                    + " for resource ID = " + resourceID + ". Problem reported: "
-                                    + ex.getMessage()),
-                    ResponseAction.QUERY, responseParam);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                            "Failed to retrieve "
-                                    + provider.getSingleObjectClassInfo().getObjectName()
-                                    + " with resouce ID = " + resourceID + ". Problem reported: "
-                                    + ex.getMessage()),
-                    ResponseAction.QUERY, responseParam);
-        }
-        catch (ForbiddenException ex)
-        {
-            return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(),
-                    "Consumer is not authorized to issue the requested operation.",
-                    AccessRight.CREATE.name() + " access is not set to "
-                            + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural
-                            + " functional service",
-                    "Provider side check."), ResponseAction.QUERY, responseParam);
-        }
-        catch (SIF3Exception ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                            "Failed to retrieve "
-                                    + provider.getSingleObjectClassInfo().getObjectName()
-                                    + " with resouce ID = " + resourceID + ". Problem reported: "
-                                    + ex.getMessage()),
-                    ResponseAction.QUERY, responseParam);
-        }
-    }
-
-    @PUT
-    @Path("{resourceID:([^\\.]*)}/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
-    public Response updateToPhase(String payload, @PathParam("resourceID") String resourceID,
-            @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType)
-    {
-        if (logger.isDebugEnabled())
-        {
-            logger.debug(
-                    "Update to phase " + phaseName + " (REST POST) with URL Postfix mimeType = '"
-                            + mimeType + "' and input data: " + payload);
-        }
-
-        ResponseParameters responseParam = getInitialCustomResponseParameters();
-
-        ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.UPDATE),
-                AccessType.APPROVED, false, false);
-        if (error != null)
-        {
-            return makeErrorResponse(error, ResponseAction.UPDATE, responseParam);
-        }
-
-        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) getProvider();
-        if (provider == null)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
-                            "No Provider for " + infraObjectNamePlural + " available."),
-                    ResponseAction.CREATE, responseParam);
-        }
-
-        // Ignore the marshaller/unmarshaller - just reflect the contentType and
-        // accept header information
-        determineMediaTypes(null, null, false);
-
-        try
-        {
-            String returnObj = provider.updateToPhase(resourceID, phaseName, payload,
-                    getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(),
-                    getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
-            return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.UPDATE,
-                    responseParam, null);
-        }
-        catch (PersistenceException ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                            "Failed to update "
-                                    + provider.getSingleObjectClassInfo().getObjectName()
-                                    + " with resouce ID = " + resourceID + ". Problem reported: "
-                                    + ex.getMessage()),
-                    ResponseAction.UPDATE, responseParam);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                            "Failed to update "
-                                    + provider.getSingleObjectClassInfo().getObjectName()
-                                    + " with resouce ID = " + resourceID + ". Problem reported: "
-                                    + ex.getMessage()),
-                    ResponseAction.UPDATE, responseParam);
-        }
-        catch (UnmarshalException ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
-                            "Could not unmarshal the given data to "
-                                    + provider.getSingleObjectClassInfo().getObjectName()
-                                    + ". Problem reported: " + ex.getMessage()),
-                    ResponseAction.UPDATE, responseParam);
-        }
-        catch (UnsupportedMediaTypeException ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(),
-                            "Could not unmarshal the given data to "
-                                    + provider.getSingleObjectClassInfo().getObjectName()
-                                    + ". Problem reported: " + ex.getMessage()),
-                    ResponseAction.UPDATE, responseParam);
-        }
-        catch (ForbiddenException ex)
-        {
-            return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(),
-                    "Consumer is not authorized to issue the requested operation.",
-                    AccessRight.CREATE.name() + " access is not set to "
-                            + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural
-                            + " functional service",
-                    "Provider side check."), ResponseAction.UPDATE, responseParam);
-        }
-        catch (SIF3Exception ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                            "Failed to update "
-                                    + provider.getSingleObjectClassInfo().getObjectName()
-                                    + " with resouce ID = " + resourceID + ". Problem reported: "
-                                    + ex.getMessage()),
-                    ResponseAction.UPDATE, responseParam);
-        }
-    }
-
-    @DELETE
-    @Path("{resourceID:([^\\.]*)}/{phaseName:([^\\.]*)}{mimeType:(\\.[^/]*?)?}")
-    public Response deleteToPhase(String payload, @PathParam("resourceID") String resourceID,
-            @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType)
-    {
-        if (logger.isDebugEnabled())
-        {
-            logger.debug(
-                    "Delete to phase " + phaseName + " (REST POST) with URL Postfix mimeType = '"
-                            + mimeType + "' and input data: " + payload);
-        }
-
-        ResponseParameters responseParam = getInitialCustomResponseParameters();
-
-        ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.DELETE),
-                AccessType.APPROVED, false, false);
-        if (error != null)
-        {
-            return makeErrorResponse(error, ResponseAction.DELETE, responseParam);
-        }
-
-        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) getProvider();
-        if (provider == null)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
-                            "No Provider for " + infraObjectNamePlural + " available."),
-                    ResponseAction.CREATE, responseParam);
-        }
-
-        // Ignore the marshaller/unmarshaller - just reflect the contentType and
-        // accept header information
-        determineMediaTypes(null, null, false);
-
-        try
-        {
-            String returnObj = provider.deleteToPhase(resourceID, phaseName, payload,
-                    getRequestMediaType(), getResponseMediaType(), getSifZone(), getSifContext(),
-                    getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
-            return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.UPDATE,
-                    responseParam, null);
-        }
-        catch (PersistenceException ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                            "Failed to delete "
-                                    + provider.getSingleObjectClassInfo().getObjectName()
-                                    + " with resouce ID = " + resourceID + ". Problem reported: "
-                                    + ex.getMessage()),
-                    ResponseAction.DELETE, responseParam);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                            "Failed to delete "
-                                    + provider.getSingleObjectClassInfo().getObjectName()
-                                    + " with resouce ID = " + resourceID + ". Problem reported: "
-                                    + ex.getMessage()),
-                    ResponseAction.DELETE, responseParam);
-        }
-        catch (ForbiddenException ex)
-        {
-            return makeErrorResponse(new ErrorDetails(Status.FORBIDDEN.getStatusCode(),
-                    "Consumer is not authorized to issue the requested operation.",
-                    AccessRight.CREATE.name() + " access is not set to "
-                            + AccessType.APPROVED.name() + " for the " + infraObjectNamePlural
-                            + " functional service",
-                    "Provider side check."), ResponseAction.DELETE, responseParam);
-        }
-        catch (SIF3Exception ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                            "Failed to delete "
-                                    + provider.getSingleObjectClassInfo().getObjectName()
-                                    + " with resouce ID = " + resourceID + ". Problem reported: "
-                                    + ex.getMessage()),
-                    ResponseAction.DELETE, responseParam);
-        }
-    }
-
-    // ------------ //
-    // -- States -- //
-    // ------------ //
-    @POST
-    @Path("{resourceID:([^\\.]*)}/{phaseName:([^\\.]*)}/states/state{mimeType:(\\.[^/]*?)?}")
-    public Response createToState(String payload, @PathParam("resourceID") String resourceID,
-            @PathParam("phaseName") String phaseName, @PathParam("mimeType") String mimeType)
-    {
-        if (logger.isDebugEnabled())
-        {
-            logger.debug(
-                    "Create to state on " + phaseName + " (REST POST) with URL Postfix mimeType = '"
-                            + mimeType + "' and input data: " + payload);
-        }
-
-        ResponseParameters responseParam = getInitialCustomResponseParameters();
-
-        ErrorDetails error = validClient(infraObjectNamePlural, getRight(AccessRight.UPDATE),
-                AccessType.APPROVED, false, false);
-        if (error != null)
-        {
-            return makeErrorResponse(error, ResponseAction.CREATE, responseParam);
-        }
-
-        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) getProvider();
-        if (provider == null)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
-                            "No Provider for " + infraObjectNamePlural + " available."),
-                    ResponseAction.CREATE, responseParam);
-        }
-
-        try
-        {
-            StateType state = provider.createToState(resourceID, phaseName,
-                    provider.getUnmarshaller().unmarshal(payload, StateType.class,
-                            getRequestMediaType()),
-                    getSifZone(), getSifContext(),
-                    getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
-
-            return makeResponse(state, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE,
-                    responseParam, provider.getMarshaller());
-        }
-        catch (PersistenceException ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                            "Failed to create State object. Problem reported: " + ex.getMessage()),
-                    ResponseAction.CREATE, responseParam);
-        }
-        catch (UnmarshalException ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
-                            "Could not unmarshal data. Problem reported: " + ex.getMessage()),
-                    ResponseAction.CREATE, responseParam);
-        }
-        catch (UnsupportedMediaTypeException ex)
-        {
-            return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(),
-                    "Could not unmarshal data due to unsupported media type. Problem reported: "
-                            + ex.getMessage()),
-                    ResponseAction.CREATE, responseParam);
-        }
-        catch (SIF3Exception ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
-                            "Unexpected error. Problem reported: " + ex.getMessage()),
-                    ResponseAction.CREATE, responseParam);
         }
     }
 }
