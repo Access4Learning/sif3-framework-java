@@ -31,6 +31,7 @@ import org.apache.log4j.Logger;
 
 import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
+import sif3.common.CommonConstants.PhaseState;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.BadRequestException;
@@ -57,7 +58,6 @@ import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
-import sif3.infra.common.ServiceStatus.PhaseState;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.interfaces.PhaseActions;
@@ -985,7 +985,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
                     "No phase found called " + phaseName + " on job with id " + resourceID + ".");
         }
 
-        ServiceUtils.changePhaseState(job, phase, PhaseState.valueOf(state.getType().name()),
+        ServiceUtils.changePhaseState(job, phase, CommonConstants.PhaseState.valueOf(state.getType().name()),
                 state.getDescription());
 
         job = sif3JobService.save(job);

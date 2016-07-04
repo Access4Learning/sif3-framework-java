@@ -16,6 +16,9 @@ package zinet.sif3.demo.uk.rest.provider.actions;
 
 import javax.ws.rs.core.MediaType;
 
+import sif3.common.CommonConstants;
+import sif3.common.CommonConstants.JobState;
+import sif3.common.CommonConstants.PhaseState;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeException;
@@ -23,8 +26,6 @@ import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
-import sif3.infra.common.ServiceStatus.JobState;
-import sif3.infra.common.ServiceStatus.PhaseState;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.PhaseType;
 import sif3.infra.common.utils.ServiceUtils;
@@ -44,8 +45,8 @@ public class DefaultActions extends BasePhaseActions
             throws IllegalArgumentException, PersistenceException, UnmarshalException,
             UnsupportedMediaTypeException, UnsupportedQueryException
     {
-        ServiceUtils.changeJobState(job, JobState.INPROGRESS, "CREATE to " + phase.getName());
-        ServiceUtils.changePhaseState(job, phase, PhaseState.INPROGRESS, "CREATE");
+        ServiceUtils.changeJobState(job, CommonConstants.JobState.INPROGRESS, "CREATE to " + phase.getName());
+        ServiceUtils.changePhaseState(job, phase, CommonConstants.PhaseState.INPROGRESS, "CREATE");
 
         getProvider().sendJobEvent(job, phase.getName(), EventAction.UPDATE, zone, context);
 
@@ -58,8 +59,8 @@ public class DefaultActions extends BasePhaseActions
     public String retrieve(JobType job, PhaseType phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
     {
-        ServiceUtils.changeJobState(job, JobState.INPROGRESS, "RETRIEVE to " + phase.getName());
-        ServiceUtils.changePhaseState(job, phase, PhaseState.INPROGRESS, "RETRIEVE");
+        ServiceUtils.changeJobState(job, CommonConstants.JobState.INPROGRESS, "RETRIEVE to " + phase.getName());
+        ServiceUtils.changePhaseState(job, phase, CommonConstants.PhaseState.INPROGRESS, "RETRIEVE");
 
         getProvider().sendJobEvent(job, phase.getName(), EventAction.UPDATE, zone, context);
 
@@ -71,8 +72,8 @@ public class DefaultActions extends BasePhaseActions
     public String update(JobType job, PhaseType phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
     {
-        ServiceUtils.changeJobState(job, JobState.INPROGRESS, "UPDATE to " + phase.getName());
-        ServiceUtils.changePhaseState(job, phase, PhaseState.COMPLETED, "UPDATE");
+        ServiceUtils.changeJobState(job, CommonConstants.JobState.INPROGRESS, "UPDATE to " + phase.getName());
+        ServiceUtils.changePhaseState(job, phase, CommonConstants.PhaseState.COMPLETED, "UPDATE");
 
         getProvider().sendJobEvent(job, phase.getName(), EventAction.UPDATE, zone, context);
 
@@ -85,8 +86,8 @@ public class DefaultActions extends BasePhaseActions
     public String delete(JobType job, PhaseType phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
     {
-        ServiceUtils.changeJobState(job, JobState.INPROGRESS, "DELETE to " + phase.getName());
-        ServiceUtils.changePhaseState(job, phase, PhaseState.COMPLETED, "DELETE");
+        ServiceUtils.changeJobState(job, CommonConstants.JobState.INPROGRESS, "DELETE to " + phase.getName());
+        ServiceUtils.changePhaseState(job, phase, CommonConstants.PhaseState.COMPLETED, "DELETE");
 
         getProvider().sendJobEvent(job, phase.getName(), EventAction.UPDATE, zone, context);
 

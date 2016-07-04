@@ -19,10 +19,11 @@ import java.util.List;
 import java.util.TimeZone;
 
 import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.CommonConstants;
+import sif3.common.CommonConstants.JobState;
+import sif3.common.CommonConstants.PhaseState;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
-import sif3.infra.common.ServiceStatus.JobState;
-import sif3.infra.common.ServiceStatus.PhaseState;
 import sif3.infra.common.model.JobStateType;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.ObjectFactory;
@@ -139,7 +140,7 @@ public class ServiceUtils
     public static PhaseType addPhase(JobType job, String phaseName, boolean required,
             List<RightType> rights, List<RightType> statesRights)
     {
-        return addPhase(job, phaseName, required, rights, statesRights, PhaseState.NOTSTARTED,
+        return addPhase(job, phaseName, required, rights, statesRights, CommonConstants.PhaseState.NOTSTARTED,
                 null);
     }
 
@@ -161,7 +162,7 @@ public class ServiceUtils
      * @return The phase instance that has been added to the job
      */
     public static PhaseType addPhase(JobType job, String phaseName, boolean required,
-            List<RightType> rights, List<RightType> statesRights, PhaseState state)
+            List<RightType> rights, List<RightType> statesRights, CommonConstants.PhaseState state)
     {
         return addPhase(job, phaseName, required, rights, statesRights, state, null);
     }
@@ -186,7 +187,7 @@ public class ServiceUtils
      * @return The phase instance that has been added to the job
      */
     public static PhaseType addPhase(JobType job, String phaseName, boolean required,
-            List<RightType> rights, List<RightType> statesRights, PhaseState state,
+            List<RightType> rights, List<RightType> statesRights, CommonConstants.PhaseState state,
             String stateDescription)
     {
         if (job.getPhases() == null)
@@ -239,7 +240,7 @@ public class ServiceUtils
      * @param description
      *            The description of the state change
      */
-    public static void changeJobState(JobType job, JobState state, String description)
+    public static void changeJobState(JobType job, CommonConstants.JobState state, String description)
     {
         job.setLastModified(Calendar.getInstance(TimeZone.getTimeZone("UTC")));
         job.setStateDescription(description);
@@ -259,7 +260,7 @@ public class ServiceUtils
      *            The description of the new state
      * @return The state that the phase has been updated with
      */
-    public static StateType changePhaseState(JobType job, PhaseType phase, PhaseState state,
+    public static StateType changePhaseState(JobType job, PhaseType phase, CommonConstants.PhaseState state,
             String description)
     {
         if (!job.getPhases().getPhase().contains(phase))

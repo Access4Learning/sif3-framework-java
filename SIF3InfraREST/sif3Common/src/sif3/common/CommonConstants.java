@@ -117,8 +117,18 @@ public class CommonConstants
 	 * Polling Type on Queues
 	 */
 	public enum QueuePollingType {IMMEDIATE, LONG};
-		
-	/*------------------------------------------------------------------------------------*/
+	
+	/*
+     * Job states (for functional services)
+     */
+	public enum JobState {NOTSTARTED, INPROGRESS, COMPLETED, FAILED}
+
+	/*
+     * Phase states (for functional services)
+     */
+    public enum PhaseState {NOTAPPLICABLE, NOTSTARTED, PENDING, SKIPPED, INPROGRESS, COMPLETED, FAILED}
+
+    /*------------------------------------------------------------------------------------*/
 	/* URL Query Parameter names in relation to security (special case for SIF Express) --*/
 	/*------------------------------------------------------------------------------------*/
 	public static final String ACCESS_TOKEN      = "access_token";

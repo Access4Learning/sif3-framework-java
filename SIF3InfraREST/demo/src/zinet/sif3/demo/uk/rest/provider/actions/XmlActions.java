@@ -19,6 +19,9 @@ import javax.ws.rs.core.MediaType;
 import sif.dd.conversion.DataModelUnmarshalFactory;
 import sif.dd.uk20.model.LearnerPersonalType;
 import sif.dd.uk20.model.NameType;
+import sif3.common.CommonConstants;
+import sif3.common.CommonConstants.JobState;
+import sif3.common.CommonConstants.PhaseState;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeException;
@@ -26,8 +29,6 @@ import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
-import sif3.infra.common.ServiceStatus.JobState;
-import sif3.infra.common.ServiceStatus.PhaseState;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.PhaseType;
 import sif3.infra.common.utils.ServiceUtils;
@@ -47,14 +48,14 @@ public class XmlActions extends BasePhaseActions
             throws IllegalArgumentException, PersistenceException, UnmarshalException,
             UnsupportedMediaTypeException, UnsupportedQueryException
     {
-        ServiceUtils.changeJobState(job, JobState.INPROGRESS, "UPDATE to " + phase.getName());
+        ServiceUtils.changeJobState(job, CommonConstants.JobState.INPROGRESS, "UPDATE to " + phase.getName());
 
         String response;
         if (!requestMediaType.isCompatible(MediaType.APPLICATION_XML_TYPE))
         {
             response = "Invalid Content-Type, expecting "
                     + MediaType.APPLICATION_XML_TYPE.toString();
-            ServiceUtils.changePhaseState(job, phase, PhaseState.FAILED, response);
+            ServiceUtils.changePhaseState(job, phase, CommonConstants.PhaseState.FAILED, response);
             throw new IllegalArgumentException(response);
         }
 
@@ -62,7 +63,7 @@ public class XmlActions extends BasePhaseActions
                 .unmarshalFromXML(payload, LearnerPersonalType.class);
 
         NameType name = learner.getPersonalInformation().getName();
-        ServiceUtils.changePhaseState(job, phase, PhaseState.COMPLETED, "UPDATE");
+        ServiceUtils.changePhaseState(job, phase, CommonConstants.PhaseState.COMPLETED, "UPDATE");
 
         getProvider().sendJobEvent(job, phase.getName(), EventAction.UPDATE, zone, context);
 
