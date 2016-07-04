@@ -60,7 +60,7 @@ public class ServiceInfo extends ZoneContextInfo implements Serializable
      * Constructor
      * 
      * @param serviceName The name of a service such as 'StudentPersonals', 'alerts', 'zones' etc. This is NOT the name of the adapter!
-     * @param serviceType Indicates if the service is an OBJECT, UTILITY or FUNCTIONal service as defined by the SIF3 spec.
+     * @param serviceType Indicates if the service is an OBJECT, UTILITY or FUNCTIONAL service as defined by the SIF3 spec.
      */
     public ServiceInfo(String serviceName, ServiceType serviceType)
     {
