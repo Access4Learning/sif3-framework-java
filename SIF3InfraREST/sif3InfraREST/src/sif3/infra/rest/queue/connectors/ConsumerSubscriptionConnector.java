@@ -206,6 +206,7 @@ public class ConsumerSubscriptionConnector
         		// Check if the current consumer has subscriptions active that are no longer allowed according to the ACLs!
     			checkSubscriptionsWithACL();
     			
+    			//FIXME Joerg, should the following line of code really be in the for loop?
     			// Create required subscriptions for those that are missing.
     			createMissingSubscriptions(queues);
     		}
@@ -388,14 +389,14 @@ public class ConsumerSubscriptionConnector
 					if (queueInfo.getListeners().keySet() != null)
 					{
             			List<SIF3Subscription> dbSubscriptions = subscriptionService.getSubscriptionsForQueue(queueInfo.getQueue().getQueueID(), CONSUMER);
-            			for (SubscriptionKey subcriptionKey : queueInfo.getListeners().keySet())
+            			for (SubscriptionKey subscriptionKey : queueInfo.getListeners().keySet())
             			{
             				// Because the subscription key map is based on the ACL it also means that the subscription must be allowed!
-        					SIF3Subscription dbSubscription = getSubscriptionFromList(subcriptionKey, dbSubscriptions);
+        					SIF3Subscription dbSubscription = getSubscriptionFromList(subscriptionKey, dbSubscriptions);
         					if (dbSubscription == null) // does not exist => create subscription
         					{
-        						logger.debug("The subscription with the following details doesn't exist and will be created:\n"+subcriptionKey);
-        						createSubscription(subcriptionKey, queueInfo);
+        						logger.debug("The subscription with the following details doesn't exist and will be created:\n"+subscriptionKey);
+        						createSubscription(subscriptionKey, queueInfo);
         					}
             			}
 					}
