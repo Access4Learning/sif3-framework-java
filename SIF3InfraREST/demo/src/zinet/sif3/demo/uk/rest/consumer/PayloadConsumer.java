@@ -78,23 +78,15 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     job.setDescription("testing");
                     responses = createSingle(job, null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    if (r == null)
-                    {
-                        logger.error("Didn't get a response when creating a job");
-                    }
                     // logger.debug(r.toString());
-                    job = (JobType) r.getDataObject();
+                    job = (JobType) getDataObject(r);
                     logger.info(makeResult("Job created and given ID " + job.getId()));
 
                     // Get a job
                     logger.info(makeHeading("Fetching job " + job.getId()));
                     responses = retrieveByPrimaryKey(job.getId(), null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    if (r == null)
-                    {
-                        logger.error("Didn't get a response when retrieving a job");
-                    }
-                    job = (JobType) r.getDataObject();
+                    job = (JobType) getDataObject(r);
                     logger.info(makeResult("Fetched " + job.getName() + " (" + job.getId() + ")"));
 
                     // Create message to phase default
@@ -102,23 +94,15 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     responses = createToPhase(job.getId(), "default", "Sending CREATE",
                             MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_PLAIN_TYPE, null, null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    if (r == null)
-                    {
-                        logger.error("Didn't get a response when calling create on a phase");
-                    }
                     logger.info(makeResult("Phase responded with data with mime type: "
-                            + r.getMediaType() + " and data:\n" + r.getDataObject()));
+                            + r.getMediaType() + " and data:\n" + getDataObject(r)));
 
                     // Query phase "default", expecting INPROGRESS
                     logger.info(
                             makeHeading("Check state of phase 'default', expecting INPROGRESS."));
                     responses = retrieveByPrimaryKey(job.getId(), null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    if (r == null)
-                    {
-                        logger.error("Didn't get a response when retrieving a job");
-                    }
-                    job = (JobType) r.getDataObject();
+                    job = (JobType) getDataObject(r);
                     state = ServiceUtils.getLastPhaseState(job, "default");
                     if (state == null)
                     {
@@ -143,23 +127,15 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     responses = updateToPhase(job.getId(), "default", "Sending UPDATE",
                             MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_PLAIN_TYPE, null, null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    if (r == null)
-                    {
-                        logger.error("Didn't get a response when calling update on a phase");
-                    }
                     logger.info(makeResult("Phase responded with data with mime type: "
-                            + r.getMediaType() + " and data:\n" + r.getDataObject()));
+                            + r.getMediaType() + " and data:\n" + getDataObject(r)));
 
                     // Query phase "default", expecting COMPLETED
                     logger.info(
                             makeHeading("Check state of phase 'default', expecting COMPLETED."));
                     responses = retrieveByPrimaryKey(job.getId(), null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    if (r == null)
-                    {
-                        logger.error("Didn't get a response when retrieving a job");
-                    }
-                    job = (JobType) r.getDataObject();
+                    job = (JobType) getDataObject(r);
                     state = ServiceUtils.getLastPhaseState(job, "default");
                     if (state == null)
                     {
@@ -184,23 +160,8 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     responses = deleteToPhase(job.getId(), "default", "Sending DELETE",
                             MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_PLAIN_TYPE, null, null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    if (r == null)
-                    {
-                        logger.error("Didn't get a response when calling delete on a phase");
-                    }
-                    if (r.hasError())
-                    {
-                        logger.info(makeResult("EXPECTED error obtained (HTTP:" + r.getStatus()
-                                + "), provider responded with:\nCode: "
-                                + r.getError().getErrorCode() + "\nMessage: "
-                                + r.getError().getMessage() + "\nDescription: "
-                                + r.getError().getDescription()));
-                    }
-                    else
-                    {
-                        logger.info(makeResult("UNEXPECTED - no error obtained!"));
-                    }
-
+                    expectError(r);
+                    
                     // Execute UPDATE to phase "xml".
                     logger.info(makeHeading("Executing UPDATE to phase 'xml'."));
                     String xml = new DataModelMarshalFactory(sif.dd.uk20.model.ObjectFactory.class)
@@ -208,12 +169,8 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     responses = updateToPhase(job.getId(), "xml", xml,
                             MediaType.APPLICATION_XML_TYPE, MediaType.TEXT_PLAIN_TYPE, null, null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    if (r == null)
-                    {
-                        logger.error("Didn't get a response when calling create on a phase");
-                    }
                     logger.info(makeResult("Phase responded with data with mime type: "
-                            + r.getMediaType() + " and data:\n" + r.getDataObject()));
+                            + r.getMediaType() + " and data:\n" + getDataObject(r)));
 
                     // Execute UPDATE to phase "json".
                     logger.info(makeHeading("Executing UPDATE to phase 'json'."));
@@ -222,12 +179,8 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     responses = updateToPhase(job.getId(), "json", json,
                             MediaType.APPLICATION_JSON_TYPE, MediaType.TEXT_PLAIN_TYPE, null, null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    if (r == null)
-                    {
-                        logger.error("Didn't get a response when calling create on a phase");
-                    }
                     logger.info(makeResult("Phase responded with data with mime type: "
-                            + r.getMediaType() + " and data:\n" + r.getDataObject()));
+                            + r.getMediaType() + " and data:\n" + getDataObject(r)));
 
                     // Change state of phase "json".
                     logger.info(makeHeading("Executing CREATE to the state of phase 'json'."));
@@ -236,12 +189,7 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     failed.setDescription("Because I want it to");
                     responses = createToState(job.getId(), "json", failed, null, null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    if (r == null)
-                    {
-                        logger.error(
-                                "Didn't get a response when calling create to state on a phase");
-                    }
-                    state = (StateType) r.getDataObject();
+                    state = (StateType) getDataObject(r);
                     if (state == null)
                     {
                         logger.info(makeResult("Got UNEXPECTED result, no state object!"));
@@ -271,11 +219,7 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     logger.info(makeHeading("Check state of phase 'json', expecting FAILED."));
                     responses = retrieveByPrimaryKey(job.getId(), null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    if (r == null)
-                    {
-                        logger.error("Didn't get a response when retrieving a job");
-                    }
-                    job = (JobType) r.getDataObject();
+                    job = (JobType) getDataObject(r);
                     state = ServiceUtils.getLastPhaseState(job, "json");
                     if (state == null)
                     {
@@ -305,11 +249,7 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     }
                     responses = retrieveByPrimaryKey(job.getId(), null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    if (r == null)
-                    {
-                        logger.error("Didn't get a response when retrieving a job");
-                    }
-                    job = (JobType) r.getDataObject();
+                    job = (JobType) getDataObject(r);
                     if (job == null)
                     {
                         logger.info(makeResult("Job deleted successfully"));
@@ -430,6 +370,36 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
         pi.setName(bname);
         bruce.setPersonalInformation(pi);
         return bruce;
+    }
+    
+    private Object getDataObject(Response r) {
+        if (r == null)
+        {
+            throw new RuntimeException("No response");
+        }
+        if(r.hasError()) {
+            throw new RuntimeException(r.getError().getMessage() + ". HTTP " + r.getStatus() + " (" + r.getError().getErrorCode() + ")");
+        }
+        return r.getDataObject();
+    }
+    
+    private void expectError(Response r) {
+        if (r == null)
+        {
+            logger.error("Didn't get a response when calling delete on a phase");
+        }
+        if (r.hasError())
+        {
+            logger.info(makeResult("EXPECTED error obtained (HTTP:" + r.getStatus()
+                    + "), provider responded with:\nCode: "
+                    + r.getError().getErrorCode() + "\nMessage: "
+                    + r.getError().getMessage() + "\nDescription: "
+                    + r.getError().getDescription()));
+        }
+        else
+        {
+            logger.info(makeResult("UNEXPECTED - no error obtained!"));
+        }
     }
 
     /*
