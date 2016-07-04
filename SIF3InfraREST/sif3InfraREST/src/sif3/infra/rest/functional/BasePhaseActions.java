@@ -28,11 +28,11 @@ import sif3.infra.common.model.PhaseType;
 import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
 
 /**
- * A simple implementation of the {@link sif3.infra.rest.functional.IPhaseActions IPhaseActions}
+ * A simple implementation of the {@link sif3.infra.rest.functional.PhaseActions IPhaseActions}
  * interface that throws appropriate not implemented type errors for each method. Allows an
  * implementation to only implement the methods it needs.
  */
-public class BasePhaseActions implements IPhaseActions
+public class BasePhaseActions implements PhaseActions
 {
     protected ObjectFactory               objectFactory = new ObjectFactory();
     private BaseFunctionalServiceProvider provider;

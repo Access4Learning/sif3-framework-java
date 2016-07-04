@@ -67,7 +67,7 @@ import sif3.infra.common.model.PhaseType;
 import sif3.infra.common.model.StateType;
 import sif3.infra.common.persist.service.SIF3JobService;
 import sif3.infra.common.utils.ServiceUtils;
-import sif3.infra.rest.functional.IPhaseActions;
+import sif3.infra.rest.functional.PhaseActions;
 import sif3.infra.rest.functional.JobEvent;
 import sif3.infra.rest.functional.JobEvents;
 import sif3.infra.rest.functional.JobIterator;
@@ -88,7 +88,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
     private static ObjectFactory             objectFactory   = new ObjectFactory();
 
     private String                           serviceName;
-    protected HashMap<String, IPhaseActions> phaseActions;
+    protected HashMap<String, PhaseActions> phaseActions;
 
     private static JobEvents                 sifevents       = null;
 
@@ -106,7 +106,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
         super();
 
         this.serviceName = serviceName;
-        phaseActions = new HashMap<String, IPhaseActions>();
+        phaseActions = new HashMap<String, PhaseActions>();
 
         JAXBUtils.initCtx(getMultiObjectClassInfo().getObjectType());
         JAXBUtils.initCtx(getSingleObjectClassInfo().getObjectType());
@@ -710,7 +710,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
             throw new ForbiddenException();
         }
 
-        IPhaseActions actions = phaseActions.get(phase.getName());
+        PhaseActions actions = phaseActions.get(phase.getName());
         if (actions == null)
         {
             throw new IllegalArgumentException("Unexpected error, phase is known (" + job.getId()
@@ -778,7 +778,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
             throw new ForbiddenException();
         }
 
-        IPhaseActions actions = phaseActions.get(phase.getName());
+        PhaseActions actions = phaseActions.get(phase.getName());
         if (actions == null)
         {
             throw new IllegalArgumentException("Unexpected error, phase is known (" + job.getId()
@@ -847,7 +847,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
             throw new ForbiddenException();
         }
 
-        IPhaseActions actions = phaseActions.get(phase.getName());
+        PhaseActions actions = phaseActions.get(phase.getName());
         if (actions == null)
         {
             throw new IllegalArgumentException("Unexpected error, phase is known (" + job.getId()
@@ -915,7 +915,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
             throw new ForbiddenException();
         }
 
-        IPhaseActions actions = phaseActions.get(phase.getName());
+        PhaseActions actions = phaseActions.get(phase.getName());
         if (actions == null)
         {
             throw new IllegalArgumentException("Unexpected error, phase is known (" + job.getId()

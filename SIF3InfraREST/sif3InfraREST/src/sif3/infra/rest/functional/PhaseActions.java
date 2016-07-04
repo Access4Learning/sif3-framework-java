@@ -28,7 +28,7 @@ import sif3.infra.common.model.PhaseType;
 /**
  * Interface for all actions that a phase may be allowed to execute.
  */
-public interface IPhaseActions
+public interface PhaseActions
 {
     /**
      * Create operation on this phase.
