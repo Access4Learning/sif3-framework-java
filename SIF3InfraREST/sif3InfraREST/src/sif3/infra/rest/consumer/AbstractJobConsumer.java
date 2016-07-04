@@ -43,6 +43,7 @@ import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment;
+import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.common.model.JobCollectionType;
 import sif3.infra.common.model.StateType;
 import sif3.infra.rest.client.FunctionalServiceClient;
@@ -139,12 +140,14 @@ public abstract class AbstractJobConsumer extends AbstractEventConsumer<JobColle
     protected FunctionalServiceClient getClient(ConsumerEnvironment envInfo)
             throws IllegalArgumentException
     {
-        URI baseURI = envInfo
-                .getConnectorBaseURI(ConsumerEnvironment.ConnectorName.servicesConnector);
+        // FIXME Change back to servicesConnector once testing is done
+        ConnectorName connector = ConnectorName.requestsConnector; //ConnectorName.servicesConnector;
+
+        URI baseURI = envInfo.getConnectorBaseURI(connector);
         if (baseURI == null)
         {
-            logger.error(ConsumerEnvironment.ConnectorName.servicesConnector.toString()
-                    + " not defined for environment " + envInfo.getEnvironmentName());
+            logger.error(connector.toString() + " not defined for environment "
+                    + envInfo.getEnvironmentName());
             return null;
         }
         else
@@ -152,11 +155,11 @@ public abstract class AbstractJobConsumer extends AbstractEventConsumer<JobColle
             nullMethodCheck(getMarshaller(), "getMarshaller()");
             nullMethodCheck(getUnmarshaller(), "getUnmarshaller()");
 
+            // FIXME Change back to servicesConnector once testing is done
             return new FunctionalServiceClient(ConsumerEnvironmentManager.getInstance(),
-                    envInfo.getConnectorBaseURI(
-                            ConsumerEnvironment.ConnectorName.servicesConnector),
-                    getRequestMediaType(), getResponseMediaType(), getMarshaller(),
-                    getUnmarshaller(), envInfo.getSecureConnection(), getCompressionEnabled());
+                    envInfo.getConnectorBaseURI(connector), getRequestMediaType(),
+                    getResponseMediaType(), getMarshaller(), getUnmarshaller(),
+                    envInfo.getSecureConnection(), getCompressionEnabled());
         }
     }
 

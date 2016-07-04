@@ -66,7 +66,6 @@ public class ConsumerService
         final ConsumerService tmpSvc = this;
         Runtime.getRuntime().addShutdownHook(new Thread()
         {
-
             public void run()
             {
                 tmpSvc.stopService(serviceID);
@@ -90,48 +89,45 @@ public class ConsumerService
 
             System.exit(0);
         }
-        else
+
+        ConsumerService svc = null;
+        String serviceID = getServiceIDParam(args);
+        try
         {
-            ConsumerService svc = null;
-            String serviceID = getServiceIDParam(args);
+            svc = new ConsumerService();
+            svc.startService(serviceID, getPropertyFileNameParam(args));
+
+            // Put this agent to a blocking wait.....
             try
             {
-                svc = new ConsumerService();
-                svc.startService(serviceID, getPropertyFileNameParam(args));
-
-                // Put this agent to a blocking wait.....
-                try
+                Object semaphore = new Object();
+                synchronized (semaphore) // this will block until CTRL-C is
+                // pressed.
                 {
-                    Object semaphore = new Object();
-                    synchronized (semaphore) // this will block until CTRL-C is
-                    // pressed.
-                    {
-                        semaphore.wait();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.out.println(
-                            "Blocking wait in " + serviceID + " interrupted: " + ex.getMessage());
-                    ex.printStackTrace();
+                    semaphore.wait();
                 }
             }
             catch (Exception ex)
             {
                 System.out.println(
-                        serviceID + " could not be started. See previous log entries for details.");
+                        "Blocking wait in " + serviceID + " interrupted: " + ex.getMessage());
                 ex.printStackTrace();
             }
-            finally // If startup is successful then this will never be
-            // reached.
+        }
+        catch (Exception ex)
+        {
+            System.out.println(
+                    serviceID + " could not be started. See previous log entries for details.");
+            ex.printStackTrace();
+        }
+        finally // If startup is successful then this will never be
+        // reached.
+        {
+            System.out.println("Exit " + serviceID + "...");
+            if (svc != null)
             {
-                System.out.println("Exit " + serviceID + "...");
-                if (svc != null)
-                {
-                    svc.stopService(serviceID);
-                }
+                svc.stopService(serviceID);
             }
         }
     }
-
 }
