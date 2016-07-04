@@ -12,7 +12,7 @@
  * the License.
  */
 
-package sif3.infra.rest.functional;
+package sif3.infra.common.functional;
 
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;

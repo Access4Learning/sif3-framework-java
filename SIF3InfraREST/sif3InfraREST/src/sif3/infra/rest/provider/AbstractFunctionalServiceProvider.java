@@ -59,6 +59,9 @@ import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
+import sif3.infra.common.functional.JobEvent;
+import sif3.infra.common.functional.JobEvents;
+import sif3.infra.common.functional.JobIterator;
 import sif3.infra.common.interfaces.FunctionalServiceProvider;
 import sif3.infra.common.interfaces.PhaseActions;
 import sif3.infra.common.model.JobCollectionType;
@@ -68,9 +71,6 @@ import sif3.infra.common.model.PhaseType;
 import sif3.infra.common.model.StateType;
 import sif3.infra.common.persist.service.SIF3JobService;
 import sif3.infra.common.utils.ServiceUtils;
-import sif3.infra.rest.functional.JobEvent;
-import sif3.infra.rest.functional.JobEvents;
-import sif3.infra.rest.functional.JobIterator;
 
 /**
  * Base implementation of A functional service. This should be extended to define what phases a job

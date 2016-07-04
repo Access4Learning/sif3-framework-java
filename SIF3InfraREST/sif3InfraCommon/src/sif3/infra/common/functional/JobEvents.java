@@ -12,7 +12,7 @@
  * the License.
  */
 
-package sif3.infra.rest.functional;
+package sif3.infra.common.functional;
 
 import java.util.ArrayList;
 import java.util.Collections;
