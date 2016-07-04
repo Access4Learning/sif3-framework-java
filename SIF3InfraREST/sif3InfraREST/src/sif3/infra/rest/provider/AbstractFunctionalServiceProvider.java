@@ -31,7 +31,6 @@ import org.apache.log4j.Logger;
 
 import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
-import sif3.common.CommonConstants.PhaseState;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.BadRequestException;
@@ -60,6 +59,7 @@ import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
+import sif3.infra.common.interfaces.FunctionalServiceProvider;
 import sif3.infra.common.interfaces.PhaseActions;
 import sif3.infra.common.model.JobCollectionType;
 import sif3.infra.common.model.JobType;
@@ -76,7 +76,7 @@ import sif3.infra.rest.functional.JobIterator;
  * Base implementation of A functional service. This should be extended to define what phases a job
  * has and other details about what the Job should know/be able to do/etc.
  */
-public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<JobCollectionType>
+public abstract class AbstractFunctionalServiceProvider extends BaseEventProvider<JobCollectionType> implements FunctionalServiceProvider
 {
 
     protected final Logger                   logger          = Logger.getLogger(getClass());
@@ -101,7 +101,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
      * @param serviceName
      *            The (plural) name of this functional service.
      */
-    public BaseFunctionalServiceProvider(String serviceName)
+    public AbstractFunctionalServiceProvider(String serviceName)
     {
         super();
 
@@ -281,25 +281,19 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
         }
     }
 
-    /**
-     * Determines if this provider should accept operations on the given job instance
-     * 
-     * @param job
-     *            The job to check.
-     * @return True if the job is one this provider supports, false otherwise.
+    /* (non-Javadoc)
+     * @see sif3.infra.rest.provider.FunctionalServiceProvider#acceptJob(sif3.infra.common.model.JobType)
      */
+    @Override
     public boolean acceptJob(JobType job)
     {
         return acceptJob(job.getName());
     }
 
-    /**
-     * Determines if this provider should accept operations on the given job name.
-     * 
-     * @param jobName
-     *            The job name to check.
-     * @return True if the job name is one this provider supports, false otherwise.
+    /* (non-Javadoc)
+     * @see sif3.infra.rest.provider.FunctionalServiceProvider#acceptJob(java.lang.String)
      */
+    @Override
     public boolean acceptJob(String jobName)
     {
         return acceptJob(getServiceName(), jobName);
@@ -657,32 +651,10 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
     /*----------------------*/
     /*-- Phase Operations --*/
     /*----------------------*/
-    /**
-     * Responds to create operations on the named phase on the given job.
-     * 
-     * @param resourceID
-     *            The refid of the job (functional service instance) to perform the operation on.
-     * @param phaseName
-     *            The name of the phase being targeted.
-     * @param payload
-     *            A payload, possibly an object marshaled to its string representation.
-     * @param requestMediaType
-     *            The media type of the payload.
-     * @param responseMediaType
-     *            The media type the consumer expects data back in.
-     * @param zone
-     *            The zone for which this operation shall be invoked. Can be null which indicates
-     *            the DEFAULT zone.
-     * @param context
-     *            The context for which this operation shall be invoked. Can be null which indicates
-     *            the DEFAULT context.
-     * @param metadata
-     *            Metadata of the request
-     * @param customResponseParams
-     *            Any custom header properties set by the consumer.
-     * 
-     * @return a string to be returned to the consumer.
+    /* (non-Javadoc)
+     * @see sif3.infra.rest.provider.FunctionalServiceProvider#createToPhase(java.lang.String, java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.RequestMetadata, sif3.common.model.ResponseParameters)
      */
+    @Override
     public String createToPhase(String resourceID, String phaseName, String payload,
             MediaType requestMediaType, MediaType responseMediaType, SIFZone zone,
             SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams)
@@ -725,32 +697,10 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
         return result;
     }
 
-    /**
-     * Responds to retrieve operations on the named phase on the given job.
-     * 
-     * @param resourceID
-     *            The refid of the job (functional service instance) to perform the operation on.
-     * @param phaseName
-     *            The name of the phase being targeted.
-     * @param payload
-     *            A payload, possibly an object marshaled to its string representation.
-     * @param requestMediaType
-     *            The media type of the payload.
-     * @param responseMediaType
-     *            The media type the consumer expects data back in.
-     * @param zone
-     *            The zone for which this operation shall be invoked. Can be null which indicates
-     *            the DEFAULT zone.
-     * @param context
-     *            The context for which this operation shall be invoked. Can be null which indicates
-     *            the DEFAULT context.
-     * @param metadata
-     *            Metadata of the request
-     * @param customResponseParams
-     *            Any custom header properties set by the consumer.
-     * 
-     * @return a string to be returned to the consumer.
+    /* (non-Javadoc)
+     * @see sif3.infra.rest.provider.FunctionalServiceProvider#retrieveToPhase(java.lang.String, java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.RequestMetadata, sif3.common.model.ResponseParameters)
      */
+    @Override
     public String retrieveToPhase(String resourceID, String phaseName, String payload,
             MediaType requestMediaType, MediaType responseMediaType, SIFZone zone,
             SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams)
@@ -794,32 +744,10 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
         return result;
     }
 
-    /**
-     * Responds to update operations on the named phase on the given job.
-     * 
-     * @param resourceID
-     *            The refid of the job (functional service instance) to perform the operation on.
-     * @param phaseName
-     *            The name of the phase being targeted.
-     * @param payload
-     *            A payload, possibly an object marshaled to its string representation.
-     * @param requestMediaType
-     *            The media type of the payload.
-     * @param responseMediaType
-     *            The media type the consumer expects data back in.
-     * @param zone
-     *            The zone for which this operation shall be invoked. Can be null which indicates
-     *            the DEFAULT zone.
-     * @param context
-     *            The context for which this operation shall be invoked. Can be null which indicates
-     *            the DEFAULT context.
-     * @param metadata
-     *            Metadata of the request
-     * @param customResponseParams
-     *            Any custom header properties set by the consumer.
-     * 
-     * @return a string to be returned to the consumer.
+    /* (non-Javadoc)
+     * @see sif3.infra.rest.provider.FunctionalServiceProvider#updateToPhase(java.lang.String, java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.RequestMetadata, sif3.common.model.ResponseParameters)
      */
+    @Override
     public String updateToPhase(String resourceID, String phaseName, String payload,
             MediaType requestMediaType, MediaType responseMediaType, SIFZone zone,
             SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams)
@@ -862,32 +790,10 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
         return result;
     }
 
-    /**
-     * Responds to delete operations on the named phase on the given job.
-     * 
-     * @param resourceID
-     *            The refid of the job (functional service instance) to perform the operation on.
-     * @param phaseName
-     *            The name of the phase being targeted.
-     * @param payload
-     *            A payload, possibly an object marshaled to its string representation.
-     * @param requestMediaType
-     *            The media type of the payload.
-     * @param responseMediaType
-     *            The media type the consumer expects data back in.
-     * @param zone
-     *            The zone for which this operation shall be invoked. Can be null which indicates
-     *            the DEFAULT zone.
-     * @param context
-     *            The context for which this operation shall be invoked. Can be null which indicates
-     *            the DEFAULT context.
-     * @param metadata
-     *            Metadata of the request
-     * @param customResponseParams
-     *            Any custom header properties set by the consumer.
-     * 
-     * @return a string to be returned to the consumer.
+    /* (non-Javadoc)
+     * @see sif3.infra.rest.provider.FunctionalServiceProvider#deleteToPhase(java.lang.String, java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.RequestMetadata, sif3.common.model.ResponseParameters)
      */
+    @Override
     public String deleteToPhase(String resourceID, String phaseName, String payload,
             MediaType requestMediaType, MediaType responseMediaType, SIFZone zone,
             SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams)
@@ -933,28 +839,10 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
     /*----------------------*/
     /*-- State Operations --*/
     /*----------------------*/
-    /**
-     * Responds to create operations on the state of the named phase on the given job.
-     * 
-     * @param resourceID
-     *            The refid of the job (functional service instance) to perform the operation on.
-     * @param phaseName
-     *            The name of the phase being targeted.
-     * @param data
-     *            The StateType instance to create.
-     * @param zone
-     *            The zone for which this operation shall be invoked. Can be null which indicates
-     *            the DEFAULT zone.
-     * @param context
-     *            The context for which this operation shall be invoked. Can be null which indicates
-     *            the DEFAULT context.
-     * @param metadata
-     *            Metadata of the request
-     * @param customResponseParams
-     *            Any custom header properties set by the consumer.
-     * 
-     * @return a string to be returned to the consumer.
+    /* (non-Javadoc)
+     * @see sif3.infra.rest.provider.FunctionalServiceProvider#createToState(java.lang.String, java.lang.String, java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.RequestMetadata, sif3.common.model.ResponseParameters)
      */
+    @Override
     public StateType createToState(String resourceID, String phaseName, Object data, SIFZone zone,
             SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams)
             throws SIF3Exception
@@ -1029,18 +917,10 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
     /*----------------------*/
     /*--  Phase Eventing  --*/
     /*----------------------*/
-    /**
-     * Registers an event to send out in the next broadcast.
-     * 
-     * @param job
-     *            The changed job
-     * @param action
-     *            The action performed on the job
-     * @param zone
-     *            The zone the operation occurred in
-     * @param context
-     *            The context the operation occurred in
+    /* (non-Javadoc)
+     * @see sif3.infra.rest.provider.FunctionalServiceProvider#sendJobEvent(sif3.infra.common.model.JobType, sif3.common.header.HeaderValues.EventAction, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
+    @Override
     public void sendJobEvent(JobType job, EventAction action, SIFZone zone, SIFContext context)
     {
         SIFEvent<JobCollectionType> event = new SIFEvent<JobCollectionType>(new JobCollectionType(),
@@ -1049,20 +929,10 @@ public abstract class BaseFunctionalServiceProvider extends BaseEventProvider<Jo
         sifevents.add(new JobEvent(event, zone, context));
     }
 
-    /**
-     * Registers an event to send out in the next broadcast.
-     * 
-     * @param job
-     *            The changed job
-     * @param phaseName
-     *            The phase on which the operation occurred on.
-     * @param action
-     *            The action performed on the job
-     * @param zone
-     *            The zone the operation occurred in
-     * @param context
-     *            The context the operation occurred in
+    /* (non-Javadoc)
+     * @see sif3.infra.rest.provider.FunctionalServiceProvider#sendJobEvent(sif3.infra.common.model.JobType, java.lang.String, sif3.common.header.HeaderValues.EventAction, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
+    @Override
     public void sendJobEvent(JobType job, String phaseName, EventAction action, SIFZone zone,
             SIFContext context)
     {

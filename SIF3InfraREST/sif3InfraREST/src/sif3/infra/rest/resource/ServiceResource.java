@@ -66,8 +66,9 @@ import sif3.common.ws.OperationStatus;
 import sif3.infra.common.env.mgr.ProviderManagerFactory;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
 import sif3.infra.common.interfaces.EnvironmentManager;
+import sif3.infra.common.interfaces.FunctionalServiceProvider;
 import sif3.infra.common.model.StateType;
-import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
+import sif3.infra.rest.provider.AbstractFunctionalServiceProvider;
 import sif3.infra.rest.provider.ProviderFactory;
 
 /**
@@ -1180,7 +1181,7 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.CREATE, responseParam);
         }
 
-        BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) getProvider();
+        FunctionalServiceProvider provider = (FunctionalServiceProvider) getProvider();
         if (provider == null)
         {
             return makeErrorResponse(
@@ -1274,7 +1275,7 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.QUERY, responseParam);
         }
 
-        BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) getProvider();
+        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) getProvider();
         if (provider == null)
         {
             return makeErrorResponse(
@@ -1368,7 +1369,7 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.UPDATE, responseParam);
         }
 
-        BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) getProvider();
+        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) getProvider();
         if (provider == null)
         {
             return makeErrorResponse(
@@ -1469,7 +1470,7 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.DELETE, responseParam);
         }
 
-        BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) getProvider();
+        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) getProvider();
         if (provider == null)
         {
             return makeErrorResponse(
@@ -1555,7 +1556,7 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.CREATE, responseParam);
         }
 
-        BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) getProvider();
+        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) getProvider();
         if (provider == null)
         {
             return makeErrorResponse(

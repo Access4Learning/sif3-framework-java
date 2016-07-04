@@ -22,11 +22,11 @@ import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.infra.common.interfaces.FunctionalServiceProvider;
 import sif3.infra.common.interfaces.PhaseActions;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.PhaseType;
-import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
 
 /**
  * A simple implementation of the {@link sif3.infra.common.interfaces.PhaseActions IPhaseActions}
@@ -36,7 +36,7 @@ import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
 public class BasePhaseActions implements PhaseActions
 {
     protected ObjectFactory               objectFactory = new ObjectFactory();
-    private BaseFunctionalServiceProvider provider;
+    private FunctionalServiceProvider provider;
 
     /**
      * Constructor
@@ -44,7 +44,7 @@ public class BasePhaseActions implements PhaseActions
      * @param provider
      *            The provider through which events may be sent.
      */
-    public BasePhaseActions(BaseFunctionalServiceProvider provider)
+    public BasePhaseActions(FunctionalServiceProvider provider)
     {
         this.provider = provider;
     }
@@ -118,7 +118,7 @@ public class BasePhaseActions implements PhaseActions
      * 
      * @return the Provider for this action.
      */
-    public BaseFunctionalServiceProvider getProvider()
+    public FunctionalServiceProvider getProvider()
     {
         return provider;
     }

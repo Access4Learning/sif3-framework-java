@@ -29,15 +29,15 @@ import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.infra.common.interfaces.FunctionalServiceProvider;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.PhaseType;
 import sif3.infra.common.utils.ServiceUtils;
 import sif3.infra.rest.functional.BasePhaseActions;
-import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
 
 public class XmlActions extends BasePhaseActions
 {
-    public XmlActions(BaseFunctionalServiceProvider provider)
+    public XmlActions(FunctionalServiceProvider provider)
     {
         super(provider);
     }

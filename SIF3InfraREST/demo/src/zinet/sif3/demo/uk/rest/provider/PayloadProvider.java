@@ -20,14 +20,14 @@ import javax.xml.datatype.DatatypeFactory;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.utils.ServiceUtils;
-import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
+import sif3.infra.rest.provider.AbstractFunctionalServiceProvider;
 import sif3.infra.common.utils.SIFRights;
 import zinet.sif3.demo.uk.rest.PayloadConstants;
 import zinet.sif3.demo.uk.rest.provider.actions.DefaultActions;
 import zinet.sif3.demo.uk.rest.provider.actions.JsonActions;
 import zinet.sif3.demo.uk.rest.provider.actions.XmlActions;
 
-public class PayloadProvider extends BaseFunctionalServiceProvider
+public class PayloadProvider extends AbstractFunctionalServiceProvider
 {
     public PayloadProvider()
     {

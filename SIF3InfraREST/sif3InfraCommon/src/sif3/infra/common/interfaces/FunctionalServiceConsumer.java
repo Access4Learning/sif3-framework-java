@@ -11,9 +11,10 @@ import sif3.common.interfaces.EventConsumer;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.ZoneContextInfo;
 import sif3.common.ws.Response;
+import sif3.infra.common.model.JobCollectionType;
 import sif3.infra.common.model.StateType;
 
-public interface FunctionalServiceConsumer<L> extends Consumer, EventConsumer<L>
+public interface FunctionalServiceConsumer extends Consumer, EventConsumer<JobCollectionType>
 {
     /**
      * Will invoke the REST POST method. This expects the payload to have already been marshaled to
