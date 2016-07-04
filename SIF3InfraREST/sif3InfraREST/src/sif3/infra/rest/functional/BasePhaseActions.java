@@ -22,13 +22,14 @@ import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.infra.common.interfaces.PhaseActions;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.PhaseType;
 import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
 
 /**
- * A simple implementation of the {@link sif3.infra.rest.functional.PhaseActions IPhaseActions}
+ * A simple implementation of the {@link sif3.infra.common.interfaces.PhaseActions IPhaseActions}
  * interface that throws appropriate not implemented type errors for each method. Allows an
  * implementation to only implement the methods it needs.
  */

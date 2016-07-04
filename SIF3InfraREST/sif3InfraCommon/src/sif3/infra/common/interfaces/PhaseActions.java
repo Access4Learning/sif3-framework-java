@@ -12,7 +12,7 @@
  * the License.
  */
 
-package sif3.infra.rest.functional;
+package sif3.infra.common.interfaces;
 
 import javax.ws.rs.core.MediaType;
 
