@@ -385,7 +385,7 @@ public class ConsumerLoader
         for (int i = 0; i < numThreads; i++)
         {
             //String readerID = remoteQueueName + " - Reader " + (i + 1);
-            String reader = remoteQueueName + " - Reader " + (i + 1) + "(connectionId: " + i + ")";
+            String reader = remoteQueueName + " - Reader " + (i + 1) + " (connectionId: " + i + ")";
             try
             {
                 RemoteMessageQueueReader remoteReader = new RemoteMessageQueueReader(queueInfo, i);
