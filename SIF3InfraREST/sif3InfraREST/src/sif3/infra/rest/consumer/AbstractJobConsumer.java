@@ -140,8 +140,7 @@ public abstract class AbstractJobConsumer extends AbstractEventConsumer<JobColle
     protected FunctionalServiceClient getClient(ConsumerEnvironment envInfo)
             throws IllegalArgumentException
     {
-        // FIXME Change back to servicesConnector once testing is done
-        ConnectorName connector = ConnectorName.requestsConnector; //ConnectorName.servicesConnector;
+        ConnectorName connector = ConnectorName.servicesConnector;
 
         URI baseURI = envInfo.getConnectorBaseURI(connector);
         if (baseURI == null)
@@ -155,7 +154,6 @@ public abstract class AbstractJobConsumer extends AbstractEventConsumer<JobColle
             nullMethodCheck(getMarshaller(), "getMarshaller()");
             nullMethodCheck(getUnmarshaller(), "getUnmarshaller()");
 
-            // FIXME Change back to servicesConnector once testing is done
             return new FunctionalServiceClient(ConsumerEnvironmentManager.getInstance(),
                     envInfo.getConnectorBaseURI(connector), getRequestMediaType(),
                     getResponseMediaType(), getMarshaller(), getUnmarshaller(),
