@@ -103,7 +103,6 @@ public class MessageClient extends BaseClient
 	private WebResource buildMessageURI(WebResource svc, String removeMsgID, boolean useMatrix)
 	{
 		UriBuilder uriBuilder = svc.getUriBuilder();
-		uriBuilder.path("messages");
 		if (StringUtils.notEmpty(removeMsgID))
 		{
 			if (useMatrix)
