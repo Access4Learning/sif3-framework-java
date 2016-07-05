@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 import javax.ws.rs.core.MediaType;
 
@@ -76,24 +74,25 @@ import sif3.infra.common.utils.ServiceUtils;
  * Base implementation of A functional service. This should be extended to define what phases a job
  * has and other details about what the Job should know/be able to do/etc.
  */
-public abstract class AbstractFunctionalServiceProvider extends BaseEventProvider<JobCollectionType> implements FunctionalServiceProvider
+public abstract class AbstractFunctionalServiceProvider extends BaseEventProvider<JobCollectionType>
+        implements FunctionalServiceProvider
 {
 
-    protected final Logger                   logger          = Logger.getLogger(getClass());
+    protected final Logger                  logger          = Logger.getLogger(getClass());
 
-    protected SIF3JobService                 sif3JobService  = new SIF3JobService();
+    protected SIF3JobService                sif3JobService  = new SIF3JobService();
 
-    private static InfraUnmarshalFactory     unmarshaller    = new InfraUnmarshalFactory();
-    private static InfraMarshalFactory       marshaller      = new InfraMarshalFactory();
-    private static ObjectFactory             objectFactory   = new ObjectFactory();
+    private static InfraUnmarshalFactory    unmarshaller    = new InfraUnmarshalFactory();
+    private static InfraMarshalFactory      marshaller      = new InfraMarshalFactory();
+    private static ObjectFactory            objectFactory   = new ObjectFactory();
 
-    private String                           serviceName;
+    private String                          serviceName;
     protected HashMap<String, PhaseActions> phaseActions;
 
-    private static JobEvents                 sifevents       = null;
+    private static JobEvents                sifevents       = null;
 
-    private Timer                            jobTimeoutTimer = null;
-    private TimerTask                        jobTimeoutTask  = null;
+    private Timer                           jobTimeoutTimer = null;
+    private TimerTask                       jobTimeoutTask  = null;
 
     /**
      * Constructor
@@ -232,25 +231,11 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
 
                     try
                     {
-                        sif3JobService.getJobs().stream().filter(new Predicate<JobType>()
-                        {
-                            @Override
-                            public boolean test(JobType job)
-                            {
-                                Calendar now = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                                Calendar then = (Calendar) job.getCreated().clone();
+                        List<JobType> jobs = sif3JobService.getJobs();
 
-                                job.getTimeout().addTo(then);
-
-                                return acceptJob(job)
-                                        && job.getTimeout()
-                                                .getTimeInMillis(Calendar.getInstance()) > 0
-                                        && now.after(then);
-                            }
-                        }).forEach(new Consumer<JobType>()
+                        for (JobType job : jobs)
                         {
-                            @Override
-                            public void accept(JobType job)
+                            if (hasTimedout(job))
                             {
                                 logger.debug("Job " + job.getId()
                                         + " has timed out, requesting its deletion.");
@@ -264,7 +249,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
                                             + job.getId() + " due to error: " + e.getMessage(), e);
                                 }
                             }
-                        });
+                        }
                     }
                     catch (Exception e)
                     {
@@ -281,8 +266,11 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         }
     }
 
-    /* (non-Javadoc)
-     * @see sif3.infra.rest.provider.FunctionalServiceProvider#acceptJob(sif3.infra.common.model.JobType)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * sif3.infra.rest.provider.FunctionalServiceProvider#acceptJob(sif3.infra.common.model.JobType)
      */
     @Override
     public boolean acceptJob(JobType job)
@@ -290,7 +278,9 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         return acceptJob(job.getName());
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see sif3.infra.rest.provider.FunctionalServiceProvider#acceptJob(java.lang.String)
      */
     @Override
@@ -656,8 +646,13 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
     /*----------------------*/
     /*-- Phase Operations --*/
     /*----------------------*/
-    /* (non-Javadoc)
-     * @see sif3.infra.rest.provider.FunctionalServiceProvider#createToPhase(java.lang.String, java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.RequestMetadata, sif3.common.model.ResponseParameters)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sif3.infra.rest.provider.FunctionalServiceProvider#createToPhase(java.lang.String,
+     * java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType,
+     * sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.RequestMetadata,
+     * sif3.common.model.ResponseParameters)
      */
     @Override
     public String createToPhase(String resourceID, String phaseName, String payload,
@@ -702,8 +697,13 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see sif3.infra.rest.provider.FunctionalServiceProvider#retrieveToPhase(java.lang.String, java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.RequestMetadata, sif3.common.model.ResponseParameters)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sif3.infra.rest.provider.FunctionalServiceProvider#retrieveToPhase(java.lang.String,
+     * java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType,
+     * sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.RequestMetadata,
+     * sif3.common.model.ResponseParameters)
      */
     @Override
     public String retrieveToPhase(String resourceID, String phaseName, String payload,
@@ -749,8 +749,13 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see sif3.infra.rest.provider.FunctionalServiceProvider#updateToPhase(java.lang.String, java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.RequestMetadata, sif3.common.model.ResponseParameters)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sif3.infra.rest.provider.FunctionalServiceProvider#updateToPhase(java.lang.String,
+     * java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType,
+     * sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.RequestMetadata,
+     * sif3.common.model.ResponseParameters)
      */
     @Override
     public String updateToPhase(String resourceID, String phaseName, String payload,
@@ -795,8 +800,13 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see sif3.infra.rest.provider.FunctionalServiceProvider#deleteToPhase(java.lang.String, java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.RequestMetadata, sif3.common.model.ResponseParameters)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sif3.infra.rest.provider.FunctionalServiceProvider#deleteToPhase(java.lang.String,
+     * java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType,
+     * sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.RequestMetadata,
+     * sif3.common.model.ResponseParameters)
      */
     @Override
     public String deleteToPhase(String resourceID, String phaseName, String payload,
@@ -844,8 +854,12 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
     /*----------------------*/
     /*-- State Operations --*/
     /*----------------------*/
-    /* (non-Javadoc)
-     * @see sif3.infra.rest.provider.FunctionalServiceProvider#createToState(java.lang.String, java.lang.String, java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.RequestMetadata, sif3.common.model.ResponseParameters)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sif3.infra.rest.provider.FunctionalServiceProvider#createToState(java.lang.String,
+     * java.lang.String, java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext,
+     * sif3.common.model.RequestMetadata, sif3.common.model.ResponseParameters)
      */
     @Override
     public StateType createToState(String resourceID, String phaseName, Object data, SIFZone zone,
@@ -878,8 +892,8 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
                     "No phase found called " + phaseName + " on job with id " + resourceID + ".");
         }
 
-        ServiceUtils.changePhaseState(job, phase, CommonConstants.PhaseState.valueOf(state.getType().name()),
-                state.getDescription());
+        ServiceUtils.changePhaseState(job, phase,
+                CommonConstants.PhaseState.valueOf(state.getType().name()), state.getDescription());
 
         job = sif3JobService.save(job);
 
@@ -922,8 +936,12 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
     /*----------------------*/
     /*--  Phase Eventing  --*/
     /*----------------------*/
-    /* (non-Javadoc)
-     * @see sif3.infra.rest.provider.FunctionalServiceProvider#sendJobEvent(sif3.infra.common.model.JobType, sif3.common.header.HeaderValues.EventAction, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sif3.infra.rest.provider.FunctionalServiceProvider#sendJobEvent(sif3.infra.common.model.
+     * JobType, sif3.common.header.HeaderValues.EventAction, sif3.common.model.SIFZone,
+     * sif3.common.model.SIFContext)
      */
     @Override
     public void sendJobEvent(JobType job, EventAction action, SIFZone zone, SIFContext context)
@@ -934,8 +952,12 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         sifevents.add(new JobEvent(event, zone, context));
     }
 
-    /* (non-Javadoc)
-     * @see sif3.infra.rest.provider.FunctionalServiceProvider#sendJobEvent(sif3.infra.common.model.JobType, java.lang.String, sif3.common.header.HeaderValues.EventAction, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sif3.infra.rest.provider.FunctionalServiceProvider#sendJobEvent(sif3.infra.common.model.
+     * JobType, java.lang.String, sif3.common.header.HeaderValues.EventAction,
+     * sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
     public void sendJobEvent(JobType job, String phaseName, EventAction action, SIFZone zone,
@@ -954,6 +976,17 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
     /*---------------------*/
     /*-- Private Methods --*/
     /*---------------------*/
+    private boolean hasTimedout(JobType job)
+    {
+        Calendar now = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        Calendar then = (Calendar) job.getCreated().clone();
+
+        job.getTimeout().addTo(then);
+
+        return acceptJob(job) && job.getTimeout().getTimeInMillis(Calendar.getInstance()) > 0
+                && now.after(then);
+    }
+
     private String getZoneAndContext(SIFZone zone, SIFContext context)
     {
         StringBuffer buffer = new StringBuffer();
