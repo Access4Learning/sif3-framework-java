@@ -787,15 +787,14 @@ public class ServiceResource extends InfraResource
         {
             return makeErrorResponse(error, ResponseAction.QUERY, responseParam);
         }
-
-        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) getProvider();
-        if (provider == null)
+        
+        Provider p = getProvider();
+        Response errResponse = checkProvider(p, responseParam);
+        if (errResponse != null)
         {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
-                            "No Provider for " + infraObjectNamePlural + " available."),
-                    ResponseAction.CREATE, responseParam);
+            return errResponse;
         }
+        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) p;
 
         // Ignore the marshaller/unmarshaller - just reflect the contentType and
         // accept header information
@@ -882,14 +881,13 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.UPDATE, responseParam);
         }
 
-        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) getProvider();
-        if (provider == null)
+        Provider p = getProvider();
+        Response errResponse = checkProvider(p, responseParam);
+        if (errResponse != null)
         {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
-                            "No Provider for " + infraObjectNamePlural + " available."),
-                    ResponseAction.CREATE, responseParam);
+            return errResponse;
         }
+        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) p;
 
         // Ignore the marshaller/unmarshaller - just reflect the contentType and
         // accept header information
@@ -983,14 +981,13 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.DELETE, responseParam);
         }
 
-        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) getProvider();
-        if (provider == null)
+        Provider p = getProvider();
+        Response errResponse = checkProvider(p, responseParam);
+        if (errResponse != null)
         {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
-                            "No Provider for " + infraObjectNamePlural + " available."),
-                    ResponseAction.CREATE, responseParam);
+            return errResponse;
         }
+        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) p;
 
         // Ignore the marshaller/unmarshaller - just reflect the contentType and
         // accept header information
@@ -1069,14 +1066,13 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.CREATE, responseParam);
         }
 
-        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) getProvider();
-        if (provider == null)
+        Provider p = getProvider();
+        Response errResponse = checkProvider(p, responseParam);
+        if (errResponse != null)
         {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
-                            "No Provider for " + infraObjectNamePlural + " available."),
-                    ResponseAction.CREATE, responseParam);
+            return errResponse;
         }
+        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) p;
 
         try
         {
@@ -1118,7 +1114,7 @@ public class ServiceResource extends InfraResource
                     ResponseAction.CREATE, responseParam);
         }
     }
-    
+
     /*----------------------------------------------------------------------*/
     /*-- HEAD Methods: Only the root Object service provides full support --*/
     /*----------------------------------------------------------------------*/
@@ -1604,5 +1600,24 @@ public class ServiceResource extends InfraResource
                                     + ". Problem reported: " + ex.getMessage()),
                     ResponseAction.QUERY, responseParam);
         }
+    }
+    
+    private Response checkProvider(Provider p, ResponseParameters responseParam) {
+        if (p == null)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
+                            "No provider for " + infraObjectNamePlural + " available."),
+                    ResponseAction.CREATE, responseParam);
+        }
+        if (!(p instanceof AbstractFunctionalServiceProvider))
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
+                            "A provider for " + infraObjectNamePlural
+                                    + " found but not of an expected type."),
+                    ResponseAction.CREATE, responseParam);
+        }
+        return null;
     }
 }
