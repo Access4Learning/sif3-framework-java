@@ -48,6 +48,18 @@ public interface PhaseActions
      * @param context
      *            The context the operation has happened in.
      * @return The result of the operation, marshaled to a string as necessary.
+     * @throws IllegalArgumentException
+     *             Implementations should throw this exception if there is a problem with the
+     *             payload beyond an unexpected media type issue.
+     * @throws PersistenceException
+     *             Implementations should throw this exception if there is a problem with any
+     *             persistence operation that may be performed to the payload.
+     * @throws UnsupportedMediaTypeException
+     *             Implementations should throw this exception if there either the request or
+     *             response media type are unsupported.
+     * @throws UnsupportedQueryException
+     *             Implementations should throw this exception if this operation is not supported on
+     *             this phase.
      */
     String create(JobType job, PhaseType phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
@@ -72,6 +84,18 @@ public interface PhaseActions
      * @param context
      *            The context the operation has happened in.
      * @return The result of the operation, marshaled to a string as necessary.
+     * @throws IllegalArgumentException
+     *             Implementations should throw this exception if there is a problem with the
+     *             payload beyond an unexpected media type issue.
+     * @throws PersistenceException
+     *             Implementations should throw this exception if there is a problem with any
+     *             persistence operation that may be performed to the payload.
+     * @throws UnsupportedMediaTypeException
+     *             Implementations should throw this exception if there either the request or
+     *             response media type are unsupported.
+     * @throws UnsupportedQueryException
+     *             Implementations should throw this exception if this operation is not supported on
+     *             this phase.
      */
     String retrieve(JobType job, PhaseType phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
@@ -96,6 +120,18 @@ public interface PhaseActions
      * @param context
      *            The context the operation has happened in.
      * @return The result of the operation, marshaled to a string as necessary.
+     * @throws IllegalArgumentException
+     *             Implementations should throw this exception if there is a problem with the
+     *             payload beyond an unexpected media type issue.
+     * @throws PersistenceException
+     *             Implementations should throw this exception if there is a problem with any
+     *             persistence operation that may be performed to the payload.
+     * @throws UnsupportedMediaTypeException
+     *             Implementations should throw this exception if there either the request or
+     *             response media type are unsupported.
+     * @throws UnsupportedQueryException
+     *             Implementations should throw this exception if this operation is not supported on
+     *             this phase.
      */
     String update(JobType job, PhaseType phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
@@ -120,6 +156,18 @@ public interface PhaseActions
      * @param context
      *            The context the operation has happened in.
      * @return The result of the operation, marshaled to a string as necessary.
+     * @throws IllegalArgumentException
+     *             Implementations should throw this exception if there is a problem with the
+     *             payload beyond an unexpected media type issue.
+     * @throws PersistenceException
+     *             Implementations should throw this exception if there is a problem with any
+     *             persistence operation that may be performed to the payload.
+     * @throws UnsupportedMediaTypeException
+     *             Implementations should throw this exception if there either the request or
+     *             response media type are unsupported.
+     * @throws UnsupportedQueryException
+     *             Implementations should throw this exception if this operation is not supported on
+     *             this phase.
      */
     String delete(JobType job, PhaseType phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
