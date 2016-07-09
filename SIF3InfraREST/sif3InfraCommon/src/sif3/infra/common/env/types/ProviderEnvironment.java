@@ -168,12 +168,12 @@ public class ProviderEnvironment extends EnvironmentInfo
     	this.accessTokenAuthMethod = accessTokenAuthMethod;
     }
 
-	// authMethod for accessToken: Valid values are what is listed in AuthenticationUtils.AuthenticationMethod (case sensitive!!!)
+	// authMethod for accessToken: Valid values are what is listed in AuthenticationUtils.AuthenticationMethod
 	public void setAccessTokenAuthMethod(String accessTokenAuthMethod)
     {
 		try
 		{
-			this.accessTokenAuthMethod = AuthenticationMethod.valueOf(accessTokenAuthMethod);
+			this.accessTokenAuthMethod = AuthenticationMethod.lookup(accessTokenAuthMethod);
 		}
 		catch (Exception ex)
 		{

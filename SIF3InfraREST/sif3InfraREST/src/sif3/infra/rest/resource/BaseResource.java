@@ -1834,7 +1834,7 @@ public abstract class BaseResource
 		    {
 		        try
 		        {
-		          authMethod = AuthenticationMethod.valueOf(authMethodStr.trim());
+		          authMethod = AuthenticationMethod.lookup(authMethodStr.trim());
 		        }
 		        catch (Exception ex) // invalid value is provided. Ignore it!
 		        {

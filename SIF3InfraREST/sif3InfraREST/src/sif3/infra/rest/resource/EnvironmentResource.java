@@ -159,7 +159,7 @@ public class EnvironmentResource extends InfraResource
 			
 			// check if initial Authentication Token is valid for this environment template. 
 		     // Check if the Authentication Method matches the session's mandated authentication method.
-	        if (!getAuthInfo().getAuthMethod().toString().equals(appEnvTemplate.getAuthMethod()))
+	        if (!getAuthInfo().getAuthMethod().isFor(appEnvTemplate.getAuthMethod()))
 	        {
 	            ErrorDetails error = new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not Authorized.", "Invalid authentication method. Authentication method must be "+appEnvTemplate.getAuthMethod());     
                 return makeErrorResponse(error, ResponseAction.CREATE, getInitialCustomResponseParameters());

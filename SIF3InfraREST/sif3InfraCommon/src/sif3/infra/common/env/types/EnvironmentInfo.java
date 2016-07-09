@@ -212,7 +212,7 @@ public class EnvironmentInfo implements Serializable
     {
 		try
 		{
-			this.authMethod = AuthenticationMethod.valueOf(authMethod);
+			this.authMethod = AuthenticationMethod.lookup(authMethod);
 		}
 		catch (Exception ex)
 		{

@@ -36,10 +36,48 @@ public class AuthenticationInfo implements Serializable
 {
     private static final long serialVersionUID = -8736784141972585133L;
 
-    /* Defines valid authentication methods for SIF 3.0 */
+    /* Defines valid authentication methods for SIF 3.0 as in the Environment XML */
     public enum AuthenticationMethod
     {
-        BASIC, SIF_HMACSHA256, Bearer
+        BASIC, SIF_HMACSHA256, Bearer;
+
+        /**
+         * Gets the text that appears the authorization header property. Usually this is the same as the method name, but can differ, for example the method "BASIC" should appear in the authorization header as "Basic".
+         * @return See description.
+         */
+        public String getAuthTokenString() {
+            if(this.equals(BASIC)) {
+                return "Basic";
+            }
+            return this.name();
+        }
+        
+        /**
+         * A case insensitive check if the method provided as a string matches this authentication method.
+         * @param method The string to check. Will be trimmed before compared.
+         * @return True if the argument is the same as the method name, ignoring case. False otherwise.
+         */
+        public boolean isFor(String method) {
+            return this.name().equalsIgnoreCase(method.trim());
+        }
+        
+        /**
+         * Finds an authentication method in the same way as valueOf, but not case sensitive.
+         * @param method The method to look for as a string. Will be trimmed before compared.
+         * @return The AuthenticationMethod that matched the name (case insensitive).
+         * @throws IllegalArgumentException When the method string does not identify any supported AuthenticaionMethod.
+         */
+        public static AuthenticationMethod lookup(String method)
+        {
+            for (AuthenticationMethod m : AuthenticationMethod.values())
+            {
+                if (m.name().equalsIgnoreCase(method))
+                {
+                    return m;
+                }
+            }
+            throw new IllegalArgumentException("Could not find the requested authentication method " + method);
+        }
     };
 
     private AuthenticationMethod authMethod = AuthenticationMethod.BASIC;
@@ -87,7 +125,7 @@ public class AuthenticationInfo implements Serializable
     {
         try
         {
-            this.authMethod = AuthenticationMethod.valueOf(authMethod);
+            this.authMethod = AuthenticationMethod.lookup(authMethod);
         }
         catch (Exception ex)
         {

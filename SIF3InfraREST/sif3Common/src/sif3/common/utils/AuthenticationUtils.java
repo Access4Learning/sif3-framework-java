@@ -63,8 +63,7 @@ public class AuthenticationUtils
      */
     public static String getBasicAuthToken(String username, String password)
     {
-        // return AuthenticationMethod.BASIC.name()+" "+base64Encode(username, password);
-        return "Basic " + base64Encode(username, password);
+        return AuthenticationMethod.BASIC.getAuthTokenString()+" "+base64Encode(username, password);
     }
 
     /**
@@ -86,7 +85,7 @@ public class AuthenticationUtils
             String dateAsISO8601)
     {
         String token = username + ":" + hmacsha256Base64(username + ":" + dateAsISO8601, password);
-        return AuthenticationMethod.SIF_HMACSHA256.name() + " "
+        return AuthenticationMethod.SIF_HMACSHA256.getAuthTokenString() + " "
                 + new String(Base64.encodeBase64(token.getBytes()), Charset.forName("ASCII"));
     }
 
@@ -102,7 +101,7 @@ public class AuthenticationUtils
      */
     public static String getBearerAuthToken(String token, String password)
     {
-        return AuthenticationMethod.Bearer.name() + " " + token;
+        return AuthenticationMethod.Bearer.getAuthTokenString() + " " + token;
     }
 
     /**
@@ -129,9 +128,9 @@ public class AuthenticationUtils
         switch (authInfo.getAuthMethod())
         {
         case BASIC:
-            return "Basic " + base64Encode(authInfo.getUserToken(), authInfo.getPassword());
+            return getBasicAuthToken(authInfo.getUserToken(), authInfo.getPassword());
         case SIF_HMACSHA256:
-            return authInfo.getAuthMethod().name() + " "
+            return authInfo.getAuthMethod().getAuthTokenString() + " "
                     + base64Encode(authInfo.getUserToken(), authInfo.getPassword());
         default:
         case Bearer:
@@ -266,7 +265,7 @@ public class AuthenticationUtils
             String authMethodStr = (splitPos > 0) ? fullToken.substring(0, splitPos) : null;
             try
             {
-                return (authMethodStr != null) ? AuthenticationMethod.valueOf(authMethodStr) : null;
+                return (authMethodStr != null) ? AuthenticationMethod.lookup(authMethodStr) : null;
             }
             catch (Exception ex)
             {
@@ -308,7 +307,7 @@ public class AuthenticationUtils
     /**
      * This method takes the full authentication token. This is the token that has one of the two
      * forms:<br/>
-     * ("Basic"|"SIF_HMACSHA256")" "<base64EncodedString> where the <base64EncodedString> must be of
+     * ("BASIC"|"SIF_HMACSHA256")" "<base64EncodedString> where the <base64EncodedString> must be of
      * the format: <usreToken>:<some_string>.<br/>
      * "Bearer "<securityToken><br/>
      * <br/>
@@ -318,8 +317,8 @@ public class AuthenticationUtils
      * then the returned AuthenticationInfo has the following Structure:<br/>
      * <br/>
      * 
-     * For "Basic"|"SIF_HMACSHA256":<br/>
-     * AuthenticationInfo.authMethod="Basic"|"SIF_HMACSHA256"<br/>
+     * For "BASIC"|"SIF_HMACSHA256":<br/>
+     * AuthenticationInfo.authMethod="BASIC"|"SIF_HMACSHA256"<br/>
      * AuthenticationInfo.userToken=<userToken><br/>
      * AuthenticationInfo.password=<some_string><br/>
      * <br/>
@@ -352,7 +351,7 @@ public class AuthenticationUtils
             return new AuthenticationInfo(AuthenticationInfo.AuthenticationMethod.Bearer,
                     securityToken, null);
         }
-        else // it should be Basic or SIF_HMACSHA256
+        else // it should be BASIC or SIF_HMACSHA256
         {
             String[] splitValues = splitValuesFromBase64(securityToken);
 

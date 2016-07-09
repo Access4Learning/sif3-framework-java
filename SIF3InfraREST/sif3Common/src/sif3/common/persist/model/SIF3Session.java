@@ -213,7 +213,7 @@ public class SIF3Session extends EnvironmentKey implements Serializable
     
     public void setAuthenticationMethod(String authenticationMethod)
     {
-        this.authenticationMethod = StringUtils.isEmpty(authenticationMethod) ? AuthenticationMethod.BASIC : AuthenticationMethod.valueOf(authenticationMethod);
+        this.authenticationMethod = StringUtils.isEmpty(authenticationMethod) ? AuthenticationMethod.BASIC : AuthenticationMethod.lookup(authenticationMethod);
     }
 	
 	/*---------------------------------------------------------------------------------------------------------------------------------------*/
