@@ -161,7 +161,7 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                             MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_PLAIN_TYPE, null, null);
                     r = responses.isEmpty() ? null : responses.get(0);
                     expectError(r);
-                    
+
                     // Execute UPDATE to phase "xml".
                     logger.info(makeHeading("Executing UPDATE to phase 'xml'."));
                     String xml = new DataModelMarshalFactory(sif.dd.uk20.model.ObjectFactory.class)
@@ -371,19 +371,24 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
         bruce.setPersonalInformation(pi);
         return bruce;
     }
-    
-    private Object getDataObject(Response r) {
+
+    private Object getDataObject(Response r)
+    {
         if (r == null)
         {
             throw new RuntimeException("No response");
         }
-        if(r.hasError()) {
-            throw new RuntimeException(r.getError().getMessage() + ". HTTP " + r.getStatus() + " (" + r.getError().getErrorCode() + ")");
+        if (r.hasError())
+        {
+            logger.error(r.getError().getMessage() + ". HTTP " + r.getStatus() + " ("
+                    + r.getError().getErrorCode() + ")");
+            return null;
         }
         return r.getDataObject();
     }
-    
-    private void expectError(Response r) {
+
+    private void expectError(Response r)
+    {
         if (r == null)
         {
             logger.error("Didn't get a response when calling delete on a phase");
@@ -391,9 +396,8 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
         if (r.hasError())
         {
             logger.info(makeResult("EXPECTED error obtained (HTTP:" + r.getStatus()
-                    + "), provider responded with:\nCode: "
-                    + r.getError().getErrorCode() + "\nMessage: "
-                    + r.getError().getMessage() + "\nDescription: "
+                    + "), provider responded with:\nCode: " + r.getError().getErrorCode()
+                    + "\nMessage: " + r.getError().getMessage() + "\nDescription: "
                     + r.getError().getDescription()));
         }
         else
