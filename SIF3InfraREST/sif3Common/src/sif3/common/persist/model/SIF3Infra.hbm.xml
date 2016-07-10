@@ -147,7 +147,7 @@
 		<property name="name" column="NAME" type="string" length="128" />
 		<property name="description" column="DESCRIPTION" type="string"
 			length="256" />
-		<property name="state" column="STATE" >
+		<property name="state" column="STATE">
 			<type name="org.hibernate.type.EnumType">
 				<param name="enumClass">sif3.common.CommonConstants$JobState</param>
 				<param name="type">12</param>
@@ -193,5 +193,16 @@
 		<property name="created" column="CREATED" type="timestamp" />
 		<property name="lastModified" column="LASTMODIFIED" type="timestamp" />
 		<property name="description" column="DESCRIPTION" length="256" />
+	</class>
+
+	<!-- ******************** -->
+	<!-- SIF3 Object Bindings -->
+	<!-- ******************** -->
+	<class name="sif3.common.persist.model.SIF3ObjectBinding" table="SIF3_OBJECT_BINDING">
+		<id name="objectId" type="string" column="OBJECT_ID">
+			<generator class="assigned" />
+		</id>
+		<property name="sessionToken" column="SESSION_TOKEN" type="string"
+			length="200" />
 	</class>
 </hibernate-mapping>

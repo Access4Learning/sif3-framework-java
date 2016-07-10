@@ -203,7 +203,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseProvider
     public void run()
     {
         super.run();
-        int frequencyInSec = getTimeoutFrequency(getProviderName());
+        int frequencyInSec = getTimeoutFrequency(getServiceName());
         int period = frequencyInSec * CommonConstants.MILISEC;
 
         logger.info("Job timout frequency " + frequencyInSec + " secs (" + period + ").");
@@ -477,7 +477,8 @@ public abstract class AbstractFunctionalServiceProvider extends BaseProvider
         for (JobType job : jobs)
         {
             advisoryId = job.getId();
-            created = (JobType)createSingle(job, useAdvisory, zone, context, metadata, customResponseParams);
+            created = (JobType) createSingle(job, useAdvisory, zone, context, metadata,
+                    customResponseParams);
             if (created == null)
             {
                 opStatus.add(new CreateOperationStatus(advisoryId, advisoryId, 404,

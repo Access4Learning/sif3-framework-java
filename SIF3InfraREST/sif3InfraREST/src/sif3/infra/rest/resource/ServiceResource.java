@@ -14,6 +14,8 @@
 
 package sif3.infra.rest.resource;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.ws.rs.DELETE;
@@ -31,7 +33,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.ModelObjectInfo;
@@ -48,12 +49,9 @@ import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.RequestHeaderConstants;
-import sif3.common.header.ResponseHeaderConstants;
-import sif3.common.interfaces.ChangesSinceProvider;
 import sif3.common.interfaces.FunctionalServiceProvider;
 import sif3.common.interfaces.Provider;
-import sif3.common.interfaces.QueryProvider;
-import sif3.common.model.ChangedSinceInfo;
+import sif3.common.model.AuthenticationInfo;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
@@ -61,12 +59,15 @@ import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
 import sif3.common.persist.model.SIF3Session;
+import sif3.common.persist.service.SIF3BindingService;
 import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.infra.common.env.mgr.ProviderManagerFactory;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
 import sif3.infra.common.interfaces.EnvironmentManager;
+import sif3.infra.common.model.JobCollectionType;
+import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.StateType;
 import sif3.infra.rest.provider.AbstractFunctionalServiceProvider;
 import sif3.infra.rest.provider.ProviderFactory;
@@ -85,8 +86,9 @@ import sif3.infra.rest.provider.ProviderFactory;
 public class ServiceResource extends InfraResource
 {
 
-    protected String   infraObjectNamePlural = null;
-    protected Provider provider              = null;
+    protected String             infraObjectNamePlural = null;
+    protected Provider           provider              = null;
+    protected SIF3BindingService sif3BindingService    = new SIF3BindingService();
 
     /**
      * Initialises an Provider Resource. All the parameters are automatically injected by the Jersey
@@ -209,15 +211,30 @@ public class ServiceResource extends InfraResource
 
         try
         {
-            Object returnObj = provider.createSingle(
+            JobType job = (JobType) provider.createSingle(
                     provider.getUnmarshaller().unmarshal(payload,
                             provider.getSingleObjectClassInfo().getObjectType(),
                             getRequestMediaType()),
                     getAdvisory(), getSifZone(), getSifContext(),
                     getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
 
-            return makeResponse(returnObj, Status.CREATED.getStatusCode(), false,
-                    ResponseAction.CREATE, responseParam, provider.getMarshaller());
+            try
+            {
+                if (getJobBinding())
+                {
+                    sif3BindingService.bind(job.getId(), getAuthInfo().getUserToken());
+                }
+            }
+            catch (Exception e)
+            {
+                return makeErrorResponse(
+                        new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                                "Unexpected request failure due to " + e.getMessage()),
+                        ResponseAction.CREATE, responseParam);
+            }
+
+            return makeResponse(job, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE,
+                    responseParam, provider.getMarshaller());
         }
         catch (PersistenceException ex)
         {
@@ -302,7 +319,15 @@ public class ServiceResource extends InfraResource
                     ((isQBE) ? ResponseAction.QUERY : ResponseAction.CREATE), responseParam);
         }
 
-        return (isQBE) ? queryByQBE(provider, payload) : createMany(provider, payload);
+        if (isQBE)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
+                            infraObjectNamePlural + " does not support query by example."),
+                    ResponseAction.QUERY, responseParam);
+        }
+
+        return createMany(provider, payload);
     }
 
     // --------------------------------------------------------//
@@ -329,9 +354,9 @@ public class ServiceResource extends InfraResource
         }
 
         Provider provider = getProvider();
-        if (provider == null) // error already logged but we must return an error
-                              // response for the caller
+        if (provider == null)
         {
+            // error already logged but we must return an error response for the caller
             return makeErrorResponse(
                     new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
                             "No Provider for " + infraObjectNamePlural + " available."),
@@ -346,6 +371,25 @@ public class ServiceResource extends InfraResource
 
             if (returnObj != null)
             {
+                try
+                {
+                    if (getJobBinding()
+                            && !sif3BindingService.isBound(resourceID, getAuthInfo().getUserToken()))
+                    {
+                        return makeErrorResponse(
+                                new ErrorDetails(Status.FORBIDDEN.getStatusCode(),
+                                        "Request failed, object requested does not belong to this consumer."),
+                                ResponseAction.QUERY, responseParam);
+                    }
+                }
+                catch (Exception e)
+                {
+                    return makeErrorResponse(
+                            new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                                    "Unexpected request failure due to " + e.getMessage()),
+                            ResponseAction.QUERY, responseParam);
+                }
+                
                 return makeResponse(returnObj, Status.OK.getStatusCode(), false,
                         ResponseAction.QUERY, responseParam, provider.getMarshaller());
             }
@@ -417,96 +461,40 @@ public class ServiceResource extends InfraResource
                     ResponseAction.QUERY, responseParam);
         }
 
-        PagingInfo pagingInfo = null;
+        PagingInfo pagingInfo = getPagingInfo();
+
         try
         {
-            pagingInfo = getPagingInfo();
-            if (pretendDelayed())
+            Object returnObj = provider.retrieve(getSifZone(), getSifContext(), pagingInfo,
+                    getRequestMetadata(getSIF3SessionForRequest(), true), responseParam);
+
+            try
             {
-                // Simply send a response with status of 202
-                return makeDelayedAcceptResponse(ResponseAction.QUERY);
-            }
-            else
-            {
-                // We need to check if the request is for "changes since" functionality. This is the
-                // case if the provider implements
-                // the ChangesSinceProvider and the changesSinceMarker has been provided. If either
-                // if these criterias are not met
-                // then we must assume that a standard request to get a list of objects is required.
-                ChangesSinceProvider csProvider = getChangesSinceProvider(provider);
-                String changesSinceMarker = getChangesSinceMarker();
-                if ((csProvider != null) && (changesSinceMarker != null)) // We have a ChangesSince
-                                                                          // request and all is in
-                                                                          // order
+                if (getJobBinding())
                 {
-                    if (csProvider.changesSinceSupported())
+                    JobCollectionType jobs = (JobCollectionType) returnObj;
+                    AuthenticationInfo auth = getAuthInfo();
+                    Iterator<JobType> itr = jobs.getJob().iterator();
+                    while (itr.hasNext())
                     {
-                        // Get new changes since marker if page = first page or no paging info
-                        HeaderProperties customHeaders = null;
-                        String newChangesSinceMarker = null;
-                        if ((pagingInfo == null)
-                                || (pagingInfo.getCurrentPageNo() == CommonConstants.FIRST_PAGE))
+                        JobType job = itr.next();
+                        if (!sif3BindingService.isBound(job.getId(), auth.getUserToken()))
                         {
-                            newChangesSinceMarker = csProvider.getLatestOpaqueMarker(getSifZone(),
-                                    getSifContext(), pagingInfo,
-                                    getRequestMetadata(getSIF3SessionForRequest(), true));
-                            customHeaders = new HeaderProperties();
-                            customHeaders.setHeaderProperty(
-                                    ResponseHeaderConstants.HDR_CHANGES_SINCE_MARKER,
-                                    newChangesSinceMarker);
+                            itr.remove();
                         }
-
-                        // Return the results.
-                        Object returnObj = csProvider.getChangesSince(getSifZone(), getSifContext(),
-                                pagingInfo, new ChangedSinceInfo(changesSinceMarker),
-                                getRequestMetadata(getSIF3SessionForRequest(), true),
-                                responseParam);
-
-                        // Check if we have pagingInfo parameter and if so if the navigationID is
-                        // set. If it is not set we set it to the value of the
-                        // newChangesSinceMarker. Consumer can use this to identify which query the
-                        // provider ran in subsequent paged queries.
-                        if ((pagingInfo != null)
-                                && (StringUtils.isEmpty(pagingInfo.getNavigationId())
-                                        && (newChangesSinceMarker != null)))
-                        {
-                            pagingInfo.setNavigationId(newChangesSinceMarker);
-                        }
-
-                        return makePagedResponse(returnObj, pagingInfo, false, responseParam,
-                                provider.getMarshaller());
-
-                    }
-                    else // changes since is not supported => Error
-                    {
-                        return makeErrorResponse(
-                                new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
-                                        "Provider for " + infraObjectNamePlural
-                                                + " does not support 'ChangesSince' functionality."),
-                                ResponseAction.QUERY, responseParam);
-                    }
-                }
-                else // It is a standard request and/or provider
-                {
-                    if (changesSinceMarker != null) // Provider is a standard provider but
-                                                    // changesSince marker is provided => Error
-                    {
-                        return makeErrorResponse(
-                                new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
-                                        "Provider for " + infraObjectNamePlural
-                                                + " does not support 'ChangesSince' functionality."),
-                                ResponseAction.QUERY, responseParam);
-                    }
-                    else // All good.
-                    {
-                        Object returnObj = provider.retrieve(getSifZone(), getSifContext(),
-                                pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true),
-                                responseParam);
-                        return makePagedResponse(returnObj, pagingInfo, false, responseParam,
-                                provider.getMarshaller());
                     }
                 }
             }
+            catch (Exception e)
+            {
+                return makeErrorResponse(
+                        new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                                "Unexpected request failure due to " + e.getMessage()),
+                        ResponseAction.QUERY, responseParam);
+            }
+
+            return makePagedResponse(returnObj, pagingInfo, false, responseParam,
+                    provider.getMarshaller());
         }
         catch (PersistenceException ex)
         {
@@ -661,9 +649,44 @@ public class ServiceResource extends InfraResource
 
         try
         {
+            if (getJobBinding()
+                    && !sif3BindingService.isBound(resourceID, getAuthInfo().getUserToken()))
+            {
+                return makeErrorResponse(
+                        new ErrorDetails(Status.FORBIDDEN.getStatusCode(),
+                                "Request failed, if the object exists it does not belong to this consumer."),
+                        ResponseAction.DELETE, responseParam);
+            }
+        }
+        catch (Exception e)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                            "Unexpected request failure due to " + e.getMessage()),
+                    ResponseAction.DELETE, responseParam);
+        }
+
+        try
+        {
             if (provider.deleteSingle(resourceID, getSifZone(), getSifContext(),
                     getRequestMetadata(getSIF3SessionForRequest(), false), responseParam))
             {
+
+                try
+                {
+                    if (getJobBinding())
+                    {
+                        sif3BindingService.unbind(resourceID);
+                    }
+                }
+                catch (Exception e)
+                {
+                    return makeErrorResponse(
+                            new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                                    "Unexpected request failure due to " + e.getMessage()),
+                            ResponseAction.DELETE, responseParam);
+                }
+
                 return makeResopnseWithNoContent(false, ResponseAction.DELETE, responseParam);
             }
             else
@@ -754,6 +777,25 @@ public class ServiceResource extends InfraResource
                     new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
                             "No Provider for " + infraObjectNamePlural + " available."),
                     ResponseAction.CREATE, responseParam);
+        }
+
+        try
+        {
+            if (getJobBinding()
+                    && !sif3BindingService.isBound(resourceID, getAuthInfo().getUserToken()))
+            {
+                return makeErrorResponse(
+                        new ErrorDetails(Status.FORBIDDEN.getStatusCode(),
+                                "Request failed, object requested does not belong to this consumer."),
+                        ResponseAction.QUERY, responseParam);
+            }
+        }
+        catch (Exception e)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                            "Unexpected request failure due to " + e.getMessage()),
+                    ResponseAction.QUERY, responseParam);
         }
 
         // Ignore the marshaller/unmarshaller - just reflect the contentType and
@@ -849,6 +891,25 @@ public class ServiceResource extends InfraResource
         }
         AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) p;
 
+        try
+        {
+            if (getJobBinding()
+                    && !sif3BindingService.isBound(resourceID, getAuthInfo().getUserToken()))
+            {
+                return makeErrorResponse(
+                        new ErrorDetails(Status.FORBIDDEN.getStatusCode(),
+                                "Request failed, object requested does not belong to this consumer."),
+                        ResponseAction.QUERY, responseParam);
+            }
+        }
+        catch (Exception e)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                            "Unexpected request failure due to " + e.getMessage()),
+                    ResponseAction.QUERY, responseParam);
+        }
+
         // Ignore the marshaller/unmarshaller - just reflect the contentType and
         // accept header information
         determineMediaTypes(null, null, false);
@@ -941,6 +1002,25 @@ public class ServiceResource extends InfraResource
             return errResponse;
         }
         AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) p;
+
+        try
+        {
+            if (getJobBinding()
+                    && !sif3BindingService.isBound(resourceID, getAuthInfo().getUserToken()))
+            {
+                return makeErrorResponse(
+                        new ErrorDetails(Status.FORBIDDEN.getStatusCode(),
+                                "Request failed, object requested does not belong to this consumer."),
+                        ResponseAction.QUERY, responseParam);
+            }
+        }
+        catch (Exception e)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                            "Unexpected request failure due to " + e.getMessage()),
+                    ResponseAction.QUERY, responseParam);
+        }
 
         // Ignore the marshaller/unmarshaller - just reflect the contentType and
         // accept header information
@@ -1042,6 +1122,25 @@ public class ServiceResource extends InfraResource
         }
         AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) p;
 
+        try
+        {
+            if (getJobBinding()
+                    && !sif3BindingService.isBound(resourceID, getAuthInfo().getUserToken()))
+            {
+                return makeErrorResponse(
+                        new ErrorDetails(Status.FORBIDDEN.getStatusCode(),
+                                "Request failed, object requested does not belong to this consumer."),
+                        ResponseAction.QUERY, responseParam);
+            }
+        }
+        catch (Exception e)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                            "Unexpected request failure due to " + e.getMessage()),
+                    ResponseAction.QUERY, responseParam);
+        }
+
         // Ignore the marshaller/unmarshaller - just reflect the contentType and
         // accept header information
         determineMediaTypes(null, null, false);
@@ -1129,12 +1228,31 @@ public class ServiceResource extends InfraResource
 
         try
         {
+            if (getJobBinding()
+                    && !sif3BindingService.isBound(resourceID, getAuthInfo().getUserToken()))
+            {
+                return makeErrorResponse(
+                        new ErrorDetails(Status.FORBIDDEN.getStatusCode(),
+                                "Request failed, object requested does not belong to this consumer."),
+                        ResponseAction.QUERY, responseParam);
+            }
+        }
+        catch (Exception e)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                            "Unexpected request failure due to " + e.getMessage()),
+                    ResponseAction.QUERY, responseParam);
+        }
+
+        try
+        {
             StateType state = provider.createToState(resourceID, phaseName,
                     provider.getUnmarshaller().unmarshal(payload, StateType.class,
                             getRequestMediaType()),
                     getSifZone(), getSifContext(),
                     getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
-            
+
             return makeResponse(state, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE,
                     responseParam, provider.getMarshaller());
         }
@@ -1218,22 +1336,6 @@ public class ServiceResource extends InfraResource
             {
                 logger.debug("Custom headers to be returned from 'getServiceInfo()' method:\n"
                         + customHeaders);
-            }
-
-            // Check if provider supports Changes Since and if so we need to get the latest opaque
-            // changes since marker.
-            ChangesSinceProvider csProvider = getChangesSinceProvider(provider);
-            if (csProvider != null)
-            {
-                if (csProvider.changesSinceSupported())
-                {
-                    defaultCustomHeaders.setHeaderProperty(
-                            ResponseHeaderConstants.HDR_CHANGES_SINCE_MARKER,
-                            csProvider.getLatestOpaqueMarker(getSifZone(), getSifContext(),
-                                    pagingInfo,
-                                    getRequestMetadata(getSIF3SessionForRequest(), true)));
-                }
-
             }
 
             ResponseParameters responseParams = new ResponseParameters(defaultCustomHeaders);
@@ -1351,44 +1453,17 @@ public class ServiceResource extends InfraResource
     protected PagingInfo getPagingInfo()
     {
         PagingInfo pagingInfo = new PagingInfo(getSIFHeaderProperties(), getQueryParameters());
-        if (pagingInfo.getPageSize() <= PagingInfo.NOT_DEFINED) // page size not
-                                                                // defined. Pass
-                                                                // null to
-                                                                // provider.
+        if (pagingInfo.getPageSize() <= PagingInfo.NOT_DEFINED)
         {
+            // page size not defined. Pass null to provider.
             pagingInfo = null;
         }
         else
         {
-            pagingInfo = pagingInfo.clone(); // ensure that initial values are not
-                                             // overridden in case we need them later,
+            // ensure that initial values are not overridden in case we need them later
+            pagingInfo = pagingInfo.clone();
         }
         return pagingInfo;
-    }
-
-    /*
-     * Can return null if the changesSinceMarker is not given. In this case we can also assume that
-     * the call is not for a changeSince request.
-     */
-    protected String getChangesSinceMarker()
-    {
-        return getQueryParameters().getQueryParam(CommonConstants.CHANGES_SINCE_MARKER_NAME);
-    }
-
-    /*
-     * If the given provider implements the ChangesSinceProvider then a casted provider is returned
-     * otherwise null is returned.
-     */
-    protected ChangesSinceProvider getChangesSinceProvider(Provider provider)
-    {
-        if (ChangesSinceProvider.class.isAssignableFrom(provider.getClass()))
-        {
-            return (ChangesSinceProvider) provider;
-        }
-        else
-        {
-            return null;
-        }
     }
 
     private Response updateMany(Provider provider, String payload)
@@ -1475,9 +1550,53 @@ public class ServiceResource extends InfraResource
             }
             else
             {
-                List<OperationStatus> statusList = provider.deleteMany(
-                        getResourceIDsFromDeleteRequest(payload), getSifZone(), getSifContext(),
-                        getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+                List<OperationStatus> statusList = null;
+                List<String> ids = getResourceIDsFromDeleteRequest(payload);
+                try
+                {
+                    if (getJobBinding())
+                    {
+                        statusList = new ArrayList<OperationStatus>();
+                        for (String objectId : ids)
+                        {
+                            if (sif3BindingService.isBound(objectId))
+                            {
+                                if (provider.deleteSingle(objectId, getSifZone(), getSifContext(),
+                                        getRequestMetadata(getSIF3SessionForRequest(), false),
+                                        responseParam))
+                                {
+                                    statusList.add(new OperationStatus(objectId, 200));
+                                    sif3BindingService.unbind(objectId);
+                                }
+                                else
+                                {
+                                    statusList.add(new OperationStatus(objectId, 404,
+                                            new ErrorDetails(404, "Job with GUID = " + objectId
+                                                    + " does not exist.")));
+                                }
+                            }
+                            else
+                            {
+                                statusList.add(new OperationStatus(objectId, 403, new ErrorDetails(
+                                        403,
+                                        "Consumer does not own object with " + objectId + ".")));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        statusList = provider.deleteMany(ids, getSifZone(), getSifContext(),
+                                getRequestMetadata(getSIF3SessionForRequest(), false),
+                                responseParam);
+                    }
+                }
+                catch (Exception e)
+                {
+                    return makeErrorResponse(
+                            new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                                    "Unexpected request failure due to " + e.getMessage()),
+                            ResponseAction.CREATE, responseParam);
+                }
 
                 if (statusList != null)
                 {
@@ -1493,14 +1612,6 @@ public class ServiceResource extends InfraResource
                             ResponseAction.DELETE, responseParam);
                 }
             }
-        }
-        catch (PersistenceException ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                            "Failed to delete " + provider.getMultiObjectClassInfo().getObjectName()
-                                    + " (Bulk Operation). Problem reported: " + ex.getMessage()),
-                    ResponseAction.DELETE, responseParam);
         }
         catch (UnmarshalException ex)
         {
@@ -1549,6 +1660,30 @@ public class ServiceResource extends InfraResource
 
                 if (statusList != null)
                 {
+                    try
+                    {
+                        if (getJobBinding())
+                        {
+                            AuthenticationInfo auth = getAuthInfo();
+                            for (CreateOperationStatus status : statusList)
+                            {
+                                if (status.getError() != null)
+                                {
+                                    continue;
+                                }
+                                sif3BindingService.bind(status.getResourceID(),
+                                        auth.getUserToken());
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        return makeErrorResponse(
+                                new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+                                        "Unexpected request failure due to " + e.getMessage()),
+                                ResponseAction.CREATE, responseParam);
+                    }
+
                     return makeCreateMultipleResponse(statusList, Status.CREATED, responseParam);
                 }
                 else
@@ -1600,101 +1735,6 @@ public class ServiceResource extends InfraResource
         }
     }
 
-    private Response queryByQBE(Provider provider, String payload)
-    {
-        ResponseParameters responseParam = getInitialCustomResponseParameters();
-
-        if (provider == null || !QueryProvider.class.isAssignableFrom(provider.getClass()))
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
-                            "The " + provider.getMultiObjectClassInfo().getObjectName()
-                                    + " does not support QBE style queries."),
-                    ResponseAction.QUERY, responseParam);
-        }
-
-        PagingInfo pagingInfo = null;
-        try
-        {
-            pagingInfo = getPagingInfo();
-            if (pretendDelayed())
-            {
-                // Simply send a response with status of 202
-                return makeDelayedAcceptResponse(ResponseAction.QUERY);
-            }
-            else
-            {
-                Object returnObj = QueryProvider.class.cast(provider).retrieveByQBE(
-                        provider.getUnmarshaller().unmarshal(
-                                payload, provider.getSingleObjectClassInfo().getObjectType(),
-                                getRequestMediaType()),
-                        getSifZone(), getSifContext(), pagingInfo,
-                        getRequestMetadata(getSIF3SessionForRequest(), true), responseParam);
-
-                return makePagedResponse(returnObj, pagingInfo, false, responseParam,
-                        provider.getMarshaller());
-            }
-        }
-        catch (PersistenceException ex)
-        {
-            return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                    "(QBE) Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName()
-                            + " with Paging Information: " + pagingInfo + ". Problem reported: "
-                            + ex.getMessage()),
-                    ResponseAction.QUERY, responseParam);
-        }
-        catch (UnmarshalException ex)
-        {
-            return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
-                    "(QBE) Could not unmarshal the given data to payload. Problem reported: "
-                            + ex.getMessage()),
-                    ResponseAction.QUERY, responseParam);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                    "(QBE) Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName()
-                            + " with Paging Information: " + pagingInfo + ". Problem reported: "
-                            + ex.getMessage()),
-                    ResponseAction.QUERY, responseParam);
-        }
-        catch (UnsupportedQueryException ex)
-        {
-            return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
-                    "(QBE) Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName()
-                            + " with Paging Information: " + pagingInfo + ". Problem reported: "
-                            + ex.getMessage()),
-                    ResponseAction.QUERY, responseParam);
-        }
-        catch (DataTooLargeException ex)
-        {
-            return makeErrorResponse(new ErrorDetails(CommonConstants.RESPONSE_TOO_LARGE,
-                    "(QBE) Failed to retrieve " + provider.getMultiObjectClassInfo().getObjectName()
-                            + " with Paging Information: " + pagingInfo + ". Problem reported: "
-                            + ex.getMessage()),
-                    ResponseAction.QUERY, responseParam);
-        }
-        catch (UnsupportedMediaTypeException ex)
-        {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(),
-                            "(QBE) Could not unmarshal the given data to "
-                                    + provider.getSingleObjectClassInfo().getObjectName()
-                                    + ". Problem reported: " + ex.getMessage()),
-                    ResponseAction.QUERY, responseParam);
-        }
-        catch (Exception ex)
-        {
-            logger.error("Unexpected error occurred", ex);
-            return makeErrorResponse(
-                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
-                            "Request failed to "
-                                    + provider.getSingleObjectClassInfo().getObjectName()
-                                    + ". Problem reported: " + ex.getMessage()),
-                    ResponseAction.QUERY, responseParam);
-        }
-    }
-
     private Response checkProvider(Provider p, ResponseParameters responseParam)
     {
         if (p == null)
@@ -1713,5 +1753,11 @@ public class ServiceResource extends InfraResource
                     ResponseAction.CREATE, responseParam);
         }
         return null;
+    }
+
+    private boolean getJobBinding()
+    {
+        return getServiceProperties().getPropertyAsBool(CommonConstants.JOB_BINDING_PROPERTY,
+                infraObjectNamePlural, CommonConstants.DEFAULT_JOB_BINDING);
     }
 }
