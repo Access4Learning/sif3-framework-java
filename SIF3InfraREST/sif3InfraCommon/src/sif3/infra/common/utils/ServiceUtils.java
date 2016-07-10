@@ -393,7 +393,10 @@ public class ServiceUtils
         item.setLastModified(convertDate(job.getLastModified()));
         try
         {
-            item.setTimeout(DatatypeFactory.newInstance().newDuration(job.getTimeout()));
+            if (job.getTimeout() != 0)
+            {
+                item.setTimeout(DatatypeFactory.newInstance().newDuration(job.getTimeout()));
+            }
         }
         catch (DatatypeConfigurationException e)
         {
@@ -482,7 +485,7 @@ public class ServiceUtils
         job.setStateDescription(item.getStateDescription());
         job.setCreated(convertDate(item.getCreated()));
         job.setLastModified(convertDate(item.getLastModified()));
-        job.setTimeout(item.getTimeout() == null ? null : item.getTimeout().getTimeInMillis(now()));
+        job.setTimeout(item.getTimeout() == null ? 0 : item.getTimeout().getTimeInMillis(now()));
         ArrayList<SIF3Phase> phases = new ArrayList<SIF3Phase>();
         for (PhaseType p : item.getPhases().getPhase())
         {
@@ -581,7 +584,7 @@ public class ServiceUtils
         time.setTime(date);
         return time;
     }
-    
+
     private static Date convertDate(Calendar calendar)
     {
         if (calendar == null)

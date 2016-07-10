@@ -171,8 +171,8 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractConsumer
         {
             throw new IllegalArgumentException("Payload must be a collection");
         }
-        return super.createMany(ServiceUtils.marshal((Collection<?>) data),
-                zoneCtxList, requestType, customParameters);
+        return super.createMany(ServiceUtils.marshal((Collection<?>) data), zoneCtxList,
+                requestType, customParameters);
     }
 
     @Override
@@ -202,14 +202,15 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractConsumer
                 .unmarshal(super.retrieveByQBE(ServiceUtils.marshal((SIF3Job) exampleObject),
                         pagingInfo, zoneCtxList, requestType, queryIntention, customParameters));
     }
-    
+
     @Override
     public List<Response> retrieve(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList,
             RequestType requestType, QueryIntention queryIntention,
             CustomParameters customParameters)
             throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
     {
-        return ServiceUtils.unmarshal(super.retrieve(pagingInfo, zoneCtxList, requestType, queryIntention, customParameters));
+        return ServiceUtils.unmarshal(super.retrieve(pagingInfo, zoneCtxList, requestType,
+                queryIntention, customParameters));
     }
 
     @Override
@@ -544,6 +545,6 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractConsumer
         logger.debug("Time taken to call and process 'createToPhase' for "
                 + getSingleObjectClassInfo().getObjectName() + "/" + resourceID + "/phases/"
                 + phaseName + ": " + timer.timeTaken() + "ms");
-        return responses;
+        return ServiceUtils.unmarshal(responses);
     }
 }

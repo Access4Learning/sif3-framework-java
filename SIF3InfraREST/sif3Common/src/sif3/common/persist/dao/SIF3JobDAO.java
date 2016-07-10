@@ -14,10 +14,7 @@
 
 package sif3.common.persist.dao;
 
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
@@ -25,14 +22,11 @@ import org.hibernate.HibernateException;
 import org.hibernate.criterion.Restrictions;
 
 import au.com.systemic.framework.utils.StringUtils;
-import sif3.common.CommonConstants.PhaseState;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.persist.common.BasicTransaction;
 import sif3.common.persist.model.SIF3Job;
-import sif3.common.persist.model.SIF3Phase;
-import sif3.common.persist.model.SIF3PhaseState;
 
 public class SIF3JobDAO extends BaseDAO
 {

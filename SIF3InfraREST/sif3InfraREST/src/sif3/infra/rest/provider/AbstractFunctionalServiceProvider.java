@@ -470,14 +470,14 @@ public abstract class AbstractFunctionalServiceProvider extends BaseProvider
 
         logger.debug("Create jobs (Bulk Operation) for " + getZoneAndContext(zone, context)
                 + " and RequestMetadata = " + metadata);
-        List<SIF3Job> jobs = ServiceUtils.unmarshal((JobCollectionType) data);
+        List<JobType> jobs = ((JobCollectionType) data).getJob();
         ArrayList<CreateOperationStatus> opStatus = new ArrayList<CreateOperationStatus>();
-        Object created = null;
+        JobType created = null;
         String advisoryId = null;
-        for (SIF3Job job : jobs)
+        for (JobType job : jobs)
         {
             advisoryId = job.getId();
-            created = createSingle(job, useAdvisory, zone, context, metadata, customResponseParams);
+            created = (JobType)createSingle(job, useAdvisory, zone, context, metadata, customResponseParams);
             if (created == null)
             {
                 opStatus.add(new CreateOperationStatus(advisoryId, advisoryId, 404,
@@ -485,7 +485,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseProvider
             }
             else
             {
-                opStatus.add(new CreateOperationStatus(job.getId(), advisoryId, 201));
+                opStatus.add(new CreateOperationStatus(created.getId(), advisoryId, 201));
             }
         }
         return opStatus;

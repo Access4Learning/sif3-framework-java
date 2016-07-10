@@ -248,6 +248,7 @@ public class ServiceResource extends InfraResource
         }
         catch (Exception ex)
         {
+            logger.error("Unexpected error occurred", ex);
             return makeErrorResponse(
                     new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
                             "Request failed to "
@@ -379,6 +380,7 @@ public class ServiceResource extends InfraResource
         }
         catch (Exception ex)
         {
+            logger.error("Unexpected error occurred", ex);
             return makeErrorResponse(
                     new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
                             "Request failed to "
@@ -540,6 +542,7 @@ public class ServiceResource extends InfraResource
         }
         catch (Exception ex)
         {
+            logger.error("Unexpected error occurred", ex);
             return makeErrorResponse(
                     new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
                             "Request failed to "
@@ -564,6 +567,7 @@ public class ServiceResource extends InfraResource
         }
         catch (Exception ex)
         {
+            logger.error("Unexpected error occurred", ex);
             return makeErrorResponse(
                     new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
                             "Request failed to "
@@ -693,6 +697,7 @@ public class ServiceResource extends InfraResource
         }
         catch (Exception ex)
         {
+            logger.error("Unexpected error occurred", ex);
             return makeErrorResponse(
                     new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
                             "Request failed to "
@@ -1129,7 +1134,7 @@ public class ServiceResource extends InfraResource
                             getRequestMediaType()),
                     getSifZone(), getSifContext(),
                     getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
-
+            
             return makeResponse(state, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE,
                     responseParam, provider.getMarshaller());
         }
@@ -1448,6 +1453,7 @@ public class ServiceResource extends InfraResource
         }
         catch (Exception ex)
         {
+            logger.error("Unexpected error occurred", ex);
             return makeErrorResponse(
                     new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
                             "Request failed to "
@@ -1512,6 +1518,7 @@ public class ServiceResource extends InfraResource
         }
         catch (Exception ex)
         {
+            logger.error("Unexpected error occurred", ex);
             return makeErrorResponse(
                     new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
                             "Request failed to "
@@ -1583,6 +1590,7 @@ public class ServiceResource extends InfraResource
         }
         catch (Exception ex)
         {
+            logger.error("Unexpected error occurred", ex);
             return makeErrorResponse(
                     new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
                             "Request failed to "
@@ -1677,6 +1685,7 @@ public class ServiceResource extends InfraResource
         }
         catch (Exception ex)
         {
+            logger.error("Unexpected error occurred", ex);
             return makeErrorResponse(
                     new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
                             "Request failed to "
