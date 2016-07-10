@@ -20,19 +20,16 @@ import sif.dd.conversion.DataModelUnmarshalFactory;
 import sif.dd.uk20.model.LearnerPersonalType;
 import sif.dd.uk20.model.NameType;
 import sif3.common.CommonConstants;
-import sif3.common.CommonConstants.JobState;
-import sif3.common.CommonConstants.PhaseState;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.exception.UnsupportedQueryException;
-import sif3.common.header.HeaderValues.EventAction;
+import sif3.common.interfaces.FunctionalServiceProvider;
+import sif3.common.model.BasePhaseActions;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
-import sif3.infra.common.functional.BasePhaseActions;
-import sif3.infra.common.interfaces.FunctionalServiceProvider;
-import sif3.infra.common.model.JobType;
-import sif3.infra.common.model.PhaseType;
+import sif3.common.persist.model.SIF3Job;
+import sif3.common.persist.model.SIF3Phase;
 import sif3.infra.common.utils.ServiceUtils;
 
 public class JsonActions extends BasePhaseActions
@@ -43,12 +40,13 @@ public class JsonActions extends BasePhaseActions
     }
 
     @Override
-    public String update(JobType job, PhaseType phase, String payload, MediaType requestMediaType,
+    public String update(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
             throws IllegalArgumentException, PersistenceException, UnmarshalException,
             UnsupportedMediaTypeException, UnsupportedQueryException
     {
-        ServiceUtils.changeJobState(job, CommonConstants.JobState.INPROGRESS, "UPDATE to " + phase.getName());
+        ServiceUtils.changeJobState(job, CommonConstants.JobState.INPROGRESS,
+                "UPDATE to " + phase.getName());
 
         String response;
         if (!requestMediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE))
@@ -64,8 +62,6 @@ public class JsonActions extends BasePhaseActions
 
         NameType name = learner.getPersonalInformation().getName();
         ServiceUtils.changePhaseState(job, phase, CommonConstants.PhaseState.COMPLETED, "UPDATE");
-
-        getProvider().sendJobEvent(job, phase.getName(), EventAction.UPDATE, zone, context);
 
         return "Got UPDATE message for " + phase.getName() + "@" + job.getId()
                 + " with content type " + requestMediaType.toString() + " and accept "

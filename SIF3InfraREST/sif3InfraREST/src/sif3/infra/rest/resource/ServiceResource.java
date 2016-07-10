@@ -50,6 +50,7 @@ import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.interfaces.ChangesSinceProvider;
+import sif3.common.interfaces.FunctionalServiceProvider;
 import sif3.common.interfaces.Provider;
 import sif3.common.interfaces.QueryProvider;
 import sif3.common.model.ChangedSinceInfo;
@@ -66,7 +67,6 @@ import sif3.common.ws.OperationStatus;
 import sif3.infra.common.env.mgr.ProviderManagerFactory;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
 import sif3.infra.common.interfaces.EnvironmentManager;
-import sif3.infra.common.interfaces.FunctionalServiceProvider;
 import sif3.infra.common.model.StateType;
 import sif3.infra.rest.provider.AbstractFunctionalServiceProvider;
 import sif3.infra.rest.provider.ProviderFactory;
@@ -246,6 +246,15 @@ public class ServiceResource extends InfraResource
                                     + ". Problem reported: " + ex.getMessage()),
                     ResponseAction.CREATE, responseParam);
         }
+        catch (Exception ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+                            "Request failed to "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + ". Problem reported: " + ex.getMessage()),
+                    ResponseAction.CREATE, responseParam);
+        }
     }
 
     @POST
@@ -366,6 +375,15 @@ public class ServiceResource extends InfraResource
                                     + provider.getSingleObjectClassInfo().getObjectName()
                                     + " with resouce ID = " + resourceID + ". Problem reported: "
                                     + ex.getMessage()),
+                    ResponseAction.QUERY, responseParam);
+        }
+        catch (Exception ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+                            "Request failed to "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + ". Problem reported: " + ex.getMessage()),
                     ResponseAction.QUERY, responseParam);
         }
     }
@@ -520,6 +538,15 @@ public class ServiceResource extends InfraResource
                             + ex.getMessage()),
                     ResponseAction.QUERY, responseParam);
         }
+        catch (Exception ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+                            "Request failed to "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + ". Problem reported: " + ex.getMessage()),
+                    ResponseAction.QUERY, responseParam);
+        }
     }
 
     // ----------------------------------------------------------//
@@ -530,8 +557,20 @@ public class ServiceResource extends InfraResource
     public Response updateSingle(String payload, @PathParam("resourceID") String resourceID,
             @PathParam("mimeType") String mimeType)
     {
-        throw new UnsupportedOperationException(
-                "Update operations not supported on functional services");
+        try
+        {
+            throw new UnsupportedOperationException(
+                    "Update operations not supported on functional services");
+        }
+        catch (Exception ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+                            "Request failed to "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + ". Problem reported: " + ex.getMessage()),
+                    ResponseAction.QUERY, getInitialCustomResponseParameters());
+        }
     }
 
     @PUT
@@ -650,6 +689,15 @@ public class ServiceResource extends InfraResource
                                     + provider.getSingleObjectClassInfo().getObjectName()
                                     + " with resouce ID = " + resourceID + ". Problem reported: "
                                     + ex.getMessage()),
+                    ResponseAction.DELETE, responseParam);
+        }
+        catch (Exception ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+                            "Request failed to "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + ". Problem reported: " + ex.getMessage()),
                     ResponseAction.DELETE, responseParam);
         }
     }
@@ -787,7 +835,7 @@ public class ServiceResource extends InfraResource
         {
             return makeErrorResponse(error, ResponseAction.QUERY, responseParam);
         }
-        
+
         Provider p = getProvider();
         Response errResponse = checkProvider(p, responseParam);
         if (errResponse != null)
@@ -1398,6 +1446,15 @@ public class ServiceResource extends InfraResource
                                     + ". Problem reported: " + ex.getMessage()),
                     ResponseAction.UPDATE, responseParam);
         }
+        catch (Exception ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+                            "Request failed to "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + ". Problem reported: " + ex.getMessage()),
+                    ResponseAction.UPDATE, responseParam);
+        }
     }
 
     private Response deleteMany(Provider provider, String payload)
@@ -1451,6 +1508,15 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(),
                     "Could not unmarshal the given data to DeleteRequestType. Problem reported: "
                             + ex.getMessage()),
+                    ResponseAction.DELETE, responseParam);
+        }
+        catch (Exception ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+                            "Request failed to "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + ". Problem reported: " + ex.getMessage()),
                     ResponseAction.DELETE, responseParam);
         }
     }
@@ -1511,6 +1577,15 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(
                     new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(),
                             "Could not unmarshal the given data to "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + ". Problem reported: " + ex.getMessage()),
+                    ResponseAction.CREATE, responseParam);
+        }
+        catch (Exception ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+                            "Request failed to "
                                     + provider.getSingleObjectClassInfo().getObjectName()
                                     + ". Problem reported: " + ex.getMessage()),
                     ResponseAction.CREATE, responseParam);
@@ -1600,9 +1675,19 @@ public class ServiceResource extends InfraResource
                                     + ". Problem reported: " + ex.getMessage()),
                     ResponseAction.QUERY, responseParam);
         }
+        catch (Exception ex)
+        {
+            return makeErrorResponse(
+                    new ErrorDetails(Status.BAD_REQUEST.getStatusCode(),
+                            "Request failed to "
+                                    + provider.getSingleObjectClassInfo().getObjectName()
+                                    + ". Problem reported: " + ex.getMessage()),
+                    ResponseAction.QUERY, responseParam);
+        }
     }
-    
-    private Response checkProvider(Provider p, ResponseParameters responseParam) {
+
+    private Response checkProvider(Provider p, ResponseParameters responseParam)
+    {
         if (p == null)
         {
             return makeErrorResponse(

@@ -14,22 +14,38 @@
 
 package sif3.infra.common.utils;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+
+import org.apache.log4j.Logger;
+
 import au.com.systemic.framework.utils.StringUtils;
-import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.JobState;
 import sif3.common.CommonConstants.PhaseState;
+import sif3.common.model.ServiceRights;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
+import sif3.common.persist.model.SIF3Job;
+import sif3.common.persist.model.SIF3Phase;
+import sif3.common.persist.model.SIF3PhaseState;
+import sif3.common.ws.Response;
+import sif3.infra.common.model.JobCollectionType;
 import sif3.infra.common.model.JobStateType;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.ObjectFactory;
+import sif3.infra.common.model.PhaseCollectionType;
 import sif3.infra.common.model.PhaseStateType;
 import sif3.infra.common.model.PhaseType;
 import sif3.infra.common.model.RightType;
+import sif3.infra.common.model.RightValueType;
+import sif3.infra.common.model.RightsType;
 import sif3.infra.common.model.StateType;
 
 /**
@@ -37,6 +53,7 @@ import sif3.infra.common.model.StateType;
  */
 public class ServiceUtils
 {
+    protected final Logger       logger        = Logger.getLogger(getClass());
     private static ObjectFactory objectFactory = new ObjectFactory();
 
     /**
@@ -50,7 +67,7 @@ public class ServiceUtils
      * @throws IllegalArgumentException
      *             if the phase cannot be found
      */
-    public static PhaseType getPhase(JobType job, String phaseName)
+    public static SIF3Phase getPhase(SIF3Job job, String phaseName)
     {
         if (job == null)
         {
@@ -66,9 +83,9 @@ public class ServiceUtils
 
         if (job.getPhases() == null)
         {
-            job.setPhases(objectFactory.createPhaseCollectionType());
+            job.setPhases(new ArrayList<SIF3Phase>());
         }
-        for (PhaseType phase : job.getPhases().getPhase())
+        for (SIF3Phase phase : job.getPhases())
         {
             if (phase.getName().equals(phaseName))
             {
@@ -90,7 +107,7 @@ public class ServiceUtils
      * @throws IllegalArgumentException
      *             if the phase cannot be found or other problem is encountered
      */
-    public static StateType getLastPhaseState(JobType job, String phaseName)
+    public static SIF3PhaseState getLastPhaseState(SIF3Job job, String phaseName)
     {
         return getLastPhaseState(getPhase(job, phaseName));
     }
@@ -104,7 +121,7 @@ public class ServiceUtils
      * @throws IllegalArgumentException
      *             If the phase is null
      */
-    public static StateType getLastPhaseState(PhaseType phase)
+    public static SIF3PhaseState getLastPhaseState(SIF3Phase phase)
     {
         if (phase == null)
         {
@@ -114,8 +131,8 @@ public class ServiceUtils
         {
             return null;
         }
-        List<StateType> states = phase.getStates().getState();
-        if (states.isEmpty())
+        List<SIF3PhaseState> states = phase.getStates();
+        if (states == null || states.isEmpty())
         {
             return null;
         }
@@ -137,10 +154,10 @@ public class ServiceUtils
      *            The access rights for CRUD operations on the states of the phase
      * @return The phase instance that has been added to the job
      */
-    public static PhaseType addPhase(JobType job, String phaseName, boolean required,
-            List<RightType> rights, List<RightType> statesRights)
+    public static SIF3Phase addPhase(SIF3Job job, String phaseName, boolean required,
+            ServiceRights rights, ServiceRights statesRights)
     {
-        return addPhase(job, phaseName, required, rights, statesRights, CommonConstants.PhaseState.NOTSTARTED,
+        return addPhase(job, phaseName, required, rights, statesRights, PhaseState.NOTSTARTED,
                 null);
     }
 
@@ -161,8 +178,8 @@ public class ServiceUtils
      *            The initial state of the phase
      * @return The phase instance that has been added to the job
      */
-    public static PhaseType addPhase(JobType job, String phaseName, boolean required,
-            List<RightType> rights, List<RightType> statesRights, CommonConstants.PhaseState state)
+    public static SIF3Phase addPhase(SIF3Job job, String phaseName, boolean required,
+            ServiceRights rights, ServiceRights statesRights, PhaseState state)
     {
         return addPhase(job, phaseName, required, rights, statesRights, state, null);
     }
@@ -186,26 +203,25 @@ public class ServiceUtils
      *            The description of the phase
      * @return The phase instance that has been added to the job
      */
-    public static PhaseType addPhase(JobType job, String phaseName, boolean required,
-            List<RightType> rights, List<RightType> statesRights, CommonConstants.PhaseState state,
+    public static SIF3Phase addPhase(SIF3Job job, String phaseName, boolean required,
+            ServiceRights rights, ServiceRights statesRights, PhaseState state,
             String stateDescription)
     {
         if (job.getPhases() == null)
         {
-            job.setPhases(objectFactory.createPhaseCollectionType());
+            job.setPhases(new ArrayList<SIF3Phase>());
         }
-        PhaseType phase = objectFactory.createPhaseType();
+
+        SIF3Phase phase = new SIF3Phase();
         phase.setName(phaseName);
         phase.setRequired(required);
-        phase.setStates(objectFactory.createStateCollectionType());
+        phase.setStates(new ArrayList<SIF3PhaseState>());
+        phase.setRights(rights);
+        phase.setStatesRights(statesRights);
 
-        phase.setRights(objectFactory.createRightsType());
-        phase.getRights().getRight().addAll(rights);
-
-        phase.setStatesRights(objectFactory.createRightsType());
-        phase.getStatesRights().getRight().addAll(statesRights);
-
-        job.getPhases().getPhase().add(phase);
+        List<SIF3Phase> phases = job.getPhases();
+        phases.add(phase);
+        job.setPhases(phases);
 
         changePhaseState(job, phase, state, stateDescription);
 
@@ -224,10 +240,9 @@ public class ServiceUtils
      *            The expected value of the AccessRight (APPROOVED, REJECTED, etc.)
      * @return true if the phase supports the given access right, false otherwise.
      */
-    public static boolean checkPhaseACL(PhaseType phase, AccessRight right, AccessType type)
+    public static boolean checkPhaseACL(SIF3Phase phase, AccessRight right, AccessType type)
     {
-        SIFRights rights = new SIFRights().setRights(phase.getRights());
-        return rights.hasRight(right, type);
+        return phase.getRights().hasRight(right, type);
     }
 
     /**
@@ -240,11 +255,11 @@ public class ServiceUtils
      * @param description
      *            The description of the state change
      */
-    public static void changeJobState(JobType job, CommonConstants.JobState state, String description)
+    public static void changeJobState(SIF3Job job, JobState state, String description)
     {
-        job.setLastModified(Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+        job.setLastModified(now());
         job.setStateDescription(description);
-        job.setState(JobStateType.valueOf(state.name()));
+        job.setState(JobState.valueOf(state.name()));
     }
 
     /**
@@ -260,19 +275,32 @@ public class ServiceUtils
      *            The description of the new state
      * @return The state that the phase has been updated with
      */
-    public static StateType changePhaseState(JobType job, PhaseType phase, CommonConstants.PhaseState state,
+    public static SIF3PhaseState changePhaseState(SIF3Job job, SIF3Phase phase, PhaseState state,
             String description)
     {
-        if (!job.getPhases().getPhase().contains(phase))
+        if (!job.getPhases().contains(phase))
         {
-            throw new IllegalArgumentException("Phase with name " + phase.getName()
-                    + " Does not belong to job with refid " + job.getId());
+            String msg = "Phase with name " + phase.getName()
+                    + " Does not belong to job with refid " + job.getId() + ".";
+
+            if (job.getPhases().size() == 0)
+            {
+                throw new IllegalArgumentException(msg);
+            }
+
+            String names[] = new String[job.getPhases().size()];
+            for (int i = 0; i < job.getPhases().size(); i++)
+            {
+                names[i] = job.getPhases().get(i).getName();
+            }
+            throw new IllegalArgumentException(
+                    msg + " Known phases are: " + String.join(", ", names));
         }
 
-        StateType current = null;
+        SIF3PhaseState current = null;
         try
         {
-            current = phase.getStates().getState().get(phase.getStates().getState().size() - 1);
+            current = phase.getStates().get(phase.getStates().size() - 1);
         }
         catch (Exception e)
         {
@@ -281,10 +309,12 @@ public class ServiceUtils
 
         if (current == null || !current.getType().equals(state))
         {
-            current = objectFactory.createStateType();
-            current.setType(PhaseStateType.valueOf(state.name()));
-            current.setCreated(Calendar.getInstance(TimeZone.getTimeZone("UTC")));
-            phase.getStates().getState().add(current);
+            current = new SIF3PhaseState();
+            current.setType(state);
+            current.setCreated(now());
+            List<SIF3PhaseState> states = phase.getStates();
+            states.add(current);
+            phase.setStates(states);
         }
         current.setDescription(description);
 
@@ -299,9 +329,9 @@ public class ServiceUtils
      * @param job
      *            The job to touch
      */
-    public static void touch(JobType job)
+    public static void touch(SIF3Job job)
     {
-        job.setLastModified(Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+        job.setLastModified();
     }
 
     /**
@@ -312,10 +342,257 @@ public class ServiceUtils
      * @param phase
      *            The phase to touch
      */
-    public static void touch(JobType job, PhaseType phase)
+    public static void touch(SIF3Job job, SIF3Phase phase)
     {
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        Date time = now();
         getLastPhaseState(phase).setLastModified(time);
         job.setLastModified(time);
+    }
+
+    public static void touchAll(SIF3Job job)
+    {
+        Date time = now();
+        for (SIF3Phase phase : job.getPhases())
+        {
+            getLastPhaseState(phase).setLastModified(time);
+        }
+        job.setLastModified(time);
+    }
+
+    public static JobCollectionType marshal(Collection<?> jobs)
+    {
+        JobCollectionType items = objectFactory.createJobCollectionType();
+        if (jobs != null && !jobs.isEmpty())
+        {
+            for (Object job : jobs)
+            {
+                if (!(job instanceof SIF3Job))
+                {
+                    throw new IllegalArgumentException(
+                            "The collection must contain elements of type SIF3Job");
+                }
+                items.getJob().add(marshal((SIF3Job) job));
+            }
+        }
+        return items;
+    }
+
+    public static JobType marshal(SIF3Job job)
+    {
+        if (job == null)
+        {
+            return null;
+        }
+        JobType item = objectFactory.createJobType();
+        item.setId(job.getId());
+        item.setName(job.getName());
+        item.setDescription(job.getDescription());
+        item.setState(job.getState() == null ? null : JobStateType.valueOf(job.getState().name()));
+        item.setStateDescription(job.getStateDescription());
+        item.setCreated(convertDate(job.getCreated()));
+        item.setLastModified(convertDate(job.getLastModified()));
+        try
+        {
+            item.setTimeout(DatatypeFactory.newInstance().newDuration(job.getTimeout()));
+        }
+        catch (DatatypeConfigurationException e)
+        {
+            throw new IllegalArgumentException(
+                    "Could not convert the timeout to an XML Duration object.", e);
+        }
+        PhaseCollectionType phases = objectFactory.createPhaseCollectionType();
+        for (SIF3Phase p : job.getPhases())
+        {
+            phases.getPhase().add(marshal(p));
+        }
+        item.setPhases(phases);
+        return item;
+    }
+
+    public static PhaseType marshal(SIF3Phase p)
+    {
+        if (p == null)
+        {
+            return null;
+        }
+        PhaseType phase = objectFactory.createPhaseType();
+        phase.setName(p.getName());
+        phase.setRequired(p.isRequired());
+        phase.setRights(marshal(p.getRights()));
+        phase.setStatesRights(marshal(p.getStatesRights()));
+        return phase;
+    }
+
+    public static StateType marshal(SIF3PhaseState s)
+    {
+        if (s == null)
+        {
+            return null;
+        }
+        StateType state = objectFactory.createStateType();
+        state.setId(s.getId());
+        state.setDescription(s.getDescription());
+        state.setCreated(convertDate(s.getCreated()));
+        state.setLastModified(convertDate(s.getLastModified()));
+        state.setType(s.getType() == null ? null : PhaseStateType.valueOf(s.getType().name()));
+        return state;
+    }
+
+    public static RightsType marshal(ServiceRights r)
+    {
+        if (r == null)
+        {
+            return null;
+        }
+        RightsType rights = objectFactory.createRightsType();
+        for (AccessRight accessRight : r.getRights().keySet())
+        {
+            RightType right = objectFactory.createRightType();
+            right.setType(accessRight.name());
+            right.setValue(RightValueType.valueOf(r.getRights().get(accessRight).name()));
+            rights.getRight().add(right);
+        }
+        return rights;
+    }
+
+    public static List<SIF3Job> unmarshal(JobCollectionType items)
+    {
+        ArrayList<SIF3Job> jobs = new ArrayList<SIF3Job>();
+        if (items != null)
+        {
+            for (JobType item : items.getJob())
+            {
+                jobs.add(unmarshal(item));
+            }
+        }
+        return jobs;
+    }
+
+    public static SIF3Job unmarshal(JobType item)
+    {
+        if (item == null)
+        {
+            return null;
+        }
+        SIF3Job job = new SIF3Job();
+        job.setId(item.getId());
+        job.setName(item.getName());
+        job.setDescription(item.getDescription());
+        job.setState(item.getState() == null ? null : JobState.valueOf(item.getState().name()));
+        job.setStateDescription(item.getStateDescription());
+        job.setCreated(convertDate(item.getCreated()));
+        job.setLastModified(convertDate(item.getLastModified()));
+        job.setTimeout(item.getTimeout() == null ? null : item.getTimeout().getTimeInMillis(now()));
+        ArrayList<SIF3Phase> phases = new ArrayList<SIF3Phase>();
+        for (PhaseType p : item.getPhases().getPhase())
+        {
+            phases.add(unmarshal(p));
+        }
+        job.setPhases(phases);
+        return job;
+    }
+
+    public static SIF3Phase unmarshal(PhaseType p)
+    {
+        if (p == null)
+        {
+            return null;
+        }
+        SIF3Phase phase = new SIF3Phase();
+        phase.setName(p.getName());
+        phase.setRequired(p.isRequired());
+        phase.setRights(unmarshal(p.getRights()));
+        phase.setStatesRights(unmarshal(p.getStatesRights()));
+        return phase;
+    }
+
+    public static SIF3PhaseState unmarshal(StateType s)
+    {
+        if (s == null)
+        {
+            return null;
+        }
+        SIF3PhaseState state = new SIF3PhaseState();
+        state.setId(s.getId());
+        state.setDescription(s.getDescription());
+        state.setCreated(convertDate(s.getCreated()));
+        state.setLastModified(convertDate(s.getLastModified()));
+        state.setType(s.getType() == null ? null : PhaseState.valueOf(s.getType().name()));
+        return state;
+    }
+
+    public static ServiceRights unmarshal(RightsType r)
+    {
+        if (r == null)
+        {
+            return null;
+        }
+        ServiceRights rights = new ServiceRights();
+        for (RightType rightType : r.getRight())
+        {
+            rights.addRight(AccessRight.valueOf(rightType.getType()),
+                    AccessType.valueOf(rightType.getValue().name()));
+        }
+        return rights;
+    }
+
+    public static List<Response> unmarshal(List<Response> responses)
+    {
+        for (Response r : responses)
+        {
+            if (!r.getHasEntity())
+            {
+                continue;
+            }
+            if (JobType.class.isAssignableFrom(r.getDataObjectType()))
+            {
+                r.setDataObjectType(SIF3Job.class);
+                r.setDataObject(unmarshal((JobType) r.getDataObject()));
+            }
+            if (StateType.class.isAssignableFrom(r.getDataObjectType()))
+            {
+                r.setDataObjectType(SIF3PhaseState.class);
+                r.setDataObject(unmarshal((StateType) r.getDataObject()));
+            }
+        }
+        return responses;
+    }
+
+    public static SIF3Job filter(SIF3Job job, String phaseName)
+    {
+        SIF3Job newJob = new SIF3Job();
+        newJob.setId(job.getId());
+        newJob.setName(job.getName());
+        /*
+         * newJob.setDescription(job.getDescription()); newJob.setCreated(job.getCreated());
+         * newJob.setLastModified(job.getLastModified()); newJob.setState(job.getState());
+         */
+        newJob.getPhases().add(ServiceUtils.getPhase(job, phaseName));
+        return newJob;
+    }
+
+    private static Calendar convertDate(Date date)
+    {
+        if (date == null)
+        {
+            return null;
+        }
+        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        time.setTime(date);
+        return time;
+    }
+    
+    private static Date convertDate(Calendar calendar)
+    {
+        if (calendar == null)
+        {
+            return null;
+        }
+        return calendar.getTime();
+    }
+
+    private static Date now()
+    {
+        return Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime();
     }
 }

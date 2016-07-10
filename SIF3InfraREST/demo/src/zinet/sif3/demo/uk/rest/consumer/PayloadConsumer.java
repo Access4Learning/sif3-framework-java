@@ -27,25 +27,19 @@ import sif.dd.conversion.DataModelMarshalFactory;
 import sif.dd.uk20.model.LearnerPersonalType;
 import sif.dd.uk20.model.NameType;
 import sif.dd.uk20.model.PersonalInformationType;
+import sif3.common.CommonConstants.PhaseState;
 import sif3.common.conversion.ModelObjectInfo;
-import sif3.common.model.EventMetadata;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
-import sif3.common.model.SIFContext;
-import sif3.common.model.SIFEvent;
-import sif3.common.model.SIFZone;
 import sif3.common.model.delayed.DelayedResponseReceipt;
+import sif3.common.persist.model.SIF3Job;
+import sif3.common.persist.model.SIF3PhaseState;
 import sif3.common.ws.BulkOperationResponse;
 import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.common.ws.Response;
 import sif3.common.ws.model.MultiOperationStatusList;
-import sif3.infra.common.model.JobCollectionType;
-import sif3.infra.common.model.JobType;
-import sif3.infra.common.model.ObjectFactory;
-import sif3.infra.common.model.PhaseStateType;
-import sif3.infra.common.model.StateType;
 import sif3.infra.common.utils.ServiceUtils;
 import sif3.infra.rest.consumer.AbstractFunctionalServiceConsumer;
 import zinet.sif3.demo.uk.rest.PayloadConstants;
@@ -63,9 +57,8 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
 
             public void run()
             {
-                ObjectFactory factory = new ObjectFactory();
-                JobType job = null;
-                StateType state = null;
+                SIF3Job job = null;
+                SIF3PhaseState state = null;
                 List<Response> responses;
                 Response r;
 
@@ -73,20 +66,20 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                 {
                     // Create a job
                     logger.info(makeHeading("Creating Payload job"));
-                    job = factory.createJobType();
+                    job = new SIF3Job();
                     job.setName("Payload");
                     job.setDescription("testing");
                     responses = createSingle(job, null);
                     r = responses.isEmpty() ? null : responses.get(0);
                     // logger.debug(r.toString());
-                    job = (JobType) getDataObject(r);
+                    job = (SIF3Job) getDataObject(r);
                     logger.info(makeResult("Job created and given ID " + job.getId()));
 
                     // Get a job
                     logger.info(makeHeading("Fetching job " + job.getId()));
                     responses = retrieveByPrimaryKey(job.getId(), null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    job = (JobType) getDataObject(r);
+                    job = (SIF3Job) getDataObject(r);
                     logger.info(makeResult("Fetched " + job.getName() + " (" + job.getId() + ")"));
 
                     // Create message to phase default
@@ -102,7 +95,7 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                             makeHeading("Check state of phase 'default', expecting INPROGRESS."));
                     responses = retrieveByPrimaryKey(job.getId(), null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    job = (JobType) getDataObject(r);
+                    job = (SIF3Job) getDataObject(r);
                     state = ServiceUtils.getLastPhaseState(job, "default");
                     if (state == null)
                     {
@@ -110,7 +103,7 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     }
                     else
                     {
-                        if (state.getType().equals(PhaseStateType.INPROGRESS))
+                        if (state.getType().equals(PhaseState.INPROGRESS))
                         {
                             logger.info(makeResult("Got EXPECTED result, last modified at "
                                     + state.getLastModified().getTime()));
@@ -135,7 +128,7 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                             makeHeading("Check state of phase 'default', expecting COMPLETED."));
                     responses = retrieveByPrimaryKey(job.getId(), null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    job = (JobType) getDataObject(r);
+                    job = (SIF3Job) getDataObject(r);
                     state = ServiceUtils.getLastPhaseState(job, "default");
                     if (state == null)
                     {
@@ -143,7 +136,7 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     }
                     else
                     {
-                        if (state.getType().equals(PhaseStateType.COMPLETED))
+                        if (state.getType().equals(PhaseState.COMPLETED))
                         {
                             logger.info(makeResult("Got EXPECTED result, last modified at "
                                     + state.getLastModified().getTime()));
@@ -184,12 +177,12 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
 
                     // Change state of phase "json".
                     logger.info(makeHeading("Executing CREATE to the state of phase 'json'."));
-                    StateType failed = new StateType();
-                    failed.setType(PhaseStateType.FAILED);
+                    SIF3PhaseState failed = new SIF3PhaseState();
+                    failed.setType(PhaseState.FAILED);
                     failed.setDescription("Because I want it to");
                     responses = createToState(job.getId(), "json", failed, null, null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    state = (StateType) getDataObject(r);
+                    state = (SIF3PhaseState) getDataObject(r);
                     if (state == null)
                     {
                         logger.info(makeResult("Got UNEXPECTED result, no state object!"));
@@ -203,7 +196,7 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     }
                     else
                     {
-                        if (state.getType().equals(PhaseStateType.FAILED))
+                        if (state.getType().equals(PhaseState.FAILED))
                         {
                             logger.info(makeResult("Got EXPECTED result, last modified at "
                                     + state.getLastModified().getTime()));
@@ -219,7 +212,7 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     logger.info(makeHeading("Check state of phase 'json', expecting FAILED."));
                     responses = retrieveByPrimaryKey(job.getId(), null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    job = (JobType) getDataObject(r);
+                    job = (SIF3Job) getDataObject(r);
                     state = ServiceUtils.getLastPhaseState(job, "json");
                     if (state == null)
                     {
@@ -227,7 +220,7 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     }
                     else
                     {
-                        if (state.getType().equals(PhaseStateType.FAILED))
+                        if (state.getType().equals(PhaseState.FAILED))
                         {
                             logger.info(makeResult("Got EXPECTED result, last modified at "
                                     + state.getLastModified().getTime()));
@@ -249,7 +242,7 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     }
                     responses = retrieveByPrimaryKey(job.getId(), null);
                     r = responses.isEmpty() ? null : responses.get(0);
-                    job = (JobType) getDataObject(r);
+                    job = (SIF3Job) getDataObject(r);
                     if (job == null)
                     {
                         logger.info(makeResult("Job deleted successfully"));
@@ -261,16 +254,16 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
 
                     // Create many jobs
                     logger.info(makeHeading("Creating many jobs"));
-                    JobCollectionType collection = new JobCollectionType();
+                    ArrayList<SIF3Job> jobs = new ArrayList<SIF3Job>();
                     for (int i = 0; i < 5; i++)
                     {
-                        JobType j = new JobType();
+                        SIF3Job j = new SIF3Job();
                         j.setName("Payload");
-                        collection.getJob().add(j);
+                        jobs.add(j);
                     }
 
                     List<BulkOperationResponse<CreateOperationStatus>> creates = createMany(
-                            collection, null, null);
+                            jobs, null, null);
 
                     logger.info("Processing multiple job creation:");
                     List<String> ids = new ArrayList<String>();
@@ -431,22 +424,6 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
     /*----------------------------------------------------------------------------*/
     /*-- Abstract Consumer Methods: Dummy Implementation - Just log the values. --*/
     /*----------------------------------------------------------------------------*/
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see sif3.common.interfaces.EventConsumer#onEvent(sif3.common.model.SIFEvent,
-     * sif3.common.model.SIFZone, sif3.common.model.SIFContext, java.lang.String)
-     */
-    @Override
-    public void processEvent(SIFEvent<JobCollectionType> sifEvent, SIFZone zone, SIFContext context,
-            EventMetadata metadata, String msgReadID, String consumerID)
-    {
-        String consumerName = getPrettyName() + "(QueueID:" + msgReadID + "; ConsumerID: "
-                + consumerID + ")";
-        logger.info(makeResult(consumerName + " received an event from Zone = " + zone.getId()
-                + ", Context = " + context.getId() + " and Event Metadata = " + metadata));
-    }
 
     @Override
     public void processDelayedCreateMany(MultiOperationStatusList<CreateOperationStatus> statusList,

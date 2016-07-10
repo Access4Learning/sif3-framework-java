@@ -42,6 +42,9 @@ public class CommonConstants
 
 	/* Base name of event max objects per event property */
 	public static final String EVENT_MAX_OBJ = "event.maxObjects";
+    
+	/* Base name of timout frequency property */
+    public static final String TIMEOUT_FREQ_PROPERTY = "job.timeout.frequency";
 
 	/*-----------------------------------------------------------*/
 	/* Event related constants.                                  */
@@ -59,6 +62,16 @@ public class CommonConstants
 	public static final int DEFAULT_POLL_FREQ = 60;
 	
 	public static final int DEFAULT_LONGPOLL_WAIT = 120;
+	
+	/*-----------------------------------------------------------*/
+    /* Job timeout related constants.                            */
+    /*-----------------------------------------------------------*/
+	
+	/* Value to indicate that job timeout is disabled. */
+    public static final int NO_TIMEOUT = 0;
+    
+    /* Consumer Event Constants */
+    public static final int DEFAULT_TIMEOUT_FREQ = 60;
 	
 	/*-----------------------------------------------------------*/
 	/* Default values and other important constants.             */

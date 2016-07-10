@@ -16,10 +16,12 @@ package sif3.infra.rest.consumer;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.lang.NullArgumentException;
 import org.apache.log4j.Logger;
 
 import au.com.systemic.framework.utils.Timer;
@@ -27,29 +29,35 @@ import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.ServiceInvokationException;
+import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderValues;
-import sif3.common.header.HeaderValues.EventAction;
-import sif3.common.header.HeaderValues.UpdateType;
+import sif3.common.header.HeaderValues.QueryIntention;
+import sif3.common.header.HeaderValues.RequestType;
+import sif3.common.interfaces.FunctionalServiceConsumer;
 import sif3.common.model.CustomParameters;
-import sif3.common.model.SIFEvent;
+import sif3.common.model.PagingInfo;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
 import sif3.common.model.URLQueryParameter;
 import sif3.common.model.ZoneContextInfo;
+import sif3.common.persist.model.SIF3Job;
+import sif3.common.persist.model.SIF3PhaseState;
 import sif3.common.utils.JAXBUtils;
+import sif3.common.ws.BulkOperationResponse;
+import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
+import sif3.common.ws.OperationStatus;
 import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
-import sif3.infra.common.interfaces.FunctionalServiceConsumer;
-import sif3.infra.common.model.JobCollectionType;
-import sif3.infra.common.model.StateType;
+import sif3.infra.common.utils.ServiceUtils;
 import sif3.infra.rest.client.FunctionalServiceClient;
 
-public abstract class AbstractFunctionalServiceConsumer extends AbstractEventConsumer<JobCollectionType> implements FunctionalServiceConsumer
+public abstract class AbstractFunctionalServiceConsumer extends AbstractConsumer
+        implements FunctionalServiceConsumer
 {
 
     protected final Logger               logger       = Logger.getLogger(getClass());
@@ -99,37 +107,6 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractEventCon
     /*
      * (non-Javadoc)
      * 
-     * @see sif3.common.interfaces.EventConsumer#createEventObject(java.lang.Object,
-     * sif3.common.header.HeaderValues.EventAction, sif3.common.header.HeaderValues.UpdateType)
-     */
-    @Override
-    public SIFEvent<JobCollectionType> createEventObject(Object sifObjectList,
-            EventAction eventAction, UpdateType updateType)
-    {
-        if (sifObjectList != null)
-        {
-            if (sifObjectList instanceof JobCollectionType)
-            {
-                int size = ((JobCollectionType) sifObjectList).getJob().size();
-                return new SIFEvent<JobCollectionType>((JobCollectionType) sifObjectList,
-                        eventAction, updateType, size);
-            }
-            else
-            {
-                logger.error(
-                        "The given event data is not of type JobCollectionType as expected. Cannot create event object. Return null");
-            }
-        }
-        else
-        {
-            logger.error("The given event data is null. Cannot create event object. Return null");
-        }
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see sif3.infra.rest.consumer.AbstractConsumer#shutdown()
      */
     public void shutdown()
@@ -162,8 +139,110 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractEventCon
         }
     }
 
-    /* (non-Javadoc)
-     * @see sif3.infra.rest.consumer.FunctionalServiceConsumer#createToPhase(java.lang.String, java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType, java.util.List, sif3.common.model.CustomParameters)
+    @Override
+    public List<Response> createSingle(Object data, java.util.List<ZoneContextInfo> zoneCtxList,
+            CustomParameters customParameters)
+            throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+    {
+        if (data == null)
+        {
+            throw new NullArgumentException("data");
+        }
+        if (!(data instanceof SIF3Job))
+        {
+            throw new IllegalArgumentException("Payload must be of type SIF3Job");
+        }
+
+        return ServiceUtils.unmarshal(super.createSingle(ServiceUtils.marshal((SIF3Job) data),
+                zoneCtxList, customParameters));
+    };
+
+    @Override
+    public List<BulkOperationResponse<CreateOperationStatus>> createMany(Object data,
+            List<ZoneContextInfo> zoneCtxList, RequestType requestType,
+            CustomParameters customParameters)
+            throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+    {
+        if (data == null)
+        {
+            throw new NullArgumentException("data");
+        }
+        if (!(data instanceof Collection))
+        {
+            throw new IllegalArgumentException("Payload must be a collection");
+        }
+        return super.createMany(ServiceUtils.marshal((Collection<?>) data),
+                zoneCtxList, requestType, customParameters);
+    }
+
+    @Override
+    public List<Response> retrieveByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList,
+            CustomParameters customParameters)
+            throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+    {
+        return ServiceUtils
+                .unmarshal(super.retrieveByPrimaryKey(resourceID, zoneCtxList, customParameters));
+    }
+
+    @Override
+    public List<Response> retrieveByQBE(Object exampleObject, PagingInfo pagingInfo,
+            List<ZoneContextInfo> zoneCtxList, RequestType requestType,
+            QueryIntention queryIntention, CustomParameters customParameters)
+            throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+    {
+        if (exampleObject == null)
+        {
+            throw new NullArgumentException("data");
+        }
+        if (!(exampleObject instanceof SIF3Job))
+        {
+            throw new IllegalArgumentException("Example object must be of type SIF3Job");
+        }
+        return ServiceUtils
+                .unmarshal(super.retrieveByQBE(ServiceUtils.marshal((SIF3Job) exampleObject),
+                        pagingInfo, zoneCtxList, requestType, queryIntention, customParameters));
+    }
+    
+    @Override
+    public List<Response> retrieve(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList,
+            RequestType requestType, QueryIntention queryIntention,
+            CustomParameters customParameters)
+            throws PersistenceException, UnsupportedQueryException, ServiceInvokationException
+    {
+        return ServiceUtils.unmarshal(super.retrieve(pagingInfo, zoneCtxList, requestType, queryIntention, customParameters));
+    }
+
+    @Override
+    public List<Response> updateSingle(Object data, String resourceID,
+            List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters)
+            throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+    {
+        throw new UnsupportedOperationException("Operation not applicable to a functional service");
+    }
+
+    @Override
+    public List<BulkOperationResponse<OperationStatus>> updateMany(Object data,
+            List<ZoneContextInfo> zoneCtxList, RequestType requestType,
+            CustomParameters customParameters)
+            throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+    {
+        throw new UnsupportedOperationException("Operation not applicable to a functional service");
+    }
+
+    @Override
+    public List<BulkOperationResponse<OperationStatus>> updateMany(Object data,
+            List<ZoneContextInfo> zoneCtxList, RequestType requestType)
+            throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+    {
+        throw new UnsupportedOperationException("Operation not applicable to a functional service");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sif3.infra.rest.consumer.FunctionalServiceConsumer#createToPhase(java.lang.String,
+     * java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType,
+     * java.util.List, sif3.common.model.CustomParameters)
      */
     @Override
     public List<Response> createToPhase(String resourceID, String phaseName, String payload,
@@ -220,8 +299,12 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractEventCon
         return responses;
     }
 
-    /* (non-Javadoc)
-     * @see sif3.infra.rest.consumer.FunctionalServiceConsumer#retrieveToPhase(java.lang.String, java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType, java.util.List, sif3.common.model.CustomParameters)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sif3.infra.rest.consumer.FunctionalServiceConsumer#retrieveToPhase(java.lang.String,
+     * java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType,
+     * java.util.List, sif3.common.model.CustomParameters)
      */
     @Override
     public List<Response> retrieveToPhase(String resourceID, String phaseName, String payload,
@@ -279,8 +362,12 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractEventCon
         return responses;
     }
 
-    /* (non-Javadoc)
-     * @see sif3.infra.rest.consumer.FunctionalServiceConsumer#updateToPhase(java.lang.String, java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType, java.util.List, sif3.common.model.CustomParameters)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sif3.infra.rest.consumer.FunctionalServiceConsumer#updateToPhase(java.lang.String,
+     * java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType,
+     * java.util.List, sif3.common.model.CustomParameters)
      */
     @Override
     public List<Response> updateToPhase(String resourceID, String phaseName, String payload,
@@ -338,8 +425,12 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractEventCon
         return responses;
     }
 
-    /* (non-Javadoc)
-     * @see sif3.infra.rest.consumer.FunctionalServiceConsumer#deleteToPhase(java.lang.String, java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType, java.util.List, sif3.common.model.CustomParameters)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sif3.infra.rest.consumer.FunctionalServiceConsumer#deleteToPhase(java.lang.String,
+     * java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType,
+     * java.util.List, sif3.common.model.CustomParameters)
      */
     @Override
     public List<Response> deleteToPhase(String resourceID, String phaseName, String payload,
@@ -397,11 +488,15 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractEventCon
         return responses;
     }
 
-    /* (non-Javadoc)
-     * @see sif3.infra.rest.consumer.FunctionalServiceConsumer#createToState(java.lang.String, java.lang.String, sif3.infra.common.model.StateType, java.util.List, sif3.common.model.CustomParameters)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see sif3.infra.common.interfaces.FunctionalServiceConsumer#createToState(java.lang.String,
+     * java.lang.String, sif3.common.persist.model.SIF3PhaseState, java.util.List,
+     * sif3.common.model.CustomParameters)
      */
     @Override
-    public List<Response> createToState(String resourceID, String phaseName, StateType state,
+    public List<Response> createToState(String resourceID, String phaseName, SIF3PhaseState state,
             List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters)
             throws IllegalArgumentException, PersistenceException, ServiceInvokationException
     {

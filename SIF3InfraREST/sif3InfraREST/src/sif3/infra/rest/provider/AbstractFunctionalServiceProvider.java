@@ -16,6 +16,7 @@ package sif3.infra.rest.provider;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.apache.log4j.Logger;
 
 import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
+import sif3.common.CommonConstants.PhaseState;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.BadRequestException;
@@ -38,18 +40,20 @@ import sif3.common.exception.PersistenceException;
 import sif3.common.exception.SIF3Exception;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
-import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.ServiceType;
-import sif3.common.header.HeaderValues.UpdateType;
-import sif3.common.interfaces.SIFEventIterator;
+import sif3.common.interfaces.FunctionalServiceProvider;
+import sif3.common.interfaces.PhaseActions;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
-import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
+import sif3.common.persist.model.SIF3Job;
+import sif3.common.persist.model.SIF3Phase;
+import sif3.common.persist.model.SIF3PhaseState;
+import sif3.common.persist.service.SIF3JobService;
 import sif3.common.utils.JAXBUtils;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.CreateOperationStatus;
@@ -57,24 +61,17 @@ import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
-import sif3.infra.common.functional.JobEvent;
-import sif3.infra.common.functional.JobEvents;
-import sif3.infra.common.functional.JobIterator;
-import sif3.infra.common.interfaces.FunctionalServiceProvider;
-import sif3.infra.common.interfaces.PhaseActions;
 import sif3.infra.common.model.JobCollectionType;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.ObjectFactory;
-import sif3.infra.common.model.PhaseType;
 import sif3.infra.common.model.StateType;
-import sif3.infra.common.persist.service.SIF3JobService;
 import sif3.infra.common.utils.ServiceUtils;
 
 /**
  * Base implementation of A functional service. This should be extended to define what phases a job
  * has and other details about what the Job should know/be able to do/etc.
  */
-public abstract class AbstractFunctionalServiceProvider extends BaseEventProvider<JobCollectionType>
+public abstract class AbstractFunctionalServiceProvider extends BaseProvider
         implements FunctionalServiceProvider
 {
 
@@ -88,8 +85,6 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
 
     private String                          serviceName;
     protected HashMap<String, PhaseActions> phaseActions;
-
-    private static JobEvents                sifevents       = null;
 
     private Timer                           jobTimeoutTimer = null;
     private TimerTask                       jobTimeoutTask  = null;
@@ -109,12 +104,6 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
 
         JAXBUtils.initCtx(getMultiObjectClassInfo().getObjectType());
         JAXBUtils.initCtx(getSingleObjectClassInfo().getObjectType());
-
-        if (sifevents == null)
-        {
-            logger.debug("Constructor for AbstractJobProvider called for the first time...");
-            sifevents = new JobEvents();
-        }
     }
 
     /**
@@ -123,7 +112,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
      * @param job
      *            The job to configure
      */
-    protected abstract void configure(JobType job);
+    protected abstract void configure(SIF3Job job);
 
     /**
      * Attempts to shutdown the given job. Should throw an exception if the job cannot be shutdown
@@ -135,7 +124,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
      * @param job
      *            The job to shut down.
      */
-    protected abstract void shutdownJob(JobType job);
+    protected abstract void shutdownJob(SIF3Job job);
 
     /*
      * (non-Javadoc)
@@ -188,16 +177,15 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
     public void finalise()
     {
         super.finalise();
-        // Shut down event timer & task - thread
         if (jobTimeoutTask != null)
         {
-            logger.debug("Shut Down event task for: " + getProviderName());
+            logger.debug("Shut Down timout task for: " + getProviderName());
             jobTimeoutTask.cancel();
             jobTimeoutTask = null;
         }
         if (jobTimeoutTimer != null)
         {
-            logger.debug("Shut Down event timer for: " + getProviderName());
+            logger.debug("Shut Down timeout timer for: " + getProviderName());
             jobTimeoutTimer.cancel();
             jobTimeoutTimer.purge();
             jobTimeoutTimer = null;
@@ -215,7 +203,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
     public void run()
     {
         super.run();
-        int frequencyInSec = 20;// getEventFrequency(providerName);
+        int frequencyInSec = getTimeoutFrequency(getProviderName());
         int period = frequencyInSec * CommonConstants.MILISEC;
 
         logger.info("Job timout frequency " + frequencyInSec + " secs (" + period + ").");
@@ -231,9 +219,9 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
 
                     try
                     {
-                        List<JobType> jobs = sif3JobService.getJobs();
+                        List<SIF3Job> jobs = sif3JobService.getJobs();
 
-                        for (JobType job : jobs)
+                        for (SIF3Job job : jobs)
                         {
                             if (hasTimedout(job))
                             {
@@ -270,10 +258,11 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
      * (non-Javadoc)
      * 
      * @see
-     * sif3.infra.rest.provider.FunctionalServiceProvider#acceptJob(sif3.infra.common.model.JobType)
+     * sif3.infra.common.interfaces.FunctionalServiceProvider#acceptJob(sif3.common.persist.model.
+     * SIF3Job)
      */
     @Override
-    public boolean acceptJob(JobType job)
+    public boolean acceptJob(SIF3Job job)
     {
         return acceptJob(job.getName());
     }
@@ -299,89 +288,6 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         return getServiceName().equals(serviceName) && getServiceName().equals(jobName + "s");
     }
 
-    /*-------------------------------------*/
-    /*-- EventProvider Interface Methods --*/
-    /*-------------------------------------*/
-    /*
-     * (non-Javadoc) @see sif3.common.interfaces.EventProvider#getSIFEvents()
-     */
-    @Override
-    public SIFEventIterator<JobCollectionType> getSIFEvents()
-    {
-        if (sifevents.isEmpty())
-        {
-            return null;
-        }
-        JobIterator itr = new JobIterator(getServiceName(), getServiceProperties(),
-                sifevents.getAllEvents());
-        return itr;
-    }
-
-    /*
-     * (non-Javadoc) @see sif3.common.interfaces.EventProvider#onEventError(sif3.common.model.
-     * SIFEvent, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
-     */
-    @Override
-    public void onEventError(SIFEvent<JobCollectionType> sifEvent, SIFZone zone, SIFContext context)
-    {
-        // We need to deal with the error. At this point in time we just log it.
-        if ((sifEvent != null) && (sifEvent.getSIFObjectList() != null))
-        {
-            try
-            {
-                String eventXML = getMarshaller().marshalToXML(sifEvent.getSIFObjectList());
-                logger.error("Failed to sent the following Objects as and Event to Zone (" + zone
-                        + ") and Context (" + context + "):\n" + eventXML);
-            }
-            catch (Exception ex)
-            {
-                logger.error("Failed to marshall events.", ex);
-            }
-        }
-        else
-        {
-            logger.error(
-                    "sifEvent Object is null, or there are no events on sifEvent.sifObjectList");
-        }
-
-    }
-
-    /*
-     * (non-Javadoc) @see sif3.common.interfaces.EventProvider#modifyBeforeSent(sif3.common.model.
-     * SIFEvent, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
-     */
-    @Override
-    public SIFEvent<JobCollectionType> modifyBeforePublishing(SIFEvent<JobCollectionType> sifEvent,
-            SIFZone zone, SIFContext context, HeaderProperties customHTTPHeaders)
-    {
-        JobEvent jobEvent = sifevents.get(sifEvent);
-        if (jobEvent == null)
-        {
-            // Don't know anything about this event
-            logger.info("Dropping event, could not get the job event");
-            return null;
-        }
-
-        if (!jobEvent.hasZone(zone))
-        {
-            // Not the right zone to send this to
-            logger.info("Dropping event, zone is not one we expect");
-            logger.debug("Expecting: '" + jobEvent.getZone() + "', but got: '" + zone + "'");
-            return null;
-        }
-
-        if (!jobEvent.hasContext(context))
-        {
-            // Not the right context to send this to
-            logger.info("Dropping event, context is not one we expect");
-            logger.debug("Expecting: '" + jobEvent.getContext() + "', but got: '" + context + "'");
-            return null;
-        }
-
-        logger.info("SIFEvent being sent unmodified.");
-        return sifEvent;
-    }
-
     /*--------------------------------*/
     /*-- Provider Interface Methods --*/
     /*--------------------------------*/
@@ -404,7 +310,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         logger.debug("Retrieve job with Resource ID = " + resourceID + ", "
                 + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 
-        return sif3JobService.getJobById(resourceID);
+        return ServiceUtils.marshal(sif3JobService.getJobById(resourceID));
     }
 
     /*
@@ -422,36 +328,28 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         logger.debug("Create single job for " + getZoneAndContext(zone, context)
                 + " and RequestMetadata = " + metadata);
 
-        if (data instanceof JobType)
-        {
-            JobType job = (JobType) data;
-
-            configure(job);
-
-            if (!useAdvisory)
-            {
-                job.setId(null);
-            }
-
-            if (useAdvisory && StringUtils.isEmpty(job.getId()))
-            {
-                logger.debug("UseAdvisory is true, but no advisory refid provided.");
-            }
-
-            job = sif3JobService.save(job);
-
-            customResponseParams.addHTTPHeaderParameter("jobId", job.getId());
-
-            sendJobEvent(job, EventAction.CREATE, zone, context);
-
-            return job;
-        }
-        else
+        if (!(data instanceof JobType))
         {
             throw new IllegalArgumentException(
                     "Expected Object Type = JobType. Received Object Type = "
                             + data.getClass().getSimpleName());
         }
+        SIF3Job job = ServiceUtils.unmarshal((JobType) data);
+
+        initialise(job);
+        configure(job);
+
+        if (!useAdvisory)
+        {
+            job.setId(null);
+        }
+
+        if (useAdvisory && StringUtils.isEmpty(job.getId()))
+        {
+            logger.debug("UseAdvisory is true, but no advisory refid provided.");
+        }
+
+        return ServiceUtils.marshal(sif3JobService.save(job));
     }
 
     /*
@@ -527,7 +425,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         logger.debug("Remove job with Resource ID = " + resourceID + ", "
                 + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 
-        JobType job = (JobType) sif3JobService.getJobById(resourceID);
+        SIF3Job job = sif3JobService.getJobById(resourceID);
 
         if (job == null)
         {
@@ -548,8 +446,6 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
 
         sif3JobService.removeJobById(resourceID);
 
-        sendJobEvent(job, EventAction.DELETE, zone, context);
-
         return true;
     }
 
@@ -565,37 +461,34 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
             SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams)
             throws IllegalArgumentException, PersistenceException
     {
-        if (data instanceof JobCollectionType)
-        {
-            logger.debug("Create jobs (Bulk Operation) for " + getZoneAndContext(zone, context)
-                    + " and RequestMetadata = " + metadata);
-            JobCollectionType jobCollection = (JobCollectionType) data;
-            ArrayList<CreateOperationStatus> opStatus = new ArrayList<CreateOperationStatus>();
-            Object created = null;
-            String advisoryId = null;
-            for (JobType job : jobCollection.getJob())
-            {
-                advisoryId = job.getId();
-                created = createSingle(job, useAdvisory, zone, context, metadata,
-                        customResponseParams);
-                if (created == null)
-                {
-                    opStatus.add(new CreateOperationStatus(advisoryId, advisoryId, 404,
-                            new ErrorDetails(400, "Data not good.")));
-                }
-                else
-                {
-                    opStatus.add(new CreateOperationStatus(job.getId(), advisoryId, 201));
-                }
-            }
-            return opStatus;
-        }
-        else
+        if (!(data instanceof JobCollectionType))
         {
             throw new IllegalArgumentException(
                     "Expected Object of type JobCollectionType. Received Object Type = "
                             + data.getClass().getSimpleName());
         }
+
+        logger.debug("Create jobs (Bulk Operation) for " + getZoneAndContext(zone, context)
+                + " and RequestMetadata = " + metadata);
+        List<SIF3Job> jobs = ServiceUtils.unmarshal((JobCollectionType) data);
+        ArrayList<CreateOperationStatus> opStatus = new ArrayList<CreateOperationStatus>();
+        Object created = null;
+        String advisoryId = null;
+        for (SIF3Job job : jobs)
+        {
+            advisoryId = job.getId();
+            created = createSingle(job, useAdvisory, zone, context, metadata, customResponseParams);
+            if (created == null)
+            {
+                opStatus.add(new CreateOperationStatus(advisoryId, advisoryId, 404,
+                        new ErrorDetails(400, "Data not good.")));
+            }
+            else
+            {
+                opStatus.add(new CreateOperationStatus(job.getId(), advisoryId, 201));
+            }
+        }
+        return opStatus;
     }
 
     /*
@@ -610,7 +503,21 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
             RequestMetadata metadata, ResponseParameters customResponseParams)
             throws IllegalArgumentException, PersistenceException
     {
-        return new ArrayList<OperationStatus>();
+        if (!(data instanceof JobCollectionType))
+        {
+            throw new IllegalArgumentException(
+                    "Expected Object of type JobCollectionType. Received Object Type = "
+                            + data.getClass().getSimpleName());
+        }
+
+        List<SIF3Job> jobs = ServiceUtils.unmarshal((JobCollectionType) data);
+        ArrayList<OperationStatus> opStatus = new ArrayList<OperationStatus>();
+        for (SIF3Job job : jobs)
+        {
+            opStatus.add(new OperationStatus(job.getId(), 400, new ErrorDetails(400,
+                    "A direct update not supported on functional services, use phase or state interface for as appropriate.")));
+        }
+        return opStatus;
     }
 
     /*
@@ -663,14 +570,15 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         logger.debug("Create to phase " + resourceID + "/" + phaseName + " in "
                 + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 
-        JobType job = (JobType) retrieveByPrimaryKey(resourceID, zone, context, metadata,
-                customResponseParams);
+        SIF3Job job = ServiceUtils.unmarshal((JobType) retrieveByPrimaryKey(resourceID, zone,
+                context, metadata, customResponseParams));
+
         if (job == null)
         {
             throw new BadRequestException("No job found with refid " + resourceID);
         }
 
-        PhaseType phase = ServiceUtils.getPhase(job, phaseName);
+        SIF3Phase phase = ServiceUtils.getPhase(job, phaseName);
         if (phase == null)
         {
             throw new BadRequestException(
@@ -714,14 +622,16 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         logger.debug("Retrieve to phase " + resourceID + "/" + phaseName + " in "
                 + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 
-        JobType job = (JobType) retrieveByPrimaryKey(resourceID, zone, context, metadata,
-                customResponseParams);
+        SIF3Job job = ServiceUtils.unmarshal((JobType) retrieveByPrimaryKey(resourceID, zone,
+                context, metadata, customResponseParams));
+
         if (job == null)
         {
             throw new BadRequestException("No job found with refid " + resourceID);
         }
 
-        PhaseType phase = ServiceUtils.getPhase(job, phaseName);
+        SIF3Phase phase = ServiceUtils.getPhase(job, phaseName);
+
         if (phase == null)
         {
             throw new BadRequestException(
@@ -734,6 +644,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         }
 
         PhaseActions actions = phaseActions.get(phase.getName());
+
         if (actions == null)
         {
             throw new IllegalArgumentException("Unexpected error, phase is known (" + job.getId()
@@ -766,14 +677,16 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         logger.debug("Update to phase " + resourceID + "/" + phaseName + " in "
                 + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 
-        JobType job = (JobType) retrieveByPrimaryKey(resourceID, zone, context, metadata,
-                customResponseParams);
+        SIF3Job job = ServiceUtils.unmarshal((JobType) retrieveByPrimaryKey(resourceID, zone,
+                context, metadata, customResponseParams));
+
         if (job == null)
         {
             throw new BadRequestException("No job found with refid " + resourceID);
         }
 
-        PhaseType phase = ServiceUtils.getPhase(job, phaseName);
+        SIF3Phase phase = ServiceUtils.getPhase(job, phaseName);
+
         if (phase == null)
         {
             throw new BadRequestException(
@@ -786,6 +699,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         }
 
         PhaseActions actions = phaseActions.get(phase.getName());
+
         if (actions == null)
         {
             throw new IllegalArgumentException("Unexpected error, phase is known (" + job.getId()
@@ -817,14 +731,16 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         logger.debug("Delete to phase " + resourceID + "/" + phaseName + " in "
                 + getZoneAndContext(zone, context) + " and RequestMetadata = " + metadata);
 
-        JobType job = (JobType) retrieveByPrimaryKey(resourceID, zone, context, metadata,
-                customResponseParams);
+        SIF3Job job = ServiceUtils.unmarshal((JobType) retrieveByPrimaryKey(resourceID, zone,
+                context, metadata, customResponseParams));
+
         if (job == null)
         {
             throw new BadRequestException("No job found with refid " + resourceID);
         }
 
-        PhaseType phase = ServiceUtils.getPhase(job, phaseName);
+        SIF3Phase phase = ServiceUtils.getPhase(job, phaseName);
+
         if (phase == null)
         {
             throw new BadRequestException(
@@ -837,6 +753,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         }
 
         PhaseActions actions = phaseActions.get(phase.getName());
+
         if (actions == null)
         {
             throw new IllegalArgumentException("Unexpected error, phase is known (" + job.getId()
@@ -857,7 +774,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
     /*
      * (non-Javadoc)
      * 
-     * @see sif3.infra.rest.provider.FunctionalServiceProvider#createToState(java.lang.String,
+     * @see sif3.infra.common.interfaces.FunctionalServiceProvider#createToState(java.lang.String,
      * java.lang.String, java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext,
      * sif3.common.model.RequestMetadata, sif3.common.model.ResponseParameters)
      */
@@ -875,16 +792,17 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
                     "Expected Object Type = StateType. Received Object Type = "
                             + data.getClass().getSimpleName());
         }
-        StateType state = (StateType) data;
 
-        JobType job = sif3JobService.getJobById(resourceID);
+        SIF3PhaseState state = ServiceUtils.unmarshal((StateType) data);
+
+        SIF3Job job = sif3JobService.getJobById(resourceID);
 
         if (job == null)
         {
             throw new IllegalArgumentException("No job found with id " + resourceID + ".");
         }
 
-        PhaseType phase = ServiceUtils.getPhase(job, phaseName);
+        SIF3Phase phase = ServiceUtils.getPhase(job, phaseName);
 
         if (phase == null)
         {
@@ -902,8 +820,6 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
             throw new IllegalArgumentException("Failed to save job with id " + resourceID + ".");
         }
 
-        sendJobEvent(job, EventAction.UPDATE, zone, context);
-
         state = ServiceUtils.getLastPhaseState(job, phaseName);
 
         if (state == null)
@@ -912,7 +828,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
                     + phaseName + " on job with id " + resourceID + ".");
         }
 
-        return state;
+        return ServiceUtils.marshal(state);
     }
 
     /*----------------------*/
@@ -933,42 +849,6 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         return metadata.getHTTPParameters();
     }
 
-    /*----------------------*/
-    /*--  Phase Eventing  --*/
-    /*----------------------*/
-    /*
-     * (non-Javadoc)
-     * 
-     * @see sif3.infra.rest.provider.FunctionalServiceProvider#sendJobEvent(sif3.infra.common.model.
-     * JobType, sif3.common.header.HeaderValues.EventAction, sif3.common.model.SIFZone,
-     * sif3.common.model.SIFContext)
-     */
-    @Override
-    public void sendJobEvent(JobType job, EventAction action, SIFZone zone, SIFContext context)
-    {
-        SIFEvent<JobCollectionType> event = new SIFEvent<JobCollectionType>(new JobCollectionType(),
-                action, UpdateType.FULL, 1);
-        event.getSIFObjectList().getJob().add(job);
-        sifevents.add(new JobEvent(event, zone, context));
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see sif3.infra.rest.provider.FunctionalServiceProvider#sendJobEvent(sif3.infra.common.model.
-     * JobType, java.lang.String, sif3.common.header.HeaderValues.EventAction,
-     * sif3.common.model.SIFZone, sif3.common.model.SIFContext)
-     */
-    @Override
-    public void sendJobEvent(JobType job, String phaseName, EventAction action, SIFZone zone,
-            SIFContext context)
-    {
-        SIFEvent<JobCollectionType> event = new SIFEvent<JobCollectionType>(new JobCollectionType(),
-                action, UpdateType.PARTIAL, 1);
-        event.getSIFObjectList().getJob().add(filter(job, phaseName));
-        sifevents.add(new JobEvent(event, zone, context));
-    }
-
     /*--------------------------------------*/
     /*-- Other required Interface Methods --*/
     /*--------------------------------------*/
@@ -976,15 +856,21 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
     /*---------------------*/
     /*-- Private Methods --*/
     /*---------------------*/
-    private boolean hasTimedout(JobType job)
+    /* 0 = No timeout */
+    private int getTimeoutFrequency(String providerName)
+    {
+        return getServiceProperties().getPropertyAsInt(CommonConstants.TIMEOUT_FREQ_PROPERTY,
+                providerName, CommonConstants.DEFAULT_TIMEOUT_FREQ);
+    }
+
+    private boolean hasTimedout(SIF3Job job)
     {
         Calendar now = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        Calendar then = (Calendar) job.getCreated().clone();
+        Calendar then = (Calendar) now.clone();
 
-        job.getTimeout().addTo(then);
+        then.add(Calendar.SECOND, (int) job.getTimeout());
 
-        return acceptJob(job) && job.getTimeout().getTimeInMillis(Calendar.getInstance()) > 0
-                && now.after(then);
+        return acceptJob(job) && job.getTimeout() > 0 && now.after(then);
     }
 
     private String getZoneAndContext(SIFZone zone, SIFContext context)
@@ -998,12 +884,15 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         return buffer.toString();
     }
 
-    private List<JobType> fetchJobs(List<JobType> jobs, PagingInfo pagingInfo)
+    private List<JobType> fetchJobs(List<SIF3Job> jobs, PagingInfo pagingInfo)
     {
         ArrayList<JobType> output = new ArrayList<JobType>();
         if (pagingInfo == null)
         {
-            output.addAll(jobs);
+            for (SIF3Job job : jobs)
+            {
+                output.add(ServiceUtils.marshal(job));
+            }
         }
         else
         {
@@ -1018,12 +907,12 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
             int i = 0;
             int startPos = pagingInfo.getPageSize() * pagingInfo.getCurrentPageNo();
             int endPos = startPos + pagingInfo.getPageSize();
-            for (Iterator<JobType> iter = jobs.iterator(); iter.hasNext();)
+            for (Iterator<SIF3Job> iter = jobs.iterator(); iter.hasNext();)
             {
-                JobType job = iter.next();
+                SIF3Job job = iter.next();
                 if ((i >= startPos) && (i < endPos))
                 {
-                    output.add(job);
+                    output.add(ServiceUtils.marshal(job));
                 }
                 i++;
             }
@@ -1034,17 +923,47 @@ public abstract class AbstractFunctionalServiceProvider extends BaseEventProvide
         return output;
     }
 
-    private JobType filter(JobType job, String phaseName)
+    private void initialise(SIF3Job job)
     {
-        JobType newJob = objectFactory.createJobType();
-        newJob.setId(job.getId());
-        newJob.setName(job.getName());
-        /*
-         * newJob.setDescription(job.getDescription()); newJob.setCreated(job.getCreated());
-         * newJob.setLastModified(job.getLastModified()); newJob.setState(job.getState());
-         */
-        newJob.setPhases(objectFactory.createPhaseCollectionType());
-        newJob.getPhases().getPhase().add(ServiceUtils.getPhase(job, phaseName));
-        return newJob;
+        Date time = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime();
+
+        if (job.getCreated() == null)
+        {
+            job.setCreated(time);
+            job.setLastModified(time);
+        }
+
+        if (job.getLastModified() == null)
+        {
+            job.setLastModified(time);
+        }
+
+        if (job.getPhases() == null)
+        {
+            job.setPhases(new ArrayList<SIF3Phase>());
+            return;
+        }
+
+        for (SIF3Phase phase : job.getPhases())
+        {
+            if (phase.getStates() == null)
+            {
+                phase.setStates(new ArrayList<SIF3PhaseState>());
+                continue;
+            }
+
+            for (SIF3PhaseState state : phase.getStates())
+            {
+                if (state.getType() == null)
+                {
+                    state.setType(PhaseState.NOTSTARTED);
+                }
+                if (state.getCreated() == null)
+                {
+                    state.setCreated(time);
+                    state.setLastModified(time);
+                }
+            }
+        }
     }
 }

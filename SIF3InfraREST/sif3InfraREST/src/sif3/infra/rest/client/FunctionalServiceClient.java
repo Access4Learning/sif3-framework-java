@@ -33,9 +33,11 @@ import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.URLQueryParameter;
+import sif3.common.persist.model.SIF3PhaseState;
 import sif3.common.ws.Response;
 import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.StateType;
+import sif3.infra.common.utils.ServiceUtils;
 
 public class FunctionalServiceClient extends ObjectServiceClient
 {
@@ -466,7 +468,7 @@ public class FunctionalServiceClient extends ObjectServiceClient
      *             Any underlying errors occurred such failure to invoke actual web-service etc.
      */
     public Response createToState(String relURI, String resourceID, String phaseName,
-            StateType state, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams,
+            SIF3PhaseState state, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams,
             SIFZone zone, SIFContext context) throws ServiceInvokationException
     {
         WebResource service = getService();
@@ -475,7 +477,7 @@ public class FunctionalServiceClient extends ObjectServiceClient
             service = buildURI(service, relURI, resourceID, phaseName, MethodType.POST, zone,
                     context, urlQueryParams);
 
-            String payload = getDataModelMarshaller().marshal(state, getRequestMediaType());
+            String payload = getDataModelMarshaller().marshal(ServiceUtils.marshal(state), getRequestMediaType());
 
             if (logger.isDebugEnabled())
             {

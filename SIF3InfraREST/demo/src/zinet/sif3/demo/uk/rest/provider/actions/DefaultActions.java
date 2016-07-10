@@ -17,19 +17,16 @@ package zinet.sif3.demo.uk.rest.provider.actions;
 import javax.ws.rs.core.MediaType;
 
 import sif3.common.CommonConstants;
-import sif3.common.CommonConstants.JobState;
-import sif3.common.CommonConstants.PhaseState;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.exception.UnsupportedQueryException;
-import sif3.common.header.HeaderValues.EventAction;
+import sif3.common.interfaces.FunctionalServiceProvider;
+import sif3.common.model.BasePhaseActions;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
-import sif3.infra.common.functional.BasePhaseActions;
-import sif3.infra.common.interfaces.FunctionalServiceProvider;
-import sif3.infra.common.model.JobType;
-import sif3.infra.common.model.PhaseType;
+import sif3.common.persist.model.SIF3Job;
+import sif3.common.persist.model.SIF3Phase;
 import sif3.infra.common.utils.ServiceUtils;
 
 public class DefaultActions extends BasePhaseActions
@@ -40,7 +37,7 @@ public class DefaultActions extends BasePhaseActions
     }
 
     @Override
-    public String create(JobType job, PhaseType phase, String payload, MediaType requestMediaType,
+    public String create(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
             throws IllegalArgumentException, PersistenceException, UnmarshalException,
             UnsupportedMediaTypeException, UnsupportedQueryException
@@ -48,34 +45,28 @@ public class DefaultActions extends BasePhaseActions
         ServiceUtils.changeJobState(job, CommonConstants.JobState.INPROGRESS, "CREATE to " + phase.getName());
         ServiceUtils.changePhaseState(job, phase, CommonConstants.PhaseState.INPROGRESS, "CREATE");
 
-        getProvider().sendJobEvent(job, phase.getName(), EventAction.UPDATE, zone, context);
-
         return "Got CREATE message for " + phase.getName() + "@" + job.getId()
                 + " with content type " + requestMediaType.toString() + " and accept "
                 + responseMediaType.toString() + ".\nBODY START\n" + payload + ".\nBODY END.";
     }
 
     @Override
-    public String retrieve(JobType job, PhaseType phase, String payload, MediaType requestMediaType,
+    public String retrieve(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
     {
         ServiceUtils.changeJobState(job, CommonConstants.JobState.INPROGRESS, "RETRIEVE to " + phase.getName());
         ServiceUtils.changePhaseState(job, phase, CommonConstants.PhaseState.INPROGRESS, "RETRIEVE");
-
-        getProvider().sendJobEvent(job, phase.getName(), EventAction.UPDATE, zone, context);
 
         return "Got RETRIEVE message for " + phase.getName() + "@" + job.getId() + " with accept "
                 + responseMediaType.toString() + ".";
     }
 
     @Override
-    public String update(JobType job, PhaseType phase, String payload, MediaType requestMediaType,
+    public String update(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
     {
         ServiceUtils.changeJobState(job, CommonConstants.JobState.INPROGRESS, "UPDATE to " + phase.getName());
         ServiceUtils.changePhaseState(job, phase, CommonConstants.PhaseState.COMPLETED, "UPDATE");
-
-        getProvider().sendJobEvent(job, phase.getName(), EventAction.UPDATE, zone, context);
 
         return "Got UPDATE message for " + phase.getName() + "@" + job.getId()
                 + " with content type " + requestMediaType.toString() + " and accept "
@@ -83,13 +74,11 @@ public class DefaultActions extends BasePhaseActions
     }
 
     @Override
-    public String delete(JobType job, PhaseType phase, String payload, MediaType requestMediaType,
+    public String delete(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
     {
         ServiceUtils.changeJobState(job, CommonConstants.JobState.INPROGRESS, "DELETE to " + phase.getName());
         ServiceUtils.changePhaseState(job, phase, CommonConstants.PhaseState.COMPLETED, "DELETE");
-
-        getProvider().sendJobEvent(job, phase.getName(), EventAction.UPDATE, zone, context);
 
         return "Got DELETE message for " + phase.getName() + "@" + job.getId()
                 + " with content type " + requestMediaType.toString() + " and accept "
