@@ -202,7 +202,7 @@
 		<id name="objectId" type="string" column="OBJECT_ID">
 			<generator class="assigned" />
 		</id>
-		<property name="sessionToken" column="SESSION_TOKEN" type="string"
+		<property name="ownerId" column="OWNER_ID" type="string"
 			length="200" />
 	</class>
 </hibernate-mapping>

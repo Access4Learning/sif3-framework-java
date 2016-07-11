@@ -74,23 +74,23 @@ public class SIF3BindingDAO extends BaseDAO
     }
 
     @SuppressWarnings("unchecked")
-    private List<SIF3ObjectBinding> getObjectBySessionToken(BasicTransaction tx,
-            String sessionToken)
+    private List<SIF3ObjectBinding> getObjectByOwnerId(BasicTransaction tx,
+            String ownerId)
     {
-        if (StringUtils.isEmpty(sessionToken))
+        if (StringUtils.isEmpty(ownerId))
         {
-            throw new IllegalArgumentException("Session token is empty or null.");
+            throw new IllegalArgumentException("OwnerId is empty or null.");
         }
 
         Criteria criteria = tx.getSession().createCriteria(SIF3ObjectBinding.class)
-                .add(Restrictions.eq("sessionToken", sessionToken));
+                .add(Restrictions.eq("ownerId", ownerId));
         List<SIF3ObjectBinding> bindings = criteria.list();
 
         // There can only be a maximum of one
         if (bindings.isEmpty())
         {
             // not in cache
-            logger.debug("No bindings found for session token '" + sessionToken + "'.");
+            logger.debug("No bindings found for ownerId '" + ownerId + "'.");
         }
         return bindings;
     }
@@ -109,17 +109,17 @@ public class SIF3BindingDAO extends BaseDAO
         }
     }
     
-    public List<SIF3ObjectBinding> getBindingsBySessionToken(BasicTransaction tx, String sessionToken)
+    public List<SIF3ObjectBinding> getBindingsByOwnerId(BasicTransaction tx, String ownerId)
             throws IllegalArgumentException, PersistenceException
     {
         try
         {
-            return getObjectBySessionToken(tx, sessionToken);
+            return getObjectByOwnerId(tx, ownerId);
         }
         catch (HibernateException e)
         {
             throw new PersistenceException(
-                    "Unable to retrieve SIF3 bindings for session token '" + sessionToken + "'.", e);
+                    "Unable to retrieve SIF3 bindings for session token '" + ownerId + "'.", e);
         }
     }
 
@@ -139,14 +139,14 @@ public class SIF3BindingDAO extends BaseDAO
             }
 
             logger.info("Attempting to save binding for " + binding.getObjectId() + " in "
-                    + binding.getSessionToken());
+                    + binding.getOwnerId());
             tx.getSession().saveOrUpdate(binding.getObjectId(), binding);
             return binding.getObjectId();
         }
         catch (HibernateException e)
         {
             throw new PersistenceException("Unable to save binding for object "
-                    + binding.getObjectId() + " in " + binding.getSessionToken(), e);
+                    + binding.getObjectId() + " in " + binding.getOwnerId(), e);
         }
     }
 
@@ -162,27 +162,27 @@ public class SIF3BindingDAO extends BaseDAO
         }
         catch (HibernateException e)
         {
-            throw new PersistenceException("Failed to delete binding with ID='" + id + "'.", e);
+            throw new PersistenceException("Failed to delete binding with objectId '" + id + "'.", e);
         }
     }
 
-    public void removeBySessionToken(BasicTransaction tx, String sessionToken)
+    public void removeByOwnerId(BasicTransaction tx, String ownerId)
             throws PersistenceException
     {
         try
         {
-            List<SIF3ObjectBinding> bindings = getObjectBySessionToken(tx, sessionToken);
+            List<SIF3ObjectBinding> bindings = getObjectByOwnerId(tx, ownerId);
             if (bindings != null)
             {
                 for(SIF3ObjectBinding binding : bindings) {
-                    tx.getSession().delete(sessionToken, binding);
+                    tx.getSession().delete(ownerId, binding);
                 }
             }
         }
         catch (HibernateException e)
         {
             throw new PersistenceException(
-                    "Failed to delete binding with ID='" + sessionToken + "'.", e);
+                    "Failed to delete binding with ownerId '" + ownerId + "'.", e);
         }
     }
 }

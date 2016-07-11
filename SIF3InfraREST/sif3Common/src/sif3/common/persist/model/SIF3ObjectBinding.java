@@ -6,23 +6,21 @@ public class SIF3ObjectBinding implements Serializable
 {
     private static final long serialVersionUID = -5791623824653436683L;
     private String            objectId;
-    private String            sessionToken;
-    // FIXME JN Extend this class with queueID (fix hmb.xml, extend the DAO, etc.) if that is the
-    // appropriate update for direct eventing.
+    private String            ownerId;
 
     public void setObjectId(String objectId)
     {
         this.objectId = objectId;
     }
 
-    public void setSessionToken(String sessionToken)
+    public void setOwnerId(String sessionToken)
     {
-        this.sessionToken = sessionToken;
+        this.ownerId = sessionToken;
     }
 
-    public String getSessionToken()
+    public String getOwnerId()
     {
-        return sessionToken;
+        return ownerId;
     }
 
     public String getObjectId()

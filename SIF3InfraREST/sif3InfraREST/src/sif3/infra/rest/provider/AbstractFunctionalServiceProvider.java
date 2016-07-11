@@ -869,7 +869,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseProvider
         Calendar now = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         Calendar then = (Calendar) now.clone();
 
-        then.add(Calendar.SECOND, (int) job.getTimeout());
+        then.add(Calendar.MILLISECOND, (int) job.getTimeout());
 
         return acceptJob(job) && job.getTimeout() > 0 && now.after(then);
     }

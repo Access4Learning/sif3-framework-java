@@ -90,7 +90,7 @@ public class SIF3BindingService extends DBService
             rollback(tx);
             exceptionMapper(ex,
                     "Failed to save binding for object '" + binding.getObjectId()
-                            + "' against session token '" + binding.getSessionToken() + "'",
+                            + "' against ownerId '" + binding.getOwnerId() + "'",
                     true, false);
             return null;
         }
@@ -114,31 +114,31 @@ public class SIF3BindingService extends DBService
         }
     }
 
-    public void removeBindingsBySessionToken(String sessionToken)
+    public void removeBindingsByOwnerId(String ownerId)
             throws IllegalArgumentException, PersistenceException
     {
         BasicTransaction tx = null;
         try
         {
             tx = startTransaction();
-            sif3BindingDAO.removeBySessionToken(tx, sessionToken);
+            sif3BindingDAO.removeByOwnerId(tx, ownerId);
             tx.commit();
         }
         catch (Exception ex)
         {
             rollback(tx);
             exceptionMapper(ex,
-                    "Failed to remove bindings for session token '" + sessionToken + "'.", true,
+                    "Failed to remove bindings for ownerId '" + ownerId + "'.", true,
                     true);
         }
     }
 
-    public SIF3ObjectBinding bind(String objectId, String sessionToken)
+    public SIF3ObjectBinding bind(String objectId, String ownerId)
             throws IllegalArgumentException, PersistenceException
     {
         SIF3ObjectBinding binding = new SIF3ObjectBinding();
         binding.setObjectId(objectId);
-        binding.setSessionToken(sessionToken);
+        binding.setOwnerId(ownerId);
         return save(binding);
     }
 
@@ -158,6 +158,6 @@ public class SIF3BindingService extends DBService
         if(binding == null) {
             return false;
         }
-        return  binding.getSessionToken().equals(sessionToken);
+        return  binding.getOwnerId().equals(sessionToken);
     }
 }
