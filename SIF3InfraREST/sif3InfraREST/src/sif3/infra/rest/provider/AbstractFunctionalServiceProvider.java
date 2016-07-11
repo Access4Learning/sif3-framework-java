@@ -223,6 +223,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseProvider
 
                         for (SIF3Job job : jobs)
                         {
+                            logger.debug("Checking timeout of job " + job.getId());
                             if (hasTimedout(job))
                             {
                                 logger.debug("Job " + job.getId()
@@ -869,6 +870,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseProvider
         Calendar now = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         Calendar then = (Calendar) now.clone();
 
+        then.setTime(job.getCreated());
         then.add(Calendar.MILLISECOND, (int) job.getTimeout());
 
         return acceptJob(job) && job.getTimeout() > 0 && now.after(then);
