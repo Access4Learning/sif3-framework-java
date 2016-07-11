@@ -18,30 +18,31 @@ import javax.ws.rs.core.Response.Status;
 
 public class BadRequestException extends SIF3Exception
 {
-  private static final long serialVersionUID = 807165545454L;
-  
-	public BadRequestException()
-	{
-		super();
-	}
+    private static final long serialVersionUID = 807165545454L;
 
-	public BadRequestException(String msg)
-	{
-		super(msg);
-	}
+    public BadRequestException()
+    {
+        super();
+    }
 
-	public BadRequestException(String msg, Throwable ex)
-	{
-		super(msg, ex);
-	}
+    public BadRequestException(String msg)
+    {
+        super(msg);
+    }
 
-	public BadRequestException(Throwable ex)
-	{
-		super(ex);
-	}
-	
-	@Override
-	public Status getStatus() {
-		return Status.BAD_REQUEST;
-	}
+    public BadRequestException(String msg, Throwable ex)
+    {
+        super(msg, ex);
+    }
+
+    public BadRequestException(Throwable ex)
+    {
+        super(ex);
+    }
+
+    @Override
+    public int getStatus()
+    {
+        return Status.BAD_REQUEST.getStatusCode();
+    }
 }

@@ -41,8 +41,8 @@ public class NotFoundException extends SIF3Exception
     }
 
     @Override
-    public Status getStatus()
+    public int getStatus()
     {
-        return Status.NOT_FOUND;
+        return Status.NOT_FOUND.getStatusCode();
     }
 }

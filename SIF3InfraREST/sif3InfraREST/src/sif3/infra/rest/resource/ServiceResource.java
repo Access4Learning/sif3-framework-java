@@ -1401,7 +1401,7 @@ public class ServiceResource extends InfraResource
     private Response makeExceptionError(PersistenceException e, ResponseAction action,
             ResponseParameters responseParam)
     {
-        int status = e.getStatus().getStatusCode();
+        int status = e.getStatus();
         String msg = "Operation failed due to persistence error in provider "
                 + provider.getMultiObjectClassInfo().getObjectName() + ". Problem reported: "
                 + e.getMessage();
@@ -1415,7 +1415,7 @@ public class ServiceResource extends InfraResource
     private Response makeExceptionError(UnmarshalException e, ResponseAction action,
             ResponseParameters responseParam)
     {
-        int status = e.getStatus().getStatusCode();
+        int status = e.getStatus();
         String msg = "Could not unmarshal data sent to provider "
                 + provider.getMultiObjectClassInfo().getObjectName() + ". Problem reported: "
                 + e.getMessage();
@@ -1429,7 +1429,7 @@ public class ServiceResource extends InfraResource
     private Response makeExceptionError(UnsupportedMediaTypeException e, ResponseAction action,
             ResponseParameters responseParam)
     {
-        int status = e.getStatus().getStatusCode();
+        int status = e.getStatus();
         String msg = "Could not unmarshal data sent to provider "
                 + provider.getMultiObjectClassInfo().getObjectName() + ". Problem reported: "
                 + e.getMessage();
@@ -1443,7 +1443,7 @@ public class ServiceResource extends InfraResource
     private Response makeExceptionError(UnsupportedQueryException e, ResponseAction action,
             ResponseParameters responseParam)
     {
-        int status = e.getStatus().getStatusCode();
+        int status = e.getStatus();
         String msg = "Provider " + provider.getMultiObjectClassInfo().getObjectName()
                 + " does not support this request. Detail: " + e.getMessage();
         ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
@@ -1456,7 +1456,7 @@ public class ServiceResource extends InfraResource
     private Response makeExceptionError(BadRequestException e, ResponseAction action,
             ResponseParameters responseParam)
     {
-        int status = e.getStatus().getStatusCode();
+        int status = e.getStatus();
         String msg = "Bad request to provider " + provider.getMultiObjectClassInfo().getObjectName()
                 + ". Problem reported: " + e.getMessage();
         ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
@@ -1469,7 +1469,7 @@ public class ServiceResource extends InfraResource
     private Response makeExceptionError(ForbiddenException e, ResponseAction action,
             ResponseParameters responseParam)
     {
-        int status = e.getStatus().getStatusCode();
+        int status = e.getStatus();
         String msg = "Consumer is not authorized to issue the requested operation. Problem reported: "
                 + e.getMessage();
         ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
@@ -1494,7 +1494,7 @@ public class ServiceResource extends InfraResource
     private Response makeExceptionError(DataTooLargeException e, ResponseAction action,
             ResponseParameters responseParam)
     {
-        int status = CommonConstants.RESPONSE_TOO_LARGE;
+        int status = e.getStatus();
         String msg = "Data too large. Problem reported: " + e.getMessage();
         ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
 
@@ -1506,7 +1506,7 @@ public class ServiceResource extends InfraResource
     private Response makeExceptionError(NotFoundException e, ResponseAction action,
             ResponseParameters responseParam)
     {
-        int status = e.getStatus().getStatusCode();
+        int status = e.getStatus();
         String msg = "Count not find requested object. Problem reported: " + e.getMessage();
         ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
 

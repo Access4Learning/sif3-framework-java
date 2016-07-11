@@ -16,34 +16,35 @@
 
 package sif3.common.exception;
 
-import javax.ws.rs.core.Response.Status;
+import sif3.common.CommonConstants;
 
 public class DataTooLargeException extends SIF3Exception
 {
-	private static final long serialVersionUID = 8201196298932433571L;
+    private static final long serialVersionUID = 8201196298932433571L;
 
-	public DataTooLargeException()
-	{
-		super();
-	}
+    public DataTooLargeException()
+    {
+        super();
+    }
 
-	public DataTooLargeException(String msg)
-	{
-		super(msg);
-	}
+    public DataTooLargeException(String msg)
+    {
+        super(msg);
+    }
 
-	public DataTooLargeException(String msg, Throwable ex)
-	{
-		super(msg, ex);
-	}
+    public DataTooLargeException(String msg, Throwable ex)
+    {
+        super(msg, ex);
+    }
 
-	public DataTooLargeException(Throwable ex)
-	{
-		super(ex);
-	}
-	
-	@Override
-  public Status getStatus() {
-    return Status.BAD_REQUEST;
-  }
+    public DataTooLargeException(Throwable ex)
+    {
+        super(ex);
+    }
+
+    @Override
+    public int getStatus()
+    {
+        return CommonConstants.RESPONSE_TOO_LARGE;
+    }
 }
