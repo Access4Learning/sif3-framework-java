@@ -40,6 +40,7 @@ import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.BadRequestException;
 import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.ForbiddenException;
+import sif3.common.exception.NotFoundException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeException;
@@ -335,8 +336,7 @@ public class ServiceResource extends InfraResource
 
             if (returnObj != null)
             {
-                if (getJobBinding()
-                        && !sif3BindingService.isBound(resourceID, getOwnerId()))
+                if (getJobBinding() && !sif3BindingService.isBound(resourceID, getOwnerId()))
                 {
                     throw new ForbiddenException(
                             "Object requested does not belong to this consumer.");
@@ -347,8 +347,12 @@ public class ServiceResource extends InfraResource
             }
             else
             {
-                return makeNotFoundError(resourceID, ResponseAction.QUERY, responseParam);
+                throw new NotFoundException("Could not find object with id '" + resourceID + "'.");
             }
+        }
+        catch (NotFoundException ex)
+        {
+            return makeExceptionError(ex, ResponseAction.QUERY, responseParam);
         }
         catch (PersistenceException ex)
         {
@@ -538,8 +542,7 @@ public class ServiceResource extends InfraResource
 
         try
         {
-            if (getJobBinding()
-                    && !sif3BindingService.isBound(resourceID, getOwnerId()))
+            if (getJobBinding() && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException(
                         "If the object exists it does not belong to this consumer.");
@@ -557,8 +560,13 @@ public class ServiceResource extends InfraResource
             }
             else
             {
-                return makeNotFoundError(resourceID, ResponseAction.DELETE, responseParam);
+                throw new NotFoundException("Could not find object with id '" + resourceID + "'.");
+
             }
+        }
+        catch (NotFoundException ex)
+        {
+            return makeExceptionError(ex, ResponseAction.DELETE, responseParam);
         }
         catch (PersistenceException ex)
         {
@@ -631,8 +639,7 @@ public class ServiceResource extends InfraResource
 
         try
         {
-            if (getJobBinding()
-                    && !sif3BindingService.isBound(resourceID, getOwnerId()))
+            if (getJobBinding() && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException("Object requested does not belong to this consumer.");
             }
@@ -707,8 +714,7 @@ public class ServiceResource extends InfraResource
 
         try
         {
-            if (getJobBinding()
-                    && !sif3BindingService.isBound(resourceID, getOwnerId()))
+            if (getJobBinding() && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException("Object requested does not belong to this consumer.");
             }
@@ -723,8 +729,12 @@ public class ServiceResource extends InfraResource
             }
             else
             {
-                return makeNotFoundError(resourceID, ResponseAction.QUERY, responseParam);
+                throw new NotFoundException("Could not find object with id '" + resourceID + "'.");
             }
+        }
+        catch (NotFoundException ex)
+        {
+            return makeExceptionError(ex, ResponseAction.QUERY, responseParam);
         }
         catch (PersistenceException ex)
         {
@@ -779,8 +789,7 @@ public class ServiceResource extends InfraResource
 
         try
         {
-            if (getJobBinding()
-                    && !sif3BindingService.isBound(resourceID, getOwnerId()))
+            if (getJobBinding() && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException("Object requested does not belong to this consumer.");
             }
@@ -853,8 +862,7 @@ public class ServiceResource extends InfraResource
 
         try
         {
-            if (getJobBinding()
-                    && !sif3BindingService.isBound(resourceID, getOwnerId()))
+            if (getJobBinding() && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException("Object requested does not belong to this consumer.");
             }
@@ -917,8 +925,7 @@ public class ServiceResource extends InfraResource
 
         try
         {
-            if (getJobBinding()
-                    && !sif3BindingService.isBound(resourceID, getOwnerId()))
+            if (getJobBinding() && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException("Object requested does not belong to this consumer.");
             }
@@ -1394,7 +1401,7 @@ public class ServiceResource extends InfraResource
     private Response makeExceptionError(PersistenceException e, ResponseAction action,
             ResponseParameters responseParam)
     {
-        int status = Status.INTERNAL_SERVER_ERROR.getStatusCode();
+        int status = e.getStatus().getStatusCode();
         String msg = "Operation failed due to persistence error in provider "
                 + provider.getMultiObjectClassInfo().getObjectName() + ". Problem reported: "
                 + e.getMessage();
@@ -1408,7 +1415,7 @@ public class ServiceResource extends InfraResource
     private Response makeExceptionError(UnmarshalException e, ResponseAction action,
             ResponseParameters responseParam)
     {
-        int status = Status.BAD_REQUEST.getStatusCode();
+        int status = e.getStatus().getStatusCode();
         String msg = "Could not unmarshal data sent to provider "
                 + provider.getMultiObjectClassInfo().getObjectName() + ". Problem reported: "
                 + e.getMessage();
@@ -1422,7 +1429,7 @@ public class ServiceResource extends InfraResource
     private Response makeExceptionError(UnsupportedMediaTypeException e, ResponseAction action,
             ResponseParameters responseParam)
     {
-        int status = Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode();
+        int status = e.getStatus().getStatusCode();
         String msg = "Could not unmarshal data sent to provider "
                 + provider.getMultiObjectClassInfo().getObjectName() + ". Problem reported: "
                 + e.getMessage();
@@ -1436,7 +1443,7 @@ public class ServiceResource extends InfraResource
     private Response makeExceptionError(UnsupportedQueryException e, ResponseAction action,
             ResponseParameters responseParam)
     {
-        int status = Status.BAD_REQUEST.getStatusCode();
+        int status = e.getStatus().getStatusCode();
         String msg = "Provider " + provider.getMultiObjectClassInfo().getObjectName()
                 + " does not support this request. Detail: " + e.getMessage();
         ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
@@ -1449,7 +1456,7 @@ public class ServiceResource extends InfraResource
     private Response makeExceptionError(BadRequestException e, ResponseAction action,
             ResponseParameters responseParam)
     {
-        int status = Status.BAD_REQUEST.getStatusCode();
+        int status = e.getStatus().getStatusCode();
         String msg = "Bad request to provider " + provider.getMultiObjectClassInfo().getObjectName()
                 + ". Problem reported: " + e.getMessage();
         ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
@@ -1462,7 +1469,7 @@ public class ServiceResource extends InfraResource
     private Response makeExceptionError(ForbiddenException e, ResponseAction action,
             ResponseParameters responseParam)
     {
-        int status = Status.FORBIDDEN.getStatusCode();
+        int status = e.getStatus().getStatusCode();
         String msg = "Consumer is not authorized to issue the requested operation. Problem reported: "
                 + e.getMessage();
         ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
@@ -1496,11 +1503,11 @@ public class ServiceResource extends InfraResource
         return makeErrorResponse(error, action, responseParam);
     }
 
-    private Response makeNotFoundError(String resourceID, ResponseAction action,
+    private Response makeExceptionError(NotFoundException e, ResponseAction action,
             ResponseParameters responseParam)
     {
-        int status = Status.NOT_FOUND.getStatusCode();
-        String msg = "Count not find requested object with id '" + resourceID + "'.";
+        int status = e.getStatus().getStatusCode();
+        String msg = "Count not find requested object. Problem reported: " + e.getMessage();
         ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
 
         logger.debug(msg);
@@ -1521,8 +1528,29 @@ public class ServiceResource extends InfraResource
 
         return makeErrorResponse(error, action, responseParam);
     }
-    
-    private String getOwnerId() {
-        return getAuthInfo().getUserToken();
+
+    private String getOwnerId() throws NotFoundException
+    {
+        HeaderProperties headers = getSIFHeaderProperties();
+        String ownerId = null;
+
+        switch (getProviderEnvironment().getEnvironmentType())
+        {
+        case DIRECT:
+            // Application key is either in header or in user token
+            ownerId = headers.getHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY,
+                    getAuthInfo().getUserToken());
+            break;
+        case BROKERED:
+            // Application key must have been moved into sourceName property
+            ownerId = headers.getHeaderProperty(RequestHeaderConstants.HDR_SOURCE_NAME);
+            break;
+        }
+
+        if (ownerId == null)
+        {
+            throw new NotFoundException("Could not identify consumer.");
+        }
+        return ownerId;
     }
 }
