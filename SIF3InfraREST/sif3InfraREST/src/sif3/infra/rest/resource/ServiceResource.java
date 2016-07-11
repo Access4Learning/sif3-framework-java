@@ -216,7 +216,7 @@ public class ServiceResource extends InfraResource
 
             if (getJobBinding())
             {
-                sif3BindingService.bind(job.getId(), getAuthInfo().getUserToken());
+                sif3BindingService.bind(job.getId(), getOwnerId());
             }
 
             return makeResponse(job, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE,
@@ -336,7 +336,7 @@ public class ServiceResource extends InfraResource
             if (returnObj != null)
             {
                 if (getJobBinding()
-                        && !sif3BindingService.isBound(resourceID, getAuthInfo().getUserToken()))
+                        && !sif3BindingService.isBound(resourceID, getOwnerId()))
                 {
                     throw new ForbiddenException(
                             "Object requested does not belong to this consumer.");
@@ -539,7 +539,7 @@ public class ServiceResource extends InfraResource
         try
         {
             if (getJobBinding()
-                    && !sif3BindingService.isBound(resourceID, getAuthInfo().getUserToken()))
+                    && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException(
                         "If the object exists it does not belong to this consumer.");
@@ -632,7 +632,7 @@ public class ServiceResource extends InfraResource
         try
         {
             if (getJobBinding()
-                    && !sif3BindingService.isBound(resourceID, getAuthInfo().getUserToken()))
+                    && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException("Object requested does not belong to this consumer.");
             }
@@ -708,7 +708,7 @@ public class ServiceResource extends InfraResource
         try
         {
             if (getJobBinding()
-                    && !sif3BindingService.isBound(resourceID, getAuthInfo().getUserToken()))
+                    && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException("Object requested does not belong to this consumer.");
             }
@@ -780,7 +780,7 @@ public class ServiceResource extends InfraResource
         try
         {
             if (getJobBinding()
-                    && !sif3BindingService.isBound(resourceID, getAuthInfo().getUserToken()))
+                    && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException("Object requested does not belong to this consumer.");
             }
@@ -854,7 +854,7 @@ public class ServiceResource extends InfraResource
         try
         {
             if (getJobBinding()
-                    && !sif3BindingService.isBound(resourceID, getAuthInfo().getUserToken()))
+                    && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException("Object requested does not belong to this consumer.");
             }
@@ -918,7 +918,7 @@ public class ServiceResource extends InfraResource
         try
         {
             if (getJobBinding()
-                    && !sif3BindingService.isBound(resourceID, getAuthInfo().getUserToken()))
+                    && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException("Object requested does not belong to this consumer.");
             }
@@ -1520,5 +1520,9 @@ public class ServiceResource extends InfraResource
         logger.debug(msg, e);
 
         return makeErrorResponse(error, action, responseParam);
+    }
+    
+    private String getOwnerId() {
+        return getAuthInfo().getUserToken();
     }
 }
