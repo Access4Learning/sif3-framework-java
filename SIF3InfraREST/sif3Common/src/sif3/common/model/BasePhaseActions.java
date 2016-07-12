@@ -16,9 +16,7 @@ package sif3.common.model;
 
 import javax.ws.rs.core.MediaType;
 
-import sif3.common.exception.PersistenceException;
-import sif3.common.exception.UnmarshalException;
-import sif3.common.exception.UnsupportedMediaTypeException;
+import sif3.common.exception.SIF3Exception;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.interfaces.FunctionalServiceProvider;
 import sif3.common.interfaces.PhaseActions;
@@ -58,8 +56,7 @@ public class BasePhaseActions implements PhaseActions
     @Override
     public String create(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
-            throws IllegalArgumentException, PersistenceException, UnmarshalException,
-            UnsupportedMediaTypeException, UnsupportedQueryException
+            throws SIF3Exception
     {
         throw new UnsupportedQueryException("CREATE is not supported");
     }
@@ -74,8 +71,7 @@ public class BasePhaseActions implements PhaseActions
     @Override
     public String retrieve(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
-            throws IllegalArgumentException, PersistenceException, UnsupportedMediaTypeException,
-            UnsupportedQueryException
+            throws SIF3Exception
     {
         throw new UnsupportedQueryException("RETRIEVE is not supported");
     }
@@ -90,8 +86,7 @@ public class BasePhaseActions implements PhaseActions
     @Override
     public String update(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
-            throws IllegalArgumentException, PersistenceException, UnmarshalException,
-            UnsupportedMediaTypeException, UnsupportedQueryException
+            throws SIF3Exception
     {
         throw new UnsupportedQueryException("UPDATE is not supported");
     }
@@ -106,8 +101,7 @@ public class BasePhaseActions implements PhaseActions
     @Override
     public String delete(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
-            throws IllegalArgumentException, PersistenceException, UnmarshalException,
-            UnsupportedMediaTypeException, UnsupportedQueryException
+            throws SIF3Exception
     {
         throw new UnsupportedQueryException("DELETE is not supported");
     }

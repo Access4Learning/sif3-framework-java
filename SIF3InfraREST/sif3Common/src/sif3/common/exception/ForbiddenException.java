@@ -27,24 +27,30 @@ public class ForbiddenException extends SIF3Exception
         super();
     }
 
-    public ForbiddenException(String msg)
+    public ForbiddenException(String message)
     {
-        super(msg);
+        super(message);
     }
 
-    public ForbiddenException(String msg, Throwable ex)
+    public ForbiddenException(String message, Throwable cause)
     {
-        super(msg, ex);
+        super(message, cause);
     }
 
-    public ForbiddenException(Throwable ex)
+    public ForbiddenException(Throwable cause)
     {
-        super(ex);
+        super(cause);
     }
 
     @Override
     public int getStatus()
     {
         return Status.FORBIDDEN.getStatusCode();
+    }
+    
+    @Override
+    public String getHeadline()
+    {
+        return "Consumer is not authorized to issue the requested operation.";
     }
 }

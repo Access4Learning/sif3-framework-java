@@ -27,24 +27,30 @@ public class DataTooLargeException extends SIF3Exception
         super();
     }
 
-    public DataTooLargeException(String msg)
+    public DataTooLargeException(String message)
     {
-        super(msg);
+        super(message);
     }
 
-    public DataTooLargeException(String msg, Throwable ex)
+    public DataTooLargeException(String message, Throwable cause)
     {
-        super(msg, ex);
+        super(message, cause);
     }
 
-    public DataTooLargeException(Throwable ex)
+    public DataTooLargeException(Throwable cause)
     {
-        super(ex);
+        super(cause);
     }
 
     @Override
     public int getStatus()
     {
         return CommonConstants.RESPONSE_TOO_LARGE;
+    }
+    
+    @Override
+    public String getHeadline()
+    {
+        return "Data too large.";
     }
 }

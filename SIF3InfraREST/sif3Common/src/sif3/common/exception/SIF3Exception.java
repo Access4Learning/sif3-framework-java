@@ -16,6 +16,8 @@ package sif3.common.exception;
 
 import javax.ws.rs.core.Response.Status;
 
+import sif3.common.ws.ErrorDetails;
+
 /**
  * The root exception for all SIF3 exceptions.
  * 
@@ -32,29 +34,68 @@ public class SIF3Exception extends Exception
         super();
     }
 
-    public SIF3Exception(String msg)
+    public SIF3Exception(String message)
     {
-        super(msg);
+        super(message);
     }
 
-    public SIF3Exception(String msg, Throwable ex)
+    public SIF3Exception(String message, Throwable cause)
     {
-        super(msg, ex);
+        super(message, cause);
     }
 
-    public SIF3Exception(Throwable ex)
+    public SIF3Exception(Throwable cause)
     {
-        super(ex);
+        super(cause);
     }
 
     /**
-     * Returns a Status object that should be used when reporting this exception. Should be
+     * Returns the HTTP status code that should be used when reporting this exception. Should be
      * overridden.
      * 
-     * @return The Status object appropriate for this exception.
+     * @return The HTTP status code (int) appropriate for this exception.
      */
     public int getStatus()
     {
         return Status.INTERNAL_SERVER_ERROR.getStatusCode();
+    }
+
+    /**
+     * Returns the headline of this exception.
+     * 
+     * @return The Status object appropriate for this exception.
+     */
+    public String getHeadline()
+    {
+        return "Error performing action.";
+    }
+
+    /**
+     * Converts this exception into an ErrorDetails instance ready to be used in a REST Response.
+     * The ErrorDetails object's "message" property will be populated with the string returned by
+     * getHeadline(), whereas the "description" property will be populated by the exceptions message
+     * (getMessage()). The scope is left undefined.
+     * 
+     * @return ErrorDetails object with default details.
+     */
+    public ErrorDetails getErrorDetails()
+    {
+        return new ErrorDetails(getStatus(), getHeadline(), getMessage());
+    }
+
+    /**
+     * Converts this exception into an ErrorDetails instance ready to be used in a REST Response.
+     * The ErrorDetails object's "message" property will be populated with the string returned by
+     * getHeadline(), whereas the "description" property will be populated by the exceptions message
+     * (getMessage()). The scope, which should indicate the attempted operation, is defined by the
+     * single argument.
+     * 
+     * @param scope
+     *            The scope to put into the ErrorDetails object.
+     * @return ErrorDetails object with default details.
+     */
+    public ErrorDetails getErrorDetails(String scope)
+    {
+        return new ErrorDetails(getStatus(), getHeadline(), getMessage(), scope);
     }
 }

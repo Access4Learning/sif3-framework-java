@@ -31,24 +31,30 @@ public class NotFoundException extends SIF3Exception
         super();
     }
 
-    public NotFoundException(String msg)
+    public NotFoundException(String message)
     {
-        super(msg);
+        super(message);
     }
 
-    public NotFoundException(String msg, Throwable ex)
+    public NotFoundException(String message, Throwable cause)
     {
-        super(msg, ex);
+        super(message, cause);
     }
 
-    public NotFoundException(Throwable ex)
+    public NotFoundException(Throwable cause)
     {
-        super(ex);
+        super(cause);
     }
 
     @Override
     public int getStatus()
     {
         return Status.NOT_FOUND.getStatusCode();
+    }
+    
+    @Override
+    public String getHeadline()
+    {
+        return "Could not find the requested resource.";
     }
 }

@@ -37,13 +37,10 @@ import sif3.common.CommonConstants;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.conversion.UnmarshalFactory;
-import sif3.common.exception.BadRequestException;
-import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.ForbiddenException;
 import sif3.common.exception.NotFoundException;
 import sif3.common.exception.PersistenceException;
-import sif3.common.exception.UnmarshalException;
-import sif3.common.exception.UnsupportedMediaTypeException;
+import sif3.common.exception.SIF3Exception;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
@@ -69,7 +66,6 @@ import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.common.model.JobCollectionType;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.StateType;
-import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
 import sif3.infra.rest.provider.ProviderFactory;
 
 /**
@@ -202,15 +198,15 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.CREATE, responseParam);
         }
 
-        Provider provider = getProvider();
-        if (provider == null)
-        {
-            // error already logged but we must return an error response for the caller
-            return makeNoProviderError(ResponseAction.CREATE, responseParam);
-        }
-
         try
         {
+            Provider provider = getProvider();
+            if (provider == null)
+            {
+                throw new NotFoundException(
+                        "No provider for " + infraObjectNamePlural + " available.");
+            }
+
             JobType job = (JobType) provider.createSingle(
                     provider.getUnmarshaller().unmarshal(payload,
                             provider.getSingleObjectClassInfo().getObjectType(),
@@ -226,21 +222,13 @@ public class ServiceResource extends InfraResource
             return makeResponse(job, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE,
                     responseParam, provider.getMarshaller());
         }
-        catch (PersistenceException ex)
+        catch (SIF3Exception ex)
         {
-            return makeExceptionError(ex, ResponseAction.CREATE, responseParam);
-        }
-        catch (UnmarshalException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.CREATE, responseParam);
-        }
-        catch (UnsupportedMediaTypeException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.CREATE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.CREATE, responseParam);
         }
         catch (Exception ex)
         {
-            return makeUnexpectedError(ex, ResponseAction.CREATE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.CREATE, responseParam);
         }
     }
 
@@ -268,34 +256,38 @@ public class ServiceResource extends InfraResource
 
         ResponseParameters responseParam = getInitialCustomResponseParameters();
 
+        ResponseAction action = (isQBE) ? ResponseAction.QUERY : ResponseAction.CREATE;
+
         ErrorDetails error = validClient(infraObjectNamePlural,
                 ((isQBE) ? getRight(AccessRight.QUERY) : getRight(AccessRight.CREATE)),
                 AccessType.APPROVED, true, true);
         if (error != null) // Not allowed to access!
         {
             logger.debug("Error Found: " + error);
-            return makeErrorResponse(error,
-                    ((isQBE) ? ResponseAction.QUERY : ResponseAction.CREATE), responseParam);
-        }
-
-        Provider provider = getProvider();
-        if (provider == null)
-        {
-            // error already logged but we must return an error response for the caller
-            return makeNoProviderError(((isQBE) ? ResponseAction.QUERY : ResponseAction.CREATE),
-                    responseParam);
+            return makeErrorResponse(error, action, responseParam);
         }
 
         try
         {
+            Provider provider = getProvider();
+            if (provider == null)
+            {
+                throw new NotFoundException(
+                        "No provider for " + infraObjectNamePlural + " available.");
+            }
+
             if (isQBE)
             {
                 throw new UnsupportedQueryException("QBE in functional services is not supported.");
             }
         }
-        catch (UnsupportedQueryException ex)
+        catch (SIF3Exception ex)
         {
-            return makeExceptionError(ex, ResponseAction.QUERY, responseParam);
+            return makeErrorResponse(ex, action, responseParam);
+        }
+        catch (Exception ex)
+        {
+            return makeErrorResponse(ex, action, responseParam);
         }
 
         return createMany(provider, payload);
@@ -324,15 +316,15 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.QUERY, responseParam);
         }
 
-        Provider provider = getProvider();
-        if (provider == null)
-        {
-            // error already logged but we must return an error response for the caller
-            return makeNoProviderError(ResponseAction.QUERY, responseParam);
-        }
-
         try
         {
+            Provider provider = getProvider();
+            if (provider == null)
+            {
+                throw new NotFoundException(
+                        "No provider for " + infraObjectNamePlural + " available.");
+            }
+
             Object returnObj = provider.retrieveByPrimaryKey(resourceID, getSifZone(),
                     getSifContext(), getRequestMetadata(getSIF3SessionForRequest(), false),
                     responseParam);
@@ -353,25 +345,13 @@ public class ServiceResource extends InfraResource
                 throw new NotFoundException("Could not find object with id '" + resourceID + "'.");
             }
         }
-        catch (NotFoundException ex)
+        catch (SIF3Exception ex)
         {
-            return makeExceptionError(ex, ResponseAction.QUERY, responseParam);
-        }
-        catch (PersistenceException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.QUERY, responseParam);
-        }
-        catch (ForbiddenException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.QUERY, responseParam);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.QUERY, responseParam);
+            return makeErrorResponse(ex, ResponseAction.QUERY, responseParam);
         }
         catch (Exception ex)
         {
-            return makeUnexpectedError(ex, ResponseAction.QUERY, responseParam);
+            return makeErrorResponse(ex, ResponseAction.QUERY, responseParam);
         }
     }
 
@@ -392,17 +372,17 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.QUERY, responseParam);
         }
 
-        Provider provider = getProvider();
-        if (provider == null)
-        {
-            // error already logged but we must return an error response for the caller
-            return makeNoProviderError(ResponseAction.QUERY, responseParam);
-        }
-
         PagingInfo pagingInfo = getPagingInfo();
 
         try
         {
+            Provider provider = getProvider();
+            if (provider == null)
+            {
+                throw new NotFoundException(
+                        "No provider for " + infraObjectNamePlural + " available.");
+            }
+
             Object returnObj = provider.retrieve(getSifZone(), getSifContext(), pagingInfo,
                     getRequestMetadata(getSIF3SessionForRequest(), true), responseParam);
 
@@ -424,25 +404,13 @@ public class ServiceResource extends InfraResource
             return makePagedResponse(returnObj, pagingInfo, false, responseParam,
                     provider.getMarshaller());
         }
-        catch (PersistenceException ex)
+        catch (SIF3Exception ex)
         {
-            return makeExceptionError(ex, ResponseAction.QUERY, responseParam);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.QUERY, responseParam);
-        }
-        catch (UnsupportedQueryException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.QUERY, responseParam);
-        }
-        catch (DataTooLargeException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.QUERY, responseParam);
+            return makeErrorResponse(ex, ResponseAction.QUERY, responseParam);
         }
         catch (Exception ex)
         {
-            return makeUnexpectedError(ex, ResponseAction.QUERY, responseParam);
+            return makeErrorResponse(ex, ResponseAction.QUERY, responseParam);
         }
     }
 
@@ -461,7 +429,7 @@ public class ServiceResource extends InfraResource
         }
         catch (UnsupportedQueryException ex)
         {
-            return makeExceptionError(ex, ResponseAction.QUERY,
+            return makeErrorResponse(ex, ResponseAction.QUERY,
                     getInitialCustomResponseParameters());
         }
     }
@@ -500,12 +468,24 @@ public class ServiceResource extends InfraResource
                     ((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE), responseParam);
         }
 
-        Provider provider = getProvider();
-        if (provider == null)
+        ResponseAction action = (doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE;
+
+        try
         {
-            // error already logged but we must return an error response for the caller
-            return makeNoProviderError(((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE),
-                    responseParam);
+            Provider provider = getProvider();
+            if (provider == null)
+            {
+                throw new NotFoundException(
+                        "No provider for " + infraObjectNamePlural + " available.");
+            }
+        }
+        catch (SIF3Exception ex)
+        {
+            return makeErrorResponse(ex, action, responseParam);
+        }
+        catch (Exception ex)
+        {
+            return makeErrorResponse(ex, action, responseParam);
         }
 
         return (doDelete) ? deleteMany(provider, payload) : updateMany(provider, payload);
@@ -536,15 +516,15 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.DELETE, responseParam);
         }
 
-        Provider provider = getProvider();
-        if (provider == null)
-        {
-            // error already logged but we must return an error response for the caller
-            return makeNoProviderError(ResponseAction.DELETE, responseParam);
-        }
-
         try
         {
+            Provider provider = getProvider();
+            if (provider == null)
+            {
+                throw new NotFoundException(
+                        "No provider for " + infraObjectNamePlural + " available.");
+            }
+
             if (getJobBinding() && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException(
@@ -567,25 +547,13 @@ public class ServiceResource extends InfraResource
 
             }
         }
-        catch (NotFoundException ex)
+        catch (SIF3Exception ex)
         {
-            return makeExceptionError(ex, ResponseAction.DELETE, responseParam);
-        }
-        catch (PersistenceException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.DELETE, responseParam);
-        }
-        catch (ForbiddenException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.DELETE, responseParam);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.DELETE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.DELETE, responseParam);
         }
         catch (Exception ex)
         {
-            return makeUnexpectedError(ex, ResponseAction.DELETE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.DELETE, responseParam);
         }
     }
 
@@ -629,19 +597,14 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.CREATE, responseParam);
         }
 
-        FunctionalServiceProvider provider = (FunctionalServiceProvider) getProvider();
-        if (provider == null)
-        {
-            // error already logged but we must return an error response for the caller
-            return makeNoProviderError(ResponseAction.CREATE, responseParam);
-        }
-
-        // Ignore the marshaller/unmarshaller - just reflect the contentType and
-        // accept header information
+        // Ignore the marshaller/unmarshaller - just reflect the contentType and accept header
+        // information
         determineMediaTypes(null, null, false);
 
         try
         {
+            FunctionalServiceProvider provider = getFunctionalServiceProvider();
+
             if (getJobBinding() && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException("Object requested does not belong to this consumer.");
@@ -653,33 +616,13 @@ public class ServiceResource extends InfraResource
             return makeResponse(returnPayload, Status.CREATED.getStatusCode(), false,
                     ResponseAction.CREATE, responseParam, null);
         }
-        catch (PersistenceException ex)
+        catch (SIF3Exception ex)
         {
-            return makeExceptionError(ex, ResponseAction.CREATE, responseParam);
-        }
-        catch (UnmarshalException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.CREATE, responseParam);
-        }
-        catch (UnsupportedMediaTypeException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.CREATE, responseParam);
-        }
-        catch (UnsupportedQueryException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.CREATE, responseParam);
-        }
-        catch (BadRequestException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.CREATE, responseParam);
-        }
-        catch (ForbiddenException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.CREATE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.CREATE, responseParam);
         }
         catch (Exception ex)
         {
-            return makeUnexpectedError(ex, ResponseAction.CREATE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.CREATE, responseParam);
         }
     }
 
@@ -703,20 +646,14 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.QUERY, responseParam);
         }
 
-        Provider p = getProvider();
-        Response errResponse = checkProvider(p, responseParam);
-        if (errResponse != null)
-        {
-            return errResponse;
-        }
-        BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) p;
-
         // Ignore the marshaller/unmarshaller - just reflect the contentType and
         // accept header information
         determineMediaTypes(null, null, false);
 
         try
         {
+            FunctionalServiceProvider provider = getFunctionalServiceProvider();
+
             if (getJobBinding() && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException("Object requested does not belong to this consumer.");
@@ -735,25 +672,13 @@ public class ServiceResource extends InfraResource
                 throw new NotFoundException("Could not find object with id '" + resourceID + "'.");
             }
         }
-        catch (NotFoundException ex)
+        catch (SIF3Exception ex)
         {
-            return makeExceptionError(ex, ResponseAction.QUERY, responseParam);
-        }
-        catch (PersistenceException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.QUERY, responseParam);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.QUERY, responseParam);
-        }
-        catch (ForbiddenException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.QUERY, responseParam);
+            return makeErrorResponse(ex, ResponseAction.QUERY, responseParam);
         }
         catch (Exception ex)
         {
-            return makeUnexpectedError(ex, ResponseAction.QUERY, responseParam);
+            return makeErrorResponse(ex, ResponseAction.QUERY, responseParam);
         }
     }
 
@@ -778,20 +703,14 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.UPDATE, responseParam);
         }
 
-        Provider p = getProvider();
-        Response errResponse = checkProvider(p, responseParam);
-        if (errResponse != null)
-        {
-            return errResponse;
-        }
-        BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) p;
-
         // Ignore the marshaller/unmarshaller - just reflect the contentType and
         // accept header information
         determineMediaTypes(null, null, false);
 
         try
         {
+            FunctionalServiceProvider provider = getFunctionalServiceProvider();
+
             if (getJobBinding() && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException("Object requested does not belong to this consumer.");
@@ -804,29 +723,13 @@ public class ServiceResource extends InfraResource
             return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.UPDATE,
                     responseParam, null);
         }
-        catch (PersistenceException ex)
+        catch (SIF3Exception ex)
         {
-            return makeExceptionError(ex, ResponseAction.UPDATE, responseParam);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.UPDATE, responseParam);
-        }
-        catch (UnmarshalException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.UPDATE, responseParam);
-        }
-        catch (UnsupportedMediaTypeException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.UPDATE, responseParam);
-        }
-        catch (ForbiddenException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.UPDATE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.UPDATE, responseParam);
         }
         catch (Exception ex)
         {
-            return makeUnexpectedError(ex, ResponseAction.UPDATE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.UPDATE, responseParam);
         }
     }
 
@@ -851,20 +754,14 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.DELETE, responseParam);
         }
 
-        Provider p = getProvider();
-        Response errResponse = checkProvider(p, responseParam);
-        if (errResponse != null)
-        {
-            return errResponse;
-        }
-        BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) p;
-
         // Ignore the marshaller/unmarshaller - just reflect the contentType and
         // accept header information
         determineMediaTypes(null, null, false);
 
         try
         {
+            FunctionalServiceProvider provider = getFunctionalServiceProvider();
+
             if (getJobBinding() && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException("Object requested does not belong to this consumer.");
@@ -876,21 +773,13 @@ public class ServiceResource extends InfraResource
             return makeResponse(returnObj, Status.OK.getStatusCode(), false, ResponseAction.UPDATE,
                     responseParam, null);
         }
-        catch (PersistenceException ex)
+        catch (SIF3Exception ex)
         {
-            return makeExceptionError(ex, ResponseAction.DELETE, responseParam);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.DELETE, responseParam);
-        }
-        catch (ForbiddenException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.DELETE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.DELETE, responseParam);
         }
         catch (Exception ex)
         {
-            return makeUnexpectedError(ex, ResponseAction.DELETE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.DELETE, responseParam);
         }
     }
 
@@ -918,22 +807,16 @@ public class ServiceResource extends InfraResource
             return makeErrorResponse(error, ResponseAction.CREATE, responseParam);
         }
 
-        Provider p = getProvider();
-        Response errResponse = checkProvider(p, responseParam);
-        if (errResponse != null)
-        {
-            return errResponse;
-        }
-        BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) p;
-
         try
         {
+            FunctionalServiceProvider provider = getFunctionalServiceProvider();
+
             if (getJobBinding() && !sif3BindingService.isBound(resourceID, getOwnerId()))
             {
                 throw new ForbiddenException("Object requested does not belong to this consumer.");
             }
 
-            StateType state = provider.createToState(resourceID, phaseName,
+            Object state = provider.createToState(resourceID, phaseName,
                     provider.getUnmarshaller().unmarshal(payload, StateType.class,
                             getRequestMediaType()),
                     getSifZone(), getSifContext(),
@@ -942,25 +825,13 @@ public class ServiceResource extends InfraResource
             return makeResponse(state, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE,
                     responseParam, provider.getMarshaller());
         }
-        catch (PersistenceException ex)
+        catch (SIF3Exception ex)
         {
-            return makeExceptionError(ex, ResponseAction.CREATE, responseParam);
-        }
-        catch (UnmarshalException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.CREATE, responseParam);
-        }
-        catch (UnsupportedMediaTypeException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.CREATE, responseParam);
-        }
-        catch (ForbiddenException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.CREATE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.CREATE, responseParam);
         }
         catch (Exception ex)
         {
-            return makeUnexpectedError(ex, ResponseAction.DELETE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.DELETE, responseParam);
         }
     }
 
@@ -988,16 +859,16 @@ public class ServiceResource extends InfraResource
                     getInitialCustomResponseParameters(), null);
         }
 
-        Provider provider = getProvider();
-        if (provider == null)
-        {
-            // error already logged but we must return an error response for the caller
-            return makeNoProviderError(ResponseAction.HEAD, getInitialCustomResponseParameters());
-        }
-
         PagingInfo pagingInfo = null;
         try
         {
+            Provider provider = getProvider();
+            if (provider == null)
+            {
+                throw new NotFoundException(
+                        "No provider for " + infraObjectNamePlural + " available.");
+            }
+
             pagingInfo = getPagingInfo();
             HeaderProperties defaultCustomHeaders = getInitialCustomResponseParameters()
                     .getHttpHeaderParams();
@@ -1018,30 +889,13 @@ public class ServiceResource extends InfraResource
             ResponseParameters responseParams = new ResponseParameters(defaultCustomHeaders);
             return makePagedResponse(null, pagingInfo, false, responseParams, null);
         }
-        catch (PersistenceException ex)
+        catch (SIF3Exception ex)
         {
-            return makeExceptionError(ex, ResponseAction.HEAD,
-                    getInitialCustomResponseParameters());
-        }
-        catch (IllegalArgumentException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.HEAD,
-                    getInitialCustomResponseParameters());
-        }
-        catch (UnsupportedQueryException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.HEAD,
-                    getInitialCustomResponseParameters());
-        }
-        catch (DataTooLargeException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.HEAD,
-                    getInitialCustomResponseParameters());
+            return makeErrorResponse(ex, ResponseAction.HEAD, getInitialCustomResponseParameters());
         }
         catch (Exception ex)
         {
-            return makeUnexpectedError(ex, ResponseAction.HEAD,
-                    getInitialCustomResponseParameters());
+            return makeErrorResponse(ex, ResponseAction.HEAD, getInitialCustomResponseParameters());
         }
     }
 
@@ -1106,7 +960,7 @@ public class ServiceResource extends InfraResource
         if (provider == null)
         {
             // No provider known for this Object Type! This is an issue and needs to be logged.
-            logger.error("No Provider found for name " + infraObjectNamePlural);
+            logger.error("No provider found for name " + infraObjectNamePlural);
         }
         return provider;
     }
@@ -1181,21 +1035,13 @@ public class ServiceResource extends InfraResource
                 }
             }
         }
-        catch (PersistenceException ex)
+        catch (SIF3Exception ex)
         {
-            return makeExceptionError(ex, ResponseAction.UPDATE, responseParam);
-        }
-        catch (UnmarshalException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.UPDATE, responseParam);
-        }
-        catch (UnsupportedMediaTypeException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.UPDATE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.UPDATE, responseParam);
         }
         catch (Exception ex)
         {
-            return makeUnexpectedError(ex, ResponseAction.UPDATE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.UPDATE, responseParam);
         }
     }
 
@@ -1211,53 +1057,7 @@ public class ServiceResource extends InfraResource
             }
             else
             {
-                List<OperationStatus> statusList = null;
-                List<String> ids = getResourceIDsFromDeleteRequest(payload);
-                try
-                {
-                    if (getJobBinding())
-                    {
-                        statusList = new ArrayList<OperationStatus>();
-                        for (String objectId : ids)
-                        {
-                            if (sif3BindingService.isBound(objectId))
-                            {
-                                if (provider.deleteSingle(objectId, getSifZone(), getSifContext(),
-                                        getRequestMetadata(getSIF3SessionForRequest(), false),
-                                        responseParam))
-                                {
-                                    statusList.add(new OperationStatus(objectId, 200));
-                                    sif3BindingService.unbind(objectId);
-                                }
-                                else
-                                {
-                                    statusList.add(new OperationStatus(objectId, 404,
-                                            new ErrorDetails(404, "Job with GUID = " + objectId
-                                                    + " does not exist.")));
-                                }
-                            }
-                            else
-                            {
-                                statusList.add(new OperationStatus(objectId, 403, new ErrorDetails(
-                                        403,
-                                        "Consumer does not own object with " + objectId + ".")));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        statusList = provider.deleteMany(ids, getSifZone(), getSifContext(),
-                                getRequestMetadata(getSIF3SessionForRequest(), false),
-                                responseParam);
-                    }
-                }
-                catch (Exception e)
-                {
-                    return makeErrorResponse(
-                            new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                                    "Unexpected request failure due to " + e.getMessage()),
-                            ResponseAction.CREATE, responseParam);
-                }
+                List<OperationStatus> statusList = doDeleteMany(provider, payload, responseParam);
 
                 if (statusList != null)
                 {
@@ -1265,27 +1065,56 @@ public class ServiceResource extends InfraResource
                 }
                 else
                 {
-                    return makeErrorResponse(
-                            new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                                    "Failed to delete "
-                                            + provider.getMultiObjectClassInfo().getObjectName()
-                                            + " (Bulk Operation). Contact your System Administrator."),
-                            ResponseAction.DELETE, responseParam);
+                    throw new PersistenceException(
+                            "Failed to delete " + provider.getMultiObjectClassInfo().getObjectName()
+                                    + " (Bulk Operation). Contact your System Administrator.");
                 }
             }
         }
-        catch (UnmarshalException ex)
+        catch (SIF3Exception ex)
         {
-            return makeExceptionError(ex, ResponseAction.DELETE, responseParam);
-        }
-        catch (UnsupportedMediaTypeException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.DELETE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.DELETE, responseParam);
         }
         catch (Exception ex)
         {
-            return makeUnexpectedError(ex, ResponseAction.DELETE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.DELETE, responseParam);
         }
+    }
+
+    private List<OperationStatus> doDeleteMany(Provider provider, String payload,
+            ResponseParameters responseParam) throws SIF3Exception
+    {
+        List<String> ids = getResourceIDsFromDeleteRequest(payload);
+
+        if (!getJobBinding())
+        {
+            return provider.deleteMany(ids, getSifZone(), getSifContext(),
+                    getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+        }
+
+        List<OperationStatus> statusList = new ArrayList<OperationStatus>();
+        for (String objectId : ids)
+        {
+            if (!sif3BindingService.isBound(objectId))
+            {
+                statusList.add(new OperationStatus(objectId, 403, new ErrorDetails(403,
+                        "Consumer does not own object with " + objectId + ".")));
+                continue;
+            }
+
+            if (provider.deleteSingle(objectId, getSifZone(), getSifContext(),
+                    getRequestMetadata(getSIF3SessionForRequest(), false), responseParam))
+            {
+                statusList.add(new OperationStatus(objectId, 200));
+                sif3BindingService.unbind(objectId);
+            }
+            else
+            {
+                statusList.add(new OperationStatus(objectId, 404,
+                        new ErrorDetails(404, "Job with GUID = " + objectId + " does not exist.")));
+            }
+        }
+        return statusList;
     }
 
     private Response createMany(Provider provider, String payload)
@@ -1300,236 +1129,66 @@ public class ServiceResource extends InfraResource
             }
             else
             {
-                List<CreateOperationStatus> statusList = provider.createMany(
-                        provider.getUnmarshaller().unmarshal(
-                                payload, provider.getMultiObjectClassInfo().getObjectType(),
-                                getRequestMediaType()),
-                        getAdvisory(), getSifZone(), getSifContext(),
+                Object data = provider.getUnmarshaller().unmarshal(payload,
+                        provider.getMultiObjectClassInfo().getObjectType(), getRequestMediaType());
+                List<CreateOperationStatus> statusList = provider.createMany(data, getAdvisory(),
+                        getSifZone(), getSifContext(),
                         getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
 
                 if (statusList != null)
                 {
-                    try
+                    if (getJobBinding())
                     {
-                        if (getJobBinding())
+                        AuthenticationInfo auth = getAuthInfo();
+                        for (CreateOperationStatus status : statusList)
                         {
-                            AuthenticationInfo auth = getAuthInfo();
-                            for (CreateOperationStatus status : statusList)
+                            if (status.getError() != null)
                             {
-                                if (status.getError() != null)
-                                {
-                                    continue;
-                                }
-                                sif3BindingService.bind(status.getResourceID(),
-                                        auth.getUserToken());
+                                continue;
                             }
+                            sif3BindingService.bind(status.getResourceID(), auth.getUserToken());
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        return makeErrorResponse(
-                                new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                                        "Unexpected request failure due to " + e.getMessage()),
-                                ResponseAction.CREATE, responseParam);
                     }
 
                     return makeCreateMultipleResponse(statusList, Status.CREATED, responseParam);
                 }
                 else
                 {
-                    return makeErrorResponse(
-                            new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-                                    "Failed to create "
-                                            + provider.getMultiObjectClassInfo().getObjectName()
-                                            + " (Bulk Operation). Contact your System Administrator."),
-                            ResponseAction.CREATE, responseParam);
+                    throw new PersistenceException(
+                            "Failed to create " + provider.getMultiObjectClassInfo().getObjectName()
+                                    + " (Bulk Operation). Contact your System Administrator.");
                 }
             }
         }
-        catch (PersistenceException ex)
+        catch (SIF3Exception ex)
         {
-            return makeExceptionError(ex, ResponseAction.CREATE, responseParam);
-        }
-        catch (UnmarshalException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.CREATE, responseParam);
-        }
-        catch (UnsupportedMediaTypeException ex)
-        {
-            return makeExceptionError(ex, ResponseAction.CREATE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.CREATE, responseParam);
         }
         catch (Exception ex)
         {
-            return makeUnexpectedError(ex, ResponseAction.CREATE, responseParam);
+            return makeErrorResponse(ex, ResponseAction.CREATE, responseParam);
         }
     }
 
-    private Response checkProvider(Provider p, ResponseParameters responseParam)
+    private FunctionalServiceProvider getFunctionalServiceProvider() throws SIF3Exception
     {
-        if (p == null)
+        Provider candidate = getProvider();
+        if (candidate == null)
         {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
-                            "No provider for " + infraObjectNamePlural + " available."),
-                    ResponseAction.CREATE, responseParam);
+            throw new NotFoundException("No provider for " + infraObjectNamePlural + " available.");
         }
-        if (!(p instanceof BaseFunctionalServiceProvider))
+        if (!(candidate instanceof FunctionalServiceProvider))
         {
-            return makeErrorResponse(
-                    new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),
-                            "A provider for " + infraObjectNamePlural
-                                    + " found but not of an expected type."),
-                    ResponseAction.CREATE, responseParam);
+            throw new NotFoundException(
+                    "No suitable provider for " + infraObjectNamePlural + " available.");
         }
-        return null;
+        return (FunctionalServiceProvider) candidate;
     }
 
     private boolean getJobBinding()
     {
         return getServiceProperties().getPropertyAsBool(CommonConstants.JOB_BINDING_PROPERTY,
                 infraObjectNamePlural, CommonConstants.DEFAULT_JOB_BINDING);
-    }
-
-    private Response makeNoProviderError(ResponseAction action, ResponseParameters responseParam)
-    {
-        int status = Status.SERVICE_UNAVAILABLE.getStatusCode();
-        String msg = "No Provider for " + infraObjectNamePlural + " available.";
-        ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
-
-        logger.debug(msg);
-
-        return makeErrorResponse(error, action, responseParam);
-    }
-
-    private Response makeExceptionError(PersistenceException e, ResponseAction action,
-            ResponseParameters responseParam)
-    {
-        int status = e.getStatus();
-        String msg = "Operation failed due to persistence error in provider "
-                + provider.getMultiObjectClassInfo().getObjectName() + ". Problem reported: "
-                + e.getMessage();
-        ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
-
-        logger.debug(msg, e);
-
-        return makeErrorResponse(error, action, responseParam);
-    }
-
-    private Response makeExceptionError(UnmarshalException e, ResponseAction action,
-            ResponseParameters responseParam)
-    {
-        int status = e.getStatus();
-        String msg = "Could not unmarshal data sent to provider "
-                + provider.getMultiObjectClassInfo().getObjectName() + ". Problem reported: "
-                + e.getMessage();
-        ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
-
-        logger.debug(msg, e);
-
-        return makeErrorResponse(error, action, responseParam);
-    }
-
-    private Response makeExceptionError(UnsupportedMediaTypeException e, ResponseAction action,
-            ResponseParameters responseParam)
-    {
-        int status = e.getStatus();
-        String msg = "Could not unmarshal data sent to provider "
-                + provider.getMultiObjectClassInfo().getObjectName() + ". Problem reported: "
-                + e.getMessage();
-        ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
-
-        logger.debug(msg, e);
-
-        return makeErrorResponse(error, action, responseParam);
-    }
-
-    private Response makeExceptionError(UnsupportedQueryException e, ResponseAction action,
-            ResponseParameters responseParam)
-    {
-        int status = e.getStatus();
-        String msg = "Provider " + provider.getMultiObjectClassInfo().getObjectName()
-                + " does not support this request. Detail: " + e.getMessage();
-        ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
-
-        logger.debug(msg);
-
-        return makeErrorResponse(error, action, responseParam);
-    }
-
-    private Response makeExceptionError(BadRequestException e, ResponseAction action,
-            ResponseParameters responseParam)
-    {
-        int status = e.getStatus();
-        String msg = "Bad request to provider " + provider.getMultiObjectClassInfo().getObjectName()
-                + ". Problem reported: " + e.getMessage();
-        ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
-
-        logger.debug(msg, e);
-
-        return makeErrorResponse(error, action, responseParam);
-    }
-
-    private Response makeExceptionError(ForbiddenException e, ResponseAction action,
-            ResponseParameters responseParam)
-    {
-        int status = e.getStatus();
-        String msg = "Consumer is not authorized to issue the requested operation. Problem reported: "
-                + e.getMessage();
-        ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
-
-        logger.debug(msg, e);
-
-        return makeErrorResponse(error, action, responseParam);
-    }
-
-    private Response makeExceptionError(IllegalArgumentException e, ResponseAction action,
-            ResponseParameters responseParam)
-    {
-        int status = Status.INTERNAL_SERVER_ERROR.getStatusCode();
-        String msg = "Error in the arguments of the request. Problem reported: " + e.getMessage();
-        ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
-
-        logger.debug(msg, e);
-
-        return makeErrorResponse(error, action, responseParam);
-    }
-
-    private Response makeExceptionError(DataTooLargeException e, ResponseAction action,
-            ResponseParameters responseParam)
-    {
-        int status = e.getStatus();
-        String msg = "Data too large. Problem reported: " + e.getMessage();
-        ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
-
-        logger.debug(msg, e);
-
-        return makeErrorResponse(error, action, responseParam);
-    }
-
-    private Response makeExceptionError(NotFoundException e, ResponseAction action,
-            ResponseParameters responseParam)
-    {
-        int status = e.getStatus();
-        String msg = "Count not find requested object. Problem reported: " + e.getMessage();
-        ErrorDetails error = new ErrorDetails(status, msg, "Provider side check.");
-
-        logger.debug(msg);
-
-        return makeErrorResponse(error, action, responseParam);
-    }
-
-    private Response makeUnexpectedError(Exception e, ResponseAction action,
-            ResponseParameters responseParam)
-    {
-        int status = Status.BAD_REQUEST.getStatusCode();
-        String msg = "Unexpected error occurred in provider "
-                + provider.getMultiObjectClassInfo().getObjectName() + ". Problem reported: "
-                + e.getMessage();
-        ErrorDetails error = new ErrorDetails(status, msg);
-
-        logger.debug(msg, e);
-
-        return makeErrorResponse(error, action, responseParam);
     }
 
     private String getOwnerId() throws NotFoundException

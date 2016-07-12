@@ -27,24 +27,30 @@ public class UnsupportedMediaTypeException extends SIF3Exception
         super();
     }
 
-    public UnsupportedMediaTypeException(String msg)
+    public UnsupportedMediaTypeException(String message)
     {
-        super(msg);
+        super(message);
     }
 
-    public UnsupportedMediaTypeException(String msg, Throwable ex)
+    public UnsupportedMediaTypeException(String message, Throwable cause)
     {
-        super(msg, ex);
+        super(message, cause);
     }
 
-    public UnsupportedMediaTypeException(Throwable ex)
+    public UnsupportedMediaTypeException(Throwable cause)
     {
-        super(ex);
+        super(cause);
     }
 
     @Override
     public int getStatus()
     {
         return Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode();
+    }
+    
+    @Override
+    public String getHeadline()
+    {
+        return "Media type not supported";
     }
 }

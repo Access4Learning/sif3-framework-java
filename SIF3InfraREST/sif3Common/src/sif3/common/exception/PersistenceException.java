@@ -27,24 +27,30 @@ public class PersistenceException extends SIF3Exception
         super();
     }
 
-    public PersistenceException(String msg)
+    public PersistenceException(String message)
     {
-        super(msg);
+        super(message);
     }
 
-    public PersistenceException(String msg, Throwable ex)
+    public PersistenceException(String message, Throwable cause)
     {
-        super(msg, ex);
+        super(message, cause);
     }
 
-    public PersistenceException(Throwable ex)
+    public PersistenceException(Throwable cause)
     {
-        super(ex);
+        super(cause);
     }
 
     @Override
     public int getStatus()
     {
         return Status.INTERNAL_SERVER_ERROR.getStatusCode();
+    }
+    
+    @Override
+    public String getHeadline()
+    {
+        return "Error in persisting data.";
     }
 }

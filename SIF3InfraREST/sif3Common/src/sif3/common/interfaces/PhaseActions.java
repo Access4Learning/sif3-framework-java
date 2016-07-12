@@ -16,10 +16,7 @@ package sif3.common.interfaces;
 
 import javax.ws.rs.core.MediaType;
 
-import sif3.common.exception.PersistenceException;
-import sif3.common.exception.UnmarshalException;
-import sif3.common.exception.UnsupportedMediaTypeException;
-import sif3.common.exception.UnsupportedQueryException;
+import sif3.common.exception.SIF3Exception;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.persist.model.SIF3Job;
@@ -51,23 +48,17 @@ public interface PhaseActions
      * @param context
      *            The context the operation has happened in.
      * @return The result of the operation, marshaled to a string as necessary.
-     * @throws IllegalArgumentException
-     *             Implementations should throw this exception if there is a problem with the
-     *             payload beyond an unexpected media type issue.
-     * @throws PersistenceException
-     *             Implementations should throw this exception if there is a problem with any
-     *             persistence operation that may be performed to the payload.
-     * @throws UnsupportedMediaTypeException
-     *             Implementations should throw this exception if there either the request or
-     *             response media type are unsupported.
-     * @throws UnsupportedQueryException
-     *             Implementations should throw this exception if this operation is not supported on
-     *             this phase.
+     * @throws SIF3Exception
+     *             Indicates that an error has occurred in this phase. The calling provider will
+     *             convey an appropriate message back to the consumer using an error code
+     *             appropriate for the exception thrown.
+     * @throws RuntimeException
+     *             Runtime exceptions (e.g. IllegalArgumentException) can also be used to report
+     *             errors, but are conveyed to the consumer in a generic Internal Server Error (500)
+     *             response.
      */
     String create(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
-            MediaType responseMediaType, SIFZone zone, SIFContext context)
-            throws IllegalArgumentException, PersistenceException, UnmarshalException,
-            UnsupportedMediaTypeException, UnsupportedQueryException;
+            MediaType responseMediaType, SIFZone zone, SIFContext context) throws SIF3Exception;
 
     /**
      * Retrieve operation on this phase.
@@ -87,23 +78,17 @@ public interface PhaseActions
      * @param context
      *            The context the operation has happened in.
      * @return The result of the operation, marshaled to a string as necessary.
-     * @throws IllegalArgumentException
-     *             Implementations should throw this exception if there is a problem with the
-     *             payload beyond an unexpected media type issue.
-     * @throws PersistenceException
-     *             Implementations should throw this exception if there is a problem with any
-     *             persistence operation that may be performed to the payload.
-     * @throws UnsupportedMediaTypeException
-     *             Implementations should throw this exception if there either the request or
-     *             response media type are unsupported.
-     * @throws UnsupportedQueryException
-     *             Implementations should throw this exception if this operation is not supported on
-     *             this phase.
+     * @throws SIF3Exception
+     *             Indicates that an error has occurred in this phase. The calling provider will
+     *             convey an appropriate message back to the consumer using an error code
+     *             appropriate for the exception thrown.
+     * @throws RuntimeException
+     *             Runtime exceptions (e.g. IllegalArgumentException) can also be used to report
+     *             errors, but are conveyed to the consumer in a generic Internal Server Error (500)
+     *             response.
      */
     String retrieve(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
-            MediaType responseMediaType, SIFZone zone, SIFContext context)
-            throws IllegalArgumentException, PersistenceException, UnsupportedMediaTypeException,
-            UnsupportedQueryException;
+            MediaType responseMediaType, SIFZone zone, SIFContext context) throws SIF3Exception;
 
     /**
      * Update operation on this phase.
@@ -123,23 +108,18 @@ public interface PhaseActions
      * @param context
      *            The context the operation has happened in.
      * @return The result of the operation, marshaled to a string as necessary.
-     * @throws IllegalArgumentException
-     *             Implementations should throw this exception if there is a problem with the
-     *             payload beyond an unexpected media type issue.
-     * @throws PersistenceException
-     *             Implementations should throw this exception if there is a problem with any
-     *             persistence operation that may be performed to the payload.
-     * @throws UnsupportedMediaTypeException
-     *             Implementations should throw this exception if there either the request or
-     *             response media type are unsupported.
-     * @throws UnsupportedQueryException
-     *             Implementations should throw this exception if this operation is not supported on
-     *             this phase.
+     * @throws SIF3Exception
+     *             Indicates that an error has occurred in this phase. The calling provider will
+     *             convey an appropriate message back to the consumer using an error code
+     *             appropriate for the exception thrown.
+     * @throws RuntimeException
+     *             Runtime exceptions (e.g. IllegalArgumentException) can also be used to report
+     *             errors, but are conveyed to the consumer in a generic Internal Server Error (500)
+     *             response.
      */
     String update(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
-            throws IllegalArgumentException, PersistenceException, UnmarshalException,
-            UnsupportedMediaTypeException, UnsupportedQueryException;
+            throws SIF3Exception;
 
     /**
      * Delete operation on this phase.
@@ -159,21 +139,16 @@ public interface PhaseActions
      * @param context
      *            The context the operation has happened in.
      * @return The result of the operation, marshaled to a string as necessary.
-     * @throws IllegalArgumentException
-     *             Implementations should throw this exception if there is a problem with the
-     *             payload beyond an unexpected media type issue.
-     * @throws PersistenceException
-     *             Implementations should throw this exception if there is a problem with any
-     *             persistence operation that may be performed to the payload.
-     * @throws UnsupportedMediaTypeException
-     *             Implementations should throw this exception if there either the request or
-     *             response media type are unsupported.
-     * @throws UnsupportedQueryException
-     *             Implementations should throw this exception if this operation is not supported on
-     *             this phase.
+     * @throws SIF3Exception
+     *             Indicates that an error has occurred in this phase. The calling provider will
+     *             convey an appropriate message back to the consumer using an error code
+     *             appropriate for the exception thrown.
+     * @throws RuntimeException
+     *             Runtime exceptions (e.g. IllegalArgumentException) can also be used to report
+     *             errors, but are conveyed to the consumer in a generic Internal Server Error (500)
+     *             response.
      */
     String delete(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
             MediaType responseMediaType, SIFZone zone, SIFContext context)
-            throws IllegalArgumentException, PersistenceException, UnmarshalException,
-            UnsupportedMediaTypeException, UnsupportedQueryException;
+            throws SIF3Exception;
 }

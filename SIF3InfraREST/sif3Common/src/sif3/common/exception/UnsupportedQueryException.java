@@ -27,24 +27,30 @@ public class UnsupportedQueryException extends SIF3Exception
         super();
     }
 
-    public UnsupportedQueryException(String msg)
+    public UnsupportedQueryException(String message)
     {
-        super(msg);
+        super(message);
     }
 
-    public UnsupportedQueryException(String msg, Throwable ex)
+    public UnsupportedQueryException(String message, Throwable cause)
     {
-        super(msg, ex);
+        super(message, cause);
     }
 
-    public UnsupportedQueryException(Throwable ex)
+    public UnsupportedQueryException(Throwable cause)
     {
-        super(ex);
+        super(cause);
     }
 
     @Override
     public int getStatus()
     {
         return Status.BAD_REQUEST.getStatusCode();
+    }
+    
+    @Override
+    public String getHeadline()
+    {
+        return "Type of query is not supported.";
     }
 }

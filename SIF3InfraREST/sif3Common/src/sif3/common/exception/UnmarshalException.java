@@ -63,4 +63,10 @@ public class UnmarshalException extends SIF3Exception
     {
         return Status.BAD_REQUEST.getStatusCode();
     }
+    
+    @Override
+    public String getHeadline()
+    {
+        return "Error unmarshalling data";
+    }
 }

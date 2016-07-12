@@ -31,24 +31,30 @@ public class BadRequestException extends SIF3Exception
         super();
     }
 
-    public BadRequestException(String msg)
+    public BadRequestException(String message)
     {
-        super(msg);
+        super(message);
     }
 
-    public BadRequestException(String msg, Throwable ex)
+    public BadRequestException(String message, Throwable cause)
     {
-        super(msg, ex);
+        super(message, cause);
     }
 
-    public BadRequestException(Throwable ex)
+    public BadRequestException(Throwable cause)
     {
-        super(ex);
+        super(cause);
     }
 
     @Override
     public int getStatus()
     {
         return Status.BAD_REQUEST.getStatusCode();
+    }
+    
+    @Override
+    public String getHeadline()
+    {
+        return "Bad request.";
     }
 }
