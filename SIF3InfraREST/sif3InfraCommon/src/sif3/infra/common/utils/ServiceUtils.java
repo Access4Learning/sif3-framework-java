@@ -288,13 +288,13 @@ public class ServiceUtils
                 throw new IllegalArgumentException(msg);
             }
 
-            String names[] = new String[job.getPhases().size()];
+            List<String> names = new ArrayList<String>();
             for (int i = 0; i < job.getPhases().size(); i++)
             {
-                names[i] = job.getPhases().get(i).getName();
+                names.add(job.getPhases().get(i).getName());
             }
             throw new IllegalArgumentException(
-                    msg + " Known phases are: " + String.join(", ", names));
+                    msg + " Known phases are: " + StringUtils.join(names, ", "));
         }
 
         SIF3PhaseState current = null;
