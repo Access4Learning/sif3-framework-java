@@ -60,7 +60,7 @@
 	<classpathentry kind="lib" path="lib/json/jettison-1.3.3.jar"/>
 	<classpathentry kind="lib" path="lib/pjl/pjl-comp-filter-1.8.1.jar"/>
 	<classpathentry kind="lib" path="lib/xml/xom-1.2.8.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
 		<attributes>
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
