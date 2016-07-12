@@ -42,30 +42,43 @@ public class AuthenticationInfo implements Serializable
         BASIC, SIF_HMACSHA256, Bearer;
 
         /**
-         * Gets the text that appears the authorization header property. Usually this is the same as the method name, but can differ, for example the method "BASIC" should appear in the authorization header as "Basic".
+         * Gets the text that appears the authorization header property. Usually this is the same as
+         * the method name, but can differ, for example the method "BASIC" should appear in the
+         * authorization header as "Basic".
+         * 
          * @return See description.
          */
-        public String getAuthTokenString() {
-            if(this.equals(BASIC)) {
+        public String getAuthTokenString()
+        {
+            if (this.equals(BASIC))
+            {
                 return "Basic";
             }
             return this.name();
         }
-        
+
         /**
-         * A case insensitive check if the method provided as a string matches this authentication method.
-         * @param method The string to check. Will be trimmed before compared.
-         * @return True if the argument is the same as the method name, ignoring case. False otherwise.
+         * A case insensitive check if the method provided as a string matches this authentication
+         * method.
+         * 
+         * @param method
+         *            The string to check. Will be trimmed before compared.
+         * @return True if the argument is the same as the method name, ignoring case. False
+         *         otherwise.
          */
-        public boolean isFor(String method) {
+        public boolean isFor(String method)
+        {
             return this.name().equalsIgnoreCase(method.trim());
         }
-        
+
         /**
          * Finds an authentication method in the same way as valueOf, but not case sensitive.
-         * @param method The method to look for as a string. Will be trimmed before compared.
+         * 
+         * @param method
+         *            The method to look for as a string. Will be trimmed before compared.
          * @return The AuthenticationMethod that matched the name (case insensitive).
-         * @throws IllegalArgumentException When the method string does not identify any supported AuthenticaionMethod.
+         * @throws IllegalArgumentException
+         *             When the method string does not identify any supported AuthenticaionMethod.
          */
         public static AuthenticationMethod lookup(String method)
         {
@@ -76,7 +89,8 @@ public class AuthenticationInfo implements Serializable
                     return m;
                 }
             }
-            throw new IllegalArgumentException("Could not find the requested authentication method " + method);
+            throw new IllegalArgumentException(
+                    "Could not find the requested authentication method " + method);
         }
     };
 
