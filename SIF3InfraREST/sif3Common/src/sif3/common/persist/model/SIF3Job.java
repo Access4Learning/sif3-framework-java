@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.apache.log4j.Logger;
-
 import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants.JobState;
 import sif3.common.CommonConstants.PhaseState;
@@ -35,7 +33,6 @@ import sif3.common.CommonConstants.PhaseState;
  */
 public class SIF3Job implements Serializable
 {
-    protected final Logger         logger           = Logger.getLogger(getClass());
     private static final long      serialVersionUID = 6414285847037508670L;
     private long                   jobID;
     private String                 id;
