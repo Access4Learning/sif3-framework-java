@@ -124,6 +124,14 @@ Please refer to the release notes in the directory "release/v0.9.0" for addition
 - Added new parameter called customResponseParams to ALL provider side interface methods. *THIS WILL BREAK YOUR CODE.*
 - There is a very easy change to your code to fix the compile errors. See Relaese_Notes_v0.10.0.txt in the release/v0.10.0
   directory.
+- Implemented function service providers
+- Implemented function service consumers
+- Implemented binding of SIF objects (e.g. jobs) to a specific consumer (curruntly only supported in functional services)
+- Implemented support for multiple enviroment templates
+- Generated SIF UK 2.0 data model and incorporated into UK demo
+- Generated SIF 3.2 Infrastructure model and incorporated in UK/US/AU demos
+- Added scripts to lauch projects from the command line
+- Added scripts to build projects from the command line
 
 Please refer to the release notes in the directory "release/v0.10.0" for additional details and upgrade instructions.
 
