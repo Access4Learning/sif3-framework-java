@@ -71,7 +71,7 @@ import sif3.infra.common.utils.ServiceUtils;
  * Base implementation of A functional service. This should be extended to define what phases a job
  * has and other details about what the Job should know/be able to do/etc.
  */
-public abstract class AbstractFunctionalServiceProvider extends BaseProvider
+public abstract class BaseFunctionalServiceProvider extends BaseProvider
         implements FunctionalServiceProvider
 {
 
@@ -95,7 +95,7 @@ public abstract class AbstractFunctionalServiceProvider extends BaseProvider
      * @param serviceName
      *            The (plural) name of this functional service.
      */
-    public AbstractFunctionalServiceProvider(String serviceName)
+    public BaseFunctionalServiceProvider(String serviceName)
     {
         super();
 

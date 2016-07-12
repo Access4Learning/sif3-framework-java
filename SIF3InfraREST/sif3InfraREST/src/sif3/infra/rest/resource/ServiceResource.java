@@ -69,7 +69,7 @@ import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.common.model.JobCollectionType;
 import sif3.infra.common.model.JobType;
 import sif3.infra.common.model.StateType;
-import sif3.infra.rest.provider.AbstractFunctionalServiceProvider;
+import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
 import sif3.infra.rest.provider.ProviderFactory;
 
 /**
@@ -706,7 +706,7 @@ public class ServiceResource extends InfraResource
         {
             return errResponse;
         }
-        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) p;
+        BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) p;
 
         // Ignore the marshaller/unmarshaller - just reflect the contentType and
         // accept header information
@@ -781,7 +781,7 @@ public class ServiceResource extends InfraResource
         {
             return errResponse;
         }
-        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) p;
+        BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) p;
 
         // Ignore the marshaller/unmarshaller - just reflect the contentType and
         // accept header information
@@ -854,7 +854,7 @@ public class ServiceResource extends InfraResource
         {
             return errResponse;
         }
-        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) p;
+        BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) p;
 
         // Ignore the marshaller/unmarshaller - just reflect the contentType and
         // accept header information
@@ -921,7 +921,7 @@ public class ServiceResource extends InfraResource
         {
             return errResponse;
         }
-        AbstractFunctionalServiceProvider provider = (AbstractFunctionalServiceProvider) p;
+        BaseFunctionalServiceProvider provider = (BaseFunctionalServiceProvider) p;
 
         try
         {
@@ -1370,7 +1370,7 @@ public class ServiceResource extends InfraResource
                             "No provider for " + infraObjectNamePlural + " available."),
                     ResponseAction.CREATE, responseParam);
         }
-        if (!(p instanceof AbstractFunctionalServiceProvider))
+        if (!(p instanceof BaseFunctionalServiceProvider))
         {
             return makeErrorResponse(
                     new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(),

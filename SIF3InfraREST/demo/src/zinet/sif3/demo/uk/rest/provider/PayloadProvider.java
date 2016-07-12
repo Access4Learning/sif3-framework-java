@@ -18,13 +18,13 @@ import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.model.ServiceRights;
 import sif3.common.persist.model.SIF3Job;
 import sif3.infra.common.utils.ServiceUtils;
-import sif3.infra.rest.provider.AbstractFunctionalServiceProvider;
+import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
 import zinet.sif3.demo.uk.rest.PayloadConstants;
 import zinet.sif3.demo.uk.rest.provider.actions.DefaultActions;
 import zinet.sif3.demo.uk.rest.provider.actions.JsonActions;
 import zinet.sif3.demo.uk.rest.provider.actions.XmlActions;
 
-public class PayloadProvider extends AbstractFunctionalServiceProvider
+public class PayloadProvider extends BaseFunctionalServiceProvider
 {
     public PayloadProvider()
     {

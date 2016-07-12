@@ -49,7 +49,7 @@ import sif3.infra.common.model.RightsType;
 import sif3.infra.common.model.StateType;
 
 /**
- * Utility methods for functional service related activities.
+ * Utility methods for functional service related activities. 
  */
 public class ServiceUtils
 {
