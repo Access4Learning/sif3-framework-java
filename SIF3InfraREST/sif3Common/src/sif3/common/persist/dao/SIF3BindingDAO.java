@@ -28,6 +28,12 @@ import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.persist.common.BasicTransaction;
 import sif3.common.persist.model.SIF3ObjectBinding;
 
+/**
+ * DAO class for SIF bindings, which bind a SIF object (e.g. a job) to a particular consumer.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class SIF3BindingDAO extends BaseDAO
 {
 
@@ -74,8 +80,7 @@ public class SIF3BindingDAO extends BaseDAO
     }
 
     @SuppressWarnings("unchecked")
-    private List<SIF3ObjectBinding> getObjectByOwnerId(BasicTransaction tx,
-            String ownerId)
+    private List<SIF3ObjectBinding> getObjectByOwnerId(BasicTransaction tx, String ownerId)
     {
         if (StringUtils.isEmpty(ownerId))
         {
@@ -108,7 +113,7 @@ public class SIF3BindingDAO extends BaseDAO
                     "Unable to retrieve SIF3 binding for ID = '" + objectId + "'.", e);
         }
     }
-    
+
     public List<SIF3ObjectBinding> getBindingsByOwnerId(BasicTransaction tx, String ownerId)
             throws IllegalArgumentException, PersistenceException
     {
@@ -162,19 +167,20 @@ public class SIF3BindingDAO extends BaseDAO
         }
         catch (HibernateException e)
         {
-            throw new PersistenceException("Failed to delete binding with objectId '" + id + "'.", e);
+            throw new PersistenceException("Failed to delete binding with objectId '" + id + "'.",
+                    e);
         }
     }
 
-    public void removeByOwnerId(BasicTransaction tx, String ownerId)
-            throws PersistenceException
+    public void removeByOwnerId(BasicTransaction tx, String ownerId) throws PersistenceException
     {
         try
         {
             List<SIF3ObjectBinding> bindings = getObjectByOwnerId(tx, ownerId);
             if (bindings != null)
             {
-                for(SIF3ObjectBinding binding : bindings) {
+                for (SIF3ObjectBinding binding : bindings)
+                {
                     tx.getSession().delete(ownerId, binding);
                 }
             }

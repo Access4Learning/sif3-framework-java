@@ -81,6 +81,9 @@ import sif3.infra.rest.provider.ProviderFactory;
  * 
  * It must be ensured that in all the environments managed with this framework that the "service"
  * connector URI follows this structure.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
  */
 @Path("/services/{infraObjectNamePlural:([^\\./]*)}{mimeType:(\\.[^/]*?)?}")
 public class ServiceResource extends InfraResource

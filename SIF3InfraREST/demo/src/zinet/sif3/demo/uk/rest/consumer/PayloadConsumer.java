@@ -44,6 +44,12 @@ import sif3.infra.common.utils.ServiceUtils;
 import sif3.infra.rest.consumer.AbstractFunctionalServiceConsumer;
 import zinet.sif3.demo.uk.rest.PayloadConstants;
 
+/**
+ * SIF Functional Service (Payload) consumer demo
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class PayloadConsumer extends AbstractFunctionalServiceConsumer
 {
 
@@ -262,8 +268,8 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                         jobs.add(j);
                     }
 
-                    List<BulkOperationResponse<CreateOperationStatus>> creates = createMany(
-                            jobs, null, null);
+                    List<BulkOperationResponse<CreateOperationStatus>> creates = createMany(jobs,
+                            null, null);
 
                     logger.info("Processing multiple job creation:");
                     List<String> ids = new ArrayList<String>();

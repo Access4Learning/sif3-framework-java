@@ -25,8 +25,10 @@ import sif3.common.CommonConstants.PhaseState;
 import sif3.common.model.ServiceRights;
 
 /**
- * The following Phase elements/properties are mandatory according to the SIF specification:
- * /phase/name /phase/state /phase/required /phase/rights
+ * A SIF phase object, representing the current state of a phase in a functional service.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
  */
 public class SIF3Phase implements Serializable
 {
@@ -146,7 +148,7 @@ public class SIF3Phase implements Serializable
     {
         return getStates() == null ? null : getStates().get(getStates().size() - 1);
     }
-    
+
     public long getId()
     {
         return id;

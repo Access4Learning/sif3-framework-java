@@ -28,6 +28,12 @@ import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.persist.common.BasicTransaction;
 import sif3.common.persist.model.SIF3Job;
 
+/**
+ * DAO class for SIF Jobs, the object that represents the state of a functional service.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class SIF3JobDAO extends BaseDAO
 {
 

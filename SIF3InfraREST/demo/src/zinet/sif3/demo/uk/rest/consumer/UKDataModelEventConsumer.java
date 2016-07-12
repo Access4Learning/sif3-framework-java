@@ -43,6 +43,12 @@ import sif3.common.ws.OperationStatus;
 import sif3.common.ws.model.MultiOperationStatusList;
 import sif3.infra.rest.consumer.AbstractEventConsumer;
 
+/**
+ * A UK SIF data model event consumer, an almost direct copy of the AU version by Joerg Huber.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public abstract class UKDataModelEventConsumer<L> extends AbstractEventConsumer<L>
 {
 

@@ -18,6 +18,10 @@ import sif.dd.uk20.model.LearnerPersonalCollectionType;
 import sif.dd.uk20.model.LearnerPersonalType;
 import sif3.common.conversion.ModelObjectInfo;
 
+/**
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class ModelObjectConstants
 {
 

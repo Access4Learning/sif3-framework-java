@@ -32,6 +32,10 @@ import sif3.common.model.SIFZone;
 import sif3.common.utils.JAXBUtils;
 import sif3.infra.rest.provider.BaseEventProvider;
 
+/**
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public abstract class UKDataModelProviderWithEvents<L> extends BaseEventProvider<L>
 {
 

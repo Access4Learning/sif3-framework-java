@@ -16,6 +16,12 @@ package sif3.common.exception;
 
 import javax.ws.rs.core.Response.Status;
 
+/**
+ * Exception class for when data could not be found.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class NotFoundException extends SIF3Exception
 {
     private static final long serialVersionUID = 1409571837341328926L;

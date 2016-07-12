@@ -29,6 +29,9 @@ import sif3.common.persist.model.SIF3Phase;
  * A simple implementation of the {@link sif3.common.interfaces.PhaseActions IPhaseActions}
  * interface that throws appropriate not implemented type errors for each method. Allows an
  * implementation to only implement the methods it needs.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
  */
 public class BasePhaseActions implements PhaseActions
 {
@@ -47,7 +50,10 @@ public class BasePhaseActions implements PhaseActions
 
     /*
      * (non-Javadoc)
-     * @see sif3.infra.common.interfaces.PhaseActions#create(sif3.common.persist.model.SIF3Job, sif3.common.persist.model.SIF3Phase, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
+     * 
+     * @see sif3.infra.common.interfaces.PhaseActions#create(sif3.common.persist.model.SIF3Job,
+     * sif3.common.persist.model.SIF3Phase, java.lang.String, javax.ws.rs.core.MediaType,
+     * javax.ws.rs.core.MediaType, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
     public String create(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
@@ -60,7 +66,10 @@ public class BasePhaseActions implements PhaseActions
 
     /*
      * (non-Javadoc)
-     * @see sif3.infra.common.interfaces.PhaseActions#retrieve(sif3.common.persist.model.SIF3Job, sif3.common.persist.model.SIF3Phase, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
+     * 
+     * @see sif3.infra.common.interfaces.PhaseActions#retrieve(sif3.common.persist.model.SIF3Job,
+     * sif3.common.persist.model.SIF3Phase, java.lang.String, javax.ws.rs.core.MediaType,
+     * javax.ws.rs.core.MediaType, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
     public String retrieve(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
@@ -73,7 +82,10 @@ public class BasePhaseActions implements PhaseActions
 
     /*
      * (non-Javadoc)
-     * @see sif3.infra.common.interfaces.PhaseActions#update(sif3.common.persist.model.SIF3Job, sif3.common.persist.model.SIF3Phase, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
+     * 
+     * @see sif3.infra.common.interfaces.PhaseActions#update(sif3.common.persist.model.SIF3Job,
+     * sif3.common.persist.model.SIF3Phase, java.lang.String, javax.ws.rs.core.MediaType,
+     * javax.ws.rs.core.MediaType, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
     public String update(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
@@ -86,7 +98,10 @@ public class BasePhaseActions implements PhaseActions
 
     /*
      * (non-Javadoc)
-     * @see sif3.infra.common.interfaces.PhaseActions#delete(sif3.common.persist.model.SIF3Job, sif3.common.persist.model.SIF3Phase, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
+     * 
+     * @see sif3.infra.common.interfaces.PhaseActions#delete(sif3.common.persist.model.SIF3Job,
+     * sif3.common.persist.model.SIF3Phase, java.lang.String, javax.ws.rs.core.MediaType,
+     * javax.ws.rs.core.MediaType, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
     public String delete(SIF3Job job, SIF3Phase phase, String payload, MediaType requestMediaType,
@@ -98,7 +113,8 @@ public class BasePhaseActions implements PhaseActions
     }
 
     /**
-     * Gets the provider this action is working for so that, for example, it can be used to send events.
+     * Gets the provider this action is working for so that, for example, it can be used to send
+     * events.
      * 
      * @return the Provider for this action.
      */

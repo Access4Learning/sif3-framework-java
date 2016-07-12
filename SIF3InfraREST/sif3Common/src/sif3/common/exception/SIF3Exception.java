@@ -16,6 +16,12 @@ package sif3.common.exception;
 
 import javax.ws.rs.core.Response.Status;
 
+/**
+ * The root exception for all SIF3 exceptions.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class SIF3Exception extends Exception
 {
 

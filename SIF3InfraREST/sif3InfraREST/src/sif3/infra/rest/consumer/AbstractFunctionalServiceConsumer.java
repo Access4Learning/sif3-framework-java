@@ -56,6 +56,13 @@ import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.common.utils.ServiceUtils;
 import sif3.infra.rest.client.FunctionalServiceClient;
 
+/**
+ * The abstract functional service consumer. Developers wishing to build a consumer for their own
+ * functional service should extend this class.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public abstract class AbstractFunctionalServiceConsumer extends AbstractConsumer
         implements FunctionalServiceConsumer
 {

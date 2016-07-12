@@ -16,9 +16,15 @@ package sif3.common.exception;
 
 import javax.ws.rs.core.Response.Status;
 
+/**
+ * Exception class for generic bad requests
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class BadRequestException extends SIF3Exception
 {
-    private static final long serialVersionUID = 807165545454L;
+    private static final long serialVersionUID = -1486796509065132216L;
 
     public BadRequestException()
     {

@@ -28,7 +28,10 @@ import sif3.common.model.audit.AuditRecord;
  * This is a demo implementation of an Audit Class. This particular implementation simply logs all
  * the audit entries in a particular audit file through the log4j configuration.
  * 
- * @author Ben Carter & Joerg Huber
+ * Created from a copy of the AU version by Ben Carter & Joerg Huber.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
  *
  */
 public class LogAuditor implements Auditor

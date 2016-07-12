@@ -24,6 +24,10 @@ import zinet.sif3.demo.uk.rest.provider.actions.DefaultActions;
 import zinet.sif3.demo.uk.rest.provider.actions.JsonActions;
 import zinet.sif3.demo.uk.rest.provider.actions.XmlActions;
 
+/**
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class PayloadProvider extends BaseFunctionalServiceProvider
 {
     public PayloadProvider()
@@ -38,14 +42,11 @@ public class PayloadProvider extends BaseFunctionalServiceProvider
     @Override
     protected void configure(SIF3Job job)
     {
-        ServiceUtils.addPhase(job, "default", true,
-                new ServiceRights().create().query().update(),
+        ServiceUtils.addPhase(job, "default", true, new ServiceRights().create().query().update(),
                 new ServiceRights().create());
-        ServiceUtils.addPhase(job, "xml", true,
-                new ServiceRights().create().query().update(),
+        ServiceUtils.addPhase(job, "xml", true, new ServiceRights().create().query().update(),
                 new ServiceRights().create());
-        ServiceUtils.addPhase(job, "json", true,
-                new ServiceRights().create().query().update(),
+        ServiceUtils.addPhase(job, "json", true, new ServiceRights().create().query().update(),
                 new ServiceRights().create());
 
         job.setTimeout(30000);

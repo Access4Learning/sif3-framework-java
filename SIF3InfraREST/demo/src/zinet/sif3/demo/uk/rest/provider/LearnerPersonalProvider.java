@@ -53,6 +53,10 @@ import sif3.common.ws.OperationStatus;
 import zinet.sif3.demo.uk.rest.ModelObjectConstants;
 import zinet.sif3.demo.uk.rest.provider.iterators.LearnerPersonalIterator;
 
+/**
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class LearnerPersonalProvider
         extends UKDataModelProviderWithEvents<LearnerPersonalCollectionType>
         implements QueryProvider, ChangesSinceProvider

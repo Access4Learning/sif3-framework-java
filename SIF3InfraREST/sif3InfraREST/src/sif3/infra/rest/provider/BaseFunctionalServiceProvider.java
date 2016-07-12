@@ -68,8 +68,12 @@ import sif3.infra.common.model.StateType;
 import sif3.infra.common.utils.ServiceUtils;
 
 /**
- * Base implementation of A functional service. This should be extended to define what phases a job
- * has and other details about what the Job should know/be able to do/etc.
+ * Base implementation of a functional service provider. This should be extended to define what
+ * phases a job has and other details about what the Job should know/be able to do/etc. using the
+ * configure method. See the UK demo for example usage.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
  */
 public abstract class BaseFunctionalServiceProvider extends BaseProvider
         implements FunctionalServiceProvider

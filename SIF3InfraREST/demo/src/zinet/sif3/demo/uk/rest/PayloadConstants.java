@@ -18,6 +18,10 @@ import sif3.common.conversion.ModelObjectInfo;
 import sif3.infra.common.model.JobCollectionType;
 import sif3.infra.common.model.JobType;
 
+/**
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class PayloadConstants
 {
 

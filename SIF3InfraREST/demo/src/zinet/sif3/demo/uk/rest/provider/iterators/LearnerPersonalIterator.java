@@ -26,6 +26,10 @@ import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.SIFEvent;
 
+/**
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class LearnerPersonalIterator implements SIFEventIterator<LearnerPersonalCollectionType>
 {
 

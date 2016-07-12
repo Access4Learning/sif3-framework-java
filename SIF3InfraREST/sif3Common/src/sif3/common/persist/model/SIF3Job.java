@@ -28,8 +28,12 @@ import sif3.common.CommonConstants.JobState;
 import sif3.common.CommonConstants.PhaseState;
 
 /**
- * The following Job elements/properties are mandatory according to the SIF specification: /job[@id]
- * /job/name
+ * A SIF3 job object representing the state of a functional service.
+ * 
+ * Must at least have a name defined.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
  */
 public class SIF3Job implements Serializable
 {

@@ -23,6 +23,9 @@ import sif3.infra.rest.consumer.ConsumerLoader;
  * 
  * The intend of this class is to illustrate how a stand-alone consumer service could be implemented
  * and started.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
  */
 public class ConsumerService
 {

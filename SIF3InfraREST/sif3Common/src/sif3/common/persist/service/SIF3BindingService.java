@@ -22,6 +22,13 @@ import sif3.common.persist.dao.BaseDAO;
 import sif3.common.persist.dao.SIF3BindingDAO;
 import sif3.common.persist.model.SIF3ObjectBinding;
 
+/**
+ * Service through which SIF3 bindings (e.g. that bind a SIF3 object, like a job, to a particular
+ * consumer) can be interrogated.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class SIF3BindingService extends DBService
 {
 
@@ -88,10 +95,8 @@ public class SIF3BindingService extends DBService
         catch (Exception ex)
         {
             rollback(tx);
-            exceptionMapper(ex,
-                    "Failed to save binding for object '" + binding.getObjectId()
-                            + "' against ownerId '" + binding.getOwnerId() + "'",
-                    true, false);
+            exceptionMapper(ex, "Failed to save binding for object '" + binding.getObjectId()
+                    + "' against ownerId '" + binding.getOwnerId() + "'", true, false);
             return null;
         }
     }
@@ -127,8 +132,7 @@ public class SIF3BindingService extends DBService
         catch (Exception ex)
         {
             rollback(tx);
-            exceptionMapper(ex,
-                    "Failed to remove bindings for ownerId '" + ownerId + "'.", true,
+            exceptionMapper(ex, "Failed to remove bindings for ownerId '" + ownerId + "'.", true,
                     true);
         }
     }
@@ -146,18 +150,20 @@ public class SIF3BindingService extends DBService
     {
         removeBindingByObjectId(objectId);
     }
-    
+
     public boolean isBound(String objectId) throws IllegalArgumentException, PersistenceException
     {
         return getBindingByObjectId(objectId) != null;
     }
-    
-    public boolean isBound(String objectId, String sessionToken) throws IllegalArgumentException, PersistenceException
+
+    public boolean isBound(String objectId, String sessionToken)
+            throws IllegalArgumentException, PersistenceException
     {
         SIF3ObjectBinding binding = getBindingByObjectId(objectId);
-        if(binding == null) {
+        if (binding == null)
+        {
             return false;
         }
-        return  binding.getOwnerId().equals(sessionToken);
+        return binding.getOwnerId().equals(sessionToken);
     }
 }

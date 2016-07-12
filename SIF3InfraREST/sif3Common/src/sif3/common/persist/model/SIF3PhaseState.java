@@ -20,6 +20,13 @@ import java.util.TimeZone;
 
 import sif3.common.CommonConstants.PhaseState;
 
+/**
+ * A state object within a phase of a functional service, used to represent changes in state over
+ * time.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class SIF3PhaseState implements Serializable
 {
     private static final long serialVersionUID = -1570304821696181148L;

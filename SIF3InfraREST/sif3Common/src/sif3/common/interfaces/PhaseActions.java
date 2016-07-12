@@ -27,6 +27,9 @@ import sif3.common.persist.model.SIF3Phase;
 
 /**
  * Interface for all actions that a phase may be allowed to execute.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
  */
 public interface PhaseActions
 {

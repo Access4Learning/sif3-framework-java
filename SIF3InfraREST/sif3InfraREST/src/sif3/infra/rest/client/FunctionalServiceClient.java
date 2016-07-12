@@ -39,6 +39,12 @@ import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.StateType;
 import sif3.infra.common.utils.ServiceUtils;
 
+/**
+ * The client class designed to interact with functional services.
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class FunctionalServiceClient extends ObjectServiceClient
 {
     /**
@@ -477,7 +483,8 @@ public class FunctionalServiceClient extends ObjectServiceClient
             service = buildURI(service, relURI, resourceID, phaseName, MethodType.POST, zone,
                     context, urlQueryParams);
 
-            String payload = getDataModelMarshaller().marshal(ServiceUtils.marshal(state), getRequestMediaType());
+            String payload = getDataModelMarshaller().marshal(ServiceUtils.marshal(state),
+                    getRequestMediaType());
 
             if (logger.isDebugEnabled())
             {

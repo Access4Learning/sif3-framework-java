@@ -16,6 +16,12 @@ package sif3.common.exception;
 
 import javax.ws.rs.core.Response.Status;
 
+/**
+ * Exception class for issues invoking a service
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class ServiceInvokationException extends SIF3Exception
 {
     private static final long serialVersionUID = -7309084634964371L;

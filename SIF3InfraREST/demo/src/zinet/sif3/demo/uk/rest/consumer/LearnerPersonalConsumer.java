@@ -30,6 +30,12 @@ import sif3.common.model.SIFEvent;
 import sif3.common.ws.Response;
 import zinet.sif3.demo.uk.rest.ModelObjectConstants;
 
+/**
+ * SIF Learner Personal data object consumer
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class LearnerPersonalConsumer extends UKDataModelEventConsumer<LearnerPersonalCollectionType>
 {
     public LearnerPersonalConsumer()

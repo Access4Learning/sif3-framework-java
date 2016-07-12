@@ -32,6 +32,12 @@ import sif3.common.persist.model.SIF3Job;
 import sif3.common.persist.model.SIF3Phase;
 import sif3.infra.common.utils.ServiceUtils;
 
+/**
+ * The actions for the phase "json"
+ * 
+ * @author Dr Jon Nicholson (ZiNET Data Solutions Limited) on behalf of the Department for Education
+ *         (UK)
+ */
 public class JsonActions extends BasePhaseActions
 {
     public JsonActions(FunctionalServiceProvider provider)
