@@ -26,6 +26,8 @@ import java.util.TimeZone;
 import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants.JobState;
 import sif3.common.CommonConstants.PhaseState;
+import sif3.common.model.ServiceRights;
+import sif3.common.utils.DateUtils;
 
 /**
  * A SIF3 job object representing the state of a functional service.
@@ -223,7 +225,146 @@ public class SIF3Job implements Serializable
         this.phases = new HashMap<String, SIF3Phase>();
         for (SIF3Phase phase : phases)
         {
-            this.phases.put(phase.getName(), phase);
+            addPhase(phase);
         }
+    }
+
+    /**
+     * Adds a phase to a job instance
+     * 
+     * @param phaseName
+     *            The name of the phase to add
+     * @param required
+     *            Whether the phase is required or not
+     * @param rights
+     *            The access rights for CRUD operations on the phase
+     * @param statesRights
+     *            The access rights for CRUD operations on the states of the phase
+     * @return The phase instance that has been added to the job
+     */
+    public SIF3Phase addPhase(String phaseName, boolean required, ServiceRights rights,
+            ServiceRights statesRights)
+    {
+        return addPhase(phaseName, required, rights, statesRights, PhaseState.NOTSTARTED, null);
+    }
+
+    /**
+     * Adds a phase to a job instance
+     * 
+     * @param phaseName
+     *            The name of the phase to add
+     * @param required
+     *            Whether the phase is required or not
+     * @param rights
+     *            The access rights for CRUD operations on the phase
+     * @param statesRights
+     *            The access rights for CRUD operations on the states of the phase
+     * @param state
+     *            The initial state of the phase
+     * @return The phase instance that has been added to the job
+     */
+    public SIF3Phase addPhase(String phaseName, boolean required, ServiceRights rights,
+            ServiceRights statesRights, PhaseState state)
+    {
+        return addPhase(phaseName, required, rights, statesRights, state, null);
+    }
+
+    /**
+     * Adds a phase to a job instance
+     * 
+     * @param phaseName
+     *            The name of the phase to add
+     * @param required
+     *            Whether the phase is required or not
+     * @param rights
+     *            The access rights for CRUD operations on the phase
+     * @param statesRights
+     *            The access rights for CRUD operations on the states of the phase
+     * @param state
+     *            The initial state of the phase
+     * @param stateDescription
+     *            The description of the phase
+     * @return The phase instance that has been added to the job
+     */
+    public SIF3Phase addPhase(String phaseName, boolean required, ServiceRights rights,
+            ServiceRights statesRights, PhaseState state, String stateDescription)
+    {
+        if (getPhases() == null)
+        {
+            setPhases(new ArrayList<SIF3Phase>());
+        }
+
+        SIF3Phase phase = new SIF3Phase();
+        phase.setName(phaseName);
+        phase.setRequired(required);
+        phase.setStates(new ArrayList<SIF3PhaseState>());
+        phase.setRights(rights);
+        phase.setStatesRights(statesRights);
+        phase.updatePhaseState(state, stateDescription);
+
+        addPhase(phase);
+
+        return phase;
+    }
+
+    /**
+     * Get the named phase from the job instance.
+     * 
+     * @param phaseName
+     *            The name of the phase
+     * @return The named phase from the job object
+     * @throws IllegalArgumentException
+     *             if the phase cannot be found
+     */
+    public SIF3Phase getPhase(String phaseName)
+    {
+        if (StringUtils.isEmpty(phaseName))
+        {
+            throw new IllegalArgumentException(
+                    "Cannot get empty phase from job (" + getId() + ").");
+        }
+
+        if (getPhases() == null)
+        {
+            setPhases(new ArrayList<SIF3Phase>());
+        }
+
+        if (phases.containsKey(phaseName))
+        {
+            return phases.get(phaseName);
+        }
+
+        List<String> names = new ArrayList<String>(phases.keySet());
+        throw new IllegalArgumentException("Could not find phase " + phaseName + " in " + getName()
+                + " job (" + getId() + "). Known phases are: " + StringUtils.join(names, ", "));
+    }
+
+    /**
+     * Gets the last state object from the named phase on the given job
+     * 
+     * @param phaseName
+     *            The target phase name
+     * @return The last state object for the named phase, or null if there isn't one.
+     * @throws IllegalArgumentException
+     *             if the phase cannot be found or other problem is encountered
+     */
+    public SIF3PhaseState getLastPhaseState(String phaseName)
+    {
+        return this.getPhase(phaseName).getLastPhaseState();
+    }
+
+    /**
+     * Change the state of a given job, updating the last modified value etc.
+     * 
+     * @param state
+     *            The new status of the job
+     * @param description
+     *            The description of the state change
+     */
+    public void updateJobState(JobState state, String description)
+    {
+        setLastModified(DateUtils.now());
+        setStateDescription(description);
+        setState(JobState.valueOf(state.name()));
     }
 }

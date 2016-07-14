@@ -40,7 +40,6 @@ import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.common.ws.Response;
 import sif3.common.ws.model.MultiOperationStatusList;
-import sif3.infra.common.utils.ServiceUtils;
 import sif3.infra.rest.consumer.AbstractFunctionalServiceConsumer;
 import zinet.sif3.demo.uk.rest.PayloadConstants;
 
@@ -102,7 +101,7 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     responses = retrieveByPrimaryKey(job.getId(), null);
                     r = responses.isEmpty() ? null : responses.get(0);
                     job = (SIF3Job) getDataObject(r);
-                    state = ServiceUtils.getLastPhaseState(job, "default");
+                    state = job.getLastPhaseState("default");
                     if (state == null)
                     {
                         logger.info(makeResult("Got UNEXPECTED result, no state object!"));
@@ -135,7 +134,7 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     responses = retrieveByPrimaryKey(job.getId(), null);
                     r = responses.isEmpty() ? null : responses.get(0);
                     job = (SIF3Job) getDataObject(r);
-                    state = ServiceUtils.getLastPhaseState(job, "default");
+                    state = job.getLastPhaseState("default");
                     if (state == null)
                     {
                         logger.info(makeResult("Got UNEXPECTED result, no state object!"));
@@ -219,7 +218,7 @@ public class PayloadConsumer extends AbstractFunctionalServiceConsumer
                     responses = retrieveByPrimaryKey(job.getId(), null);
                     r = responses.isEmpty() ? null : responses.get(0);
                     job = (SIF3Job) getDataObject(r);
-                    state = ServiceUtils.getLastPhaseState(job, "json");
+                    state = job.getLastPhaseState("json");
                     if (state == null)
                     {
                         logger.info(makeResult("Got UNEXPECTED result, no state object!"));

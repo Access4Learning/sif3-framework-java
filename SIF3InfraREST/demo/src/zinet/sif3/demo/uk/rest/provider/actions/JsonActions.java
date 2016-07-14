@@ -30,7 +30,6 @@ import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.persist.model.SIF3Job;
 import sif3.common.persist.model.SIF3Phase;
-import sif3.infra.common.utils.ServiceUtils;
 
 /**
  * The actions for the phase "json"
@@ -51,15 +50,14 @@ public class JsonActions extends BasePhaseActions
             throws IllegalArgumentException, PersistenceException, UnmarshalException,
             UnsupportedMediaTypeException, UnsupportedQueryException
     {
-        ServiceUtils.changeJobState(job, CommonConstants.JobState.INPROGRESS,
-                "UPDATE to " + phase.getName());
+        job.updateJobState(CommonConstants.JobState.INPROGRESS, "UPDATE to " + phase.getName());
 
         String response;
         if (!requestMediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE))
         {
             response = "Invalid Content-Type, expecting "
                     + MediaType.APPLICATION_JSON_TYPE.toString();
-            ServiceUtils.changePhaseState(job, phase, CommonConstants.PhaseState.FAILED, response);
+            phase.updatePhaseState(CommonConstants.PhaseState.FAILED, response);
             throw new IllegalArgumentException(response);
         }
 
@@ -67,7 +65,7 @@ public class JsonActions extends BasePhaseActions
                 .unmarshalFromJSON(payload, LearnerPersonalType.class);
 
         NameType name = learner.getPersonalInformation().getName();
-        ServiceUtils.changePhaseState(job, phase, CommonConstants.PhaseState.COMPLETED, "UPDATE");
+        phase.updatePhaseState(CommonConstants.PhaseState.COMPLETED, "UPDATE");
 
         return "Got UPDATE message for " + phase.getName() + "@" + job.getId()
                 + " with content type " + requestMediaType.toString() + " and accept "

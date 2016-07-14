@@ -582,14 +582,14 @@ public abstract class BaseFunctionalServiceProvider extends BaseProvider
             throw new BadRequestException("No job found with refid " + resourceID);
         }
 
-        SIF3Phase phase = ServiceUtils.getPhase(job, phaseName);
+        SIF3Phase phase = job.getPhase(phaseName);
         if (phase == null)
         {
             throw new BadRequestException(
                     "No phase with name " + phaseName + " found for job with refid " + resourceID);
         }
 
-        if (!ServiceUtils.checkPhaseACL(phase, AccessRight.CREATE, AccessType.APPROVED))
+        if (!phase.checkPhaseACL(AccessRight.CREATE, AccessType.APPROVED))
         {
             throw new ForbiddenException();
         }
@@ -634,7 +634,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseProvider
             throw new BadRequestException("No job found with refid " + resourceID);
         }
 
-        SIF3Phase phase = ServiceUtils.getPhase(job, phaseName);
+        SIF3Phase phase = job.getPhase(phaseName);
 
         if (phase == null)
         {
@@ -642,7 +642,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseProvider
                     "No phase with name " + phaseName + " found for job with refid " + resourceID);
         }
 
-        if (!ServiceUtils.checkPhaseACL(phase, AccessRight.QUERY, AccessType.APPROVED))
+        if (!phase.checkPhaseACL(AccessRight.QUERY, AccessType.APPROVED))
         {
             throw new ForbiddenException();
         }
@@ -689,7 +689,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseProvider
             throw new BadRequestException("No job found with refid " + resourceID);
         }
 
-        SIF3Phase phase = ServiceUtils.getPhase(job, phaseName);
+        SIF3Phase phase = job.getPhase(phaseName);
 
         if (phase == null)
         {
@@ -697,7 +697,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseProvider
                     "No phase with name " + phaseName + " found for job with refid " + resourceID);
         }
 
-        if (!ServiceUtils.checkPhaseACL(phase, AccessRight.UPDATE, AccessType.APPROVED))
+        if (!phase.checkPhaseACL(AccessRight.UPDATE, AccessType.APPROVED))
         {
             throw new ForbiddenException();
         }
@@ -743,7 +743,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseProvider
             throw new BadRequestException("No job found with refid " + resourceID);
         }
 
-        SIF3Phase phase = ServiceUtils.getPhase(job, phaseName);
+        SIF3Phase phase = job.getPhase(phaseName);
 
         if (phase == null)
         {
@@ -751,7 +751,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseProvider
                     "No phase with name " + phaseName + " found for job with refid " + resourceID);
         }
 
-        if (!ServiceUtils.checkPhaseACL(phase, AccessRight.DELETE, AccessType.APPROVED))
+        if (!phase.checkPhaseACL(AccessRight.DELETE, AccessType.APPROVED))
         {
             throw new ForbiddenException();
         }
@@ -806,7 +806,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseProvider
             throw new IllegalArgumentException("No job found with id " + resourceID + ".");
         }
 
-        SIF3Phase phase = ServiceUtils.getPhase(job, phaseName);
+        SIF3Phase phase = job.getPhase(phaseName);
 
         if (phase == null)
         {
@@ -814,8 +814,8 @@ public abstract class BaseFunctionalServiceProvider extends BaseProvider
                     "No phase found called " + phaseName + " on job with id " + resourceID + ".");
         }
 
-        ServiceUtils.changePhaseState(job, phase,
-                CommonConstants.PhaseState.valueOf(state.getType().name()), state.getDescription());
+        phase.updatePhaseState(CommonConstants.PhaseState.valueOf(state.getType().name()),
+                state.getDescription());
 
         job = sif3JobService.save(job);
 
@@ -824,7 +824,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseProvider
             throw new IllegalArgumentException("Failed to save job with id " + resourceID + ".");
         }
 
-        state = ServiceUtils.getLastPhaseState(job, phaseName);
+        state = job.getLastPhaseState(phaseName);
 
         if (state == null)
         {

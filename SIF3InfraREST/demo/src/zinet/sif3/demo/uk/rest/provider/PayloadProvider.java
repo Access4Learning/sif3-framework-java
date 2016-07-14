@@ -17,7 +17,6 @@ package zinet.sif3.demo.uk.rest.provider;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.model.ServiceRights;
 import sif3.common.persist.model.SIF3Job;
-import sif3.infra.common.utils.ServiceUtils;
 import sif3.infra.rest.provider.BaseFunctionalServiceProvider;
 import zinet.sif3.demo.uk.rest.PayloadConstants;
 import zinet.sif3.demo.uk.rest.provider.actions.DefaultActions;
@@ -42,11 +41,11 @@ public class PayloadProvider extends BaseFunctionalServiceProvider
     @Override
     protected void configure(SIF3Job job)
     {
-        ServiceUtils.addPhase(job, "default", true, new ServiceRights().create().query().update(),
+        job.addPhase("default", true, new ServiceRights().create().query().update(),
                 new ServiceRights().create());
-        ServiceUtils.addPhase(job, "xml", true, new ServiceRights().create().query().update(),
+        job.addPhase("xml", true, new ServiceRights().create().query().update(),
                 new ServiceRights().create());
-        ServiceUtils.addPhase(job, "json", true, new ServiceRights().create().query().update(),
+        job.addPhase("json", true, new ServiceRights().create().query().update(),
                 new ServiceRights().create());
 
         job.setTimeout(30000);

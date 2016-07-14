@@ -23,6 +23,9 @@ import javax.persistence.Transient;
 import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants.PhaseState;
 import sif3.common.model.ServiceRights;
+import sif3.common.model.ServiceRights.AccessRight;
+import sif3.common.model.ServiceRights.AccessType;
+import sif3.common.utils.DateUtils;
 
 /**
  * A SIF phase object, representing the current state of a phase in a functional service.
@@ -179,6 +182,11 @@ public class SIF3Phase implements Serializable
         this.states = states;
     }
 
+    public boolean addState(SIF3PhaseState state)
+    {
+        return states.add(state);
+    }
+
     public boolean isRequired()
     {
         return required;
@@ -207,5 +215,80 @@ public class SIF3Phase implements Serializable
     public void setStatesRights(ServiceRights statesRights)
     {
         this.statesRights = statesRights;
+    }
+
+    /**
+     * Gets the last state object from the named phase on the given job
+     * 
+     * @return The last state object for the given phase, or null if there isn't one.
+     * @throws IllegalArgumentException
+     *             If the phase is null
+     */
+    public SIF3PhaseState getLastPhaseState()
+    {
+        if (getStates() == null)
+        {
+            return null;
+        }
+
+        if (getStates() == null || getStates().isEmpty())
+        {
+            return null;
+        }
+        return getStates().get(getStates().size() - 1);
+    }
+
+    /**
+     * Change the state of a phase on a given job
+     * 
+     * @param state
+     *            The new state type for the phase
+     * @param description
+     *            The description of the new state
+     * @return The state that the phase has been updated with
+     */
+    public SIF3PhaseState updatePhaseState(PhaseState state, String description)
+    {
+        if (getStates() == null)
+        {
+            setStates(new ArrayList<SIF3PhaseState>());
+        }
+
+        SIF3PhaseState current = null;
+        try
+        {
+            current = getStates().get(getStates().size() - 1);
+        }
+        catch (Exception e)
+        {
+            // Do nothing
+        }
+
+        if (current == null || !current.getType().equals(state))
+        {
+            current = new SIF3PhaseState();
+            current.setType(state);
+            current.setCreated(DateUtils.now());
+            addState(current);
+        }
+        current.setDescription(description);
+        current.setLastModified();
+
+        return current;
+    }
+
+    /**
+     * Check that the given phase has sufficient rights for the given AccessRight and AccessType
+     * instances.
+     * 
+     * @param right
+     *            The type of access right desired (CREATE, QUERY, DELETE, etc.)
+     * @param type
+     *            The expected value of the AccessRight (APPROOVED, REJECTED, etc.)
+     * @return true if the phase supports the given access right, false otherwise.
+     */
+    public boolean checkPhaseACL(AccessRight right, AccessType type)
+    {
+        return getRights().hasRight(right, type);
     }
 }
