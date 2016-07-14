@@ -87,7 +87,6 @@ public abstract class BaseFunctionalServiceProvider extends BaseProvider
     private static InfraMarshalFactory      marshaller      = new InfraMarshalFactory();
     private static ObjectFactory            objectFactory   = new ObjectFactory();
 
-    private String                          serviceName;
     protected HashMap<String, PhaseActions> phaseActions;
 
     private Timer                           jobTimeoutTimer = null;
@@ -99,11 +98,10 @@ public abstract class BaseFunctionalServiceProvider extends BaseProvider
      * @param serviceName
      *            The (plural) name of this functional service.
      */
-    public BaseFunctionalServiceProvider(String serviceName)
+    public BaseFunctionalServiceProvider()
     {
         super();
 
-        this.serviceName = serviceName;
         phaseActions = new HashMap<String, PhaseActions>();
 
         JAXBUtils.initCtx(getMultiObjectClassInfo().getObjectType());
@@ -128,7 +126,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseProvider
      * @param job
      *            The job to shut down.
      */
-    protected abstract void shutdownJob(SIF3Job job);
+    protected abstract void jobShutdown(SIF3Job job);
 
     /*
      * (non-Javadoc)
@@ -158,7 +156,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseProvider
     @Override
     public String getServiceName()
     {
-        return serviceName;
+        return getMultiObjectClassInfo().getObjectName();
     }
 
     /*
@@ -441,7 +439,7 @@ public abstract class BaseFunctionalServiceProvider extends BaseProvider
 
         try
         {
-            shutdownJob(job);
+            jobShutdown(job);
         }
         catch (Exception e)
         {

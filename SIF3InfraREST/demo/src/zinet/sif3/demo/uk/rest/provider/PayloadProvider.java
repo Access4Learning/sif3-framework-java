@@ -32,7 +32,7 @@ public class PayloadProvider extends BaseFunctionalServiceProvider
 {
     public PayloadProvider()
     {
-        super("Payloads");
+        super();
 
         phaseActions.put("default", new DefaultActions(this));
         phaseActions.put("xml", new XmlActions(this));
@@ -53,7 +53,7 @@ public class PayloadProvider extends BaseFunctionalServiceProvider
     }
 
     @Override
-    protected void shutdownJob(SIF3Job job)
+    protected void jobShutdown(SIF3Job job)
     {
     }
 
