@@ -1,4 +1,12 @@
 #License
+> Copyright 2014 Systemic Pty Ltd
+> 
+> Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+> 
+> [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0 "Apache License, Version 2.0")
+> 
+> Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
 Copyright 2013-2016 Systemic Pty Ltd
  
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at:
@@ -122,8 +130,8 @@ Please refer to the release notes in the directory "release/v0.9.0" for addition
 ##Version from MM DD, 2016: v0.10.0 - Various changes
 - Some small bug fixes in relation to external security services.
 - Added new parameter called customResponseParams to ALL provider side interface methods. *THIS WILL BREAK YOUR CODE.*
-- There is a very easy change to your code to fix the compile errors. See Relaese_Notes_v0.10.0.txt in the release/v0.10.0
-  directory.
+- There is a very easy change to your code to fix the compile errors. See Relaese_Notes_v0.10.0.txt in the release/v0.10.0 directory.
+- Fixed a bug in BASIC authorization method where the text put into the XML was not capitalised as defined in the SIF3.0.1 - 3.2 specifications.
 - Implemented function service providers
 - Implemented function service consumers
 - Implemented binding of SIF objects (e.g. jobs) to a specific consumer (curruntly only supported in functional services)
