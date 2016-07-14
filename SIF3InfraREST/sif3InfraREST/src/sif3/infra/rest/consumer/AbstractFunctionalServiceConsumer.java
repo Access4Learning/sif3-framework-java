@@ -147,7 +147,7 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractConsumer
     }
 
     @Override
-    public List<Response> createSingle(Object data, java.util.List<ZoneContextInfo> zoneCtxList,
+    public List<Response> createSingle(Object data, List<ZoneContextInfo> zoneCtxList,
             CustomParameters customParameters)
             throws IllegalArgumentException, PersistenceException, ServiceInvokationException
     {
@@ -245,6 +245,15 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractConsumer
         throw new UnsupportedOperationException("Operation not applicable to a functional service");
     }
 
+    @Override
+    public List<Response> createToPhase(String resourceID, String phaseName, String payload,
+            MediaType requestMediaType, MediaType responseMediaType,
+            List<ZoneContextInfo> zoneCtxList) throws ServiceInvokationException
+    {
+        return createToPhase(resourceID, phaseName, payload, requestMediaType, responseMediaType,
+                zoneCtxList, null);
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -256,7 +265,7 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractConsumer
     public List<Response> createToPhase(String resourceID, String phaseName, String payload,
             MediaType requestMediaType, MediaType responseMediaType,
             List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters)
-            throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+            throws ServiceInvokationException
     {
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
         nullMethodCheck(getSingleObjectClassInfo(), "getSingleObjectClassInfo()");
@@ -307,6 +316,15 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractConsumer
         return responses;
     }
 
+    @Override
+    public List<Response> retrieveToPhase(String resourceID, String phaseName, String payload,
+            MediaType requestMediaType, MediaType responseMediaType,
+            List<ZoneContextInfo> zoneCtxList) throws ServiceInvokationException
+    {
+        return retrieveToPhase(resourceID, phaseName, payload, requestMediaType, responseMediaType,
+                zoneCtxList, null);
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -318,7 +336,7 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractConsumer
     public List<Response> retrieveToPhase(String resourceID, String phaseName, String payload,
             MediaType requestMediaType, MediaType responseMediaType,
             List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters)
-            throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+            throws ServiceInvokationException
     {
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
         nullMethodCheck(getSingleObjectClassInfo(), "getSingleObjectClassInfo()");
@@ -370,6 +388,15 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractConsumer
         return responses;
     }
 
+    @Override
+    public List<Response> updateToPhase(String resourceID, String phaseName, String payload,
+            MediaType requestMediaType, MediaType responseMediaType,
+            List<ZoneContextInfo> zoneCtxList) throws ServiceInvokationException
+    {
+        return updateToPhase(resourceID, phaseName, payload, requestMediaType, responseMediaType,
+                zoneCtxList, null);
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -377,11 +404,10 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractConsumer
      * java.lang.String, java.lang.String, javax.ws.rs.core.MediaType, javax.ws.rs.core.MediaType,
      * java.util.List, sif3.common.model.CustomParameters)
      */
-    @Override
     public List<Response> updateToPhase(String resourceID, String phaseName, String payload,
             MediaType requestMediaType, MediaType responseMediaType,
             List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters)
-            throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+            throws ServiceInvokationException
     {
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
         nullMethodCheck(getSingleObjectClassInfo(), "getSingleObjectClassInfo()");
@@ -433,6 +459,15 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractConsumer
         return responses;
     }
 
+    @Override
+    public List<Response> deleteToPhase(String resourceID, String phaseName, String payload,
+            MediaType requestMediaType, MediaType responseMediaType,
+            List<ZoneContextInfo> zoneCtxList) throws ServiceInvokationException
+    {
+        return deleteToPhase(resourceID, phaseName, payload, requestMediaType, responseMediaType,
+                zoneCtxList, null);
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -444,7 +479,7 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractConsumer
     public List<Response> deleteToPhase(String resourceID, String phaseName, String payload,
             MediaType requestMediaType, MediaType responseMediaType,
             List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters)
-            throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+            throws ServiceInvokationException
     {
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
         nullMethodCheck(getSingleObjectClassInfo(), "getSingleObjectClassInfo()");
@@ -496,6 +531,13 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractConsumer
         return responses;
     }
 
+    @Override
+    public List<Response> createToState(String resourceID, String phaseName, SIF3PhaseState state,
+            List<ZoneContextInfo> zoneCtxList) throws ServiceInvokationException
+    {
+        return createToState(resourceID, phaseName, state, zoneCtxList, null);
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -506,7 +548,7 @@ public abstract class AbstractFunctionalServiceConsumer extends AbstractConsumer
     @Override
     public List<Response> createToState(String resourceID, String phaseName, SIF3PhaseState state,
             List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters)
-            throws IllegalArgumentException, PersistenceException, ServiceInvokationException
+            throws ServiceInvokationException
     {
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
         nullMethodCheck(getSingleObjectClassInfo(), "getSingleObjectClassInfo()");
