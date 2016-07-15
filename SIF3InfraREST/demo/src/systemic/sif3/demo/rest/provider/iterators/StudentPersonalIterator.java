@@ -22,13 +22,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import sif.dd.au30.model.StudentPersonalCollectionType;
-import sif.dd.au30.model.StudentPersonalType;
+import au.com.systemic.framework.utils.AdvancedProperties;
+import sif.dd.au34.model.StudentPersonalCollectionType;
+import sif.dd.au34.model.StudentPersonalType;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.SIFEvent;
-import au.com.systemic.framework.utils.AdvancedProperties;
 
 /**
  * @author Joerg Huber

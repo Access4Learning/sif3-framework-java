@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="services" type="{http://www.sifassociation.org/infrastructure/3.1}servicesType" minOccurs="0"/>
+ *         &lt;element name="services" type="{http://www.sifassociation.org/infrastructure/3.2}servicesType" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="id" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
@@ -29,12 +29,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "provisionedZoneType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "provisionedZoneType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "services"
 })
 public class ProvisionedZoneType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected ServicesType services;
     @XmlAttribute(name = "id", required = true)
     protected String id;
@@ -63,6 +63,10 @@ public class ProvisionedZoneType {
         this.services = value;
     }
 
+    public boolean isSetServices() {
+        return (this.services!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -85,6 +89,10 @@ public class ProvisionedZoneType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

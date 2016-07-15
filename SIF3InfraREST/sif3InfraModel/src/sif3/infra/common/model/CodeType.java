@@ -38,7 +38,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "codeType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "codeType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "old",
     "official",
     "value"
@@ -67,6 +67,10 @@ public class CodeType {
         this.old = value;
     }
 
+    public boolean isSetOld() {
+        return true;
+    }
+
     /**
      * Gets the value of the official property.
      * 
@@ -81,6 +85,10 @@ public class CodeType {
      */
     public void setOfficial(boolean value) {
         this.official = value;
+    }
+
+    public boolean isSetOfficial() {
+        return true;
     }
 
     /**
@@ -105,6 +113,10 @@ public class CodeType {
      */
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public boolean isSetValue() {
+        return (this.value!= null);
     }
 
 }

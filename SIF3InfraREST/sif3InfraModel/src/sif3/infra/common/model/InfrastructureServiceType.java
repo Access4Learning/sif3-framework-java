@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * &lt;complexType name="infrastructureServiceType">
  *   &lt;simpleContent>
  *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>token">
- *       &lt;attribute name="name" type="{http://www.sifassociation.org/infrastructure/3.1}infrastructureServiceNamesType" />
+ *       &lt;attribute name="name" type="{http://www.sifassociation.org/infrastructure/3.2}infrastructureServiceNamesType" />
  *     &lt;/extension>
  *   &lt;/simpleContent>
  * &lt;/complexType>
@@ -29,7 +29,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "infrastructureServiceType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "infrastructureServiceType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "value"
 })
 public class InfrastructureServiceType {
@@ -65,6 +65,10 @@ public class InfrastructureServiceType {
         this.value = value;
     }
 
+    public boolean isSetValue() {
+        return (this.value!= null);
+    }
+
     /**
      * Gets the value of the name property.
      * 
@@ -87,6 +91,10 @@ public class InfrastructureServiceType {
      */
     public void setName(InfrastructureServiceNamesType value) {
         this.name = value;
+    }
+
+    public boolean isSetName() {
+        return (this.name!= null);
     }
 
 }

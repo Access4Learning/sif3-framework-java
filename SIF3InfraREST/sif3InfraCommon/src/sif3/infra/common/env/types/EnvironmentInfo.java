@@ -53,7 +53,7 @@ public class EnvironmentInfo implements Serializable
     private AdapterType adapterType         = null;
     private boolean checkACL                = true;
     private EnvironmentType environmentType = null;
-    private AuthenticationMethod authMethod = AuthenticationMethod.Basic;
+    private AuthenticationMethod authMethod = AuthenticationMethod.BASIC;
     private boolean removeEnvOnShutdown = false;
     private String adapterName = null; ; // consumerName 
     private EnvironmentKey environmentKey = new EnvironmentKey();
@@ -212,11 +212,11 @@ public class EnvironmentInfo implements Serializable
     {
 		try
 		{
-			this.authMethod = AuthenticationMethod.valueOf(authMethod);
+			this.authMethod = AuthenticationMethod.lookup(authMethod);
 		}
 		catch (Exception ex)
 		{
-			this.authMethod = AuthenticationMethod.Basic;
+			this.authMethod = AuthenticationMethod.BASIC;
 		}
     }
 
@@ -255,9 +255,9 @@ public class EnvironmentInfo implements Serializable
 		connectorBaseURIs.put(connectorName, connectorURI);
 	}
 	
-	public URI getConnectorBaseURI(ConnectorName conectorName)
+	public URI getConnectorBaseURI(ConnectorName connectorName)
 	{
-		return connectorBaseURIs.get(conectorName);
+		return connectorBaseURIs.get(connectorName);
 	}
 	
 	public void clearConnectorBaseURIs()

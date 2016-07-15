@@ -28,9 +28,9 @@ import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.model.ServiceInfo;
-import sif3.common.model.SubscriptionKey;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
+import sif3.common.model.SubscriptionKey;
 import sif3.common.persist.model.SIF3Queue;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.persist.model.SIF3Subscription;
@@ -40,6 +40,7 @@ import sif3.common.ws.Response;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.model.ObjectFactory;
+import sif3.infra.common.model.ServiceTypeType;
 import sif3.infra.common.model.SubscriptionCollectionType;
 import sif3.infra.common.model.SubscriptionType;
 import sif3.infra.rest.client.SubscriptionClient;
@@ -205,6 +206,7 @@ public class ConsumerSubscriptionConnector
         		// Check if the current consumer has subscriptions active that are no longer allowed according to the ACLs!
     			checkSubscriptionsWithACL();
     			
+    			//FIXME Joerg, should the following line of code really be in the for loop?
     			// Create required subscriptions for those that are missing.
     			createMissingSubscriptions(queues);
     		}
@@ -261,7 +263,7 @@ public class ConsumerSubscriptionConnector
 		subscriptionInfo.setContextId(subscriptionKey.getContextID());
 		subscriptionInfo.setZoneId(subscriptionKey.getZoneID());
 		subscriptionInfo.setServiceName(subscriptionKey.getServiceName());
-		subscriptionInfo.setServiceType(subscriptionKey.getServiceType());
+		subscriptionInfo.setServiceType(ServiceTypeType.valueOf(subscriptionKey.getServiceType()));
 		subscriptionInfo.setQueueId(queueInfo.getQueue().getQueueID());		
 		Response response = subscriptionClient.subscribe(subscriptionInfo);
 		
@@ -287,7 +289,7 @@ public class ConsumerSubscriptionConnector
 			dbSubscription.setLastAccessed(new Date());
 			dbSubscription.setQueueID(subscription.getQueueId());
 			dbSubscription.setServiceName(subscription.getServiceName());
-			dbSubscription.setServiceType(subscription.getServiceType());
+			dbSubscription.setServiceType(subscription.getServiceType().name());
 			dbSubscription.setSubscriptionID(subscription.getId());
 			dbSubscription.setZoneID(subscription.getZoneId());
 			
@@ -387,14 +389,14 @@ public class ConsumerSubscriptionConnector
 					if (queueInfo.getListeners().keySet() != null)
 					{
             			List<SIF3Subscription> dbSubscriptions = subscriptionService.getSubscriptionsForQueue(queueInfo.getQueue().getQueueID(), CONSUMER);
-            			for (SubscriptionKey subcriptionKey : queueInfo.getListeners().keySet())
+            			for (SubscriptionKey subscriptionKey : queueInfo.getListeners().keySet())
             			{
             				// Because the subscription key map is based on the ACL it also means that the subscription must be allowed!
-        					SIF3Subscription dbSubscription = getSubscriptionFromList(subcriptionKey, dbSubscriptions);
+        					SIF3Subscription dbSubscription = getSubscriptionFromList(subscriptionKey, dbSubscriptions);
         					if (dbSubscription == null) // does not exist => create subscription
         					{
-        						logger.debug("The subscription with the following details doesn't exist and will be created:\n"+subcriptionKey);
-        						createSubscription(subcriptionKey, queueInfo);
+        						logger.debug("The subscription with the following details doesn't exist and will be created:\n"+subscriptionKey);
+        						createSubscription(subscriptionKey, queueInfo);
         					}
             			}
 					}

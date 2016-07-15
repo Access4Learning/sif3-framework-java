@@ -18,12 +18,14 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="dynamicQuery" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="paged" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
+ *         &lt;element name="dynamicQuery" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="queryByExample" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="changesSinceMarker" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="paged" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="maxPageSize" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *         &lt;element name="totalCount" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="applicationProduct" type="{http://www.sifassociation.org/infrastructure/3.1}productIdentityType" minOccurs="0"/>
- *         &lt;element name="adapterProduct" type="{http://www.sifassociation.org/infrastructure/3.1}productIdentityType" minOccurs="0"/>
+ *         &lt;element name="applicationProduct" type="{http://www.sifassociation.org/infrastructure/3.2}productIdentityType" minOccurs="0"/>
+ *         &lt;element name="adapterProduct" type="{http://www.sifassociation.org/infrastructure/3.2}productIdentityType" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -33,8 +35,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "querySupportType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "querySupportType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "dynamicQuery",
+    "queryByExample",
+    "changesSinceMarker",
     "paged",
     "maxPageSize",
     "totalCount",
@@ -43,50 +47,134 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class QuerySupportType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
-    protected boolean dynamicQuery;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
-    protected boolean paged;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
+    protected Boolean dynamicQuery;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
+    protected Boolean queryByExample;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
+    protected Boolean changesSinceMarker;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
+    protected Boolean paged;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlSchemaType(name = "unsignedInt")
     protected Long maxPageSize;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected Boolean totalCount;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected ProductIdentityType applicationProduct;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected ProductIdentityType adapterProduct;
 
     /**
      * Gets the value of the dynamicQuery property.
      * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
      */
-    public boolean isDynamicQuery() {
+    public Boolean isDynamicQuery() {
         return dynamicQuery;
     }
 
     /**
      * Sets the value of the dynamicQuery property.
      * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
      */
-    public void setDynamicQuery(boolean value) {
+    public void setDynamicQuery(Boolean value) {
         this.dynamicQuery = value;
+    }
+
+    public boolean isSetDynamicQuery() {
+        return (this.dynamicQuery!= null);
+    }
+
+    /**
+     * Gets the value of the queryByExample property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isQueryByExample() {
+        return queryByExample;
+    }
+
+    /**
+     * Sets the value of the queryByExample property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setQueryByExample(Boolean value) {
+        this.queryByExample = value;
+    }
+
+    public boolean isSetQueryByExample() {
+        return (this.queryByExample!= null);
+    }
+
+    /**
+     * Gets the value of the changesSinceMarker property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isChangesSinceMarker() {
+        return changesSinceMarker;
+    }
+
+    /**
+     * Sets the value of the changesSinceMarker property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setChangesSinceMarker(Boolean value) {
+        this.changesSinceMarker = value;
+    }
+
+    public boolean isSetChangesSinceMarker() {
+        return (this.changesSinceMarker!= null);
     }
 
     /**
      * Gets the value of the paged property.
      * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
      */
-    public boolean isPaged() {
+    public Boolean isPaged() {
         return paged;
     }
 
     /**
      * Sets the value of the paged property.
      * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
      */
-    public void setPaged(boolean value) {
+    public void setPaged(Boolean value) {
         this.paged = value;
+    }
+
+    public boolean isSetPaged() {
+        return (this.paged!= null);
     }
 
     /**
@@ -113,6 +201,10 @@ public class QuerySupportType {
         this.maxPageSize = value;
     }
 
+    public boolean isSetMaxPageSize() {
+        return (this.maxPageSize!= null);
+    }
+
     /**
      * Gets the value of the totalCount property.
      * 
@@ -135,6 +227,10 @@ public class QuerySupportType {
      */
     public void setTotalCount(Boolean value) {
         this.totalCount = value;
+    }
+
+    public boolean isSetTotalCount() {
+        return (this.totalCount!= null);
     }
 
     /**
@@ -161,6 +257,10 @@ public class QuerySupportType {
         this.applicationProduct = value;
     }
 
+    public boolean isSetApplicationProduct() {
+        return (this.applicationProduct!= null);
+    }
+
     /**
      * Gets the value of the adapterProduct property.
      * 
@@ -183,6 +283,10 @@ public class QuerySupportType {
      */
     public void setAdapterProduct(ProductIdentityType value) {
         this.adapterProduct = value;
+    }
+
+    public boolean isSetAdapterProduct() {
+        return (this.adapterProduct!= null);
     }
 
 }

@@ -20,9 +20,9 @@ package sif3.infra.test.common.utils;
 
 import java.util.Date;
 
+import au.com.systemic.framework.utils.DateUtils;
 import sif3.common.model.AuthenticationInfo;
 import sif3.common.utils.AuthenticationUtils;
-import au.com.systemic.framework.utils.DateUtils;
 
 /**
  * @author Joerg Huber

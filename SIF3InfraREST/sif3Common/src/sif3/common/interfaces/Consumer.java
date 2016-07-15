@@ -225,7 +225,7 @@ public interface Consumer extends DataModelLink
 	 * @throws PersistenceException Some data could not be persisted. An error log entry is performed and the message of the exceptions holds some info.
 	 * @throws ServiceInvokationException Service on provider could not be executed. See error log for details.
 	 */
-	public List<Response> retrievByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException;
+	public List<Response> retrieveByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException;
   	
 	/**
 	 * This method is used to retrieve any number of objects. This is achieved in terms of 'paging' through the list of objects. The consumer

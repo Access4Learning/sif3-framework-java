@@ -17,11 +17,11 @@
  */
 package sif3.infra.test.common.security;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.security.TokenCoreInfo;
 import sif3.common.model.security.TokenInfo;
 import sif3.common.security.AbstractSecurityService;
-import au.com.systemic.framework.utils.AdvancedProperties;
 
 public class DummySecurityService extends AbstractSecurityService
 {

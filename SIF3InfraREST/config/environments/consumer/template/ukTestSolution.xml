@@ -1,0 +1,16 @@
+<environment xmlns="http://www.sifassociation.org/infrastructure/3.2">
+    <solutionId>ukTestSolution</solutionId>
+    <authenticationMethod>Basic</authenticationMethod>
+    <consumerName></consumerName>
+    <applicationInfo>
+        <applicationKey></applicationKey>
+        <supportedInfrastructureVersion>3.2</supportedInfrastructureVersion>
+        <dataModelNamespace>http://www.SIFinfo.org/uk/datamodel/2.0</dataModelNamespace>
+        <transport>REST</transport>
+        <applicationProduct>
+            <vendorName>ZiNET Data Solutions Limited</vendorName>
+            <productName>Test System</productName>
+            <productVersion>0.1alpha</productVersion>
+        </applicationProduct>
+    </applicationInfo>
+</environment>

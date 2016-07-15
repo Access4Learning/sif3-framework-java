@@ -2,10 +2,10 @@ package sif3.infra.test.common.conversion;
 
 import javax.ws.rs.core.MediaType;
 
+import au.com.systemic.framework.utils.FileReaderWriter;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.model.EnvironmentType;
-import au.com.systemic.framework.utils.FileReaderWriter;
 
 public class TestInfraUnmarshalFactory
 {

@@ -24,7 +24,7 @@ import javax.ws.rs.core.Response.Status;
 
 import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.exception.UnmarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
@@ -81,7 +81,7 @@ public class InfraDataModelMapper implements Serializable
 		{
 			errorDetails = new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not unmarshal payload into ErrorType object: "+ex.getMessage()+". See error description for payload details.", payload);
 		}
-		catch (UnsupportedMediaTypeExcpetion ex)
+		catch (UnsupportedMediaTypeException ex)
 		{
 			errorDetails = new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload into ErrorType object (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload);
 		}
@@ -122,7 +122,7 @@ public class InfraDataModelMapper implements Serializable
 		{
 			statusList.setError(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not unmarshal multi-create payload: "+ex.getMessage()+". See error description for payload details.", payload));
 		}
-		catch (UnsupportedMediaTypeExcpetion ex)
+		catch (UnsupportedMediaTypeException ex)
 		{
 			statusList.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal multi-create payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
 		}
@@ -163,7 +163,7 @@ public class InfraDataModelMapper implements Serializable
 		{
 			statusList.setError(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not unmarshal multi-update payload: "+ex.getMessage()+". See error description for payload details.", payload));
 		}
-		catch (UnsupportedMediaTypeExcpetion ex)
+		catch (UnsupportedMediaTypeException ex)
 		{
 			statusList.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal multi-update payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
 		}
@@ -204,7 +204,7 @@ public class InfraDataModelMapper implements Serializable
 		{
 			statusList.setError(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not unmarshal multi-delete payload: "+ex.getMessage()+". See error description for payload details.", payload));
 		}
-		catch (UnsupportedMediaTypeExcpetion ex)
+		catch (UnsupportedMediaTypeException ex)
 		{
 			statusList.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal multi-delete payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
 		}

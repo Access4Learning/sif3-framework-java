@@ -19,11 +19,11 @@ package sif3.common.security;
 
 import java.util.HashMap;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
 import sif3.common.interfaces.SecurityService;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.security.TokenCoreInfo;
 import sif3.common.model.security.TokenInfo;
-import au.com.systemic.framework.utils.AdvancedProperties;
 
 /**
  * All custom security services that shall be used for 'Bearer' security must extend this abstract Security Service. This will enforce the

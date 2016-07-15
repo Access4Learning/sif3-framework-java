@@ -15,13 +15,13 @@
  */
 package sif3.infra.test.common.security;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.PropertyManager;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.model.security.TokenCoreInfo;
 import sif3.common.model.security.TokenInfo;
 import sif3.common.security.AbstractSecurityService;
 import sif3.common.security.BearerSecurityFactory;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.PropertyManager;
 
 public class TestSecurityServiceFactory
 {

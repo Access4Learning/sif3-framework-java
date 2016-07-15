@@ -11,24 +11,28 @@
 
 	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
 		<classpath>
-			<pathelement location="${basedir}/lib/ant-contrib-1.0b3/ant-contrib-1.0b3.jar"/>
+			<pathelement location="${basedir}/lib/ant-contrib-1.0b3/ant-contrib-1.0b3.jar" />
 		</classpath>
 	</taskdef>
 
-	<property name="project.basedir" value="${basedir}"/>
+	<property name="project.basedir" value="${basedir}" />
 
 	<!-- *************************** -->
 	<!-- Load default property files -->
 	<!-- *************************** -->
-	<property file="${project.basedir}/ant.properties"/>
+	<property file="${project.basedir}/ant.properties" />
 
 	<!-- ********************* -->
 	<!-- Environment Variables -->
 	<!-- ********************* -->
 	<property name="app.name" value="${app.name}" />
-	<property name="build.dir" value="${project.basedir}/${builddir}"/>
-	<property name="web.dir.name" value="war"/>
-	<property name="dist.dir" value="${build.dir}/dist"/>
+	<property name="build.dir" value="${project.basedir}/${builddir}" />
+	<property name="web.dir.name" value="war" />
+	<property name="dist.dir" value="${build.dir}/dist" />
+	<property name="doc.dir" value="${build.dir}/api" />
+	<property name="doc.filename" value="${app.name}.javadoc.${frameworkversion}" />
+	<property name="doc.jar" value="${dist.dir}/${doc.filename}.jar" />
+	<property name="doc.zip" value="${project.basedir}/documentation/${doc.filename}.zip" />
 	<property name="src.dir" value="src" />
 	<property name="class.dir" value="${build.dir}/classes" />
 	<property name="web.lib.root.dir" value="${project.basedir}/${web.dir.name}/WEB-INF/lib" />
@@ -45,34 +49,34 @@
 	</path>
 
 	<!-- Comma separated list of Source directories -->
-	<property name="srcs" value="sif3Common,sif3InfraModel,sif3InfraCommon,sif3InfraREST"/>
-<!--	
+	<property name="srcs" value="sif3Common,sif3InfraModel,sif3InfraCommon,sif3InfraREST" />
+	<!--	
 	<property name="infra-jars" value="common,rest"/>
 -->
-	
+
 	<!-- print some varaibles -->
 	<target name="00-env" description="Show Ant variables">
-		<echo message="Java/JVM version: ${ant.java.version}"/> 
-		<echo message="Java/JVM detail version: ${java.version}"/> 
-		<echo message="project.basedir: ${project.basedir}"/>
-		<echo message="app.name: ${app.name}"/>
-		<echo message="build.dir: ${build.dir}"/>
-		<echo message="web.dir.name: ${web.dir.name}"/>
-		<echo message="dist.dir: ${dist.dir}"/>
-		<echo message="src.dir: ${src.dir}"/>
-		<echo message="class.dir: ${class.dir}"/>
-		<echo message="lib.root.dir: ${lib.root.dir}"/>
-		<echo message="web.lib.root.dir: ${web.lib.root.dir}"/>
-		<echo message="config.dir: ${config.dir}"/>
-		<echo message="deploy.install.dir: ${deploy.install.dir}"/>
-		<echo message="frameworkversion: ${frameworkversion}"/>
+		<echo message="Java/JVM version: ${ant.java.version}" />
+		<echo message="Java/JVM detail version: ${java.version}" />
+		<echo message="project.basedir: ${project.basedir}" />
+		<echo message="app.name: ${app.name}" />
+		<echo message="build.dir: ${build.dir}" />
+		<echo message="web.dir.name: ${web.dir.name}" />
+		<echo message="dist.dir: ${dist.dir}" />
+		<echo message="src.dir: ${src.dir}" />
+		<echo message="class.dir: ${class.dir}" />
+		<echo message="lib.root.dir: ${lib.root.dir}" />
+		<echo message="web.lib.root.dir: ${web.lib.root.dir}" />
+		<echo message="config.dir: ${config.dir}" />
+		<echo message="deploy.install.dir: ${deploy.install.dir}" />
+		<echo message="frameworkversion: ${frameworkversion}" />
 		<!--echo message="javaversion: ${javaversion}"/-->
-		<echo message="jarprefix: ${jarprefix}"/>
-		<echo message="classpath: ${toString:classpath}"/>
+		<echo message="jarprefix: ${jarprefix}" />
+		<echo message="classpath: ${toString:classpath}" />
 	</target>
 
 	<!-- Check Dependencies -->
-	<target name="01-check-dependencies" depends="02-clean, compile-all" description="Check Build Dependencies"/>
+	<target name="01-check-dependencies" depends="02-clean, compile-all" description="Check Build Dependencies" />
 
 	<!-- Clean environment. -->
 	<target name="02-clean" description="Deletes the build directory">
@@ -83,9 +87,9 @@
 	<!-- ***************** -->
 	<!-- Environment setup -->
 	<!-- ***************** -->
-	<target name="init">
-		<mkdir dir="${class.dir}"/>
-		<mkdir dir="${dist.dir}"/>
+	<target name="init" depends="02-clean">
+		<mkdir dir="${class.dir}" />
+		<mkdir dir="${dist.dir}" />
 	</target>
 
 	<!-- ******************************* -->
@@ -94,77 +98,103 @@
 
 	<!-- Main Compile Target -->
 	<target name="compile-all" depends="init" description="Compile all sources">
-		<echo message="Ant uses Java/JVM version: ${ant.java.version}"/> 
-		<echo message="Detailed Java/JVM version: ${java.version}"/> 
+		<echo message="Ant uses Java/JVM version: ${ant.java.version}" />
+		<echo message="Detailed Java/JVM version: ${java.version}" />
 
 		<!-- Compile Inrastructure components -->
 		<foreach list="${srcs}" target="compile-src" param="elem" trim="true" />
 
 		<!-- Compile Demo Stuff -->
-		<echo message="Compile: SIF3 Demo Classes"/>
-		<javac destdir="${class.dir}" debug="on" verbose="false">
-			<compilerarg value="-Xbootclasspath/p:${toString:classpath}"/>
+		<echo message="Compile: SIF3 Demo Classes" />
+		<javac destdir="${class.dir}" debug="on" verbose="false" includeantruntime="false">
+			<compilerarg value="-Xbootclasspath/p:${toString:classpath}" />
+			<compilerarg value="-Xlint:deprecation" />
 			<src path="${project.basedir}/demo/${src.dir}" />
 		</javac>
 
 	</target>
 
 	<target name="compile-src">
-		<echo message="Compile: ${project.basedir}/${elem}/${src.dir}"/>
+		<echo message="Compile: ${project.basedir}/${elem}/${src.dir}" />
 
 		<!-- Compile source -->
-		<javac destdir="${class.dir}" debug="on">
+		<javac destdir="${class.dir}" debug="on" includeantruntime="false">
 			<!-- Ensure project jars are first. -->
-			<compilerarg value="-Xbootclasspath/p:${toString:classpath}"/>
+			<compilerarg value="-Xbootclasspath/p:${toString:classpath}" />
+			<compilerarg value="-Xlint:deprecation" />
 			<src path="${project.basedir}/${elem}/${src.dir}" />
 		</javac>
 
 		<!-- copy all non-java files across -->
 		<copy todir="${class.dir}">
 			<fileset dir="${project.basedir}/${elem}/${src.dir}">
-				<exclude name="**/*.java"/>
+				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
 	</target>
 
-	<!-- Main Jar Target -->
-	<target name="03-jar-components" depends="compile-all" description="Create JAR files for all components">
-		
+	<target name="jar-sources" depends="init" description="Create JAR files for all components">
+
 		<!-- jar Common: Classes and resources -->
-		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar"/>
-		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar">
-			<fileset dir="${class.dir}" includes="**/sif3/common/**" excludes="**/readme.txt"/>
+		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Common-${frameworkversion}.src.jar" />
+		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.src.jar">
+			<fileset dir="${project.basedir}/sif3Common/${src.dir}" includes="**/sif3/common/**" />
 		</jar>
 
-		<!-- jar infrastructure -->
-		<!--foreach list="${infra-jars}" target="jar-lib" param="elem" trim="true"/-->
-
 		<!-- jar InfraCommon Model only: Classes and resources -->
-		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Infra-model-${frameworkversion}.jar"/>
-		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Infra-model-${frameworkversion}.jar">
-			<fileset dir="${class.dir}" includes="**/infra/common/model/**,**/infra/common/conversion/**" excludes="**/readme.txt"/>
+		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Infra-model-${frameworkversion}.src.jar" />
+		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Infra-model-${frameworkversion}.src.jar">
+			<fileset dir="${project.basedir}/sif3InfraModel/${src.dir}" includes="**/infra/common/model/**,**/infra/common/conversion/**" />
 		</jar>
 
 		<!-- jar InfraCommon excluding Model: Classes and resources -->
-		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Infra-common-${frameworkversion}.jar"/>
-		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Infra-common-${frameworkversion}.jar">
-			<fileset dir="${class.dir}" includes="**/infra/common/**" excludes="**/readme.txt,**/infra/common/model/**,**/infra/common/conversion/**"/>
+		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Infra-common-${frameworkversion}.src.jar" />
+		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Infra-common-${frameworkversion}.src.jar">
+			<fileset dir="${project.basedir}/sif3InfraCommon/${src.dir}" includes="**/infra/common/**" excludes="**/infra/common/model/**,**/infra/common/conversion/**" />
 		</jar>
 
 		<!-- jar InfraREST: Classes and resources -->
-		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Infra-rest-${frameworkversion}.jar"/>
-		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Infra-rest-${frameworkversion}.jar">
-			<fileset dir="${class.dir}" includes="**/infra/rest/**" excludes="**/readme.txt"/>
-		</jar>
-		
-		<!-- Demo Classes and resources -->
-		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar"/>
-		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar">
-			<fileset dir="${class.dir}" includes="**/sif3/demo/**" excludes="**/readme.txt"/>
+		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Infra-rest-${frameworkversion}.src.jar" />
+		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Infra-rest-${frameworkversion}.src.jar">
+			<fileset dir="${project.basedir}/sif3InfraREST/${src.dir}" includes="**/infra/rest/**" />
 		</jar>
 	</target>
 
-<!--
+	<!-- Main Jar Target -->
+	<target name="03-jar-components" depends="init, compile-all" description="Create JAR files for all components">
+
+		<!-- jar Common: Classes and resources -->
+		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar" />
+		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar">
+			<fileset dir="${class.dir}" includes="**/sif3/common/**" excludes="**/readme.txt" />
+		</jar>
+
+		<!-- jar InfraCommon Model only: Classes and resources -->
+		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Infra-model-${frameworkversion}.jar" />
+		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Infra-model-${frameworkversion}.jar">
+			<fileset dir="${class.dir}" includes="**/infra/common/model/**,**/infra/common/conversion/**" excludes="**/readme.txt" />
+		</jar>
+
+		<!-- jar InfraCommon excluding Model: Classes and resources -->
+		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Infra-common-${frameworkversion}.jar" />
+		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Infra-common-${frameworkversion}.jar">
+			<fileset dir="${class.dir}" includes="**/infra/common/**" excludes="**/readme.txt,**/infra/common/model/**,**/infra/common/conversion/**" />
+		</jar>
+
+		<!-- jar InfraREST: Classes and resources -->
+		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Infra-rest-${frameworkversion}.jar" />
+		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Infra-rest-${frameworkversion}.jar">
+			<fileset dir="${class.dir}" includes="**/infra/rest/**" excludes="**/readme.txt" />
+		</jar>
+
+		<!-- Demo Classes and resources -->
+		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar" />
+		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar">
+			<fileset dir="${class.dir}" includes="**/sif3/demo/**" excludes="**/readme.txt" />
+		</jar>
+	</target>
+
+	<!--
 	<target name="jar-lib">
 		<echo message="Create Jar: ${jarprefix}${sifinfraversion}Infra-${elem}-${frameworkversion}.jar"/>
 		<jar destfile="${dist.dir}/${jarprefix}${sifinfraversion}Infra-${elem}-${frameworkversion}.jar">
@@ -172,9 +202,9 @@
 		</jar>
 	</target>
 -->
-	
+
 	<target name="jar-config">
-		<echo message="Jar: ${dist.dir}/config.jar"/>
+		<echo message="Jar: ${dist.dir}/config.jar" />
 		<!--		
 		<mkdir dir="${dist.dir}"/>
 		<jar destfile="${dist.dir}/config.jar">
@@ -182,51 +212,104 @@
             	<include name="basicsis/spring/*"/>
             </fileset>
 		</jar>
-  -->
+  		-->
+
+		<!-- get all config files -->
+		<copy todir="${class.dir}" flatten="true">
+			<fileset dir="${config.dir}">
+				<include name="*.properties" />
+				<include name="hibernate/*.*" />
+				<include name="providers/*.*" />
+			</fileset>
+		</copy>
+		<!-- Looks like we can"t use these if in the jar with existing code
+		<copy todir="${class.dir}/environments">
+			<fileset dir="${config.dir}/environments" />
+		</copy>
+		-->
+
+		<jar destfile="${dist.dir}/config.jar">
+			<fileset dir="${class.dir}">
+				<include name="**/*.properties" />
+				<include name="**/*.xml" />
+				<exclude name="sif3/**/*.xml" />
+			</fileset>
+		</jar>
 	</target>
 
 	<!-- *************** -->
 	<!-- Create WAR file -->
 	<!-- *************** -->
 	<target name="80-build-war" depends="03-jar-components, jar-config" description="Package WAR for distribution">
-		<delete file="${dist.dir}/${app.name}.war}"/>
+		<delete file="${dist.dir}/${app.name}.war}" />
+
+		<!-- clear out any old jars -->
+		<delete dir="${web.lib.root.dir}" />
+		<mkdir dir="${web.lib.root.dir}" />
 
 		<!-- get all jar files -->
-		<copy todir="${web.lib.root.dir}">
-			<fileset dir="${dist.dir}" includes="*.jar"/>
+		<copy todir="${web.lib.root.dir}" flatten="true">
+			<fileset dir="${lib.root.dir}">
+				<include name="**/*.jar" />
+				<exclude name="**/servlet-api-*.jar" />
+			</fileset>
 		</copy>
 
-		<echo message="War Creation: ${project.basedir}/${web.dir.name}"/>
+		<copy todir="${web.lib.root.dir}">
+			<fileset dir="${dist.dir}" includes="*.jar" />
+		</copy>
+
+		<echo message="War Creation: ${project.basedir}/${web.dir.name}" />
 		<jar destfile="${dist.dir}/${app.name}.war">
 			<fileset dir="${project.basedir}/${web.dir.name}">
-				<exclude name="**/readme.txt"/>
-				<exclude name=".*"/>
+				<exclude name="**/readme.txt" />
+				<exclude name=".*" />
 				<!-- ignore eclipse files -->
 			</fileset>
 		</jar>
 
 		<!-- remove project jars from WEB-INF/lib again -->
 		<!--foreach list="${infra-jars}" target="del-project-jar" param="elem" trim="true"/-->
-		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar"/>
-		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Infra-model-${frameworkversion}.jar"/>
-		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Infra-common-${frameworkversion}.jar"/>
-		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Infra-rest-${frameworkversion}.jar"/>
-		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar"/>
-		<delete file="${web.lib.root.dir}/config.jar"/>
+		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Common-${frameworkversion}.jar" />
+		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Infra-model-${frameworkversion}.jar" />
+		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Infra-common-${frameworkversion}.jar" />
+		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Infra-rest-${frameworkversion}.jar" />
+		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Demo-${frameworkversion}.jar" />
+		<delete file="${web.lib.root.dir}/config.jar" />
 	</target>
 
 	<!-- delete project Jar file from WEB-INF/lib -->
-<!--	
-	<target name="del-project-jar">
-		<delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Infra-${elem}-${frameworkversion}.jar"/>
-	</target>
--->
+	<!--target name="del-project-jar"-->
+	<!--delete file="${web.lib.root.dir}/${jarprefix}${sifinfraversion}Infra-${elem}-${frameworkversion}.jar"/-->
+	<!--/target-->
+
 	<!-- ************************************ -->
 	<!-- Deploy to local web or app container -->
 	<!-- ************************************ -->
 	<target name="85-deploy-to-Local-WebContainer" depends="80-build-war" description="Deploy War to Local Web Container">
-		<echo message="Copy ${dist.dir}/${app.name}.war to ${deploy.install.dir}"/>
-		<copy file="${dist.dir}/${app.name}.war" todir="${deploy.install.dir}"/>
+		<echo message="Copy ${dist.dir}/${app.name}.war to ${deploy.install.dir}" />
+		<copy file="${dist.dir}/${app.name}.war" todir="${deploy.install.dir}" />
 	</target>
 
+	<!-- ************************ -->
+	<!-- Generate JavaDoc jar/zip -->
+	<!-- ************************ -->
+	<target name="javadoc" depends="00-env" description="Buld JavaDoc jar">
+		<delete dir="${doc.dir}" />
+		<mkdir dir="${doc.dir}" />
+		<javadoc classpathref="classpath" destdir="${doc.dir}" source="1.7" packagenames="sif3.*" windowtitle="SIF Framework (Java) ${frameworkversion}" overview="${project.basedir}/documentation/Overview.html" access="protected" author="true" use="true" version="true" linksource="yes">
+			<sourcepath>
+				<pathelement location="${project.basedir}/sif3Common/${src.dir}" />
+				<pathelement location="${project.basedir}/sif3InfraModel/${src.dir}" />
+				<pathelement location="${project.basedir}/sif3InfraCommon/${src.dir}" />
+				<pathelement location="${project.basedir}/sif3InfraREST/${src.dir}" />
+			</sourcepath>
+			<doctitle>SIF Framework (Java)</doctitle>
+			<header>SIF Framework (Java) ${frameworkversion}</header>
+			<footer>SIF Framework (Java) ${frameworkversion}</footer>
+			<link href="https://docs.oracle.com/javase/7/docs/api/" />
+		</javadoc>
+		<jar basedir="${doc.dir}" destfile="${doc.jar}" index="true" update="true" />
+		<jar basedir="${doc.dir}" destfile="${doc.zip}" index="false" update="true" />
+	</target>
 </project>

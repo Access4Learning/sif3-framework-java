@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "deleteIdType", namespace = "http://www.sifassociation.org/infrastructure/3.1")
+@XmlType(name = "deleteIdType", namespace = "http://www.sifassociation.org/infrastructure/3.2")
 public class DeleteIdType {
 
     @XmlAttribute(name = "id", required = true)
@@ -58,6 +58,10 @@ public class DeleteIdType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

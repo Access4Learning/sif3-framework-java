@@ -30,8 +30,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.1}uriType"/>
- *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.1}uriType"/>
+ *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.2}uriType"/>
+ *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.2}uriType"/>
  *         &lt;element name="value">
  *           &lt;simpleType>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -56,7 +56,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="aliases" type="{http://www.sifassociation.org/infrastructure/3.1}aliasesType" minOccurs="0"/>
+ *         &lt;element name="aliases" type="{http://www.sifassociation.org/infrastructure/3.2}aliasesType" minOccurs="0"/>
  *         &lt;element name="action">
  *           &lt;simpleType>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
@@ -77,7 +77,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "codeItemType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "codeItemType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "code",
     "source",
     "namespace",
@@ -136,6 +136,10 @@ public class CodeItemType {
         this.code = value;
     }
 
+    public boolean isSetCode() {
+        return (this.code!= null);
+    }
+
     /**
      * Gets the value of the source property.
      * 
@@ -158,6 +162,10 @@ public class CodeItemType {
      */
     public void setSource(String value) {
         this.source = value;
+    }
+
+    public boolean isSetSource() {
+        return (this.source!= null);
     }
 
     /**
@@ -184,6 +192,10 @@ public class CodeItemType {
         this.namespace = value;
     }
 
+    public boolean isSetNamespace() {
+        return (this.namespace!= null);
+    }
+
     /**
      * Gets the value of the value property.
      * 
@@ -206,6 +218,10 @@ public class CodeItemType {
      */
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public boolean isSetValue() {
+        return (this.value!= null);
     }
 
     /**
@@ -232,6 +248,10 @@ public class CodeItemType {
         this.description = value;
     }
 
+    public boolean isSetDescription() {
+        return (this.description!= null);
+    }
+
     /**
      * Gets the value of the definition property.
      * 
@@ -254,6 +274,10 @@ public class CodeItemType {
      */
     public void setDefinition(String value) {
         this.definition = value;
+    }
+
+    public boolean isSetDefinition() {
+        return (this.definition!= null);
     }
 
     /**
@@ -280,6 +304,10 @@ public class CodeItemType {
         this.aliases = value;
     }
 
+    public boolean isSetAliases() {
+        return (this.aliases!= null);
+    }
+
     /**
      * Gets the value of the action property.
      * 
@@ -304,6 +332,10 @@ public class CodeItemType {
         this.action = value;
     }
 
+    public boolean isSetAction() {
+        return (this.action!= null);
+    }
+
     /**
      * Gets the value of the timestamp property.
      * 
@@ -326,6 +358,10 @@ public class CodeItemType {
      */
     public void setTimestamp(Calendar value) {
         this.timestamp = value;
+    }
+
+    public boolean isSetTimestamp() {
+        return (this.timestamp!= null);
     }
 
 }

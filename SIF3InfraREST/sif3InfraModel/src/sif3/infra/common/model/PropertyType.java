@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "propertyType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "propertyType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "value"
 })
 public class PropertyType {
@@ -72,6 +72,10 @@ public class PropertyType {
         this.value = value;
     }
 
+    public boolean isSetValue() {
+        return (this.value!= null);
+    }
+
     /**
      * Gets the value of the name property.
      * 
@@ -94,6 +98,10 @@ public class PropertyType {
      */
     public void setName(String value) {
         this.name = value;
+    }
+
+    public boolean isSetName() {
+        return (this.name!= null);
     }
 
 }

@@ -7,8 +7,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
@@ -21,11 +19,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="rights" type="{http://www.sifassociation.org/infrastructure/3.1}rightsType"/>
+ *         &lt;element name="rights" type="{http://www.sifassociation.org/infrastructure/3.2}rightsType"/>
  *       &lt;/sequence>
  *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}anySimpleType" />
  *       &lt;attribute name="contextId" use="required" type="{http://www.w3.org/2001/XMLSchema}anySimpleType" />
- *       &lt;attribute name="type" use="required" type="{http://www.sifassociation.org/infrastructure/3.1}serviceTypeType" />
+ *       &lt;attribute name="type" use="required" type="{http://www.sifassociation.org/infrastructure/3.2}serviceTypeType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -34,12 +32,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "serviceType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "serviceType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "rights"
 })
 public class ServiceType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected RightsType rights;
     @XmlAttribute(name = "name", required = true)
     @XmlSchemaType(name = "anySimpleType")
@@ -48,8 +46,7 @@ public class ServiceType {
     @XmlSchemaType(name = "anySimpleType")
     protected String contextId;
     @XmlAttribute(name = "type", required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-    protected String type;
+    protected ServiceTypeType type;
 
     /**
      * Gets the value of the rights property.
@@ -73,6 +70,10 @@ public class ServiceType {
      */
     public void setRights(RightsType value) {
         this.rights = value;
+    }
+
+    public boolean isSetRights() {
+        return (this.rights!= null);
     }
 
     /**
@@ -99,6 +100,10 @@ public class ServiceType {
         this.name = value;
     }
 
+    public boolean isSetName() {
+        return (this.name!= null);
+    }
+
     /**
      * Gets the value of the contextId property.
      * 
@@ -123,15 +128,19 @@ public class ServiceType {
         this.contextId = value;
     }
 
+    public boolean isSetContextId() {
+        return (this.contextId!= null);
+    }
+
     /**
      * Gets the value of the type property.
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link ServiceTypeType }
      *     
      */
-    public String getType() {
+    public ServiceTypeType getType() {
         return type;
     }
 
@@ -140,11 +149,15 @@ public class ServiceType {
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link ServiceTypeType }
      *     
      */
-    public void setType(String value) {
+    public void setType(ServiceTypeType value) {
         this.type = value;
+    }
+
+    public boolean isSetType() {
+        return (this.type!= null);
     }
 
 }

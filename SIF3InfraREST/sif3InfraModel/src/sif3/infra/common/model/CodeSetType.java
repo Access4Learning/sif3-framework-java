@@ -13,6 +13,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * The Code Set Registry Service provides a way for all legal codes to be defined outside of the SIF Specification while allowing changes (additions and replacements) of external code set values to be easily verified by the recipient so as not to break existing Consumer / Provider interoperability.
+ * 
  * <p>Java class for codeSetType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -23,12 +25,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="zone" type="{http://www.w3.org/2001/XMLSchema}token"/>
- *         &lt;element name="version" type="{http://www.sifassociation.org/infrastructure/3.1}versionType"/>
+ *         &lt;element name="version" type="{http://www.sifassociation.org/infrastructure/3.2}versionType"/>
  *         &lt;element name="timestamp" type="{http://www.w3.org/2001/XMLSchema}dateTime"/>
- *         &lt;choice>
- *           &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.1}uriType" minOccurs="0"/>
- *           &lt;element name="codeItems" type="{http://www.sifassociation.org/infrastructure/3.1}codeItemsType" minOccurs="0"/>
- *         &lt;/choice>
+ *         &lt;sequence>
+ *           &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.2}uriType" minOccurs="0"/>
+ *           &lt;element name="codeItems" type="{http://www.sifassociation.org/infrastructure/3.2}codeItemsType" minOccurs="0"/>
+ *         &lt;/sequence>
  *       &lt;/sequence>
  *       &lt;attribute name="id">
  *         &lt;simpleType>
@@ -46,7 +48,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "codeSetType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "codeSetType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "zone",
     "version",
     "timestamp",
@@ -96,6 +98,10 @@ public class CodeSetType {
         this.zone = value;
     }
 
+    public boolean isSetZone() {
+        return (this.zone!= null);
+    }
+
     /**
      * Gets the value of the version property.
      * 
@@ -118,6 +124,10 @@ public class CodeSetType {
      */
     public void setVersion(String value) {
         this.version = value;
+    }
+
+    public boolean isSetVersion() {
+        return (this.version!= null);
     }
 
     /**
@@ -144,6 +154,10 @@ public class CodeSetType {
         this.timestamp = value;
     }
 
+    public boolean isSetTimestamp() {
+        return (this.timestamp!= null);
+    }
+
     /**
      * Gets the value of the source property.
      * 
@@ -166,6 +180,10 @@ public class CodeSetType {
      */
     public void setSource(String value) {
         this.source = value;
+    }
+
+    public boolean isSetSource() {
+        return (this.source!= null);
     }
 
     /**
@@ -192,6 +210,10 @@ public class CodeSetType {
         this.codeItems = value;
     }
 
+    public boolean isSetCodeItems() {
+        return (this.codeItems!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -214,6 +236,10 @@ public class CodeSetType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
     }
 
 }

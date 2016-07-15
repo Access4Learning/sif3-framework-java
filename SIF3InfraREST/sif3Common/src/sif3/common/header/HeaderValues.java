@@ -54,7 +54,7 @@ public class HeaderValues
 	/**
 	 * Valid values for the "serviceType" header field in the request.
 	 */
-	public enum ServiceType {OBJECT, FUNCTION, UTILITY, SERVICEPATH, XQUERYTEMPLATE};
+	public enum ServiceType {OBJECT, FUNCTIONAL, UTILITY, SERVICEPATH, XQUERYTEMPLATE};
 
 	/**
 	 * Valid values for the "requestType" header field in the request.

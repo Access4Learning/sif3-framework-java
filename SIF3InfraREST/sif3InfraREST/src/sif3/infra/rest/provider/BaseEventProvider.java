@@ -25,7 +25,6 @@ import javax.ws.rs.core.MediaType;
 import sif3.common.CommonConstants;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues.EventAction;
-import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.EventProvider;
 import sif3.common.interfaces.SIFEventIterator;
@@ -194,7 +193,7 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 		// If there are no services for this provider defined then we don't need to get any events at all.
 		if ((servicesForProvider == null) || (servicesForProvider.size() == 0))
 		{
-			logger.info("This emvironment does not have any zones and contexts defined for the "+getMultiObjectClassInfo().getObjectName() + " service. No events can be sent.");
+			logger.info("This environment does not have any zones and contexts defined for the "+getMultiObjectClassInfo().getObjectName() + " service. No events can be sent.");
 			return;
 		}		
 		try
@@ -364,7 +363,7 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
     {
     	if (sif3Session != null)
     	{
-    		return sif3Session.getServiceInfoForService(getServiceName(), ServiceType.OBJECT);
+    		return sif3Session.getServiceInfoForService(getServiceName(), getServiceType());
     	}
     	
     	return null;

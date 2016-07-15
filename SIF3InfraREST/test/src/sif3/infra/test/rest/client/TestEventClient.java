@@ -22,9 +22,11 @@ import java.net.URI;
 
 import javax.ws.rs.core.MediaType;
 
-import sif.dd.au30.conversion.DataModelMarshalFactory;
-import sif.dd.au30.conversion.DataModelUnmarshalFactory;
-import sif.dd.au30.model.StudentPersonalCollectionType;
+import au.com.systemic.framework.utils.FileReaderWriter;
+import sif.dd.conversion.DataModelMarshalFactory;
+import sif.dd.conversion.DataModelUnmarshalFactory;
+import sif.dd.au34.model.ObjectFactory;
+import sif.dd.au34.model.StudentPersonalCollectionType;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.ServiceInvokationException;
@@ -37,7 +39,6 @@ import sif3.infra.common.env.types.AdapterEnvironmentStore;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.rest.client.EventClient;
 import systemic.sif3.demo.rest.conversion.CSVMarshaller;
-import au.com.systemic.framework.utils.FileReaderWriter;
 
 /**
  * @author Joerg Huber
@@ -67,7 +68,7 @@ public class TestEventClient
 	private static final String ZONE="auSchoolTestingZone";
 
 	
-	private MarshalFactory marshaller = new DataModelMarshalFactory();
+	private MarshalFactory marshaller = new DataModelMarshalFactory(ObjectFactory.class);
 	private UnmarshalFactory unmarshaller = new DataModelUnmarshalFactory();
 	private AdapterEnvironmentStore store = new AdapterEnvironmentStore(PROP_FILE_NAME);
 

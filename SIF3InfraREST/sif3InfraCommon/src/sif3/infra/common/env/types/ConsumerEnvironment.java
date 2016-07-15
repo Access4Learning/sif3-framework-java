@@ -24,7 +24,7 @@ package sif3.infra.common.env.types;
  */
 public class ConsumerEnvironment extends EnvironmentInfo
 {
-	public static enum ConnectorName {environment, requestsConnector, provisionRequests, eventsConnector, queues, subscriptions};
+	public static enum ConnectorName {environment, requestsConnector, servicesConnector, provisionRequests, eventsConnector, queues, subscriptions};
         	
 	private static final long serialVersionUID = -2685814104916173550L;
 

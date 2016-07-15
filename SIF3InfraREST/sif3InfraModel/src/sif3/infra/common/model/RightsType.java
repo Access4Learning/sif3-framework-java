@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="right" type="{http://www.sifassociation.org/infrastructure/3.1}rightType" maxOccurs="unbounded"/>
+ *         &lt;element name="right" type="{http://www.sifassociation.org/infrastructure/3.2}rightType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +29,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "rightsType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "rightsType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "right"
 })
 public class RightsType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected List<RightType> right;
 
     /**
@@ -64,6 +64,14 @@ public class RightsType {
             right = new ArrayList<RightType>();
         }
         return this.right;
+    }
+
+    public boolean isSetRight() {
+        return ((this.right!= null)&&(!this.right.isEmpty()));
+    }
+
+    public void unsetRight() {
+        this.right = null;
     }
 
 }

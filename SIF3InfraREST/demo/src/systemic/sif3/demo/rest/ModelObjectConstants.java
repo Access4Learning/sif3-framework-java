@@ -18,14 +18,14 @@
 
 package systemic.sif3.demo.rest;
 
-import sif.dd.au30.model.SchoolInfoCollectionType;
-import sif.dd.au30.model.SchoolInfoType;
-import sif.dd.au30.model.StudentDailyAttendanceCollectionType;
-import sif.dd.au30.model.StudentDailyAttendanceType;
-import sif.dd.au30.model.StudentPersonalCollectionType;
-import sif.dd.au30.model.StudentPersonalType;
-import sif.dd.au30.model.TeachingGroupCollectionType;
-import sif.dd.au30.model.TeachingGroupType;
+import sif.dd.au34.model.SchoolInfoCollectionType;
+import sif.dd.au34.model.SchoolInfoType;
+import sif.dd.au34.model.StudentDailyAttendanceCollectionType;
+import sif.dd.au34.model.StudentDailyAttendanceType;
+import sif.dd.au34.model.StudentPersonalCollectionType;
+import sif.dd.au34.model.StudentPersonalType;
+import sif.dd.au34.model.TeachingGroupCollectionType;
+import sif.dd.au34.model.TeachingGroupType;
 import sif3.common.conversion.ModelObjectInfo;
 
 /**
