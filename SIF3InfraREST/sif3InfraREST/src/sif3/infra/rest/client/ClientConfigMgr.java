@@ -26,21 +26,21 @@ import javax.net.ssl.TrustManager;
 
 import org.apache.log4j.Logger;
 
-import sif3.common.CommonConstants;
-import sif3.common.security.X509KeystoreManager;
-import sif3.common.security.X509TrustedStoreManager;
-import sif3.common.security.X509TrustedStoreManagerNoCheck;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.PropertyManager;
-import au.com.systemic.framework.utils.StringUtils;
-import au.com.systemic.framework.utils.Timer;
-
 //TODO: JH - Here we do have some jersey specific classes => Investigate how to replace them with generic classes! 
 //Note: These are "client" classes only and the only jar that might be required could be jersey-client-1.17.1.jar which
 //would not conflict with any other JAX-RS implementation.
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.client.urlconnection.HTTPSProperties;
+
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.PropertyManager;
+import au.com.systemic.framework.utils.StringUtils;
+import au.com.systemic.framework.utils.Timer;
+import sif3.common.CommonConstants;
+import sif3.common.security.X509KeystoreManager;
+import sif3.common.security.X509TrustedStoreManager;
+import sif3.common.security.X509TrustedStoreManagerNoCheck;
 
 /**
  * There are many places where client contexts are required for REST service invocation. The client context can either be a secure 

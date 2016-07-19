@@ -18,17 +18,17 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * <pre>
  * &lt;complexType name="rightType">
  *   &lt;simpleContent>
- *     &lt;extension base="&lt;http://www.sifassociation.org/infrastructure/3.1>rightValueType">
+ *     &lt;extension base="&lt;http://www.sifassociation.org/infrastructure/3.2>rightValueType">
  *       &lt;attribute name="type" use="required">
  *         &lt;simpleType>
  *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
- *             &lt;pattern value="QUERY"/>
- *             &lt;pattern value="CREATE"/>
- *             &lt;pattern value="UPDATE"/>
- *             &lt;pattern value="DELETE"/>
- *             &lt;pattern value="PROVIDE"/>
- *             &lt;pattern value="SUBSCRIBE"/>
- *             &lt;pattern value="ADMIN"/>
+ *             &lt;enumeration value="QUERY"/>
+ *             &lt;enumeration value="CREATE"/>
+ *             &lt;enumeration value="UPDATE"/>
+ *             &lt;enumeration value="DELETE"/>
+ *             &lt;enumeration value="PROVIDE"/>
+ *             &lt;enumeration value="SUBSCRIBE"/>
+ *             &lt;enumeration value="ADMIN"/>
  *           &lt;/restriction>
  *         &lt;/simpleType>
  *       &lt;/attribute>
@@ -40,14 +40,13 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "rightType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "rightType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "value"
 })
 public class RightType {
 
     @XmlValue
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-    protected String value;
+    protected RightValueType value;
     @XmlAttribute(name = "type", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String type;
@@ -57,10 +56,10 @@ public class RightType {
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link RightValueType }
      *     
      */
-    public String getValue() {
+    public RightValueType getValue() {
         return value;
     }
 
@@ -69,11 +68,15 @@ public class RightType {
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link RightValueType }
      *     
      */
-    public void setValue(String value) {
+    public void setValue(RightValueType value) {
         this.value = value;
+    }
+
+    public boolean isSetValue() {
+        return (this.value!= null);
     }
 
     /**
@@ -98,6 +101,10 @@ public class RightType {
      */
     public void setType(String value) {
         this.type = value;
+    }
+
+    public boolean isSetType() {
+        return (this.type!= null);
     }
 
 }

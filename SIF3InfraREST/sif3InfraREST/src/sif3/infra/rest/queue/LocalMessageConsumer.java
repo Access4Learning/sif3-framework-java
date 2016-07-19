@@ -21,8 +21,10 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 
+import com.sun.jersey.api.client.ClientResponse.Status;
+
 import sif3.common.exception.UnmarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.interfaces.Consumer;
 import sif3.common.interfaces.DelayedConsumer;
 import sif3.common.interfaces.EventConsumer;
@@ -37,8 +39,6 @@ import sif3.infra.rest.queue.types.ErrorInfo;
 import sif3.infra.rest.queue.types.EventInfo;
 import sif3.infra.rest.queue.types.QueueMessage;
 import sif3.infra.rest.queue.types.ResponseInfo;
-
-import com.sun.jersey.api.client.ClientResponse.Status;
 
 
 /**
@@ -248,7 +248,7 @@ public class LocalMessageConsumer implements Runnable
         {
             return new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not unmarshal Datamodel payload into SIF Object: "+ex.getMessage()+". See error description for payload details.", payload);
         }
-        catch (UnsupportedMediaTypeExcpetion ex)
+        catch (UnsupportedMediaTypeException ex)
         {
             return new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal Datamodel payload into SIF Object (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload);
         }

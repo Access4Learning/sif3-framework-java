@@ -25,17 +25,18 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.PropertyManager;
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.CommonConstants.QueuePollingType;
 import sif3.common.CommonConstants.QueueStrategy;
+import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.utils.FileAndFolderUtils;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.PropertyManager;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class abstract the reading and processing of the consumer and provider property file of this framework.
@@ -421,7 +422,7 @@ public class AdapterEnvironmentStore implements Serializable
   		}
           
   		// Authentication Method
-  		envInfo.setAuthMethod(adapterProperties.getPropertyAsString("env.authentication.method", AuthenticationMethod.Basic.name()));
+  		envInfo.setAuthMethod(adapterProperties.getPropertyAsString("env.authentication.method", AuthenticationMethod.BASIC.name()));
  		
 		envInfo.getEnvironmentKey().setUserToken(props.getPropertyAsString("env.userToken", null));
 		envInfo.getEnvironmentKey().setInstanceID(props.getPropertyAsString("env.instanceID", null));
@@ -484,7 +485,7 @@ public class AdapterEnvironmentStore implements Serializable
 	  		}
 	          
 	  		// Authentication Method
-	  		envInfo.setAuthMethod(adapterProperties.getPropertyAsString("env.authentication.method", AuthenticationMethod.Basic.name()));
+	  		envInfo.setAuthMethod(adapterProperties.getPropertyAsString("env.authentication.method", AuthenticationMethod.BASIC.name()));
 	  			  		
 	  		envInfo.setTemplateXMLFileName(props.getPropertyAsString("env.xml.file.name", null));
 	  		if (StringUtils.isEmpty(envInfo.getTemplateXMLFileName()))
@@ -546,6 +547,9 @@ public class AdapterEnvironmentStore implements Serializable
 
         // Allow access_token or URL
         envInfo.setAllowAuthOnURL(adapterProperties.getPropertyAsBool("adapter.authTokenOnURL.allowed", false));
+        
+        // Load custom response headers.
+        errorsFound = errorsFound || loadCustomResponseHeaders(props, envInfo);
 
 		if (errorsFound)
 		{
@@ -553,6 +557,45 @@ public class AdapterEnvironmentStore implements Serializable
 		}
 		return errorsFound;
     }
+    
+    
+    /*
+     * Returns TRUE if there was an error loading custom http headers. Detailed error will be logged.
+     */
+    private boolean loadCustomResponseHeaders(AdvancedProperties props, ProviderEnvironment envInfo)
+    {
+        boolean errorsFound = false;
+        HeaderProperties customHeaders = new HeaderProperties();
+        envInfo.setCustomResponseHeaders(customHeaders);
+        
+        String headerList = props.getPropertyAsString("adapter.custom.response.headers", null);
+        if (StringUtils.notEmpty(headerList))
+        {
+            // First we split on '|'
+            String[] headerArray = headerList.trim().split("\\|");
+            for (int i=0; i<headerArray.length; i++)
+            {
+                String headerStr = headerArray[i];
+                
+                // Next we split on the ":" to get header name and header value
+                String[] nameValue = headerStr.split(":");
+                
+                // We must have 2 values in the array otherwise the header notation is incorrect.
+                if (nameValue.length == 2)
+                {
+                    customHeaders.setHeaderProperty(nameValue[0].trim(), nameValue[1].trim());
+                }
+                else
+                {
+                    errorsFound = true;
+                    logger.error("The value '"+headerStr+"' does not follow the notation for the adapter.custom.response.headers properties. Header Name and Header Value must be separated by a ':'. Different headers must be separated by a '|'.");
+                }
+            }
+        }
+        
+        return errorsFound;
+    }
+    
     
     /*
      * This method read the following Consumer Adapter specific properties:

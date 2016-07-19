@@ -23,6 +23,11 @@ import java.net.URI;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.WebResource.Builder;
+
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.exception.ServiceInvokationException;
@@ -38,11 +43,6 @@ import sif3.common.ws.BaseResponse;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.interfaces.ClientEnvironmentManager;
-import au.com.systemic.framework.utils.StringUtils;
-
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.WebResource.Builder;
 
 /**
  * This class implements the function(s) required to publish REST SIF3 Events to a environment provider and/or broker. The event interface
@@ -100,7 +100,7 @@ public class EventClient extends BaseClient
 			setRequestMediaType(requestMediaType, dmMarshaller);
 			setResponseMediaType(responseMediaType, null);
 			setUseCompression(useCompression);
-			configureClienService(eventConnector, getProviderEnvironment().getSecureConnection(), getUseCompression());
+			configureClientService(eventConnector, getProviderEnvironment().getSecureConnection(), getUseCompression());
 		}
 	}
 	

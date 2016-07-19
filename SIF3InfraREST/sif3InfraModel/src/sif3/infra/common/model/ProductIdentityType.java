@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="productName" minOccurs="0">
+ *         &lt;element name="productName">
  *           &lt;simpleType>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
  *               &lt;maxLength value="256"/>
@@ -51,7 +51,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "productIdentityType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "productIdentityType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "vendorName",
     "productName",
     "productVersion",
@@ -59,16 +59,16 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class ProductIdentityType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String vendorName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String productName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String productVersion;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlSchemaType(name = "anyURI")
     protected String iconURI;
 
@@ -96,6 +96,10 @@ public class ProductIdentityType {
         this.vendorName = value;
     }
 
+    public boolean isSetVendorName() {
+        return (this.vendorName!= null);
+    }
+
     /**
      * Gets the value of the productName property.
      * 
@@ -118,6 +122,10 @@ public class ProductIdentityType {
      */
     public void setProductName(String value) {
         this.productName = value;
+    }
+
+    public boolean isSetProductName() {
+        return (this.productName!= null);
     }
 
     /**
@@ -144,6 +152,10 @@ public class ProductIdentityType {
         this.productVersion = value;
     }
 
+    public boolean isSetProductVersion() {
+        return (this.productVersion!= null);
+    }
+
     /**
      * Gets the value of the iconURI property.
      * 
@@ -166,6 +178,10 @@ public class ProductIdentityType {
      */
     public void setIconURI(String value) {
         this.iconURI = value;
+    }
+
+    public boolean isSetIconURI() {
+        return (this.iconURI!= null);
     }
 
 }

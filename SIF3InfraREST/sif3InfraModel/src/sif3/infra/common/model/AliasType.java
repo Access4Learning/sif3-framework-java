@@ -17,9 +17,9 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="code" type="{http://www.sifassociation.org/infrastructure/3.1}codeType"/>
- *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.1}uriType"/>
- *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.1}uriType"/>
+ *         &lt;element name="code" type="{http://www.sifassociation.org/infrastructure/3.2}codeType"/>
+ *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.2}uriType"/>
+ *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.2}uriType"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,7 +29,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "aliasType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "aliasType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "code",
     "source",
     "namespace"
@@ -67,6 +67,10 @@ public class AliasType {
         this.code = value;
     }
 
+    public boolean isSetCode() {
+        return (this.code!= null);
+    }
+
     /**
      * Gets the value of the source property.
      * 
@@ -91,6 +95,10 @@ public class AliasType {
         this.source = value;
     }
 
+    public boolean isSetSource() {
+        return (this.source!= null);
+    }
+
     /**
      * Gets the value of the namespace property.
      * 
@@ -113,6 +121,10 @@ public class AliasType {
      */
     public void setNamespace(String value) {
         this.namespace = value;
+    }
+
+    public boolean isSetNamespace() {
+        return (this.namespace!= null);
     }
 
 }

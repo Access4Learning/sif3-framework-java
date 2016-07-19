@@ -20,6 +20,10 @@ package sif3.infra.rest.client;
 
 import javax.ws.rs.core.Response.Status;
 
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderProperties;
@@ -30,10 +34,6 @@ import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.SubscriptionCollectionType;
 import sif3.infra.common.model.SubscriptionType;
-import au.com.systemic.framework.utils.StringUtils;
-
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 
 /**
  * This class implements the REST client for the subscription connector as defined in the SIF3 Spec.
@@ -111,7 +111,7 @@ public class SubscriptionClient extends BaseClient
 			{
 				throw new IllegalArgumentException("Property serviceName in subscriptioninfo for method subscribe is empty or null.");
 			}			
-			if (StringUtils.isEmpty(subscriptionInfo.getServiceType()))
+			if (subscriptionInfo.getServiceType() == null)
 			{
 				throw new IllegalArgumentException("Property serviceType in subscriptioninfo for method subscribe is empty or null. Must be of value 'OBJECT', 'FUNCTION' or 'UTILITY'");
 			}

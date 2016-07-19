@@ -20,7 +20,7 @@ package sif3.infra.test.rest.client;
 
 import java.net.URI;
 
-import sif.dd.au30.model.StudentPersonalType;
+import sif.dd.au34.model.StudentPersonalType;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.header.HeaderProperties;

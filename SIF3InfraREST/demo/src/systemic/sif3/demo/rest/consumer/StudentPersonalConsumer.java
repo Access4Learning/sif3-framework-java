@@ -18,7 +18,7 @@
 
 package systemic.sif3.demo.rest.consumer;
 
-import sif.dd.au30.model.StudentPersonalCollectionType;
+import sif.dd.au34.model.StudentPersonalCollectionType;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.UpdateType;

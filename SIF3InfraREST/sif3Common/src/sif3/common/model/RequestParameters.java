@@ -21,7 +21,6 @@ package sif3.common.model;
 import java.io.Serializable;
 
 import au.com.systemic.framework.utils.StringUtils;
-
 import sif3.common.header.HeaderProperties;
 
 /**

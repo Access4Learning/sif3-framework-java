@@ -20,7 +20,7 @@ package sif3.infra.test.common.env;
 
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.MarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.env.ops.ConsumerEnvironmentStoreOperations;
 import sif3.infra.common.model.EnvironmentType;
@@ -70,7 +70,7 @@ public class TestConsumerEnvStoreOps
 			{
 				ex.printStackTrace();
 			}
-      catch (UnsupportedMediaTypeExcpetion ex)
+      catch (UnsupportedMediaTypeException ex)
       {
         ex.printStackTrace();
       }

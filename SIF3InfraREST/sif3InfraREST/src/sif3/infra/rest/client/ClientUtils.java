@@ -18,11 +18,11 @@
 
 package sif3.infra.rest.client;
 
+import au.com.systemic.framework.utils.DateUtils;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.utils.AuthenticationUtils;
-import au.com.systemic.framework.utils.DateUtils;
 
 /**
  * @author Joerg Huber
@@ -43,7 +43,7 @@ public class ClientUtils
 	{
 		switch (authenticationMethod)
 		{
-			case Basic:
+			case BASIC:
 			{
 				hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AuthenticationUtils.getBasicAuthToken(username, password));
 				break;

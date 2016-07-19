@@ -1,6 +1,8 @@
 
 package sif3.infra.common.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -13,6 +15,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * This collection defines the entire set of named queries that Consumers may legally issue for execution by Service Providers.  A Consumer specifies the ID of a Named XQuery in a Query Request to a specific Service Provider, along with a set of values for any associated script parameters.
+ * 
  * <p>Java class for xqueryType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -63,6 +67,17 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
+ *         &lt;element name="parameters">
+ *           &lt;complexType>
+ *             &lt;complexContent>
+ *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *                 &lt;sequence>
+ *                   &lt;element name="parameter" type="{http://www.sifassociation.org/infrastructure/3.2}parameterType" maxOccurs="unbounded" minOccurs="0"/>
+ *                 &lt;/sequence>
+ *               &lt;/restriction>
+ *             &lt;/complexContent>
+ *           &lt;/complexType>
+ *         &lt;/element>
  *         &lt;element name="returnType" type="{http://www.w3.org/2001/XMLSchema}anyURI"/>
  *       &lt;/sequence>
  *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}token" />
@@ -74,30 +89,33 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "xqueryType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "xqueryType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "type",
     "status",
     "qualifier",
     "description",
     "script",
+    "parameters",
     "returnType"
 })
 public class XqueryType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String type;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected String status;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String qualifier;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String description;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
     protected String script;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true, nillable = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true)
+    protected XqueryType.Parameters parameters;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2", required = true, nillable = true)
     @XmlSchemaType(name = "anyURI")
     protected String returnType;
     @XmlAttribute(name = "id")
@@ -129,6 +147,10 @@ public class XqueryType {
         this.type = value;
     }
 
+    public boolean isSetType() {
+        return (this.type!= null);
+    }
+
     /**
      * Gets the value of the status property.
      * 
@@ -151,6 +173,10 @@ public class XqueryType {
      */
     public void setStatus(String value) {
         this.status = value;
+    }
+
+    public boolean isSetStatus() {
+        return (this.status!= null);
     }
 
     /**
@@ -177,6 +203,10 @@ public class XqueryType {
         this.qualifier = value;
     }
 
+    public boolean isSetQualifier() {
+        return (this.qualifier!= null);
+    }
+
     /**
      * Gets the value of the description property.
      * 
@@ -199,6 +229,10 @@ public class XqueryType {
      */
     public void setDescription(String value) {
         this.description = value;
+    }
+
+    public boolean isSetDescription() {
+        return (this.description!= null);
     }
 
     /**
@@ -225,6 +259,38 @@ public class XqueryType {
         this.script = value;
     }
 
+    public boolean isSetScript() {
+        return (this.script!= null);
+    }
+
+    /**
+     * Gets the value of the parameters property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link XqueryType.Parameters }
+     *     
+     */
+    public XqueryType.Parameters getParameters() {
+        return parameters;
+    }
+
+    /**
+     * Sets the value of the parameters property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link XqueryType.Parameters }
+     *     
+     */
+    public void setParameters(XqueryType.Parameters value) {
+        this.parameters = value;
+    }
+
+    public boolean isSetParameters() {
+        return (this.parameters!= null);
+    }
+
     /**
      * Gets the value of the returnType property.
      * 
@@ -249,6 +315,10 @@ public class XqueryType {
         this.returnType = value;
     }
 
+    public boolean isSetReturnType() {
+        return (this.returnType!= null);
+    }
+
     /**
      * Gets the value of the id property.
      * 
@@ -271,6 +341,78 @@ public class XqueryType {
      */
     public void setId(String value) {
         this.id = value;
+    }
+
+    public boolean isSetId() {
+        return (this.id!= null);
+    }
+
+
+    /**
+     * <p>Java class for anonymous complex type.
+     * 
+     * <p>The following schema fragment specifies the expected content contained within this class.
+     * 
+     * <pre>
+     * &lt;complexType>
+     *   &lt;complexContent>
+     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+     *       &lt;sequence>
+     *         &lt;element name="parameter" type="{http://www.sifassociation.org/infrastructure/3.2}parameterType" maxOccurs="unbounded" minOccurs="0"/>
+     *       &lt;/sequence>
+     *     &lt;/restriction>
+     *   &lt;/complexContent>
+     * &lt;/complexType>
+     * </pre>
+     * 
+     * 
+     */
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @XmlType(name = "", propOrder = {
+        "parameter"
+    })
+    public static class Parameters {
+
+        @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
+        protected List<ParameterType> parameter;
+
+        /**
+         * Gets the value of the parameter property.
+         * 
+         * <p>
+         * This accessor method returns a reference to the live list,
+         * not a snapshot. Therefore any modification you make to the
+         * returned list will be present inside the JAXB object.
+         * This is why there is not a <CODE>set</CODE> method for the parameter property.
+         * 
+         * <p>
+         * For example, to add a new item, do as follows:
+         * <pre>
+         *    getParameter().add(newItem);
+         * </pre>
+         * 
+         * 
+         * <p>
+         * Objects of the following type(s) are allowed in the list
+         * {@link ParameterType }
+         * 
+         * 
+         */
+        public List<ParameterType> getParameter() {
+            if (parameter == null) {
+                parameter = new ArrayList<ParameterType>();
+            }
+            return this.parameter;
+        }
+
+        public boolean isSetParameter() {
+            return ((this.parameter!= null)&&(!this.parameter.isEmpty()));
+        }
+
+        public void unsetParameter() {
+            this.parameter = null;
+        }
+
     }
 
 }

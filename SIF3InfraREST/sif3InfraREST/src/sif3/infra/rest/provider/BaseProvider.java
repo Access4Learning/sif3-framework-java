@@ -23,11 +23,13 @@ import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
 import sif3.common.CommonConstants;
 import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
+import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.interfaces.EventProvider;
 import sif3.common.interfaces.Provider;
 import sif3.common.model.PagingInfo;
@@ -37,7 +39,6 @@ import sif3.common.model.SIFZone;
 import sif3.infra.common.env.mgr.ProviderManagerFactory;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
 import sif3.infra.common.env.types.ProviderEnvironment;
-import au.com.systemic.framework.utils.AdvancedProperties;
 
 /**
  * This is the main class each specific provider of a given SIF Object type must extends to implement the CRUD operation as defined
@@ -154,7 +155,14 @@ public abstract class BaseProvider implements Provider, Runnable
     {
     	return getMultiObjectClassInfo().getObjectName();
     }
-
+	
+    /**
+     * This method returns the service type (e.g. OBJECT or FUNCTIONAL). 
+     * @return See Desc.
+     */
+  	public ServiceType getServiceType() {
+  		return ServiceType.OBJECT;
+  	}
     
     /**
      * (non-Javadoc)
@@ -200,7 +208,7 @@ public abstract class BaseProvider implements Provider, Runnable
 	 * defined in there is used to determine how often this thread is run.
 	 */
     @Override
-    public final synchronized void run()
+    public synchronized void run()
     {
     	String providerName = getProviderName();
     	boolean checkEnvType = getServiceProperties().getPropertyAsBool("provider.check.envType", true);

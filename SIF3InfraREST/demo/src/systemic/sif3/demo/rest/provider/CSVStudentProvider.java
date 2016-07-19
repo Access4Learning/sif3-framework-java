@@ -32,6 +32,7 @@ import sif3.common.header.HeaderProperties;
 import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
+import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
@@ -59,10 +60,10 @@ public class CSVStudentProvider extends  BaseEventProvider<String>
     /*--------------------------------*/
 
     /* (non-Javadoc)
-     * @see sif3.common.interfaces.Provider#retrievByPrimaryKey(java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
+     * @see sif3.common.interfaces.Provider#retrieveByPrimaryKey(java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public Object retrievByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public Object retrieveByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	logger.debug("Retrieve By Primary Key Resoucre ID = "+resourceID+", "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	throw new IllegalArgumentException("Not implemented for CSV Provider.");
@@ -72,7 +73,7 @@ public class CSVStudentProvider extends  BaseEventProvider<String>
      * @see sif3.common.interfaces.Provider#createSingle(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public Object createSingle(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public Object createSingle(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	logger.debug("Create Single for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	logger.debug("Payload to Process:\n"+data.toString());
@@ -84,7 +85,7 @@ public class CSVStudentProvider extends  BaseEventProvider<String>
      * @see sif3.common.interfaces.Provider#updateSingle(java.lang.Object, java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public boolean updateSingle(Object data, String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public boolean updateSingle(Object data, String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
 		logger.debug("Update single with Resoucre ID = "+resourceID+", "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	throw new IllegalArgumentException("Not implemented for CSV Provider.");
@@ -94,7 +95,7 @@ public class CSVStudentProvider extends  BaseEventProvider<String>
      * @see sif3.common.interfaces.Provider#deleteSingle(java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public boolean deleteSingle(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public boolean deleteSingle(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	logger.debug("Remove Single with Resoucre ID = "+resourceID+", "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	throw new IllegalArgumentException("Not implemented for CSV Provider.");
@@ -105,7 +106,7 @@ public class CSVStudentProvider extends  BaseEventProvider<String>
      * @see sif3.common.interfaces.Provider#retrive(sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo)
      */
     @Override
-    public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+    public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata, ResponseParameters customResponseParams) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
     {
     	logger.debug("Retrieve All for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	throw new IllegalArgumentException("Not implemented for CSV Provider.");
@@ -115,7 +116,7 @@ public class CSVStudentProvider extends  BaseEventProvider<String>
      * @see sif3.common.interfaces.Provider#createMany(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public List<CreateOperationStatus> createMany(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public List<CreateOperationStatus> createMany(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
 		logger.debug("Create Many (Bulk Operation) for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	throw new IllegalArgumentException("Not implemented for CSV Provider.");
@@ -125,7 +126,7 @@ public class CSVStudentProvider extends  BaseEventProvider<String>
      * @see sif3.common.interfaces.Provider#updateMany(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public List<OperationStatus> updateMany(Object data, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public List<OperationStatus> updateMany(Object data, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
 		logger.debug("Update Many (Bulk Operation) for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	throw new IllegalArgumentException("Not implemented for CSV Provider.");
@@ -135,7 +136,7 @@ public class CSVStudentProvider extends  BaseEventProvider<String>
      * @see sif3.common.interfaces.Provider#deleteMany(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext)
      */
     @Override
-    public List<OperationStatus> deleteMany(List<String> resourceIDs, SIFZone zone, SIFContext context, RequestMetadata metadata) throws IllegalArgumentException, PersistenceException
+    public List<OperationStatus> deleteMany(List<String> resourceIDs, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException
     {
     	logger.debug("Delete Many (Bulk Operation) for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	throw new IllegalArgumentException("Not implemented for CSV Provider.");

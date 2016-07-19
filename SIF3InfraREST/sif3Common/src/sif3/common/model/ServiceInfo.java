@@ -20,10 +20,10 @@ package sif3.common.model;
 
 import java.io.Serializable;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class is a POJO for service information as provided by the Environment. Each environment has a list of services and each service 
@@ -60,7 +60,7 @@ public class ServiceInfo extends ZoneContextInfo implements Serializable
      * Constructor
      * 
      * @param serviceName The name of a service such as 'StudentPersonals', 'alerts', 'zones' etc. This is NOT the name of the adapter!
-     * @param serviceType Indicates if the service is an OBJECT, UTILITY or FUNCTIONal service as defined by the SIF3 spec.
+     * @param serviceType Indicates if the service is an OBJECT, UTILITY or FUNCTIONAL service as defined by the SIF3 spec.
      */
     public ServiceInfo(String serviceName, ServiceType serviceType)
     {

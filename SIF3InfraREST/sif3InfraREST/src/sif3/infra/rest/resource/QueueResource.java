@@ -36,18 +36,22 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.DateUtils;
+import au.com.systemic.framework.utils.FileReaderWriter;
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.exception.UnmarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.exception.UnsupportedMediaTypeException;
 import sif3.common.header.HeaderValues;
-import sif3.common.header.RequestHeaderConstants;
-import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.HeaderValues.UpdateType;
+import sif3.common.header.RequestHeaderConstants;
+import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.ErrorDetails;
@@ -56,10 +60,6 @@ import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.common.model.QueueCollectionType;
 import sif3.infra.common.model.QueueType;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.DateUtils;
-import au.com.systemic.framework.utils.FileReaderWriter;
-import au.com.systemic.framework.utils.StringUtils;
 
 /*
  * http://localhost:9080/SIF3InfraREST/sif3/queues/69df9d79-8e01-43e8-825f-d0dc1775761b
@@ -137,7 +137,7 @@ public class QueueResource extends InfraResource
 			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
-				return makeErrorResponse(error, ResponseAction.QUERY);
+				return makeErrorResponse(error, ResponseAction.QUERY, null);
 			}
 			QueueCollectionType queuesCollection = infraObjectFactory.createQueueCollectionType();
 			for (QueueType queue : queues.values())
@@ -148,11 +148,11 @@ public class QueueResource extends InfraResource
 //			{
 //				queues.getQueue().add(dummyQueue);
 //			}
-			return makeResponse(queuesCollection, Status.OK.getStatusCode(), false, ResponseAction.QUERY, getInfraMarshaller());				
+			return makeResponse(queuesCollection, Status.OK.getStatusCode(), false, ResponseAction.QUERY, null, getInfraMarshaller());				
 		}
 		else
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Queues not supported.", "This DIRECT Environment implementation does not support queues, yet."), ResponseAction.QUERY);
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Queues not supported.", "This DIRECT Environment implementation does not support queues, yet."), ResponseAction.QUERY, null);
 		}
 	} 
 	
@@ -177,21 +177,21 @@ public class QueueResource extends InfraResource
 			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
-				return makeErrorResponse(error, ResponseAction.QUERY);
+				return makeErrorResponse(error, ResponseAction.QUERY, null);
 			}
 			QueueType queue = queues.get(queueID);		
 			if (queue != null)
 			{
-				return makeResponse(queue, Status.OK.getStatusCode(), false, ResponseAction.QUERY, getInfraMarshaller());				
+				return makeResponse(queue, Status.OK.getStatusCode(), false, ResponseAction.QUERY, null, getInfraMarshaller());				
 			}
 			else
 			{
-				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Queues with ID = "+queueID+" does not exist."), ResponseAction.QUERY);				
+				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Queues with ID = "+queueID+" does not exist."), ResponseAction.QUERY, null);				
 			}
 		}
 		else
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Queues not supported.", "This DIRECT Environment implementation does not support queues, yet."), ResponseAction.QUERY);
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Queues not supported.", "This DIRECT Environment implementation does not support queues, yet."), ResponseAction.QUERY, null);
 		}
 	} 
 
@@ -214,7 +214,7 @@ public class QueueResource extends InfraResource
 			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
-				return makeErrorResponse(error, ResponseAction.CREATE);
+				return makeErrorResponse(error, ResponseAction.CREATE, null);
 			}
 			try
 			{
@@ -223,24 +223,24 @@ public class QueueResource extends InfraResource
 				
 				queues.put(outputQueue.getId(), outputQueue);
 				
-				return makeResponse(outputQueue, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, getInfraMarshaller());
+				return makeResponse(outputQueue, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, null, getInfraMarshaller());
 			}
 			catch (UnmarshalException ex)
 			{
 				logger.error("Failed to unmarshal payload into an QueueType: "+ ex.getMessage(), ex);
 				logger.error("Queue Payload: "+ payload);
-				return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal queue payload: "+ ex.getMessage()), ResponseAction.CREATE);
+				return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal queue payload: "+ ex.getMessage()), ResponseAction.CREATE, null);
 			}
-			catch (UnsupportedMediaTypeExcpetion ex)
+			catch (UnsupportedMediaTypeException ex)
 			{
 				logger.error("Failed to unmarshal payload into an QueueType: "+ ex.getMessage(), ex);
 				logger.error("Queue Payload: "+ payload);
-				return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal queue payload: "+ ex.getMessage()), ResponseAction.CREATE);
+				return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal queue payload: "+ ex.getMessage()), ResponseAction.CREATE, null);
 			}
 		}
 		else
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Queues not supported.", "This DIRECT Environment implementation does not support queues, yet."), ResponseAction.CREATE);
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Queues not supported.", "This DIRECT Environment implementation does not support queues, yet."), ResponseAction.CREATE, null);
 		}
 	} 
 
@@ -265,7 +265,7 @@ public class QueueResource extends InfraResource
 			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
-				return makeErrorResponse(error, ResponseAction.DELETE);
+				return makeErrorResponse(error, ResponseAction.DELETE, null);
 			}
 	         QueueType queue = queues.get(queueID);      
 
@@ -274,16 +274,16 @@ public class QueueResource extends InfraResource
 			    queues.remove(queue.getId());
 				numGetMessages = 0;
 				messageIDMap = new HashMap<String, String>();
-				return makeResopnseWithNoContent(false, ResponseAction.DELETE);				
+				return makeResopnseWithNoContent(false, ResponseAction.DELETE, null);				
 			}
 			else
 			{
-				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Queues with ID = "+queueID+" does not exist."), ResponseAction.DELETE);				
+				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Queues with ID = "+queueID+" does not exist."), ResponseAction.DELETE, null);				
 			}
 		}
 		else
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Queues not supported.", "This DIRECT Environment implementation does not support queues, yet."), ResponseAction.DELETE);
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Queues not supported.", "This DIRECT Environment implementation does not support queues, yet."), ResponseAction.DELETE, null);
 		}
 	}
 		
@@ -312,7 +312,7 @@ public class QueueResource extends InfraResource
 			logger.debug("Consumer ID = "+consumerID+" requested next message");
 			if (error != null) // Not allowed to access!
 			{
-				return makeErrorResponse(error, ResponseAction.QUERY);
+				return makeErrorResponse(error, ResponseAction.QUERY, null);
 			}
 			
 	        QueueType queue = queues.get(queueID);      
@@ -334,13 +334,13 @@ public class QueueResource extends InfraResource
 					  else
 					  {
 			              messageIDMap.put(consumerID, null);
-			              return makeResopnseWithNoContent(false, ResponseAction.QUERY);
+			              return makeResopnseWithNoContent(false, ResponseAction.QUERY, null);
 					    
 					  }
 					}
 					else // message id doesn't match
 					{
-						return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Delete Message ID = "+getDeleteMessageId()+" is not the last delivered message."), ResponseAction.QUERY);										
+						return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Delete Message ID = "+getDeleteMessageId()+" is not the last delivered message."), ResponseAction.QUERY, null);										
 					}
 				}
 				else // deleted Message ID not set. Return next message but don't increase message count
@@ -350,12 +350,12 @@ public class QueueResource extends InfraResource
 			}
 			else
 			{
-				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Queues with ID = "+queueID+" does not exist."), ResponseAction.QUERY);				
+				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Queues with ID = "+queueID+" does not exist."), ResponseAction.QUERY, null);				
 			}
 		} 
 		else
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Queues not supported.", "This DIRECT Environment implementation does not support queues, yet."), ResponseAction.QUERY);
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Queues not supported.", "This DIRECT Environment implementation does not support queues, yet."), ResponseAction.QUERY, null);
 		}
 	}
 		
@@ -377,7 +377,7 @@ public class QueueResource extends InfraResource
 			String consumerID = getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_CONSUMER_ID);
 			logger.debug("Remove Message from Queue (REST DELETE - Single) with queueID = "+queueID+", URL Postfix mime type = '"+mimeType+"' and message with ID = "+getDeleteMessageId()+" requested by consumer = "+consumerID);
 		}
-		return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Queues not supported.", "This DIRECT Environment implementation does not support queues, yet."), ResponseAction.DELETE);
+		return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Queues not supported.", "This DIRECT Environment implementation does not support queues, yet."), ResponseAction.DELETE, null);
 	} 
 
 	public String getDeleteMessageId()

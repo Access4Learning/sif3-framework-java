@@ -29,7 +29,7 @@ import org.apache.log4j.Logger;
 
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.exception.MarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.exception.UnsupportedMediaTypeException;
 
 /**
  * Implementation of a Marshal Factory for CSV Payloads.
@@ -48,7 +48,7 @@ public class CSVMarshaller implements MarshalFactory
 	 * @see sif3.infra.common.conversion.MarshalFactory#marshalToXML(java.lang.Object)
 	 */
 	@Override
-  public String marshalToXML(Object obj) throws MarshalException, UnsupportedMediaTypeExcpetion
+  public String marshalToXML(Object obj) throws MarshalException, UnsupportedMediaTypeException
   {
 		return obj.toString();
   }
@@ -57,7 +57,7 @@ public class CSVMarshaller implements MarshalFactory
 	 * @see sif3.infra.common.conversion.MarshalFactory#marshalToJSON(java.lang.Object)
 	 */
 	@Override
-	public String marshalToJSON(Object obj) throws MarshalException, UnsupportedMediaTypeExcpetion
+	public String marshalToJSON(Object obj) throws MarshalException, UnsupportedMediaTypeException
 	{
 		return obj.toString();
 	}
@@ -66,14 +66,14 @@ public class CSVMarshaller implements MarshalFactory
 	 * @see sif3.infra.common.conversion.MarshalFactory#marschal(java.lang.Object, javax.ws.rs.core.MediaType)
 	 */
 	@Override
-	public String marshal(Object obj, MediaType mediaType) throws MarshalException, UnsupportedMediaTypeExcpetion
+	public String marshal(Object obj, MediaType mediaType) throws MarshalException, UnsupportedMediaTypeException
 	{
 		if (isSupported(mediaType))
 		{
 			return obj.toString();
 		}
 		// If we get here then we deal with an unknown media type
-		throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot marshal the given input to this media type.");
+		throw new UnsupportedMediaTypeException("Unsupported media type: " + mediaType + ". Cannot marshal the given input to this media type.");
 	}
 	
 	/*

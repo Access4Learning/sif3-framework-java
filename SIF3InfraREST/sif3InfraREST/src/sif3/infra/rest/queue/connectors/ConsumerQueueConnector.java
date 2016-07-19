@@ -188,6 +188,7 @@ public class ConsumerQueueConnector
             {
                 logger.debug("Queue exists in DB and on remote location. Sync DB with remote location.");
                 // update queue in DB store if they both have the same QueueID
+                // FIXME Joerg, Assuming remoteQueue.getClass() should be remoteQueue.getId()?
                 if (dbQueue.getQueueID().equals(remoteQueue.getClass()))
                 {
                     copy(remoteQueue, dbQueue);

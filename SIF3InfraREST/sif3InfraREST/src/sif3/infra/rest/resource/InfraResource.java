@@ -25,62 +25,63 @@ import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
 
 /**
- * This is the class to be used (extended) by all infrastructure resources. It holds some infrastructure specific knowledge and 
- * operations.
+ * This is the class to be used (extended) by all infrastructure resources. It holds some
+ * infrastructure specific knowledge and operations.
  * 
  * @author Joerg Huber
  */
 public abstract class InfraResource extends BaseResource
 {
-//	/* Below variables are for testing purposes only */
-//	private static Boolean testMode = null;
-//	/* End Testing variables */
-	
-	private MarshalFactory marshaller = new InfraMarshalFactory();
-	private UnmarshalFactory unmarshaller = new InfraUnmarshalFactory();
+    // /* Below variables are for testing purposes only */
+    // private static Boolean testMode = null;
+    // /* End Testing variables */
 
-	public InfraResource(UriInfo uriInfo, HttpHeaders requestHeaders, Request request, String servicePrefixPath, String zoneID, String contextID)
-	{
-		super(uriInfo, requestHeaders, request, servicePrefixPath, zoneID, contextID);
-		determineMediaTypes(marshaller, unmarshaller, true);
-		
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("Request Media Type : " + getRequestMediaType());
-			logger.debug("Response Media Type: " + getResponseMediaType());
-		}
-	}
-	
-	public MarshalFactory getInfraMarshaller()
-	{
-		return this.marshaller;
-	}
+    private MarshalFactory   marshaller   = new InfraMarshalFactory();
+    private UnmarshalFactory unmarshaller = new InfraUnmarshalFactory();
 
-	public UnmarshalFactory getInfraUnmarshaller()
-	{
-		return this.unmarshaller;
-	}
+    public InfraResource(UriInfo uriInfo, HttpHeaders requestHeaders, Request request,
+            String servicePrefixPath, String zoneID, String contextID)
+    {
+        super(uriInfo, requestHeaders, request, servicePrefixPath, zoneID, contextID);
+        determineMediaTypes(marshaller, unmarshaller, true);
 
-	@Override
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Request Media Type : " + getRequestMediaType());
+            logger.debug("Response Media Type: " + getResponseMediaType());
+        }
+    }
+
+    public MarshalFactory getInfraMarshaller()
+    {
+        return this.marshaller;
+    }
+
+    public UnmarshalFactory getInfraUnmarshaller()
+    {
+        return this.unmarshaller;
+    }
+
+    @Override
     public MarshalFactory getMarshaller()
     {
-	    return getInfraMarshaller();
+        return getInfraMarshaller();
     }
 
-	@Override
+    @Override
     public UnmarshalFactory getUnmarshaller()
     {
-	    return getInfraUnmarshaller();
+        return getInfraUnmarshaller();
     }
 
-//	protected boolean isTestMode()
-//	{
-//		if (testMode == null)
-//		{
-//			AdvancedProperties props = getEnvironmentManager().getServiceProperties();
-//			testMode = props.getPropertyAsBool("resource.testmode", false);
-//		}
-//		return testMode;
-//	}
+    // protected boolean isTestMode()
+    // {
+    // if (testMode == null)
+    // {
+    // AdvancedProperties props = getEnvironmentManager().getServiceProperties();
+    // testMode = props.getPropertyAsBool("resource.testmode", false);
+    // }
+    // return testMode;
+    // }
 
 }

@@ -20,11 +20,11 @@ import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
+import au.com.systemic.framework.utils.FileReaderWriter;
 import sif3.common.ws.Response;
 import sif3.infra.rest.consumer.ConsumerLoader;
 import systemic.sif3.demo.rest.consumer.CSVStudentConsumer;
 import systemic.sif3.demo.rest.conversion.CSVUnmarshaller;
-import au.com.systemic.framework.utils.FileReaderWriter;
 
 /**
  * @author Joerg Huber

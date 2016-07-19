@@ -21,11 +21,12 @@ package sif3.infra.common.env.ops;
 import java.util.Date;
 import java.util.List;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.PersistenceException;
-import sif3.common.model.EnvironmentKey;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
+import sif3.common.model.EnvironmentKey;
 import sif3.common.model.security.TokenInfo;
 import sif3.common.persist.model.AppEnvironmentTemplate;
 import sif3.common.persist.model.SIF3Session;
@@ -33,11 +34,11 @@ import sif3.common.persist.service.AppEnvironmentService;
 import sif3.common.persist.service.SIF3SessionService;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.env.types.ProviderEnvironment;
+import sif3.infra.common.interfaces.ClientEnvStoreOperations;
 import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.common.model.EnvironmentTypeType;
 import sif3.infra.common.model.InfrastructureServiceType;
 import sif3.infra.common.model.InfrastructureServicesType;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class implements operations required by a direct environment provider. They are quite distinct and therefore warrant having its own
@@ -46,7 +47,7 @@ import au.com.systemic.framework.utils.StringUtils;
  * @author Joerg Huber
  *
  */
-public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
+public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations implements ClientEnvStoreOperations
 {
 	private SIF3SessionService service = new SIF3SessionService();
 	private AppEnvironmentService appEnvService = new AppEnvironmentService();
@@ -422,7 +423,7 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 		        }
 		        else if (StringUtils.isEmpty(environment.getAuthenticationMethod())) // if empty in env.xml set to Basic
 		        {
-		          environment.setAuthenticationMethod(AuthenticationMethod.Basic.name());
+		          environment.setAuthenticationMethod(AuthenticationMethod.BASIC.name());
 		        }
 		        
 		        // Set Authentication Method is sif3 Session.
@@ -527,7 +528,7 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 						}
 						else // assume Basic
 						{
-							environment.setAuthenticationMethod(AuthenticationMethod.Basic.name());
+							environment.setAuthenticationMethod(AuthenticationMethod.BASIC.name());
 						}
 						
                         // Set authentication method it in the session.
@@ -626,5 +627,15 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 	private void reloadServiceInfo(EnvironmentType environment, EnvironmentType templEnv)
 	{
 		environment.setProvisionedZones(templEnv.getProvisionedZones());
+	}
+
+	@Override
+	public SIF3Session loadSession(EnvironmentKey environmentKey) {
+		return loadSession(environmentKey, AdapterType.PROVIDER, service);
+	}
+
+	@Override
+	public SIF3Session createOrUpdateSession(EnvironmentType inputEnv, TokenInfo tokenInfo) {
+		return createOrUpdateSession(inputEnv, tokenInfo, AdapterType.PROVIDER, service);
 	}
 }

@@ -1,0 +1,68 @@
+<environment type="DIRECT" xmlns="http://www.sifassociation.org/infrastructure/3.2">
+    <sessionToken></sessionToken>
+    <solutionId>ukTestSolution</solutionId>
+    <defaultZone id="ukSchoolTestingZone">
+        <description>UK Testing Zone: Default Zone</description>
+    </defaultZone>
+    <authenticationMethod>Basic</authenticationMethod>
+    <consumerName></consumerName>
+    <infrastructureServices>
+        <infrastructureService name="environment">environments</infrastructureService>
+        <infrastructureService name="requestsConnector">requests</infrastructureService>
+        <infrastructureService name="servicesConnector">services</infrastructureService>
+        <infrastructureService name="provisionRequests">provision</infrastructureService>
+        <infrastructureService name="queues">queues</infrastructureService>
+		<infrastructureService name="eventsConnector">eventsConnector</infrastructureService>
+        <infrastructureService name="subscriptions">subscriptions</infrastructureService>
+    </infrastructureServices>
+    <provisionedZones>
+        <provisionedZone id="ukSchoolTestingZone">
+            <services>
+                <service name="alerts" contextId="DEFAULT" type="UTILITY">
+                  <rights>
+                    <right type="QUERY">APPROVED</right>
+                    <right type="CREATE">APPROVED</right>
+                    <right type="UPDATE">APPROVED</right>
+                    <right type="DELETE">APPROVED</right>
+                    <right type="PROVIDE">SUPPORTED</right>
+                    <right type="SUBSCRIBE">SUPPORTED</right>
+                    <right type="ADMIN">APPROVED</right>
+                  </rights>
+                </service>
+                <service name="LearnerPersonals" contextId="DEFAULT">
+                  <rights>
+                    <right type="QUERY">APPROVED</right>
+                    <right type="CREATE">APPROVED</right>
+                    <right type="UPDATE">REJECTED</right>
+                    <right type="DELETE">APPROVED</right>
+                    <right type="PROVIDE">REJECTED</right>
+                    <right type="SUBSCRIBE">SUPPORTED</right>
+                    <right type="ADMIN">REJECTED</right>
+                  </rights>
+                </service>
+                <service name="zones" contextId="DEFAULT" type="UTILITY">
+                  <rights>
+                    <right type="QUERY">APPROVED</right>
+                    <right type="CREATE">APPROVED</right>
+                    <right type="UPDATE">APPROVED</right>
+                    <right type="DELETE">APPROVED</right>
+                    <right type="PROVIDE">SUPPORTED</right>
+                    <right type="SUBSCRIBE">SUPPORTED</right>
+                    <right type="ADMIN">APPROVED</right>
+                  </rights>
+                </service>
+                <service name="Payloads" contextId="DEFAULT" type="FUNCTIONAL">
+                  <rights>
+                    <right type="QUERY">APPROVED</right>
+                    <right type="CREATE">APPROVED</right>
+                    <right type="UPDATE">APPROVED</right>
+                    <right type="DELETE">APPROVED</right>
+                    <right type="PROVIDE">APPROVED</right>
+                    <right type="SUBSCRIBE">SUPPORTED</right>
+                    <right type="ADMIN">REJECTED</right>
+                  </rights>
+                </service>
+            </services>
+        </provisionedZone>
+    </provisionedZones>
+</environment>

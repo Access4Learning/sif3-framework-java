@@ -29,7 +29,7 @@ import org.apache.log4j.Logger;
 
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.UnmarshalException;
-import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.exception.UnsupportedMediaTypeException;
 
 /**
  * Implementation of an unmarshal Factory for all CSV Payloads.
@@ -48,7 +48,7 @@ public class CSVUnmarshaller implements UnmarshalFactory
 	 * @see sif3.infra.common.conversion.UnmarshalFactory#unmarshalFromXML(java.lang.String, java.lang.Class)
 	 */
 	@Override
-	public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
+	public Object unmarshalFromXML(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeException
 	{
 		return payload.toString();
 	}
@@ -57,7 +57,7 @@ public class CSVUnmarshaller implements UnmarshalFactory
 	 * @see sif3.infra.common.conversion.UnmarshalFactory#unmarshalFromJSON(java.lang.String, java.lang.Class)
 	 */
 	@Override
-	public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion
+	public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeException
 	{
 		return payload.toString();
 	}
@@ -66,7 +66,7 @@ public class CSVUnmarshaller implements UnmarshalFactory
 	 * @see sif3.infra.common.conversion.UnmarshalFactory#unmarschal(java.lang.String, java.lang.Class, javax.ws.rs.core.MediaType)
 	 */
 	@Override
-	public Object unmarshal(String payload, Class<?> clazz, MediaType mediaType) throws UnmarshalException, UnsupportedMediaTypeExcpetion
+	public Object unmarshal(String payload, Class<?> clazz, MediaType mediaType) throws UnmarshalException, UnsupportedMediaTypeException
 	{
 		if (isSupported(mediaType))
 		{
@@ -74,7 +74,7 @@ public class CSVUnmarshaller implements UnmarshalFactory
 		}
 
 		// If we get here then we deal with an unknown media type
-		throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot unmarshal the given input from this media type.");
+		throw new UnsupportedMediaTypeException("Unsupported media type: " + mediaType + ". Cannot unmarshal the given input from this media type.");
 	}
 	
 	/*

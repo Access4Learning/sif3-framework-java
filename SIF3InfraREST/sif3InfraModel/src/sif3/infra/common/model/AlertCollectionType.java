@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="alert" type="{http://www.sifassociation.org/infrastructure/3.1}alertType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="alert" type="{http://www.sifassociation.org/infrastructure/3.2}alertType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +29,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "alertCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "alertCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.2", propOrder = {
     "alert"
 })
 public class AlertCollectionType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2")
     protected List<AlertType> alert;
 
     /**
@@ -64,6 +64,14 @@ public class AlertCollectionType {
             alert = new ArrayList<AlertType>();
         }
         return this.alert;
+    }
+
+    public boolean isSetAlert() {
+        return ((this.alert!= null)&&(!this.alert.isEmpty()));
+    }
+
+    public void unsetAlert() {
+        this.alert = null;
     }
 
 }

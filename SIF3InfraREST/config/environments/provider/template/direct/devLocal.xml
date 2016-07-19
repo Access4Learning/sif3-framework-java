@@ -7,12 +7,12 @@
     <authenticationMethod>Basic</authenticationMethod>
     <consumerName></consumerName>
     <infrastructureServices>
-        <infrastructureService name="environment">environments/</infrastructureService>
+        <infrastructureService name="environment">environments</infrastructureService>
         <infrastructureService name="requestsConnector">requests</infrastructureService>
         <infrastructureService name="provisionRequests">provision</infrastructureService>
         <infrastructureService name="eventsConnector">eventsConnector</infrastructureService>
-        <infrastructureService name="queues">/queues</infrastructureService>
-        <infrastructureService name="subscriptions">/subscriptions/</infrastructureService>
+        <infrastructureService name="queues">queues</infrastructureService>
+        <infrastructureService name="subscriptions">subscriptions</infrastructureService>
     </infrastructureServices>
     <provisionedZones>
        <provisionedZone id="auSchoolTestingZone">

@@ -29,8 +29,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import sif3.common.interfaces.Auditor;
 
+import sif3.common.interfaces.Auditor;
 import sif3.common.model.audit.AuditRecord;
 import sif3.infra.rest.resource.audit.AuditableResource;
 import sif3.infra.rest.web.audit.AuditRequestWrapper;

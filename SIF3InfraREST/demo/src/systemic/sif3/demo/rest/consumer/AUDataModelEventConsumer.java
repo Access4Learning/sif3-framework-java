@@ -27,8 +27,10 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 
-import sif.dd.au30.conversion.DataModelMarshalFactory;
-import sif.dd.au30.conversion.DataModelUnmarshalFactory;
+import au.com.systemic.framework.utils.DateUtils;
+import sif.dd.au34.model.ObjectFactory;
+import sif.dd.conversion.DataModelMarshalFactory;
+import sif.dd.conversion.DataModelUnmarshalFactory;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.model.EventMetadata;
@@ -44,7 +46,6 @@ import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.common.ws.model.MultiOperationStatusList;
 import sif3.infra.rest.consumer.AbstractEventConsumer;
-import au.com.systemic.framework.utils.DateUtils;
 
 /**
  * @author Joerg Huber
@@ -61,7 +62,7 @@ public abstract class AUDataModelEventConsumer<L> extends AbstractEventConsumer<
     private HashMap<String, Integer> recordCounters = new HashMap<String, Integer>();
 
 	private static DataModelUnmarshalFactory unmarshaller = new DataModelUnmarshalFactory();
-	private static DataModelMarshalFactory marshaller = new DataModelMarshalFactory();
+	private static DataModelMarshalFactory marshaller = new DataModelMarshalFactory(ObjectFactory.class);
 	
 	public AUDataModelEventConsumer()
 	{

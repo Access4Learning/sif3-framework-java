@@ -19,6 +19,7 @@ package sif3.infra.rest.env.connectors;
 
 import org.apache.log4j.Logger;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.security.TokenCoreInfo;
@@ -32,7 +33,6 @@ import sif3.infra.common.env.types.EnvironmentInfo;
 import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.rest.client.EnvironmentClient;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class provides a set of methods that are required by a "client connector" style service. This includes a consumer but also a
