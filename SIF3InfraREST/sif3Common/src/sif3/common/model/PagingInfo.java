@@ -49,7 +49,19 @@ public class PagingInfo implements Serializable
 	
     public PagingInfo()
 	{}
-	
+
+    /**
+     * Constructor
+     * This constructor is mainly be used to send a DELAYED paged request where all pages shall be returned. In this case the consumer 
+     * only needs to set the page size but not the actual page.
+     * 
+     * @param pageSize
+     */
+    public PagingInfo(int pageSize)
+    {
+        setPageSize(pageSize);
+    }
+
 	/**
 	 * Constructor
 	 * 
