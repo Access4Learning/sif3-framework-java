@@ -7,6 +7,7 @@ Bug Fixes
 - Fixed issue on provider with external security services and the environment resource class. External tokens are
   now dealt with correctly if a token is renewed with a different value.
 - Provider reports proper error to consumer if navigationPage is <=0.
+- Fixed issue where consumerInstanceId must be a int rather than a string when reading from Message Queues.
 
 New Functionality
 -----------------
