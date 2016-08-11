@@ -1429,7 +1429,7 @@ public abstract class AbstractConsumer implements Consumer, DelayedConsumer, Que
 		return result;
 	}
 	
-	@SuppressWarnings("unused")
+//	@SuppressWarnings("unused")
     private List<ZoneContextInfo> getFinalZoneCtxList( List<ZoneContextInfo> zoneCtxList, SIF3Session sif3Session)
 	{
 		List<ZoneContextInfo> finalZoneContextList = null;

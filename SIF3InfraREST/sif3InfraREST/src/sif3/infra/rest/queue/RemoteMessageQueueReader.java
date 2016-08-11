@@ -65,7 +65,7 @@ public class RemoteMessageQueueReader implements Runnable
 	private QueueInfo queueInfo = null;
     private ConsumerEnvironmentManager consumerEvnMgr = null;
 	private SIF3Session sif3Session = null;
-	private String readerID = null;
+	private int readerID;
 	private String lastMsgeID = null;
 	private int waitTime = 0; // milliseconds
 
@@ -81,7 +81,7 @@ public class RemoteMessageQueueReader implements Runnable
 	 *            A string identifying the ID of this reader. Since it is expected that readers are running in multiple threads each 
 	 *            reader should have its own id to identify it for logging purpose.
 	 */
-	public RemoteMessageQueueReader(QueueInfo queueInfo, String readerID) throws ServiceInvokationException
+	public RemoteMessageQueueReader(QueueInfo queueInfo, int readerID) throws ServiceInvokationException
 	{
 		super();
 		try
@@ -118,7 +118,7 @@ public class RemoteMessageQueueReader implements Runnable
     @Override
     public void run()
     {
-    	logger.debug("Message Queue Reader "+getReaderID()+" starts reading messages...");
+    	logger.debug("Message Queue Reader "+getReaderID()+" starts reading messages for queue "+getQueueInfo().getQueue().getName()+"...");
     	startReading();
     }
 
@@ -206,7 +206,7 @@ public class RemoteMessageQueueReader implements Runnable
 
 	private void waitBeforeGetNext()
 	{
-		logger.debug("\n==========================\n"+getReaderID()+ " will wait for "+getWaitTime()/CommonConstants.MILISEC+" seconds before attempting to get next message."+"\n==========================");
+		logger.debug("\n==========================\n"+getReaderID()+" for queue "+getQueueInfo().getQueue().getName()+ " will wait for "+getWaitTime()/CommonConstants.MILISEC+" seconds before attempting to get next message."+"\n==========================");
 		try
 		{
 			Object semaphore = new Object();
@@ -350,7 +350,7 @@ public class RemoteMessageQueueReader implements Runnable
 		baseInfo.setContext(getSif3Session().getContext(pathInfo.getContext()));
 //      baseInfo.setZone(getZone(pathInfo.getZone() != null ? pathInfo.getZone().getId() : null));
 //      baseInfo.setContext(getContext(pathInfo.getContext()!= null ? pathInfo.getContext().getId() : null));
-		baseInfo.setMessageQueueReaderID(getReaderID());
+		baseInfo.setMessageQueueReaderID(getQueueReaderID());
 		baseInfo.setFullRelativeURL(pathInfo.getOriginalURLString());
 		baseInfo.setServiceName(pathInfo.getServiceName());
 		baseInfo.setUrlService(pathInfo.getUrlService());
@@ -366,7 +366,7 @@ public class RemoteMessageQueueReader implements Runnable
 		{
 			if (logger.isDebugEnabled())
 			{
-				logger.debug("EVENT Message Received:\n"+response);
+				logger.debug(getQueueReaderID()+": EVENT Message Received:\n"+response);
 			}
 			SIFZone zone = getZone(response);
 			SIFContext context = getContext(response);
@@ -396,10 +396,10 @@ public class RemoteMessageQueueReader implements Runnable
 				
 				//TODO: JH - Do we need applicationKey and authenticatedUser HTTP header here?				
 				
-				EventInfo eventInfo = new EventInfo(eventPayload, response.getMediaType(), eventAction, updateType, zone, context, metadata, getReaderID());
-				logger.debug(getReaderID()+": Attempts to push Event to local queue...");
+				EventInfo eventInfo = new EventInfo(eventPayload, response.getMediaType(), eventAction, updateType, zone, context, metadata, getQueueReaderID());
+				logger.debug(getQueueReaderID()+": Attempts to push Event to local queue...");
 				localQueue.blockingPush(eventInfo);
-				logger.debug(getReaderID()+": Event successfully pushed to local queue");
+				logger.debug(getQueueReaderID()+": Event successfully pushed to local queue");
 			}
 		}
 		catch (Exception ex)
@@ -562,9 +562,17 @@ public class RemoteMessageQueueReader implements Runnable
 		return client;
 	}
 
-	private String getReaderID()
+	private int getReaderID()
 	{
 		return readerID;
+	}
+	
+	/*
+	 * Returns a String ID of the Queue Name and consumerInstance Id. Used for logging an debugging.
+	 */
+	private String getQueueReaderID()
+	{
+		return getQueueInfo().getQueue().getName()+"_"+getReaderID();
 	}
 
 	private String getLastMsgeID()

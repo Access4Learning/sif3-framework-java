@@ -52,7 +52,7 @@ public class MessageClient extends BaseClient
 	/*
 	 * Get message and remove old one.
 	 */
-	public Response getMessage(String removeMsgID, String consumerInstanceID) throws ServiceInvokationException
+	public Response getMessage(String removeMsgID, int consumerInstanceID) throws ServiceInvokationException
 	{
 		WebResource service = getService();
 		try
@@ -78,7 +78,7 @@ public class MessageClient extends BaseClient
 	/*
 	 * Remove old message.
 	 */
-	public Response removeMessage(String removeMsgID, String consumerInstanceID) throws ServiceInvokationException
+	public Response removeMessage(String removeMsgID, int consumerInstanceID) throws ServiceInvokationException
 	{
 		WebResource service = getService();
 		try
@@ -121,17 +121,17 @@ public class MessageClient extends BaseClient
 	 * This method sets all header properties for queue related request as specified by the SIF3 Spec.
 	 * 
 	 * @param sif3Session TSession information. Required for authentication token creation.
-	 * @param consumerInstanceID Can be null.
+	 * @param consumerInstanceID The id of the consumer instance.
 	 * @return
 	 */
-	private HeaderProperties getHeaderProperties(String consumerInstanceID)
+	private HeaderProperties getHeaderProperties(int consumerInstanceID)
 	{
 	    // Add Authentication info to existing header properties
 		HeaderProperties hdrProperties = createAuthenticationHdr(false, null);
-		if (StringUtils.notEmpty(consumerInstanceID))
-		{
-			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_CONSUMER_ID, consumerInstanceID);
-		}
+//		if (StringUtils.notEmpty(consumerInstanceID))
+//		{
+			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_CONSUMER_ID, String.valueOf(consumerInstanceID));
+//		}
 		return hdrProperties;
 	}
 }

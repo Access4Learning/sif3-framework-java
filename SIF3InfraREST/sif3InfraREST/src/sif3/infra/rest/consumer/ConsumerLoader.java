@@ -355,16 +355,15 @@ public class ConsumerLoader
 		ExecutorService service = Executors.newFixedThreadPool(numThreads);
 		for (int i = 0; i < numThreads; i++)
 		{
-			String readerID = remoteQueueName+" - Reader "+(i+1);
 			try
 			{
-				RemoteMessageQueueReader remoteReader = new RemoteMessageQueueReader(queueInfo, readerID);
-				logger.debug("Start Remote Reader "+readerID);
+				RemoteMessageQueueReader remoteReader = new RemoteMessageQueueReader(queueInfo, i);
+				logger.debug("Start Remote Reader "+remoteQueueName+" "+i);
 				service.execute(remoteReader);
 			}
 			catch (Exception ex)
 			{
-				logger.error("Failed to start message reader thread for : "+readerID);
+				logger.error("Failed to start message reader thread for : "+remoteQueueName+" "+i);
 			}
 		}
 		logger.debug(numThreads+" "+remoteQueueName+" message readers initilaised and started.");
