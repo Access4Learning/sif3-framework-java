@@ -319,8 +319,8 @@ public class TestStudentPersonalConsumer
 //			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
 //            envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, CommonConstants.DEFAULT_CONTEXT));
 
-//			List<Response> responses = consumer.retrieve(new PagingInfo(10, 0), envZoneCtxList, RequestType.DELAYED, QueryIntention.NO_CACHE, params);
-			List<Response> responses = consumer.retrieve(new PagingInfo(10, 0), envZoneCtxList, RequestType.IMMEDIATE, QueryIntention.NO_CACHE, params);
+//			List<Response> responses = consumer.retrieve(new PagingInfo(10), envZoneCtxList, RequestType.DELAYED, QueryIntention.NO_CACHE, params);
+			List<Response> responses = consumer.retrieve(new PagingInfo(10, 1), envZoneCtxList, RequestType.IMMEDIATE, QueryIntention.NO_CACHE, params);
 //            List<Response> responses = consumer.retrieve(new PagingInfo(10, 0), envZoneCtxList, REQUEST_TYPE, QueryIntention.NO_CACHE, params);
 //			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), envZoneCtxList, REQUEST_TYPE);
 //			List<Response> responses = consumer.retrieve(null, envZoneCtxList, REQUEST_TYPE);
@@ -511,7 +511,7 @@ public class TestStudentPersonalConsumer
 		
 			StudentPersonalConsumer consumer = tester.getConsumer();
   		
-            tester.getStudent(consumer);
+//            tester.getStudent(consumer);
             tester.getStudents(consumer, true);
 //            tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
 //            tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
