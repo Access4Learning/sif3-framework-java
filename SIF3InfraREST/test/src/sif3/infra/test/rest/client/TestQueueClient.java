@@ -40,6 +40,8 @@ public class TestQueueClient
 //	private static final String PROP_FILE_NAME="StudentConsumer";
 //	private AdapterEnvironmentStore store = new AdapterEnvironmentStore(PROP_FILE_NAME);
 
+	private static final int CONSUMER_INSTANCE_ID = 0;
+	
     // Local
     private static final String CONSUMER_ID = "StudentConsumer";
 
@@ -217,7 +219,7 @@ public class TestQueueClient
 		System.out.println("Get Next Message...");
 		MessageClient clt = new MessageClient(ConsumerEnvironmentManager.getInstance(), new URI(queue.getQueueUri())); 
 		
-		Response response = clt.getMessage(deleteMsgID, "Thread-1");
+		Response response = clt.getMessage(deleteMsgID, CONSUMER_INSTANCE_ID);
 		printResponse(response);
 		String nextMsgID = response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_MESSAGE_ID);
 		System.out.println("Next Available message is: "+nextMsgID);
@@ -231,7 +233,7 @@ public class TestQueueClient
 		MessageClient clt = new MessageClient(ConsumerEnvironmentManager.getInstance(), new URI(queue.getQueueUri())); 
 		for (int i = 0; i<10; i++)
 		{
-			Response response = clt.getMessage(deleteMsgID, "Thread-1");
+			Response response = clt.getMessage(deleteMsgID, CONSUMER_INSTANCE_ID);
 			deleteMsgID = response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_MESSAGE_ID);
 			System.out.println("Returned message ID is: "+deleteMsgID);
 		}
@@ -242,7 +244,7 @@ public class TestQueueClient
 	{
 		System.out.println("Remove Message...");
 		MessageClient clt = new MessageClient(ConsumerEnvironmentManager.getInstance(), new URI(queue.getQueueUri())); 
-		printResponse(clt.removeMessage(deleteMsgID, "Thread-1"));
+		printResponse(clt.removeMessage(deleteMsgID, CONSUMER_INSTANCE_ID));
 		System.out.println("Remove Message done.");
 	}
 
