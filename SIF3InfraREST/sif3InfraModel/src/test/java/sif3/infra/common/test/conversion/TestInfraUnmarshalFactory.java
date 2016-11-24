@@ -76,7 +76,7 @@ public class TestInfraUnmarshalFactory
     
     System.out.println("Start Testing InfraUnmarshalFactory...");
     
-//    tester.testFromXML();
+    tester.testFromXML();
     tester.testSupportMethods();
     
     System.out.println("End Testing InfraUnmarshalFactory.");
