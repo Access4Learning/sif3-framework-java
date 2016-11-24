@@ -154,6 +154,7 @@ public class XMLUtils
    * @param clazz Class to be used for retrieving a class loader to load the CML document.
    * @return Document or null on error (written to error log)
    */
+  @SuppressWarnings("rawtypes")
   public static Document load(String resource, Class clazz)
   {
     Document document = null;
@@ -251,6 +252,7 @@ public class XMLUtils
    * 
    * @return the object created or null on error (written to error log)
    */
+  @SuppressWarnings("resource")
   public static Object readXMLObject(Document xml)
   {
     try
@@ -267,6 +269,7 @@ public class XMLUtils
     }
   }
 
+  @SuppressWarnings("rawtypes")
   private static InputSource getInputSource(String resource, Class clazz)
   {
     // load the file using class resource loader
