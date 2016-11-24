@@ -1,0 +1,64 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+	<!-- ======================== -->
+	<!-- Parent Module Definition -->
+	<!-- ======================== -->
+	<parent>
+		<groupId>sif3.framework</groupId>
+		<artifactId>sif3-framework</artifactId>
+		<version>0.10.0-beta</version>
+	</parent>
+	
+	<!-- =========== -->
+	<!-- Module Info -->
+	<!-- =========== -->
+	<artifactId>sif3-infra-model</artifactId>
+	<packaging>jar</packaging>
+	<name>SIF3 Infrastructure Data Model</name>
+
+	<!-- =============================== -->
+	<!-- Properties local to this module -->
+	<!-- =============================== -->
+	<properties>
+
+		<!-- Because we want the infrastructure version to be part of the final jar name we override the default jar name -->
+		<jar.finalName>${jarName.prefix}Infra-model-${project.version}</jar.finalName>
+
+	</properties>
+
+	<dependencies>
+
+		<!-- ================================= -->
+		<!-- Other SIF3 Framework Dependencies -->
+		<!-- ================================= -->
+		<dependency>
+			<groupId>sif3.framework</groupId>
+			<artifactId>sif3-common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		
+		<!-- ================== -->
+		<!-- Log4J Dependencies -->
+		<!-- ================== -->
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+		</dependency>
+
+	</dependencies>
+ 
+	<build>
+		<plugins>
+		    <!-- =============================================================== -->
+		    <!--  Test Plugin configuration. Required to turn on/off test cases. -->
+		    <!-- =============================================================== -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+	<description>This project holds the SIF3 Infrastructure Data Model that is generated out of the SIF3 Infrastructure XSD using xjc (JAXB Pojo Generator).</description>
+</project>
