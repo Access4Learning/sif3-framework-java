@@ -1,0 +1,16 @@
+<environment xmlns="http://www.sifassociation.org/infrastructure/3.1">
+    <solutionId>auTestSolution</solutionId>
+    <authenticationMethod>Basic</authenticationMethod>
+    <consumerName></consumerName>
+    <applicationInfo>
+        <applicationKey></applicationKey>
+        <supportedInfrastructureVersion>3.1</supportedInfrastructureVersion>
+        <dataModelNamespace>http://www.SIFinfo.org/au/datamodel/3.4</dataModelNamespace>
+        <transport>REST</transport>
+        <applicationProduct>
+            <vendorName>Systemic Pty Ltd</vendorName>
+            <productName>Test Driver</productName>
+            <productVersion>0.1alpha</productVersion>
+        </applicationProduct>
+    </applicationInfo>
+</environment>
