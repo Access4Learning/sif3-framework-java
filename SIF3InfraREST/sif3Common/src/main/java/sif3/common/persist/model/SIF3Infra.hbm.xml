@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+    <!-- ************************* -->
+    <!-- SIF3_SESSION              -->
+    <!-- ************************* -->
+    <class name="sif3.common.persist.model.SIF3Session" table="SIF3_SESSION">
+        <id name="sessionID" type="long" column="SESSION_ID">
+            <generator class="native"/>
+        </id>
+        <property name="adapterName" column="CONSUMER_NAME" type="string" length="100"/>
+        <property name="solutionID" column="SOLUTION_ID" type="string" length="100"/>
+        <property name="applicationKey" column="APPLICATION_KEY" type="string" length="100"/>
+        <property name="userToken" column="USER_TOKEN" type="string" length="200"/>
+        <property name="instanceID" column="INSTANCE_ID" type="string" length="200"/>
+        <property name="password" column="PASSWORD" type="string" length="100"/>
+        <property name="sessionToken" column="SESSION_TOKEN" type="string" length="200"/>
+        <property name="environmentID" column="ENVIRONMENT_ID" type="string" length="36"/>
+        <property name="securityToken" column="SECURITY_TOKEN" type="string" length="200"/>
+        <property name="securityTokenExpiry" column="SECURITY_TOKEN_EXPIRY" type="timestamp"/>
+        <property name="adapterType" column="ADAPTER_TYPE" type="string" length="20"/>
+        <property name="environmentXML" column="ENVIRONMENT_XML" type="text"/>
+        <property name="queueStrategy" column="QUEUE_STRATEGY" type="string"/>
+        <property name="created" column="CREATED" type="timestamp"/>
+        <property name="lastAccessed" column="LAST_ACCESSED" type="timestamp"/>
+    </class>
+    
+    <!-- ************************* -->
+    <!-- SIF3_QUEUE                -->
+    <!-- ************************* -->
+    <class name="sif3.common.persist.model.SIF3Queue" table="SIF3_QUEUE">
+        <id name="queueID" type="string" column="QUEUE_ID">
+            <generator class="assigned"/>
+        </id>
+        <property name="name" column="NAME" type="string" length="100"/>
+        <property name="queueType" column="QUEUE_TYPE" type="string" length="10"/>
+        <property name="environmentID" column="ENVIRONMENT_ID" type="string" length="36"/>
+        <property name="adapterType" column="ADAPTER_TYPE" type="string" length="20"/>
+        <property name="zoneID" column="ZONE_ID" type="string" length="256"/>
+        <property name="contextID" column="CONTEXT_ID" type="string" length="256"/>
+        <property name="serviceName" column="SERVICE_NAME" type="string" length="256"/>
+        <property name="serviceType" column="SERVICE_TYPE" type="string" length="20"/>
+        <property name="messageURI" column="MESSAGE_URI" type="string" length="256"/>
+        <property name="wakeupURI" column="WAKUP_URI" type="string" length="256"/>
+        <property name="longPollingTimeout" column="LONGPOLLING_TIMEOUT" type="long"/>
+        <property name="waitTime" column="WAIT_TIME" type="long"/>
+        <property name="maxConsumers" column="MAX_CONSUMERS" type="int"/>
+        <property name="numMessages" column="MSG_COUNT" type="long"/>
+        <property name="created" column="CREATED" type="timestamp"/>
+        <property name="lastAccessed" column="LAST_ACCESSED" type="timestamp"/>
+        <property name="lastModified" column="LAST_MODIFIED" type="timestamp"/>
+    </class>    
+    
+    <!-- ************************* -->
+    <!-- SIF3_SUBSCRIPTION         -->
+    <!-- ************************* -->
+    <class name="sif3.common.persist.model.SIF3Subscription" table="SIF3_SUBSCRIPTION">
+        <id name="subscriptionID" type="string" column="SUBSCRIPTION_ID">
+            <generator class="assigned"/>
+        </id>
+        <property name="queueID" column="QUEUE_ID" type="string" length="36"/>
+        <property name="adapterType" column="ADAPTER_TYPE" type="string" length="20"/>
+        <property name="zoneID" column="ZONE_ID" type="string" length="256"/>
+        <property name="contextID" column="CONTEXT_ID" type="string" length="256"/>
+        <property name="serviceName" column="SERVICE_NAME" type="string" length="256"/>
+        <property name="serviceType" column="SERVICE_TYPE" type="string" length="20"/>
+        <property name="created" column="CREATED" type="timestamp"/>
+        <property name="lastAccessed" column="LAST_ACCESSED" type="timestamp"/>
+    </class>
+
+    <!-- ************************* -->
+    <!-- SIF3_ENV_TEMPLATE         -->
+    <!-- ************************* -->
+    <class name="sif3.common.persist.model.EnvironmentTemplate" table="SIF3_ENV_TEMPLATE">
+        <id name="templateID" type="string" column="ENV_TEMPLATE_ID" length="50">
+            <generator class="assigned"/>
+        </id>
+        <property name="templateFileName" column="TEMPLATE_FILE_NAME" type="string" length="100"/>
+    </class>
+    
+    <!-- ************************* -->
+    <!-- SIF3_APP_TEMPLATE         -->
+    <!-- ************************* -->
+    <class name="sif3.common.persist.model.AppEnvironmentTemplate" table="SIF3_APP_TEMPLATE">
+        <id name="appTemplateID" type="long" column="APP_TEMPLATE_ID">
+            <generator class="assigned"/>
+        </id>
+        <property name="solutionID" column="SOLUTION_ID" type="string" length="100"/>
+        <property name="applicationKey" column="APPLICATION_KEY" type="string" length="100"/>
+        <property name="userToken" column="USER_TOKEN" type="string" length="200"/>
+        <property name="instanceID" column="INSTANCE_ID" type="string" length="200"/>
+        <property name="password" column="PASSWORD" type="string" length="100"/>
+        <property name="authMethod" column="AUTH_METHOD" type="string" length="20"/>
+        <many-to-one name="environmentTemplate" column="ENV_TEMPLATE_ID" class="sif3.common.persist.model.EnvironmentTemplate" fetch="join"/>
+    </class>
+
+</hibernate-mapping>
