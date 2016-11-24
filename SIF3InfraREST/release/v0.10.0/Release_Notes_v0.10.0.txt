@@ -2,6 +2,24 @@
 Release Notes for v0.10.0 of SIF3 Framework (MM DD, 2016)
 ==============================================================
 
+Please note that as of this version the SIF3 Framework no longer uses Ant for the build process. It now uses
+Maven that is superior when it comes to dependency management. Therefore if you wish to build the framework
+yourself or need changes and want to rebuild it, you need either a Maven capable IDE or maven installed.
+Please refer to the developer's guide for maven version information.
+
+If you have the framework imported to your IDE and want to upgrade to the latest version it is suggested
+that you perform the steps listed below. The directory structure has changed considerably and uses
+maven conventions. Therefore it is best to completely re-import the project to your IDE:
+
+1) Remove the current SIF3 Framework Project from your IDE. This not only includes the removal from the IDE
+   but also physical removal of the SIF3 Framework directory and its sub-directory. If you made changes to
+   the framework, make sure you make a backup first!
+2) Now re-import the project as a Maven multi-module project into your IDE. Details for Eclispe are listed
+   in the developer's guide under section "3.3.6.1 Eclipse Notes" Follow similar steps for other IDEs.
+
+More details about the various maven modules can be found in the Developer's Guide in section 
+"3.2. Framework Structure".
+
 Bug Fixes
 ---------
 - Fixed issue on provider with external security services and the environment resource class. External tokens are
@@ -22,7 +40,9 @@ Changed Functionality
 
 Removed Artifacts/Functionality
 -------------------------------
-- None  
+- None
+- Dependency on the systemoc-framework_<date>.jar has been removed. Applicable classes of that library are now part of
+  the SIF3 Framework.  
 
 --------------------------
 -- Upgrade Instructions --
