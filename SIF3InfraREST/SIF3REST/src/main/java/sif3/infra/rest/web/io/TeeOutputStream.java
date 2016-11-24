@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 
 /**
  * 
@@ -79,4 +80,16 @@ public class TeeOutputStream extends ServletOutputStream
 			this.branch.close();
 		}
 	}
+	
+    // @Override
+    public boolean isReady()
+    {
+        return false;
+    }
+
+    // @Override
+    public void setWriteListener(WriteListener arg0)
+    {
+        throw new IllegalStateException();
+    }
 }

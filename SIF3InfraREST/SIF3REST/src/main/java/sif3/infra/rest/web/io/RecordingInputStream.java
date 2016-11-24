@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javax.servlet.ServletInputStream;
+import javax.servlet.ReadListener;
 
 /**
  * 
@@ -81,4 +82,22 @@ public class RecordingInputStream extends ServletInputStream
 	{
 		return new String(byteArrayOutputStream.toByteArray());
 	}
+	
+    // @Override
+    public boolean isFinished()
+    {
+        return false;
+    }
+
+    // @Override
+    public boolean isReady()
+    {
+        return false;
+    }
+
+    // @Override
+    public void setReadListener(ReadListener arg0)
+    {
+        throw new IllegalStateException();
+    }
 }
