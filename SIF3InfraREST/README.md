@@ -18,7 +18,7 @@ There is a set of pre-built framework libraries in the "release" directory. Plea
 As of version 0.10.0 the SIF3 Framework is a multi-module Maven project. It is important to note that the SIF3
 Framework is not yet available in a global maven repository. For more details about the maven build and how it can
 be used within other maven projects refer to the developer's guide section **"3.3.1. Framework Libraries Build"** and 
-**"3.3.2. Maven Coordinates"** and its sub-sections.. Once you understand these sections and have performed appropriate 
+**"3.3.2. Maven Coordinates"** and its sub-sections. Once you understand these sections and have performed appropriate 
 actions to have the SIF3 Framework in an accessible repository you can use the following dependency in your own SIF3 
 Project (note that the version number will change over time):
 ```xml
