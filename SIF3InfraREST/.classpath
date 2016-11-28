@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry kind="src" path="src/main/resources"/>
-	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry excluding="config/|config/providers/|config/providers/|config/hibernate/|config/hibernate/|config/environments/|config/environments/|config/consumers/|config/consumers/|config/" kind="src" path="src/test/resources"/>
 	<classpathentry kind="src" path="src/test/resources/config/providers"/>
 	<classpathentry kind="src" path="src/test/resources/config/hibernate"/>
