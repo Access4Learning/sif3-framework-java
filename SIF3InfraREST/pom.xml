@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>manual</distribution>
+			<comments>A business-friendly OSS license</comments>
+		</license>
+	</licenses>
+
+	<!-- =========== -->
+	<!-- Module Info -->
+	<!-- =========== -->
+	<groupId>sif3.framework</groupId>
+	<artifactId>sif3-framework</artifactId>
+	<version>0.10.0-beta</version>
+	<packaging>pom</packaging>
+	
+	<!-- ===================================== -->
+	<!-- Global Properties used by sub-modules -->
+	<!-- ===================================== -->
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<!-- Set the Java Version compliance -->
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+		
+		<!-- Hardcoded Variable for the non-maven library location -->
+		<!--project.lib.dir>C:/DEV/workspaces/jbds10.1.0/sif3-framework/lib</project.lib.dir-->
+		<project.lib.dir>C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/lib</project.lib.dir>
+		
+		<!-- The location of the SIF AU Data Model library -->
+		<auDMLibLocation>${project.lib.dir}/datamodel</auDMLibLocation>
+
+		<!-- The current SIF 3.x infrastructure version for which the library intended for. -->
+		<sifInfraVersion>3.1</sifInfraVersion>
+		
+		<!-- Final Jar name of all sub-modules follows a certain naming convention that includes the SIF infrastructure version. -->
+		<jarName.prefix>sif${sifInfraVersion}</jarName.prefix>
+
+		<!-- Because the tests are not JUnit tests and are run manually we disable them by default. This may change in future. -->
+		<skipTests>true</skipTests>
+	</properties>
+	
+	<!-- ====================== -->
+	<!-- SIF3 Framework Modules -->
+	<!-- ====================== -->
+
+	<dependencyManagement>
+		<dependencies>
+		
+			<!-- =================== -->
+			<!-- Local Dependencies  -->
+			<!-- Non-Maven Libraries -->
+			<!-- =================== -->
+			<dependency>
+				<groupId>sifau</groupId>
+				<artifactId>sif3-au-datamodel</artifactId>
+				<version>3.4</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- ========================= -->
+			<!-- JDBC Drivers Dependencies -->
+			<!-- ========================= -->
+			<dependency>
+				<groupId>jdbc</groupId>
+				<artifactId>mysql-jdbc</artifactId>
+				<version>4.0</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>jdbc</groupId>
+				<artifactId>oracle-jdbc</artifactId>
+				<version>6.0</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>jdbc</groupId>
+				<artifactId>sqlite-jdbc</artifactId>
+				<version>3.7.2</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- ================== -->
+			<!-- Log4j Dependencies -->
+			<!-- ================== -->
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>1.2.14</version>
+			</dependency>
+
+			<!-- ======================== -->
+			<!-- Servlet API Dependencies -->
+			<!-- ======================== -->
+			<dependency>
+			    <groupId>javax.servlet</groupId>
+			    <artifactId>javax.servlet-api</artifactId>
+			    <version>3.1.0</version>
+			    <scope>provided</scope>
+			</dependency>
+		
+			<!-- =================== -->
+			<!-- JAX-RS Dependencies -->
+			<!-- =================== -->
+			<dependency>
+			    <groupId>javax.ws.rs</groupId>
+			    <artifactId>jsr311-api</artifactId>
+			    <version>1.1.1</version>
+			    <scope>provided</scope>
+			</dependency>
+		
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+			    <!-- =============================================================== -->
+			    <!--  Test Plugin configuration. Required to turn on/off test cases. -->
+			    <!-- =============================================================== -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.19.1</version>
+					<configuration>
+						<skipTests>${skipTests}</skipTests>
+					</configuration>
+				</plugin>
+
+			    <!-- ====================================================================================================== -->
+			    <!-- Install non-maven libraries into the local repository. This enables these libraries to be treated like -->
+			    <!-- standard maven libraries for the rest of the project builds.                                           -->
+			    <!-- ====================================================================================================== -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>2.5.2</version>
+					<executions>
+						<execution>
+							<id>install-external-au-datamodel</id>
+							<phase>clean</phase>
+							<configuration>
+								<file>${project.lib.dir}/datamodel/sifDataModel_au3.4.jar</file>
+								<repositoryLayout>default</repositoryLayout>
+								<groupId>sifau</groupId>
+								<artifactId>sif3-au-datamodel</artifactId>
+								<version>3.4</version>
+								<packaging>jar</packaging>
+								<generatePom>true</generatePom>
+							</configuration>
+							<goals>
+								<goal>install-file</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>install-external-mysql-jdbc</id>
+							<phase>clean</phase>
+							<configuration>
+								<file>${project.lib.dir}/jdbc/mysql.jar</file>
+								<repositoryLayout>default</repositoryLayout>
+								<groupId>jdbc</groupId>
+								<artifactId>mysql-jdbc</artifactId>
+								<version>4.0</version>
+								<packaging>jar</packaging>
+								<generatePom>true</generatePom>
+							</configuration>
+							<goals>
+								<goal>install-file</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>install-external-oracle-jdbc</id>
+							<phase>clean</phase>
+							<configuration>
+								<file>${project.lib.dir}/jdbc/ojdbc6.jar</file>
+								<repositoryLayout>default</repositoryLayout>
+								<groupId>jdbc</groupId>
+								<artifactId>oracle-jdbc</artifactId>
+								<version>6.0</version>
+								<packaging>jar</packaging>
+								<generatePom>true</generatePom>
+							</configuration>
+							<goals>
+								<goal>install-file</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>install-external-sqlite-jdbc</id>
+							<phase>clean</phase>
+							<configuration>
+								<file>${project.lib.dir}/jdbc/sqlite-jdbc-3.7.2.jar</file>
+								<repositoryLayout>default</repositoryLayout>
+								<groupId>jdbc</groupId>
+								<artifactId>sqlite-jdbc</artifactId>
+								<version>3.7.2</version>
+								<packaging>jar</packaging>
+								<generatePom>true</generatePom>
+							</configuration>
+							<goals>
+								<goal>install-file</goal>
+							</goals>
+						</execution>
+					</executions>			
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		
+		<plugins>
+		    <!-- ====================================================================================================== -->
+		    <!-- Install non-maven libraries into the local repository. This enables these libraries to be treated like -->
+		    <!-- standard maven libraries for the rest of the project builds.                                           -->
+		    <!-- ====================================================================================================== -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+	
+	<modules>
+		<module>SIF3Common</module>
+		<module>SIF3InfraModel</module>
+		<module>SIF3InfraCommon</module>
+		<module>SIF3REST</module>
+	</modules>
+	<name>SIF3 Framework Parent Project</name>
+	<description>This is the parent project to build all SIF3 Framework Artifacts.</description>
+</project>

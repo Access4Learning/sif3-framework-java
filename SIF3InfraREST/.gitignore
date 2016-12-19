@@ -1,1 +1,6 @@
 /backup
+/.settings/
+/.project
+/.classpath
+/bin/
+

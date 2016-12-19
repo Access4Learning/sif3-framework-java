@@ -1,5 +1,5 @@
 # License
-> Copyright 2014 Systemic Pty Ltd
+> Copyright 2014 - 2016 Systemic Pty Ltd
 > 
 > Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 > 
@@ -13,6 +13,21 @@ The SIF3 Framework is a Java Framework that enables developers to efficiently im
 The framework has some basic demo classes that illustrate how to use the framework. It also has a developer's guide that can be found in the "documentation/UserGuide" directory.
 
 There is a set of pre-built framework libraries in the "release" directory. Please refer to the developer's guide for more details an the libraries.
+
+# Maven
+As of version 0.10.0 the SIF3 Framework is a multi-module Maven project. It is important to note that the SIF3
+Framework is not yet available in a global maven repository. For more details about the maven build and how it can
+be used within other maven projects refer to the developer's guide section **"3.3.1. Framework Libraries Build"** and 
+**"3.3.2. Maven Coordinates"** and its sub-sections. Once you understand these sections and have performed appropriate 
+actions to have the SIF3 Framework in an accessible repository you can use the following dependency in your own SIF3 
+Project (note that the version number will change over time):
+```xml
+<dependency>
+   <groupId>sif3.framework</groupId>
+   <artifactId>sif3-infra-rest</artifactId>
+   <version>0.10.0</version>
+</dependency>
+```
 
 # Version History and Update
 ## Version from 26/11/2013
@@ -118,9 +133,17 @@ ___
 Please refer to the release notes in the directory "release/v0.9.0" for additional details and upgrade instructions.
 
 ## Version from MM DD, 2016: v0.10.0 - Various changes
+___
+**AS OF THIS VERSION THE FRAMEWORK USES MAVEN AS THE BUILD MECHANISM INSTEAD OF ANT. THE DEVELOPER'S GUIDE HAS
+ BEEN UPDATED TO REFLECT THIS. PLEASE REFER TO THE RELEASE NOTES FOR ADDITIONAL INFORMATION ON HOW TO UPGRADE 
+ THE FRAMEWORK YOU MAY HAVE DOWNLOADED AND IMPORTED TO YOUR IDE OF CHOICE.**
+___
+
+Additional changes to the framework include:
 - Some small bug fixes in relation to external security services.
 - Added new parameter called customResponseParams to **ALL** provider side interface methods. **_THIS WILL BREAK YOUR CODE_**. There is a 
   very easy change to your code to fix the compile errors. See Relaese_Notes_v0.10.0.txt in the release/v0.10.0 directory.
+- Removed dependency on systemic-framework_<date>.jar. Applicable classes of that library are now part of the framework.
 
 Please refer to the release notes in the directory "release/v0.10.0" for additional details and upgrade instructions.
 
