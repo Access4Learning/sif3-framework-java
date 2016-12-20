@@ -1,5 +1,6 @@
 <environment xmlns="http://www.sifassociation.org/infrastructure/3.1">
-    <solutionId>ee8558d5-c943-48e7-9752-3794622157ac</solutionId>
+    <solutionId/>
+    <!--solutionId>ee8558d5-c943-48e7-9752-3794622157ac</solutionId-->
     <authenticationMethod>Bearer</authenticationMethod>
     <instanceId/>
     <userToken/>
