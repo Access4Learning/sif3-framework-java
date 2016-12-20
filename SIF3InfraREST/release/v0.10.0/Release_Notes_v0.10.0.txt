@@ -1,5 +1,5 @@
 ==============================================================
-Release Notes for v0.10.0 of SIF3 Framework (MM DD, 2016)
+Release Notes for v0.10.0 of SIF3 Framework (Dec 20, 2016)
 ==============================================================
 
 Please note that as of this version the SIF3 Framework no longer uses Ant for the build process. It now uses

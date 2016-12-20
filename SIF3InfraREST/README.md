@@ -132,7 +132,7 @@ ___
 
 Please refer to the release notes in the directory "release/v0.9.0" for additional details and upgrade instructions.
 
-## Version from MM DD, 2016: v0.10.0 - Various changes
+## Version from Dec 20, 2016: v0.10.0 - Various changes
 ___
 **AS OF THIS VERSION THE FRAMEWORK USES MAVEN AS THE BUILD MECHANISM INSTEAD OF ANT. THE DEVELOPER'S GUIDE HAS
  BEEN UPDATED TO REFLECT THIS. PLEASE REFER TO THE RELEASE NOTES FOR ADDITIONAL INFORMATION ON HOW TO UPGRADE 
