@@ -1,0 +1,19 @@
+<environment xmlns="http://www.sifassociation.org/infrastructure/3.1">
+    <solutionId/>
+    <!--solutionId>ee8558d5-c943-48e7-9752-3794622157ac</solutionId-->
+    <authenticationMethod>Bearer</authenticationMethod>
+    <instanceId/>
+    <userToken/>
+    <consumerName></consumerName>
+    <applicationInfo>
+        <applicationKey></applicationKey>
+        <supportedInfrastructureVersion>3.1</supportedInfrastructureVersion>
+        <dataModelNamespace>http://www.sifassociation.org/datamodel/na/3.3</dataModelNamespace>
+        <transport>REST</transport>
+        <applicationProduct>
+            <vendorName>Systemic Pty Ltd</vendorName>
+            <productName>RICOne Consumer</productName>
+            <productVersion>0.1alpha</productVersion>
+        </applicationProduct>
+    </applicationInfo>
+</environment>

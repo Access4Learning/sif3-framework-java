@@ -1,0 +1,101 @@
+###
+StudentPersonals
+###
+<StudentPersonals xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+    <StudentPersonal RefId="2bc9ff83dbbe44e596da64b7271ec25e"
+        xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        <LocalId>879</LocalId>
+        <PersonInfo>
+            <Name Type="LGL">
+                <FamilyName>Barker</FamilyName>
+                <GivenName>Bob</GivenName>
+            </Name>
+        </PersonInfo>
+        <MostRecent>
+            <SchoolLocalId></SchoolLocalId>
+            <YearLevel></YearLevel>
+        </MostRecent>
+    </StudentPersonal>
+    <StudentPersonal RefId="399f1200f6034d8fbeda72a81b634639"
+        xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        <LocalId></LocalId>
+        <PersonInfo>
+            <Name Type="LGL">
+                <FamilyName></FamilyName>
+                <GivenName></GivenName>
+            </Name>
+        </PersonInfo>
+        <MostRecent>
+            <SchoolLocalId></SchoolLocalId>
+            <YearLevel></YearLevel>
+        </MostRecent>
+    </StudentPersonal>
+</StudentPersonals>
+###
+StudentPersonals
+###
+<StudentPersonals xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+    <StudentPersonal RefId="164da5d9bcbf4cf8a058ba0b0efde9ba"
+        xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        <LocalId>98765</LocalId>
+        <PersonInfo>
+            <Name Type="LGL">
+                <FamilyName>DAVEY</FamilyName>
+                <GivenName>Tim</GivenName>
+            </Name>
+        </PersonInfo>
+        <MostRecent>
+            <SchoolLocalId></SchoolLocalId>
+            <YearLevel></YearLevel>
+        </MostRecent>
+    </StudentPersonal>
+    <StudentPersonal RefId="24ed508e1ed04bba82198233efa55859"
+        xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        <LocalId>98765</LocalId>
+        <PersonInfo>
+            <Name Type="LGL">
+                <FamilyName>DAVEY</FamilyName>
+                <GivenName>Tim</GivenName>
+            </Name>
+        </PersonInfo>
+        <MostRecent>
+            <SchoolLocalId></SchoolLocalId>
+            <YearLevel></YearLevel>
+        </MostRecent>
+    </StudentPersonal>
+</StudentPersonals>
+###
+StudentPersonals
+###
+<StudentPersonals xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+    <StudentPersonal RefId="2ae2d4a3a3c04d77ad843b73adac7747"
+        xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        <LocalId>98765</LocalId>
+        <PersonInfo>
+            <Name Type="LGL">
+                <FamilyName>DAVEY</FamilyName>
+                <GivenName>Tim</GivenName>
+            </Name>
+        </PersonInfo>
+        <MostRecent>
+            <SchoolLocalId></SchoolLocalId>
+            <YearLevel></YearLevel>
+        </MostRecent>
+    </StudentPersonal>
+</StudentPersonals>
+###
+SchoolInfos
+###
+<SchoolInfos xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+    <SchoolInfo RefId="D3E34B359D75101A8C3D00AA001A1651" xmlns="http://www.SIFinfo.org/au/datamodel/1.3">
+        <LocalId>E1013</LocalId>
+        <StateProvinceId>01011234</StateProvinceId>
+        <SchoolType>Pri/Sec</SchoolType>
+        <ARIA>1.0</ARIA>
+        <SchoolSector>NG</SchoolSector>
+        <IndependentSchool>Y</IndependentSchool>
+        <NonGovSystemicStatus>S</NonGovSystemicStatus>
+        <System>0003</System>
+        <ReligiousAffiliation>2171</ReligiousAffiliation>
+    </SchoolInfo>
+</SchoolInfos>

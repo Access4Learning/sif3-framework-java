@@ -1,0 +1,172 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+	<!-- =========== -->
+	<!-- Module Info -->
+	<!-- =========== -->
+	<groupId>sif3.framework</groupId>
+	<artifactId>sif3-demo-web</artifactId>
+	<packaging>war</packaging>
+	<version>0.10.0-Demo</version>
+	<name>SIF3 Demo Provider</name>
+	
+	<!-- =============================== -->
+	<!-- Properties local to this module -->
+	<!-- =============================== -->
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<!-- Set the Java Version compliance -->
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+
+		<!-- Hardcoded Variable for the non-maven library location -->
+		<!--project.lib.dir>C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/lib</project.lib.dir-->
+		<project.lib.dir>${project.basedir}/../../lib</project.lib.dir>
+		
+		<!-- The location of the SIF AU Data Model library -->
+		<auDMLibLocation>${project.lib.dir}/datamodel</auDMLibLocation>
+
+		<!-- Because the tests are not JUnit tests and are run manually we disable them by default. This may change in future. -->
+		<skipTests>true</skipTests>
+		
+	</properties>
+	
+	<dependencies>
+
+		<!-- ================================= -->
+		<!-- Other SIF3 Framework Dependencies -->
+		<!-- ================================= -->
+		<dependency>
+			<groupId>sif3.framework</groupId>
+			<artifactId>sif3-infra-rest</artifactId>
+			<version>0.10.0-beta</version>
+		</dependency>
+
+		<!-- ====================== -->
+		<!-- Local Dependencies     -->
+		<!-- Datamodel              -->
+		<!-- ====================== -->
+		<dependency>
+			<groupId>sifau</groupId>
+			<artifactId>sif3-au-datamodel</artifactId>
+			<version>3.4</version>
+		</dependency>
+
+		<!-- =============================== -->
+		<!-- Compression Filter Dependencies -->
+		<!-- =============================== -->
+		<dependency>
+			<groupId>com.github.ziplet</groupId>
+			<artifactId>ziplet</artifactId>
+			<version>2.1.2</version>
+		</dependency>
+
+		<!-- ================== -->
+		<!-- Log4j Dependencies -->
+		<!-- ================== -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.5.8</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.14</version>
+		</dependency>
+		
+		<!-- ======================================== -->
+		<!-- JDBC Dependencies                        -->
+		<!-- In Reality you would only have one here. -->
+		<!-- ======================================== -->
+		<dependency>
+			<groupId>jdbc</groupId>
+			<artifactId>mysql-jdbc</artifactId>
+			<version>4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>jdbc</groupId>
+			<artifactId>oracle-jdbc</artifactId>
+			<version>6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>jdbc</groupId>
+			<artifactId>sqlite-jdbc</artifactId>
+			<version>3.7.2</version>
+		</dependency>
+
+		<!-- ======================== -->
+		<!-- Servlet API Dependencies -->
+		<!-- ======================== -->
+		<dependency>
+		    <groupId>javax.servlet</groupId>
+		    <artifactId>javax.servlet-api</artifactId>
+		    <version>3.0.1</version>
+		    <scope>provided</scope>
+		</dependency>
+		
+		<!-- ============================================================ -->
+		<!-- JAX-RS Implementation: Jersey Dependencies                   -->
+		<!-- This is an example if Jersey is used as JAXRS implementation -->
+		<!-- ============================================================ -->
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>1.19</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-servlet</artifactId>
+			<version>1.19</version>
+		</dependency>
+
+		<!-- ================================================= -->
+		<!-- JAX-RS Implementation: RESTEasy                   -->
+		<!-- This is the dependency to use JBoss and RESTEasy  -->
+		<!-- ================================================= -->
+		<!-- 
+		<dependency>
+		    <groupId>javax.ws.rs</groupId>
+		    <artifactId>jsr311-api</artifactId>
+		    <version>1.1.1</version>
+		    <scope>provided</scope>
+		</dependency>
+		-->
+
+	</dependencies>
+ 
+	<build>
+		<plugins>
+		    <!-- =============================================================== -->
+		    <!--  Test Plugin configuration. Required to turn on/off test cases. -->
+		    <!-- =============================================================== -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.19.1</version>
+				<configuration>
+					<skipTests>${skipTests}</skipTests>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<!--version>3.0.0</version-->
+				<configuration>
+					<attachClasses>true</attachClasses>
+					<archiveClasses>true</archiveClasses>
+					<classesClassifier>demo</classesClassifier>
+				</configuration>
+			</plugin>
+			
+		</plugins>
+		<finalName>SIF3InfraREST</finalName>
+	</build>
+	
+	<description>This is the Demo Provider project to show case how to use the framework. It also has test consumer code.</description>
+</project>
