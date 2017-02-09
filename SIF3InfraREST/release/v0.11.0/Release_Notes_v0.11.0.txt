@@ -1,0 +1,50 @@
+==============================================================
+Release Notes for v0.11.0 of SIF3 Framework (MMM DD, 2017)
+==============================================================
+
+
+Bug Fixes
+---------
+- None
+
+New Functionality
+-----------------
+- None 
+
+Changed Functionality
+---------------------
+- None
+
+Removed Artifacts/Functionality
+-------------------------------
+- None
+
+--------------------------
+-- Upgrade Instructions --
+--------------------------
+
+----------------------------
+-- Infrastructure Upgrade --
+----------------------------
+- Drop the latest framework library into your project's lib directory/directories or use the latest maven dependency
+<dependency>
+   <groupId>sif3.framework</groupId>
+   <artifactId>sif3-infra-rest</artifactId>
+   <version>0.11.0</version>
+</dependency>
+
+
+------------------------
+-- Data Model Upgrade --
+------------------------
+None.
+
+------------------------------
+-- 3rd Party Library Update --
+------------------------------
+The SIF3 Framework uses the sfl4j as its logging framework. This has changed from the fixed log4j. This change allows that the
+implementation can easily choose between logging implementations. To allow proper and full logging a slf4j binding implementation
+must be provided with your implementation. The example in the SIF3Demo project uses the slf4j-log4j12 as a binding implementation.
+ - Maven: Simply add the appropriate bridge dependency to your project (see SIF3Demo for an example). 
+ - Ant: You need to add the slf4j-api-<version>.jar and an appropriate slf4j bridging jar (i.e. self4j-log4j-<version>) to your 
+        project.
