@@ -24,11 +24,12 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.model.AuthenticationInfo;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class provides a few useful methods for SIF3 specific authentication functions. If the authentication method is 'Basic' or 
@@ -43,7 +44,7 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class AuthenticationUtils
 {
-	protected static final Logger logger = Logger.getLogger(AuthenticationUtils.class);
+	protected final static Logger logger = LoggerFactory.getLogger(AuthenticationUtils.class);
 
 	/*----------------------*/
 	/*-- Encoding Methods --*/

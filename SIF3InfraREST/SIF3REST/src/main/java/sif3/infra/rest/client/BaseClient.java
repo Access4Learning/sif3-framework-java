@@ -28,8 +28,17 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.WebResource.Builder;
+import com.sun.jersey.api.client.config.ClientConfig;
+
+import au.com.systemic.framework.utils.DateUtils;
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.UnmarshalException;
@@ -62,14 +71,6 @@ import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.ErrorType;
 import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.rest.mapper.InfraDataModelMapper;
-import au.com.systemic.framework.utils.DateUtils;
-import au.com.systemic.framework.utils.StringUtils;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.WebResource.Builder;
-import com.sun.jersey.api.client.config.ClientConfig;
 
 /**
  * This class is a core client class to deal with REST clients for SIF3. It takes care of all the little things that define the
@@ -87,7 +88,7 @@ import com.sun.jersey.api.client.config.ClientConfig;
  */
 public abstract class BaseClient
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private URI baseURI = null;
 	private ClientConfig config = null;

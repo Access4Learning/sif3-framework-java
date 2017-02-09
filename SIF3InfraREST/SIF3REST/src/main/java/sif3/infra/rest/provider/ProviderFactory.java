@@ -24,12 +24,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import sif3.common.conversion.ModelObjectInfo;
-import sif3.common.interfaces.Provider;
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.conversion.ModelObjectInfo;
+import sif3.common.interfaces.Provider;
 
 /**
  * This is the provider factory. Each provider deals with a number of objects (i.e. StudentPersonal, SchoolInfo etc). 
@@ -44,7 +45,7 @@ public class ProviderFactory
 	private static final int DEFAULT_DELAY = 10;
 	private static final String DELAY_PROPERTY = "provider.startup.delay";
 
-	private static final Logger logger = Logger.getLogger(ProviderFactory.class);
+	private final static Logger logger = LoggerFactory.getLogger(ProviderFactory.class);
 
 	private static ProviderFactory factory = null;
 	

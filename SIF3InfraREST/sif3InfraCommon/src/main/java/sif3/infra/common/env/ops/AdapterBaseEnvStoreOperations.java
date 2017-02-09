@@ -20,8 +20,12 @@ package sif3.infra.common.env.ops;
 
 import java.util.Date;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.FileReaderWriter;
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.PersistenceException;
 import sif3.common.model.EnvironmentKey;
@@ -35,9 +39,6 @@ import sif3.infra.common.env.types.AdapterEnvironmentStore;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.env.types.EnvironmentInfo;
 import sif3.infra.common.model.EnvironmentType;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.FileReaderWriter;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * Helper class for some operations required by the Environment Store (Consumer or Provider). Only used internal to the framework.
@@ -50,7 +51,7 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class AdapterBaseEnvStoreOperations
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 	
 	private AdapterEnvironmentStore environmentStore = null;
 

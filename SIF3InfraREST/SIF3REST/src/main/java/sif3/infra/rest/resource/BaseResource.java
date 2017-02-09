@@ -33,8 +33,12 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.DateUtils;
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.MediaTypeOperations;
@@ -90,9 +94,6 @@ import sif3.infra.common.model.UpdateResponseType;
 import sif3.infra.common.model.UpdateType;
 import sif3.infra.common.model.UpdatesType;
 import sif3.infra.rest.resource.audit.AuditableResource;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.DateUtils;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This is a utility class. All REST resource style class should extend this class. It provides many common functions that are
@@ -105,7 +106,7 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public abstract class BaseResource
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 	
 	/* Below variables are for testing purposes only */
     private static Boolean testMode = null;

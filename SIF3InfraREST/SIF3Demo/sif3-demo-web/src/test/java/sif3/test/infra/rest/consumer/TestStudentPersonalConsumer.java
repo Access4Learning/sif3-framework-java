@@ -58,8 +58,8 @@ public class TestStudentPersonalConsumer
 	private final static String SINGLE_STUDENT_FILE_NAME = PATH + "/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
 	private final static String MULTI_STUDENT_FILE_NAME = PATH + "/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
 //	private static final String CONSUMER_ID = "SecureStudentConsumer";
-	private static final String CONSUMER_ID = "StudentConsumer";
-//    private static final String CONSUMER_ID = "HITSStudentConsumer";
+//	private static final String CONSUMER_ID = "StudentConsumer";
+    private static final String CONSUMER_ID = "HITSStudentConsumer";
 //	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
 //	private static final String CONSUMER_ID = "QueueTestConsumer";
 
@@ -319,8 +319,8 @@ public class TestStudentPersonalConsumer
 //			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
 //            envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, CommonConstants.DEFAULT_CONTEXT));
 
-//			List<Response> responses = consumer.retrieve(new PagingInfo(10), envZoneCtxList, RequestType.DELAYED, QueryIntention.NO_CACHE, params);
-			List<Response> responses = consumer.retrieve(new PagingInfo(10, 1), envZoneCtxList, RequestType.IMMEDIATE, QueryIntention.NO_CACHE, params);
+//			List<Response> responses = consumer.retrieve(new PagingInfo(100), envZoneCtxList, RequestType.DELAYED, QueryIntention.NO_CACHE, params);
+			List<Response> responses = consumer.retrieve(new PagingInfo(5, 1), envZoneCtxList, RequestType.IMMEDIATE, QueryIntention.NO_CACHE, params);
 //            List<Response> responses = consumer.retrieve(new PagingInfo(10, 0), envZoneCtxList, REQUEST_TYPE, QueryIntention.NO_CACHE, params);
 //			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), envZoneCtxList, REQUEST_TYPE);
 //			List<Response> responses = consumer.retrieve(null, envZoneCtxList, REQUEST_TYPE);

@@ -25,8 +25,10 @@ import java.util.HashMap;
 
 import javax.ws.rs.core.MediaType;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.DateUtils;
 import sif.dd.au30.conversion.DataModelMarshalFactory;
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
 import sif3.common.conversion.MarshalFactory;
@@ -44,7 +46,6 @@ import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.common.ws.model.MultiOperationStatusList;
 import sif3.infra.rest.consumer.AbstractEventConsumer;
-import au.com.systemic.framework.utils.DateUtils;
 
 /**
  * @author Joerg Huber
@@ -52,7 +53,7 @@ import au.com.systemic.framework.utils.DateUtils;
  */
 public abstract class AUDataModelEventConsumer<L> extends AbstractEventConsumer<L>
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 	
 	private static Integer busyInSec = null;
 	private static Boolean writePayload = null;

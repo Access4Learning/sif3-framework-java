@@ -19,7 +19,8 @@ package sif3.common.security;
 
 import java.lang.reflect.Constructor;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.StringUtils;
@@ -51,7 +52,7 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class BearerSecurityFactory
 {
-  private static final Logger logger = Logger.getLogger(BearerSecurityFactory.class);
+  private final static Logger logger = LoggerFactory.getLogger(BearerSecurityFactory.class);
 
   private static final String SECURITY_SERVICE_PROP_NAME = "adapter.security.service";
   

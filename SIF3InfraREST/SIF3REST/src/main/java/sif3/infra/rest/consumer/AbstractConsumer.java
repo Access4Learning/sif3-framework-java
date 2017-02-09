@@ -24,8 +24,12 @@ import java.util.concurrent.Executors;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.StringUtils;
+import au.com.systemic.framework.utils.Timer;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.exception.UnsupportedQueryException;
@@ -65,9 +69,6 @@ import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.rest.client.ObjectServiceClient;
 import sif3.infra.rest.queue.LocalConsumerQueue;
 import sif3.infra.rest.queue.LocalMessageConsumer;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.StringUtils;
-import au.com.systemic.framework.utils.Timer;
 
 /**
  * This is the core class that a developer will use to implement their consumers. Each consumer for each object type MUST extend this
@@ -84,7 +85,7 @@ import au.com.systemic.framework.utils.Timer;
  */
 public abstract class AbstractConsumer implements Consumer, DelayedConsumer, QueryConsumer
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	/* Below variables are for testing purposes only */
     private static Boolean testMode = null;

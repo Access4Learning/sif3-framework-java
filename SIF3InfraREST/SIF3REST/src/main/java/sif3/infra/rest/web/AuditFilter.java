@@ -28,9 +28,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
-import sif3.common.interfaces.Auditor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import sif3.common.interfaces.Auditor;
 import sif3.common.model.audit.AuditRecord;
 import sif3.infra.rest.resource.audit.AuditableResource;
 import sif3.infra.rest.web.audit.AuditRequestWrapper;
@@ -46,8 +47,9 @@ public class AuditFilter implements Filter
 {
 	public static final String AUDIT_SERVICE_CLASS = "AUDIT_SERVICE_CLASS";
 
-	protected final Logger logger  = Logger.getLogger(getClass());
-	private Auditor        auditor = null;
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+
+    private Auditor        auditor = null;
 
 	@Override
 	public void destroy()
