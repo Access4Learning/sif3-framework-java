@@ -1,64 +1,84 @@
 <project name="SIF3InfraPOJOGenerator" basedir="." default="generate-infra30">
 
- 	<property name="project.basedir" value="${basedir}/.."/>
+	<property name="project.basedir" value="${basedir}/.."/>
 
-    <!-- *************************** -->
-    <!-- Load default property files -->
-    <!-- *************************** -->
-    <property file="${basedir}/ant.properties"/>
+	<!-- *************************** -->
+	<!-- Load default property files -->
+	<!-- *************************** -->
+	<property file="${basedir}/ant.properties"/>
 
 	<!-- ********************* -->
-    <!-- Environment Variables -->
-    <!-- ********************* -->
-    <property name="output.base.name" value="${project.basedir}/data/output"/>
-    <property name="input.base.dir" value="${project.basedir}/data/input"/>
-    <property name="jaxb.lib.root.dir" value="${project.basedir}/bin/lib/jaxblib" />
-    
-    <property name="verbose" value="true" />
+	<!-- Environment Variables -->
+	<!-- ********************* -->
+	<property name="output.base.name" value="${project.basedir}/data/output"/>
+	<property name="input.base.dir" value="${project.basedir}/data/input"/>
+	<property name="jaxb.lib.root.dir" value="${project.basedir}/bin/lib/jaxblib" />
 
-    <taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask">
-      <classpath>
-        <fileset dir="${jaxb.lib.root.dir}" includes="*.jar" />
-      </classpath>
-    </taskdef>
+	<property name="verbose" value="true" />
 
-    <!-- print some varaibles -->
-    <target name="00-env" description="Show Ant variables">
-        <echo message="project.basedir: ${project.basedir}"/>
-        <echo message="output.base.name: ${output.base.name}"/>
-        <echo message="input.base.dir: ${input.base.dir}"/>
-        <echo message="jaxb.lib.root.dir: ${jaxb.lib.root.dir}"/>
-    	<echo message="xsd.dir: ${xsd.dir}"/>
-    </target>
+	<taskdef name="xjc" classname="com.sun.tools.xjc.XJCTask">
+		<classpath>
+			<fileset dir="${jaxb.lib.root.dir}" includes="*.jar" />
+		</classpath>
+	</taskdef>
 
-    <!-- Clean environment. -->
-    <target name="02-clean" description="Deletes the build directory">
-        <delete dir="${output.base.name}" />
-    </target>
+	<!-- print some varaibles -->
+	<target name="00-env" description="Show Ant variables">
+		<echo message="project.basedir: ${project.basedir}"/>
+		<echo message="output.base.name: ${output.base.name}"/>
+		<echo message="input.base.dir: ${input.base.dir}"/>
+		<echo message="jaxb.lib.root.dir: ${jaxb.lib.root.dir}"/>
+		<echo message="xsd.dir: ${xsd.dir}"/>
+	</target>
 
-    <!-- ***************** -->
-    <!-- Environment setup -->
-    <!-- ***************** -->
-    <target name="init">
-        <mkdir dir="${output.base.name}"/>
-    </target>
+	<!-- Clean environment. -->
+	<target name="02-clean" description="Deletes the build directory">
+		<delete dir="${output.base.name}" />
+	</target>
 
-    <!-- ************************************** -->
-    <!-- Generate SIF3.0 Infrastructure Objects -->
-    <!-- ************************************** -->
-	 <target name="generate-infra30" depends="02-clean,init" description="Create all Infrastructure POJOs based on XSD Directory">
-	        <echo message="Generate Pojos using JAXB for SIF 3.0.1 Infra for all XSDs in one go..."/>
-	          <mkdir dir="${output.base.name}/${xsd.dir}"/>
-	          <xjc destdir="${output.base.name}/${xsd.dir}" 
+	<!-- ***************** -->
+	<!-- Environment setup -->
+	<!-- ***************** -->
+	<target name="init">
+		<mkdir dir="${output.base.name}"/>
+	</target>
+
+	<!-- *********************************************** -->
+	<!-- Generate SIF 3.0.1 & 3.1 Infrastructure Objects -->
+	<!-- *********************************************** -->
+	<target name="generate-infra30" depends="02-clean,init" description="Create all Infrastructure POJOs based on XSD Directory">
+		<echo message="Generate Pojos using JAXB for SIF 3.0.1 - 3.1 Infra for all XSDs in one go..."/>
+		<mkdir dir="${output.base.name}/${xsd.dir}"/>
+		<xjc destdir="${output.base.name}/${xsd.dir}" 
 	             package="sif3.infra.common.model" 
 	             extension="true" 
 	             header="false" 
 	             source="2.0">
-	            <!-- must exclude the infrastructurecommontypes.xsd so that it all works. It will still create the classes of that -->
-	            <!-- XSD because it is used as an include rather than import.                                                      --> 
-	          <schema  dir="${input.base.dir}/${xsd.dir}" includes="*.xsd" excludes="infrastructurecommontypes.xsd"/>
-	          <binding dir="${basedir}" includes="infra30.xjb"/>
-	          <arg value="-npa"/>
-	        </xjc>
-	    </target>
+			<!-- must exclude the infrastructurecommontypes.xsd so that it all works. It will still create the classes of that -->
+			<!-- XSD because it is used as an include rather than import.                                                      -->
+			<schema  dir="${input.base.dir}/${xsd.dir}" includes="*.xsd" excludes="infrastructurecommontypes.xsd"/>
+			<binding dir="${basedir}" includes="infra30.xjb"/>
+			<arg value="-npa"/>
+		</xjc>
+	</target>
+	
+	<!-- *********************************************** -->
+	<!-- Generate SIF 3.2+ Infrastructure Objects -->
+	<!-- *********************************************** -->
+	<target name="generate-infra32+" depends="02-clean,init" description="Create all Infrastructure POJOs based on XSD Directory">
+		<echo message="Generate Pojos using JAXB for SIF 3.2.x and after Infra for all XSDs in one go..."/>
+		<mkdir dir="${output.base.name}/${xsd.dir}"/>
+		<xjc destdir="${output.base.name}/${xsd.dir}" 
+	             package="sif3.infra.common.model" 
+	             extension="true" 
+	             header="false" 
+	             source="2.0">
+			<!-- must exclude the infrastructurecommontypes.xsd so that it all works. It will still create the classes of that -->
+			<!-- XSD because it is used as an include rather than import.                                                      -->
+			<schema  dir="${input.base.dir}/${xsd.dir}" includes="Collections.xsd"/>
+			<binding dir="${basedir}" includes="infra30.xjb"/>
+			<arg value="-npa"/>
+		</xjc>
+	</target>
+	
 </project>
