@@ -398,6 +398,8 @@ public class RemoteMessageQueueReader implements Runnable
 				//TODO: JH - Do we need applicationKey and authenticatedUser HTTP header here?				
 				
 				EventInfo eventInfo = new EventInfo(eventPayload, response.getMediaType(), eventAction, updateType, zone, context, metadata, getQueueReaderID());
+				eventInfo.setFingerprint(getHeaderValue(response, ResponseHeaderConstants.HDR_FINGERPRINT));
+				
 				logger.debug(getQueueReaderID()+": Attempts to push Event to local queue...");
 				localQueue.blockingPush(eventInfo);
 				logger.debug(getQueueReaderID()+": Event successfully pushed to local queue");

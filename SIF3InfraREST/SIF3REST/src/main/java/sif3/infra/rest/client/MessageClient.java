@@ -60,7 +60,7 @@ public class MessageClient extends BaseClient
 			service = buildMessageURI(service, removeMsgID, true);
 			HeaderProperties hdrProperties = getHeaderProperties(consumerInstanceID);
 			logger.debug("HTTP GET Next Message...");
-		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
+		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).get(ClientResponse.class);
 			logger.debug("HTTP GET Next Message received.");
 		    
 		    //OK: Message Returned, NO_CONTENT: No message on queue: Both are valid returns
@@ -85,7 +85,7 @@ public class MessageClient extends BaseClient
 		{
 			service = buildMessageURI(service, removeMsgID, false);
 			HeaderProperties hdrProperties = getHeaderProperties(consumerInstanceID);
-		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).delete(ClientResponse.class);
+		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).delete(ClientResponse.class);
 
 			return setResponse(service, clientResponse, null, hdrProperties, null, null, false, Status.NO_CONTENT);
 		}

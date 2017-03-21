@@ -362,12 +362,16 @@ public abstract class BaseClient
 	 * @param hdrProperties A set of defined header properties. Should really hold the authentication related properties!
 	 * @param requestType The request type to be set in the HTTP headers.
 	 * @param includeRequestID TRUE: Add a generated request ID header property
+	 * @param includeFingerprint TRUE: Fingerprint will be retrieved from current session. Note for a provider this will be
+	 *                                 the provider's fingerprint! This is generally not desired for events. In this case
+	 *                                 this parameter should be set to FALSE.
+	 *                           FALSE: Fingerprint from the current session will not be added to the HTTP headers.
 	 * @hasPayload TRUE: The request will contain a payload. Required for compression header settings
 	 *             FALSE: The request is payload free.
 	 * 
 	 * @return A builder class on which a HTTP operation can be invoked on.
 	 */
-	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, RequestType requestType, boolean includeRequestID, boolean hasPayload)
+	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, RequestType requestType, boolean includeRequestID, boolean includeFingerprint, boolean hasPayload)
 	{
 	    String charEncoding = getClientEnvMgr().getEnvironmentInfo().getCharsetEncoding();
 		Builder builder = service.type(addEncoding(getRequestMediaType(), charEncoding)).accept(addEncoding(getResponseMediaType(), charEncoding));
@@ -384,6 +388,19 @@ public abstract class BaseClient
 		
 		// Set the request type.
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE, ((requestType == null) ? RequestType.IMMEDIATE.name() : requestType.name()));
+		
+		// Add fingerprint to HTTP Header if it is known and not yet set. Note for events this value might already be set, so we
+		// should not override it! This should be indicated with the includeFingerprint parameter that would be set to false!
+		if (includeFingerprint)
+		{
+    		if (hdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_FINGERPRINT) == null)
+    		{
+        		if ((getClientEnvMgr().getSIF3Session() != null) && (getClientEnvMgr().getSIF3Session().getFingerprint() != null))
+        		{
+        		    hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_FINGERPRINT, getClientEnvMgr().getSIF3Session().getFingerprint());
+        		}
+    		}
+		}
 		
 		// Sometimes the request ID is not required (i.e. events)
 		if (includeRequestID)
@@ -440,14 +457,18 @@ public abstract class BaseClient
 	 * @param service The service to which media type and header properties shall be added.
 	 * @param hdrProperties A set of defined header properties. Should really hold the authentication related properties!
 	 * @param includeRequestID TRUE: Add a generated request ID header property
+     * @param includeFingerprint TRUE: Fingerprint will be retrieved from current session. Note for a provider this will be
+     *                                 the provider's fingerprint! This is generally not desired for events. In this case
+     *                                 this parameter should be set to FALSE.
+     *                           FALSE: Fingerprint from the current session will not be added to the HTTP headers.
 	 * @hasPayload TRUE: The request will contain a payload. Required for compression header settings
 	 *             FALSE: The request is payload free.
 	 * 
 	 * @return A builder class on which a HTTP operation can be invoked on.
 	 */
-	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, boolean includeRequestID, boolean hasPayload)
+	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, boolean includeRequestID, boolean includeFingerprint, boolean hasPayload)
 	{
-		return setRequestHeaderAndMediaTypes(service, hdrProperties, RequestType.IMMEDIATE, includeRequestID, hasPayload);
+		return setRequestHeaderAndMediaTypes(service, hdrProperties, RequestType.IMMEDIATE, includeRequestID, includeFingerprint, hasPayload);
 	}
 
 	protected HeaderProperties createAuthenticationHdr(boolean isEnvCreate, SIF3Session pseudoSIF3Session)

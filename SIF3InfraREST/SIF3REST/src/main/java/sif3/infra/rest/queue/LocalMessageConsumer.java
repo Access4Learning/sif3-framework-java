@@ -145,6 +145,7 @@ public class LocalMessageConsumer implements Runnable
             // Create actual event Object
             SIFEvent event = eventConsumer.createEventObject(eventPayload, eventInfo.getEventAction(), eventInfo.getUpdateType());
             event.setMetadata(eventInfo.getMetadata());
+            event.setFingerprint(eventInfo.getFingerprint());
 
             // Send event to actual event consumer.
             eventConsumer.onEvent(event, eventInfo.getZone(), eventInfo.getContext(), eventInfo.getEventMetadata(), eventInfo.getMessageQueueReaderID(), consumerID);

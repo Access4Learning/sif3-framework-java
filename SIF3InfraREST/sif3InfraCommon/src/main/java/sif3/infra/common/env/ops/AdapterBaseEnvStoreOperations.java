@@ -216,6 +216,9 @@ public class AdapterBaseEnvStoreOperations
 					sif3Session.setSecurityToken(tokenInfo.getToken());
 					sif3Session.setSecurityTokenExpiry(tokenInfo.getTokenExpiryDate());
 				}
+				
+				// Fingerprint is now available or may have changed. Need to update
+				sif3Session.setFingerprint(inputEnv.getFingerprint());
 			}
 			else
 			{
@@ -226,6 +229,7 @@ public class AdapterBaseEnvStoreOperations
 				sif3Session.setAdapterType(adapterType.name());
 				sif3Session.setSessionToken(inputEnv.getSessionToken());
 				sif3Session.setEnvironmentID(inputEnv.getId());
+				sif3Session.setFingerprint(inputEnv.getFingerprint());
 
 				// Also add the security token info if it is available
 				if (tokenInfo != null)

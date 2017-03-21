@@ -148,9 +148,9 @@ public class EventClient extends BaseClient
 //				{
 //					logger.debug("sendEvents: Payload to send:\n"+payloadStr);
 //				}
-				HeaderProperties headerProps = getEventHeaders(event.getEventAction(),	event.getUpdateType(), zone, context, customHdrFields);
+				HeaderProperties headerProps = getEventHeaders(event.getEventAction(),	event.getUpdateType(), event.getFingerprint(), zone, context, customHdrFields);
 				
-				Builder builder = setRequestHeaderAndMediaTypes(service, headerProps, false, true);
+				Builder builder = setRequestHeaderAndMediaTypes(service, headerProps, false, false, true);
 				logger.debug("Send Event with payload size: "+payloadStr.length());
 				ClientResponse response = builder.post(ClientResponse.class, payloadStr);
 				logger.debug("Receive Event Response Status: "+response.getStatus());
@@ -186,7 +186,7 @@ public class EventClient extends BaseClient
 	 * @param context The context for this event. Can be null.
 	 * @return
 	 */
-	private HeaderProperties getEventHeaders(EventAction eventAction, UpdateType updateType, SIFZone zone, SIFContext context, HeaderProperties overrideHdrFields)
+	private HeaderProperties getEventHeaders(EventAction eventAction, UpdateType updateType, String fingerprint, SIFZone zone, SIFContext context, HeaderProperties overrideHdrFields)
 	{
 		// Set the override header fields
 		HeaderProperties hdrProperties = (overrideHdrFields != null) ? new HeaderProperties(overrideHdrFields.getHeaderProperties()) : new HeaderProperties();
@@ -212,6 +212,11 @@ public class EventClient extends BaseClient
 			}
 		}	
 		
+		if (StringUtils.notEmpty(fingerprint))
+		{
+		    hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_FINGERPRINT, fingerprint);
+		}
+		    
 		if ((zone == null) || (zone.getIsDefault()) || StringUtils.isEmpty(zone.getId())) // Assume default zone!
 		{
 			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_ZONE_ID, getSIF3Session().getDefaultZone().getId());			

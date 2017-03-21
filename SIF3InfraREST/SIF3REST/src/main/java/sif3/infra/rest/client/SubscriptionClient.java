@@ -55,7 +55,7 @@ public class SubscriptionClient extends BaseClient
 		{
 			service = buildURI(service, null);
 			HeaderProperties hdrProperties = getHeaderProperties();		
-			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
+			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).get(ClientResponse.class);
 
 			return setResponse(service, clientResponse, SubscriptionCollectionType.class, hdrProperties, null, null, false, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
 		}
@@ -74,7 +74,7 @@ public class SubscriptionClient extends BaseClient
 		{
 			service = buildURI(service, null, subscriptionID, null, null, null);
 			HeaderProperties hdrProperties = getHeaderProperties();		
-			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
+			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).get(ClientResponse.class);
 
 			return setResponse(service, clientResponse, SubscriptionType.class, hdrProperties, null, null, false, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
 		}
@@ -135,7 +135,7 @@ public class SubscriptionClient extends BaseClient
 			{
 				logger.debug("subscribe: Payload to send:\n"+payloadStr);
 			}
-			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true).post(ClientResponse.class, payloadStr);
+			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, true).post(ClientResponse.class, payloadStr);
 			return setResponse(service, clientResponse, SubscriptionType.class, hdrProperties, null, null, false, Status.CREATED, Status.CONFLICT);
 		}
 		catch (Exception ex)
@@ -164,7 +164,7 @@ public class SubscriptionClient extends BaseClient
 		{
 			service = buildURI(service, null, subscriptionID, null, null, null);
 			HeaderProperties hdrProperties = getHeaderProperties();		
-		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).delete(ClientResponse.class);
+		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).delete(ClientResponse.class);
 
 			return setResponse(service, clientResponse, null, hdrProperties, null, null, false, Status.NO_CONTENT);
 		}

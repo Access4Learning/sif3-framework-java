@@ -866,11 +866,10 @@ public abstract class BaseResource
 		
 		// Get values from HTTP Header.
 		metadata.setGeneratorID(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID));
-//		metadata.setNavigationID(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_NAVIGATION_ID));
 		metadata.setApplicationKey(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY));
 		metadata.setAuthentictedUser(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_AUTHENTICATED_USER));
 
-		// Source Name is a HTTP header if DBROKERED. Defaulted to applicationKey if DIRECT
+		// Brokered: SourceName and Fingerprint are in HTTP Headers and are set by the Broker
 		if (isBrokeredEnvironment())
 		{
 			metadata.setSourceName(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_SOURCE_NAME));
@@ -880,12 +879,25 @@ public abstract class BaseResource
 			{
 				metadata.setSourceName(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_SOURCE_NAME));
 			}
+			
+	        metadata.setFingerprint(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_FINGERPRINT));
+	        
+            //Or is it a URL query parameter
+            if (metadata.getFingerprint() == null)
+            {
+                metadata.setFingerprint(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_FINGERPRINT));
+            }
+
 		}
-		else // In a direct environment we set the SourceName to the consumer's application key if available.
+		// Direct: We set the SourceName to the consumer's application key if available and the fingerprint to the appropriate
+		//         value as in the session of this consumer. These values cannot be set by consumers, so that they cannot
+		//         pretend to be someone else.
+		else
 		{
 			if (sif3Session != null)
 			{
 				metadata.setSourceName(sif3Session.getApplicationKey());
+				metadata.setFingerprint(sif3Session.getFingerprint());
 			}
 		}
 		
@@ -918,10 +930,6 @@ public abstract class BaseResource
 		{
 			metadata.setGeneratorID(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_GENERATOR_ID));
 		}
-//		if (metadata.getNavigationID() == null)
-//		{
-//			metadata.setNavigationID(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_NAVIGATION_ID));
-//		}
 		
 		if (metadata.getApplicationKey() == null)
 		{
@@ -1461,6 +1469,10 @@ public abstract class BaseResource
 					String baseURIStr = isSecure() ? envInfo.getSecureConnectorBaseURI().toString() : envInfo.getConnectorBaseURI().toString();
 					StringBuilder envURLStr = new StringBuilder(baseURIStr).append("/environments/").append(sif3Session.getEnvironmentID());
 					allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_ENVIRONMENT_URI, envURLStr.toString());
+//					if (sif3Session.getFingerprint() != null)
+//					{
+					    allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_FINGERPRINT, sif3Session.getFingerprint());
+//					}
 				}
 			}
 			else // ensure that environmentURI header is not set by customHeaders and fakes some back door.
