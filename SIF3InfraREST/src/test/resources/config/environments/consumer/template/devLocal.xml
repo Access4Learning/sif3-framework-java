@@ -7,7 +7,7 @@
     <applicationInfo>
         <applicationKey></applicationKey>
         <supportedInfrastructureVersion>3.2.1</supportedInfrastructureVersion>
-        <dataModelNamespace>http://www.sifassociation.org/au/datamodel/3.4</dataModelNamespace>
+        <dataModelNamespace>http://www.sifassociation.org/datamodel/au/3.4.1</dataModelNamespace>
         <transport>REST</transport>
         <applicationProduct>
             <vendorName>Systemic Pty Ltd</vendorName>
