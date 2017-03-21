@@ -40,6 +40,7 @@ import sif3.common.ws.BulkOperationResponse;
 import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.OperationStatus;
 import sif3.common.ws.Response;
+import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.rest.consumer.ConsumerLoader;
 import systemic.sif3.demo.rest.consumer.StudentPersonalConsumer;
 import au.com.systemic.framework.utils.FileReaderWriter;
@@ -58,8 +59,8 @@ public class TestStudentPersonalConsumer
 	private final static String SINGLE_STUDENT_FILE_NAME = PATH + "/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
 	private final static String MULTI_STUDENT_FILE_NAME = PATH + "/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
 //	private static final String CONSUMER_ID = "SecureStudentConsumer";
-//	private static final String CONSUMER_ID = "StudentConsumer";
-    private static final String CONSUMER_ID = "HITSStudentConsumer";
+	private static final String CONSUMER_ID = "StudentConsumer";
+//    private static final String CONSUMER_ID = "HITSStudentConsumer";
 //	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
 //	private static final String CONSUMER_ID = "QueueTestConsumer";
 
@@ -508,6 +509,7 @@ public class TestStudentPersonalConsumer
 
 		if (ConsumerLoader.initialise(CONSUMER_ID))
 		{
+            System.out.println("Consumer loaded successfully. Environment Data:\n"+ConsumerEnvironmentManager.getInstance().getEnvironmentInfo());
 		
 			StudentPersonalConsumer consumer = tester.getConsumer();
   		

@@ -18,6 +18,7 @@
 
 package sif3.test.infra.rest.consumer;
 
+import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.rest.consumer.ConsumerLoader;
 
 /**
@@ -68,7 +69,7 @@ public class TestConsumerLoader
 
 		if (ConsumerLoader.initialise(CONSUMER_ID))
 		{
-			System.out.println("Consumer loaded successfully.");
+			System.out.println("Consumer loaded successfully. Environment Data:\n"+ConsumerEnvironmentManager.getInstance().getEnvironmentInfo());
 		}
 		
         // Put this agent to a blocking wait.....
