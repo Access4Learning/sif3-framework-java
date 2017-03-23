@@ -27,7 +27,8 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.X509KeyManager;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is an utility class to load the Keystore from a specific location. The code is inspired from the following
@@ -38,7 +39,7 @@ import org.apache.log4j.Logger;
  */
 public class X509KeystoreManager implements X509KeyManager 
 {
-  private final Logger logger = Logger.getLogger(getClass());
+  private final Logger logger = LoggerFactory.getLogger(getClass());
   
   //The default PKIX X509KeyManager.  We'll delegate decisions to it, and fall back to the logic in this class if 
   //the default X509KeyManager doesn't trust it.

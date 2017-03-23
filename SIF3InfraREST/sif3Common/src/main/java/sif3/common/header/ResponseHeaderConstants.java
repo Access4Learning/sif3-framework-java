@@ -65,7 +65,9 @@ public class ResponseHeaderConstants
 	public static final String HDR_CONTEXT_ID = "contextId";
 	public static final String HDR_ZONE_ID = "zoneId";
 	public static final String HDR_EVENT_ACTION = "eventAction"; // CREATE, UPDATE, DELETE (see HeaderValues.EventAction)
-	public static final String HDR_CONSUMER_ID = "connectionId"; // Used by getMessage() on queue to identify the thread that queries 
+	public static final String HDR_CONSUMER_ID = "connectionId"; // Used by getMessage() on queue to identify the thread that queries
+    public static final String HDR_FINGERPRINT = "fingerprint";
+
 	
 	// NON SIF specific but of interest
 	public static final String HDR_CONNECTION = "Connection";
@@ -107,6 +109,7 @@ public class ResponseHeaderConstants
 		HDR_UPDATE_TYPE,
 		HDR_SERVICE_NAME,
 		HDR_CONSUMER_ID,
+		HDR_FINGERPRINT,
 	 };
 
 }

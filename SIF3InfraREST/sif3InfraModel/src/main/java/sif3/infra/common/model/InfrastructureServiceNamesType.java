@@ -20,12 +20,13 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="eventsConnector"/>
  *     &lt;enumeration value="queues"/>
  *     &lt;enumeration value="subscriptions"/>
+ *     &lt;enumeration value="servicesConnector"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
  * 
  */
-@XmlType(name = "infrastructureServiceNamesType", namespace = "http://www.sifassociation.org/infrastructure/3.1")
+@XmlType(name = "infrastructureServiceNamesType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
 @XmlEnum
 public enum InfrastructureServiceNamesType {
 
@@ -40,7 +41,9 @@ public enum InfrastructureServiceNamesType {
     @XmlEnumValue("queues")
     QUEUES("queues"),
     @XmlEnumValue("subscriptions")
-    SUBSCRIPTIONS("subscriptions");
+    SUBSCRIPTIONS("subscriptions"),
+    @XmlEnumValue("servicesConnector")
+    SERVICES_CONNECTOR("servicesConnector");
     private final String value;
 
     InfrastructureServiceNamesType(String v) {

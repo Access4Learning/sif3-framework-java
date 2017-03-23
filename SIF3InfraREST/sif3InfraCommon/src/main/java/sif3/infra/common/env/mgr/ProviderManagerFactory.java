@@ -18,7 +18,8 @@
 
 package sif3.infra.common.env.mgr;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import sif3.infra.common.env.types.AdapterEnvironmentStore;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
@@ -34,7 +35,7 @@ import sif3.infra.common.interfaces.EnvironmentManager;
  */
 public class ProviderManagerFactory
 {
-	protected static final Logger logger = Logger.getLogger(ProviderManagerFactory.class);
+    protected static final Logger logger = LoggerFactory.getLogger(ProviderManagerFactory.class);
 
 	private static EnvironmentManager envMgr = null;
 	

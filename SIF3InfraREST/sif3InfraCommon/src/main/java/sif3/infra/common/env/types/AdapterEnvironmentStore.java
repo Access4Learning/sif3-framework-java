@@ -23,8 +23,12 @@ import java.net.URI;
 
 import javax.ws.rs.core.MediaType;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.PropertyManager;
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.CommonConstants.QueuePollingType;
@@ -34,9 +38,6 @@ import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.utils.FileAndFolderUtils;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.PropertyManager;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class abstract the reading and processing of the consumer and provider property file of this framework.
@@ -49,7 +50,7 @@ public class AdapterEnvironmentStore implements Serializable
 	
     private static final long serialVersionUID = 34177453457564336L;
 
-	protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private static final String TEMPLATE_DIR_NAME = "template";
 	private static final String PROVIDER_DIR_NAME = "provider";

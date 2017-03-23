@@ -17,7 +17,7 @@
 	<!-- =========== -->
 	<groupId>sif3.framework</groupId>
 	<artifactId>sif3-framework</artifactId>
-	<version>0.10.0-beta</version>
+	<version>0.11.0-beta</version>
 	<packaging>pom</packaging>
 	
 	<!-- ===================================== -->
@@ -38,7 +38,7 @@
 		<auDMLibLocation>${project.lib.dir}/datamodel</auDMLibLocation>
 
 		<!-- The current SIF 3.x infrastructure version for which the library intended for. -->
-		<sifInfraVersion>3.1</sifInfraVersion>
+		<sifInfraVersion>3.2.1</sifInfraVersion>
 		
 		<!-- Final Jar name of all sub-modules follows a certain naming convention that includes the SIF infrastructure version. -->
 		<jarName.prefix>sif${sifInfraVersion}</jarName.prefix>
@@ -61,7 +61,7 @@
 			<dependency>
 				<groupId>sifau</groupId>
 				<artifactId>sif3-au-datamodel</artifactId>
-				<version>3.4</version>
+				<version>3.4.1</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -88,12 +88,20 @@
 			</dependency>
 
 			<!-- ================== -->
-			<!-- Log4j Dependencies -->
+			<!-- slf4j Dependencies -->
 			<!-- ================== -->
 			<dependency>
-				<groupId>log4j</groupId>
-				<artifactId>log4j</artifactId>
-				<version>1.2.14</version>
+			    <groupId>org.slf4j</groupId>
+			    <artifactId>slf4j-api</artifactId>
+			    <version>1.7.22</version>
+			</dependency>
+
+			<!-- Use log4j as the slf4j binder for tests: A specific slf4j binder will be provided in the runtime and may differ from this one. -->
+			<dependency>
+	    		<groupId>org.slf4j</groupId>
+	    		<artifactId>slf4j-log4j12</artifactId>
+	    		<version>1.7.22</version>
+	    		<scope>test</scope>
 			</dependency>
 
 			<!-- ======================== -->
@@ -147,11 +155,11 @@
 							<id>install-external-au-datamodel</id>
 							<phase>clean</phase>
 							<configuration>
-								<file>${project.lib.dir}/datamodel/sifDataModel_au3.4.jar</file>
+								<file>${project.lib.dir}/datamodel/sifDataModel_au3.4.1.jar</file>
 								<repositoryLayout>default</repositoryLayout>
 								<groupId>sifau</groupId>
 								<artifactId>sif3-au-datamodel</artifactId>
-								<version>3.4</version>
+								<version>3.4.1</version>
 								<packaging>jar</packaging>
 								<generatePom>true</generatePom>
 							</configuration>

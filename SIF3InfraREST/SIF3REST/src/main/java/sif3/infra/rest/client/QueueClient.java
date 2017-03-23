@@ -54,7 +54,7 @@ public class QueueClient extends BaseClient
 		{
 			service = buildURI(service, null);
 			HeaderProperties hdrProperties = getHeaderProperties();		
-			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
+			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).get(ClientResponse.class);
 
 			return setResponse(service, clientResponse, QueueCollectionType.class, hdrProperties, null, null, false, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
 		}
@@ -73,7 +73,7 @@ public class QueueClient extends BaseClient
 		{
 			service = buildURI(service, null, queueID, null, null, null);
 			HeaderProperties hdrProperties = getHeaderProperties();		
-			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
+			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).get(ClientResponse.class);
 
 			return setResponse(service, clientResponse, QueueType.class, hdrProperties, null, null, false, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
 		}
@@ -148,7 +148,7 @@ public class QueueClient extends BaseClient
 		{
 			service = buildURI(service, null, queueID, null, null, null);
 			HeaderProperties hdrProperties = getHeaderProperties();		
-		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).delete(ClientResponse.class);
+		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).delete(ClientResponse.class);
 
 			return setResponse(service, clientResponse, null, hdrProperties, null, null, false, Status.NO_CONTENT);
 		}
@@ -201,7 +201,7 @@ public class QueueClient extends BaseClient
 			{
 				logger.debug("createQueue: Payload to send:\n"+payloadStr);
 			}
-			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true).post(ClientResponse.class, payloadStr);
+			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, true).post(ClientResponse.class, payloadStr);
 			return setResponse(service, clientResponse, QueueType.class, hdrProperties, null, null, false, Status.CREATED, Status.CONFLICT);
 		}
 		catch (Exception ex)

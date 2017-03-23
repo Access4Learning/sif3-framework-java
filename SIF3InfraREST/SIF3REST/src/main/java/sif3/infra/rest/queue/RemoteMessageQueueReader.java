@@ -21,8 +21,10 @@ import java.net.URI;
 
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderValues.EventAction;
@@ -43,7 +45,6 @@ import sif3.infra.rest.queue.types.ErrorInfo;
 import sif3.infra.rest.queue.types.EventInfo;
 import sif3.infra.rest.queue.types.QueueInfo;
 import sif3.infra.rest.queue.types.ResponseInfo;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class is the actual reader on the remote SIF Queue. It deals with all the logic that applies to SIF Message Queues and how
@@ -60,7 +61,7 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class RemoteMessageQueueReader implements Runnable
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private QueueInfo queueInfo = null;
     private ConsumerEnvironmentManager consumerEvnMgr = null;
@@ -397,6 +398,8 @@ public class RemoteMessageQueueReader implements Runnable
 				//TODO: JH - Do we need applicationKey and authenticatedUser HTTP header here?				
 				
 				EventInfo eventInfo = new EventInfo(eventPayload, response.getMediaType(), eventAction, updateType, zone, context, metadata, getQueueReaderID());
+				eventInfo.setFingerprint(getHeaderValue(response, ResponseHeaderConstants.HDR_FINGERPRINT));
+				
 				logger.debug(getQueueReaderID()+": Attempts to push Event to local queue...");
 				localQueue.blockingPush(eventInfo);
 				logger.debug(getQueueReaderID()+": Event successfully pushed to local queue");

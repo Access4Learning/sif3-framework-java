@@ -129,7 +129,7 @@ public class ObjectServiceClient extends BaseClient
 		{
 			service = buildURI(service, relURI, resourceID, zone, context, urlQueryParams);
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).get(ClientResponse.class);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).get(ClientResponse.class);
 
 			return setResponse(service, response, returnObjectClass, hdrProperties, zone, context, true, Status.OK, Status.NOT_MODIFIED);
 		}
@@ -177,7 +177,7 @@ public class ObjectServiceClient extends BaseClient
 			}
 			
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true).post(ClientResponse.class, payloadStr);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, true).post(ClientResponse.class, payloadStr);
 
 			return setResponse(service, response, returnObjectClass, hdrProperties, zone, context, true, Status.CREATED, Status.CONFLICT);
 		}
@@ -225,7 +225,7 @@ public class ObjectServiceClient extends BaseClient
 			}
 			
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true).put(ClientResponse.class, payloadStr);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, true).put(ClientResponse.class, payloadStr);
 
 			return setResponse(service, response, null, hdrProperties, zone, context, true, Status.NO_CONTENT);
 		}
@@ -264,7 +264,7 @@ public class ObjectServiceClient extends BaseClient
 			service = buildURI(service, relURI, resourceID, zone, context, urlQueryParams);
 			
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
-		    ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, false).delete(ClientResponse.class);
+		    ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).delete(ClientResponse.class);
 
 			return setResponse(service, response, null, hdrProperties, zone, context, true, Status.NO_CONTENT);
 		}
@@ -310,7 +310,7 @@ public class ObjectServiceClient extends BaseClient
 			addPagingInfoToHeaders(pagingInfo, hdrProperties);
 			addDelayedInfo(hdrProperties, zone, context, serviceName, serviceType, requestType);
 			
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, false).get(ClientResponse.class);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, true, false).get(ClientResponse.class);
 
 			return setResponse(service, response, returnObjectClass, hdrProperties, zone, context, requestType, true, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT, Status.ACCEPTED);
 		}
@@ -365,7 +365,7 @@ public class ObjectServiceClient extends BaseClient
 				logger.debug("getByQBE: Payload to send:\n"+payloadStr);
 			}
 			
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, true).post(ClientResponse.class, payloadStr);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, true, true).post(ClientResponse.class, payloadStr);
 
 			return setResponse(service, response, returnObjectClass, hdrProperties, zone, context, requestType, true, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT, Status.ACCEPTED);
 		}
@@ -414,7 +414,7 @@ public class ObjectServiceClient extends BaseClient
 			
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
 			addDelayedInfo(hdrProperties, zone, context, serviceName, ServiceType.OBJECT, requestType);
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, true).post(ClientResponse.class, payloadStr);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, true, true).post(ClientResponse.class, payloadStr);
 
 			return setCreateBulkResponse(service, response, zone, context, requestType, hdrProperties);
 		}
@@ -467,7 +467,7 @@ public class ObjectServiceClient extends BaseClient
 			// Set specific header so that PUT method knows that an UPDATE and not a DELETE is required! 
 			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.UPDATE.name());																																			
 			
-			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, true).put(ClientResponse.class, payloadStr);
+			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, true, true).put(ClientResponse.class, payloadStr);
 
 			return setUpdateBulkResponse(service, response, zone, context, requestType, hdrProperties);
 		}
@@ -536,7 +536,7 @@ public class ObjectServiceClient extends BaseClient
 			{
 				logger.debug("removeMany: Payload to send:\n"+payloadStr);
 			}
-			ClientResponse cltResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, true).put(ClientResponse.class, payloadStr);
+			ClientResponse cltResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, true, true).put(ClientResponse.class, payloadStr);
 			
 			return setDeleteBulkResponse(service, cltResponse, zone, context, requestType, hdrProperties);
 		}
@@ -579,7 +579,7 @@ public class ObjectServiceClient extends BaseClient
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
             addPagingInfoToHeaders(pagingInfo, hdrProperties);
             
-            ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, RequestType.IMMEDIATE, true, false).head();
+            ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, RequestType.IMMEDIATE, true, true, false).head();
 
             return setResponse(service, response, null, hdrProperties, zone, context, RequestType.IMMEDIATE, true, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT, Status.ACCEPTED);
         }

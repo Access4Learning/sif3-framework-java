@@ -25,7 +25,7 @@ Project (note that the version number will change over time):
 <dependency>
    <groupId>sif3.framework</groupId>
    <artifactId>sif3-infra-rest</artifactId>
-   <version>0.10.0</version>
+   <version>0.11.0</version>
 </dependency>
 ```
 
@@ -146,6 +146,14 @@ Additional changes to the framework include:
 - Removed dependency on systemic-framework_<date>.jar. Applicable classes of that library are now part of the framework.
 
 Please refer to the release notes in the directory "release/v0.10.0" for additional details and upgrade instructions.
+
+## Version from MMM DD, 2017: v0.11.0 - Various changes
+- The SIF3 Framework uses the sfl4j as its logging framework. This has changed from the fixed log4j.
+- Framework infrastructure is now SIF 3.2.1. Fingerprint functionality has been added.
+- While the framework is now SIF 3.2.1 there is no support for functional services, yet. 
+
+**NOTE: There are database changes! You must read the detailed release notes in "release/v0.11.0" carefully to ensure that your 
+project is upgraded properly to the new framework version.**
 
 # Download Instructions
 How to download this project:

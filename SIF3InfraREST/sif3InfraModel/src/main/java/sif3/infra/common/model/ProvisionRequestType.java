@@ -11,6 +11,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * If an Environment supports self-provisioning Consumers than either this section must initially contain all the rights the Consumer has to all Services in all Zones, or the provisionRequests Infrastructure Service must be present in the Consumer’s Environment to allow additional rights to be obtained.
+ * 
  * <p>Java class for provisionRequestType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -20,9 +22,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="provisionedZones" type="{http://www.sifassociation.org/infrastructure/3.1}provisionedZonesType"/>
+ *         &lt;element name="provisionedZones" type="{http://www.sifassociation.org/infrastructure/3.2.1}provisionedZonesType"/>
  *       &lt;/sequence>
- *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.1}uuidType" />
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.2.1}uuidType" />
  *       &lt;attribute name="completionStatus">
  *         &lt;simpleType>
  *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -40,12 +42,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "provisionRequestType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "provisionRequestType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
     "provisionedZones"
 })
 public class ProvisionRequestType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
     protected ProvisionedZonesType provisionedZones;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)

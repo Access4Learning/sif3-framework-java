@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "deleteIdType", namespace = "http://www.sifassociation.org/infrastructure/3.1")
+@XmlType(name = "deleteIdType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
 public class DeleteIdType {
 
     @XmlAttribute(name = "id", required = true)

@@ -31,15 +31,20 @@ public class RequestMetadata extends BaseMetadata
     private static final long serialVersionUID = 1477907327110025038L;
     
     private QueryIntention queryIntention = null; // May only be used in HTTP GET requests
-//    private String navigationID = null; // May only be used in HTTP GET requests
-    
+
     // Refer to javadoc for the getSourceName() method.
     private String sourceName = null; 
     
     // Refer to javadoc for the getEnvironmentID() method.
     private String environmentID = null; // Only useful in DIRECT environments
     
-	public RequestMetadata(URLQueryParameter queryParams, HeaderProperties httpHeaderParams)
+    // Introduced in SIF 3.2.1. Uniquely identifies the consumer. 
+    // In a brokered environment this value will be set by the broker. 
+    // In a direct environment this framework will assign the value according to the environment of the consumer regardless of
+    // what the consumer has set this header for. This will ensure that a consumer cannot pretend to be someone else.
+    private String fingerprint = null;
+    
+    public RequestMetadata(URLQueryParameter queryParams, HeaderProperties httpHeaderParams)
     {
     	super(queryParams, httpHeaderParams);
     }
@@ -53,16 +58,6 @@ public class RequestMetadata extends BaseMetadata
     {
     	this.queryIntention = queryIntention;
     }
-	
-//	public String getNavigationID()
-//    {
-//    	return this.navigationID;
-//    }
-//	
-//	public void setNavigationID(String navigationID)
-//    {
-//    	this.navigationID = navigationID;
-//    }
 	
 	/**
 	 * IMPORTANT:<br>
@@ -111,10 +106,21 @@ public class RequestMetadata extends BaseMetadata
     	this.environmentID = environmentID;
     }
 
-	@Override
+    public String getFingerprint()
+    {
+        return fingerprint;
+    }
+
+    public void setFingerprint(String fingerprint)
+    {
+        this.fingerprint = fingerprint;
+    }
+
+    @Override
     public String toString()
     {
-	    return "RequestMetadata [queryIntention=" + this.queryIntention + ", sourceName=" + this.sourceName + ", environmentID="
-	            + this.environmentID + ", toString()=" + super.toString() + "]";
+        return "RequestMetadata [queryIntention=" + queryIntention + ", sourceName=" + sourceName
+                + ", environmentID=" + environmentID + ", fingerprint=" + fingerprint
+                + ", toString()=" + super.toString() + "]";
     }
 }

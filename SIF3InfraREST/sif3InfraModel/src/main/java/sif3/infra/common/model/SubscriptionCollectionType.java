@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="subscription" type="{http://www.sifassociation.org/infrastructure/3.1}subscriptionType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="subscription" type="{http://www.sifassociation.org/infrastructure/3.2.1}subscriptionType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +29,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "subscriptionCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "subscriptionCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
     "subscription"
 })
 public class SubscriptionCollectionType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     protected List<SubscriptionType> subscription;
 
     /**

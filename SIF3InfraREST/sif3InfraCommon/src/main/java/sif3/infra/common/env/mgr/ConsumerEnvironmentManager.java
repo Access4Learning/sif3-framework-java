@@ -22,8 +22,11 @@ import java.net.URI;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.exception.PersistenceException;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.model.security.TokenInfo;
@@ -36,8 +39,6 @@ import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.common.model.InfrastructureServiceType;
 import sif3.infra.common.model.InfrastructureServicesType;
 import sif3.infra.common.utils.SIFSessionUtils;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class deals with the main functions relating to the environments that need to be managed on a consumer. A consumer connects, 
@@ -49,7 +50,7 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class ConsumerEnvironmentManager implements ClientEnvironmentManager
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	/* The property file name of this consumer */
 	private String adapterFileNameWithoutExt = null;

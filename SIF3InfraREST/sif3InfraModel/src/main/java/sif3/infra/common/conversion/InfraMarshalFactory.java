@@ -28,7 +28,8 @@ import java.util.Set;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBElement;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.exception.MarshalException;
@@ -46,7 +47,7 @@ import sif3.infra.common.model.ObjectFactory;
  */
 public class InfraMarshalFactory implements MarshalFactory
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 	
 	private static final HashMap<Class<?>, Method> CREATE_METHODS = new HashMap<Class<?>, Method>();
 	

@@ -60,7 +60,7 @@ public class EnvironmentInfo implements Serializable
     private String    password              = null;
     private String generatorID  = null; // Value to be used for the generatorId HTTP Header field. 
     private boolean compressionEnabled = false;
-    private boolean noCertificateCheck = false; // by default we want certififcates checked.
+    private boolean noCertificateCheck = false; // by default we want certificates checked.
     
     // Properties for using an existing environment.
     private boolean useExistingEnv = false;

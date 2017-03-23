@@ -1,4 +1,4 @@
-<environment type="DIRECT" xmlns="http://www.sifassociation.org/infrastructure/3.1">
+<environment type="DIRECT" xmlns="http://www.sifassociation.org/infrastructure/3.2.1">
     <sessionToken></sessionToken>
     <solutionId>test</solutionId>
     <defaultZone id="auSchoolTestingZone">
@@ -13,6 +13,7 @@
         <infrastructureService name="eventsConnector">eventsConnector</infrastructureService>
         <infrastructureService name="queues">/queues</infrastructureService>
         <infrastructureService name="subscriptions">/subscriptions/</infrastructureService>
+        <infrastructureService name="servicesConnector">services</infrastructureService>
     </infrastructureServices>
     <provisionedZones>
        <provisionedZone id="auSchoolTestingZone">

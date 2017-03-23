@@ -41,7 +41,8 @@ public class SIFEvent<L> implements Serializable
 	private EventAction eventAction;
 	private int listSize;
 	private UpdateType updateType;
-	private HashMap<String, String> metadata = new HashMap<String, String>();
+	private String fingerprint;
+    private HashMap<String, String> metadata = new HashMap<String, String>();
 
 	public SIFEvent()
 	{
@@ -124,6 +125,16 @@ public class SIFEvent<L> implements Serializable
     	return this.metadata;
     }
 
+    public String getFingerprint()
+    {
+        return fingerprint;
+    }
+
+    public void setFingerprint(String fingerprint)
+    {
+        this.fingerprint = fingerprint;
+    }
+
 	/**
 	 * This method stores a simple name/value hashmap with this event. Note that this data is not forming part of the actual event that
 	 * is being sent in a provider. It is also not received by a consumer from the event queue. It is the developer that can add additional
@@ -150,9 +161,9 @@ public class SIFEvent<L> implements Serializable
 	@Override
     public String toString()
     {
-	    return "SIFEvent [sifObjectList=" + this.sifObjectList + ", eventAction="
-	            + this.eventAction + ", listSize=" + this.listSize + ", updateType="
-	            + this.updateType + ", metadata=" + this.metadata + "]";
+        return "SIFEvent [sifObjectList=" + sifObjectList + ", eventAction=" + eventAction
+                + ", listSize=" + listSize + ", updateType=" + updateType + ", fingerprint="
+                + fingerprint + ", metadata=" + metadata + "]";
     }
 
 

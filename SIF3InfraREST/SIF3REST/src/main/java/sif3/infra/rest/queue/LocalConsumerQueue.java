@@ -20,10 +20,11 @@ package sif3.infra.rest.queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import sif3.infra.rest.queue.types.QueueMessage;
 import au.com.systemic.framework.utils.StringUtils;
+import sif3.infra.rest.queue.types.QueueMessage;
 
 
 /**
@@ -45,7 +46,7 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class LocalConsumerQueue
 {	
-    protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private BlockingQueue<QueueMessage> queue = null;
 	

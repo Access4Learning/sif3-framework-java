@@ -19,8 +19,11 @@ package sif3.infra.common.env.mgr;
 import java.util.Date;
 import java.util.HashMap;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.exception.PersistenceException;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.model.security.TokenInfo;
@@ -31,8 +34,6 @@ import sif3.infra.common.env.types.EnvironmentInfo;
 import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.common.utils.SIFSessionUtils;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class deals with the main functions relating to the environments that need to be managed by the environment provider. 
@@ -44,7 +45,7 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class DirectProviderEnvironmentManager implements EnvironmentManager
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	/* The property file name of this consumer */
 	private String adapterFileNameWithoutExt = null;

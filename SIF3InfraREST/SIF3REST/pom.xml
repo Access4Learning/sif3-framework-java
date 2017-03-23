@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>sif3.framework</groupId>
 		<artifactId>sif3-framework</artifactId>
-		<version>0.10.0-beta</version>
+		<version>0.11.0-beta</version>
 	</parent>
 	
 	<!-- =========== -->
@@ -55,11 +55,16 @@
 		</dependency>
 		
 		<!-- ================== -->
-		<!-- Log4J Dependencies -->
+		<!-- slf4j Dependencies -->
 		<!-- ================== -->
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-api</artifactId>
+		</dependency>
+  		
+		<dependency>
+    		<groupId>org.slf4j</groupId>
+    		<artifactId>slf4j-log4j12</artifactId>
 		</dependency>
 
 		<!-- ================================= -->

@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "namespaceQualifierType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "namespaceQualifierType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
     "prefix",
     "_static",
     "startsWith",
@@ -43,18 +43,18 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class NamespaceQualifierType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true, nillable = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true, nillable = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String prefix;
-    @XmlElement(name = "static", namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(name = "static", namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     @XmlSchemaType(name = "anyURI")
     protected String _static;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String startsWith;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     protected String regularExpression;
 
     /**

@@ -21,17 +21,18 @@ package sif3.common.persist.dao;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.PersistenceException;
 import sif3.common.persist.common.BasicTransaction;
 import sif3.common.persist.model.SIF3Queue;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * Implements some low level DB operations relating to the SIF Queue Information that must be stored locally.
@@ -41,7 +42,7 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class SIF3QueueDAO extends BaseDAO
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	
 	@SuppressWarnings("unchecked")
     public SIF3Queue getQueue(BasicTransaction tx, String queueID, AdapterType adapterType) throws IllegalArgumentException, PersistenceException

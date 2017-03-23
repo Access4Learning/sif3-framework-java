@@ -37,7 +37,7 @@ public class TestSIF3SessionService extends ServiceBaseTest
 //	private static final String INSTANCE_ID = "1234567890-0987654321";
 	
 	private static final String SESSION_TOKEN = "fa224931-9425-45e1-a7a1-432eb178e76e";
-	private static final String ENVIRONMENT_ID = "22d7a78a-cde3-4757-8ce3-db471ecd807a";
+	private static final String ENVIRONMENT_ID = "431889c2-97dc-48bd-9acb-72b9c30b044c";
 	private static final String SECURITY_TOKEN = "OAUTH-TOKEN:1234";
 //	private static final String ENVIRONMENT_ID = "1f8d7a78-74f1-4757-8ce3-db471ecdf1eb";
 	private static final AdapterType ADAPTER_TYPE = AdapterType.CONSUMER;
@@ -114,9 +114,9 @@ public class TestSIF3SessionService extends ServiceBaseTest
 //			tester.testGetSessionBySolutionAppkeyUserInst();
 //			tester.testCreateNewSession();
 			//tester.testCreateNewSessionWithXML();
-//			tester.testGetSessionByEnvID();
+			tester.testGetSessionByEnvID();
 //			tester.testGetSessionBySessionToken();
-			tester.testGetSessionBySecurityToken();
+//			tester.testGetSessionBySecurityToken();
 //			tester.testRemoveSessionByEnvironmentID();
 			//tester.testSave();
        
