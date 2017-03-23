@@ -5,7 +5,9 @@ Release Notes for v0.11.0 of SIF3 Framework (MMM DD, 2017)
 
 Bug Fixes
 ---------
-- None
+- Fix pom.xml for sif3-common to ensure the latest jettison library is used rather than an old one
+  that is included through jersey. Old one has a bug with JSON deserialising. Latest version fixes
+  that issue.
 
 New Functionality
 -----------------
