@@ -29,7 +29,6 @@ import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -39,6 +38,8 @@ import org.jdom.output.DOMOutputter;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.XPath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
 /**
@@ -50,7 +51,7 @@ public class XMLUtils
   protected static org.w3c.dom.DocumentFragment tmpFragment    = null;
   protected static int                          tmpNameCounter = 0;
 
-  protected final static Logger logger = Logger.getLogger(XMLUtils.class);
+  protected final static Logger logger = LoggerFactory.getLogger(XMLUtils.class);
 
   private static final XMLOutputter prettyXML  = new XMLOutputter(Format.getPrettyFormat());
   private static final XMLOutputter compactXML = new XMLOutputter(Format.getCompactFormat());

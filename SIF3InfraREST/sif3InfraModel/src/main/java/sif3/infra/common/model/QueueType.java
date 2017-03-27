@@ -13,6 +13,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * The Queues Service supports creation, deletion and querying of Queue (Instance) / Queue Messages Service pairs.
+ * 
  * <p>Java class for queueType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -30,7 +32,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="ownerId" type="{http://www.sifassociation.org/infrastructure/3.1}uuidType" minOccurs="0"/>
+ *         &lt;element name="ownerId" type="{http://www.sifassociation.org/infrastructure/3.2.1}uuidType" minOccurs="0"/>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
  *         &lt;element name="queueUri" type="{http://www.w3.org/2001/XMLSchema}anyURI" minOccurs="0"/>
  *         &lt;element name="ownerUri" type="{http://www.w3.org/2001/XMLSchema}anyURI" minOccurs="0"/>
@@ -48,7 +50,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="lastModified" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
  *         &lt;element name="messageCount" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.1}uuidType" />
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.2.1}uuidType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -57,7 +59,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "queueType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "queueType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
     "polling",
     "ownerId",
     "name",
@@ -73,42 +75,42 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class QueueType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     protected String polling;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String ownerId;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String name;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     @XmlSchemaType(name = "anyURI")
     protected String queueUri;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     @XmlSchemaType(name = "anyURI")
     protected String ownerUri;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     @XmlSchemaType(name = "unsignedInt")
     protected Long idleTimeout;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     @XmlSchemaType(name = "unsignedInt")
     protected Long minWaitTime;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     protected Long maxConcurrentConnections;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", type = String.class)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", type = String.class)
     @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
     protected Calendar created;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", type = String.class)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", type = String.class)
     @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
     protected Calendar lastAccessed;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", type = String.class)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", type = String.class)
     @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
     protected Calendar lastModified;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     @XmlSchemaType(name = "unsignedInt")
     protected Long messageCount;
     @XmlAttribute(name = "id")

@@ -8,6 +8,8 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
+ * A “deleteRequest” element, which consists of multiple, “delete” object ids. Since REST conventions do not support payloads on HTTP DELETE messages, all multi-object Delete Requests are conveyed via an HTTP PUT message containing an additional HTTP Header Field value of methodOverride set to DELETE.
+ * 
  * <p>Java class for deleteRequestType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -17,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="deletes" type="{http://www.sifassociation.org/infrastructure/3.1}deleteIdCollection"/>
+ *         &lt;element name="deletes" type="{http://www.sifassociation.org/infrastructure/3.2.1}deleteIdCollection"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -27,12 +29,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "deleteRequestType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "deleteRequestType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
     "deletes"
 })
 public class DeleteRequestType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
     protected DeleteIdCollection deletes;
 
     /**

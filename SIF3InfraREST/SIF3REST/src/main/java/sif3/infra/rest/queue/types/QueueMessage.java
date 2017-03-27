@@ -49,6 +49,7 @@ public class QueueMessage implements Serializable
     private MediaType mediaType; // indicates what format the payload string is in.
     private SIFZone zone;
     private SIFContext context;
+    private String fingerprint = null;
     private String messageQueueReaderID;
 
     public QueueMessage()
@@ -195,6 +196,16 @@ public class QueueMessage implements Serializable
         this.context = context;
     }
     
+    public String getFingerprint()
+    {
+        return fingerprint;
+    }
+
+    public void setFingerprint(String fingerprint)
+    {
+        this.fingerprint = fingerprint;
+    }
+
     /**
      * @return the messageQueueReaderID
      */
@@ -211,16 +222,13 @@ public class QueueMessage implements Serializable
         this.messageQueueReaderID = messageQueueReaderID;
     }
     
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString()
     {
         return "QueueMessage [messageType=" + messageType + ", serviceType=" + serviceType
                 + ", payload=" + payload + ", metadata=" + metadata + ", mediaType=" + mediaType
-                + ", zone=" + zone + ", context=" + context + ", messageQueueReaderID="
-                + messageQueueReaderID + "]";
+                + ", zone=" + zone + ", context=" + context + ", fingerprint=" + fingerprint
+                + ", messageQueueReaderID=" + messageQueueReaderID + "]";
     }
 
 }

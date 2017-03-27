@@ -26,7 +26,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is an utility class to load the Trusted Keystore from a specific location. The code is inspired from the following
@@ -37,7 +38,7 @@ import org.apache.log4j.Logger;
  */
 public class X509TrustedStoreManager implements X509TrustManager 
 {
-  private final Logger logger = Logger.getLogger(getClass());
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
   /*
    * The default PKIX X509TrustManager.  We'll delegate decisions to it, and fall back to the logic in this 

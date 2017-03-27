@@ -40,6 +40,7 @@ import sif3.common.ws.BulkOperationResponse;
 import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.OperationStatus;
 import sif3.common.ws.Response;
+import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.rest.consumer.ConsumerLoader;
 import systemic.sif3.demo.rest.consumer.StudentPersonalConsumer;
 import au.com.systemic.framework.utils.FileReaderWriter;
@@ -319,8 +320,8 @@ public class TestStudentPersonalConsumer
 //			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
 //            envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, CommonConstants.DEFAULT_CONTEXT));
 
-//			List<Response> responses = consumer.retrieve(new PagingInfo(10), envZoneCtxList, RequestType.DELAYED, QueryIntention.NO_CACHE, params);
-			List<Response> responses = consumer.retrieve(new PagingInfo(10, 1), envZoneCtxList, RequestType.IMMEDIATE, QueryIntention.NO_CACHE, params);
+//			List<Response> responses = consumer.retrieve(new PagingInfo(100), envZoneCtxList, RequestType.DELAYED, QueryIntention.NO_CACHE, params);
+			List<Response> responses = consumer.retrieve(new PagingInfo(5, 1), envZoneCtxList, RequestType.IMMEDIATE, QueryIntention.NO_CACHE, params);
 //            List<Response> responses = consumer.retrieve(new PagingInfo(10, 0), envZoneCtxList, REQUEST_TYPE, QueryIntention.NO_CACHE, params);
 //			List<Response> responses = consumer.retrieve(new PagingInfo(5, 17), envZoneCtxList, REQUEST_TYPE);
 //			List<Response> responses = consumer.retrieve(null, envZoneCtxList, REQUEST_TYPE);
@@ -508,6 +509,7 @@ public class TestStudentPersonalConsumer
 
 		if (ConsumerLoader.initialise(CONSUMER_ID))
 		{
+            System.out.println("Consumer loaded successfully. Environment Data:\n"+ConsumerEnvironmentManager.getInstance().getEnvironmentInfo());
 		
 			StudentPersonalConsumer consumer = tester.getConsumer();
   		

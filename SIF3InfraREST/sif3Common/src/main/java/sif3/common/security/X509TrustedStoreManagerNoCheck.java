@@ -22,7 +22,8 @@ import java.security.cert.X509Certificate;
 
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is a "dummy" trusted store implementation that accepts all certificates. There are situations during development
@@ -36,7 +37,7 @@ import org.apache.log4j.Logger;
  */
 public class X509TrustedStoreManagerNoCheck implements X509TrustManager 
 {
-  private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     public X509TrustedStoreManagerNoCheck() throws Exception
     {

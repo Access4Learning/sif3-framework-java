@@ -8,7 +8,7 @@
 	<groupId>sif3.framework</groupId>
 	<artifactId>sif3-demo-web</artifactId>
 	<packaging>war</packaging>
-	<version>0.10.0-Demo</version>
+	<version>0.11.0-Demo</version>
 	<name>SIF3 Demo Provider</name>
 	
 	<!-- =============================== -->
@@ -41,7 +41,7 @@
 		<dependency>
 			<groupId>sif3.framework</groupId>
 			<artifactId>sif3-infra-rest</artifactId>
-			<version>0.10.0-beta</version>
+			<version>0.11.0-beta</version>
 		</dependency>
 
 		<!-- ====================== -->
@@ -51,7 +51,7 @@
 		<dependency>
 			<groupId>sifau</groupId>
 			<artifactId>sif3-au-datamodel</artifactId>
-			<version>3.4</version>
+			<version>3.4.1</version>
 		</dependency>
 
 		<!-- =============================== -->
@@ -67,17 +67,28 @@
 		<!-- Log4j Dependencies -->
 		<!-- ================== -->
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.5.8</version>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-api</artifactId>
+		    <version>1.7.22</version>
 		</dependency>
-		
+
+		<!-- Use log4j as the slf4j binder -->
+
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.14</version>
+    		<groupId>org.slf4j</groupId>
+    		<artifactId>slf4j-log4j12</artifactId>
+    		<version>1.7.22</version>
 		</dependency>
-		
+
+		<!-- Use simple logger as the slf4j binder -->
+<!--
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.22</version>
+		</dependency>
+-->
+
 		<!-- ======================================== -->
 		<!-- JDBC Dependencies                        -->
 		<!-- In Reality you would only have one here. -->

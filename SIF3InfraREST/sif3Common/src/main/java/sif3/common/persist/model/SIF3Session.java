@@ -49,7 +49,8 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	private String password;
 	private String sessionToken;
 	private String environmentID;
-	private String adapterType; //CONSUMER, PROVIDER, ENVIRONMENT_PROVIDER
+	private String fingerprint;
+    private String adapterType; //CONSUMER, PROVIDER, ENVIRONMENT_PROVIDER
 	private String securityToken;
 	private Date securityTokenExpiry;
 	private String environmentXML;
@@ -121,6 +122,16 @@ public class SIF3Session extends EnvironmentKey implements Serializable
     	this.environmentID = environmentID;
     }
 	
+    public String getFingerprint()
+    {
+        return fingerprint;
+    }
+
+    public void setFingerprint(String fingerprint)
+    {
+        this.fingerprint = fingerprint;
+    }
+
 	public String getSecurityToken()
 	{
 		return securityToken;
@@ -405,20 +416,17 @@ public class SIF3Session extends EnvironmentKey implements Serializable
     }
 
 	
-	/* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    @Override
+	@Override
     public String toString()
     {
         return "SIF3Session [sessionID=" + sessionID + ", adapterName=" + adapterName
                 + ", password=" + password + ", sessionToken=" + sessionToken + ", environmentID="
-                + environmentID + ", adapterType=" + adapterType + ", securityToken="
-                + securityToken + ", securityTokenExpiry=" + securityTokenExpiry
-                + ", environmentXML=" + environmentXML + ", queueStrategy=" + queueStrategy
-                + ", created=" + created + ", lastAccessed=" + lastAccessed + ", defaultZone="
-                + defaultZone + ", authenticationMethod=" + authenticationMethod + ", services="
-                + services + ", toString()=" + super.toString() + "]";
+                + environmentID + ", fingerprint=" + fingerprint + ", adapterType=" + adapterType
+                + ", securityToken=" + securityToken + ", securityTokenExpiry="
+                + securityTokenExpiry + ", environmentXML=" + environmentXML + ", queueStrategy="
+                + queueStrategy + ", created=" + created + ", lastAccessed=" + lastAccessed
+                + ", defaultZone=" + defaultZone + ", authenticationMethod=" + authenticationMethod
+                + ", services=" + services + ", toString()=" + super.toString() + "]";
     }	
     
 	/*---------------------*/

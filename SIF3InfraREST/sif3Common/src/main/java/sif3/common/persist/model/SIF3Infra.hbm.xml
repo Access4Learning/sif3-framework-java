@@ -20,6 +20,7 @@
         <property name="password" column="PASSWORD" type="string" length="100"/>
         <property name="sessionToken" column="SESSION_TOKEN" type="string" length="200"/>
         <property name="environmentID" column="ENVIRONMENT_ID" type="string" length="36"/>
+        <property name="fingerprint" column="FINGERPRINT" type="string" length="255"/>
         <property name="securityToken" column="SECURITY_TOKEN" type="string" length="200"/>
         <property name="securityTokenExpiry" column="SECURITY_TOKEN_EXPIRY" type="timestamp"/>
         <property name="adapterType" column="ADAPTER_TYPE" type="string" length="20"/>

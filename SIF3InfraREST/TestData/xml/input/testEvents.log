@@ -1,9 +1,9 @@
 ###
 StudentPersonals
 ###
-<StudentPersonals xmlns="http://www.sifassociation.org/au/datamodel/3.4">
+<StudentPersonals xmlns="http://www.sifassociation.org/datamodel/au/3.4.1">
     <StudentPersonal RefId="2bc9ff83dbbe44e596da64b7271ec25e"
-        xmlns="http://www.sifassociation.org/au/datamodel/3.4">
+        xmlns="http://www.sifassociation.org/datamodel/au/3.4.1">
         <LocalId>879</LocalId>
         <PersonInfo>
             <Name Type="LGL">
@@ -17,7 +17,7 @@ StudentPersonals
         </MostRecent>
     </StudentPersonal>
     <StudentPersonal RefId="399f1200f6034d8fbeda72a81b634639"
-        xmlns="http://www.sifassociation.org/au/datamodel/3.4">
+        xmlns="http://www.sifassociation.org/datamodel/au/3.4.1">
         <LocalId></LocalId>
         <PersonInfo>
             <Name Type="LGL">
@@ -34,9 +34,9 @@ StudentPersonals
 ###
 StudentPersonals
 ###
-<StudentPersonals xmlns="http://www.sifassociation.org/au/datamodel/3.4">
+<StudentPersonals xmlns="http://www.sifassociation.org/datamodel/au/3.4.1">
     <StudentPersonal RefId="164da5d9bcbf4cf8a058ba0b0efde9ba"
-        xmlns="http://www.sifassociation.org/au/datamodel/3.4">
+        xmlns="http://www.sifassociation.org/datamodel/au/3.4.1">
         <LocalId>98765</LocalId>
         <PersonInfo>
             <Name Type="LGL">
@@ -50,7 +50,7 @@ StudentPersonals
         </MostRecent>
     </StudentPersonal>
     <StudentPersonal RefId="24ed508e1ed04bba82198233efa55859"
-        xmlns="http://www.sifassociation.org/au/datamodel/3.4">
+        xmlns="http://www.sifassociation.org/datamodel/au/3.4.1">
         <LocalId>98765</LocalId>
         <PersonInfo>
             <Name Type="LGL">
@@ -109,9 +109,9 @@ StudentDailyAttendances
 ###
 StudentPersonals
 ###
-<StudentPersonals xmlns="http://www.sifassociation.org/au/datamodel/3.4">
+<StudentPersonals xmlns="http://www.sifassociation.org/datamodel/au/3.4.1">
     <StudentPersonal RefId="2ae2d4a3a3c04d77ad843b73adac7747"
-        xmlns="http://www.sifassociation.org/au/datamodel/3.4">
+        xmlns="http://www.sifassociation.org/datamodel/au/3.4.1">
         <LocalId>98765</LocalId>
         <PersonInfo>
             <Name Type="LGL">
@@ -128,8 +128,8 @@ StudentPersonals
 ###
 SchoolInfos
 ###
-<SchoolInfos xmlns="http://www.sifassociation.org/au/datamodel/3.4">
-    <SchoolInfo RefId="D3E34B359D75101A8C3D00AA001A1651" xmlns="http://www.sifassociation.org/au/datamodel/3.4">
+<SchoolInfos xmlns="http://www.sifassociation.org/datamodel/au/3.4.1">
+    <SchoolInfo RefId="D3E34B359D75101A8C3D00AA001A1651" xmlns="http://www.sifassociation.org/datamodel/au/3.4.1">
         <LocalId>E1013</LocalId>
         <StateProvinceId>01011234</StateProvinceId>
         <SchoolType>Pri/Sec</SchoolType>

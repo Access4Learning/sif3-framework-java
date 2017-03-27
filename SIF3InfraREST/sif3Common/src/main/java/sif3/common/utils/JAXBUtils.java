@@ -35,7 +35,6 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.jettison.mapped.Configuration;
@@ -43,10 +42,12 @@ import org.codehaus.jettison.mapped.MappedNamespaceConvention;
 import org.codehaus.jettison.mapped.MappedXMLStreamReader;
 import org.codehaus.jettison.mapped.MappedXMLStreamWriter;
 import org.codehaus.jettison.mapped.SimpleConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.Timer;
 import sif3.common.exception.MarshalException;
 import sif3.common.exception.UnmarshalException;
-import au.com.systemic.framework.utils.Timer;
 
 /**
  * @author Joerg Huber
@@ -54,7 +55,7 @@ import au.com.systemic.framework.utils.Timer;
  */
 public class JAXBUtils
 {	
-	protected static final Logger logger = Logger.getLogger(JAXBUtils.class);
+	protected final static Logger logger = LoggerFactory.getLogger(JAXBUtils.class);
 
 	/* Make JAXBContext a singleton. Otherwise creating the JAXBContext every time is very slow! */
 	private static HashMap<String, JAXBContext> jaxbCtx = new HashMap<String, JAXBContext>();

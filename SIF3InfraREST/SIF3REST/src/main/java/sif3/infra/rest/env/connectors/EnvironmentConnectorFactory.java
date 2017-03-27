@@ -18,7 +18,8 @@
 
 package sif3.infra.rest.env.connectors;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import sif3.infra.common.env.mgr.BrokeredProviderEnvironmentManager;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
@@ -36,7 +37,7 @@ import sif3.infra.common.interfaces.EnvironmentManager;
  */
 public class EnvironmentConnectorFactory
 {
-	protected static final Logger logger = Logger.getLogger(EnvironmentConnectorFactory.class);
+	protected final static Logger logger = LoggerFactory.getLogger(EnvironmentConnectorFactory.class);
 
 	public static EnvironmentConnector getEnvironmentConnector(EnvironmentManager envMgr)
 	{

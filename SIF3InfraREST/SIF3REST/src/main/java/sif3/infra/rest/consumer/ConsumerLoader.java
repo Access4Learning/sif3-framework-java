@@ -22,8 +22,11 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.exception.PersistenceException;
 import sif3.common.interfaces.HibernateProperties;
 import sif3.common.model.ServiceInfo;
@@ -39,8 +42,6 @@ import sif3.infra.rest.queue.connectors.ConsumerQueueConnector;
 import sif3.infra.rest.queue.connectors.ConsumerSubscriptionConnector;
 import sif3.infra.rest.queue.types.LocalQueueServiceInfo;
 import sif3.infra.rest.queue.types.QueueInfo;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This is the initialise/finalise class that must be called at startup or shutdown of any consumer adapter/service. The methods in here 
@@ -59,7 +60,7 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class ConsumerLoader
 {
-    protected static final Logger logger = Logger.getLogger(ConsumerLoader.class);
+    protected final static Logger logger = LoggerFactory.getLogger(ConsumerLoader.class);
 
     private static ConsumerLoader instance = null;
   

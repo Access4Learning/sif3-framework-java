@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * <pre>
  * &lt;complexType name="rightType">
  *   &lt;simpleContent>
- *     &lt;extension base="&lt;http://www.sifassociation.org/infrastructure/3.1>rightValueType">
+ *     &lt;extension base="&lt;http://www.sifassociation.org/infrastructure/3.2.1>rightValueType">
  *       &lt;attribute name="type" use="required">
  *         &lt;simpleType>
  *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -40,7 +40,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "rightType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "rightType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
     "value"
 })
 public class RightType {

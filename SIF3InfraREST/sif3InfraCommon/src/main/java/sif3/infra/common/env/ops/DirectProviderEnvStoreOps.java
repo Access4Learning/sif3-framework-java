@@ -31,6 +31,7 @@ import sif3.common.persist.model.AppEnvironmentTemplate;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.persist.service.AppEnvironmentService;
 import sif3.common.persist.service.SIF3SessionService;
+import sif3.common.utils.UUIDGenerator;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.model.EnvironmentType;
@@ -372,6 +373,7 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 				// Now we have a session token and a environmentID. Store them in the environment.
 				environment.setSessionToken(sif3Session.getSessionToken());
 				environment.setId(sif3Session.getEnvironmentID());
+				environment.setFingerprint(sif3Session.getFingerprint());
 				
 				// Other important values can be taken from the input environment or if not provided (payload free creation)
 				// some of the values should remain as in the template others can be taken from the template lookup tabble
@@ -565,6 +567,13 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 						if (StringUtils.isEmpty(sif3Session.getAdapterName())) // only override consumer if it doesn't exist
 						{
 						  sif3Session.setAdapterName(templateEnv.getConsumerName());
+						}
+						
+						// Since SIF 3.2.1 we need a fingerprint. This bit is providing a automatic upgrade to this SIF version.
+						if (StringUtils.isEmpty(environment.getFingerprint()))
+						{
+						    sif3Session.setFingerprint(UUIDGenerator.getUUID());
+                            environment.setFingerprint(sif3Session.getFingerprint());
 						}
 						
 						//Note some values may have been changed in the applciationInfo node but we don't really know how to deal with them

@@ -20,8 +20,8 @@ public class TestPropertyManager
       PropertyManager manager = tester.getManager();
       manager.loadPropertyFile("c3p0");
       manager.loadPropertyFile("env");
-      manager.loadPropertyFile("c3p0");
-      //manager.loadPropertyFile("dummy");
+//      manager.loadPropertyFile("c3p0");
+//      manager.loadPropertyFile("dummy");
       
       System.out.println("c3p0.autoCommitOnClose from c3p0: "+manager.getPropertyAsBool("c3p0", "c3p0.autoCommitOnClose", true));
       System.out.println("c3p0.autoCommitOnClose from env : "+manager.getPropertyAsBool("env", "c3p0.autoCommitOnClose", true));

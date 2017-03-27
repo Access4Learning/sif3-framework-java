@@ -20,7 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * @author Joerg Huber
@@ -28,7 +30,7 @@ import org.apache.log4j.Logger;
  */
 public class AdvancedProperties
 {
-	protected Logger logger = Logger.getLogger(getClass());
+	protected Logger logger = LoggerFactory.getLogger(getClass());
 
 	private String propFileNameFull = null;
 	private Properties props = null;

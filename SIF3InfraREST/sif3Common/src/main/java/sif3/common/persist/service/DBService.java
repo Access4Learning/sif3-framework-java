@@ -19,7 +19,8 @@
 
 package sif3.common.persist.service;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import sif3.common.exception.PersistenceException;
 import sif3.common.persist.common.BasicTransaction;
@@ -33,7 +34,7 @@ import sif3.common.persist.dao.BaseDAO;
  */
 public abstract class DBService
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	public abstract BaseDAO getDAO();
 	
