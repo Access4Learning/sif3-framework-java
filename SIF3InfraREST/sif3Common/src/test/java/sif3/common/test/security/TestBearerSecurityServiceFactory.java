@@ -15,18 +15,15 @@
  */
 package sif3.common.test.security;
 
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.PropertyManager;
-import sif3.common.CommonConstants.AdapterType;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.model.security.TokenCoreInfo;
 import sif3.common.model.security.TokenInfo;
-import sif3.common.persist.common.HibernateUtil;
-import sif3.common.persist.model.ExternalSecurityService;
 import sif3.common.security.AbstractSecurityService;
-import sif3.common.security.SecurityServiceFactory;
+import sif3.common.security.BearerSecurityFactory;
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.PropertyManager;
 
-public class TestSecurityServiceFactory
+public class TestBearerSecurityServiceFactory
 {
     private static final boolean IS_PROVDER          = false;
 
@@ -35,9 +32,8 @@ public class TestSecurityServiceFactory
 
     private AdvancedProperties   properties          = null;
 
-    public TestSecurityServiceFactory()
+    public TestBearerSecurityServiceFactory()
     {
-        HibernateUtil.initialise(null);
         PropertyManager propMgr = PropertyManager.getInstance();
         String propFileName = IS_PROVDER ? PROV_PROP_FILE_NAME : CONS_PROP_FILE_NAME;
         propMgr.loadPropertyFile(propFileName);
@@ -47,40 +43,32 @@ public class TestSecurityServiceFactory
 
     public void testGetInstance()
     {
-        ExternalSecurityService extService = SecurityServiceFactory.getSecurityService("BeareR", AdapterType.CONSUMER);
-        if (extService != null)
+    	AbstractSecurityService service = BearerSecurityFactory.getSecurityService(properties);
+        if (service != null)
         {
-            AbstractSecurityService abstractService = extService.getSecurityService(properties);
-            if (abstractService != null)
+            if (IS_PROVDER)
             {
-                if (IS_PROVDER)
-                {
-                    TokenInfo tokenInfo = abstractService.getInfo("VGVzdFNJUzoyMDE1LTA3LTE0VDE1OjE5OjAxWg==", null);
-                    System.out.println(tokenInfo);
-                }
-                else
-                {
-                    TokenCoreInfo coreInfo = new TokenCoreInfo();
-                    coreInfo.setAppUserInfo(new EnvironmentKey(null, properties.getPropertyAsString("env.application.key", null)));
-    //                TokenInfo tokenInfo = service.generateToken(coreInfo, properties.getPropertyAsString("env.pwd", null));
-                    TokenInfo tokenInfo = abstractService.createToken(coreInfo, properties.getPropertyAsString("env.pwd", null));
-                    System.out.println(tokenInfo);
-                }
+                TokenInfo tokenInfo = service.getInfo("VGVzdFNJUzoyMDE1LTA3LTE0VDE1OjE5OjAxWg==", null);
+                System.out.println(tokenInfo);
             }
             else
             {
-                System.out.println("Returned Security Service Implementation is null.");
+                TokenCoreInfo coreInfo = new TokenCoreInfo();
+                coreInfo.setAppUserInfo(new EnvironmentKey(null, properties.getPropertyAsString("env.application.key", null)));
+//                TokenInfo tokenInfo = service.generateToken(coreInfo, properties.getPropertyAsString("env.pwd", null));
+                TokenInfo tokenInfo = service.createToken(coreInfo, properties.getPropertyAsString("env.pwd", null));
+                System.out.println(tokenInfo);
             }
         }
         else
         {
-            System.out.println("Returned Security Service from Factory is null.");
+            System.out.println("Returned Security Service is null.");
         }
     }
 
     public static void main(String[] args)
     {
-        TestSecurityServiceFactory tester = new TestSecurityServiceFactory();
+        TestBearerSecurityServiceFactory tester = new TestBearerSecurityServiceFactory();
 
         System.out.println("Start Testing TestSecurityServiceFactory...");
 
