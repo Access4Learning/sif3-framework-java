@@ -17,6 +17,8 @@
 
 package systemic.sif3.demo.security;
 
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 
 import au.com.systemic.framework.utils.AdvancedProperties;
@@ -40,7 +42,7 @@ public class RICOneSecurityService extends AbstractSecurityService
     /**
      * @param properties
      */
-    public RICOneSecurityService(AdvancedProperties properties)
+    public RICOneSecurityService(AdvancedProperties properties, Map<String, String> securityServiceParameters)
     {
         super(properties);
         if (logger.isDebugEnabled())
