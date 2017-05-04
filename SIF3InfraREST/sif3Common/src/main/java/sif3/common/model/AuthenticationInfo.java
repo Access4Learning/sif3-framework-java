@@ -21,6 +21,9 @@ package sif3.common.model;
 import java.io.Serializable;
 import java.util.Date;
 
+import sif3.common.model.security.InternalSecurityServiceConstants;
+import sif3.common.model.security.SecurityServiceInfo;
+
 /**
  * This is a simple utility class to deal with components that make up the authentication token in SIF3. If the authentication method 
  * is 'Basic' or 'SIF_HMACSHA256' then the authentication token has the structure as defined in the SIF specification, meaning it is 
@@ -36,62 +39,41 @@ public class AuthenticationInfo implements Serializable
 {
 	private static final long serialVersionUID = -8736784141972585133L;
 
-	/* Defines valid authentication methods for SIF 3.0 */
-	public enum AuthenticationMethod {Basic, SIF_HMACSHA256, Bearer};
+	private SecurityServiceInfo securityServiceInfo = null;
 
-	private AuthenticationMethod authMethod = AuthenticationMethod.Basic;
-	private String               userToken  = null;
-	private String               password   = null;
-	private Date                 expireDate = null; // date when token expires.
+    //	private String authMethod = AuthenticationType.Basic.name();
+	private String userToken  = null;
+	private String password   = null;
+	private Date   expireDate = null; // date when token expires.
 
 	public AuthenticationInfo()
 	{
-		this(AuthenticationMethod.Basic, null, null, null);
+		this(InternalSecurityServiceConstants.BASIC_GENERIC_SECURITY, null, null, null);
 	}
 
-
-	public AuthenticationInfo(AuthenticationMethod authMethod, String userToken, String password, Date expireDate)
+	public AuthenticationInfo(SecurityServiceInfo securityServiceInfo, String userToken, String password, Date expireDate)
 	{
 		super();
-		setAuthMethod(authMethod);
+		setSecurityServiceInfo(securityServiceInfo);
 		setUserToken(userToken);
 		setPassword(password);
 		setExpireDate(expireDate);
 	}
 
-	
-	public AuthenticationInfo(AuthenticationMethod authMethod, String userToken, String password)
+	public AuthenticationInfo(SecurityServiceInfo securityServiceInfo, String userToken, String password)
 	{
-		this(authMethod, userToken, password, null);
+		this(securityServiceInfo, userToken, password, null);
 	}
 
-	public AuthenticationInfo(String authMethod, String userToken, String password)
-	{
-		this(null, userToken, password, null);
-		setAuthMethod(authMethod);
-	}
+	public SecurityServiceInfo getSecurityServiceInfo()
+    {
+        return securityServiceInfo;
+    }
 
-	public AuthenticationMethod getAuthMethod()
-	{
-		return authMethod;
-	}
-
-	public void setAuthMethod(AuthenticationMethod authMethod)
-	{
-		this.authMethod = authMethod;
-	}
-
-	public void setAuthMethod(String authMethod)
-	{
-		try
-		{
-			this.authMethod = AuthenticationMethod.valueOf(authMethod);
-		}
-		catch (Exception ex)
-		{
-			this.authMethod = AuthenticationMethod.Basic;
-		}
-	}
+    public void setSecurityServiceInfo(SecurityServiceInfo securityServiceInfo)
+    {
+        this.securityServiceInfo = securityServiceInfo;
+    }
 
 	public String getUserToken()
 	{
@@ -126,9 +108,8 @@ public class AuthenticationInfo implements Serializable
 	@Override
     public String toString()
     {
-	    return "AuthenticationInfo [authMethod=" + authMethod + ", userToken="
-	            + userToken + ", password=" + password + ", expireDate="
-	            + expireDate + "]";
+        return "AuthenticationInfo [securityServiceInfo=" + securityServiceInfo + ", userToken="
+                + userToken + ", password=" + password + ", expireDate=" + expireDate + "]";
     }
 
 }
