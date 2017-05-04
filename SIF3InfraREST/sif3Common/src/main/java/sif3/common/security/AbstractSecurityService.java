@@ -18,12 +18,13 @@
 package sif3.common.security;
 
 import java.util.HashMap;
+import java.util.Map;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
 import sif3.common.interfaces.SecurityService;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.security.TokenCoreInfo;
 import sif3.common.model.security.TokenInfo;
-import au.com.systemic.framework.utils.AdvancedProperties;
 
 /**
  * All custom security services that shall be used for 'Bearer' security must extend this abstract Security Service. This will enforce the
@@ -46,8 +47,9 @@ public abstract class AbstractSecurityService implements SecurityService
   
 	/* The consumer's properties. Used to access the property file within the security service implementation. */
 	private AdvancedProperties properties = null;
+	private Map<String, String> securityServiceParameters = null;
 
-	/**
+    /**
 	 * Only a provider needs to implement this method. If the security service is used by a consumer it might 'null out' this method (i.e. return 
 	 * false).<br/><br/>
 	 * 
@@ -106,13 +108,17 @@ public abstract class AbstractSecurityService implements SecurityService
 
   	
 	/**
-	 * Ensure constructor exists and has no arguments. This is the constructor called by the
-	 * framework to instantiate a concrete security service implementation.
+	 * This is the constructor called by the framework to instantiate a concrete security service implementation.
+	 *
+	 * @param properties Properties file for the given adapter.
+	 * @param securityServiceParameters Name/Value (name=key) map of parameters that are listed in the SIF3_SEC_SERVICE_PARAM table for
+	 *                                  the given security service.
 	 */
-	public AbstractSecurityService(AdvancedProperties properties)
+	public AbstractSecurityService(AdvancedProperties properties, Map<String, String> securityServiceParameters)
 	{
 		super();
 		this.properties = properties;
+		this.securityServiceParameters = securityServiceParameters;
 
 	}
 
@@ -121,6 +127,11 @@ public abstract class AbstractSecurityService implements SecurityService
 		return properties;
 	}
   
+    public Map<String, String> getSecurityServiceParameters()
+    {
+        return securityServiceParameters;
+    }
+
 	/*-----------------------*/
 	/*-- Interface Methods --*/
 	/*-----------------------*/
