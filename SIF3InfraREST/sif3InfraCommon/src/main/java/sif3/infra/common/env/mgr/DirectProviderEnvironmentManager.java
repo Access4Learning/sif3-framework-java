@@ -422,7 +422,9 @@ public class DirectProviderEnvironmentManager implements EnvironmentManager
 	@Override
     public String toString()
     {
-	    return "DirectProviderEnvironmentManager [sessions=" + this.sessions + "]";
+        return "DirectProviderEnvironmentManager [adapterFileNameWithoutExt="
+                + adapterFileNameWithoutExt + ", sessions=" + sessions
+                + ", secTokenSession=" + secTokenSession + "]";
     }
 
 	/*---------------------*/
