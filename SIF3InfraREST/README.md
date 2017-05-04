@@ -147,10 +147,12 @@ Additional changes to the framework include:
 
 Please refer to the release notes in the directory "release/v0.10.0" for additional details and upgrade instructions.
 
-## Version from MMM DD, 2017: v0.11.0 - Various changes
+## Version from May 04, 2017: v0.11.0 - Various changes
 - The SIF3 Framework uses the sfl4j as its logging framework. This has changed from the fixed log4j.
-- Framework infrastructure is now SIF 3.2.1. Fingerprint functionality has been added.
-- While the framework is now SIF 3.2.1 there is no support for functional services, yet. 
+- Framework infrastructure is now SIF 3.2.1. Fingerprint functionality has been added. While the framework is now SIF 3.2.1 there 
+  is no support for functional services, yet. 
+- Refactor'ed approach to external security services (i.e. OAuth) to open up the framework to other security services. For details
+  on how to use external security please refer to section 5.10 of the Developer's Guide.
 
 **NOTE: There are database changes! You must read the detailed release notes in "release/v0.11.0" carefully to ensure that your 
 project is upgraded properly to the new framework version.**
