@@ -18,11 +18,11 @@
 
 package sif3.infra.rest.client;
 
+import au.com.systemic.framework.utils.DateUtils;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.RequestHeaderConstants;
-import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
+import sif3.common.model.security.SecurityServiceInfo;
 import sif3.common.utils.AuthenticationUtils;
-import au.com.systemic.framework.utils.DateUtils;
 
 /**
  * @author Joerg Huber
@@ -35,13 +35,13 @@ public class ClientUtils
 	 * 
 	 * @param hdrProps A not null TransportHeaderProperties object where authentication properties will be added to. If some authentication
 	 *                 related properties should already exist then they will be over overwritten.
-	 * @param authenticationMethod The authentication method to set in the header properties.
+	 * @param serviceInfo The security service to use to create the correct HTTP Header notation.
 	 * @param username Username to use to generate the authentication token for the header properties.
 	 * @param password Password to use to generate the authentication token for the header properties.
 	 */
-	public static synchronized void setAuthenticationHeader(HeaderProperties hdrProps, AuthenticationMethod authenticationMethod, String username, String password)
+	public static synchronized void setAuthenticationHeader(HeaderProperties hdrProps, SecurityServiceInfo serviceInfo, String username, String password)
 	{
-		switch (authenticationMethod)
+		switch (serviceInfo.getAuthenticationType())
 		{
 			case Basic:
 			{
@@ -55,23 +55,11 @@ public class ClientUtils
 				hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME, iso8601Date);			
 				break;
 			}
-			case Bearer:
+			case Other:
 			{
-				hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AuthenticationUtils.getBearerAuthToken(username, password));
+				hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AuthenticationUtils.getOtherAuthToken(serviceInfo, username, password));
 				break;
 			}
 		}
-		
-//		if (authenticationMethod == AuthenticationMethod.Basic)
-//		{
-//			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AuthenticationUtils.getBasicAuthToken(username, password));
-//		}
-//		else if (authenticationMethod == AuthenticationMethod.SIF_HMACSHA256)
-//		{
-//			String iso8601Date = DateUtils.nowAsISO8601withSecFraction();
-//			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AuthenticationUtils.getSIFHMACSHA256Token(username, password, iso8601Date));
-//			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME, iso8601Date);			
-//		}
-
 	}
 }
