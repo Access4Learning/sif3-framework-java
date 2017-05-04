@@ -15,22 +15,25 @@
  * or implied.
  * See the License for the specific language governing permissions and limitations under the License.
  */
-package sif3.common.test.security;
+package systemic.sif3.demo.security;
 
+import java.util.Map;
+
+import au.com.systemic.framework.utils.AdvancedProperties;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.security.TokenCoreInfo;
 import sif3.common.model.security.TokenInfo;
 import sif3.common.security.AbstractSecurityService;
-import au.com.systemic.framework.utils.AdvancedProperties;
 
 public class DummySecurityService extends AbstractSecurityService
 {
 //	private static final long MINUTE = 1000*60;
 
-	public DummySecurityService(AdvancedProperties properties)
+	public DummySecurityService(AdvancedProperties properties, Map<String, String> securityServiceParameters)
 	{
-		super(properties);
+		super(properties, securityServiceParameters);
 		System.out.println("DummySecurityService Constructor called with property: " + getServiceProperties());
+        System.out.println("DummySecurityService Constructor called with securityServiceParameters: " + getSecurityServiceParameters());
 	}
 
 	@Override
@@ -38,7 +41,7 @@ public class DummySecurityService extends AbstractSecurityService
 	{
 		System.out.println("DummySecurityService.getTokenInfo() called for securityToken = "+securityToken+" and request metadata = "+requestMetadata);
 		TokenInfo tokenInfo = BaseSecurityOperations.getTokenInfo(securityToken);
-		
+
 //		long expireTime = MINUTE*5; // expire every x minute.
 //		TokenInfo tokenInfo = new TokenInfo(securityToken);
 //		tokenInfo.setTokenExpiryDate(new Date(((new Date()).getTime()) + expireTime));

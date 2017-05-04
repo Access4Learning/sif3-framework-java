@@ -15,7 +15,7 @@
  * the License. 
  */
 
-package sif3.common.test.security;
+package systemic.sif3.demo.security;
 
 import java.nio.charset.Charset;
 import java.text.ParseException;
@@ -41,7 +41,7 @@ public class BaseSecurityOperations
     @SuppressWarnings("unused")
     public static TokenInfo createToken(TokenCoreInfo coreInfo, String password)
     {
-        String iso8601Str = "2016-05-26T14:01:00Z";
+        String iso8601Str = "2017-04-20T14:00:00Z";
         String token = coreInfo.getAppUserInfo().getApplicationKey()+":"+iso8601Str;
         token = new String(Base64.encodeBase64(token.getBytes()), Charset.forName("ASCII"));
         TokenInfo newToken = null;
