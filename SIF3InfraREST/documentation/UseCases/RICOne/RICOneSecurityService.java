@@ -19,7 +19,8 @@ package systemic.sif3.demo.security;
 
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import au.com.systemic.framework.utils.AdvancedProperties;
 import riconeapi.common.Authenticator;
@@ -36,7 +37,7 @@ import sif3.common.security.AbstractSecurityService;
  */
 public class RICOneSecurityService extends AbstractSecurityService
 {
-    protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final static String AOUTH_URL_PROP_NAME = "ricOne.authUrl";
     /**
@@ -44,7 +45,7 @@ public class RICOneSecurityService extends AbstractSecurityService
      */
     public RICOneSecurityService(AdvancedProperties properties, Map<String, String> securityServiceParameters)
     {
-        super(properties);
+        super(properties, securityServiceParameters);
         if (logger.isDebugEnabled())
         {
             logger.debug("RICOneSecurityService Constructor called with property: " + getServiceProperties());
