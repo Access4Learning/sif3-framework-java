@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="productName" minOccurs="0">
+ *         &lt;element name="productName">
  *           &lt;simpleType>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
  *               &lt;maxLength value="256"/>
@@ -51,7 +51,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "productIdentityType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "productIdentityType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
     "vendorName",
     "productName",
     "productVersion",
@@ -59,16 +59,16 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class ProductIdentityType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String vendorName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String productName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String productVersion;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     @XmlSchemaType(name = "anyURI")
     protected String iconURI;
 

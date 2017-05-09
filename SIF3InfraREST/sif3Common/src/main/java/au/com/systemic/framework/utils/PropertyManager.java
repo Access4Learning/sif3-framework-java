@@ -20,7 +20,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * This class allows to load any number of property files and keep their content in a singleton to avoid poroperty files to be read over
@@ -32,7 +34,7 @@ import org.apache.log4j.Logger;
  */
 public class PropertyManager
 {
-  protected Logger logger = Logger.getLogger(getClass());
+  protected Logger logger = LoggerFactory.getLogger(getClass());
 
   private HashMap<String, AdvancedProperties> properties = new HashMap<String, AdvancedProperties>();
   

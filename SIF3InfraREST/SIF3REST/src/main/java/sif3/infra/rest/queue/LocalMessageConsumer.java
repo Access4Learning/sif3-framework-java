@@ -19,7 +19,10 @@ package sif3.infra.rest.queue;
 
 import javax.ws.rs.core.MediaType;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sun.jersey.api.client.ClientResponse.Status;
 
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
@@ -38,8 +41,6 @@ import sif3.infra.rest.queue.types.EventInfo;
 import sif3.infra.rest.queue.types.QueueMessage;
 import sif3.infra.rest.queue.types.ResponseInfo;
 
-import com.sun.jersey.api.client.ClientResponse.Status;
-
 
 /**
  * This class allows the subscriber to consume messages in a multi-threaded manner according to the
@@ -50,7 +51,8 @@ import com.sun.jersey.api.client.ClientResponse.Status;
  */
 public class LocalMessageConsumer implements Runnable
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private LocalConsumerQueue localQueue;
 	private String consumerID;
@@ -143,6 +145,7 @@ public class LocalMessageConsumer implements Runnable
             // Create actual event Object
             SIFEvent event = eventConsumer.createEventObject(eventPayload, eventInfo.getEventAction(), eventInfo.getUpdateType());
             event.setMetadata(eventInfo.getMetadata());
+            event.setFingerprint(eventInfo.getFingerprint());
 
             // Send event to actual event consumer.
             eventConsumer.onEvent(event, eventInfo.getZone(), eventInfo.getContext(), eventInfo.getEventMetadata(), eventInfo.getMessageQueueReaderID(), consumerID);
@@ -154,7 +157,7 @@ public class LocalMessageConsumer implements Runnable
         if (logger.isDebugEnabled())
         {
             logger.debug(consumerID + " has receive a DELAYED RESPONSE from its local consumer queue ID: "  + responseInfo.getMessageQueueReaderID());
-            logger.debug(responseInfo);
+            logger.debug(responseInfo.toString());
         }
         
         DelayedConsumer delayedConsumer = (DelayedConsumer)consumer; 

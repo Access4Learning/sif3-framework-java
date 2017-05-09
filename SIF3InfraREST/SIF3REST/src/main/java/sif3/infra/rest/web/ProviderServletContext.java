@@ -25,8 +25,11 @@ import javax.servlet.FilterRegistration.Dynamic;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.exception.PersistenceException;
 import sif3.common.interfaces.HibernateProperties;
 import sif3.common.persist.common.HibernateHelper;
@@ -36,8 +39,6 @@ import sif3.infra.common.interfaces.EnvironmentConnector;
 import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.rest.env.connectors.EnvironmentConnectorFactory;
 import sif3.infra.rest.provider.ProviderFactory;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class is to initialise the provider at startup and clean up resources at shutdown.
@@ -47,7 +48,7 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class ProviderServletContext implements ServletContextListener
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+   protected final Logger logger = LoggerFactory.getLogger(getClass());
 	
 	/* Context Property name: <context-param>...<param-name> Node in web.xml */ 
 	private static final String SERVICE_PROPERTY_FILE_TAG = "SERVICE_PROPERTY_FILE";

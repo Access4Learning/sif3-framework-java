@@ -23,16 +23,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
+import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.header.HeaderValues.ServiceType;
-import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceInfo;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * POJO to encapsulate SIF3 Session Information and configuration.
@@ -49,7 +49,8 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	private String password;
 	private String sessionToken;
 	private String environmentID;
-	private String adapterType; //CONSUMER, PROVIDER, ENVIRONMENT_PROVIDER
+	private String fingerprint;
+    private String adapterType; //CONSUMER, PROVIDER, ENVIRONMENT_PROVIDER
 	private String securityToken;
 	private Date securityTokenExpiry;
 	private String environmentXML;
@@ -59,7 +60,7 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	
 	// The properties below are runtime properties. They are not read or maintained in the DB!
 	private transient SIFZone defaultZone             = null;
-	private transient AuthenticationMethod authenticationMethod = AuthenticationMethod.Basic;
+	private transient String authenticationMethod = AuthenticationType.Basic.name();
 	
 	// List of all services according to the ACL of this session.
     private transient ArrayList<ServiceInfo> services = new ArrayList<ServiceInfo>();
@@ -121,6 +122,16 @@ public class SIF3Session extends EnvironmentKey implements Serializable
     	this.environmentID = environmentID;
     }
 	
+    public String getFingerprint()
+    {
+        return fingerprint;
+    }
+
+    public void setFingerprint(String fingerprint)
+    {
+        this.fingerprint = fingerprint;
+    }
+
 	public String getSecurityToken()
 	{
 		return securityToken;
@@ -196,24 +207,14 @@ public class SIF3Session extends EnvironmentKey implements Serializable
     	this.lastAccessed = lastAccessed;
     }
 	
-    public AuthenticationMethod getAuthenticationMethod()
+    public String getAuthenticationMethod()
     {
         return authenticationMethod;
     }
 
-    /**
-     * Will default to BASIC if set to null.
-     * 
-     * @param authenticationMethod the authenticationMethod to set.
-     */
-    public void setAuthenticationMethod(AuthenticationMethod authenticationMethod)
-    {
-        this.authenticationMethod = (authenticationMethod == null) ? AuthenticationMethod.Basic : authenticationMethod;
-    }
-    
     public void setAuthenticationMethod(String authenticationMethod)
     {
-        this.authenticationMethod = StringUtils.isEmpty(authenticationMethod) ? AuthenticationMethod.Basic : AuthenticationMethod.valueOf(authenticationMethod);
+        this.authenticationMethod = StringUtils.isEmpty(authenticationMethod) ? AuthenticationType.Basic.name() : authenticationMethod;
     }
 	
 	/*---------------------------------------------------------------------------------------------------------------------------------------*/
@@ -405,20 +406,17 @@ public class SIF3Session extends EnvironmentKey implements Serializable
     }
 
 	
-	/* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    @Override
+	@Override
     public String toString()
     {
         return "SIF3Session [sessionID=" + sessionID + ", adapterName=" + adapterName
                 + ", password=" + password + ", sessionToken=" + sessionToken + ", environmentID="
-                + environmentID + ", adapterType=" + adapterType + ", securityToken="
-                + securityToken + ", securityTokenExpiry=" + securityTokenExpiry
-                + ", environmentXML=" + environmentXML + ", queueStrategy=" + queueStrategy
-                + ", created=" + created + ", lastAccessed=" + lastAccessed + ", defaultZone="
-                + defaultZone + ", authenticationMethod=" + authenticationMethod + ", services="
-                + services + ", toString()=" + super.toString() + "]";
+                + environmentID + ", fingerprint=" + fingerprint + ", adapterType=" + adapterType
+                + ", securityToken=" + securityToken + ", securityTokenExpiry="
+                + securityTokenExpiry + ", environmentXML=" + environmentXML + ", queueStrategy="
+                + queueStrategy + ", created=" + created + ", lastAccessed=" + lastAccessed
+                + ", defaultZone=" + defaultZone + ", authenticationMethod=" + authenticationMethod
+                + ", services=" + services + ", toString()=" + super.toString() + "]";
     }	
     
 	/*---------------------*/

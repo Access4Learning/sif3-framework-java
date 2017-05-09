@@ -21,17 +21,18 @@ package sif3.common.persist.dao;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.PersistenceException;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.persist.common.BasicTransaction;
 import sif3.common.persist.model.SIF3Session;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class provides some low level DB access to SIF3 session information.
@@ -41,7 +42,7 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class SIF3SessionDAO extends BaseDAO
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 	
     @SuppressWarnings("unchecked")
     public SIF3Session getSessionBySolutionAppkeyUserInst(BasicTransaction tx, EnvironmentKey environmentKey, AdapterType adapterType) throws IllegalArgumentException, PersistenceException

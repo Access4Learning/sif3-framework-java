@@ -8,6 +8,8 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
+ * An HTTP Response with a status of 200 and a payload consisting of a single “createResponse” element. This includes, for each requested object successfully created, an internal status of 201 and the service-assigned refId. Any requested object that failed to be created is indicated by an error statusCode and a corresponding error payload.
+ * 
  * <p>Java class for createResponseType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -17,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="creates" type="{http://www.sifassociation.org/infrastructure/3.1}createsType"/>
+ *         &lt;element name="creates" type="{http://www.sifassociation.org/infrastructure/3.2.1}createsType"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -27,12 +29,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "createResponseType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "createResponseType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
     "creates"
 })
 public class CreateResponseType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
     protected CreatesType creates;
 
     /**

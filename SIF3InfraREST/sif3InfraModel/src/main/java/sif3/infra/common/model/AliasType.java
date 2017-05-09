@@ -1,9 +1,11 @@
 
 package sif3.infra.common.model;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -17,9 +19,9 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="code" type="{http://www.sifassociation.org/infrastructure/3.1}codeType"/>
- *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.1}uriType"/>
- *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.1}uriType"/>
+ *         &lt;element name="code" type="{http://www.sifassociation.org/infrastructure/3.2.1}codeType"/>
+ *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.2.1}uriType" minOccurs="0"/>
+ *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.2.1}uriType" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,7 +31,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "aliasType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "aliasType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
     "code",
     "source",
     "namespace"
@@ -38,10 +40,10 @@ public class AliasType {
 
     @XmlElement(required = true)
     protected CodeType code;
-    @XmlElement(required = true, nillable = true)
-    protected String source;
-    @XmlElement(required = true, nillable = true)
-    protected String namespace;
+    @XmlElementRef(name = "source", type = JAXBElement.class, required = false)
+    protected JAXBElement<String> source;
+    @XmlElementRef(name = "namespace", type = JAXBElement.class, required = false)
+    protected JAXBElement<String> namespace;
 
     /**
      * Gets the value of the code property.
@@ -72,10 +74,10 @@ public class AliasType {
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link JAXBElement }{@code <}{@link String }{@code >}
      *     
      */
-    public String getSource() {
+    public JAXBElement<String> getSource() {
         return source;
     }
 
@@ -84,10 +86,10 @@ public class AliasType {
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link JAXBElement }{@code <}{@link String }{@code >}
      *     
      */
-    public void setSource(String value) {
+    public void setSource(JAXBElement<String> value) {
         this.source = value;
     }
 
@@ -96,10 +98,10 @@ public class AliasType {
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link JAXBElement }{@code <}{@link String }{@code >}
      *     
      */
-    public String getNamespace() {
+    public JAXBElement<String> getNamespace() {
         return namespace;
     }
 
@@ -108,10 +110,10 @@ public class AliasType {
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link JAXBElement }{@code <}{@link String }{@code >}
      *     
      */
-    public void setNamespace(String value) {
+    public void setNamespace(JAXBElement<String> value) {
         this.namespace = value;
     }
 

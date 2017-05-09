@@ -19,7 +19,8 @@
 
 package sif3.infra.rest.env.connectors;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import sif3.infra.common.env.mgr.DirectProviderEnvironmentManager;
 import sif3.infra.common.interfaces.EnvironmentConnector;
@@ -30,7 +31,7 @@ import sif3.infra.common.interfaces.EnvironmentConnector;
  */
 public class DirectProviderEnvironmentConnector implements EnvironmentConnector
 {
-  protected final Logger logger = Logger.getLogger(getClass());
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   public DirectProviderEnvironmentConnector(DirectProviderEnvironmentManager environmentManager)
 	{

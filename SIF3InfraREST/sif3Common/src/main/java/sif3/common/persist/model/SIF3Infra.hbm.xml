@@ -20,6 +20,7 @@
         <property name="password" column="PASSWORD" type="string" length="100"/>
         <property name="sessionToken" column="SESSION_TOKEN" type="string" length="200"/>
         <property name="environmentID" column="ENVIRONMENT_ID" type="string" length="36"/>
+        <property name="fingerprint" column="FINGERPRINT" type="string" length="255"/>
         <property name="securityToken" column="SECURITY_TOKEN" type="string" length="200"/>
         <property name="securityTokenExpiry" column="SECURITY_TOKEN_EXPIRY" type="timestamp"/>
         <property name="adapterType" column="ADAPTER_TYPE" type="string" length="20"/>
@@ -96,6 +97,37 @@
         <property name="password" column="PASSWORD" type="string" length="100"/>
         <property name="authMethod" column="AUTH_METHOD" type="string" length="20"/>
         <many-to-one name="environmentTemplate" column="ENV_TEMPLATE_ID" class="sif3.common.persist.model.EnvironmentTemplate" fetch="join"/>
+    </class>
+
+    <!-- ************************** -->
+    <!-- SIF3_EXT_SECURITY_SERVICE  -->
+    <!-- ************************** -->
+    <class name="sif3.common.persist.model.ExternalSecurityService" table="SIF3_EXT_SECURITY_SERVICE" mutable="false">
+        <id name="externalSecurityServiceID" type="long" column="EXT_SECURITY_SERVICE_ID">
+            <generator class="assigned"/>
+        </id>
+        <property name="authenticationMethod" column="AUTH_METHOD" type="string" length="20"/>
+        <property name="adapterType" column="ADAPTER_TYPE" type="string" length="20"/>
+        <property name="httpHeaderValue" column="HTTP_HEADER_VALUE" type="string" length="20"/>
+        <property name="xmlValue" column="XML_VALUE" type="string" length="20"/>
+        <property name="twoPhase" column="TWO_PHASE" type="boolean"/>
+        <property name="implementationClass" column="IMPLEMENTATION_CLASS" type="string" length="256"/>
+        
+        <set name="parameters" lazy="false">
+          <key column="EXT_SECURITY_SERVICE_ID"/>
+          <one-to-many class="sif3.common.persist.model.SecurityServiceParameter"/>
+        </set>
+    </class>
+
+    <!-- *********************** -->
+    <!-- SIF3_SEC_SERVICE_PARAM  -->
+    <!-- *********************** -->
+    <class name="sif3.common.persist.model.SecurityServiceParameter" table="SIF3_SEC_SERVICE_PARAM" mutable="false">
+        <id name="parameterID" type="long" column="SEC_SERVICE_PARAM_ID">
+            <generator class="assigned"/>
+        </id>
+        <property name="parameterName" column="PARAM_NAME" type="string" length="45"/>
+        <property name="parameterValue" column="PARAM_VALUE" type="string" length="256"/>
     </class>
 
 </hibernate-mapping>

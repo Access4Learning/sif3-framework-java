@@ -20,9 +20,13 @@ package sif3.common.test.utils;
 
 import java.util.Date;
 
-import sif3.common.model.AuthenticationInfo;
-import sif3.common.utils.AuthenticationUtils;
 import au.com.systemic.framework.utils.DateUtils;
+import sif3.common.CommonConstants.AdapterType;
+import sif3.common.CommonConstants.AuthenticationType;
+import sif3.common.model.AuthenticationInfo;
+import sif3.common.model.security.SecurityServiceInfo;
+import sif3.common.persist.common.HibernateUtil;
+import sif3.common.utils.AuthenticationUtils;
 
 /**
  * @author Joerg Huber
@@ -30,10 +34,18 @@ import au.com.systemic.framework.utils.DateUtils;
  */
 public class TestAuthUtils
 {
+    //Test Value
+    private static final SecurityServiceInfo securityInfo = new SecurityServiceInfo("Bearer", "CONSUMER", "Bearer", "BEARER", false, AuthenticationType.Other);
+
+    public TestAuthUtils()
+    {
+        HibernateUtil.initialise(null);        
+    }
+    
 	private void testGetBasicAuthToken()
 	{
 //		System.out.println("Basic Auth String: "+AuthenticationUtils.getBasicAuthToken("new", "guest"));	
-    System.out.println("Basic Auth String: "+AuthenticationUtils.getBasicAuthToken("2f47fd0c-fbc5-4a6e-a779-de7633624a67", "Password1"));  
+	    System.out.println("Basic Auth String: "+AuthenticationUtils.getBasicAuthToken("2f47fd0c-fbc5-4a6e-a779-de7633624a67", "Password1"));  
 	}
 
 //	 private void testGetBearerAuthToken()
@@ -55,7 +67,7 @@ public class TestAuthUtils
 		String hash = AuthenticationUtils.hmacsha256Base64(message, key);
 		long endTime = (new Date()).getTime();
 
-		System.out.println("HMACSHA256 String: " + hash + " Time taken to compute: "+(endTime-startTime)+" millis.");
+		System.out.println("HMACSHA256 String: " + hash + " Time taken to compute: "+(endTime-startTime)+" millis.");		
 	}
 
 	private void testHMACSHA256Stress()
@@ -78,8 +90,8 @@ public class TestAuthUtils
 	private void testHMACSHA256Token()
 	{
 //		String username = "TestSIS";
-		String username = "c92bf270-2ef5-41a0-bd68-d5d29c5a8214";
-		String password = "Password1";
+		String username = "d394e915-ebb0-4c22-b4ec-8a0abed239df";
+		String password = "password";
 //		String username = "new";
 //		String password = "guest";
 ///		String now = "2013-06-22T23:52-07";
@@ -142,13 +154,13 @@ public class TestAuthUtils
 		splitValues = AuthenticationUtils.splitValuesFromBase64(token);
 		System.out.println("Left Side: '"+splitValues[0]+"'   Right Side: '"+splitValues[1]+"'");
 
-	   System.out.println("");
-	   AuthenticationInfo authInfo = new AuthenticationInfo(AuthenticationInfo.AuthenticationMethod.Bearer, "xyz-abc-123", null);
-	   authToken = AuthenticationUtils.getFullBase64Token(authInfo);
-     System.out.println("Bearer Auth Token: " + authToken);
-	   token = AuthenticationUtils.extractAuthToken(authToken);    
-	   System.out.println("Auth Method: '"+AuthenticationUtils.extractAuthenticationMethod(authToken)+"' Token: '"+token+"'"); 
-	   System.out.println("All parts of Auth Token: "+AuthenticationUtils.getPartsFromAuthToken(authToken));
+		System.out.println("");
+		AuthenticationInfo authInfo = new AuthenticationInfo(securityInfo, "xyz-abc-123", null);
+		authToken = AuthenticationUtils.getFullBase64Token(authInfo);
+		System.out.println("Bearer Auth Token: " + authToken);
+		token = AuthenticationUtils.extractAuthToken(authToken);    
+		System.out.println("Auth Method: '"+AuthenticationUtils.extractAuthenticationMethod(authToken)+"' Token: '"+token+"'"); 
+		System.out.println("All parts of Auth Token: "+AuthenticationUtils.getPartsFromAuthToken(authToken, AdapterType.CONSUMER));
 	}
 	
 	private void testGetPartsFromAuthToken()
@@ -159,7 +171,7 @@ public class TestAuthUtils
 		String authToken = AuthenticationUtils.getSIFHMACSHA256AuthToken(username, password, now);
 
 		System.out.println("HMACSHA256 Auth Token for username/password/date="+username+"/"+password+"/"+now+": " + authToken + ".");
-		AuthenticationInfo authInfo = AuthenticationUtils.getPartsFromAuthToken(authToken);
+		AuthenticationInfo authInfo = AuthenticationUtils.getPartsFromAuthToken(authToken, AdapterType.PROVIDER);
 		System.out.println("Parts of Auth Token: "+authInfo);
 	}
 	
@@ -171,13 +183,12 @@ public class TestAuthUtils
 		try
 		{
 //			tester.testGetBasicAuthToken();
-//			tester.testGetBearerAuthToken();
 //			tester.testHMACSHA256();
 			//tester.testHMACSHA256Stress();
-			tester.testHMACSHA256Token();
-			//tester.testHMACSHA256TokenStress();
-			tester.testExtractMethods();
-			//tester.testGetPartsFromAuthToken();
+//			tester.testHMACSHA256Token();
+//			tester.testHMACSHA256TokenStress();
+//			tester.testExtractMethods();
+			tester.testGetPartsFromAuthToken();
 		}
 		catch (Exception ex)
 		{

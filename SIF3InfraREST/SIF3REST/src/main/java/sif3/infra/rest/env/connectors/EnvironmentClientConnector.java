@@ -17,22 +17,24 @@
  */
 package sif3.infra.rest.env.connectors;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.exception.ServiceInvokationException;
-import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.security.TokenCoreInfo;
 import sif3.common.model.security.TokenInfo;
+import sif3.common.persist.model.ExternalSecurityService;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.security.AbstractSecurityService;
-import sif3.common.security.BearerSecurityFactory;
+import sif3.common.security.SecurityServiceFactory;
 import sif3.common.ws.Response;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.common.env.types.EnvironmentInfo;
 import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.rest.client.EnvironmentClient;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This class provides a set of methods that are required by a "client connector" style service. This includes a consumer but also a
@@ -44,7 +46,7 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class EnvironmentClientConnector
 {
-  protected final Logger logger = Logger.getLogger(getClass());
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   private ClientEnvironmentManager envMgr = null;
   
@@ -151,26 +153,36 @@ public class EnvironmentClientConnector
         // Also since we connect to exiting or may need to create a new environment we may need to use an
         // external security service. There is no existing session at the moment so we cannot retrieve the info from there.
         TokenInfo tokenInfo = null;
-        if (envInfo.getAuthMethod() == AuthenticationMethod.Bearer)
+        ExternalSecurityService securityService = SecurityServiceFactory.getSecurityService(envInfo.getAuthMethod(), envInfo.getAdapterType());
+        if (securityService != null)
         {
-            AbstractSecurityService securityService = BearerSecurityFactory.getSecurityService(getEnvironmentManager().getServiceProperties());
-            if (securityService != null)
+            if (securityService.getAuthenticationType() == AuthenticationType.Other)
             {
-                TokenCoreInfo coreInfo = new TokenCoreInfo();
-                coreInfo.setAppUserInfo(envInfo.getEnvironmentKey());
-                coreInfo.setConsumerName(envInfo.getAdapterName());
-                coreInfo.setSessionToken(envInfo.getUseExistingEnv() ? envInfo.getExistingSessionToken() : null);
-
-                // Now call the security service
-                tokenInfo = securityService.createToken(coreInfo, envInfo.getPassword());
-                if ((tokenInfo == null) || StringUtils.isEmpty(tokenInfo.getToken())) // we failed to get a token!
+                AbstractSecurityService abstractService = securityService.getSecurityService(getEnvironmentManager().getServiceProperties());
+                if (abstractService != null)
                 {
-                   logger.error("Failed to retrieve a security token. See previous error log entries.");
-                   return false;
-                }                       
-            }            
+                    TokenCoreInfo coreInfo = new TokenCoreInfo();
+                    coreInfo.setAppUserInfo(envInfo.getEnvironmentKey());
+                    coreInfo.setConsumerName(envInfo.getAdapterName());
+                    coreInfo.setSessionToken(envInfo.getUseExistingEnv() ? envInfo.getExistingSessionToken() : null);
+
+                    // Now call the security service
+                    tokenInfo = abstractService.createToken(coreInfo, envInfo.getPassword());
+                    if ((tokenInfo == null) || StringUtils.isEmpty(tokenInfo.getToken())) // we failed to get a token!
+                    {
+                       logger.error("Failed to retrieve a security token. See previous error log entries.");
+                       return false;
+                    }
+                }
+            }
         }
-            
+        else
+        {
+            // Error already logged.
+            disconnect();
+            return false;
+        }
+         
     	if (envInfo.getUseExistingEnv())
     	{
     		logger.debug("No Environment for " + envInfo.getEnvironmentName() + " exists. Attempt to connect to existing environment without creating it (use pre-existing) ...");
@@ -211,7 +223,7 @@ public class EnvironmentClientConnector
     	{
 	      logger.debug("No Environment for " + envInfo.getEnvironmentName() + " exists. Attempt to create and connect ...");
 	      
-	      EnvironmentType remoteEnv = createRemoteEnvironment(envInfo, template, tokenInfo);
+	      EnvironmentType remoteEnv = createRemoteEnvironment(envInfo, template, tokenInfo, securityService);
 	      if (remoteEnv != null) // successfully created
 	      {
 	        localEnvironment = getEnvironmentManager().createOrUpdateEnvironment(remoteEnv, tokenInfo);
@@ -294,13 +306,13 @@ public class EnvironmentClientConnector
     }
   }
   
-  private EnvironmentType createRemoteEnvironment(EnvironmentInfo envInfo, EnvironmentType template, TokenInfo tokenInfo)
+  private EnvironmentType createRemoteEnvironment(EnvironmentInfo envInfo, EnvironmentType template, TokenInfo tokenInfo, ExternalSecurityService securityService)
   {
     if (template != null)
     {
         // Set a few fields in the template before it is sent to environment provider
         template.setConsumerName(envInfo.getAdapterName());
-        template.setAuthenticationMethod(envInfo.getAuthMethod().name());
+        template.setAuthenticationMethod(securityService.getXmlValue());
         template.setSolutionId(envInfo.getEnvironmentKey().getSolutionID());
         template.getApplicationInfo().setApplicationKey(envInfo.getEnvironmentKey().getApplicationKey());
         template.setUserToken(envInfo.getEnvironmentKey().getUserToken());

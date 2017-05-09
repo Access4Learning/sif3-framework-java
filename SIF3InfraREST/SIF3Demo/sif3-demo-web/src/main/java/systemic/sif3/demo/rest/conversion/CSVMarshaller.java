@@ -25,7 +25,8 @@ import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.exception.MarshalException;
@@ -39,7 +40,7 @@ import sif3.common.exception.UnsupportedMediaTypeExcpetion;
  */
 public class CSVMarshaller implements MarshalFactory
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	//List of supported media types.
 	private static final HashSet<MediaType> supportedMediaTypes = new HashSet<MediaType>(Arrays.asList(MediaType.TEXT_PLAIN_TYPE));

@@ -1,0 +1,116 @@
+==============================================================
+Release Notes for v0.11.0 of SIF3 Framework (MMM DD, 2017)
+==============================================================
+
+Bug Fixes
+---------
+- Fix pom.xml for sif3-common to ensure the latest jettison library is used rather than an old one
+  that is included through jersey. Old one has a bug with JSON deserialising. Latest version fixes
+  that issue.
+
+New Functionality
+-----------------
+- Updated framework to use SIF 3.2.1 Infrastructure namespace and data model.
+- Support for "Fingerprint" as per SIF 3.2.1 Infrastructure. Please refer to notes in "Infrastructure Upgrade" 
+  section further down.
+
+Changed Functionality
+---------------------
+- Dependency on slf4j rather than hard-wired log4j. Please refer to notes in "3rd Party Library Update" section 
+  further down.
+- Approach to link externals security services (i.e. OAuth) to the framework has changed slightly).
+  THIS WILL BREAK YOUR CODE if you use this functionality. See Infrastructure Upgrade section below for more details.
+
+Removed Artifacts/Functionality
+-------------------------------
+- None
+
+--------------------------
+-- Upgrade Instructions --
+--------------------------
+
+----------------------------
+-- Infrastructure Upgrade --
+----------------------------
+DB Upgrade Step 1
+-----------------
+Due to the support of the "Fingerprint" in SIF 3.2.1 there was the need to update the database structure of the 
+SIF3_SESSION table. There is a SQL script THAT MUST BE RUN first to upgrade the database. It will add a new
+column to the SIF3_SESSION table and it will also upgrade the namespace of all existing environment XML in that 
+table to SIF 3.2.1.
+The script can be found in the directory <frameworkInstall>/DB/DDL/Datafix/current/v0.10.0-v0.11.0. Run the script
+with the name Datafix20170314_<dbType>.sql. If you use a database other than the ones that have an update script
+provided you should be able to derive your script based on one of the provided one's.
+
+DB Upgrade Step 2
+-----------------
+Some new tables have been added to allow more flexible configuration when external security services need to be
+enabled (i.e. OAuth). For this run the database SQL script named Datafix20170330_<dbType>.sql in the 
+<frameworkInstall>/DB/DDL/Datafix/current/v0.10.0-v0.11.0. If you use a database other than the ones that have an 
+update script provided you should be able to derive your script based on one of the provided one's.
+
+Environment Template Upgrade
+---------------------------- 
+The environment template XMLs need a fix as well. They should be in a directory called "environments/consumer/template"
+and "environments/provider/template". Ensure that the namespace http://www.sifassociation.org/infrastructure/3.1 or 
+http://www.sifassociation.org/infrastructure/3.0.1 is changed to http://www.sifassociation.org/infrastructure/3.2.1.
+
+Upgrade your Project
+--------------------
+Once the above steps are done you can upgrade your project with the latest libraries of the framework as stated below:
+
+Ant:
+Drop the latest framework library into your project's lib directory/directories
+
+Maven:
+Use the latest maven dependency
+<dependency>
+   <groupId>sif3.framework</groupId>
+   <artifactId>sif3-infra-rest</artifactId>
+   <version>0.11.0</version>
+</dependency>
+
+
+==========================================================================================================================
+External Security Services ONLY: Compilation Error due to new parameter in Constructor of AbstractSecurityService Class.
+--------------------------------------------------------------------------------------------------------------------------
+Due to an additional parameters in the constructor of the AbstractSecurityService class all classes that extend that class will
+report a compilation error. Please note only the additional parameter must be added to rectify the compile error. You wont't 
+need to change any other code.
+
+Name & Type of Parameter: Map<String, String> securityServiceParameters
+
+Add the above parameter to the constructor of your class that extends the AbstractSecurityService class. Your constructor
+signature will change from:
+
+  public YourSecurityClassName(AdvancedProperties properties)
+  {
+    ...
+  }
+
+to:
+
+  public YourSecurityClassName(AdvancedProperties properties, 
+                               Map<String, String> securityServiceParameters) // <== NOTE NEW PARAMETER
+  {
+    ...
+  }
+
+Due to the change how external Security Services are configured you will need to configure the SIF3_EXT_SECURITY_SERVICE
+table as listed in the developer's guide in section 5.10. Basically the property value called adapter.security.service in
+your adapter's property file will now be in the SIF3_EXT_SECURITY_SERVICE table in the column IMPLEMENTATION_CLASS.  
+
+------------------------
+-- Data Model Upgrade --
+------------------------
+None.
+
+------------------------------
+-- 3rd Party Library Update --
+------------------------------
+The SIF3 Framework uses the sfl4j as its logging framework. This has changed from the hard-wired log4j. This change allows that the
+implementation can easily choose between logging implementations. To allow proper and full logging a slf4j binding implementation
+must be provided with your implementation. The example in the SIF3Demo project uses the slf4j-log4j12 as a binding implementation.
+ - Maven: Simply add the appropriate bridge dependency to your project (see SIF3Demo for an example). 
+ - Ant: You need to add the slf4j-api-<version>.jar and an appropriate slf4j bridging jar (i.e. self4j-log4j-<version>) to your 
+        project.

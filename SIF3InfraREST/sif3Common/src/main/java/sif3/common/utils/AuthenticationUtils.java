@@ -24,11 +24,17 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import sif3.common.model.AuthenticationInfo;
-import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.CommonConstants.AdapterType;
+import sif3.common.CommonConstants.AuthenticationType;
+import sif3.common.model.AuthenticationInfo;
+import sif3.common.model.security.InternalSecurityServiceConstants;
+import sif3.common.model.security.SecurityServiceInfo;
+import sif3.common.persist.model.ExternalSecurityService;
+import sif3.common.security.SecurityServiceFactory;
 
 /**
  * This class provides a few useful methods for SIF3 specific authentication functions. If the authentication method is 'Basic' or 
@@ -43,7 +49,7 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public class AuthenticationUtils
 {
-	protected static final Logger logger = Logger.getLogger(AuthenticationUtils.class);
+	protected final static Logger logger = LoggerFactory.getLogger(AuthenticationUtils.class);
 
 	/*----------------------*/
 	/*-- Encoding Methods --*/
@@ -60,7 +66,7 @@ public class AuthenticationUtils
 	 */
 	public static String getBasicAuthToken(String username, String password)
 	{
-		return AuthenticationMethod.Basic.name()+" "+base64Encode(username, password);
+		return InternalSecurityServiceConstants.BASIC_GENERIC_SECURITY.getHttpHeaderValue()+" "+base64Encode(username, password);
 	}
 
 	/**
@@ -78,7 +84,7 @@ public class AuthenticationUtils
 	public static String getSIFHMACSHA256AuthToken(String username, String password, String dateAsISO8601)
 	{
 		String token = username+":"+hmacsha256Base64(username+":"+dateAsISO8601, password);
-		return AuthenticationMethod.SIF_HMACSHA256.name()+" "+new String(Base64.encodeBase64(token.getBytes()), Charset.forName("ASCII"));
+		return InternalSecurityServiceConstants.SIF_HMACSHA256_GENERIC_SECURITY.getHttpHeaderValue()+" "+new String(Base64.encodeBase64(token.getBytes()), Charset.forName("ASCII"));
 	}
 
 	/**
@@ -87,18 +93,18 @@ public class AuthenticationUtils
 	 * @param token The token to be used got the final authentication token.
 	 * @param password Optional. Not currently used.
 	 * 
-	 * @return The Bearer Authentication Token of the form "Bearer <token>".
+	 * @return The Authentication Token of the form "XXX <token>", where XXX is the value of the security service HTTP Value.
 	 */
-	public static String getBearerAuthToken(String token, String password)
+	public static String getOtherAuthToken(SecurityServiceInfo serviceInfo, String token, String password)
 	{
-		return AuthenticationMethod.Bearer.name()+" "+ token;
+		return serviceInfo.getHttpHeaderValue()+" "+ token;
 	}
 
 	
 	/**
 	 * This method create the full authentication token of the format:<br/>
 	 * If authentication method is Basic or SIF_HMACSHA256: <AuthMethod>" "base64Encode(<userToken>:<password>)<br/>
-	 * If authentication method is Bearer: Bearer <userToken>. Meaning that the userToken is untouched, i.e. not base64 encoded.<br/>
+	 * If authentication method is Other: ABX <userToken>. Meaning that the userToken is untouched, i.e. not base64 encoded.<br/>
 	 * <br/>
 	 * If the authInfo is null then null is returned.
 	 * 
@@ -113,13 +119,13 @@ public class AuthenticationUtils
 		{
 			return null;
 		}
-		if (authInfo.getAuthMethod() != AuthenticationInfo.AuthenticationMethod.Bearer)
+		if (authInfo.getSecurityServiceInfo().getAuthenticationType() != AuthenticationType.Other)
 		{
-			return authInfo.getAuthMethod().name() + " " + base64Encode(authInfo.getUserToken(), authInfo.getPassword());
+			return authInfo.getSecurityServiceInfo().getHttpHeaderValue() + " " + base64Encode(authInfo.getUserToken(), authInfo.getPassword());
 		}
-		else // It is Bearer so leave token untouched!
+		else // It is other so leave token untouched!
 		{
-			return getBearerAuthToken(authInfo.getUserToken(), null);
+			return getOtherAuthToken(authInfo.getSecurityServiceInfo(), authInfo.getUserToken(), null);
 		}
 	}
 	
@@ -225,22 +231,13 @@ public class AuthenticationUtils
 	 * @return The prefix of the fullToken. Will be one of the values of the AuthenticationMethod enum. If an invalid auth method
 	 *         is used then null is returned.
 	 */
-	public static AuthenticationMethod extractAuthenticationMethod(String fullToken)
+	public static String extractAuthenticationMethod(String fullToken)
 	{
 		if (StringUtils.notEmpty(fullToken))
 		{
 			fullToken = fullToken.trim();
 			int splitPos = fullToken.indexOf(" ");
-			String authMethodStr = (splitPos>0) ? fullToken.substring(0, splitPos) : null;
-			try
-			{
-				return  (authMethodStr != null) ? AuthenticationMethod.valueOf(authMethodStr) : null;
-			}
-			catch (Exception ex)
-			{
-				logger.error(authMethodStr+" is an invalid authentication method. Valid values are Basic, SIF_HMACSHA256 and Bearer.");
-				return null;
-			}
+			return (splitPos>0) ? fullToken.substring(0, splitPos) : null;
 		}
 		return null;
 	}
@@ -272,19 +269,21 @@ public class AuthenticationUtils
 	/**
 	 * This method takes the full authentication token. This is the token that has one of the two forms:<br/>
 	 *   ("Basic"|"SIF_HMACSHA256")" "<base64EncodedString> where the <base64EncodedString> must be of the format:
-	 *   <usreToken>:<some_string>.<br/>
-   *   "Bearer "<securityToken><br/><br/>
+	 *   <userToken>:<some_string>.<br/>
+   *   "XXX "<securityToken><br/><br/>
 	 * <br/>
 	 * If the token does not follow one of these structures, i.e. cannot be split into these components then it is invalid and null 
-	 * is returned. If the token can be split successfully then the returned AuthenticationInfo has the following Structure:<br/><br/>
+	 * is returned. Null is also returned if no authentication method can be determined based on the authentication method in the
+	 * fullBaseToken. This will be logged. If the token can be split successfully then the returned AuthenticationInfo has the following 
+	 * Structure:<br/><br/>
 	 * 
 	 * For "Basic"|"SIF_HMACSHA256":<br/>
 	 * AuthenticationInfo.authMethod="Basic"|"SIF_HMACSHA256"<br/>
 	 * AuthenticationInfo.userToken=<userToken><br/>
 	 * AuthenticationInfo.password=<some_string><br/><br/>
 	 * 
-	 * For "Bearer":<br/>
-	 * AuthenticationInfo.authMethod="Bearer"<br/>
+	 * For "XXX":<br/>
+	 * AuthenticationInfo.authMethod="XXX"<br/>
 	 * AuthenticationInfo.userToken=<securityToken><br/>
 	 * AuthenticationInfo.password=null<br/><br/>
 	 * 
@@ -292,34 +291,43 @@ public class AuthenticationUtils
 	 *       according to the SIF3 spec.
 	 * 
 	 * @param fullBaseToken See desc.
+	 * @param adapterType indicates if this is authentication for Consumer or Provider. This is required for external authentication
+	 *                    where it is necessary to lookup the implementation from the Security Factory. 
 	 * 
 	 * @return See Desc
 	 */
-	public static AuthenticationInfo getPartsFromAuthToken(String fullBaseToken)
+//	public static AuthenticationInfo getPartsFromAuthToken(SecurityServiceInfo serviceInfo, String fullBaseToken)
+    public static AuthenticationInfo getPartsFromAuthToken(String fullBaseToken, AdapterType adapterType)
 	{
 		fullBaseToken = fullBaseToken.trim();
 		int splitPos = fullBaseToken.indexOf(" ");
 		String authMethodStr = (splitPos>0) ? fullBaseToken.substring(0, splitPos) : null;
 		String securityToken = (splitPos>0) ? fullBaseToken.substring(splitPos+1) : fullBaseToken;
+
+        ExternalSecurityService securityServiceInfo = SecurityServiceFactory.getSecurityService(authMethodStr, adapterType);
+        if (securityServiceInfo == null)
+        {
+            return null; // error already logged.
+        }
 		
-		// Check if we have a Bearer authentication method.
-		if (AuthenticationInfo.AuthenticationMethod.Bearer.name().equals(authMethodStr))
+		// Check if we have a SIF Internal authentication method.
+		if (securityServiceInfo.getAuthenticationType() == AuthenticationType.Other)
 		{
-			return new AuthenticationInfo(AuthenticationInfo.AuthenticationMethod.Bearer, securityToken, null);
+		    return new AuthenticationInfo(securityServiceInfo, securityToken, null);
 		}
-		else // it should be Basic or SIF_HMACSHA256
+		else
 		{
-	  		String[] splitValues = splitValuesFromBase64(securityToken);
-	  		
-	  		if (splitValues.length == 2) // all good
-	  		{
-	  			return new AuthenticationInfo(authMethodStr, splitValues[0], splitValues[1]);
-	  		}
-	  		else // we could not split the token into userToken and password
-	  		{
-	  			logger.error("The token of the authenticathen method "+authMethodStr+" is not a base64 encoded string with a ':' separating two components as expected by the SIF sepcification.");
-	  			return null;
-	  		}
+            String[] splitValues = splitValuesFromBase64(securityToken);
+            
+            if (splitValues.length == 2) // all good
+            {
+                return new AuthenticationInfo(securityServiceInfo, splitValues[0], splitValues[1]);
+            }
+            else // we could not split the token into userToken and password
+            {
+                logger.error("The token of the authenticathen method "+authMethodStr+" is not a base64 encoded string with a ':' separating two components as expected by the SIF sepcification.");
+                return null;
+            }
 		}
 	}
 }

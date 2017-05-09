@@ -20,9 +20,9 @@ package sif3.infra.common.env.types;
 
 import java.net.URI;
 
+import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues.UpdateType;
-import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 
 /**
  * This class represents a provider environment. This is a more complex class than a consumer environment as it has to validate a
@@ -42,7 +42,7 @@ public class ProviderEnvironment extends EnvironmentInfo
 	private boolean 			 eventsSupported 		= false;
 	private UpdateType           defaultUpdateType      = UpdateType.FULL; // Default value for update events.
 	private boolean              autoCreateEnvironment  = false;
-	private AuthenticationMethod accessTokenAuthMethod  = AuthenticationMethod.Bearer; // Default Auth Method if accessToken is used.
+	private String accessTokenAuthMethod = AuthenticationType.Basic.name(); // Default Auth Method if accessToken is used.
 	private boolean              allowAuthOnURL         = false;
 	private HeaderProperties     customResponseHeaders  = new HeaderProperties(); 
 	
@@ -158,28 +158,28 @@ public class ProviderEnvironment extends EnvironmentInfo
     	this.autoCreateEnvironment = autoCreateEnvironment;
     }
 
-	public AuthenticationMethod getAccessTokenAuthMethod()
+	public String getAccessTokenAuthMethod()
     {
     	return accessTokenAuthMethod;
     }
 
-	public void setAccessTokenAuthMethod(AuthenticationMethod accessTokenAuthMethod)
+	public void setAccessTokenAuthMethod(String accessTokenAuthMethod)
     {
     	this.accessTokenAuthMethod = accessTokenAuthMethod;
     }
 
-	// authMethod for accessToken: Valid values are what is listed in AuthenticationUtils.AuthenticationMethod (case sensitive!!!)
-	public void setAccessTokenAuthMethod(String accessTokenAuthMethod)
-    {
-		try
-		{
-			this.accessTokenAuthMethod = AuthenticationMethod.valueOf(accessTokenAuthMethod);
-		}
-		catch (Exception ex)
-		{
-			this.accessTokenAuthMethod = AuthenticationMethod.Bearer;
-		}
-    }
+//	// authMethod for accessToken: Valid values are what is listed in AuthenticationUtils.AuthenticationMethod (case sensitive!!!)
+//	public void setAccessTokenAuthMethod(String accessTokenAuthMethod)
+//    {
+//		try
+//		{
+//			this.accessTokenAuthMethod = AuthenticationMethod.valueOf(accessTokenAuthMethod);
+//		}
+//		catch (Exception ex)
+//		{
+//			this.accessTokenAuthMethod = AuthenticationMethod.Bearer;
+//		}
+//    }
 	
     public boolean getAllowAuthOnURL()
     {

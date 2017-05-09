@@ -16,15 +16,15 @@
  */
 package au.com.systemic.framework.utils;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Joerg Huber
  */
 public class GUIDGenerator
 {   
-    protected static final Logger logger = Logger.getLogger(GUIDGenerator.class);
-
+    protected static Logger logger = LoggerFactory.getLogger(GUIDGenerator.class);
     /**
      * Method to generate the random GUID that is 32 characters long made of HEX code and in upper case. It will follow the RFC4122 with
      * the exception that the returned GUIDs have upper case only and the '-' removed.

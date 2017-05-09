@@ -2,9 +2,11 @@
 package sif3.infra.common.model;
 
 import java.util.Calendar;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
@@ -30,8 +32,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.1}uriType"/>
- *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.1}uriType"/>
+ *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.2.1}uriType" minOccurs="0"/>
+ *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.2.1}uriType" minOccurs="0"/>
  *         &lt;element name="value">
  *           &lt;simpleType>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -56,7 +58,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="aliases" type="{http://www.sifassociation.org/infrastructure/3.1}aliasesType" minOccurs="0"/>
+ *         &lt;element name="aliases" type="{http://www.sifassociation.org/infrastructure/3.2.1}aliasesType" minOccurs="0"/>
  *         &lt;element name="action">
  *           &lt;simpleType>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
@@ -77,7 +79,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "codeItemType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "codeItemType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
     "code",
     "source",
     "namespace",
@@ -93,10 +95,10 @@ public class CodeItemType {
     @XmlElement(required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String code;
-    @XmlElement(required = true, nillable = true)
-    protected String source;
-    @XmlElement(required = true, nillable = true)
-    protected String namespace;
+    @XmlElementRef(name = "source", type = JAXBElement.class, required = false)
+    protected JAXBElement<String> source;
+    @XmlElementRef(name = "namespace", type = JAXBElement.class, required = false)
+    protected JAXBElement<String> namespace;
     @XmlElement(required = true, nillable = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String value;
@@ -141,10 +143,10 @@ public class CodeItemType {
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link JAXBElement }{@code <}{@link String }{@code >}
      *     
      */
-    public String getSource() {
+    public JAXBElement<String> getSource() {
         return source;
     }
 
@@ -153,10 +155,10 @@ public class CodeItemType {
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link JAXBElement }{@code <}{@link String }{@code >}
      *     
      */
-    public void setSource(String value) {
+    public void setSource(JAXBElement<String> value) {
         this.source = value;
     }
 
@@ -165,10 +167,10 @@ public class CodeItemType {
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link JAXBElement }{@code <}{@link String }{@code >}
      *     
      */
-    public String getNamespace() {
+    public JAXBElement<String> getNamespace() {
         return namespace;
     }
 
@@ -177,10 +179,10 @@ public class CodeItemType {
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link JAXBElement }{@code <}{@link String }{@code >}
      *     
      */
-    public void setNamespace(String value) {
+    public void setNamespace(JAXBElement<String> value) {
         this.namespace = value;
     }
 

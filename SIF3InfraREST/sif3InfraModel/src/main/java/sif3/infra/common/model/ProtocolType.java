@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="location" type="{http://www.w3.org/2001/XMLSchema}anyURI"/>
- *         &lt;element name="properties" type="{http://www.sifassociation.org/infrastructure/3.1}propertiesType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="properties" type="{http://www.sifassociation.org/infrastructure/3.2.1}propertiesType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -31,16 +31,16 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "protocolType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "protocolType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
     "location",
     "properties"
 })
 public class ProtocolType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
     @XmlSchemaType(name = "anyURI")
     protected String location;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     protected List<PropertiesType> properties;
 
     /**

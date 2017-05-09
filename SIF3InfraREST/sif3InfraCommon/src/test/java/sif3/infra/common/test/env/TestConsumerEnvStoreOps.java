@@ -21,6 +21,7 @@ package sif3.infra.common.test.env;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.MarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.persist.common.HibernateUtil;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.env.ops.ConsumerEnvironmentStoreOperations;
 import sif3.infra.common.model.EnvironmentType;
@@ -50,6 +51,7 @@ public class TestConsumerEnvStoreOps
 	
 	public TestConsumerEnvStoreOps()
 	{
+        HibernateUtil.initialise(null);
 		envOps = new ConsumerEnvironmentStoreOperations(SERVICE_NAME);
 	}
 	
@@ -87,11 +89,6 @@ public class TestConsumerEnvStoreOps
 //		System.out.println("Workstore XML for Session Token "+SESSION_TOKEN+" exists: "+envOps.existEnvInWorkstoreBySessionToken(SESSION_TOKEN));
 //	}
 	
-//	private void testExistWorkstoreEnvByEnvID() throws IllegalArgumentException, PersistenceException
-//	{
-//		System.out.println("Workstore XML for Env ID "+ENV_ID+" exists: "+envOps.existEnvInWorkstoreByEnvID(ENV_ID));
-//	}
-
 	private void testLoadTemplateEnvironment()
 	{
 		printEnvironment(envOps.loadTemplateEnvironmentData(TEMPLATE_FILE_NAME, CONSUMER, DIRECT));
@@ -102,10 +99,6 @@ public class TestConsumerEnvStoreOps
 //		printEnvironment(envOps.loadWorkstoreEnvBySessionToken(SESSION_TOKEN));
 //	}
 
-//	private void testLoadWorkstoreEnvByEnvID()
-//	{
-//		printEnvironment(envOps.loadWorkstoreEnvByEnvID(ENV_ID));
-//	}
 
 	private void testStoreEnvironmentToWorkstore()
 	{
@@ -113,7 +106,7 @@ public class TestConsumerEnvStoreOps
 		env.setConsumerName("TestConsumer");
 		env.setSolutionId("test");
 		env.getApplicationInfo().setApplicationKey("MY_APP");
-		env.setAuthenticationMethod("Basic");
+		env.setAuthenticationMethod("SAML");
 		env.setId(ENV_ID);
 		env.setSessionToken(SESSION_TOKEN);
 //		SIF3Session session = new SIF3Session(new EnvironmentKey("test", "MY_APP"));
@@ -129,11 +122,6 @@ public class TestConsumerEnvStoreOps
 		System.out.println("Environment Removed: "+envOps.removeEnvFromWorkstoreBySessionToken(SESSION_TOKEN));
 	}
 
-//	private void testRemoveEnvFromWorkstoreByEnvID()
-//	{
-//		System.out.println("Environment Removed: "+envOps.removeEnvFromWorkstoreByEnvID(ENV_ID));
-//	}
-
 	public static void main(String[] args)
 	{
 		TestConsumerEnvStoreOps tester = new TestConsumerEnvStoreOps();
@@ -143,13 +131,10 @@ public class TestConsumerEnvStoreOps
 			System.out.println("Start Testing ConsumerEnvironmentStoreOperations...");
 			
 //			tester.testExistTemplateEnvironment();
-//			tester.testExistWorkstoreEnvByEnvID();
 //			tester.testExistWorkstoreEnvBySessionTK();
-//			tester.testLoadTemplateEnvironment();
-//			tester.testLoadWorkstoreEnvByEnvID();
+			tester.testLoadTemplateEnvironment();
 //			tester.testLoadWorkstoreEnvBySessionTK();
-			tester.testStoreEnvironmentToWorkstore();
-//			tester.testRemoveEnvFromWorkstoreByEnvID();
+//			tester.testStoreEnvironmentToWorkstore();
 //			tester.testRemoveEnvFromWorkstoreBySessionTK();
 		}
 		catch (Exception ex)

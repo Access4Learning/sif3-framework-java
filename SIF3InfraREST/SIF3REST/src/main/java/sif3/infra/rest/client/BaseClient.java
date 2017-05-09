@@ -28,8 +28,18 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.WebResource.Builder;
+import com.sun.jersey.api.client.config.ClientConfig;
+
+import au.com.systemic.framework.utils.DateUtils;
+import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.UnmarshalException;
@@ -41,16 +51,16 @@ import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.model.AuthenticationInfo;
-import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.URLQueryParameter;
 import sif3.common.model.delayed.DelayedRequestReceipt;
 import sif3.common.model.security.TokenCoreInfo;
 import sif3.common.model.security.TokenInfo;
+import sif3.common.persist.model.ExternalSecurityService;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.security.AbstractSecurityService;
-import sif3.common.security.BearerSecurityFactory;
+import sif3.common.security.SecurityServiceFactory;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.BaseResponse;
 import sif3.common.ws.ErrorDetails;
@@ -62,14 +72,6 @@ import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.ErrorType;
 import sif3.infra.common.model.ObjectFactory;
 import sif3.infra.rest.mapper.InfraDataModelMapper;
-import au.com.systemic.framework.utils.DateUtils;
-import au.com.systemic.framework.utils.StringUtils;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.WebResource.Builder;
-import com.sun.jersey.api.client.config.ClientConfig;
 
 /**
  * This class is a core client class to deal with REST clients for SIF3. It takes care of all the little things that define the
@@ -87,7 +89,7 @@ import com.sun.jersey.api.client.config.ClientConfig;
  */
 public abstract class BaseClient
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private URI baseURI = null;
 	private ClientConfig config = null;
@@ -361,12 +363,16 @@ public abstract class BaseClient
 	 * @param hdrProperties A set of defined header properties. Should really hold the authentication related properties!
 	 * @param requestType The request type to be set in the HTTP headers.
 	 * @param includeRequestID TRUE: Add a generated request ID header property
+	 * @param includeFingerprint TRUE: Fingerprint will be retrieved from current session. Note for a provider this will be
+	 *                                 the provider's fingerprint! This is generally not desired for events. In this case
+	 *                                 this parameter should be set to FALSE.
+	 *                           FALSE: Fingerprint from the current session will not be added to the HTTP headers.
 	 * @hasPayload TRUE: The request will contain a payload. Required for compression header settings
 	 *             FALSE: The request is payload free.
 	 * 
 	 * @return A builder class on which a HTTP operation can be invoked on.
 	 */
-	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, RequestType requestType, boolean includeRequestID, boolean hasPayload)
+	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, RequestType requestType, boolean includeRequestID, boolean includeFingerprint, boolean hasPayload)
 	{
 	    String charEncoding = getClientEnvMgr().getEnvironmentInfo().getCharsetEncoding();
 		Builder builder = service.type(addEncoding(getRequestMediaType(), charEncoding)).accept(addEncoding(getResponseMediaType(), charEncoding));
@@ -383,6 +389,19 @@ public abstract class BaseClient
 		
 		// Set the request type.
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE, ((requestType == null) ? RequestType.IMMEDIATE.name() : requestType.name()));
+		
+		// Add fingerprint to HTTP Header if it is known and not yet set. Note for events this value might already be set, so we
+		// should not override it! This should be indicated with the includeFingerprint parameter that would be set to false!
+		if (includeFingerprint)
+		{
+    		if (hdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_FINGERPRINT) == null)
+    		{
+        		if ((getClientEnvMgr().getSIF3Session() != null) && (getClientEnvMgr().getSIF3Session().getFingerprint() != null))
+        		{
+        		    hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_FINGERPRINT, getClientEnvMgr().getSIF3Session().getFingerprint());
+        		}
+    		}
+		}
 		
 		// Sometimes the request ID is not required (i.e. events)
 		if (includeRequestID)
@@ -439,14 +458,18 @@ public abstract class BaseClient
 	 * @param service The service to which media type and header properties shall be added.
 	 * @param hdrProperties A set of defined header properties. Should really hold the authentication related properties!
 	 * @param includeRequestID TRUE: Add a generated request ID header property
+     * @param includeFingerprint TRUE: Fingerprint will be retrieved from current session. Note for a provider this will be
+     *                                 the provider's fingerprint! This is generally not desired for events. In this case
+     *                                 this parameter should be set to FALSE.
+     *                           FALSE: Fingerprint from the current session will not be added to the HTTP headers.
 	 * @hasPayload TRUE: The request will contain a payload. Required for compression header settings
 	 *             FALSE: The request is payload free.
 	 * 
 	 * @return A builder class on which a HTTP operation can be invoked on.
 	 */
-	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, boolean includeRequestID, boolean hasPayload)
+	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, boolean includeRequestID, boolean includeFingerprint, boolean hasPayload)
 	{
-		return setRequestHeaderAndMediaTypes(service, hdrProperties, RequestType.IMMEDIATE, includeRequestID, hasPayload);
+		return setRequestHeaderAndMediaTypes(service, hdrProperties, RequestType.IMMEDIATE, includeRequestID, includeFingerprint, hasPayload);
 	}
 
 	protected HeaderProperties createAuthenticationHdr(boolean isEnvCreate, SIF3Session pseudoSIF3Session)
@@ -456,7 +479,7 @@ public abstract class BaseClient
 		if (authInfo != null) // all good
 		{
 			// First create the properties for the authentication header.
-			ClientUtils.setAuthenticationHeader(hdrProps, authInfo.getAuthMethod(), authInfo.getUserToken(), authInfo.getPassword());
+			ClientUtils.setAuthenticationHeader(hdrProps, authInfo.getSecurityServiceInfo(), authInfo.getUserToken(), authInfo.getPassword());
 		}		
 
 		return hdrProps;
@@ -751,7 +774,6 @@ public abstract class BaseClient
 	 * If anything fails then null is returned. An error will already be logged.
 	 */
 	private AuthenticationInfo getAuthenicationInfo(boolean isEnvCreateRequest, SIF3Session pseudoSIF3Session)
-//    private AuthenticationInfo getAuthenicationInfo(boolean isEnvCreateRequest, TokenInfo tokenInfo)
 	{
 		EnvironmentInfo envInfo = getClientEnvMgr().getEnvironmentInfo();
 		String pwd = envInfo.getPassword();
@@ -763,7 +785,7 @@ public abstract class BaseClient
 	    }
 	    else 
 	    {
-	        // it is not a createEnv request but if we may have a pseudoSIF3Session  then it should have a sessionToken populated
+	        // it is not a createEnv request but if we may have a pseudoSIF3Session then it should have a sessionToken populated
 	        if (pseudoSIF3Session == null) // we must have a session
 	        {
 	            user =  getSIF3Session().getSessionToken();
@@ -775,20 +797,28 @@ public abstract class BaseClient
 	    }
 		
 		AuthenticationInfo authInfo = null;
-		if (envInfo.getAuthMethod() != AuthenticationMethod.Bearer)
-		{
-            authInfo = new AuthenticationInfo(envInfo.getAuthMethod(), user, pwd);
-		}
-		else // Use Bearer Authentication => potentially requires external security service.
-		{
-		    TokenInfo tokenInfo = null;
-		    if (pseudoSIF3Session != null) // we don't have a real session. Use pseudoSIF3Session and extract token info from there.
-		    {
-		        tokenInfo = new TokenInfo(pseudoSIF3Session.getSecurityToken(), pseudoSIF3Session.getSecurityTokenExpiry());
-		    }
-            authInfo = getBearerAuthorisationInfo(isEnvCreateRequest, tokenInfo);
-		}
-		
+        ExternalSecurityService securityService = SecurityServiceFactory.getSecurityService(envInfo.getAuthMethod(), envInfo.getAdapterType());
+        if (securityService != null)
+        {
+            if (securityService.getAuthenticationType() != AuthenticationType.Other) 
+            {
+                authInfo = new AuthenticationInfo(securityService, user, pwd);
+            }
+            else // Use Bearer Authentication => potentially requires external security service.
+            {
+                TokenInfo tokenInfo = null;
+                if (pseudoSIF3Session != null) // we don't have a real session. Use pseudoSIF3Session and extract token info from there.
+                {
+                    tokenInfo = new TokenInfo(pseudoSIF3Session.getSecurityToken(), pseudoSIF3Session.getSecurityTokenExpiry());
+                }
+                authInfo = getExternalAuthorisationInfo(isEnvCreateRequest, tokenInfo, securityService);
+            }
+        }
+        else
+        {
+            logger.error("Cannot determine Authentication Serice to use. See previous error log entries.");
+        }
+			
 		return authInfo;
 	}
 	
@@ -806,7 +836,7 @@ public abstract class BaseClient
 	 *  
 	 * If anything fails then null is returned and an error is logged.
 	 */
-	private AuthenticationInfo getBearerAuthorisationInfo(boolean isEnvCreateRequest, TokenInfo tokenInfo)
+	private AuthenticationInfo getExternalAuthorisationInfo(boolean isEnvCreateRequest, TokenInfo tokenInfo, ExternalSecurityService securityService)
 	{
 		boolean retrieveToken = false;
 		if (!isEnvCreateRequest) // we should have a SIF3 Session
@@ -844,8 +874,8 @@ public abstract class BaseClient
 		EnvironmentInfo envInfo = getClientEnvMgr().getEnvironmentInfo();
 		if (retrieveToken) // We must get a token from that service
 		{
-			AbstractSecurityService securityService = BearerSecurityFactory.getSecurityService(getClientEnvMgr().getServiceProperties());
-			if (securityService != null)
+			AbstractSecurityService abstractSecurityService = securityService.getSecurityService(getClientEnvMgr().getServiceProperties());
+			if (abstractSecurityService != null)
 			{
     			TokenCoreInfo coreInfo = new TokenCoreInfo();
     			if (isEnvCreateRequest)
@@ -862,10 +892,10 @@ public abstract class BaseClient
     			}
     			
     			// Now call the security service and if successful update appropriate data
-    			TokenInfo newTokenInfo = securityService.createToken(coreInfo, envInfo.getPassword());
+    			TokenInfo newTokenInfo = abstractSecurityService.createToken(coreInfo, envInfo.getPassword());
     			if ((newTokenInfo != null) && StringUtils.notEmpty(newTokenInfo.getToken())) // we just got a valid token => save it in the sif3Session
     			{
-    				AuthenticationInfo authInfo = new AuthenticationInfo(envInfo.getAuthMethod(), newTokenInfo.getToken(), envInfo.getPassword(), newTokenInfo.getTokenExpiryDate());
+    				AuthenticationInfo authInfo = new AuthenticationInfo(securityService, newTokenInfo.getToken(), envInfo.getPassword(), newTokenInfo.getTokenExpiryDate());
     				if (!isEnvCreateRequest) // not initial request => Update session!
     				{
         				getSIF3Session().setSecurityToken(newTokenInfo.getToken());
@@ -896,11 +926,11 @@ public abstract class BaseClient
 		{
 		    if (tokenInfo != null)
 		    {
-                return new AuthenticationInfo(envInfo.getAuthMethod(), tokenInfo.getToken(), envInfo.getPassword(), tokenInfo.getTokenExpiryDate());
+                return new AuthenticationInfo(securityService, tokenInfo.getToken(), envInfo.getPassword(), tokenInfo.getTokenExpiryDate());
 		    }
 		    else // we get it from the session.
 		    {
-		        return new AuthenticationInfo(envInfo.getAuthMethod(), getSIF3Session().getSecurityToken(), envInfo.getPassword(), getSIF3Session().getSecurityTokenExpiry());
+		        return new AuthenticationInfo(securityService, getSIF3Session().getSecurityToken(), envInfo.getPassword(), getSIF3Session().getSecurityTokenExpiry());
 		    }
 		}
 	}

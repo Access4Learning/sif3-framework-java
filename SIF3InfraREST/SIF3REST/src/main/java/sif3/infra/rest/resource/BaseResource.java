@@ -33,9 +33,15 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.DateUtils;
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
+import sif3.common.CommonConstants.AdapterType;
+import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.MediaTypeOperations;
 import sif3.common.conversion.UnmarshalFactory;
@@ -50,7 +56,6 @@ import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.model.AuthenticationInfo;
-import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.ResponseParameters;
@@ -59,10 +64,12 @@ import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
 import sif3.common.model.URLQueryParameter;
+import sif3.common.model.security.InternalSecurityServiceConstants;
+import sif3.common.model.security.SecurityServiceInfo;
 import sif3.common.model.security.TokenInfo;
+import sif3.common.persist.model.ExternalSecurityService;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.security.AbstractSecurityService;
-import sif3.common.security.BearerSecurityFactory;
 import sif3.common.utils.AuthenticationUtils;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.CreateOperationStatus;
@@ -90,9 +97,6 @@ import sif3.infra.common.model.UpdateResponseType;
 import sif3.infra.common.model.UpdateType;
 import sif3.infra.common.model.UpdatesType;
 import sif3.infra.rest.resource.audit.AuditableResource;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.DateUtils;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * This is a utility class. All REST resource style class should extend this class. It provides many common functions that are
@@ -105,7 +109,7 @@ import au.com.systemic.framework.utils.StringUtils;
  */
 public abstract class BaseResource
 {
-	protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 	
 	/* Below variables are for testing purposes only */
     private static Boolean testMode = null;
@@ -114,7 +118,7 @@ public abstract class BaseResource
 	private enum PostFixMimeType {XML, JSON};
 	
 	/* Name of query parameters for payload free environment creation */
-	private enum EnvironmentQueryParams {solutionId, applicationKey, userToken, instanceId, authenticationMethod, consumerName, supportedInfrastructureVersion, dataModelNamespace, transport, productName};
+	private enum EnvironmentQueryParams {solutionId, applicationKey, userToken, instanceId, authenticationMethod, consumerName, supportedInfrastructureVersion, dataModelNamespace, transport, productName, fingerprint};
 	
 	private static final String HTTPS_SCHEMA = "https";
 	private static final String NOT_AUTHORIZED = "Not Authorized.";
@@ -178,7 +182,7 @@ public abstract class BaseResource
 		extractQueryParameters();
 		setSecure(HTTPS_SCHEMA.equalsIgnoreCase(getUriInfo().getBaseUri().getScheme()));
         setRelativeServicePath(getUriInfo().getRequestUri().toString(), getUriInfo().getBaseUri().toString(), servicePrefixPath);
-		extractAuthTokenInfo();
+		extractAuthTokenInfo(isDirectEnvironment() ? AdapterType.ENVIRONMENT_PROVIDER : AdapterType.PROVIDER);
 		
 	    if (StringUtils.notEmpty(zoneID))
 	    {
@@ -196,9 +200,9 @@ public abstract class BaseResource
 	    }
 	    else
 	    {
-		    if ((authInfo.getAuthMethod() == AuthenticationInfo.AuthenticationMethod.Bearer))
+		    if ((authInfo.getSecurityServiceInfo().getAuthenticationType() == AuthenticationType.Other))
 			{
-		        setSecurityService(BearerSecurityFactory.getSecurityService(getServiceProperties()));
+		        setSecurityService(((ExternalSecurityService)authInfo.getSecurityServiceInfo()).getSecurityService(getServiceProperties()));
 			}
 	    }
 		
@@ -345,7 +349,7 @@ public abstract class BaseResource
 	/*--------------------------------*/
 	/**
 	 * This method returns the userToken form the given Authorisation token. This can either be a sessionToken (Basic, 
-	 * SIF_HMACSH256) or a securityToken (Bearer). If no authorisation information is available then null is returned.
+	 * SIF_HMACSH256) or a securityToken (External Security Service). If no authorisation information is available then null is returned.
 	 * 
 	 * @return the token held in the userToken property or null if no Authentication information is available.
 	 */
@@ -370,7 +374,7 @@ public abstract class BaseResource
 	/*---------------------------------*/
 
 	/**
-	 * This method combines the validSession() and validateBearerSession() method into a higher level, so that the caller doesn't have to know
+	 * This method combines the validSession() and validateExternalSession() method into a higher level, so that the caller doesn't have to know
 	 * which one to invoke, rather have the code here to determine it automatically as it is possible in most cases.
 	 * 
      * @param autoCreateAllowed There are times where a environment must not be created automatically even if the 
@@ -386,13 +390,13 @@ public abstract class BaseResource
 		{
 			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No or invalid Authorization Token provided");				
 		}
-	    if (authInfo.getAuthMethod() != AuthenticationMethod.Bearer) // Basic or SIF_HMACSHA256
+	    if (authInfo.getSecurityServiceInfo().getAuthenticationType() != AuthenticationType.Other) // Basic or SIF_HMACSHA256
 	    {
 	    	return validSession(authInfo, false, null);
 	    }
 	    else
 	    {
-	    	return validateBearerSession(authInfo, autoCreateAllowed);
+	    	return validateExternalSession(authInfo, autoCreateAllowed);
 	    }
 	}
 	
@@ -408,7 +412,7 @@ public abstract class BaseResource
 
 		if (token != null)
 		{
-			if (getAuthInfo().getAuthMethod() == AuthenticationMethod.Bearer)
+			if (getAuthInfo().getSecurityServiceInfo().getAuthenticationType() == AuthenticationType.Other)
 			{
 				return getEnvironmentManager().getSessionBySecurityToken(token);
 			}
@@ -701,14 +705,14 @@ public abstract class BaseResource
 	 * authorised/authenticated token. If all tests succeed then null is returned, otherwise and ErrorDetails object is returned
 	 * that holds all the required error information and status.
 	 * 
-	 * @param validateBearerToken TRUE: Bearer Token will be validated against security service.
-	 *                            FALSE: Bearer Token is assumed to already be validated.
-	 * @param tokenInfo The token Info if authentication method is Bearer. In all other cases this parameter
+	 * @param validateExternalToken TRUE: External Security Service Token will be validated against security service.
+	 *                              FALSE: External Security Service Token is assumed to already be validated.
+	 * @param tokenInfo The token Info if authentication method is "other". In all other cases this parameter
 	 *                  is null and session token info should be used from the AuthInfo object.
 	 * 
 	 * @return See desc
 	 */
-	protected ErrorDetails validSession(AuthenticationInfo authInfo, boolean validateBearerToken, TokenInfo tokenInfo)
+	protected ErrorDetails validSession(AuthenticationInfo authInfo, boolean validateExternalToken, TokenInfo tokenInfo)
 	{
 		// we must have a authentication token and there must be an environment with that authentication token
 		if ((authInfo != null) && (authInfo.getUserToken() != null))
@@ -732,18 +736,19 @@ public abstract class BaseResource
 				    try
 				    {
 				    	EnvironmentType environment = null;
-				    	if (authInfo.getAuthMethod() != AuthenticationMethod.Bearer) // Basic or SIF_HMACSHA256
+				    	if (authInfo.getSecurityServiceInfo().getAuthenticationType() != AuthenticationType.Other) // Basic or SIF_HMACSHA256
 				    	{
 				    		environment = ((DirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentBySessionToken(authInfo.getUserToken(), tokenInfo, isSecure());
 				    	}
-				    	else // Bearer Token 
+				    	else // External Token 
 				    	{
 				    		environment = ((DirectProviderEnvironmentManager)getEnvironmentManager()).reloadEnvironmentForSecurityToken(tokenInfo, isSecure());
 				    	}
 				    	// If we have no environment then there is no environment for that session token
 						if (environment == null)
 						{
-							String errorStr = "No environment exits for the given security token = "+authInfo.getUserToken()+". Ensure that environment is created first.";
+						    String tokenType = (authInfo.getSecurityServiceInfo().getAuthenticationType() != AuthenticationType.Other) ? "session" : "security";
+							String errorStr = "No environment exits for the given "+tokenType+" token = "+authInfo.getUserToken()+". Ensure that environment is created first.";
 					    	logger.error(errorStr);
 					    	return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, errorStr);			
 						}
@@ -760,7 +765,7 @@ public abstract class BaseResource
 			}
 			
 			// Do the full validation of Auth Token.
-			return validateAuthTokenWithSession(sif3Session, validateBearerToken);
+			return validateAuthTokenWithSession(sif3Session, validateExternalToken);
 		}
 		else // we have no or an invalid authorisation token
 		{
@@ -770,22 +775,22 @@ public abstract class BaseResource
 
 	/*
 	 * This method validates the user token and password against the two valid SIF authentication methods of
-	 * Basic or SIF_HMACSHA256. If the authentication method should be set to bearer and this method is 
+	 * Basic or SIF_HMACSHA256. If the authentication method should be set to "other" and this method is 
 	 * called then null is returned meaning that no validation is performed and it is assumed all is good.
-	 * This means that the bearer token must already be validated external to this method. Practically this
-	 * method should not be called if the authentication method is bearer. Future changes to this method may
+	 * This means that the "other" token must already be validated external to this method. Practically this
+	 * method should not be called if the authentication method is "other". Future changes to this method may
 	 * return an error in such a case. 
 	 */
-	protected ErrorDetails validateNoneBearerAuthToken(String userToken, String password)
+	protected ErrorDetails validateInternalAuthToken(String userToken, String password)
 	{
-		if (getAuthInfo().getAuthMethod() == null)
+		if ((getAuthInfo().getSecurityServiceInfo() == null) || StringUtils.isEmpty(getAuthInfo().getSecurityServiceInfo().getAuthenticationMethod()))
 		{
-			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No Authentication Method set.", "Choose between Basic, SIF_HMACSHA256 or Bearer as Authentication Method. Refer to SIF3 Specification for details.");
+			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No Authentication Method set.", "Choose between Basic, SIF_HMACSHA256 or External Security as Authentication Method. Refer to SIF3 Specification for details.");
 		}
 
-		if ((getAuthInfo().getAuthMethod() == AuthenticationInfo.AuthenticationMethod.Bearer))
+		if (getAuthInfo().getSecurityServiceInfo().getAuthenticationType() == AuthenticationType.Other)
 		{
-			// It is bearer token and it is already validated. Nothing else to do here.
+			// It is "other" token and it is already validated. Nothing else to do here.
 			return null;
 		}
 
@@ -797,7 +802,7 @@ public abstract class BaseResource
 	    String authToken = AuthenticationUtils.getFullBase64Token(getAuthInfo());
 	    String newAuthToken = null;
 	    
-	    if (getAuthInfo().getAuthMethod() == AuthenticationInfo.AuthenticationMethod.Basic)
+	    if (getAuthInfo().getSecurityServiceInfo().getAuthenticationType() == AuthenticationType.Basic)
 	    {
 	    	// Create authentication token and compare if it matches
 	    	newAuthToken = AuthenticationUtils.getBasicAuthToken(userToken, password);      
@@ -829,9 +834,9 @@ public abstract class BaseResource
 
 	/*
 	 * This method will attempt to validate the given securityToken against an external security service. This method is only called
-	 * if the Authorisation HTTP header is of type 'Bearer'. VerifyError is thrown if there are any issues accessing the security service.
+	 * if the Authorisation HTTP header is of type 'other'. VerifyError is thrown if there are any issues accessing the security service.
 	 */
-	protected boolean validateBearerWithSecurityService(String securityToken) throws VerifyError
+	protected boolean validateTokenWithSecurityService(String securityToken) throws VerifyError
 	{
 	    if (getSecurityService() != null)
 	    {
@@ -839,7 +844,7 @@ public abstract class BaseResource
 	    }
 	    else // No security service known => report error
 	    {
-	    	throw new VerifyError("No security service known to validate Bearer Token.");
+	    	throw new VerifyError("No security service known to validate Security Token.");
 	    }
 	}
 
@@ -865,11 +870,10 @@ public abstract class BaseResource
 		
 		// Get values from HTTP Header.
 		metadata.setGeneratorID(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID));
-//		metadata.setNavigationID(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_NAVIGATION_ID));
 		metadata.setApplicationKey(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY));
 		metadata.setAuthentictedUser(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_AUTHENTICATED_USER));
 
-		// Source Name is a HTTP header if DBROKERED. Defaulted to applicationKey if DIRECT
+		// Brokered: SourceName and Fingerprint are in HTTP Headers and are set by the Broker
 		if (isBrokeredEnvironment())
 		{
 			metadata.setSourceName(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_SOURCE_NAME));
@@ -879,12 +883,25 @@ public abstract class BaseResource
 			{
 				metadata.setSourceName(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_SOURCE_NAME));
 			}
+			
+	        metadata.setFingerprint(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_FINGERPRINT));
+	        
+            //Or is it a URL query parameter
+            if (metadata.getFingerprint() == null)
+            {
+                metadata.setFingerprint(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_FINGERPRINT));
+            }
+
 		}
-		else // In a direct environment we set the SourceName to the consumer's application key if available.
+		// Direct: We set the SourceName to the consumer's application key if available and the fingerprint to the appropriate
+		//         value as in the session of this consumer. These values cannot be set by consumers, so that they cannot
+		//         pretend to be someone else.
+		else
 		{
 			if (sif3Session != null)
 			{
 				metadata.setSourceName(sif3Session.getApplicationKey());
+				metadata.setFingerprint(sif3Session.getFingerprint());
 			}
 		}
 		
@@ -917,10 +934,6 @@ public abstract class BaseResource
 		{
 			metadata.setGeneratorID(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_GENERATOR_ID));
 		}
-//		if (metadata.getNavigationID() == null)
-//		{
-//			metadata.setNavigationID(getQueryParameters().getQueryParam(RequestHeaderConstants.HDR_NAVIGATION_ID));
-//		}
 		
 		if (metadata.getApplicationKey() == null)
 		{
@@ -948,32 +961,32 @@ public abstract class BaseResource
 
 	/*
 	 * VerifyError is thrown if anything is not valid or not working. The exception message holds the details.
-	 * If everything is ok and the authentication method is Bearer then the TokenInfo is returned,
+	 * If everything is ok and the authentication method is "other" then the TokenInfo is returned,
 	 */
-	protected TokenInfo getBearerTokenInfo(AuthenticationInfo authInfo) throws VerifyError
+	protected TokenInfo getExternalTokenInfo(AuthenticationInfo authInfo) throws VerifyError
 	{
 		if (authInfo == null)
 		{
 			throw new VerifyError("No authentication info found. Cannot authorize consumer.");
 		}
-		if ((authInfo.getAuthMethod() == AuthenticationMethod.Bearer))
+		if (authInfo.getSecurityServiceInfo().getAuthenticationType() == AuthenticationType.Other)
 		{
-			if (validateBearerWithSecurityService(authInfo.getUserToken()))
+			if (validateTokenWithSecurityService(authInfo.getUserToken()))
 			{
 				// Now, what info can we get about the token
 				TokenInfo tokenInfo = getSecurityService().getInfo(authInfo.getUserToken(), getRequestMetadata(null, false));
 				if (tokenInfo == null)
 				{
-					throw new VerifyError("No information about Bearer Token can be retrieved.");
+					throw new VerifyError("No information about Security Token can be retrieved.");
 				}
 				else
 				{
 					return tokenInfo;
 				}
 			}
-			else // invalid bearer token
+			else // invalid token
 			{
-				throw new VerifyError("Bearer Token validation with security service returned \"Not Authorized\".");
+				throw new VerifyError("External Token validation with security service returned \"Not Authorized\".");
 			}
 		}
 		else // It is a standard Basic or SIF_HMACSHA256 authentication and therefore no further action is required.
@@ -1046,10 +1059,10 @@ public abstract class BaseResource
 	 * in the tokenInfo then it will take precedence of query parameters because the tokenInfo is based on security
 	 * service information and is more trust worthy.
 	 */
-	protected EnvironmentType makeEnvironmentForBearerToken(URLQueryParameter urlParams, TokenInfo tokenInfo)
+	protected EnvironmentType makeEnvironmentForExternalToken(SecurityServiceInfo securityService, URLQueryParameter urlParams, TokenInfo tokenInfo)
 	{
 		// Use what is available from the Query Params.
-		EnvironmentType env = makeEnvironmentFromQueryParams(urlParams, null, false);
+		EnvironmentType env = makeEnvironmentFromQueryParams(securityService, urlParams, null, false);
 		
 		// Now get TokenInfo and overwrite possible query parameter values.
 		if (StringUtils.notEmpty(tokenInfo.getAppUserInfo().getApplicationKey()))
@@ -1084,7 +1097,7 @@ public abstract class BaseResource
 	 * ApplicationKey can be part of the url query parameters or it could be in the authorisation header or access token. If it is in either
 	 * in the authorisation header or as an access token then it must be passed to this method in the "applicationKey' parameter.
 	 */
-	protected EnvironmentType makeEnvironmentFromQueryParams(URLQueryParameter urlParams, String applicationKey, boolean appKeyRequired)
+	protected EnvironmentType makeEnvironmentFromQueryParams(SecurityServiceInfo securityService, URLQueryParameter urlParams, String applicationKey, boolean appKeyRequired)
 	{
 		ObjectFactory infraObjectFactory = new ObjectFactory();
 		EnvironmentType env = infraObjectFactory.createEnvironmentType();
@@ -1123,11 +1136,21 @@ public abstract class BaseResource
 						env.setInstanceId(value);
 						break;
 					case authenticationMethod:
-						env.setAuthenticationMethod(value);
+				        if (securityService == null) // not found so set to Basic
+				        {
+				            env.setAuthenticationMethod(InternalSecurityServiceConstants.BASIC_GENERIC_SECURITY.getXmlValue());
+				        }
+				        else
+				        {
+				            env.setAuthenticationMethod(securityService.getXmlValue());
+				        }
 						break;
 					case consumerName:
 						env.setConsumerName(value);
 						break;
+					case fingerprint:
+					    env.setFingerprint(value);
+					    break;
 					case supportedInfrastructureVersion:
 						env.getApplicationInfo().setSupportedInfrastructureVersion(value);
 						break;
@@ -1460,6 +1483,10 @@ public abstract class BaseResource
 					String baseURIStr = isSecure() ? envInfo.getSecureConnectorBaseURI().toString() : envInfo.getConnectorBaseURI().toString();
 					StringBuilder envURLStr = new StringBuilder(baseURIStr).append("/environments/").append(sif3Session.getEnvironmentID());
 					allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_ENVIRONMENT_URI, envURLStr.toString());
+//					if (sif3Session.getFingerprint() != null)
+//					{
+					    allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_FINGERPRINT, sif3Session.getFingerprint());
+//					}
 				}
 			}
 			else // ensure that environmentURI header is not set by customHeaders and fakes some back door.
@@ -1502,16 +1529,16 @@ public abstract class BaseResource
 		this.authInfo = authInfo;
 	}
 
-	private void extractAuthTokenInfo()
+	private void extractAuthTokenInfo(AdapterType adapterType)
 	{
 		String authToken = getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN);
 		if (StringUtils.notEmpty(authToken))
 		{
-			setAuthInfo(AuthenticationUtils.getPartsFromAuthToken(authToken));
+			setAuthInfo(AuthenticationUtils.getPartsFromAuthToken(authToken, adapterType));
 		}
 		else if (getProviderEnvironment().getAllowAuthOnURL()) 	// Ok no header info. Do we have something on the query parameters and is it allowed to be on query parameter
 		{
-		  setAuthInfo(getAccessToken());
+		  setAuthInfo(getAccessToken(adapterType));
 		}
 	}
 	
@@ -1523,37 +1550,37 @@ public abstract class BaseResource
 	 * be sent back to the client. 
 	 * 
 	 * @param sif3Session The SIF3 Session against which the given authentication token shall be validated.
-	 * @param validateBearer TRUE: Bearer Token must be validated against security service. FALSE validation required. This assumes that the
-	 *                       caller of this method has already validated the bearer token.
+	 * @param validateExternalToken TRUE: External Security Service Token must be validated against security service. 
+	 *                              FALSE validation required. This assumes that the caller of this method has already validated the token.
 	 * 
 	 * @return See desc.
 	 */
-	private ErrorDetails validateAuthTokenWithSession(SIF3Session sif3Session, boolean validateBearerToken)
+	private ErrorDetails validateAuthTokenWithSession(SIF3Session sif3Session, boolean validateExternalToken)
 	{
-		if (getAuthInfo().getAuthMethod() == null)
+		if ((getAuthInfo().getSecurityServiceInfo() == null) || StringUtils.isEmpty(getAuthInfo().getSecurityServiceInfo().getAuthenticationMethod()))
 		{
-			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Choose between Basic, SIF_HMACSHA256 or Bearer as Authentication Method. Refer to SIF3 Specification for details.");
+			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Choose between Basic, SIF_HMACSHA256 or External Security as Authentication Method. Refer to SIF3 Specification for details.");
 		}
 
 		// Check if the Authentication Method matches the session's mandated authentication method.
-		if (getAuthInfo().getAuthMethod() != sif3Session.getAuthenticationMethod())
+		if (!getAuthInfo().getSecurityServiceInfo().getAuthenticationMethod().equalsIgnoreCase(sif3Session.getAuthenticationMethod()))
 		{
-            return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Invalid authentication method. Authentication method must be "+sif3Session.getAuthenticationMethod().name());	    
+            return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Invalid authentication method. Authentication method must be "+sif3Session.getAuthenticationMethod());	    
 		}
 		
-		if (getAuthInfo().getAuthMethod() != AuthenticationInfo.AuthenticationMethod.Bearer) // It is Basic or SIF_HMACSHA256
+		if (getAuthInfo().getSecurityServiceInfo().getAuthenticationType() != AuthenticationType.Other) // It is Basic or SIF_HMACSHA256
 		{
-			return validateNoneBearerAuthToken(getAuthInfo().getUserToken(), sif3Session.getPassword());
+			return validateInternalAuthToken(getAuthInfo().getUserToken(), sif3Session.getPassword());
 		}
-		else // we must validate session against bearer token.
+		else // we must validate session against External Authentication token.
 		{
-			if (validateBearerToken)
+			if (validateExternalToken)
 			{
 				try
 				{
-					if (!validateBearerWithSecurityService(getAuthInfo().getUserToken()))
+					if (!validateTokenWithSecurityService(getAuthInfo().getUserToken()))
 					{
-						return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Bearer Token validation with security service returned \"Not Authorized\".");
+						return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Security Token validation with security service returned \"Not Authorized\".");
 					}
 				}
 				catch (VerifyError ex)
@@ -1562,14 +1589,13 @@ public abstract class BaseResource
 				}
 			}
 			
-			// If we get here we assume that the bearer token is all valid. now we can validate the session
-			// against it.
-			return validateBearerTokenAgainstSession(getAuthInfo().getUserToken(), sif3Session);
+			// If we get here we assume that the token is all valid. now we can validate the session against it.
+			return validateExternalTokenAgainstSession(getAuthInfo().getUserToken(), sif3Session);
 		}
 	}
 	
 	/*
-	 * This method deals specifically with the case where the authentication method is 'Bearer'. 
+	 * This method deals specifically with the case where the authentication method is 'Other' (External Service). 
 	 * The algorithm in this case is reasonably complex and roughly follows the algorithm below:
 	 * 
 	 * First we check if there is a sif3 session in the session cache that matches the security token.
@@ -1604,7 +1630,7 @@ public abstract class BaseResource
 	 *                          provider's property would allow this. A typical case is where we attempt to retrieve
 	 *                          an environment by its ID. In such case we do not create it if it doesn't exist.
 	 */
-	private ErrorDetails validateBearerSession(AuthenticationInfo authInfo, boolean autoCreateAllowed)
+	private ErrorDetails validateExternalSession(AuthenticationInfo authInfo, boolean autoCreateAllowed)
 	{
 		String errorStr = null;
 		SIF3Session sif3Session = getSIF3SessionForRequest();
@@ -1631,14 +1657,14 @@ public abstract class BaseResource
 			    	
 			    	// If there is no environment then there are two potential reasons:
 			    	// 1) It really does not exist
-			    	// 2) There is an environment but for a different bearer token because a previous one has expired or was
+			    	// 2) There is an environment but for a different external token because a previous one has expired or was
 			    	//    re-generated! To cover this case we must get the info for the token and then attempt to reload it that
-			    	//    way. Only if it still doesn't exist we can say for sure that there is no environment for the bearer token.
+			    	//    way. Only if it still doesn't exist we can say for sure that there is no environment for the external token.
 			    	if (environment == null)
 			    	{
-			    	    logger.debug("No envionment found yet => Attempt get bearer token info and reload environment from there...");
-                        tokenInfo = getBearerTokenInfo(authInfo);
-                        ErrorDetails errors = createOrLoadEnvByTokenInfo(tokenInfo, envMgr, (autoCreateAllowed && getProviderEnvironment().getAutoCreateEnvironment()));
+			    	    logger.debug("No envionment found yet => Attempt get external token info and reload environment from there...");
+                        tokenInfo = getExternalTokenInfo(authInfo);
+                        ErrorDetails errors = createOrLoadEnvByTokenInfo(tokenInfo, envMgr, authInfo, (autoCreateAllowed && getProviderEnvironment().getAutoCreateEnvironment()));
                         if (errors != null)
                         {
                             return errors;
@@ -1647,7 +1673,7 @@ public abstract class BaseResource
 			    }
 			    catch (VerifyError ex)
 			    {
-			    	logger.error("Bearer Token security issue: "+ ex.getMessage(), ex);
+			    	logger.error("External Security Token issue: "+ ex.getMessage(), ex);
 			    	return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, ex.getMessage());
 			    }	    
 				catch (Exception ex)
@@ -1675,11 +1701,11 @@ public abstract class BaseResource
 		// expired since it was last accessed.
 		if (isDirectEnvironment())
 		{
-			if (isSessionBearerExpired(sif3Session)) //is token expired
+			if (isExternalSessionExpired(sif3Session)) //is token expired
 			{
 				try
 				{
-					TokenInfo tokenInfo = getBearerTokenInfo(authInfo);
+					TokenInfo tokenInfo = getExternalTokenInfo(authInfo);
 					
 					// Now this should have potential expire date
 					if (tokenInfo.getTokenExpiryDate() != null)
@@ -1697,7 +1723,7 @@ public abstract class BaseResource
 					    	envMgr.removeEnvironmentBySessionToken(sif3Session.getSessionToken(), false);
 
 					    	// Report error.
-					    	errorStr = "Bearer Token = "+authInfo.getUserToken()+" is expired.";
+					    	errorStr = "External Token = "+authInfo.getUserToken()+" is expired.";
 							logger.error(errorStr);
 						    return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, errorStr);					    	
 					    }
@@ -1705,24 +1731,24 @@ public abstract class BaseResource
 				}
 				catch (VerifyError ex)
 				{
-					logger.error("Bearer Token security issue: "+ ex.getMessage(), ex);
+					logger.error("External Token security issue: "+ ex.getMessage(), ex);
 				    return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, ex.getMessage());
 				}
 			}
 		}
-		else // Brokered environment => Bearer Authentication not yet supported.
+		else // Brokered environment => External Authentication not yet supported.
 		{
 		    //TODO: JH - Add code once External Security is enabled for brokered providers.
-			errorStr = "Bearer Token security not yet supported for Brokered Environment Provider.";
+			errorStr = "External Security Token not yet supported for Brokered Environment Provider.";
 			logger.error(errorStr);
 		    return new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), errorStr);
 		}
 		
         // At this point we should have a SIF3Session which we can check to see if Authentication Method matches the Authorisation header
         // Check if the Authentication Method matches the session's mandated authentication method.
-        if (getAuthInfo().getAuthMethod() != sif3Session.getAuthenticationMethod())
+        if (!getAuthInfo().getSecurityServiceInfo().getAuthenticationMethod().equalsIgnoreCase(sif3Session.getAuthenticationMethod()))
         {
-            return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Invalid authentication method. Authentication method must be "+sif3Session.getAuthenticationMethod().name());     
+            return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Invalid authentication method. Authentication method must be "+sif3Session.getAuthenticationMethod());     
         }
 	
 		// If we get to this point then all validations have succeeded.
@@ -1730,7 +1756,7 @@ public abstract class BaseResource
 	}
 
 	/*
-	 * This method validates a security token (Bearer) against a SIF3 session. While doing so it will
+	 * This method validates a security token (external) against a SIF3 session. While doing so it will
 	 * NOT attempt to load a session from the session store. It is assumed that the sif3 session given to 
 	 * this method is retrieved from the session cache and therefore exists. It will only validate against 
 	 * the given sif3 session. It follows the steps below:
@@ -1739,7 +1765,7 @@ public abstract class BaseResource
 	 * - If it does and it is not expired in session => All fine
 	 * - If it does but expired => return error
 	 */
-	private ErrorDetails validateBearerTokenAgainstSession(String securityToken, SIF3Session sif3Session)
+	private ErrorDetails validateExternalTokenAgainstSession(String securityToken, SIF3Session sif3Session)
 	{
 		String errorStr = null;
 		if (sif3Session != null)
@@ -1785,7 +1811,7 @@ public abstract class BaseResource
 		}
 	}
 	
-	protected boolean isSessionBearerExpired(SIF3Session sif3Session)
+	protected boolean isExternalSessionExpired(SIF3Session sif3Session)
 	{
 	  if (StringUtils.notEmpty(sif3Session.getSecurityToken()))
 	  {
@@ -1810,9 +1836,8 @@ public abstract class BaseResource
 	 * This method attempts to retrieve the URL Query Parameter called 'accessToken' which may be used for SIF Simple. It will then
 	 * attempt to also get the authentication method from the URL Query Parameters. If it is provided it will be used, assuming it has a valid
 	 * value, otherwise a lookup to the provider's config file will be performed to determine the default accessToken authentication method. 
-	 * If this is set then this will be used otherwise it is defaulted to 'Bearer'.
 	 */
-	private AuthenticationInfo getAccessToken()
+	private AuthenticationInfo getAccessToken(AdapterType adapterType)
 	{
 	    String accessTokenStr = getQueryParameters().getQueryParam(CommonConstants.ACCESS_TOKEN);
 
@@ -1820,27 +1845,17 @@ public abstract class BaseResource
 	    {
 	    	// Check if we have an Authentication Method as well
 		    String authMethodStr = getQueryParameters().getQueryParam(CommonConstants.AUTH_METHOD);
-		    AuthenticationMethod authMethod = null;
+//		    String authMethod = null;
 		    
-		    if (StringUtils.notEmpty(authMethodStr))
-		    {
-		        try
-		        {
-		          authMethod = AuthenticationMethod.valueOf(authMethodStr.trim());
-		        }
-		        catch (Exception ex) // invalid value is provided. Ignore it!
-		        {
-		        	authMethod = null; // this will ensure that we use what is in the provider's config file
-		        }
-	    	}
+		    authMethodStr = (StringUtils.notEmpty(authMethodStr)) ? authMethodStr.trim() : null;
 
-	    	if (authMethod == null) // check what is in the provider's config file
+	    	if (authMethodStr == null) // check what is in the provider's config file
 	    	{
-	    		authMethod = getProviderEnvironment().getAccessTokenAuthMethod();
+	    	    authMethodStr = getProviderEnvironment().getAccessTokenAuthMethod();
 	    	}
 	    	
 		    // Create a string that looks like if it is in the Authorization HTTP Header
-		    return AuthenticationUtils.getPartsFromAuthToken(authMethod.name()+" "+accessTokenStr.trim());
+		    return AuthenticationUtils.getPartsFromAuthToken(authMethodStr+" "+accessTokenStr.trim(), adapterType);
 	    }
 	    return null;
 	}
@@ -1885,10 +1900,10 @@ public abstract class BaseResource
 	}
 	
 	/*
-	 * This method will either create a environment or load an exiting environment based on the information
+	 * This method will either create an environment or load an exiting environment based on the information
 	 * provided in the 'tokenInfo' parameter. It will do this through the EnvironmentManger to ensure that
 	 * the loaded environment is also added properly to the session cache. 
-	 * This method must only be used if the authentication type is 'Bearer'. It must be checked before calling
+	 * This method must only be used if the authentication type is 'Other'. It must be checked before calling
 	 * this method.
 	 * 
 	 * The algorithm used to determine if an existing environment shall be loaded or a new one be created is as 
@@ -1901,11 +1916,11 @@ public abstract class BaseResource
 	 *     - If one is found all is good and we don't need to create one and return null
 	 *   - appUserInfo is not available => log error and return ErrorDetails 
 	 */
-	private ErrorDetails createOrLoadEnvByTokenInfo(TokenInfo tokenInfo, DirectProviderEnvironmentManager envMgr, boolean allowCreate)
+	private ErrorDetails createOrLoadEnvByTokenInfo(TokenInfo tokenInfo, DirectProviderEnvironmentManager envMgr, AuthenticationInfo authInfo, boolean allowCreate)
 	{
 		if (tokenInfo == null) // should not be the case but for robustness...
 		{
-			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No Bearer Security Token available (token info is null)");
+			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No External Security Token available (token info is null)");
 		}
 		try
 		{
@@ -1941,7 +1956,7 @@ public abstract class BaseResource
 				    if (allowCreate) 
 				    {
                         logger.debug("Attempt to automatically create environment for security token: "+authInfo.getUserToken());
-                        EnvironmentType inputEnvironment = makeEnvironmentForBearerToken(null, tokenInfo);
+                        EnvironmentType inputEnvironment = makeEnvironmentForExternalToken(authInfo.getSecurityServiceInfo(), null, tokenInfo);
                         environment = envMgr.createOrUpdateEnvironment(inputEnvironment, tokenInfo, isSecure());
                         if (environment == null) // failed to create environment
                         {

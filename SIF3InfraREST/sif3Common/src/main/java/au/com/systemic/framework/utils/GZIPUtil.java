@@ -24,7 +24,8 @@ import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import au.com.systemic.framework.types.ByteArray;
 
@@ -36,7 +37,7 @@ import au.com.systemic.framework.types.ByteArray;
  */
 public class GZIPUtil
 {
-	protected static final Logger logger = Logger.getLogger(GZIPUtil.class);
+	protected static final Logger logger = LoggerFactory.getLogger(GZIPUtil.class);
 
 	/**
 	 * This method gzip the given string and returns the gzip as a byte array. If anything fails during the process then

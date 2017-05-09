@@ -12,6 +12,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * The Service Provider returns a SIF Error Message to a Consumer issuing an erroneous Request.
+ * 
  * <p>Java class for errorType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -47,7 +49,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "errorType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "errorType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
     "code",
     "scope",
     "message",
@@ -55,14 +57,14 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class ErrorType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     @XmlSchemaType(name = "unsignedInt")
     protected long code;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
     protected String scope;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
     protected String message;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
     protected String description;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)

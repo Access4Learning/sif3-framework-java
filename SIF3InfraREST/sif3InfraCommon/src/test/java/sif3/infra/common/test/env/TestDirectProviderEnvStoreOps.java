@@ -24,6 +24,7 @@ import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.MarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.model.EnvironmentKey;
+import sif3.common.persist.common.HibernateUtil;
 import sif3.common.persist.service.SIF3SessionService;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.env.ops.DirectProviderEnvStoreOps;
@@ -45,7 +46,8 @@ public class TestDirectProviderEnvStoreOps
 	private DirectProviderEnvStoreOps envOps = null;
 	private SIF3SessionService service = new SIF3SessionService();
 	
-	private static final String TEMPLATE_FILE_NAME="systemicDemoBrokerResponse.xml";
+//	private static final String TEMPLATE_FILE_NAME="systemicDemoBrokerResponse.xml";
+    private static final String TEMPLATE_FILE_NAME="devLocal.xml";
 	private static final String SERVICE_NAME="StudentProvider";
 
 	private static ObjectFactory objFactory = new ObjectFactory();
@@ -61,6 +63,7 @@ public class TestDirectProviderEnvStoreOps
 
 	public TestDirectProviderEnvStoreOps()
 	{
+        HibernateUtil.initialise(null);
 		envOps = new DirectProviderEnvStoreOps(SERVICE_NAME);
 	}
 
@@ -159,15 +162,15 @@ public class TestDirectProviderEnvStoreOps
 
 	private void testCreateEnvironment()
 	{
-		EnvironmentType inputEnv = envOps.loadEnvironmentFromTemplate(TEMPLATE_FILE_NAME); // use this if BROKERED
-//		EnvironmentType inputEnv = getInputEnvironment(); // use this for DIRECT
+//		EnvironmentType inputEnv = envOps.loadEnvironmentFromTemplate(TEMPLATE_FILE_NAME); // use this if BROKERED
+		EnvironmentType inputEnv = getInputEnvironment(); // use this for DIRECT
 		printEnvironment(envOps.createEnvironmentAndSession(inputEnv, null, USE_HTTPS));
 	}
 
 	private void testCreateSession()
 	{
-		EnvironmentType inputEnv = envOps.loadEnvironmentFromTemplate(TEMPLATE_FILE_NAME); // use this if BROKERED
-//		EnvironmentType inputEnv = getInputEnvironment(); // use this for DIRECT
+//		EnvironmentType inputEnv = envOps.loadEnvironmentFromTemplate(TEMPLATE_FILE_NAME); // use this if BROKERED
+		EnvironmentType inputEnv = getInputEnvironment(); // use this for DIRECT
 		
 		System.out.println("Session:\n" + envOps.createSession(inputEnv, null, USE_HTTPS));
 	}
@@ -206,10 +209,10 @@ public class TestDirectProviderEnvStoreOps
 //		tester.testExistEnvInWorkstore();
 //		tester.testLoadEnvironmentFromWorkstore();
 //		tester.testCreateEnvironment();
-//		tester.testCreateSession();
+		tester.testCreateSession();
 //		tester.testRemoveEnvFromWorkstoreByEnvID();
 //		tester.testRemoveEnvFromWorkstoreBySessionToken();
-		tester.testUpdateSessionSecurityInfo();
+//		tester.testUpdateSessionSecurityInfo();
 		
 		System.out.println("End Testing ProviderEnvironmentStoreOperations.");
 	}

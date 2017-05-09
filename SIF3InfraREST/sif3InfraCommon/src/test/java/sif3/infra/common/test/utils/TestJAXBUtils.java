@@ -294,12 +294,12 @@ public class TestJAXBUtils
 //      System.out.println("Environment JSON:\n" + envStrJSON);
 		  
 		  
-//		  tester.testXMLToObjectToXML();
+		  tester.testXMLToObjectToXML();
 //		  tester.testXMLToObjectToJSON();
 //			tester.testJSONToObjectToJSON();
 //			tester.testJSONToObjectToXML();
 //		  tester.testStudentUnicodeString();
-		  tester.testStudentUnicodeFile();
+//		  tester.testStudentUnicodeFile();
 		}
 		catch (Exception ex)
 		{

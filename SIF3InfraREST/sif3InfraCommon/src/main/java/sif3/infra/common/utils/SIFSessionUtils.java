@@ -20,7 +20,8 @@ package sif3.infra.common.utils;
 
 import java.util.ArrayList;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
@@ -42,7 +43,7 @@ import sif3.infra.common.model.RightType;
  */
 public class SIFSessionUtils
 {
-	protected static final Logger logger = Logger.getLogger(SIFSessionUtils.class);
+    protected static final Logger logger = LoggerFactory.getLogger(SIFSessionUtils.class);
 
 	/**
 	 * This method populates the SIF3Session.services property with the values of the given environment. If there are no services

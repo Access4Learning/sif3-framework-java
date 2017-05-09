@@ -21,11 +21,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="rights" type="{http://www.sifassociation.org/infrastructure/3.1}rightsType"/>
+ *         &lt;element name="rights" type="{http://www.sifassociation.org/infrastructure/3.2.1}rightsType"/>
  *       &lt;/sequence>
  *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}anySimpleType" />
  *       &lt;attribute name="contextId" use="required" type="{http://www.w3.org/2001/XMLSchema}anySimpleType" />
- *       &lt;attribute name="type" use="required" type="{http://www.sifassociation.org/infrastructure/3.1}serviceTypeType" />
+ *       &lt;attribute name="type" use="required" type="{http://www.sifassociation.org/infrastructure/3.2.1}serviceTypeType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -34,12 +34,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "serviceType", namespace = "http://www.sifassociation.org/infrastructure/3.1", propOrder = {
+@XmlType(name = "serviceType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
     "rights"
 })
 public class ServiceType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
     protected RightsType rights;
     @XmlAttribute(name = "name", required = true)
     @XmlSchemaType(name = "anySimpleType")

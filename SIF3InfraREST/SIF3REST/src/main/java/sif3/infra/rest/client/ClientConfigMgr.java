@@ -24,16 +24,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 
-import org.apache.log4j.Logger;
-
-import sif3.common.CommonConstants;
-import sif3.common.security.X509KeystoreManager;
-import sif3.common.security.X509TrustedStoreManager;
-import sif3.common.security.X509TrustedStoreManagerNoCheck;
-import au.com.systemic.framework.utils.AdvancedProperties;
-import au.com.systemic.framework.utils.PropertyManager;
-import au.com.systemic.framework.utils.StringUtils;
-import au.com.systemic.framework.utils.Timer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //TODO: JH - Here we do have some jersey specific classes => Investigate how to replace them with generic classes! 
 //Note: These are "client" classes only and the only jar that might be required could be jersey-client-1.17.1.jar which
@@ -41,6 +33,15 @@ import au.com.systemic.framework.utils.Timer;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.client.urlconnection.HTTPSProperties;
+
+import au.com.systemic.framework.utils.AdvancedProperties;
+import au.com.systemic.framework.utils.PropertyManager;
+import au.com.systemic.framework.utils.StringUtils;
+import au.com.systemic.framework.utils.Timer;
+import sif3.common.CommonConstants;
+import sif3.common.security.X509KeystoreManager;
+import sif3.common.security.X509TrustedStoreManager;
+import sif3.common.security.X509TrustedStoreManagerNoCheck;
 
 /**
  * There are many places where client contexts are required for REST service invocation. The client context can either be a secure 
@@ -54,7 +55,7 @@ import com.sun.jersey.client.urlconnection.HTTPSProperties;
  */
 public class ClientConfigMgr
 {
-  private final Logger logger = Logger.getLogger(getClass());
+      private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private static AdvancedProperties props = null;
 	private static String keystoreName = null;

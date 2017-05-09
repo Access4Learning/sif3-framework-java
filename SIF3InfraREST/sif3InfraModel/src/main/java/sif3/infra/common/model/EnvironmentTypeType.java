@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  * 
  */
-@XmlType(name = "environmentTypeType", namespace = "http://www.sifassociation.org/infrastructure/3.1")
+@XmlType(name = "environmentTypeType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
 @XmlEnum
 public enum EnvironmentTypeType {
 
