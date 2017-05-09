@@ -33,11 +33,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.model.AuthenticationInfo;
-import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.model.security.TokenInfo;
 import sif3.common.persist.model.AppEnvironmentTemplate;
@@ -48,7 +49,6 @@ import sif3.infra.common.env.mgr.ProviderManagerFactory;
 import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.common.model.EnvironmentType;
-import au.com.systemic.framework.utils.StringUtils;
 
 /*
  * http://localhost:9080/SIF3InfraREST/sif3/environments/69df9d79-8e01-43e8-825f-d0dc1775761b
@@ -121,7 +121,7 @@ public class EnvironmentResource extends InfraResource
 		  
 			// The method below will set the bearer token info if the authentication method is 'Bearer'
 			// Any failures with the method below will throw a VerifyError exception
-			TokenInfo tokenInfo = getBearerTokenInfo(authInfo);
+			TokenInfo tokenInfo = getExternalTokenInfo(authInfo);
 		  
 			if (StringUtils.notEmpty(payload))
 			{
@@ -129,14 +129,14 @@ public class EnvironmentResource extends InfraResource
 			}
 			else // check if we have the environment information as URL query parameters
 			{
-				if (authInfo.getAuthMethod() != AuthenticationInfo.AuthenticationMethod.Bearer)
+				if (authInfo.getSecurityServiceInfo().getAuthenticationType() != AuthenticationType.Other)
 				{
 					// authInfo should have an application key here at this stage if Basic or SIF_HMACSHA256
-					inputEnv = makeEnvironmentFromQueryParams(getQueryParameters(), authInfo.getUserToken(), true);
+					inputEnv = makeEnvironmentFromQueryParams(authInfo.getSecurityServiceInfo(), getQueryParameters(), authInfo.getUserToken(), true);
 				}
 				else // Bearer Token => We must get info about environment from TokenInfo or Query Parameters
 				{
-					inputEnv = makeEnvironmentForBearerToken(getQueryParameters(), tokenInfo);
+					inputEnv = makeEnvironmentForExternalToken(authInfo.getSecurityServiceInfo(), getQueryParameters(), tokenInfo);
 				}
 			}
 
@@ -158,18 +158,18 @@ public class EnvironmentResource extends InfraResource
 			}
 			
 			// check if initial Authentication Token is valid for this environment template. 
-		     // Check if the Authentication Method matches the session's mandated authentication method.
-	        if (!getAuthInfo().getAuthMethod().toString().equals(appEnvTemplate.getAuthMethod()))
+		    // Check if the Authentication Method matches the session's mandated authentication method.
+	        if (!authInfo.getSecurityServiceInfo().getAuthenticationMethod().equalsIgnoreCase(appEnvTemplate.getAuthMethod()))
 	        {
 	            ErrorDetails error = new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not Authorized.", "Invalid authentication method. Authentication method must be "+appEnvTemplate.getAuthMethod());     
                 return makeErrorResponse(error, ResponseAction.CREATE, getInitialCustomResponseParameters());
 	        }
 			
-			// No validation of token required if it is bearer token because it was validated in getBearerTokenInfo()
+			// No validation of token required if it is external service token because it was validated in getExternalTokenInfo()
 			// at the top of this method.
-			if (authInfo.getAuthMethod() != AuthenticationMethod.Bearer)
+			if (authInfo.getSecurityServiceInfo().getAuthenticationType() != AuthenticationType.Other)
 			{
-				ErrorDetails errors = validateNoneBearerAuthToken(appEnvTemplate.getApplicationKey(), appEnvTemplate.getPassword());
+				ErrorDetails errors = validateInternalAuthToken(appEnvTemplate.getApplicationKey(), appEnvTemplate.getPassword());
 				if (errors != null) // we had an issue with the authentication => return error.
 				{
 					return makeErrorResponse(errors, ResponseAction.CREATE, getInitialCustomResponseParameters());       
@@ -257,7 +257,7 @@ public class EnvironmentResource extends InfraResource
 		TokenInfo tokenInfo = null;
 		try
 		{
-			tokenInfo = getBearerTokenInfo(getAuthInfo());
+			tokenInfo = getExternalTokenInfo(getAuthInfo());
 		}
 		catch (VerifyError ex)
 		{
@@ -316,7 +316,7 @@ public class EnvironmentResource extends InfraResource
 		TokenInfo tokenInfo = null;
 		try
 		{
-			tokenInfo = getBearerTokenInfo(getAuthInfo());
+			tokenInfo = getExternalTokenInfo(getAuthInfo());
 		}
 		catch (VerifyError ex)
 		{

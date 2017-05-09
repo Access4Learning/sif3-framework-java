@@ -26,7 +26,8 @@ import org.slf4j.LoggerFactory;
 
 import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants.AdapterType;
-import sif3.common.CommonConstants.AuthenticationType;
+import sif3.common.model.security.InternalSecurityServiceConstants;
+import sif3.common.model.security.SecurityServiceInfo;
 import sif3.common.model.security.SecurityServiceKey;
 import sif3.common.persist.model.ExternalSecurityService;
 
@@ -130,11 +131,17 @@ public class SecurityServiceFactory implements Serializable
             }
             
             // Now we put the SIF3 Internal Security configuration into the factory. These will be special cases!!
-            for (AdapterType adapterType : AdapterType.values())
+            for (SecurityServiceInfo internalService : InternalSecurityServiceConstants.ALL_INTERNAL_SERVICES)
             {
-                addInternalService(AuthenticationType.Basic, adapterType);
-                addInternalService(AuthenticationType.SIF_HMACSHA256, adapterType);               
+                getSecurityServices().put(new SecurityServiceKey(internalService.getAuthenticationMethod(), internalService.getAdapterType()),
+                                          new ExternalSecurityService(internalService));
             }
+            
+//            for (AdapterType adapterType : AdapterType.values())
+//            {
+//                addInternalService(AuthenticationType.Basic, adapterType);
+//                addInternalService(AuthenticationType.SIF_HMACSHA256, adapterType);               
+//            }
             logger.debug("List of Security Services:\n"+getSecurityServices());
         }
         catch (Exception ex)
@@ -154,9 +161,9 @@ public class SecurityServiceFactory implements Serializable
 //        this.securityServices = securityServices;
 //    }
     
-    private void addInternalService(AuthenticationType authenticationType, AdapterType adapterType)
-    {
-        getSecurityServices().put(new SecurityServiceKey(authenticationType.name(), adapterType.name()),
-                                  new ExternalSecurityService(authenticationType.name(), adapterType.name(), authenticationType.name(), authenticationType.name(), Boolean.TRUE, authenticationType));
-    }
+//    private void addInternalService(AuthenticationType authenticationType, AdapterType adapterType)
+//    {
+//        getSecurityServices().put(new SecurityServiceKey(authenticationType.name(), adapterType.name()),
+//                                  new ExternalSecurityService(authenticationType.name(), adapterType.name(), authenticationType.name(), authenticationType.name(), Boolean.TRUE, authenticationType));
+//    }
 }

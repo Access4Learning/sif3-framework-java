@@ -7,7 +7,7 @@
     <consumerName></consumerName>
     <applicationInfo>
         <applicationKey></applicationKey>
-        <supportedInfrastructureVersion>3.1</supportedInfrastructureVersion>
+        <supportedInfrastructureVersion>3.2.1</supportedInfrastructureVersion>
         <dataModelNamespace>http://www.sifassociation.org/datamodel/na/3.3</dataModelNamespace>
         <transport>REST</transport>
         <applicationProduct>

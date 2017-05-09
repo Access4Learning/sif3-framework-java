@@ -39,6 +39,7 @@ import com.sun.jersey.api.client.config.ClientConfig;
 
 import au.com.systemic.framework.utils.DateUtils;
 import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.UnmarshalException;
@@ -50,16 +51,16 @@ import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.model.AuthenticationInfo;
-import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.URLQueryParameter;
 import sif3.common.model.delayed.DelayedRequestReceipt;
 import sif3.common.model.security.TokenCoreInfo;
 import sif3.common.model.security.TokenInfo;
+import sif3.common.persist.model.ExternalSecurityService;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.security.AbstractSecurityService;
-import sif3.common.security.BearerSecurityFactory;
+import sif3.common.security.SecurityServiceFactory;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.BaseResponse;
 import sif3.common.ws.ErrorDetails;
@@ -478,7 +479,7 @@ public abstract class BaseClient
 		if (authInfo != null) // all good
 		{
 			// First create the properties for the authentication header.
-			ClientUtils.setAuthenticationHeader(hdrProps, authInfo.getAuthMethod(), authInfo.getUserToken(), authInfo.getPassword());
+			ClientUtils.setAuthenticationHeader(hdrProps, authInfo.getSecurityServiceInfo(), authInfo.getUserToken(), authInfo.getPassword());
 		}		
 
 		return hdrProps;
@@ -773,7 +774,6 @@ public abstract class BaseClient
 	 * If anything fails then null is returned. An error will already be logged.
 	 */
 	private AuthenticationInfo getAuthenicationInfo(boolean isEnvCreateRequest, SIF3Session pseudoSIF3Session)
-//    private AuthenticationInfo getAuthenicationInfo(boolean isEnvCreateRequest, TokenInfo tokenInfo)
 	{
 		EnvironmentInfo envInfo = getClientEnvMgr().getEnvironmentInfo();
 		String pwd = envInfo.getPassword();
@@ -785,7 +785,7 @@ public abstract class BaseClient
 	    }
 	    else 
 	    {
-	        // it is not a createEnv request but if we may have a pseudoSIF3Session  then it should have a sessionToken populated
+	        // it is not a createEnv request but if we may have a pseudoSIF3Session then it should have a sessionToken populated
 	        if (pseudoSIF3Session == null) // we must have a session
 	        {
 	            user =  getSIF3Session().getSessionToken();
@@ -797,20 +797,28 @@ public abstract class BaseClient
 	    }
 		
 		AuthenticationInfo authInfo = null;
-		if (envInfo.getAuthMethod() != AuthenticationMethod.Bearer)
-		{
-            authInfo = new AuthenticationInfo(envInfo.getAuthMethod(), user, pwd);
-		}
-		else // Use Bearer Authentication => potentially requires external security service.
-		{
-		    TokenInfo tokenInfo = null;
-		    if (pseudoSIF3Session != null) // we don't have a real session. Use pseudoSIF3Session and extract token info from there.
-		    {
-		        tokenInfo = new TokenInfo(pseudoSIF3Session.getSecurityToken(), pseudoSIF3Session.getSecurityTokenExpiry());
-		    }
-            authInfo = getBearerAuthorisationInfo(isEnvCreateRequest, tokenInfo);
-		}
-		
+        ExternalSecurityService securityService = SecurityServiceFactory.getSecurityService(envInfo.getAuthMethod(), envInfo.getAdapterType());
+        if (securityService != null)
+        {
+            if (securityService.getAuthenticationType() != AuthenticationType.Other) 
+            {
+                authInfo = new AuthenticationInfo(securityService, user, pwd);
+            }
+            else // Use Bearer Authentication => potentially requires external security service.
+            {
+                TokenInfo tokenInfo = null;
+                if (pseudoSIF3Session != null) // we don't have a real session. Use pseudoSIF3Session and extract token info from there.
+                {
+                    tokenInfo = new TokenInfo(pseudoSIF3Session.getSecurityToken(), pseudoSIF3Session.getSecurityTokenExpiry());
+                }
+                authInfo = getExternalAuthorisationInfo(isEnvCreateRequest, tokenInfo, securityService);
+            }
+        }
+        else
+        {
+            logger.error("Cannot determine Authentication Serice to use. See previous error log entries.");
+        }
+			
 		return authInfo;
 	}
 	
@@ -828,7 +836,7 @@ public abstract class BaseClient
 	 *  
 	 * If anything fails then null is returned and an error is logged.
 	 */
-	private AuthenticationInfo getBearerAuthorisationInfo(boolean isEnvCreateRequest, TokenInfo tokenInfo)
+	private AuthenticationInfo getExternalAuthorisationInfo(boolean isEnvCreateRequest, TokenInfo tokenInfo, ExternalSecurityService securityService)
 	{
 		boolean retrieveToken = false;
 		if (!isEnvCreateRequest) // we should have a SIF3 Session
@@ -866,8 +874,8 @@ public abstract class BaseClient
 		EnvironmentInfo envInfo = getClientEnvMgr().getEnvironmentInfo();
 		if (retrieveToken) // We must get a token from that service
 		{
-			AbstractSecurityService securityService = BearerSecurityFactory.getSecurityService(getClientEnvMgr().getServiceProperties());
-			if (securityService != null)
+			AbstractSecurityService abstractSecurityService = securityService.getSecurityService(getClientEnvMgr().getServiceProperties());
+			if (abstractSecurityService != null)
 			{
     			TokenCoreInfo coreInfo = new TokenCoreInfo();
     			if (isEnvCreateRequest)
@@ -884,10 +892,10 @@ public abstract class BaseClient
     			}
     			
     			// Now call the security service and if successful update appropriate data
-    			TokenInfo newTokenInfo = securityService.createToken(coreInfo, envInfo.getPassword());
+    			TokenInfo newTokenInfo = abstractSecurityService.createToken(coreInfo, envInfo.getPassword());
     			if ((newTokenInfo != null) && StringUtils.notEmpty(newTokenInfo.getToken())) // we just got a valid token => save it in the sif3Session
     			{
-    				AuthenticationInfo authInfo = new AuthenticationInfo(envInfo.getAuthMethod(), newTokenInfo.getToken(), envInfo.getPassword(), newTokenInfo.getTokenExpiryDate());
+    				AuthenticationInfo authInfo = new AuthenticationInfo(securityService, newTokenInfo.getToken(), envInfo.getPassword(), newTokenInfo.getTokenExpiryDate());
     				if (!isEnvCreateRequest) // not initial request => Update session!
     				{
         				getSIF3Session().setSecurityToken(newTokenInfo.getToken());
@@ -918,11 +926,11 @@ public abstract class BaseClient
 		{
 		    if (tokenInfo != null)
 		    {
-                return new AuthenticationInfo(envInfo.getAuthMethod(), tokenInfo.getToken(), envInfo.getPassword(), tokenInfo.getTokenExpiryDate());
+                return new AuthenticationInfo(securityService, tokenInfo.getToken(), envInfo.getPassword(), tokenInfo.getTokenExpiryDate());
 		    }
 		    else // we get it from the session.
 		    {
-		        return new AuthenticationInfo(envInfo.getAuthMethod(), getSIF3Session().getSecurityToken(), envInfo.getPassword(), getSIF3Session().getSecurityTokenExpiry());
+		        return new AuthenticationInfo(securityService, getSIF3Session().getSecurityToken(), envInfo.getPassword(), getSIF3Session().getSecurityTokenExpiry());
 		    }
 		}
 	}

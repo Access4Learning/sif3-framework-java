@@ -2,7 +2,6 @@
 Release Notes for v0.11.0 of SIF3 Framework (MMM DD, 2017)
 ==============================================================
 
-
 Bug Fixes
 ---------
 - Fix pom.xml for sif3-common to ensure the latest jettison library is used rather than an old one
@@ -19,6 +18,8 @@ Changed Functionality
 ---------------------
 - Dependency on slf4j rather than hard-wired log4j. Please refer to notes in "3rd Party Library Update" section 
   further down.
+- Approach to link externals security services (i.e. OAuth) to the framework has changed slightly).
+  THIS WILL BREAK YOUR CODE if you use this functionality. See Infrastructure Upgrade section below for more details.
 
 Removed Artifacts/Functionality
 -------------------------------
@@ -44,10 +45,9 @@ provided you should be able to derive your script based on one of the provided o
 DB Upgrade Step 2
 -----------------
 Some new tables have been added to allow more flexible configuration when external security services need to be
-enabled (i.e. OAuth). This is a work in progress but the tables must already be created. For this run the database
-SQL script named Datafix20170330_<dbType>.sql in the <frameworkInstall>/DB/DDL/Datafix/current/v0.10.0-v0.11.0.
-If you use a database other than the ones that have an update script provided you should be able to derive your 
-script based on one of the provided one's.
+enabled (i.e. OAuth). For this run the database SQL script named Datafix20170330_<dbType>.sql in the 
+<frameworkInstall>/DB/DDL/Datafix/current/v0.10.0-v0.11.0. If you use a database other than the ones that have an 
+update script provided you should be able to derive your script based on one of the provided one's.
 
 Environment Template Upgrade
 ---------------------------- 
@@ -70,6 +70,35 @@ Use the latest maven dependency
    <version>0.11.0</version>
 </dependency>
 
+
+==========================================================================================================================
+External Security Services ONLY: Compilation Error due to new parameter in Constructor of AbstractSecurityService Class.
+--------------------------------------------------------------------------------------------------------------------------
+Due to an additional parameters in the constructor of the AbstractSecurityService class all classes that extend that class will
+report a compilation error. Please note only the additional parameter must be added to rectify the compile error. You wont't 
+need to change any other code.
+
+Name & Type of Parameter: Map<String, String> securityServiceParameters
+
+Add the above parameter to the constructor of your class that extends the AbstractSecurityService class. Your constructor
+signature will change from:
+
+  public YourSecurityClassName(AdvancedProperties properties)
+  {
+    ...
+  }
+
+to:
+
+  public YourSecurityClassName(AdvancedProperties properties, 
+                               Map<String, String> securityServiceParameters) // <== NOTE NEW PARAMETER
+  {
+    ...
+  }
+
+Due to the change how external Security Services are configured you will need to configure the SIF3_EXT_SECURITY_SERVICE
+table as listed in the developer's guide in section 5.10. Basically the property value called adapter.security.service in
+your adapter's property file will now be in the SIF3_EXT_SECURITY_SERVICE table in the column IMPLEMENTATION_CLASS.  
 
 ------------------------
 -- Data Model Upgrade --

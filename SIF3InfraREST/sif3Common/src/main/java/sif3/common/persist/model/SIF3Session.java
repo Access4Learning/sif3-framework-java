@@ -23,16 +23,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
+import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.header.HeaderValues.ServiceType;
-import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceInfo;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
-import au.com.systemic.framework.utils.StringUtils;
 
 /**
  * POJO to encapsulate SIF3 Session Information and configuration.
@@ -60,7 +60,7 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	
 	// The properties below are runtime properties. They are not read or maintained in the DB!
 	private transient SIFZone defaultZone             = null;
-	private transient AuthenticationMethod authenticationMethod = AuthenticationMethod.Basic;
+	private transient String authenticationMethod = AuthenticationType.Basic.name();
 	
 	// List of all services according to the ACL of this session.
     private transient ArrayList<ServiceInfo> services = new ArrayList<ServiceInfo>();
@@ -207,24 +207,14 @@ public class SIF3Session extends EnvironmentKey implements Serializable
     	this.lastAccessed = lastAccessed;
     }
 	
-    public AuthenticationMethod getAuthenticationMethod()
+    public String getAuthenticationMethod()
     {
         return authenticationMethod;
     }
 
-    /**
-     * Will default to BASIC if set to null.
-     * 
-     * @param authenticationMethod the authenticationMethod to set.
-     */
-    public void setAuthenticationMethod(AuthenticationMethod authenticationMethod)
-    {
-        this.authenticationMethod = (authenticationMethod == null) ? AuthenticationMethod.Basic : authenticationMethod;
-    }
-    
     public void setAuthenticationMethod(String authenticationMethod)
     {
-        this.authenticationMethod = StringUtils.isEmpty(authenticationMethod) ? AuthenticationMethod.Basic : AuthenticationMethod.valueOf(authenticationMethod);
+        this.authenticationMethod = StringUtils.isEmpty(authenticationMethod) ? AuthenticationType.Basic.name() : authenticationMethod;
     }
 	
 	/*---------------------------------------------------------------------------------------------------------------------------------------*/

@@ -25,7 +25,7 @@ import java.util.HashMap;
 import javax.ws.rs.core.MediaType;
 
 import sif3.common.CommonConstants.AdapterType;
-import sif3.common.model.AuthenticationInfo.AuthenticationMethod;
+import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.model.EnvironmentKey;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 
@@ -53,7 +53,7 @@ public class EnvironmentInfo implements Serializable
     private AdapterType adapterType         = null;
     private boolean checkACL                = true;
     private EnvironmentType environmentType = null;
-    private AuthenticationMethod authMethod = AuthenticationMethod.Basic;
+    private String authMethod = AuthenticationType.Basic.name();
     private boolean removeEnvOnShutdown = false;
     private String adapterName = null; ; // consumerName 
     private EnvironmentKey environmentKey = new EnvironmentKey();
@@ -197,28 +197,28 @@ public class EnvironmentInfo implements Serializable
 		this.checkACL = checkACL;
 	}
 
-    public AuthenticationMethod getAuthMethod()
+    public String getAuthMethod()
     {
     	return this.authMethod;
     }
 
-	public void setAuthMethod(AuthenticationMethod authMethod)
+	public void setAuthMethod(String authMethod)
     {
     	this.authMethod = authMethod;
     }
 
-	// authMethod: Valid values are what is listed in AuthenticationUtils.AuthenticationMethod (case sensitive!!!)
-	public void setAuthMethod(String authMethod)
-    {
-		try
-		{
-			this.authMethod = AuthenticationMethod.valueOf(authMethod);
-		}
-		catch (Exception ex)
-		{
-			this.authMethod = AuthenticationMethod.Basic;
-		}
-    }
+//	// authMethod: Valid values are what is listed in AuthenticationUtils.AuthenticationMethod (case sensitive!!!)
+//	public void setAuthMethod(String authMethod)
+//    {
+//		try
+//		{
+//			this.authMethod = AuthenticationMethod.valueOf(authMethod);
+//		}
+//		catch (Exception ex)
+//		{
+//			this.authMethod = AuthenticationMethod.Basic;
+//		}
+//    }
 
 	public MediaType getMediaType()
 	{

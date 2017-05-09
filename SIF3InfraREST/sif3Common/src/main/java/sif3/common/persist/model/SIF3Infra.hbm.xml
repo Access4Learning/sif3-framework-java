@@ -102,7 +102,7 @@
     <!-- ************************** -->
     <!-- SIF3_EXT_SECURITY_SERVICE  -->
     <!-- ************************** -->
-    <class name="sif3.common.persist.model.ExternalSecurityService" table="SIF3_EXT_SECURITY_SERVICE">
+    <class name="sif3.common.persist.model.ExternalSecurityService" table="SIF3_EXT_SECURITY_SERVICE" mutable="false">
         <id name="externalSecurityServiceID" type="long" column="EXT_SECURITY_SERVICE_ID">
             <generator class="assigned"/>
         </id>
@@ -122,7 +122,7 @@
     <!-- *********************** -->
     <!-- SIF3_SEC_SERVICE_PARAM  -->
     <!-- *********************** -->
-    <class name="sif3.common.persist.model.SecurityServiceParameter" table="SIF3_SEC_SERVICE_PARAM">
+    <class name="sif3.common.persist.model.SecurityServiceParameter" table="SIF3_SEC_SERVICE_PARAM" mutable="false">
         <id name="parameterID" type="long" column="SEC_SERVICE_PARAM_ID">
             <generator class="assigned"/>
         </id>
