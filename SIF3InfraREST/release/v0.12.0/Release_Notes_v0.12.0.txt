@@ -1,0 +1,78 @@
+==============================================================
+Release Notes for v0.12.0 of SIF3 Framework (MMM DD, 2017)
+==============================================================
+
+Bug Fixes
+---------
+None.
+
+New Functionality
+-----------------
+None.
+
+Changed Functionality
+---------------------
+- Changed how hibernate configuration is managed. See Infrastructure upgrade further down in this file.
+
+Removed Artifacts/Functionality
+-------------------------------
+- None
+
+--------------------------
+-- Upgrade Instructions --
+--------------------------
+
+----------------------------
+-- Infrastructure Upgrade --
+----------------------------
+This version has a slight change on how hibernate is used within the framework. Up to version v0.11.0 hibernate properties were
+provided via injection (see developer's guide section 5.13) or by adding hibernate settings in the sif3infra.hbm.cfg.xml file
+that had to be in a directory that had to be on the classpath.
+The way hibernate injection works has not changed. If injection is not used then from this version onward, hibernate properties 
+are set in the sif3infra.hibernate.properties file. This file has to be on your project's classpath similar as to the
+sif3infra.hbm.cfg.xml used to be. If you had any properties set in that file you need to copy them to a file called
+sif3infra.hibernate.properties. Instead of xml notation you need to change it to properties notation though. Also remember
+that all properties must start with a prefix of "hibernate".
+
+Example:
+--------
+sif3infra.hbm.cfg.xml:
+        <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
+        <property name="hibernate.c3p0.max_size">30</property>
+                
+sif3infra.hibernate.properties:
+        hibernate.connection.driver_class=com.mysql.jdbc.Driver
+        hibernate.c3p0.max_size=30
+
+etc.
+
+Once you have copied all properties from the sif3infra.hbm.cfg.xml to sif3infra.hibernate.properties you MUST delete the
+sif3infra.hbm.cfg.xml.
+
+Additional details on the hibernate configuration can be found in the developer's guide section 5.13.
+
+--------------------
+Upgrade your Project
+--------------------
+Once the above steps are done you can upgrade your project with the latest libraries of the framework as stated below:
+
+Ant:
+Drop the latest framework library into your project's lib directory/directories
+
+Maven:
+Use the latest maven dependency
+<dependency>
+   <groupId>sif3.framework</groupId>
+   <artifactId>sif3-infra-rest</artifactId>
+   <version>0.12.0</version>
+</dependency>
+
+------------------------
+-- Data Model Upgrade --
+------------------------
+None.
+
+------------------------------
+-- 3rd Party Library Update --
+------------------------------
+None.
