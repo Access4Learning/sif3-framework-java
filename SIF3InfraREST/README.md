@@ -160,6 +160,7 @@ project is upgraded properly to the new framework version.**
 ## Version from MMM DD, 2017: v0.12.0 - Various changes
 - Changes to the way hibernate properties are configured for the SIF3 Framework. The change ensured that projects that use hibernate
   do not have conflicts with the framework's hibernate settings.
+- Make TLS version a property in environment.properties.
 
 **Please refer to the detailed release notes in "release/v0.12.0" carefully to ensure that your project is upgraded properly to the 
 new framework version.**
