@@ -208,7 +208,8 @@ public class ClientConfigMgr
 
 			try
 			{
-				sslCtx = SSLContext.getInstance("SSL");
+//				sslCtx = SSLContext.getInstance("SSL");
+				sslCtx = SSLContext.getInstance(props.getPropertyAsString("env.tls.version", "SSL"));
 				sslCtx.init(keystoreMgr, truststoreMgr, null);
 			}
 			catch (GeneralSecurityException ex)
