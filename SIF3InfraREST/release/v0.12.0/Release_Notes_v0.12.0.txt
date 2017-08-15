@@ -8,7 +8,7 @@ None.
 
 New Functionality
 -----------------
-None.
+- Allow to configure the TLS version in the environment.properties file.
 
 Changed Functionality
 ---------------------
