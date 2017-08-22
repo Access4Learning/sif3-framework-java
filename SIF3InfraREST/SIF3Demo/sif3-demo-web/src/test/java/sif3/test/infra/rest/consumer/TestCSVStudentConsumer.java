@@ -33,10 +33,10 @@ import au.com.systemic.framework.utils.FileReaderWriter;
 public class TestCSVStudentConsumer
 {
 //	private final static String PATH = "/Users/crub/dev/nsip/Users/crub/dev/nsip/sif3-framework-java-dev";
-	private final static String PATH = "C:/DEV/eclipseWorkspace";
-//	private final static String PATH = "C:/Development/GitHubRepositories/SIF3InfraRest";
+	private final static String PATH = "C:/DEV/eclipseWorkspace/SIF3InfraREST";
+//	private final static String PATH = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST";
   
-	private final static String CSV_FILE_NAME = PATH + "/SIF3InfraREST/TestData/csv/input/CSVStudents.csv";
+	private final static String CSV_FILE_NAME = PATH + "/TestData/csv/input/CSVStudents.csv";
 	private static final String CONSUMER_ID = "StudentConsumer";
 	
 	private void printResponses(List<Response> responses, CSVStudentConsumer consumer)

@@ -54,10 +54,10 @@ public class TestStudentPersonalConsumer
 {
 //	private final static String PATH = "/Users/crub/dev/nsip/Users/crub/dev/nsip/sif3-framework-java-dev";
 //	private final static String PATH = "C:/DEV/lunaWorkspace";
-	private final static String PATH = "C:/Development/GitHubRepositories/SIF3InfraRest";
+	private final static String PATH = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST";
   
-	private final static String SINGLE_STUDENT_FILE_NAME = PATH + "/SIF3InfraREST/TestData/xml/input/StudentPersonal.xml";
-	private final static String MULTI_STUDENT_FILE_NAME = PATH + "/SIF3InfraREST/TestData/xml/input/StudentPersonals5.xml";
+	private final static String SINGLE_STUDENT_FILE_NAME = PATH + "/TestData/xml/input/StudentPersonal.xml";
+	private final static String MULTI_STUDENT_FILE_NAME = PATH + "/TestData/xml/input/StudentPersonals5.xml";
 //	private static final String CONSUMER_ID = "SecureStudentConsumer";
 	private static final String CONSUMER_ID = "StudentConsumer";
 //    private static final String CONSUMER_ID = "HITSStudentConsumer";
