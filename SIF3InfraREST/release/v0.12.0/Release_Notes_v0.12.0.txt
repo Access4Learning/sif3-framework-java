@@ -4,7 +4,7 @@ Release Notes for v0.12.0 of SIF3 Framework (MMM DD, 2017)
 
 Bug Fixes
 ---------
-None.
+- Fixed issue where Create Many in Object Service returned 201 instead of 200 as overal HTTP Status.
 
 New Functionality
 -----------------
