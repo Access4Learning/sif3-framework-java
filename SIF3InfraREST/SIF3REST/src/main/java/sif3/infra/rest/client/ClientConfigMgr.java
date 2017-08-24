@@ -208,8 +208,9 @@ public class ClientConfigMgr
 
 			try
 			{
-//				sslCtx = SSLContext.getInstance("SSL");
-				sslCtx = SSLContext.getInstance(props.getPropertyAsString("env.tls.version", "SSL"));
+			    String protocol = props.getPropertyAsString("env.tls.version", "SSL");
+			    logger.debug("HTTPS Protocol to use: "+ protocol);
+				sslCtx = SSLContext.getInstance(protocol);
 				sslCtx.init(keystoreMgr, truststoreMgr, null);
 			}
 			catch (GeneralSecurityException ex)
