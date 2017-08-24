@@ -972,7 +972,8 @@ public class DataModelResource extends BaseResource
     			
     			if (statusList != null)
     			{
-    				return makeCreateMultipleResponse(statusList, Status.CREATED, responseParam);
+//    				return makeCreateMultipleResponse(statusList, Status.CREATED, responseParam);
+                    return makeCreateMultipleResponse(statusList, Status.OK, responseParam);
     			}
     			else
     			{
