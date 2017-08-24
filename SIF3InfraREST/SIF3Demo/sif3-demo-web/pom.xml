@@ -8,7 +8,7 @@
 	<groupId>sif3.framework</groupId>
 	<artifactId>sif3-demo-web</artifactId>
 	<packaging>war</packaging>
-	<version>0.11.0-Demo</version>
+	<version>0.12.0-Demo</version>
 	<name>SIF3 Demo Provider</name>
 	
 	<!-- =============================== -->
@@ -41,7 +41,7 @@
 		<dependency>
 			<groupId>sif3.framework</groupId>
 			<artifactId>sif3-infra-rest</artifactId>
-			<version>0.11.0-beta</version>
+			<version>0.12.0-beta</version>
 		</dependency>
 
 		<!-- ====================== -->

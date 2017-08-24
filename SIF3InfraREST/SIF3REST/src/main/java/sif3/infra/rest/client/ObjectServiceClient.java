@@ -600,7 +600,8 @@ public class ObjectServiceClient extends BaseClient
 	{
 		BulkOperationResponse<CreateOperationStatus> response = new BulkOperationResponse<CreateOperationStatus>();
 		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, true, requestType, service.getURI().toString());
-		if ((clientResponse.getStatusInfo().getStatusCode() == Status.CREATED.getStatusCode()) || 
+		if ((clientResponse.getStatusInfo().getStatusCode() == Status.OK.getStatusCode()) || 
+            (clientResponse.getStatusInfo().getStatusCode() == Status.CREATED.getStatusCode()) ||
 			(clientResponse.getStatusInfo().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
 			(clientResponse.getStatusInfo().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
 		{
@@ -610,37 +611,6 @@ public class ObjectServiceClient extends BaseClient
 				MultiOperationStatusList<CreateOperationStatus> statusList = getInfraMapper().toStatusListFromSIFCreateString(payload, getResponseMediaType());
 				response.setError(statusList.getError());
 				response.setOperationStatuses(statusList.getOperationStatuses());
-
-//				try
-//				{						
-//					//Because CreateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-//					CreateResponseType createManyResponse = (CreateResponseType)getInfraUnmarshaller().unmarshal(payload, CreateResponseType.class, getResponseMediaType());
-//					if (createManyResponse == null)// this is strange. So set the unmarshalled value.
-//					{
-//						response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));							
-//					}
-//					else
-//					{
-//						response.setOperationStatuses(new ArrayList<CreateOperationStatus>());
-//						for (CreateType createStatus : createManyResponse.getCreates().getCreate())
-//						{
-//							CreateOperationStatus opStatus = new CreateOperationStatus();
-//							opStatus.setResourceID(createStatus.getId());
-//							opStatus.setAdvisoryID(createStatus.getAdvisoryId());
-//							opStatus.setStatus(toInt(createStatus.getStatusCode()));
-//							opStatus.setError(convertFromErrorType(createStatus.getError()));
-//							response.getOperationStatuses().add(opStatus);
-//						}
-//					}
-//				}
-//				catch (UnmarshalException ex)
-//				{
-//					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
-//				}
-//				catch (UnsupportedMediaTypeExcpetion ex)
-//				{
-//					response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
-//				}
 			}			
 		}
 		else// We are dealing with an error case.
@@ -670,35 +640,6 @@ public class ObjectServiceClient extends BaseClient
 				response.setError(statusList.getError());
 				response.setOperationStatuses(statusList.getOperationStatuses());
 				
-//				try
-//				{						
-//					//Because DeleteResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-//					DeleteResponseType deleteManyResponse = (DeleteResponseType)getInfraUnmarshaller().unmarshal(payload, DeleteResponseType.class, getResponseMediaType());
-//					if (deleteManyResponse == null)// this is strange. So set the unmarshalled value.
-//					{
-//						response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));							
-//					}
-//					else
-//					{
-//						response.setOperationStatuses(new ArrayList<OperationStatus>());
-//						for (DeleteStatus deleteStatus : deleteManyResponse.getDeletes().getDelete())
-//						{
-//							OperationStatus opStatus = new OperationStatus();
-//							opStatus.setResourceID(deleteStatus.getId());
-//							opStatus.setStatus(toInt(deleteStatus.getStatusCode()));
-//							opStatus.setError(convertFromErrorType(deleteStatus.getError()));
-//							response.getOperationStatuses().add(opStatus);
-//						}
-//					}
-//				}
-//				catch (UnmarshalException ex)
-//				{
-//					response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload: "+ex.getMessage()+". See error description for payload details.", payload));
-//				}
-//				catch (UnsupportedMediaTypeExcpetion ex)
-//				{
-//					response.setError(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal payload (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload));
-//				}
 			}			
 		}
 		else// We are dealing with an error case.
@@ -792,37 +733,4 @@ public class ObjectServiceClient extends BaseClient
         
         return hdrProperties;
     }
-    
-//    /*
-//     * Caller MUST ensure that the requestHdrProperties are not null. They really shouldn't since this class is only called
-//     * by the AbstractConsumer which must set a few header properties anyway.
-//     */
-//    private boolean isDelayedRequest(HeaderProperties requestHdrProperties)
-//    {
-//        String requestType = requestHdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE);
-//    
-//        if (requestType != null)
-//        {
-//            return HeaderValues.RequestType.valueOf(requestType) == RequestType.DELAYED;
-//        }
-//
-//        // Nothing found => Assume IMMEDIATE    
-//        return false;
-//    }
-//    
-//    /*
-//     * Caller MUST ensure that the requestHdrProperties are not null. They really shouldn't since this class is only called
-//     * by the AbstractConsumer which must set a few header properties anyway.
-//     */
-//    private ServiceType getServiceTypeFromRequestHeaders(HeaderProperties requestHdrProperties)
-//    {
-//        String serviceType = requestHdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_SERVICE_NAME);
-//        
-//        if (serviceType != null)
-//        {
-//            return HeaderValues.ServiceType.valueOf(serviceType);
-//        }
-//        
-//        return null;
-//    }
 }
