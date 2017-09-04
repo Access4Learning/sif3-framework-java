@@ -157,7 +157,7 @@ Please refer to the release notes in the directory "release/v0.10.0" for additio
 **NOTE: There are database changes! You must read the detailed release notes in "release/v0.11.0" carefully to ensure that your 
 project is upgraded properly to the new framework version.**
 
-## Version from MMM DD, 2017: v0.12.0 - Various changes
+## Version from Sep 05, 2017: v0.12.0 - Various changes
 - Changes to the way hibernate properties are configured for the SIF3 Framework. The change ensured that projects that use hibernate
   do not have conflicts with the framework's hibernate settings.
 - Make TLS version a property in environment.properties.
