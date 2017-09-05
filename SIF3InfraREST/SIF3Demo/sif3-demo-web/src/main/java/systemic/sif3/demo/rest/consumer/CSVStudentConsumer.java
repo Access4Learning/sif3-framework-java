@@ -181,10 +181,15 @@ public class CSVStudentConsumer extends AbstractEventConsumer<String>
      * @see sif3.infra.rest.consumer.AbstractEventConsumer#processEvent(sif3.common.model.SIFEvent, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.EventMetadata, java.lang.String, java.lang.String)
      */
     @Override
-    public void processEvent(SIFEvent<String> sifEvent, SIFZone zone, SIFContext context, EventMetadata metadata, String msgReadID, String consumerID)
+//  public void processEvent(SIFEvent<L> sifEvent, SIFZone zone, SIFContext context, EventMetadata metadata, String msgReadID, String consumerID)
+    public void processEvent(SIFEvent<String> sifEvent, EventMetadata metadata, String msgReadID, String consumerID)
     {
     	// We know from the framework that zone and context is never null. For the time being we just log the event.
         String timestamp = DateUtils.getISO8601withSecFraction(new Date());
+        SIFZone zone = sifEvent.getLimitToZoneCtxList().get(0).getZone();
+        SIFContext context = sifEvent.getLimitToZoneCtxList().get(0).getContext();
+        
         logger.debug(RECORD_MARKER+"Record processed by Thread ID = "+Thread.currentThread().getId()+"\n"+sifEvent.getEventAction().name()+" Events from Queue Reader "+ msgReadID+"\nReceived at "+timestamp+" from Zone = "+zone.getId()+" and Context = "+context.getId()+"\nData:\n"+sifEvent.getSIFObjectList()+RECORD_MARKER);    	
     }
+
 }

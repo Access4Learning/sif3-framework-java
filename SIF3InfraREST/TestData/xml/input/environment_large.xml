@@ -11,7 +11,7 @@
   <applicationInfo>
     <applicationKey>AUDemoAppKey</applicationKey>
     <supportedInfrastructureVersion>3.0</supportedInfrastructureVersion>
-    <dataModelNamespace>http://www.SIFinfo.org/au/datamodel/1.3</dataModelNamespace>
+    <dataModelNamespace>http://www.SIFinfo.org/datamodel/au/3.4</dataModelNamespace>
     <transport>REST</transport>
     <applicationProduct>
       <vendorName>NSIP EDU (JŒRG)</vendorName>

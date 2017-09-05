@@ -151,7 +151,7 @@ public class EventClient extends BaseClient
 				HeaderProperties headerProps = getEventHeaders(event.getEventAction(),	event.getUpdateType(), event.getFingerprint(), zone, context, customHdrFields);
 				
 				Builder builder = setRequestHeaderAndMediaTypes(service, headerProps, false, false, true);
-				logger.debug("Send Event with payload size: "+payloadStr.length());
+				logger.debug("Send "+serviceName+" Event with payload size: "+payloadStr.length()+" to Zone = "+((zone == null) ? "default" : zone.getId())+" and Context = "+((context == null) ? "DEFAULT" : context.getId()));
 				ClientResponse response = builder.post(ClientResponse.class, payloadStr);
 				logger.debug("Receive Event Response Status: "+response.getStatus());
 	

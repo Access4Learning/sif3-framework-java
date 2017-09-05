@@ -35,6 +35,7 @@ import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceInfo;
 import sif3.common.model.ServiceRights.AccessRight;
 import sif3.common.model.ServiceRights.AccessType;
+import sif3.common.model.ZoneContextInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.BaseResponse;
 import sif3.infra.common.env.mgr.BrokeredProviderEnvironmentManager;
@@ -200,7 +201,8 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 		try
 		{
 			// Let's get the Event Client
-			EventClient evtClient = new EventClient(getEnvironmentManager(), getRequestMediaType(), getResponseMediaType(), getServiceName(), getMarshaller(), getCompressionEnabled());
+		    String serviceName = getServiceName();
+			EventClient evtClient = new EventClient(getEnvironmentManager(), getRequestMediaType(), getResponseMediaType(), serviceName, getMarshaller(), getCompressionEnabled());
 			SIFEventIterator<L> iterator = getSIFEvents();
 			if (iterator != null)
 			{
@@ -210,39 +212,45 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 					try
 					{
 						sifEvents = iterator.getNextEvents(maxNumObjPerEvent);
-						// This should not return null since the hasNext() returned true, but just in case we check
-						// and exit the loop if it should return null. In this case we assume that there is no more
-						// data. We also log an error to make the coder aware of the issue.
+						// This should not return null since the hasNext() returned true, but just in case we check and exit the loop if it should return null. 
+						// In this case we assume that there is no more data. We also log an error to make the coder aware of the issue.
 						if (sifEvents != null)
 						{
-							logger.debug("Number of "+getMultiObjectClassInfo().getObjectName()+" Objects in this Event: " + sifEvents.getListSize());
-							for (ServiceInfo service : servicesForProvider)
+							logger.debug("Number of "+serviceName+" Objects in this Event: " + sifEvents.getListSize());
+							
+                            // keep event action. Just in case the developer changes it in modifyBeforePublishing() which would confuse everything.
+                            EventAction eventAction = sifEvents.getEventAction();
+                            
+                            // Do we need to sent to all services or to a limited list of zone & context?
+							if ((sifEvents.getLimitToZoneCtxList() == null) || (sifEvents.getLimitToZoneCtxList().size() == 0))
 							{
-								// keep event action. Just in case the developer changes it in modifyBeforePublishing() which would confuse
-								// everything.
-								EventAction eventAction = sifEvents.getEventAction();
-								if (hasAccess(service))
-								{
-									HeaderProperties customHTTPHeaders = new HeaderProperties();
-									SIFEvent<L> modifiedEvents = modifyBeforePublishing(sifEvents, service.getZone(), service.getContext(), customHTTPHeaders);
-									if (modifiedEvents != null)
-									{
-										//Just in case the developer has changed it. Should not be allowed :-)
-										modifiedEvents.setEventAction(eventAction);
-										
-										if (!sendEvents(evtClient, modifiedEvents, service.getZone(), service.getContext(), customHTTPHeaders))
-										{
-											//Report back to the caller. This should also give the event back to the caller.
-											onEventError(modifiedEvents, service.getZone(), service.getContext());
-											failedRecords = failedRecords + ((modifiedEvents != null) ? modifiedEvents.getListSize() : 0);
-										}
-									}
-								}
-								else
-								{
-									logger.debug("The "+getProviderName()+" does not have the PROVIDE = APPROVED. No events are sent.");
-									failedRecords = failedRecords + ((sifEvents != null) ? sifEvents.getListSize() : 0);
-								}
+	                            for (ServiceInfo service : servicesForProvider)
+	                            {
+	                                // Check if provider has rights to publish to given zone and context
+	                                if (hasAccess(service))
+	                                {
+	                                    failedRecords = failedRecords + prepareEventAndSend(evtClient, sifEvents, service.getZone(), service.getContext(), eventAction);
+	                                }
+	                                else
+	                                {
+                                        logNoAccessRight(service.getZone(), service.getContext());
+	                                }
+	                            }							    
+							}
+							else // only sent to limited list
+							{
+							    for (ZoneContextInfo zoneCtxInfo : sifEvents.getLimitToZoneCtxList())
+							    {
+							        // Check if provider has rights to publish to given zone and context
+							        if (sif3Session.hasAccess(AccessRight.PROVIDE, AccessType.APPROVED, serviceName, zoneCtxInfo.getZone(), zoneCtxInfo.getContext()))
+						            {
+                                        failedRecords = failedRecords + prepareEventAndSend(evtClient, sifEvents, zoneCtxInfo.getZone(), zoneCtxInfo.getContext(), eventAction);							            
+						            }
+							        else
+                                    {
+                                        logNoAccessRight(zoneCtxInfo.getZone(), zoneCtxInfo.getContext());
+                                    }
+							    }
 							}
 							
 				            totalRecords = totalRecords + sifEvents.getListSize();
@@ -275,6 +283,41 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
     	logger.debug("================================ Finished broadcastEvents() for provider "+getPrettyName());
     }
 
+    /*
+     * Return the number of failed records. If 0 is return all then the event with its content is sent successfully.
+     */
+    protected int prepareEventAndSend(EventClient evtClient, SIFEvent<L> sifEvents, SIFZone zone, SIFContext context, EventAction eventAction)
+    {
+        int failedRecords = 0;
+        
+        HeaderProperties customHTTPHeaders = new HeaderProperties();
+        SIFEvent<L> modifiedEvents = modifyBeforePublishing(sifEvents, zone, context, customHTTPHeaders);
+        if (modifiedEvents != null)
+        {
+            //Just in case the developer has changed it. Should not be allowed :-)
+            modifiedEvents.setEventAction(eventAction);
+            
+            if (!sendEvents(evtClient, modifiedEvents, zone, context, customHTTPHeaders))
+            {
+                //Report back to the caller. This should also give the event back to the caller.
+                onEventError(modifiedEvents, zone, context);
+                failedRecords = ((modifiedEvents != null) ? modifiedEvents.getListSize() : 0);
+            }
+        }
+        
+        return failedRecords;
+    }
+    
+    private void logNoAccessRight(SIFZone zone, SIFContext context)
+    {
+        String zoneID = (zone == null) ? "Default" : zone.getId();
+        String contextID = (context == null) ? CommonConstants.DEFAULT_CONTEXT_NAME : context.getId();
+        
+        logger.debug("The "+getProviderName()+" does not have the ACL entry PROVIDE = APPROVED for service = " + getServiceName() + " for the Zone = "+ zoneID + " and the Context = " + contextID + ". Events are NOT sent to this zone and context.");
+//        return ((sifEvents != null) ? sifEvents.getListSize() : 0);
+    }
+    
+    
     /**
      * If one doesn't want certain events to be published to a given zone then this method needs to be 
      * overridden. It allows to test for the event and zone and make the appropriate decision if the event
