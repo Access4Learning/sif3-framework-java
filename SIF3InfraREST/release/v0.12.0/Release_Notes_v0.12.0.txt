@@ -1,5 +1,5 @@
 ==============================================================
-Release Notes for v0.12.0 of SIF3 Framework (MMM DD, 2017)
+Release Notes for v0.12.0 of SIF3 Framework (Sep 05, 2017)
 ==============================================================
 
 Bug Fixes
@@ -13,6 +13,9 @@ New Functionality
 Changed Functionality
 ---------------------
 - Changed how hibernate configuration is managed. See Infrastructure upgrade further down in this file.
+- SIFEvent<L> Class has now a property to hold the Zone and Context for the event. This will caused 
+  compilation errors if you are using Events Functionality. See upgrade instructions below on how
+  to fix these compilation errors.
 
 Removed Artifacts/Functionality
 -------------------------------
@@ -66,6 +69,14 @@ Use the latest maven dependency
    <artifactId>sif3-infra-rest</artifactId>
    <version>0.12.0</version>
 </dependency>
+
+Due to changes to the SIFEvent<L> class and related interfaces you will get a compilation error if you have implemented
+any consumers that extend the AbstarctEventConsumer. The abstract method "processEvent" no longer has the SIFZone and SIFContext
+parameter. You need to remove them from the signature of this method in your consumer implementation. If you need access to 
+the zone and context then it can be retrieved from the SIFEvent<L> parameter of this method:
+   Example to get the Zone: sifEvent.getLimitToZoneCtxList().get(0).getZone()
+   Example to get the Zone: sifEvent.getLimitToZoneCtxList().get(0).getContext()
+Please refer to javadoc of this AbstarctEventConsumer class for more details.
 
 ------------------------
 -- Data Model Upgrade --

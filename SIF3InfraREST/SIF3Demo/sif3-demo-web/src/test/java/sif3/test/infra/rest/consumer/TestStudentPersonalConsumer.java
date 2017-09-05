@@ -170,8 +170,8 @@ public class TestStudentPersonalConsumer
 		StudentPersonalCollectionType students = getStudents((DataModelUnmarshalFactory)consumer.getUnmarshaller());
 		try
 		{
-//            List<BulkOperationResponse<CreateOperationStatus>> responses = consumer.createMany(students, null, RequestType.IMMEDIATE);
-			List<BulkOperationResponse<CreateOperationStatus>> responses = consumer.createMany(students, null, RequestType.DELAYED);
+            List<BulkOperationResponse<CreateOperationStatus>> responses = consumer.createMany(students, null, RequestType.IMMEDIATE);
+//			List<BulkOperationResponse<CreateOperationStatus>> responses = consumer.createMany(students, null, RequestType.DELAYED);
 			if (responses != null)
 			{
 				int i = 1;

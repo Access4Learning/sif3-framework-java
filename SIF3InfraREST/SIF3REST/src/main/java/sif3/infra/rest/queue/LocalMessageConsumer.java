@@ -17,6 +17,9 @@
 */
 package sif3.infra.rest.queue;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
@@ -32,6 +35,7 @@ import sif3.common.interfaces.EventConsumer;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.SIFEvent;
+import sif3.common.model.ZoneContextInfo;
 import sif3.common.model.delayed.DelayedResponseReceipt;
 import sif3.common.ws.ErrorDetails;
 import sif3.infra.rest.mapper.InfraDataModelMapper;
@@ -146,9 +150,14 @@ public class LocalMessageConsumer implements Runnable
             SIFEvent event = eventConsumer.createEventObject(eventPayload, eventInfo.getEventAction(), eventInfo.getUpdateType());
             event.setMetadata(eventInfo.getMetadata());
             event.setFingerprint(eventInfo.getFingerprint());
+            
+            List<ZoneContextInfo> limitToZoneCtxList = new ArrayList<ZoneContextInfo>();
+            limitToZoneCtxList.add(new ZoneContextInfo(eventInfo.getZone(), eventInfo.getContext()));
+            event.setLimitToZoneCtxList(limitToZoneCtxList);
 
             // Send event to actual event consumer.
-            eventConsumer.onEvent(event, eventInfo.getZone(), eventInfo.getContext(), eventInfo.getEventMetadata(), eventInfo.getMessageQueueReaderID(), consumerID);
+//            eventConsumer.onEvent(event, eventInfo.getZone(), eventInfo.getContext(), eventInfo.getEventMetadata(), eventInfo.getMessageQueueReaderID(), consumerID);
+            eventConsumer.onEvent(event, eventInfo.getEventMetadata(), eventInfo.getMessageQueueReaderID(), consumerID);
         }
 	}
 

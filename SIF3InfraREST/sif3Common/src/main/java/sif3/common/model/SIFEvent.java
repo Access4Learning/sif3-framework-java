@@ -20,6 +20,7 @@ package sif3.common.model;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.UpdateType;
@@ -29,7 +30,16 @@ import sif3.common.header.HeaderValues.UpdateType;
  * It is expected that the object type this event class deals with is a list of objects a defined in the applicable data model specification.
  * To keep this class data model independent it is not possible to generically enforce how a "list of objects" is represented in the POJOs
  * of the data model and therefore it is necessary to pass on the size of the object list the event deals with as a parameter/property to 
- * this class.
+ * this class.<br/><br/>
+ * 
+ * This class also has a property called limitToZoneCtxList. This property is managed in two ways depending if the adapter is a consumer or 
+ * a provider.<br/> 
+ * <b>PROVIDER</b><br/> 
+ * If this List is null or empty then it is assumed that the events are published to all zone and/or context the provider has appropriate 
+ * access rights to as per its environment. If this list has any entries then events are published to the zone & contexts listed only.<br/> 
+ * <b>CONSUMER<b><br/>
+ * This property will be set by the framework and will only hold one single entry. The entry holds the zone and context from where the 
+ * event has been received.
  * 
  * @author Joerg Huber
  */
@@ -43,11 +53,12 @@ public class SIFEvent<L> implements Serializable
 	private UpdateType updateType;
 	private String fingerprint;
     private HashMap<String, String> metadata = new HashMap<String, String>();
+    private List<ZoneContextInfo> limitToZoneCtxList = null;
 
-	public SIFEvent()
-	{
-		this(null, null, null, 0);
-	}
+    public SIFEvent()
+    {
+        this(null, null, null, 0, null);
+    }
 
 	/**
 	 * Constructor 
@@ -59,15 +70,42 @@ public class SIFEvent<L> implements Serializable
 	 * @param listSize Since this class is independent from the data model it cannot automatically determine how many objects are in the
 	 *                 sifObjectList. The sifObjectList could be any data structure. To indicate the number of object in the sifObjectList
 	 *                 this field must be set.
+     * @param limitToZoneCtxList This property is managed in two ways depending if the adapter is a consumer or provider.<br/> 
+     *                           PROVIDER:<br/> 
+     *                           If this List is null or empty then it is assumed that the events are published to all zone and/or context
+     *                           the provider has appropriate access rights to as per its environment. If this list has any entries then
+     *                           events are published to the zone & contexts listed only.<br/> 
+     *                           CONSUMER:<br/>
+     *                           This property will be set by the framework and will only hold one single entry. The entry holds the zone and
+     *                           context from where the event has been received.
 	 */
-	public SIFEvent(L sifObjectList, EventAction eventAction, UpdateType updateType, int listSize)
+    public SIFEvent(L sifObjectList, EventAction eventAction, UpdateType updateType, int listSize, List<ZoneContextInfo> limitToZoneCtxList)
 	{
 		super();
 		setSIFObjectList(sifObjectList);
 		setEventAction(eventAction);
 		setListSize(listSize);
 		setUpdateType(updateType);
+		setLimitToZoneCtxList(limitToZoneCtxList);
 	}
+    
+    /**
+     * As above but the limitToZoneCtxList is defaulted to null.
+     * 
+     * @param sifObjectList A list style object that encapsulates the list of objects to pack into an event.
+     * @param eventAction The event action for this event. Note that all object in the sifObjectList will be published with this event action.
+     * @param updateType If the event action is UPDATE then this update type is required to indicate if the data in the sifObjectList are 
+     *                   partial updates (only updated fields are provided in the event) or are full updates (all known fields to that provider
+     *                   for the objects are provided).
+     * @param listSize Since this class is independent from the data model it cannot automatically determine how many objects are in the
+     *                 sifObjectList. The sifObjectList could be any data structure. To indicate the number of object in the sifObjectList
+     *                 this field must be set.
+     */
+    public SIFEvent(L sifObjectList, EventAction eventAction, UpdateType updateType, int listSize)
+    {
+        this(sifObjectList, eventAction, updateType, listSize, null);
+    }
+
 
 	public L getSIFObjectList()
     {
@@ -157,13 +195,39 @@ public class SIFEvent<L> implements Serializable
 	{
 		getMetadata().put(name, value);
 	}
+	
+    public List<ZoneContextInfo> getLimitToZoneCtxList()
+    {
+        return limitToZoneCtxList;
+    }
+
+    /**
+     * If  the events shall only be sent to a given zone and context list then this list can be defined here. The internal publishing method
+     * will get this list and will attempt to send the events to the zone and context defined in this list only. If this list is null or empty
+     * then the internal publishing method will attempt to send the events to all zones and context the provider has publish rights to. This
+     * is based on the environment of the provider. 
+     * 
+     * @param limitToZoneCtxList This property is managed in two ways depending if the adapter is a consumer or provider.<br/> 
+     *                           PROVIDER:<br/> 
+     *                           If this List is null or empty then it is assumed that the events are published to all zone and/or context
+     *                           the provider has appropriate access rights to as per its environment. If this list has any entries then
+     *                           events are published to the zone & contexts listed only.<br/> 
+     *                           CONSUMER:<br/>
+     *                           This property will be set by the framework and will only hold one single entry. The entry holds the zone and
+     *                           context from where the event has been received.
+     */
+    public void setLimitToZoneCtxList(List<ZoneContextInfo> limitToZoneCtxList)
+    {
+        this.limitToZoneCtxList = limitToZoneCtxList;
+    }
 
 	@Override
     public String toString()
     {
         return "SIFEvent [sifObjectList=" + sifObjectList + ", eventAction=" + eventAction
                 + ", listSize=" + listSize + ", updateType=" + updateType + ", fingerprint="
-                + fingerprint + ", metadata=" + metadata + "]";
+                + fingerprint + ", metadata=" + metadata + ", limitToZoneCtxList="
+                + limitToZoneCtxList + "]";
     }
 
 

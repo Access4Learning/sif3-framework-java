@@ -85,12 +85,17 @@ public abstract class AUDataModelEventConsumer<L> extends AbstractEventConsumer<
      * @see sif3.common.interfaces.EventConsumer#onEvent(sif3.common.model.SIFEvent, sif3.common.model.SIFZone, sif3.common.model.SIFContext, java.lang.String)
      */
     @Override
-    public void processEvent(SIFEvent<L> sifEvent, SIFZone zone, SIFContext context, EventMetadata metadata, String msgReadID, String consumerID)
+//    public void processEvent(SIFEvent<L> sifEvent, SIFZone zone, SIFContext context, EventMetadata metadata, String msgReadID, String consumerID)
+    public void processEvent(SIFEvent<L> sifEvent, EventMetadata metadata, String msgReadID, String consumerID)
     {
     	String consumerName = getPrettyName()+"(QueueID:"+msgReadID+"; ConsumerID: "+consumerID+")";
     	
     	// We know from the framework that zone and context is never null. For the time being we just log the event.
-    	logger.debug(consumerName +" received an event from Zone = "+zone.getId()+", Context = "+context.getId()+" and Event Metadata = "+metadata);
+    	SIFZone zone = sifEvent.getLimitToZoneCtxList().get(0).getZone();
+    	SIFContext context = sifEvent.getLimitToZoneCtxList().get(0).getContext();
+    	
+//    	logger.debug(consumerName +" received an event from Zone = "+zone.getId()+", Context = "+context.getId()+" and Event Metadata = "+metadata);
+        logger.debug(consumerName +" received an event from Zone = "+zone+", Context = "+context+" and Event Metadata = "+metadata);
     	dumpObject(sifEvent, zone, context, msgReadID, consumerID);
     	
     	// Pretend to be busy for a long time to test threading
