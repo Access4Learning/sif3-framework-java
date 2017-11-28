@@ -185,7 +185,6 @@ public class SIF3Session extends EnvironmentKey implements Serializable
     {
 		this.queueStrategy = StringUtils.isEmpty(queueStrategy) ? CommonConstants.QueueStrategy.ADAPTER_LEVEL.name() : queueStrategy;
     }
-
 	
 	public Date getCreated()
     {
