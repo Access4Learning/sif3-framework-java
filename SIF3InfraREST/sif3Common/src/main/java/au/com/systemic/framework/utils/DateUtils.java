@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * @author Joerg Huber
@@ -67,12 +68,6 @@ public class DateUtils
   public static final SimpleDateFormat DISP_TIME_SEC            = new SimpleDateFormat("HH:mm:ss");
   public static final SimpleDateFormat DISP_TIME_NO_SEC         = new SimpleDateFormat("HH:mm");
   
-  /*
-   * ISO Standards
-   */
-  public static final SimpleDateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-  public static final SimpleDateFormat ISO_8601_SECFRACT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-
   public static final String DATE_FORMAT_dd_SLASH_mm_SLASH_yyyy = "dd/MM/yyyy";
   public static final String DATE_FORMAT_dd_DOT_mm_DOT_yyyy = "dd.MM.yyyy";
   public static final String DATE_FORMAT_mm_SLAST_dd_SLASH_yyyy = "MM/dd/yyyy";
@@ -81,6 +76,21 @@ public class DateUtils
   public static final String DATE_FORMAT_yyyy_mm_dd = "yyyy-MM-dd";
   public static final String DATE_FORMAT_yyyy_mm_dd_HH_mm = "yyyy-MM-dd HH:mm";
 
+  /*
+   * ISO Standards
+   */
+  public static final SimpleDateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+  public static final SimpleDateFormat ISO_8601_SECFRACT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+  
+  public static final String ZULU_TIMEZONE = "Z";
+
+  // Ensure that the ISO 8601 Formats use GMT/Zulu timezone!
+  static 
+  {
+      ISO_8601.setTimeZone(TimeZone.getTimeZone(ZULU_TIMEZONE));
+      ISO_8601_SECFRACT.setTimeZone(TimeZone.getTimeZone(ZULU_TIMEZONE));
+  }
+  
   /**
    * Transforms the given string into a date. The string must follow the
    * format as presented by the given format parameter. If the string has another

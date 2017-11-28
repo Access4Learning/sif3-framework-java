@@ -18,6 +18,10 @@
 
 package systemic.framework.utils.test;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
 import au.com.systemic.framework.utils.DateUtils;
 
 /**
@@ -26,6 +30,9 @@ import au.com.systemic.framework.utils.DateUtils;
  */
 public class TestDateUtils
 {
+    private static TimeZone gmt = TimeZone.getTimeZone("GMT");
+    private static TimeZone local = TimeZone.getDefault();
+    
 	private static void delay(long millisec)
 	{
 		try 
@@ -38,9 +45,25 @@ public class TestDateUtils
 		}		
 	}
 	
+	private static void timeZoneTest()
+	{
+	    Date now = new Date();
+	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+	    
+	    String localTime = sdf.format(now);
+	    
+	    sdf.setTimeZone(gmt);
+	    String gmtTime = sdf.format(now);
+	    
+	    System.out.println("Local Time = "+localTime+";  GMT Time = "+gmtTime);
+	}
+	
 	public static void main(String[] args)
 	{
-		System.out.println("Current Date & Time in ISO 8601: " + DateUtils.nowAsISO8601());
+        System.out.println("Local Time Zone: " + local);
+        System.out.println("GMT Time Zone: " + gmt);
+	    
+	    System.out.println("Current Date & Time in ISO 8601: " + DateUtils.nowAsISO8601());
 		System.out.println("Current Date & Time in ISO 8601 with Sec Fractions: " + DateUtils.nowAsISO8601withSecFraction());
 		delay(120);
 		System.out.println("Current Date & Time in ISO 8601 with Sec Fractions: " + DateUtils.nowAsISO8601withSecFraction());
@@ -54,5 +77,7 @@ public class TestDateUtils
 		System.out.println("Current Date & Time in ISO 8601 with Sec Fractions: " + DateUtils.nowAsISO8601withSecFraction());
 		delay(200);
 		System.out.println("Current Date & Time in ISO 8601 with Sec Fractions: " + DateUtils.nowAsISO8601withSecFraction());
+		
+		timeZoneTest();
 	}
 }
