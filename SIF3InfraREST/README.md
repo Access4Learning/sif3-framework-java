@@ -25,7 +25,7 @@ Project (note that the version number will change over time):
 <dependency>
    <groupId>sif3.framework</groupId>
    <artifactId>sif3-infra-rest</artifactId>
-   <version>0.12.0</version>
+   <version>0.13.0</version>
 </dependency>
 ```
 
@@ -163,6 +163,12 @@ project is upgraded properly to the new framework version.**
 - Make TLS version a property in environment.properties.
 
 **Please refer to the detailed release notes in "release/v0.12.0" carefully to ensure that your project is upgraded properly to the 
+new framework version.**
+
+## Version from MMM DD, 2017: v0.13.0 - Various changes
+- Fixed an issue with the DatuUtils class where ISO 8601 Dates didn't convert correctly to Zulu (GMT) Date and Time.
+
+**Please refer to the detailed release notes in "release/v0.13.0" carefully to ensure that your project is upgraded properly to the 
 new framework version.**
 
 # Download Instructions
