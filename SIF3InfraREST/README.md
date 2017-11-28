@@ -166,7 +166,7 @@ project is upgraded properly to the new framework version.**
 new framework version.**
 
 ## Version from MMM DD, 2017: v0.13.0 - Various changes
-- TBD
+- Fixed an issue with the DatuUtils class where ISO 8601 Dates didn't convert correctly to Zulu (GMT) Date and Time.
 
 **Please refer to the detailed release notes in "release/v0.13.0" carefully to ensure that your project is upgraded properly to the 
 new framework version.**

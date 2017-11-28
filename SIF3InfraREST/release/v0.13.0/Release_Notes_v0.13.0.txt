@@ -4,7 +4,7 @@ Release Notes for v0.13.0 of SIF3 Framework (MMM DD, 2017)
 
 Bug Fixes
 ---------
-- None.
+- Fixed an issue with the DatuUtils class where ISO 8601 Dates didn't convert correctly to Zulu (GMT) Date and Time.
 
 New Functionality
 -----------------
