@@ -120,7 +120,14 @@ public class RemoteMessageQueueReader implements Runnable
     public void run()
     {
     	logger.debug("Message Queue Reader "+getReaderID()+" starts reading messages for queue "+getQueueInfo().getQueue().getName()+"...");
-    	startReading();
+        try
+        {
+            startReading();
+        }
+        catch (InterruptedException ex)
+        {
+            logger.error("Thread interupted - application shutting down?", ex);
+        }
     }
 
 	/*---------------------*/
@@ -129,7 +136,7 @@ public class RemoteMessageQueueReader implements Runnable
     /*
      * This is the actual core methods. It connect to the SIF Message queue and starts reading messages from it. 
      */
-	private void startReading()
+	private void startReading() throws InterruptedException
 	{
 		if (client != null) // indicating all good
 		{
@@ -154,11 +161,18 @@ public class RemoteMessageQueueReader implements Runnable
 						processMessage(response);
 					}
 				}
-				catch (ServiceInvokationException ex)
-				{
-					// Error should already have been logged. Just wait and try again
-					waitBeforeGetNext();	  
-				}
+                catch (Exception ex)
+                {
+                    // Error should already have been logged. Just wait and try again
+                    if ((ex != null) && (ex instanceof InterruptedException))
+                    {
+                        throw (InterruptedException) ex;
+                    }
+                    else
+                    {
+                        waitBeforeGetNext();
+                    }
+                }
 			}
 		}
 	}
@@ -340,17 +354,17 @@ public class RemoteMessageQueueReader implements Runnable
 	private void setResponseBaseData(DelayedBaseInfo baseInfo, Response response, MessageType messageType)
 	{
 		//First get all the info out from the relativeServicePath
-		URIPathInfo pathInfo = new URIPathInfo(getHeaderValue(response, ResponseHeaderConstants.HDR_REL_SERVICE_PATH));
+		URIPathInfo pathInfo = new URIPathInfo(getHeaderValue(response, ResponseHeaderConstants.HDR_REL_SERVICE_PATH), getHeaderValue(response, ResponseHeaderConstants.HDR_SERVICE_TYPE));
 		
 		baseInfo.setMessageType(messageType);
 		baseInfo.setRequestGUID(getHeaderValue(response, ResponseHeaderConstants.HDR_REQUEST_ID));
 		baseInfo.setServiceType(pathInfo.getServiceType());
+		baseInfo.setResourceID(pathInfo.getResourceID());
+		baseInfo.setPhaseName(pathInfo.getPhaseName());
 		baseInfo.setPayload((String)response.getDataObject());
 		baseInfo.setMediaType(response.getMediaType());
 		baseInfo.setZone(getSif3Session().getZone(pathInfo.getZone()));
 		baseInfo.setContext(getSif3Session().getContext(pathInfo.getContext()));
-//      baseInfo.setZone(getZone(pathInfo.getZone() != null ? pathInfo.getZone().getId() : null));
-//      baseInfo.setContext(getContext(pathInfo.getContext()!= null ? pathInfo.getContext().getId() : null));
 		baseInfo.setMessageQueueReaderID(getQueueReaderID());
 		baseInfo.setFullRelativeURL(pathInfo.getOriginalURLString());
 		baseInfo.setServiceName(pathInfo.getServiceName());

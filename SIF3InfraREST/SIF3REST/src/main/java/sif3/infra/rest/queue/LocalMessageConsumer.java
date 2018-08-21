@@ -2,7 +2,7 @@
  * LocalConsumerQueue.java
  * Created: 06/05/2014
  *
- * Copyright 2014 Systemic Pty Ltd
+ * Copyright 2014-2018 Systemic Pty Ltd
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,23 +21,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.api.client.ClientResponse.Status;
-
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.interfaces.Consumer;
 import sif3.common.interfaces.DelayedConsumer;
 import sif3.common.interfaces.EventConsumer;
+import sif3.common.interfaces.MinimalConsumer;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.ZoneContextInfo;
 import sif3.common.model.delayed.DelayedResponseReceipt;
+import sif3.common.model.job.PhaseInfo;
 import sif3.common.ws.ErrorDetails;
+import sif3.common.ws.job.PhaseDataResponse;
+import sif3.infra.common.conversion.InfraUnmarshalFactory;
+import sif3.infra.common.model.JobCollectionType;
+import sif3.infra.rest.consumer.AbstractFunctionalServiceConsumer;
 import sif3.infra.rest.mapper.InfraDataModelMapper;
 import sif3.infra.rest.queue.types.DelayedBaseInfo;
 import sif3.infra.rest.queue.types.ErrorInfo;
@@ -60,7 +67,7 @@ public class LocalMessageConsumer implements Runnable
 
 	private LocalConsumerQueue localQueue;
 	private String consumerID;
-	private Consumer consumer;
+	private MinimalConsumer minimalConsumer;
 	private InfraDataModelMapper infraMapper = new InfraDataModelMapper();
 	
 	/**
@@ -71,11 +78,11 @@ public class LocalMessageConsumer implements Runnable
 	 * @param consumerID A name of the consumer. Mainly needed for nice debug and error reporting.
 	 * @param consumer An instance of consumer that will process the message.
 	 */
-	public LocalMessageConsumer(LocalConsumerQueue localQueue, String consumerID, Consumer consumer)
+	public LocalMessageConsumer(LocalConsumerQueue localQueue, String consumerID, MinimalConsumer minimalConsumer)
 	{
 		this.localQueue = localQueue;
 		this.consumerID = consumerID;
-		this.consumer = consumer;
+		this.minimalConsumer = minimalConsumer;
 	}
 	
 	/**
@@ -86,7 +93,14 @@ public class LocalMessageConsumer implements Runnable
 	//@Override
     public void run()
     {
-      consume();
+        try
+        {
+            consume();
+        }
+        catch (InterruptedException ex)
+        {
+            logger.error("Thread interupted - application shutting down...", ex);
+        }
     }
 	
 	/*-----------------*/
@@ -96,37 +110,52 @@ public class LocalMessageConsumer implements Runnable
 	 * This method will run in an infinite loop and try to retrieve messages from the local queue. Once
 	 * a message is retrieved it will determine if it will be sent to appropriate consumer thread for it to be processed.
 	 */
-	private void consume()
+	private void consume() throws InterruptedException
 	{
 		while (true)
 		{
-			QueueMessage message = localQueue.blockingPull();
-			if (message != null)
-			{
-			    // Check what type of message it is.
-			    switch (message.getMessageType())
+            try {
+    			QueueMessage message = localQueue.blockingPull();
+    			if (message != null)
+    			{
+    			    // Check what type of message it is.
+    			    switch (message.getMessageType())
+                    {
+                        case EVENT:
+                        {
+                            processEvent((EventInfo)message);
+                            break;
+                        }
+                        case RESPONSE:
+                        {
+                        	processResponse((ResponseInfo)message);
+                            break;
+                        }
+                        case ERROR:
+                        {                   
+                        	processError((ErrorInfo)message);
+                            break;
+                        }
+                    }
+    			}
+    			else
+    			{
+    				logger.error(consumerID + " has encountered a problem receiving an message from its local consumer queue.");
+    			}
+            }
+            catch (Exception ex)
+            {
+                if ((ex != null) && (ex instanceof InterruptedException))
                 {
-                    case EVENT:
-                    {
-                        processEvent((EventInfo)message);
-                        break;
-                    }
-                    case RESPONSE:
-                    {
-                    	processResponse((ResponseInfo)message);
-                        break;
-                    }
-                    case ERROR:
-                    {                   
-                    	processError((ErrorInfo)message);
-                        break;
-                    }
+                    throw (InterruptedException) ex;
                 }
-			}
-			else
-			{
-				logger.error(consumerID + " has encountered a problem receiving an message from its local consumer queue.");
-			}
+                else
+                {
+                    // Error should already have been logged. Just wait and try again
+                    logger.error(consumerID + " has encountered a problem receiving an message from its local consumer queue.", ex);
+                }
+            }
+
 		}
 	}
 	
@@ -137,8 +166,16 @@ public class LocalMessageConsumer implements Runnable
     private void processEvent(EventInfo eventInfo)
 	{
         logger.debug(consumerID + " has receive an event from its local consumer queue ID: "  + eventInfo.getMessageQueueReaderID());
-        EventConsumer<?> eventConsumer = (EventConsumer<?>) consumer;
-        Object eventPayload = makeDataModelObject(consumer, eventInfo.getPayload(), eventInfo.getMediaType());
+        EventConsumer<?> eventConsumer = (EventConsumer<?>)minimalConsumer;
+        Object eventPayload = null;
+        if (eventInfo.getServiceType() == ServiceType.FUNCTIONAL) 
+        {
+            eventPayload = makeFunctionalServiceObject(eventInfo.getPayload(), eventInfo.getMediaType(), false, true);
+        }
+        else
+        {
+            eventPayload = makeDataModelObject(minimalConsumer, eventInfo.getPayload(), eventInfo.getMediaType());
+        }
         if (eventPayload instanceof ErrorDetails)
         {
             logger.error("Failed to create and send actual event to event consumer (" + eventConsumer.getClass().getSimpleName() + "): " + eventPayload);
@@ -169,7 +206,7 @@ public class LocalMessageConsumer implements Runnable
             logger.debug(responseInfo.toString());
         }
         
-        DelayedConsumer delayedConsumer = (DelayedConsumer)consumer; 
+        DelayedConsumer delayedConsumer = (DelayedConsumer)minimalConsumer; 
         DelayedResponseReceipt delayedReceipt = extractDelayedReceiptInfo(responseInfo);
         
         if (responseInfo.getResponseAction() == null) // this is not good and something is terribly wrong.
@@ -182,27 +219,91 @@ public class LocalMessageConsumer implements Runnable
             return;
         }
         
+        boolean isPhaseObject = StringUtils.notEmpty(responseInfo.getPhaseName());
+        
         // If we get here we know what to do with the payload.
         switch (responseInfo.getResponseAction())
         {
         	case CREATE:
         	{
-        		delayedConsumer.onCreateMany(infraMapper.toStatusListFromSIFCreateString(responseInfo.getPayload(), responseInfo.getMediaType()), delayedReceipt);
-        		break;
+        	    if (responseInfo.getServiceType() == ServiceType.FUNCTIONAL)
+        	    {
+        	        if (!isPhaseObject)
+        	        {
+                        delayedConsumer.onCreateMany(infraMapper.toStatusListFromSIFCreateString(responseInfo.getPayload(), responseInfo.getMediaType()), delayedReceipt);                             	            
+        	        }
+        	        else
+        	        {
+        	            AbstractFunctionalServiceConsumer fsc = (AbstractFunctionalServiceConsumer)minimalConsumer;
+        	            fsc.processDelayedPhaseCreate(new PhaseInfo(responseInfo.getResourceID(), responseInfo.getPhaseName()), 
+        	                                          new PhaseDataResponse(responseInfo.getPayload(), responseInfo.getMediaType(), Status.OK), 
+        	                                          delayedReceipt);
+        	        }
+        	    }
+        	    else
+        	    {
+        	        delayedConsumer.onCreateMany(infraMapper.toStatusListFromSIFCreateString(responseInfo.getPayload(), responseInfo.getMediaType()), delayedReceipt);
+        	    }
+        	    break;
         	}
         	case DELETE:
         	{
-        		delayedConsumer.onDeleteMany(infraMapper.toStatusListFromSIFDeleteString(responseInfo.getPayload(), responseInfo.getMediaType()), delayedReceipt);
+                if (responseInfo.getServiceType() == ServiceType.FUNCTIONAL)
+                {
+                    if (!isPhaseObject)
+                    {
+                        delayedConsumer.onDeleteMany(infraMapper.toStatusListFromSIFDeleteString(responseInfo.getPayload(), responseInfo.getMediaType()), delayedReceipt);
+                    
+                    }
+                    else
+                    {
+                        AbstractFunctionalServiceConsumer fsc = (AbstractFunctionalServiceConsumer)minimalConsumer;
+                        fsc.processDelayedPhaseDelete(new PhaseInfo(responseInfo.getResourceID(), responseInfo.getPhaseName()), 
+                                                      new PhaseDataResponse(responseInfo.getPayload(), responseInfo.getMediaType(), Status.OK), 
+                                                      delayedReceipt);
+                    }
+                }
+                else
+                {
+                    delayedConsumer.onDeleteMany(infraMapper.toStatusListFromSIFDeleteString(responseInfo.getPayload(), responseInfo.getMediaType()), delayedReceipt);
+                }
         		break;
         	}
         	case UPDATE:
         	{
-        		delayedConsumer.onUpdateMany(infraMapper.toStatusListFromSIFUpdateString(responseInfo.getPayload(), responseInfo.getMediaType()), delayedReceipt);
+                if (responseInfo.getServiceType() == ServiceType.FUNCTIONAL)
+                {
+                    if (isPhaseObject)
+                    {
+                        AbstractFunctionalServiceConsumer fsc = (AbstractFunctionalServiceConsumer)minimalConsumer;
+                        fsc.processDelayedPhaseUpdate(new PhaseInfo(responseInfo.getResourceID(), responseInfo.getPhaseName()), 
+                                                      new PhaseDataResponse(responseInfo.getPayload(), responseInfo.getMediaType(), Status.OK), 
+                                                      delayedReceipt);
+                    }
+                    else
+                    {
+                        logger.error("Received a DELAYED UPDATE Response for Jobs of Functional Services. This is an invalid operation. Data ignored.");
+                    }
+                }
+                else
+                {
+                    delayedConsumer.onUpdateMany(infraMapper.toStatusListFromSIFUpdateString(responseInfo.getPayload(), responseInfo.getMediaType()), delayedReceipt);
+                }
         		break;
         	}
         	case QUERY:
         	{
-        	    Object payloadObject = makeDataModelObject(consumer, responseInfo.getPayload(), responseInfo.getMediaType());
+        	    Object payloadObject = null;
+        	    
+                if (responseInfo.getServiceType() == ServiceType.FUNCTIONAL) 
+                {
+                    payloadObject = makeFunctionalServiceObject(responseInfo.getPayload(), responseInfo.getMediaType(), isPhaseObject, false);
+                }
+                else
+                {
+                    payloadObject = makeDataModelObject(minimalConsumer, responseInfo.getPayload(), responseInfo.getMediaType());
+                }
+
         	    if (payloadObject instanceof ErrorDetails)
         	    {
         	        // Something is not good at all. We send the error to the consumer.
@@ -224,6 +325,21 @@ public class LocalMessageConsumer implements Runnable
         			    delayedConsumer.onServicePath(payloadObject, new QueryCriteria(responseInfo.getUrlService()), paging, delayedReceipt);
         				break;
         			}
+        			case FUNCTIONAL:
+        			{
+                        if (!isPhaseObject)
+                        {
+                            delayedConsumer.onQuery(payloadObject, paging, delayedReceipt);
+                        }
+                        else
+                        {
+                            AbstractFunctionalServiceConsumer fsc = (AbstractFunctionalServiceConsumer)minimalConsumer;
+                            fsc.processDelayedPhaseQuery(new PhaseInfo(responseInfo.getResourceID(), responseInfo.getPhaseName()), 
+                                                         new PhaseDataResponse(responseInfo.getPayload(), responseInfo.getMediaType(), Status.OK), 
+                                                         paging, delayedReceipt);
+                        }
+        			    break;
+        			}
         			default:
         			{
         				logger.error("Received a Query Response for a Servic Type ("+responseInfo.getServiceType()+") that is not yet supported with this framework. Ignore message:\n"+responseInfo);
@@ -241,7 +357,7 @@ public class LocalMessageConsumer implements Runnable
     private void processError(ErrorInfo errorInfo)
     {
         logger.debug(consumerID + " has receive a DELAYED ERROR from its local consumer queue ID: "  + errorInfo.getMessageQueueReaderID());
-        DelayedConsumer delayedConsumer = (DelayedConsumer)consumer; 
+        DelayedConsumer delayedConsumer = (DelayedConsumer)minimalConsumer; 
         delayedConsumer.onError(infraMapper.toErrorFromSIFErrorString(errorInfo.getPayload(), errorInfo.getMediaType(), new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not extract error from payload.", "Payload:\n"+errorInfo.getPayload())), extractDelayedReceiptInfo(errorInfo));
     }
     
@@ -250,8 +366,9 @@ public class LocalMessageConsumer implements Runnable
      * returned object of this method is not a Datamodel object but an ErrorDetails object. The caller of this method MUST
      * check if the returned object is of type ErrorDetails first before doing anything with it.
      */
-    private Object makeDataModelObject(Consumer consumer, String payload, MediaType mediaType)
+    private Object makeDataModelObject(MinimalConsumer miniConsumer, String payload, MediaType mediaType)
     {
+        Consumer consumer = (Consumer)miniConsumer;
         try
         {
             return consumer.getUnmarshaller().unmarshal(payload, consumer.getMultiObjectClassInfo().getObjectType(), mediaType);
@@ -269,6 +386,39 @@ public class LocalMessageConsumer implements Runnable
             return new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal Could not unmarshal Datamodel payload into SIF Object: "+ex.getMessage()+". See error description for payload details.", payload);
         }   
     }
+
+    /*
+     * Will only be called for Job Queries. So we know that it must be a JobCollection object. The other usage is from Phase Operations.
+     * In this case we know nothing about the data model and therefore we return the raw data (string).
+     */
+    private Object makeFunctionalServiceObject(String payload, MediaType mediaType, boolean isPhaseObject, boolean isEvent)
+    {
+        InfraUnmarshalFactory infraUnmarshaller = new InfraUnmarshalFactory();
+        if (isEvent || !isPhaseObject) // The object is a Job Collection object
+        {
+            try
+            {
+                return infraUnmarshaller.unmarshal(payload, JobCollectionType.class, mediaType);
+            }
+            catch (UnmarshalException ex)
+            {
+                return new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not unmarshal Job Collection payload into SIF Object: "+ex.getMessage()+". See error description for payload details.", payload, "Consumer");
+            }
+            catch (UnsupportedMediaTypeExcpetion ex)
+            {
+                return new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Could not unmarshal  Job Collection payload into SIF Object (unsupported media type): "+ex.getMessage()+". See error description for payload details.", payload, "Consumer");
+            }
+            catch (Exception ex)
+            {
+                return new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal Could not unmarshal  Job Collection payload into SIF Object: "+ex.getMessage()+". See error description for payload details.", payload, "Consumer");
+            }   
+        }
+        else // must be delayed response to Phase Operation. Cannot unmarshal as phase data model is unknown.
+        {
+            return payload;
+        }
+    }
+
     
     private DelayedResponseReceipt extractDelayedReceiptInfo(DelayedBaseInfo delayedInfo)
     {
@@ -278,6 +428,8 @@ public class LocalMessageConsumer implements Runnable
         receipt.setZone(delayedInfo.getZone());
         receipt.setContext(delayedInfo.getContext());
     	receipt.setServiceName(delayedInfo.getServiceName());
+        receipt.setResourceID(delayedInfo.getResourceID());
+        receipt.setPhaseName(delayedInfo.getPhaseName());
     	receipt.setServiceType(delayedInfo.getServiceType());
     	receipt.setRequestedAction(delayedInfo.getResponseAction());
     	receipt.setRelativeRequestURI(delayedInfo.getFullRelativeURL());
