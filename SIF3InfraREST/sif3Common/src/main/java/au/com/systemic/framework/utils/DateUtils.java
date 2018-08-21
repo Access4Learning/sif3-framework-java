@@ -26,6 +26,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.Duration;
+
 /**
  * @author Joerg Huber
  */
@@ -378,6 +382,54 @@ public class DateUtils
      return new Date(gmtTstamp * 1000);
   }
   
+  /**
+   * This method adds the duration given by the 'durationStr' to the given 'fromDate'. The fromDate is not altered instead the final
+   * result is returned. Note that the 'durationStr' must follow the syntax as defined in javax.xml.datatype.Duration. If the durationStr
+   * is invalid a ParseException is thrown.
+   * 
+   * @param durationStr if null then the 'fromDate' is returned.
+   * @param fromDate Can be null. In this case the 'current date' is used.
+   * 
+   * @return See description.
+   * 
+   * @throws ParseException If the durationStr doesn't conform to avax.xml.datatype.Duration.
+   */
+  public static Date addDuration(String durationStr, Date fromDate) throws ParseException
+  {
+      try
+      {
+          Duration duration = StringUtils.notEmpty(durationStr) ? DatatypeFactory.newInstance().newDuration(durationStr) : null;
+                  
+          return addDuration(duration, fromDate);
+      }
+      catch (DatatypeConfigurationException ex)
+      {
+          // This is not good there is nothing we can do. Throw a parse exception
+          throw new ParseException("Invalid durationStr given: '"+durationStr+"'. It must be a value as defined in javax.xml.datatype.Duration: "+ex.getMessage(), 0);
+      }
+
+  }
+  
+  /**
+   * This method adds the duration to the given 'fromDate'. The fromDate is not altered instead the final result is returned. 
+   * 
+   * @param duration if null then the 'fromDate' is returned.
+   * @param fromDate Can be null. In this case the 'current date' is used.
+   * 
+   * @return See description.
+   */
+  public static Date addDuration(Duration duration, Date fromDate)
+  {
+      Date newDate = (fromDate != null) ? new Date(fromDate.getTime()) : new Date();
+      
+      if (duration != null)
+      {
+          duration.addTo(newDate);
+      }
+     
+      return newDate;
+  }
+
   public static String nowAsISO8601()
   {
 	 // TimeZone tz = TimeZone.getTimeZone("UTC");
