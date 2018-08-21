@@ -2,7 +2,7 @@
  * Provider.java
  * Created: 29/09/2013
  *
- * Copyright 2013 Systemic Pty Ltd
+ * Copyright 2013-2018 Systemic Pty Ltd
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.List;
 
 import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
+import sif3.common.exception.SIFException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.model.PagingInfo;
@@ -73,8 +74,15 @@ public interface Provider extends DataModelLink
 	 * @throws IllegalArgumentException One of the parameters is invalid.
 	 * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
 	 *                              message of the exceptions holds some info.
+     * @throws SIFException Any other exception the implementation of that class wants to throw. This will be translated into proper
+     *                      SIF Error message that will be returned to the consumer.
 	 */
-	public Object retrievByPrimaryKey(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException;
+	public Object retrievByPrimaryKey(String resourceID, 
+	                                  SIFZone zone, 
+	                                  SIFContext context, 
+	                                  RequestMetadata metadata, 
+	                                  ResponseParameters customResponseParams) 
+	        throws IllegalArgumentException, PersistenceException, SIFException;
 
 	/**
 	 * This method creates the given object with the data provided in the given zone and context. If the object cannot be created then either
@@ -96,8 +104,16 @@ public interface Provider extends DataModelLink
      * @throws IllegalArgumentException One of the parameters is invalid.
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
+     * @throws SIFException Any other exception the implementation of that class wants to throw. This will be translated into proper
+     *                      SIF Error message that will be returned to the consumer.
 	 */
-	public Object createSingle(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException;
+	public Object createSingle(Object data, 
+	                           boolean useAdvisory, 
+	                           SIFZone zone, 
+	                           SIFContext context, 
+	                           RequestMetadata metadata, 
+	                           ResponseParameters customResponseParams) 
+	        throws IllegalArgumentException, PersistenceException, SIFException;
 
 	/**
      * This method updates the object given by its resourceID in the given zone for the given context.
@@ -118,8 +134,16 @@ public interface Provider extends DataModelLink
      * @throws IllegalArgumentException One of the parameters is invalid.
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
+     * @throws SIFException Any other exception the implementation of that class wants to throw. This will be translated into proper
+     *                      SIF Error message that will be returned to the consumer.
 	 */
-	public boolean updateSingle(Object data, String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException;
+	public boolean updateSingle(Object data, 
+	                            String resourceID, 
+	                            SIFZone zone, 
+	                            SIFContext context, 
+	                            RequestMetadata metadata, 
+	                            ResponseParameters customResponseParams) 
+	        throws IllegalArgumentException, PersistenceException, SIFException;
 
 	/**
      * Removed the object with the given resourceId in the given zone for the given context.
@@ -138,8 +162,15 @@ public interface Provider extends DataModelLink
      * @throws IllegalArgumentException One of the parameters is invalid.
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
+     * @throws SIFException Any other exception the implementation of that class wants to throw. This will be translated into proper
+     *                      SIF Error message that will be returned to the consumer.
 	 */
-	public boolean deleteSingle(String resourceID, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException;
+	public boolean deleteSingle(String resourceID, 
+	                            SIFZone zone, 
+	                            SIFContext context, 
+	                            RequestMetadata metadata, 
+	                            ResponseParameters customResponseParams) 
+	        throws IllegalArgumentException, PersistenceException, SIFException;
 
 	/*----------------------------*/
 	/*-- Bulk Object Operations --*/
@@ -148,7 +179,7 @@ public interface Provider extends DataModelLink
 	/**
      * This method is used to retrieve any number of objects. This is achieved in terms of 'paging' through the list of objects. The consumer
      * is expected to provide paging information to tell the provider which objects in the list shall be returned. The first page has
-     * the number 0. The number of records to be returned are determined by the information within the
+     * the number 1. The number of records to be returned are determined by the information within the
 	 * paging info parameter. If the data set to be returned is considered too large by the provider (implementation 
 	 * dependent) then a DataTooLargeException must be raised. This exception is then translated into an appropriate
 	 * HTTP Status within the framework to meet the SIF Specification.
@@ -166,8 +197,15 @@ public interface Provider extends DataModelLink
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
 	 * @throws DataTooLargeException If the data that shall be returned is too large due to the values in the paging info.
+     * @throws SIFException Any other exception the implementation of that class wants to throw. This will be translated into proper
+     *                      SIF Error message that will be returned to the consumer.
 	 */
-	public Object retrieve(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata, ResponseParameters customResponseParams) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
+	public Object retrieve(SIFZone zone, 
+	                       SIFContext context, 
+	                       PagingInfo pagingInfo, 
+	                       RequestMetadata metadata, 
+	                       ResponseParameters customResponseParams) 
+	        throws PersistenceException, UnsupportedQueryException, DataTooLargeException, SIFException;
 	
 	/**
      * This method will create many objects in one call. The 'data' parameter is a collection-style object that is defined in the data
@@ -188,8 +226,16 @@ public interface Provider extends DataModelLink
      * @throws IllegalArgumentException One of the parameters is invalid.
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
+     * @throws SIFException Any other exception the implementation of that class wants to throw. This will be translated into proper
+     *                      SIF Error message that will be returned to the consumer.
 	 */
-	public List<CreateOperationStatus> createMany(Object data, boolean useAdvisory, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException;
+	public List<CreateOperationStatus> createMany(Object data, 
+	                                              boolean useAdvisory, 
+	                                              SIFZone zone, 
+	                                              SIFContext context, 
+	                                              RequestMetadata metadata, 
+	                                              ResponseParameters customResponseParams) 
+	        throws IllegalArgumentException, PersistenceException, SIFException;
 
 	/**
      * This method will update many objects in one call. The 'data' parameter is a collection-style object that is defined in the data
@@ -210,8 +256,15 @@ public interface Provider extends DataModelLink
      * @throws IllegalArgumentException One of the parameters is invalid.
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
+     * @throws SIFException Any other exception the implementation of that class wants to throw. This will be translated into proper
+     *                      SIF Error message that will be returned to the consumer.
 	 */
-	public List<OperationStatus> updateMany(Object data, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException;
+	public List<OperationStatus> updateMany(Object data, 
+	                                        SIFZone zone, 
+	                                        SIFContext context, 
+	                                        RequestMetadata metadata, 
+	                                        ResponseParameters customResponseParams) 
+	        throws IllegalArgumentException, PersistenceException, SIFException;
 
 	/**
      * This method removes all objects in the resourceIDs list in one hit.
@@ -230,8 +283,15 @@ public interface Provider extends DataModelLink
      * @throws IllegalArgumentException One of the parameters is invalid.
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
+     * @throws SIFException Any other exception the implementation of that class wants to throw. This will be translated into proper
+     *                      SIF Error message that will be returned to the consumer.
 	 */
-	public List<OperationStatus> deleteMany(List<String> resourceIDs, SIFZone zone, SIFContext context, RequestMetadata metadata, ResponseParameters customResponseParams) throws IllegalArgumentException, PersistenceException;
+	public List<OperationStatus> deleteMany(List<String> resourceIDs, 
+	                                        SIFZone zone, 
+	                                        SIFContext context, 
+	                                        RequestMetadata metadata, 
+	                                        ResponseParameters customResponseParams) 
+	        throws IllegalArgumentException, PersistenceException, SIFException;
 
 
 	/*-----------------------------------------*/
@@ -257,8 +317,14 @@ public interface Provider extends DataModelLink
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
      * @throws DataTooLargeException If the data that shall be returned is too large due to the values in the paging info.
+     * @throws SIFException Any other exception the implementation of that class wants to throw. This will be translated into proper
+     *                      SIF Error message that will be returned to the consumer.
 	 */
-	public HeaderProperties getServiceInfo(SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
+	public HeaderProperties getServiceInfo(SIFZone zone, 
+	                                       SIFContext context, 
+	                                       PagingInfo pagingInfo, 
+	                                       RequestMetadata metadata) 
+	        throws PersistenceException, UnsupportedQueryException, DataTooLargeException, SIFException;
 	
 	/*-------------------------------*/
 	/*-- Other required Operations --*/

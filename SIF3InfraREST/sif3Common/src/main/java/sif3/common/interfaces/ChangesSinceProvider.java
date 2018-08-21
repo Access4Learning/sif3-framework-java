@@ -2,7 +2,7 @@
  * ChangesSinceProvider.java
  * Created: 06/01/2016
  *
- * Copyright 2016 Systemic Pty Ltd
+ * Copyright 2016-2018 Systemic Pty Ltd
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@
 package sif3.common.interfaces;
 
 import sif3.common.exception.DataTooLargeException;
+import sif3.common.exception.ExpiredException;
 import sif3.common.exception.PersistenceException;
+import sif3.common.exception.SIFException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.model.ChangedSinceInfo;
 import sif3.common.model.PagingInfo;
@@ -90,12 +92,16 @@ public interface ChangesSinceProvider
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
      * @throws DataTooLargeException If the data that shall be returned is too large due to the values in the paging info.
+     * @throws ExpiredException If the passed in changedSinceInfo.changesSinceMarker is no longer valid or has expired.
+     * @throws SIFException Any other exception the implementation of that class wants to throw. This will be translated into proper
+     *                      SIF Error message that will be returned to the consumer.
      */
     public Object getChangesSince(SIFZone zone, 
                                   SIFContext context, 
                                   PagingInfo pagingInfo, 
                                   ChangedSinceInfo changedSinceInfo, 
                                   RequestMetadata metadata, 
-                                  ResponseParameters customResponseParams) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
+                                  ResponseParameters customResponseParams) 
+                     throws PersistenceException, UnsupportedQueryException, DataTooLargeException, ExpiredException, SIFException;
  
 }

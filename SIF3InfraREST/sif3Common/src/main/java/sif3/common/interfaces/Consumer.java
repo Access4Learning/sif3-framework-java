@@ -2,7 +2,7 @@
  * Consumer.java
  * Created: 23/09/2013
  *
- * Copyright 2013 Systemic Pty Ltd
+ * Copyright 2013-2018 Systemic Pty Ltd
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,8 @@ import java.util.List;
 
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.ServiceInvokationException;
-import sif3.common.exception.UnsupportedQueryException;
-import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.model.CustomParameters;
-import sif3.common.model.PagingInfo;
 import sif3.common.model.ZoneContextInfo;
 import sif3.common.ws.BulkOperationResponse;
 import sif3.common.ws.CreateOperationStatus;
@@ -34,24 +31,25 @@ import sif3.common.ws.OperationStatus;
 import sif3.common.ws.Response;
 
 /**
- * This class defines the methods a consumer must implement to fit with this framework. The interface is independent from the 
- * Data Model and underlying infrastructure components. It defines the core function SIF3 specifies for a consumer.<br/><br/>
+ * This class defines the methods a Object Service Consumer must implement to fit with this framework. The interface is independent from the 
+ * Data Model and underlying infrastructure components. It defines the core function SIF3 specifies for a consumer. This interface defines
+ * additional methods to the MinimalConsumer. These methods are applicable for standard CRUD operations for an Object Service Consumers.<br/><br/>
  * 
  * Note:<br/>
- * Because this framework allows to be run under Java 6 some of the types in various methods use "Object" instead of the  template 
+ * Because this framework used to be run under Java 6 some of the types in various methods use "Object" instead of the  template 
  * notation. This is because Java 6 doesn't allow a 'new T()' and therefore the interface avoids the template notation to not break 
  * the implementation where a constructor for an Object might be required. This may change in future versions of the framework.
  * 
  * @author Joerg Huber
  */
-public interface Consumer extends DataModelLink
+public interface Consumer extends MinimalConsumer
 {
 	/*------------------------------*/
 	/*-- Single Object Operations --*/
 	/*------------------------------*/
 
 	/**
-	 * This method creates the given object for the list of environments, zones and contexts. 
+	 * This method creates the given object for the list of zones and contexts. 
 	 * 
 	 * @param data The object that shall be created.
 	 * @param zoneCtxList If this List is null or empty then it is assumed that the operation is performed for the default Zone and Context for the 
@@ -200,99 +198,99 @@ public interface Consumer extends DataModelLink
 	 */
 	public List<BulkOperationResponse<OperationStatus>> deleteMany(List<String> resourceIDs, List<ZoneContextInfo> zoneCtxList, RequestType requestType, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException;
 
-	/*----------------------*/
-	/*-- Query Operations --*/
-	/*----------------------*/
+	/*------------------------------------------------------------*/
+	/*-- Query Operations: Covered in MinimalConsumer interface --*/
+	/*------------------------------------------------------------*/
 
-	/**
-	 * This method returns an object with the given resourceId.
-	 * 
-	 * @param resourceID The Id of the object to be returned.
-	 * @param zoneCtxList If this List is null or empty then it is assumed that the operation is performed for the default Zone and Context for the 
-	 *                    connected. If this list is not empty then the action is performed for all Zone and Context listed. If a given 
-	 *                    environment has more than one zone and/or context and the operation shall be performed in any number of them 
-	 *                    then each combination must be a separate entry in this list.
-	 * @param customParameters Custom HTTP Header fields and Custom URL Query parameters that will be added to the request.
-	 *                         If any of the HTTP header fields correspond to a SIF pre-defined HTTP header that is managed
-	 *                         by this framework then the value in this parameter will be overridden with the internally
-	 *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
-	 *                         be null.
-	 * 
-	 * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then only one response will be returned for the
-     *         service in the default zone and context.
-	 *         
-	 * @throws IllegalArgumentException One of the parameters is invalid.
-	 * @throws PersistenceException Some data could not be persisted. An error log entry is performed and the message of the exceptions holds some info.
-	 * @throws ServiceInvokationException Service on provider could not be executed. See error log for details.
-	 */
-	public List<Response> retrievByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException;
-  	
-	/**
-	 * This method is used to retrieve any number of objects. This is achieved in terms of 'paging' through the list of objects. The consumer
-	 * is expected to provide paging information to tell the provider which objects in the list shall be returned. The first page has
-	 * the number 0.
-	 * 
-	 * @param pagingInfo Page information to be set for the provider to determine which results to return.
-	 * @param zoneCtxList If this List is null or empty then it is assumed that the operation is performed for the default Zone and Context for the 
-	 *                    connected. If this list is not empty then the action is performed for all Zone and Context listed. If a given 
-	 *                    environment has more than one zone and/or context and the operation shall be performed in any number of them 
-	 *                    then each combination must be a separate entry in this list.
-	 * @param requestType Indicating if the retrieve request is synchronous (IMMEDIATE) or if it shall be shall executed asynchronously (DELAYED).
-	 * @param queryIntention Indicating what the intention of the query and follow-up queries is. Can be set to null which
-	 *                       will default to 'ONE-OFF'
-	 * @param customParameters Custom HTTP Header fields and Custom URL Query parameters that will be added to the request.
-	 *                         If any of the HTTP header fields correspond to a SIF pre-defined HTTP header that is managed
-	 *                         by this framework then the value in this parameter will be overridden with the internally
-	 *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
-	 *                         be null.
-	 * 
-	 * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then only one response will be returned for the
-     *         service in the default zone and context.
-	 *         
-	 * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
-	 * @throws PersistenceException Some data could not be retrieved. An error log entry is performed and the message of the exceptions holds some info.
-	 * @throws ServiceInvokationException Service on provider could not be executed. See error log for details.
-	 * 
-	 */
-	public List<Response> retrieve(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention, CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException;
+//	/**
+//	 * This method returns an object with the given resourceId.
+//	 * 
+//	 * @param resourceID The Id of the object to be returned.
+//	 * @param zoneCtxList If this List is null or empty then it is assumed that the operation is performed for the default Zone and Context for the 
+//	 *                    connected. If this list is not empty then the action is performed for all Zone and Context listed. If a given 
+//	 *                    environment has more than one zone and/or context and the operation shall be performed in any number of them 
+//	 *                    then each combination must be a separate entry in this list.
+//	 * @param customParameters Custom HTTP Header fields and Custom URL Query parameters that will be added to the request.
+//	 *                         If any of the HTTP header fields correspond to a SIF pre-defined HTTP header that is managed
+//	 *                         by this framework then the value in this parameter will be overridden with the internally
+//	 *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
+//	 *                         be null.
+//	 * 
+//	 * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then only one response will be returned for the
+//     *         service in the default zone and context.
+//	 *         
+//	 * @throws IllegalArgumentException One of the parameters is invalid.
+//	 * @throws PersistenceException Some data could not be persisted. An error log entry is performed and the message of the exceptions holds some info.
+//	 * @throws ServiceInvokationException Service on provider could not be executed. See error log for details.
+//	 */
+//	public List<Response> retrievByPrimaryKey(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException;
+//  	
+//	/**
+//	 * This method is used to retrieve any number of objects. This is achieved in terms of 'paging' through the list of objects. The consumer
+//	 * is expected to provide paging information to tell the provider which objects in the list shall be returned. The first page has
+//	 * the number 0.
+//	 * 
+//	 * @param pagingInfo Page information to be set for the provider to determine which results to return.
+//	 * @param zoneCtxList If this List is null or empty then it is assumed that the operation is performed for the default Zone and Context for the 
+//	 *                    connected. If this list is not empty then the action is performed for all Zone and Context listed. If a given 
+//	 *                    environment has more than one zone and/or context and the operation shall be performed in any number of them 
+//	 *                    then each combination must be a separate entry in this list.
+//	 * @param requestType Indicating if the retrieve request is synchronous (IMMEDIATE) or if it shall be shall executed asynchronously (DELAYED).
+//	 * @param queryIntention Indicating what the intention of the query and follow-up queries is. Can be set to null which
+//	 *                       will default to 'ONE-OFF'
+//	 * @param customParameters Custom HTTP Header fields and Custom URL Query parameters that will be added to the request.
+//	 *                         If any of the HTTP header fields correspond to a SIF pre-defined HTTP header that is managed
+//	 *                         by this framework then the value in this parameter will be overridden with the internally
+//	 *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
+//	 *                         be null.
+//	 * 
+//	 * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then only one response will be returned for the
+//     *         service in the default zone and context.
+//	 *         
+//	 * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
+//	 * @throws PersistenceException Some data could not be retrieved. An error log entry is performed and the message of the exceptions holds some info.
+//	 * @throws ServiceInvokationException Service on provider could not be executed. See error log for details.
+//	 * 
+//	 */
+//	public List<Response> retrieve(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention, CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException;
   
-	/*-------------------------------*/
-	/*-- Other required Operations --*/
-	/*-------------------------------*/
+//	/*-------------------------------*/
+//	/*-- Other required Operations --*/
+//	/*-------------------------------*/
 	
-	/**
-     * Will invoke the REST HEAD call to retrieve some information about a service. It will not return a payload as per HTTP 
-     * Specification of the HEAD method. Besides a status code and an optional status message only a set of HTTP Header properties
-     * will be set in the returned responses. These HTTP Header properties can be retrieved as part of the returned response 
-     * object (response.getHdrProperties()).<br/>
-     * Because this method almost mirrors the HTTP GET for the root object service all parameters that would make up the retrieve() 
-     * method in this class are supported. The exception is the requestType and queryIntention parameter that are allowed in the 
-     * retrieve() method. They do not make any sense for this method and are therefore omitted.
-     * 
-     * @param pagingInfo Page information to be set for the provider to determine which results to return.
-     * @param zoneCtxList If this List is null or empty then it is assumed that the operation is performed for the default Zone and Context for the 
-     *                    connected. If this list is not empty then the action is performed for all Zone and Context listed. If a given 
-     *                    environment has more than one zone and/or context and the operation shall be performed in any number of them 
-     *                    then each combination must be a separate entry in this list.
-     * @param customParameters Custom HTTP Header fields and Custom URL Query parameters that will be added to the request.
-     *                         If any of the HTTP header fields correspond to a SIF pre-defined HTTP header that is managed
-     *                         by this framework then the value in this parameter will be overridden with the internally
-     *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
-     *                         be null.
-     * 
-     * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then only one response will be returned for the
-     *         information from the service in the default zone and context.
-     *         The main bit of useful information returned by this call are the HTTP Header properties that can be retrieved with the
-     *         response.getHdrProperties() method. 
-     *         
-     * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
-     * @throws PersistenceException Some data could not be retrieved. An error log entry is performed and the message of the exceptions holds some info.
-     * @throws ServiceInvokationException Service on provider could not be executed. See error log for details.
-     * 
-     */
-    public List<Response> getServiceInfo(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException;
-
-	
-	/** Call this at shut down time. */
-	public void finalise();
+//	/**
+//     * Will invoke the REST HEAD call to retrieve some information about a service. It will not return a payload as per HTTP 
+//     * Specification of the HEAD method. Besides a status code and an optional status message only a set of HTTP Header properties
+//     * will be set in the returned responses. These HTTP Header properties can be retrieved as part of the returned response 
+//     * object (response.getHdrProperties()).<br/>
+//     * Because this method almost mirrors the HTTP GET for the root object service all parameters that would make up the retrieve() 
+//     * method in this class are supported. The exception is the requestType and queryIntention parameter that are allowed in the 
+//     * retrieve() method. They do not make any sense for this method and are therefore omitted.
+//     * 
+//     * @param pagingInfo Page information to be set for the provider to determine which results to return.
+//     * @param zoneCtxList If this List is null or empty then it is assumed that the operation is performed for the default Zone and Context for the 
+//     *                    connected. If this list is not empty then the action is performed for all Zone and Context listed. If a given 
+//     *                    environment has more than one zone and/or context and the operation shall be performed in any number of them 
+//     *                    then each combination must be a separate entry in this list.
+//     * @param customParameters Custom HTTP Header fields and Custom URL Query parameters that will be added to the request.
+//     *                         If any of the HTTP header fields correspond to a SIF pre-defined HTTP header that is managed
+//     *                         by this framework then the value in this parameter will be overridden with the internally
+//     *                         managed HTTP header field. The same applies to the URL Query parameters. This parameter can
+//     *                         be null.
+//     * 
+//     * @return A list of responses corresponding to the List of envZoneCtx. If the envZoneCtx was null then only one response will be returned for the
+//     *         information from the service in the default zone and context.
+//     *         The main bit of useful information returned by this call are the HTTP Header properties that can be retrieved with the
+//     *         response.getHdrProperties() method. 
+//     *         
+//     * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
+//     * @throws PersistenceException Some data could not be retrieved. An error log entry is performed and the message of the exceptions holds some info.
+//     * @throws ServiceInvokationException Service on provider could not be executed. See error log for details.
+//     * 
+//     */
+//    public List<Response> getServiceInfo(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException;
+//
+//	
+//	/** Call this at shut down time. */
+//	public void finalise();
 }
