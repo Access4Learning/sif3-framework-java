@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.PersistenceException;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.model.security.TokenInfo;
@@ -32,7 +33,9 @@ import sif3.common.persist.model.SIF3Session;
 import sif3.infra.common.env.ops.DirectProviderEnvStoreOps;
 import sif3.infra.common.env.types.EnvironmentInfo;
 import sif3.infra.common.interfaces.EnvironmentManager;
+import sif3.infra.common.interfaces.ProviderJobManager;
 import sif3.infra.common.model.EnvironmentType;
+import sif3.infra.common.model.JobType;
 import sif3.infra.common.utils.SIFSessionUtils;
 
 /**
@@ -43,7 +46,7 @@ import sif3.infra.common.utils.SIFSessionUtils;
  * 
  * @author Joerg Huber
  */
-public class DirectProviderEnvironmentManager implements EnvironmentManager
+public class DirectProviderEnvironmentManager extends BaseEnvironmentManager implements EnvironmentManager
 {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -58,7 +61,7 @@ public class DirectProviderEnvironmentManager implements EnvironmentManager
 
 	/* Key=SecurityToken for environment & consumer, Data: SessionToken relating to securityToken. Used for Bearer security tokens*/
 	private HashMap<String, String> secTokenSession = new HashMap<String, String>();
-
+	
 	private static DirectProviderEnvironmentManager instance = null;
 
 	/**
@@ -117,6 +120,11 @@ public class DirectProviderEnvironmentManager implements EnvironmentManager
 	    return envOps.getServiceProperties();
     }
     
+    public ProviderJobManager getJobManager()
+    {
+        return (ProviderJobManager)super.getJobManager();
+    }
+
     /*
      * (non-Javadoc)
      * @see sif3.infra.common.interfaces.EnvironmentManager#getSessionBySessionToken(java.lang.String)
@@ -193,7 +201,16 @@ public class DirectProviderEnvironmentManager implements EnvironmentManager
   		
   	}
 
-  	/*
+    /* (non-Javadoc)
+     * @see sif3.infra.common.interfaces.EnvironmentManager#getJobTemplate(java.lang.String)
+     */
+    @Override
+    public JobType getJobTemplate(String urlName)
+    {
+        return getJobTemplate(urlName, getAdapterType(), envOps);
+    }
+
+    /*
      * (non-Javadoc)
      * @see sif3.infra.common.interfaces.EnvironmentManager#getEnvironmentType()
      */
@@ -202,12 +219,19 @@ public class DirectProviderEnvironmentManager implements EnvironmentManager
     {
 	    return getEnvironmentInfo().getEnvironmentType();
     }
+    
+    @Override
+    public AdapterType getAdapterType()
+    {
+        return  AdapterType.ENVIRONMENT_PROVIDER;
+    }
+
 
     /*--------------------------*/
 	/*-- Other Public Methods --*/
 	/*--------------------------*/
 
-	/**
+    /**
 	 * This method will create an environment on the provider. The environment will be created based on the given input environment
 	 * information. If this operation fails an error is logged and null is returned. The environment will be created and all the
 	 * information according to the SIF3 spec is returned (i.e. Session Token, Environment Id etc). The associated
@@ -435,6 +459,7 @@ public class DirectProviderEnvironmentManager implements EnvironmentManager
 		super();
 		this.adapterFileNameWithoutExt = adapterFileNameWithoutExt;
 		this.envOps = new DirectProviderEnvStoreOps(adapterFileNameWithoutExt);
+	    setJobManager(new DirectProviderJobManager(getEnvironmentInfo()));
 	}
 	
 	/*
