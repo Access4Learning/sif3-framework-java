@@ -485,10 +485,10 @@ public class TestStudentPersonalConsumer
 //			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
 //			envZoneCtxList.add(new ZoneContextInfo((SIFZone)null, new SIFContext("secure")));
 
-			List<Response> responses = consumer.getServiceInfo(new PagingInfo(10, 0), envZoneCtxList, params);
+			List<Response> responses = consumer.getServiceInfo(new PagingInfo(10, 1), envZoneCtxList, params);
 			if (printRepsonse)
 			{
-				System.out.println("Responses from attempt to Get All Students:");
+				System.out.println("Responses from attempt to Get StudentPersonal Service Info:");
 				printResponses(responses, consumer);
 			}
 		}
