@@ -27,12 +27,12 @@ import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.header.HeaderValues.ServiceType;
+import sif3.common.model.ACL.AccessRight;
+import sif3.common.model.ACL.AccessType;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceInfo;
-import sif3.common.model.ServiceRights.AccessRight;
-import sif3.common.model.ServiceRights.AccessType;
 
 /**
  * POJO to encapsulate SIF3 Session Information and configuration.
@@ -267,6 +267,7 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	 * @param right The access right (QUERY, UPDATE etc) that shall be checked for.
 	 * @param accessType The access level (SUPPORTED, APPROVED, etc) that must be met for the given service and right.
 	 * @param serviceName Service for which the access rights shall be checked.
+	 * @param serviceType The type of the service. Eg. OBJECT, SERVICEPATH, FUNCTIONAL ...
 	 * @param zone The Zone for which the service is valid and for which the access rights shall be checked. This can be 
 	 *             null and would indicate the default zone.
 	 * @param context The context for which the service is valid and for which the access rights shall be checked. This
@@ -274,13 +275,20 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	 * 
 	 * @return See desc
 	 */
-	public boolean hasAccess(AccessRight right, AccessType accessType, String serviceName, SIFZone zone, SIFContext context)
+	public boolean hasAccess(AccessRight right, AccessType accessType, String serviceName, ServiceType serviceType, SIFZone zone, SIFContext context)
 	{
 		boolean accessApproved = false;
 		for (ServiceInfo serviceInfo : getServices())
 		{
 			if (serviceInfo.getServiceName().equals(serviceName)) //service name matches
 			{
+			    // Check if service type matches
+			    boolean serviceTypeMatches = true;
+			    if (serviceType != null)
+			    {
+			        serviceTypeMatches = (serviceInfo.getServiceType() == serviceType);
+			    }
+			    
 				//Check if Zone matches
 				boolean zoneMatches = (zone == null) ? serviceInfo.getZone().getIsDefault() : zone.getId().equals(serviceInfo.getZone().getId());
 				
@@ -288,9 +296,9 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 				boolean contextMatches = (context == null) ? serviceInfo.getContext().getIsDefault() : context.getId().equals(serviceInfo.getContext().getId());
 
 				// Check if access right is the correct level
-				if (zoneMatches && contextMatches)
+				if (zoneMatches && contextMatches && serviceTypeMatches)
 				{
-					accessApproved = serviceInfo.getRights().hasRight(right, accessType);
+				    accessApproved = serviceInfo.getRights().hasRight(right, accessType);
 				}
 			}
 		}
