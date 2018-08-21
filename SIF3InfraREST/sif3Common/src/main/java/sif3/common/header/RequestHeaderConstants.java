@@ -36,7 +36,7 @@ public class RequestHeaderConstants
 	public static final String HDR_AUTH_TOKEN = HttpHeaders.AUTHORIZATION;
 	public static final String HDR_GENERATOR_ID = "generatorId";
 	public static final String HDR_MESSAGE_TYPE = "messageType"; // RESPONSE, EVENT, ERROR
-	public static final String HDR_SERVICE_TYPE = "serviceType"; // OBJECT, FUNCTION, UTILITY, SERVICEPATH, XQUERYTEMPLATE
+	public static final String HDR_SERVICE_TYPE = "serviceType"; // OBJECT, FUNCTIONAL, UTILITY, SERVICEPATH, XQUERYTEMPLATE
 	public static final String HDR_DATE_TIME = "timestamp";
 	public static final String HDR_SOURCE_NAME = "sourceName";
     public static final String HDR_FINGERPRINT = "fingerprint";

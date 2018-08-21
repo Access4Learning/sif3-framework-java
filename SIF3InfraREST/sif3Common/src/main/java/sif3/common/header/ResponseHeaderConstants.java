@@ -45,7 +45,7 @@ public class ResponseHeaderConstants
 	public static final String HDR_REQUEST_ID = "requestId";
 	public static final String HDR_RESPONSE_ACTION = "responseAction"; // CREATE, UPDATE, DELETE, QUERY
 	public static final String HDR_REL_SERVICE_PATH = "relativeServicePath";
-	public static final String HDR_SERVICE_TYPE = "serviceType"; // OBJECT, FUNCTION, UTILITY, SERVICEPATH, XQUERYTEMPLATE
+	public static final String HDR_SERVICE_TYPE = "serviceType"; // OBJECT, FUNCTIONAL, UTILITY, SERVICEPATH, XQUERYTEMPLATE
 
 	/* Paging and navigation related properties */
 	public static final String HDR_NAVIGATION_ID = CommonConstants.PagingResponseProperty.navigationId.name(); //"navigationId"; 
