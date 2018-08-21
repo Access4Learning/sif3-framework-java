@@ -25,14 +25,27 @@ import sif3.common.model.URIPathInfo;
  */
 public class TestPathInfo
 {
+    public static final String OBJ_SVC= "Object";
+    public static final String SP_SVC= "SERVICEPath";
+    public static final String FS_SVC= "FUNCTIONAL";
+    
     public static void main(String[] argv)
     {
-        System.out.println(new URIPathInfo("/SchoolInfos/1234-1245/StudentPersonal.xml;zoneId=ABC;contextId=DEFAULT"));
-        System.out.println(new URIPathInfo("/SchoolInfos/1234-1245/StudentPersonal.xml;zoneId=ABC;contextId=DEFAULT?myParam=7"));
-        System.out.println(new URIPathInfo("/SchoolInfos.xml;zoneId=ABC;"));
-        System.out.println(new URIPathInfo("/SchoolInfos/1234;zoneId=ABC;"));
-        System.out.println(new URIPathInfo("/SchoolInfos;zoneId=ABC;test=2?myParam=aabss"));
-        System.out.println(new URIPathInfo("/SchoolInfos;zoneId=ABC;test=2?myParam=aabss&param2=&param3=56"));
-        System.out.println(new URIPathInfo("/SchoolInfos/1234-1245/StudentPersonals/9876-0998AF/StudentDailyAttendances;zoneId=ABC;contextId=DEFAULT?myParam=7"));
+        // Object Services
+        System.out.println(new URIPathInfo("/SchoolInfos.xml;zoneId=ABC;", OBJ_SVC));
+        System.out.println(new URIPathInfo("/SchoolInfos/1234;zoneId=ABC;", OBJ_SVC));
+        System.out.println(new URIPathInfo("/SchoolInfos;zoneId=ABC;test=2?myParam=aabss", OBJ_SVC));
+        System.out.println(new URIPathInfo("/SchoolInfos;zoneId=ABC;test=2?myParam=aabss&param2=&param3=56", OBJ_SVC));
+        
+        //Service Paths
+        System.out.println(new URIPathInfo("/SchoolInfos/1234-1245/StudentPersonal.xml;zoneId=ABC;contextId=DEFAULT", SP_SVC));
+        System.out.println(new URIPathInfo("/SchoolInfos/1234-1245/StudentPersonal.xml;zoneId=ABC;contextId=DEFAULT?myParam=7", SP_SVC));
+        System.out.println(new URIPathInfo("/SchoolInfos/1234-1245/StudentPersonals/9876-0998AF/StudentDailyAttendances;zoneId=ABC;contextId=DEFAULT?myParam=7", SP_SVC));
+
+        // Job Services
+        System.out.println(new URIPathInfo("/StudentRollover;contextId=DEFAULT?myParam=7", FS_SVC));
+        System.out.println(new URIPathInfo("/StudentRollover/1234-7765-efee;contextId=DEFAULT", FS_SVC));
+        System.out.println(new URIPathInfo("/StudentRollover/1234-7765-efee/Phase1?myParam=7", FS_SVC));
+
     }   
 }
