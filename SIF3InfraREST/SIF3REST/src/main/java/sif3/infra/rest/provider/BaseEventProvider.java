@@ -29,12 +29,12 @@ import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.EventProvider;
 import sif3.common.interfaces.SIFEventIterator;
+import sif3.common.model.ACL.AccessRight;
+import sif3.common.model.ACL.AccessType;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceInfo;
-import sif3.common.model.ServiceRights.AccessRight;
-import sif3.common.model.ServiceRights.AccessType;
 import sif3.common.model.ZoneContextInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.BaseResponse;
@@ -242,7 +242,7 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 							    for (ZoneContextInfo zoneCtxInfo : sifEvents.getLimitToZoneCtxList())
 							    {
 							        // Check if provider has rights to publish to given zone and context
-							        if (sif3Session.hasAccess(AccessRight.PROVIDE, AccessType.APPROVED, serviceName, zoneCtxInfo.getZone(), zoneCtxInfo.getContext()))
+							        if (sif3Session.hasAccess(AccessRight.PROVIDE, AccessType.APPROVED, serviceName, null, zoneCtxInfo.getZone(), zoneCtxInfo.getContext()))
 						            {
                                         failedRecords = failedRecords + prepareEventAndSend(evtClient, sifEvents, zoneCtxInfo.getZone(), zoneCtxInfo.getContext(), eventAction);							            
 						            }

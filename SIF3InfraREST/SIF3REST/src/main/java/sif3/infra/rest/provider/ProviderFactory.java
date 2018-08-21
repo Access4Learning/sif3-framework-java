@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.conversion.ModelObjectInfo;
-import sif3.common.interfaces.Provider;
 
 /**
  * This is the provider factory. Each provider deals with a number of objects (i.e. StudentPersonal, SchoolInfo etc). 
@@ -133,14 +132,14 @@ public class ProviderFactory
 	}
 	
 	/**
-	 * This method is intended to be used to get a new instance of an object provider class to be used for request/response methods.
+	 * This method is intended to be used to get a new instance of an provider class to be used for request/response methods.
 	 * If provider doesn't exist for the given objectInfo then null is returned.
 	 * 
 	 * @param objectInfo must have at least the ObjectName property set otherwise null is returned and an error is logged.
 	 * 
 	 * @return See desc.
 	 */
-	public Provider getProvider(ModelObjectInfo objectInfo)
+	public Object getProvider(ModelObjectInfo objectInfo)
 	{
         if ((objectInfo != null) && (StringUtils.notEmpty(objectInfo.getObjectName())))
         {
@@ -149,7 +148,7 @@ public class ProviderFactory
             {
                 try
                 {
-                    return (BaseProvider) providerClassInfo.getClassInstance(null);
+                    return providerClassInfo.getClassInstance(null);
                 }
                 catch (Exception ex)
                 {
@@ -196,17 +195,21 @@ public class ProviderFactory
                 Object classObj = providerClassInfo.getClassInstance(null);
 
                 // Set properties and add it to correct structure
-                if (classObj instanceof BaseProvider)
+                if (classObj instanceof CoreProvider)
                 {
-                    BaseProvider provider = (BaseProvider) classObj;
-                    ModelObjectInfo objectInfo = provider.getMultiObjectClassInfo();
+                    CoreProvider provider = (CoreProvider) classObj;
+                    ModelObjectInfo objectInfo = provider.getCollectionObjectClassInfo();
                     if ((objectInfo != null) && (StringUtils.notEmpty(objectInfo.getObjectName())))
                     {
                         // First add it to the standard request/response hashmap
                         providerClasses.put(objectInfo, providerClassInfo);
 
-                        // Add it to hasmap for background threads
-                        eventProviders.put(objectInfo, provider);
+                        // So far only Object Services (BaseProvider) support events.
+                        if (classObj instanceof BaseProvider)
+                        {
+                            // Add it to hasmap for background threads
+                            eventProviders.put(objectInfo, (BaseProvider)provider);
+                        }
                     }
                     else
                     {
