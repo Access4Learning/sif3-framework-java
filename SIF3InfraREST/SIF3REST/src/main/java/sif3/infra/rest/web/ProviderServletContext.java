@@ -35,10 +35,13 @@ import sif3.common.interfaces.HibernateProperties;
 import sif3.common.persist.common.HibernateHelper;
 import sif3.common.persist.common.HibernateUtil;
 import sif3.infra.common.env.mgr.ProviderManagerFactory;
+import sif3.infra.common.env.types.EnvironmentInfo;
+import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.interfaces.EnvironmentConnector;
 import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.rest.env.connectors.EnvironmentConnectorFactory;
 import sif3.infra.rest.provider.ProviderFactory;
+import sif3.infra.rest.quarz.FunctionalServiceHouseKeeping;
 
 /**
  * This class is to initialise the provider at startup and clean up resources at shutdown.
@@ -54,6 +57,7 @@ public class ProviderServletContext implements ServletContextListener
 	private static final String SERVICE_PROPERTY_FILE_TAG = "SERVICE_PROPERTY_FILE";
 
    	private EnvironmentConnector connector = null;
+   	private FunctionalServiceHouseKeeping fsHouseKeeper = null;
 	
    	/*
    	 * (non-Javadoc)
@@ -127,6 +131,9 @@ public class ProviderServletContext implements ServletContextListener
 			
 			// If all is good till now we try to install the Auditor Filter
 			installAuditorFilter(servletCtxEvent, envMgr.getServiceProperties());
+			
+			// Setup back ground processes or Cron jobs
+			scheduleJobs(envMgr.getEnvironmentInfo());
 		}
 		logger.info("Initialise Provider sucessful: "+allOK);
 		
@@ -146,6 +153,12 @@ public class ProviderServletContext implements ServletContextListener
      */
     public void contextDestroyed(ServletContextEvent servletCtxEvent) 
     {
+        logger.info("Shutdown Functional Services Housekeeper...");
+        if (fsHouseKeeper != null)
+        {
+            fsHouseKeeper.shutdown();
+        }
+        
         logger.info("Shutdown Provider...");
         EnvironmentManager envMgr = ProviderManagerFactory.getEnvironmentManager();
 
@@ -194,4 +207,21 @@ public class ProviderServletContext implements ServletContextListener
     	}
     }
     
+    private void scheduleJobs(EnvironmentInfo envInfo)
+    {
+        ProviderEnvironment providerEnvironment = (ProviderEnvironment)envInfo;
+        if (providerEnvironment.isJobEnabled())
+        {
+            logger.info("Install Functional Service HouseKeeping Job.");
+            fsHouseKeeper = new FunctionalServiceHouseKeeping();
+            if (!fsHouseKeeper.start(providerEnvironment))
+            {
+                logger.error("Failed to schedule Functional Service House Keeper. See previous error log entry for details.");
+            }
+        }
+        else
+        {
+            logger.info("Functional Services not enabled for this Provider.");
+        }
+    }
 }
