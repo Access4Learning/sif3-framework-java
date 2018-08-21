@@ -165,8 +165,12 @@ project is upgraded properly to the new framework version.**
 **Please refer to the detailed release notes in "release/v0.12.0" carefully to ensure that your project is upgraded properly to the 
 new framework version.**
 
-## Version from MMM DD, 2017: v0.13.0 - Various changes
-- Fixed an issue with the DatuUtils class where ISO 8601 Dates didn't convert correctly to Zulu (GMT) Date and Time.
+## Version from Aug 21, 2018: v0.13.0 - Various changes
+- Fixed a number of minor issues.
+- Added SIFException to many Provider Interface methods to enable providers to throw a "generic" exceptions where the provider can customise
+  the HTTP Status Code and error message to be returned to the consumer.
+- Added Functional Services functionality (except event part). Usage of this functionality is detailed in the developer's guide in
+  section 5.11.
 
 **Please refer to the detailed release notes in "release/v0.13.0" carefully to ensure that your project is upgraded properly to the 
 new framework version.**
