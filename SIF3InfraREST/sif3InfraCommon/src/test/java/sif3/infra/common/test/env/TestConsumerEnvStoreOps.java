@@ -25,13 +25,14 @@ import sif3.common.persist.common.HibernateUtil;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.env.ops.ConsumerEnvironmentStoreOperations;
 import sif3.infra.common.model.EnvironmentType;
+import sif3.infra.common.model.JobType;
 
 
 /**
  * @author Joerg Huber
  *
  */
-public class TestConsumerEnvStoreOps
+public class TestConsumerEnvStoreOps extends TestBase
 {
 	private static final AdapterType CONSUMER = AdapterType.CONSUMER;
 	private static final sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType DIRECT = sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType.DIRECT;
@@ -39,6 +40,7 @@ public class TestConsumerEnvStoreOps
 	private ConsumerEnvironmentStoreOperations envOps = null;
 	
 	private static final String TEMPLATE_FILE_NAME="devLocal.xml";
+	private static final String JOB_TEMPLATE_FILE_NAME="rolloverStudentJob.xml";
 	private static final String SESSION_TOKEN="12341234-5678-4123-1234-123412345678";
 	//private static final String SESSION_TOKEN="e88da655-9ca6-41c3-aa21-ec467ed84437";
 	//private static final String SESSION_TOKEN="98154bc3-d4b3-427d-bf40-58ed9705f6de";
@@ -51,38 +53,22 @@ public class TestConsumerEnvStoreOps
 	
 	public TestConsumerEnvStoreOps()
 	{
-        HibernateUtil.initialise(null);
+//        HibernateUtil.initialise(null);
+        super();
 		envOps = new ConsumerEnvironmentStoreOperations(SERVICE_NAME);
 	}
 	
-	private void printEnvironment(EnvironmentType env)
-	{
-		if (env == null)
-		{
-			System.out.println("Environment is null!");
-		}
-		else
-		{
-			try
-			{
-				InfraMarshalFactory marshaller = new InfraMarshalFactory();
-				System.out.println("Environment as XML:\n"+marshaller.marshalToXML(env));
-			}
-			catch (MarshalException ex)
-			{
-				ex.printStackTrace();
-			}
-      catch (UnsupportedMediaTypeExcpetion ex)
-      {
-        ex.printStackTrace();
-      }
-		}
-	}
 	
 	private void testExistTemplateEnvironment()
 	{
 		System.out.println("Template XML for "+TEMPLATE_FILE_NAME+" exists: "+envOps.existEnvironmentTemplate(TEMPLATE_FILE_NAME, CONSUMER, DIRECT));
 	}
+	
+    private void testExistJobTemplate()
+    {
+        System.out.println("Job Template XML for "+JOB_TEMPLATE_FILE_NAME+" exists: "+envOps.existJobTemplate(JOB_TEMPLATE_FILE_NAME, CONSUMER, DIRECT));
+    }
+
 	
 //	private void testExistWorkstoreEnvBySessionTK() throws IllegalArgumentException, PersistenceException
 //	{
@@ -91,8 +77,14 @@ public class TestConsumerEnvStoreOps
 	
 	private void testLoadTemplateEnvironment()
 	{
-		printEnvironment(envOps.loadTemplateEnvironmentData(TEMPLATE_FILE_NAME, CONSUMER, DIRECT));
+	    printInfraObjectAsXML(envOps.loadTemplateEnvironmentData(TEMPLATE_FILE_NAME, CONSUMER, DIRECT));
 	}
+	
+	private void testLoadJobTemplate()
+	{
+	    printInfraObjectAsXML(envOps.loadJobTemplateData(JOB_TEMPLATE_FILE_NAME, CONSUMER, DIRECT));
+    }
+
 	
 //	private void testLoadWorkstoreEnvBySessionTK()
 //	{
@@ -131,8 +123,10 @@ public class TestConsumerEnvStoreOps
 			System.out.println("Start Testing ConsumerEnvironmentStoreOperations...");
 			
 //			tester.testExistTemplateEnvironment();
+//          tester.testExistJobTemplate();
 //			tester.testExistWorkstoreEnvBySessionTK();
-			tester.testLoadTemplateEnvironment();
+//			tester.testLoadTemplateEnvironment();
+	         tester.testLoadJobTemplate();
 //			tester.testLoadWorkstoreEnvBySessionTK();
 //			tester.testStoreEnvironmentToWorkstore();
 //			tester.testRemoveEnvFromWorkstoreBySessionTK();
@@ -140,6 +134,10 @@ public class TestConsumerEnvStoreOps
 		catch (Exception ex)
 		{
 			ex.printStackTrace();
+		}
+		finally
+		{
+		    tester.shutdown();
 		}
 		System.out.println("End Testing ConsumerEnvironmentStoreOperations.");
 	}
