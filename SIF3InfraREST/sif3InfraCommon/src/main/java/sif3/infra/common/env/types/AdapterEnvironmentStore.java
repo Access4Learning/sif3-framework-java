@@ -2,7 +2,7 @@
  * AdapterEnvironmentStore.java
  * Created: 11/02/2014
  *
- * Copyright 2014 Systemic Pty Ltd
+ * Copyright 2014-2017 Systemic Pty Ltd
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package sif3.infra.common.env.types;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
@@ -32,6 +33,7 @@ import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.CommonConstants.AuthenticationType;
+import sif3.common.CommonConstants.JobState;
 import sif3.common.CommonConstants.QueuePollingType;
 import sif3.common.CommonConstants.QueueStrategy;
 import sif3.common.header.HeaderProperties;
@@ -47,7 +49,6 @@ import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
  */
 public class AdapterEnvironmentStore implements Serializable
 {
-	
     private static final long serialVersionUID = 34177453457564336L;
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
@@ -57,6 +58,7 @@ public class AdapterEnvironmentStore implements Serializable
 	private static final String CONSUMER_DIR_NAME = "consumer";
 	private static final String DIRECT_DIR_NAME = "direct";
 	private static final String BROKERED_DIR_NAME = "brokered";
+	private static final String JOB_DIR_NAME = "job";
 	
 	private static final String XML = "XML";
 	private static final String JSON = "JSON";
@@ -124,11 +126,23 @@ public class AdapterEnvironmentStore implements Serializable
 		}
     }
 	
+    public String getFullJobTemplateDirName(boolean isConsumer, EnvironmentType envType)
+    {
+        if (isConsumer)
+        {
+            return getEnvDirName()+"/"+TEMPLATE_DIR_NAME+"/"+JOB_DIR_NAME;
+        }
+        else // at the moment it is the same structure as with a consumer but that might change in future.
+        {
+            return getEnvDirName()+"/"+TEMPLATE_DIR_NAME+"/"+JOB_DIR_NAME;
+        }
+    }
+	
 	public String getEnvDirName()
 	{
 		return  getEnvironmentBaseDirName()+"/"+((getEnvironment().getAdapterType() == AdapterType.CONSUMER) ? CONSUMER_DIR_NAME : PROVIDER_DIR_NAME );
 	}
-	
+
 	@Override
     public String toString()
     {
@@ -178,6 +192,14 @@ public class AdapterEnvironmentStore implements Serializable
 						if (!checkAndCreateDir(getFullTemplateDirName(isConsumer, environment.getEnvironmentType())))
 						{
 							errors = true;
+						}
+						else
+						{
+						    // Check and create Job Template directory
+						    if (!checkAndCreateDir(getFullJobTemplateDirName(isConsumer, environment.getEnvironmentType())))
+	                        {
+	                            errors = true;
+	                        }
 						}
 					}
 					
@@ -502,30 +524,34 @@ public class AdapterEnvironmentStore implements Serializable
 		// Secure URL Base URL for connectors
 		String secureConnectorBaseURLStr = props.getPropertyAsString("env.connector.url.secure", null);
 
-		if (StringUtils.isEmpty(connectorBaseURLStr) && StringUtils.isEmpty(secureConnectorBaseURLStr))
+		// In a DIRECT environment we need at least the connector base URL or secure connector base URL
+		if (envInfo.getEnvironmentType() == EnvironmentType.DIRECT)
 		{
-			logger.error("env.connector.url AND env.connector.url.secure for "+getAdapterFileNameWithoutExt()+".properties is missing. You must provide at least one of these URLs for them.");
-			errorsFound = true;
+    		if (StringUtils.isEmpty(connectorBaseURLStr) && StringUtils.isEmpty(secureConnectorBaseURLStr))
+    		{
+    			logger.error("env.connector.url AND env.connector.url.secure for "+getAdapterFileNameWithoutExt()+".properties is missing. You must provide at least one of these URLs for them.");
+    			errorsFound = true;
+    		}
+    		else
+    		{
+    			if (StringUtils.notEmpty(connectorBaseURLStr))
+    			{
+    				envInfo.setConnectorBaseURI(cleanURI(connectorBaseURLStr, "env.connector.url"));
+    				if (envInfo.getConnectorBaseURI() == null)
+    				{
+    					errorsFound = true;
+    				}
+    			}
+    			if (StringUtils.notEmpty(secureConnectorBaseURLStr))
+    			{
+    				envInfo.setSecureConnectorBaseURI(cleanURI(secureConnectorBaseURLStr, "env.connector.url.secure"));
+    				if (envInfo.getSecureConnectorBaseURI() == null)
+    				{
+    					errorsFound = true;
+    				}
+    			}
+    		}
 		}
-		else
-		{
-			if (StringUtils.notEmpty(connectorBaseURLStr))
-			{
-				envInfo.setConnectorBaseURI(cleanURI(connectorBaseURLStr, "env.connector.url"));
-				if (envInfo.getConnectorBaseURI() == null)
-				{
-					errorsFound = true;
-				}
-			}
-			if (StringUtils.notEmpty(secureConnectorBaseURLStr))
-			{
-				envInfo.setSecureConnectorBaseURI(cleanURI(secureConnectorBaseURLStr, "env.connector.url.secure"));
-				if (envInfo.getSecureConnectorBaseURI() == null)
-				{
-					errorsFound = true;
-				}
-			}
-		}  		
   		
 		envInfo.setBaseURI(cleanURI(props.getPropertyAsString("env.baseURI", null), "env.baseURI"));
 		if (envInfo.getEnvironmentType() == EnvironmentType.BROKERED) // The baseURI is required 
@@ -548,6 +574,37 @@ public class AdapterEnvironmentStore implements Serializable
 
         // Allow access_token or URL
         envInfo.setAllowAuthOnURL(adapterProperties.getPropertyAsBool("adapter.authTokenOnURL.allowed", false));
+        
+        
+        // Functional Service Properties
+        envInfo.setJobEnabled(adapterProperties.getPropertyAsBool("job.enabled", false));
+        envInfo.setJobEventFrequency(adapterProperties.getPropertyAsInt("job.event.frequency", 900));
+        envInfo.setJobKeepDays(adapterProperties.getPropertyAsInt("job.stale.keep.days", 30));
+        envInfo.setJobEventKeepDays(adapterProperties.getPropertyAsInt("job.changelog.keep.days", 30));
+        envInfo.setJobHousekeepingCron(adapterProperties.getPropertyAsString("job.housekeeping.cron", ProviderEnvironment.JOB_HOUSEKEEPING_CRON));
+        
+        // Get Job End States
+        List<String> endStateStrArray = props.getFromCommaSeparated("job.endStates");
+        if (endStateStrArray.isEmpty()) // not set or not provided
+        {
+            envInfo.getJobEndStates().add(JobState.COMPLETED);
+            envInfo.getJobEndStates().add(JobState.FAILED);
+        }
+        else if (!endStateStrArray.get(0).equalsIgnoreCase("NONE"))
+        {
+            for (String endState : endStateStrArray)
+            {
+                try
+                {
+                    envInfo.getJobEndStates().add(JobState.valueOf(endState));
+                }
+                catch (Exception ex) // unknown state defined in list. Log error but ignore the value and continue
+                {
+                    logger.error("Property 'job.endStates' in "+getAdapterFileNameWithoutExt()+".properties holds an invalid Job State. Invalid value is: "+endState+".");
+                    errorsFound = true;             
+                }
+            }
+        }
         
         // Load custom response headers.
         errorsFound = errorsFound || loadCustomResponseHeaders(props, envInfo);
