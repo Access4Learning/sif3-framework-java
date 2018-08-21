@@ -151,6 +151,16 @@ public class BaseMetadata implements Serializable
     	}
     	return value;
     }
+    
+    /**
+     * Returns the set of URL Query Parameters and HTTP Headers in their raw form.
+     * 
+     * @return See desc.
+     */
+    public RequestParameters getRequestParameters()
+    {
+        return requestParameters;
+    }
 	
 	@Override
     public String toString()
