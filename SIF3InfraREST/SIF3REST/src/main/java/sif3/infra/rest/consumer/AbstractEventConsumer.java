@@ -22,13 +22,10 @@ import java.util.List;
 
 import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.interfaces.EventConsumer;
+import sif3.common.model.ACL.AccessRight;
 import sif3.common.model.EventMetadata;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.ServiceInfo;
-import sif3.common.model.ServiceRights;
-import sif3.common.model.ServiceRights.AccessRight;
-import sif3.common.persist.model.SIF3Session;
-import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 
 /**
  * This is the core class that a developer will use to implement for a consumer that shall subscribe to events. Each consumer for each object 
@@ -129,11 +126,10 @@ public abstract class AbstractEventConsumer<L> extends AbstractConsumer implemen
      */
 	protected final List<ServiceInfo> getEventServices()
 	{
-		SIF3Session sif3Session = ConsumerEnvironmentManager.getInstance().getSIF3Session();
-		return filterEventServices(sif3Session.getServiceInfoForService(getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, AccessRight.SUBSCRIBE, ServiceRights.AccessType.APPROVED));
+		return filterEventServices(getAllApprovedServicesForRights(getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, AccessRight.SUBSCRIBE));
 	}
 
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-	}
+}
