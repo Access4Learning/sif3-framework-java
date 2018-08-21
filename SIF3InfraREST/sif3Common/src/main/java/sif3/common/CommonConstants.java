@@ -127,6 +127,11 @@ public class CommonConstants
      * Phase states (for functional services)
      */
     public enum PhaseState {NOTAPPLICABLE, NOTSTARTED, PENDING, SKIPPED, INPROGRESS, COMPLETED, FAILED}
+    
+    /*
+     * ACLs are applied in many places. This enum defines the plaves where they can apply.
+     */
+    public enum RightType {SERVICE, PHASE, STATE};
 
     /*------------------------------------------------------------------------------------*/
 	/* URL Query Parameter names in relation to security (special case for SIF Express) --*/
@@ -153,5 +158,6 @@ public class CommonConstants
 	/* HTTP Status that are not listed in the Response.Status class --*/
 	/*----------------------------------------------------------------*/
 	public static final int RESPONSE_TOO_LARGE = 413;
+	public static final int NOT_IMPLEMENTED = 501;
 	
 }
