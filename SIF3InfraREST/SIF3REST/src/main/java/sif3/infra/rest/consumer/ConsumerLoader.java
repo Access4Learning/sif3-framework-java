@@ -69,6 +69,7 @@ public class ConsumerLoader
     private ConsumerSubscriptionConnector subscriptionConnector = null;
     private List<AbstractEventConsumer<?>> eventConsumers = new ArrayList<AbstractEventConsumer<?>>();
     private List<AbstractConsumer> crudConsumers = new ArrayList<AbstractConsumer>();
+    private List<AbstractFunctionalServiceConsumer> fsServiceConsumers = new ArrayList<AbstractFunctionalServiceConsumer>();
   
     private List<ExecutorService> msgReaderServices = new ArrayList<ExecutorService>();
   
@@ -220,7 +221,13 @@ public class ConsumerLoader
 			consumer.finalise();
 		}
 
-		if (getConsumerEnvironment().getEventsEnabled() || (getConsumerEnvironment().getDelayedEnabled()))
+        for (AbstractFunctionalServiceConsumer consumer : fsServiceConsumers)
+        {
+            logger.debug("Shutdown " + consumer.getClass().getSimpleName());
+            consumer.finalise();
+        }
+
+        if (getConsumerEnvironment().getEventsEnabled() || (getConsumerEnvironment().getDelayedEnabled()))
 		{
     		logger.debug("Shutdown Event Subscription Connector...");
     		if (subscriptionConnector != null)
@@ -264,28 +271,36 @@ public class ConsumerLoader
 		List<LocalQueueServiceInfo> allLocalQueueEventServices = new ArrayList<LocalQueueServiceInfo>();
 		List<LocalQueueServiceInfo> allLocalQueueCRUDServices = new ArrayList<LocalQueueServiceInfo>();
 
-		for (AbstractEventConsumer<?> consumer : eventConsumers)
-		{
-		    // Get Event services for this consumer
-			if (getConsumerEnvironment().getEventsEnabled())
-			{
-				addServices(allLocalQueueEventServices, consumer.getEventServices(), consumer.getLocalConsumerQueue());
-			}
-		    
-		    // Get CRUD services for this consumer
-			if (getConsumerEnvironment().getDelayedEnabled())
-			{
-				addServices(allLocalQueueCRUDServices, consumer.getAllApprovedCRUDServices(), consumer.getLocalConsumerQueue());
-			}
-		}
+        // Get all services for all Event ONLY consumers
+        if (getConsumerEnvironment().getEventsEnabled())
+        {
+            for (AbstractEventConsumer<?> consumer : eventConsumers)
+            {
+                addServices(allLocalQueueEventServices, consumer.getEventServices(), consumer.getLocalConsumerQueue());
+            }
+            for (AbstractFunctionalServiceConsumer consumer : fsServiceConsumers)
+            {
+                addServices(allLocalQueueEventServices, consumer.getEventServices(), consumer.getLocalConsumerQueue());
+            }
+        }
 		
-		// Get all services for all CRUD ONLY consumers
+		// Get all services for all CRUD consumers
 		if (getConsumerEnvironment().getDelayedEnabled())
 		{
     		for (AbstractConsumer consumer : crudConsumers)
     		{
                 addServices(allLocalQueueCRUDServices, consumer.getAllApprovedCRUDServices(), consumer.getLocalConsumerQueue());
     		}
+    		
+            for (AbstractFunctionalServiceConsumer consumer : fsServiceConsumers)
+            {
+                addServices(allLocalQueueCRUDServices, consumer.getAllApprovedCRUDServices(), consumer.getLocalConsumerQueue());
+            }
+
+            for (AbstractEventConsumer<?> consumer : eventConsumers)
+            {
+                addServices(allLocalQueueCRUDServices, consumer.getAllApprovedCRUDServices(), consumer.getLocalConsumerQueue());
+            }
 		}
 		
 		if (logger.isDebugEnabled())
@@ -400,9 +415,14 @@ public class ConsumerLoader
 					logger.debug("Added " + classObj.getClass().getSimpleName() + " to crudConsumer only list");
 					crudConsumers.add((AbstractConsumer) classObj);
 				}
+				else if (classObj instanceof AbstractFunctionalServiceConsumer)
+				{
+                    logger.debug("Added " + classObj.getClass().getSimpleName() + " to fsServiceConsumers list");
+                    fsServiceConsumers.add((AbstractFunctionalServiceConsumer) classObj);
+				}
 				else
 				{
-					logger.error("Consumer class " + className + " doesn't extend AbstractConsumer or AbstractEventConsumer. Cannot initialse the Consumer.");
+					logger.error("Consumer class " + className + " doesn't extend AbstractConsumer, AbstractEventConsumer of AbstractFunctionalServiceConsumer. Cannot initialse the Consumer.");
 				}
 			}
 			catch (Exception ex)
