@@ -84,6 +84,18 @@
     </class>
     
     <!-- ************************* -->
+    <!-- SIF3_JOB_TEMPLATE         -->
+    <!-- ************************* -->
+    <class name="sif3.common.persist.model.JobTemplate" table="SIF3_JOB_TEMPLATE">
+        <id name="templateID" type="long" column="JOB_TEMPLATE_ID">
+            <generator class="assigned"/>
+        </id>
+        <property name="urlName" column="JOB_URL_NAME" type="string" length="100"/>
+        <property name="adapterType" column="ADAPTER_TYPE" type="string" length="20"/>
+        <property name="templateFileName" column="TEMPLATE_FILE_NAME" type="string" length="100"/>
+    </class>
+
+    <!-- ************************* -->
     <!-- SIF3_APP_TEMPLATE         -->
     <!-- ************************* -->
     <class name="sif3.common.persist.model.AppEnvironmentTemplate" table="SIF3_APP_TEMPLATE">
@@ -128,6 +140,53 @@
         </id>
         <property name="parameterName" column="PARAM_NAME" type="string" length="45"/>
         <property name="parameterValue" column="PARAM_VALUE" type="string" length="256"/>
+    </class>
+    
+    <!-- ************************* -->
+    <!-- SIF3_JOB                  -->
+    <!-- ************************* -->
+    <class name="sif3.common.persist.model.SIF3Job" table="SIF3_JOB">
+        <id name="internalID" type="long" column="JOB_ID">
+            <generator class="native"/>
+        </id>
+
+        <property name="jobID" column="JOB_REFID" type="string" length="36"/>
+        <property name="serviceName" column="SERVICE_NAME" type="string" length="256"/>
+        <property name="currentState" column="CURRENT_JOB_STATE" type="string" length="30"/>
+        <property name="environmentID" column="ENVIRONMENT_REFID" type="string" length="36"/>
+        <property name="adapterType" column="ADAPTER_TYPE" type="string" length="20"/>
+        <property name="fingerprint" column="FINGERPRINT" type="string" length="256"/>
+        <property name="zoneID" column="ZONE_ID" type="string" length="256"/>
+        <property name="contextID" column="CONTEXT_ID" type="string" length="256"/>
+        <property name="created" column="CREATED" type="timestamp"/>
+        <property name="timeoutPeriod" column="TIMEOUT_PERIOD" type="string" length="30"/>
+        <property name="lastModified" column="LAST_MODIFIED" type="timestamp"/>
+        <property name="expireDatetime" column="EXPIRE_DATETIME" type="timestamp"/>
+        <property name="jobXML" column="JOB_XML" type="text"/>
+    </class>    
+    
+    <!-- ************************* -->
+    <!-- SIF3_JOB_EVENT            -->
+    <!-- ************************* -->
+     <class name="sif3.common.persist.model.SIF3JobEvent" table="SIF3_JOB_EVENT">
+        <id name="internalID" type="long" column="JOB_EVENT_ID">
+            <generator class="native"/>
+        </id>
+
+        <property name="eventDate" column="JOB_EVENT_DATETIME" type="timestamp"/>
+        <property name="jobID" column="JOB_REFID" type="string" length="36"/>
+        <property name="serviceName" column="SERVICE_NAME" type="string" length="256"/>
+        <property name="environmentID" column="ENVIRONMENT_REFID" type="string" length="36"/>
+        <property name="adapterType" column="ADAPTER_TYPE" type="string" length="20"/>
+        <property name="fingerprint" column="FINGERPRINT" type="string" length="256"/>
+        <property name="zoneID" column="ZONE_ID" type="string" length="256"/>
+        <property name="contextID" column="CONTEXT_ID" type="string" length="256"/>
+        <property name="eventType" column="EVENT_TYPE" type="string" length="1"/>
+        <property name="fullUpdate" column="FULL_UPDATE" type="boolean"/>
+        <property name="toFingerPrintOnly" column="TO_FINGERPRINT_ONLY" type="boolean"/>
+        <property name="published" column="EVENT_PUBLISHED" type="boolean"/>
+        <property name="publishedDate" column="PUBLISHED_DATETIME" type="timestamp"/>
+        <property name="jobXML" column="JOB_XML" type="text"/>
     </class>
 
 </hibernate-mapping>
