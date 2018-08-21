@@ -279,7 +279,7 @@ public class SIF3SubscriptionDAO extends BaseDAO
     	}
     	if (StringUtils.isEmpty(subscription.getServiceType()))
     	{
-            throw new IllegalArgumentException("subscription.serviceType property is null or empty. It must be set to OBJECT, UTILITY or FUNCTION.");          
+            throw new IllegalArgumentException("subscription.serviceType property is null or empty. It must be set to OBJECT, UTILITY or FUNCTIONAL.");          
     	}
     	
     	// If context is not given we set it to default context
