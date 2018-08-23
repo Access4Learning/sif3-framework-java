@@ -22,6 +22,10 @@ import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.output.DOMOutputter;
+
 import au.com.systemic.framework.utils.FileReaderWriter;
 import sif3.common.CommonConstants.PhaseState;
 import sif3.common.header.HeaderProperties;
@@ -148,6 +152,38 @@ public class TestRolloverStudentConsumer
             ex.printStackTrace();
         }
     }
+    
+    
+    private  org.w3c.dom.Element createInitPayload()
+    {     
+        // w3c usage
+        DOMOutputter domOutputter = new DOMOutputter();
+        try
+        {
+            Document document = new Document();
+            document.setRootElement(new Element("payload"));
+            org.w3c.dom.Document domDocument = domOutputter.output(document);
+            org.w3c.dom.Element rootElement = domDocument.getDocumentElement();
+            rootElement.setAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "type", "propertiesType");
+            
+            org.w3c.dom.Element child = domDocument.createElement("property");
+            child.setAttribute("name", "contextId");
+            child.setTextContent("future");
+            rootElement.appendChild(child);
+            
+            child = domDocument.createElement("property");
+            child.setAttribute("name", "initiator");
+            child.setTextContent("user1");
+            rootElement.appendChild(child);
+                
+            return rootElement;
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
+    }
 
     private void createJobs(RolloverStudentConsumer consumer)
     {
@@ -212,10 +248,10 @@ public class TestRolloverStudentConsumer
             List<ZoneContextInfo> zoneCtxList = new ArrayList<ZoneContextInfo>();
 //          zoneCtxList.add(new ZoneContextInfo(new SIFZone("auRolloverTestingZone"), null));
             
-            ArrayList<AttributeValue> attrValue = new ArrayList<AttributeValue>();
-            attrValue.add(new AttributeValue("old-year", "2017"));
-            attrValue.add(new AttributeValue("new-year", "2018"));
-            JobCreateRequestParameter jobCreateInfo = new JobCreateRequestParameter("oldYearEnrolment", attrValue);
+//            ArrayList<AttributeValue> attrValue = new ArrayList<AttributeValue>();
+//            attrValue.add(new AttributeValue("old-year", "2017"));
+//            attrValue.add(new AttributeValue("new-year", "2018"));
+            JobCreateRequestParameter jobCreateInfo = new JobCreateRequestParameter("oldYearEnrolment", createInitPayload());
             
             List<Response> responses = consumer.createJob(jobCreateInfo, zoneCtxList);
 
