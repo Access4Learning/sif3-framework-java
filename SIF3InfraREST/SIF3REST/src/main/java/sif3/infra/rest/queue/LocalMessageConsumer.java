@@ -76,7 +76,7 @@ public class LocalMessageConsumer implements Runnable
 	 * 
 	 * @param localQueue The local queue on which this consumer will be listening on.
 	 * @param consumerID A name of the consumer. Mainly needed for nice debug and error reporting.
-	 * @param consumer An instance of consumer that will process the message.
+	 * @param minimalConsumer An instance of consumer that will process the message.
 	 */
 	public LocalMessageConsumer(LocalConsumerQueue localQueue, String consumerID, MinimalConsumer minimalConsumer)
 	{
