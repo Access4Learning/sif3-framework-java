@@ -66,6 +66,14 @@ public class RolloverStudentsProvider extends BaseFunctionalServiceProvider
         logger.debug("Create Job for Functional Service "+getMultiObjectClassInfo().getObjectName()+"...");
       
         // At the moment we do nothing... A real implementation may need to do some stuff here.
+        if (jobData.getInitialization() != null)
+        {
+            logger.debug("Initialisation values:\nInitialisation Phase: "+jobData.getInitialization().getPhaseName()+"\nInitialisation Parameters: "+jobData.getInitialization().getPayload());
+        }
+        else
+        {
+            logger.debug("No initialisation provided for Job.");
+        }
       
         // return the final job object. Generally that is the same as the one given to this method.
         return jobData;
