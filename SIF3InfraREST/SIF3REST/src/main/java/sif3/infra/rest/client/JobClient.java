@@ -891,26 +891,7 @@ public class JobClient extends BaseClient
             }
             if (jobInitRequest.getInitParams() != null)
             {
-                //TODO: JH - Figure out on how to pass parameters along...
-                /*                
-                <payload xsi:type="propertiesType" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-                    <property name="contextId">future</property>
-                    <property name="initiator">user1</property>
-                    <property name="from">vendora</property>
-                    <property name="to">3pi</property>
-                    <property name="year">2018</property>
-                </payload>
-                */
-//                JobInitPayload payload = new JobInitPayload();
-//                for (AttributeValue attrValue : jobInitRequest.getInitParams())
-//                {
-//                    Property property = new Property();
-//                    property.setNameAndValue(attrValue.getAttribute(), attrValue.getValue());
-//                    
-//                    payload.getProperties().add(property);
-//                }
-//                
-//                initSection.setPayload(payload.getInitPayload());
+                initSection.setPayload(jobInitRequest.getInitParams());
             }
             job.setInitialization(initSection);
         }

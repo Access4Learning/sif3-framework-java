@@ -177,10 +177,10 @@ public class TestJobClient
 //          hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AUTH_TOKEN);
             URLQueryParameter urlQueryParams = new URLQueryParameter();
             
-            ArrayList<AttributeValue> attrValue = new ArrayList<AttributeValue>();
-            attrValue.add(new AttributeValue("old-year", "2017"));
-            attrValue.add(new AttributeValue("new-year", "2018"));
-            JobCreateRequestParameter jobCreateInfo = new JobCreateRequestParameter("oldYearEnrolment", attrValue);
+//            ArrayList<AttributeValue> attrValue = new ArrayList<AttributeValue>();
+//            attrValue.add(new AttributeValue("old-year", "2017"));
+//            attrValue.add(new AttributeValue("new-year", "2018"));
+            JobCreateRequestParameter jobCreateInfo = new JobCreateRequestParameter("oldYearEnrolment", null);
             Response response = client.createJob(jobCreateInfo, hdrProps, urlQueryParams, null, null);
             
             System.out.println("Job ID assigned = "+jobCreateInfo.getJobID());
