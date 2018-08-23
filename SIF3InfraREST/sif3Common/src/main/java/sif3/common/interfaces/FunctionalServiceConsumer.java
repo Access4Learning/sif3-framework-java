@@ -228,7 +228,7 @@ public interface FunctionalServiceConsumer extends MinimalConsumer
      * 
      * @param phaseInfo Hold the jobID and phase name of the job where the data shall be created. If the parameter or
      *                  any of its properties is null/empty then an IllegalArgumentException will be thrown.
-     * @param phaseData The data and its mime type that is given to the operation of this phase. The data property of this
+     * @param phaseDataRequest The data and its mime type that is given to the operation of this phase. The data property of this
      *                  parameter can be null in cases where no data is provided to this phase. This is entirely valid according
      *                  to the SIF Specification. If data is provided (as a String) then the mime type is set as well, by the consumer,
      *                  to indicate the format of the data. The provider can us this mime type to unmarshal the data into the 
@@ -283,7 +283,7 @@ public interface FunctionalServiceConsumer extends MinimalConsumer
      * 
      * @param phaseInfo Hold the jobID and phase name of the job where the data shall be updated. If the parameter or
      *                  any of its properties is null/empty then an IllegalArgumentException will be thrown.
-     * @param phaseData The data and its mime type that is given to the operation of this phase. The data property of this
+     * @param phaseDataRequest The data and its mime type that is given to the operation of this phase. The data property of this
      *                  parameter can be null in cases where no data is provided to this phase. This is entirely valid according
      *                  to the SIF Specification. If data is provided (as a String) then the mime type is set as well, by the consumer,
      *                  to indicate the format of the data. The provider can us this mime type to unmarshal the data into the 
@@ -335,7 +335,7 @@ public interface FunctionalServiceConsumer extends MinimalConsumer
      * 
      * @param phaseInfo Hold the jobID and phase name of the job where the data shall be deleted. If the parameter or
      *                  any of its properties is null/empty then an IllegalArgumentException will be thrown.
-     * @param phaseData The data and its mime type that is given to the operation of this phase. The data property of this
+     * @param phaseDataRequest The data and its mime type that is given to the operation of this phase. The data property of this
      *                  parameter can be null in cases where no data is provided to this phase. This is entirely valid according
      *                  to the SIF Specification. If data is provided (as a String) then the mime type is set as well, by the consumer,
      *                  to indicate the format of the data. The provider can us this mime type to unmarshal the data into the 
@@ -369,7 +369,7 @@ public interface FunctionalServiceConsumer extends MinimalConsumer
                                       CustomParameters customParameters) 
             throws IllegalArgumentException, ServiceInvokationException;
 
-            /*----------------------------*/
+    /*----------------------------*/
     /*-- Phase State Operations --*/
     /*----------------------------*/
     /**

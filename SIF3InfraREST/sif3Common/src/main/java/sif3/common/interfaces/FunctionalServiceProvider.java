@@ -351,8 +351,7 @@ public interface FunctionalServiceProvider extends DataModelLink
 	 * "Operations required by Provider to manage job and phase states" section in this class may be invoked as part of this
 	 * method implementation.
 	 * 
-     * @param jobID The ID of the Job for which a phase change was requested.
-     * @param phaseName The phase for which the state was updated.
+     * @param phaseInfo The job ID and phase name for which a phase change was requested.
      * @param newState The new state of the phase.
      * @param zone The Zone from which the request is being issued. Can be Null (default Zone)
      * @param context The Context for which the request applies. Can be Null (default Zone)
