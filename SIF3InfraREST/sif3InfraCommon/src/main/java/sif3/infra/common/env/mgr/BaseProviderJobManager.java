@@ -58,71 +58,7 @@ public abstract class BaseProviderJobManager extends BaseJobManager implements P
     /*-----------------------*/
     /*-- Interface Methods --*/
     /*-----------------------*/
-
-//    /* (non-Javadoc)
-//     * @see sif3.infra.common.interfaces.ProviderJobManager#hasConsumerPhaseStatusRightForJob(java.lang.String, java.lang.String, java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext, java.lang.String, sif3.common.model.ACL.AccessRight, sif3.common.model.ACL.AccessType)
-//     */
-//    @Override
-//    public boolean hasConsumerPhaseStatusRightForJob(String jobID, String serviceName, String phaseName, SIFZone zone, SIFContext context, String fingerprint, AccessRight right, AccessType accessType) throws ResourceNotFoundException
-//    {
-//        try
-//        {
-//            SIF3Job sif3Job = getJobAndCheckConsumer(jobID, serviceName, zone, context, fingerprint);
-//           
-//            // We are all good up to here. Let's get the actual Job object and check for phases and rights.
-//            JobType job = unmarschalJobXML(sif3Job.getJobXML());
-//            if (job == null) // could not unmarshal. We do not know anything about the job. Return false! Error should be logged
-//            {
-//                return false;
-//            }
-//            
-//            PhaseType phase = getPhase(job, phaseName);
-//            if (phase == null) // no phase found => return false
-//            {
-//                return false;
-//            }
-//            
-//            return hasRight( phase.getStatesRights(), right, accessType);
-//        }
-//        catch (PersistenceException | IllegalArgumentException ex)
-//        {
-//            logger.error("Failed to determine Phase Status Right for Service = '"+serviceName+"' and JobID = '"+jobID+"': "+ex.getMessage(), ex);
-//            return false;
-//        }
-//    }
-
-//    /* (non-Javadoc)
-//     * @see sif3.infra.common.interfaces.ProviderJobManager#hasConsumerPhaseRightForJob(java.lang.String, java.lang.String, java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext, java.lang.String, sif3.common.model.ACL.AccessRight, sif3.common.model.ACL.AccessType)
-//     */
-//    @Override
-//    public boolean hasConsumerPhaseRightForJob(String jobID, String serviceName, String phaseName, SIFZone zone, SIFContext context, String fingerprint, AccessRight right, AccessType accessType) throws ResourceNotFoundException
-//    {
-//        try
-//        {
-//            SIF3Job sif3Job = getJobAndCheckConsumer(jobID, serviceName, zone, context, fingerprint);
-//           
-//            // We are all good up to here. Let's get the actual Job object and check for phases and rights.
-//            JobType job = unmarschalJobXML(sif3Job.getJobXML());
-//            if (job == null) // could not unmarshal. We do not know anything about the job. Return false! Error should be logged
-//            {
-//                return false;
-//            }
-//            
-//            PhaseType phase = getPhase(job, phaseName);
-//            if (phase == null) // no phase found => return false
-//            {
-//                return false;
-//            }
-//            
-//            return hasRight(phase.getRights(), right, accessType);
-//        }
-//        catch (PersistenceException | IllegalArgumentException ex)
-//        {
-//            logger.error("Failed to determine Phase Right for Service = '"+serviceName+"' and JobID = '"+jobID+"': "+ex.getMessage(), ex);
-//            return false;
-//        }
-//    }
-    
+   
     /* (non-Javadoc)
      * @see sif3.infra.common.interfaces.ProviderJobManager#updateJobState(java.lang.String, sif3.common.CommonConstants.JobState)
      */
@@ -235,82 +171,6 @@ public abstract class BaseProviderJobManager extends BaseJobManager implements P
             }
         }
      }
-
-
-//    /* (non-Javadoc)
-//     * @see sif3.infra.common.interfaces.ProviderJobManager#updatePhaseStateByConsumer(java.lang.String, java.lang.String, sif3.common.CommonConstants.PhaseState)
-//     */
-//    @Override
-//    public StateType addPhaseStateByConsumer(String jobID, String phaseName, StateType newState) throws PersistenceException
-//    {
-//        JobService service = getService();
-//        SIF3Job sif3Job = service.getJobByUUID(jobID, getAdapterType());
-//        if (sif3Job != null)
-//        {
-//            // Get the actual Job Object from XML and search for appropriate phase
-//            JobType job = unmarschalJobXML(sif3Job.getJobXML());
-//            if (job != null) // all good so we can update.
-//            {
-//                PhaseType phase = getPhase(job, phaseName);
-//                if (phase != null) // add the state
-//                {
-//                    StateType state = addStateToPhase(phase, newState);
-//                    job.setLastModified(Calendar.getInstance());
-//                    try
-//                    {
-//                        sif3Job.setJobXML(createJobXML(job));
-//                    }
-//                    catch (MarshalException ex) // not good. We must rollback. This is done by simply throw PersistenceException.
-//                    {
-//                        throw new PersistenceException("Failed to marshal Job into XML after phase state update. Attempted to update state of phase "+phaseName+" to is "+newState+".", ex);
-//                    }
-//                    
-//                    service.updateJob(sif3Job);
-//                    
-//                    if (getEventSuported()) // Create UPDATE event.
-//                    {   
-//                        service.createJobEvent(sif3Job, EventAction.UPDATE, true);
-//                    }
-//
-//                    return state;
-//                }
-//            }
-//        }
-//        
-//        return null;
-//    }
-    
-//    /* (non-Javadoc)
-//     * @see sif3.infra.common.interfaces.ProviderJobManager#getStatesOfPhase(java.lang.String, java.lang.String)
-//     */
-//    @Override
-//    public StateCollectionType getStatesOfPhase(String jobID, String phaseName) throws PersistenceException
-//    {
-//        JobService service = getService();
-//        SIF3Job sif3Job = service.getJobByUUID(jobID, getAdapterType());
-//        if (sif3Job != null)
-//        {
-//            // Get the actual Job Object from XML and serch for appropriate phase
-//            JobType job = unmarschalJobXML(sif3Job.getJobXML());
-//            if (job != null) // all good so we can update.
-//            {
-//                PhaseType phase = getPhase(job, phaseName);
-//                if (phase != null) // add the state
-//                {
-//                    StateCollectionType states = phase.getStates();
-//                    if (states == null)
-//                    {
-//                        states = new StateCollectionType();
-//                    }
-//                    
-//                    return states;
-//                }
-//            }
-//        }
-//        
-//        // If we get here then we haven't found an appropiate job of phase.
-//        return new StateCollectionType();
-//    }
     
     /* (non-Javadoc)
      * @see sif3.infra.common.interfaces.ProviderJobManager#retrieveJobChangesSince(java.util.Date, java.lang.String, java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo)
@@ -353,34 +213,6 @@ public abstract class BaseProviderJobManager extends BaseJobManager implements P
     /*---------------------*/
     /*-- Private Methods --*/
     /*---------------------*/
-//    private SIF3Job getJobAndCheckConsumer(String jobID, String serviceName, SIFZone zone, SIFContext context, String fingerprint) throws ResourceNotFoundException, PersistenceException, IllegalArgumentException
-//    {
-//        SIF3Job sif3Job = getJob(jobID);
-//        if (sif3Job == null) // not found
-//        {
-//            throw new ResourceNotFoundException("Job does not exist.", "No Job with ID = "+jobID+" found.", "Provider");
-//        }
-//        
-//        // Let'scheck if the fingerprint is given and if so it must match
-//        boolean allGood = true;
-//        if (StringUtils.notEmpty(fingerprint))
-//        {
-//            allGood = allGood && fingerprint.equals(sif3Job.getFingerprint());
-//        }
-//        
-//        if (allGood) // lets check the rest: Is it the correct consumer in the right zone & context?
-//        {
-//            allGood = allGood && (serviceName.equals(sif3Job.getServiceName()) && zone.getId().equals(sif3Job.getZoneID()) && context.getId().equals(sif3Job.getContextID()));
-//        }
-//        
-//        if (!allGood) // Job not found for the given parameters
-//        {
-//            throw new ResourceNotFoundException("Job does not exist.", "No Job with ID = "+jobID+" found for service = "+serviceName+" in zone = "+zone.getId()+" and context = "+context.getId()+". Fingerprint is "+fingerprint+".", "Provider");                
-//        }
-//        
-//        return sif3Job;
-//    }
-    
     private PhaseType getPhase(JobType job, String phaseName)
     {
         // Start iterating through the phases until it matches.
@@ -425,25 +257,6 @@ public abstract class BaseProviderJobManager extends BaseJobManager implements P
         return null;
     }
 
-//    private boolean hasRight(RightsType rights, AccessRight right, AccessType accessType)
-//    {
-//        if (rights == null)
-//        {
-//            return false;
-//        }
-//        
-//        for (RightType rightType : rights.getRight())
-//        {
-//            if (rightType.getType().equals(right.name()) && rightType.getValue().equals(accessType.name())) // Found match!
-//            {
-//                return true;
-//            }
-//        }
-//        
-//        // if we get here then we haven't found the correct right
-//        return false;
-//    }
-    
     // Only do events/changes since entries if jobs are enabled.
     private boolean getJobEnabled()
     {
