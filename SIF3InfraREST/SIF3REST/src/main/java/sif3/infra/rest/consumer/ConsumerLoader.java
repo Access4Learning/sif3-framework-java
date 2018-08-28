@@ -19,7 +19,6 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
@@ -37,6 +36,7 @@ import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.interfaces.EnvironmentConnector;
 import sif3.infra.rest.env.connectors.EnvironmentConnectorFactory;
 import sif3.infra.rest.queue.LocalConsumerQueue;
+import sif3.infra.rest.queue.QueueReaderInfo;
 import sif3.infra.rest.queue.RemoteMessageQueueReader;
 import sif3.infra.rest.queue.connectors.ConsumerQueueConnector;
 import sif3.infra.rest.queue.connectors.ConsumerSubscriptionConnector;
@@ -71,8 +71,8 @@ public class ConsumerLoader
     private List<AbstractConsumer> crudConsumers = new ArrayList<AbstractConsumer>();
     private List<AbstractFunctionalServiceConsumer> fsServiceConsumers = new ArrayList<AbstractFunctionalServiceConsumer>();
   
-    private List<ExecutorService> msgReaderServices = new ArrayList<ExecutorService>();
-  
+    private List<QueueReaderInfo<RemoteMessageQueueReader>> msgReaderServices = new ArrayList<QueueReaderInfo<RemoteMessageQueueReader>>();
+
     /**
      * Initialises the consumer based on the given property file. If anything fails to initialise then an error is logged and this method
      * returns false. The consumer should not really continue in such a case as its behaviour is not defined and most likely will throw
@@ -203,11 +203,16 @@ public class ConsumerLoader
 		ConsumerEnvironmentManager envMgr = ConsumerEnvironmentManager.getInstance();
 
 		logger.debug("Shut down all remote message queue reader threads...");
-		for (ExecutorService service : msgReaderServices)
+		for (QueueReaderInfo<RemoteMessageQueueReader> remoteReaderInfo : msgReaderServices)
 		{
-			service.shutdown();
+		    for (RemoteMessageQueueReader remoteReader : remoteReaderInfo.getLinkedClasses())
+		    {
+		        remoteReader.shutdown();
+		    }
+    
+		    remoteReaderInfo.getService().shutdown();
 		}
-		
+
 		logger.debug("Shut down each consumer ...");
 		for (AbstractConsumer consumer : crudConsumers)
 		{
@@ -362,20 +367,23 @@ public class ConsumerLoader
 
 	/*
 	 * Will initialise the threads and add them to the local consumer queue.
+	 *
 	 */
-	private ExecutorService startRemoteMessageReaderThreads(QueueInfo queueInfo, int numThreads)
+    private QueueReaderInfo<RemoteMessageQueueReader> startRemoteMessageReaderThreads(QueueInfo queueInfo, int numThreads)
 	{
 		String remoteQueueName = getRemoteQueueName(queueInfo);
 		logger.debug("Start "+numThreads+" message readers for "+remoteQueueName);
 		logger.debug("Total number of threads before starting message readers for "+remoteQueueName+" "+Thread.activeCount());
-		ExecutorService service = Executors.newFixedThreadPool(numThreads);
+		
+		QueueReaderInfo<RemoteMessageQueueReader> queueReaderInfo = new QueueReaderInfo<RemoteMessageQueueReader>(Executors.newFixedThreadPool(numThreads), new ArrayList<RemoteMessageQueueReader>());
 		for (int i = 0; i < numThreads; i++)
 		{
 			try
 			{
 				RemoteMessageQueueReader remoteReader = new RemoteMessageQueueReader(queueInfo, i);
 				logger.debug("Start Remote Reader "+remoteQueueName+" "+i);
-				service.execute(remoteReader);
+				queueReaderInfo.getLinkedClasses().add(remoteReader);
+				queueReaderInfo.getService().execute(remoteReader);
 			}
 			catch (Exception ex)
 			{
@@ -384,7 +392,7 @@ public class ConsumerLoader
 		}
 		logger.debug(numThreads+" "+remoteQueueName+" message readers initilaised and started.");
 		logger.debug("Total number of threads after starting message readers for "+remoteQueueName+" "+Thread.activeCount());
-		return service;
+		return queueReaderInfo;
 	}
 	
 	private void initialiseConsumers(AdvancedProperties adapterProps)
