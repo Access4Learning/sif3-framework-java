@@ -1,5 +1,5 @@
 ==============================================================
-Release Notes for v0.13.0 of SIF3 Framework (Aug 21, 2018)
+Release Notes for v0.13.0 of SIF3 Framework (Aug 28, 2018)
 ==============================================================
 
 Bug Fixes
