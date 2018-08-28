@@ -9,6 +9,7 @@ Bug Fixes
 - Fixed GitHub issue #34 - Provider in Brokered Environment over eager properties validation.
 - Fixed GitHub issue #35 - Improve Queue Reader Exception Handling
 - Fixed GitHub issue #36 - Typo: 'SIF' in lower case in main pom.xml
+- Fixed GitHub issue #37 - Remote message readers not stopping
 
 New Functionality
 -----------------
