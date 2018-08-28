@@ -62,6 +62,8 @@ import sif3.infra.rest.queue.types.ResponseInfo;
 public class RemoteMessageQueueReader implements Runnable
 {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
+    
+    private final static long MAX_SLEEP_MILLISEC = 5000; 
 
 	private QueueInfo queueInfo = null;
     private ConsumerEnvironmentManager consumerEvnMgr = null;
@@ -69,9 +71,10 @@ public class RemoteMessageQueueReader implements Runnable
 	private int readerID;
 	private String lastMsgeID = null;
 	private int waitTime = 0; // milliseconds
+	private boolean shutdownFlag = false;
 
 	private MessageClient client = null;
-
+	
 	/**
 	 * Constructs a RemoteMessageQueueReader for the queue identified through the queueListenerInfo parameter for the given session and consumer 
 	 * configuration.
@@ -109,8 +112,8 @@ public class RemoteMessageQueueReader implements Runnable
 
 	public void shutdown()
 	{
-		// nothing to do at the moment
-		logger.debug("Shutdown Message Reader wit ID = " + getReaderID() + " for queue = " + getQueueInfo().getQueue().getName());
+		logger.debug("Shutdown Message sent to Remote Reader with ID = " + getReaderID() + " for queue = " + getQueueInfo().getQueue().getName());
+		shutdownFlag = true;
 	}
 	
 	/* (non-Javadoc)
@@ -140,7 +143,7 @@ public class RemoteMessageQueueReader implements Runnable
 	{
 		if (client != null) // indicating all good
 		{
-			while (true)
+			while (!shutdownFlag)
 			{
 				try
 				{
@@ -163,6 +166,7 @@ public class RemoteMessageQueueReader implements Runnable
 				}
                 catch (Exception ex)
                 {
+                    logger.debug("Message Reader '" + getReaderID() + "' (ThreadID:"+Thread.currentThread().getId()+") shutdown flag: "+shutdownFlag);
                     // Error should already have been logged. Just wait and try again
                     if ((ex != null) && (ex instanceof InterruptedException))
                     {
@@ -174,6 +178,7 @@ public class RemoteMessageQueueReader implements Runnable
                     }
                 }
 			}
+			logger.debug("Message Reader '" + getReaderID() + "' (ThreadID:"+Thread.currentThread().getId()+") stopped reading messages. Shutdown flag: "+shutdownFlag);
 		}
 	}
 
@@ -219,21 +224,56 @@ public class RemoteMessageQueueReader implements Runnable
 		return false;
 	}
 
-	private void waitBeforeGetNext()
+	private void waitBeforeGetNext() //throws Exception
 	{
 		logger.debug("\n==========================\n"+getReaderID()+" for queue "+getQueueInfo().getQueue().getName()+ " will wait for "+getWaitTime()/CommonConstants.MILISEC+" seconds before attempting to get next message."+"\n==========================");
 		try
 		{
-			Object semaphore = new Object();
-			synchronized (semaphore)
-			{
-				semaphore.wait(getWaitTime());
-			}
+		    // For efficient shutdown purpose and the way semaphores work we only sleep for a max of 5 sec. and then go
+		    // back to sleep if the waitTime isn't reached, yet. However if the shutdown flag is set we won't go back to
+		    // sleep and finish off instead.
+		    
+		    // How many intervals of 5 secs to we have. 
+		    long intervals = getWaitTime() / MAX_SLEEP_MILLISEC;
+		    long reminder = getWaitTime() - (intervals * MAX_SLEEP_MILLISEC);
+		    
+		    logger.debug("Num Intervals: "+intervals);
+		    logger.debug("Reminder in Secs: "+reminder/1000);
+		    
+		    for (long i = 0; i < intervals; i++)
+		    {
+		        doWait(MAX_SLEEP_MILLISEC);
+		        if (shutdownFlag)
+		        {
+		            break;
+		        }
+		    }
+		    if ((!shutdownFlag) && (reminder > 0))
+		    {
+		        doWait(reminder);
+		    }
 		}
 		catch (Exception ex)
 		{
 			logger.error("Blocking wait in Message Reader '" + getReaderID() + "' for queue: " + getQueueInfo().getQueue().getName() + " interrupted: " + ex.getMessage(), ex);
 		}
+	}
+	
+	private void doWait(long millisecs)
+	{
+	    Object semaphore = new Object();
+        synchronized (semaphore)
+        {
+            try
+            {
+                logger.debug("Message Reader '" + getReaderID() + "' has mini sleep for " + millisecs/1000 + " seconds");
+                semaphore.wait(millisecs);
+            }
+            catch (InterruptedException ex)
+            {
+                logger.debug("Message Reader '" + getReaderID() + "' mini sleep interupted...: " + ex.getMessage());
+            }
+        }
 	}
 
 	/*
