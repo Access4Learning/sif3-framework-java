@@ -28,11 +28,11 @@ import sif3.infra.rest.consumer.ConsumerLoader;
 public class TestConsumerLoader
 {
 	// Local
-	private static final String CONSUMER_ID = "StudentConsumer";
+//	private static final String CONSUMER_ID = "StudentConsumer";
 //    private static final String CONSUMER_ID = "RicOneConsumer";
 
 	// Broker
-//	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
+	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
 //	private static final String CONSUMER_ID = "QueueTestConsumer";
 
 	
@@ -63,10 +63,27 @@ public class TestConsumerLoader
 //	    System.out.println(serviceID+" is running (Press Ctrl-C to stop)");
 //	  }
 	
+	private void doWait(long waitTime)
+	{
+        try
+        {
+            System.out.println("Wait for "+waitTime +" seconds...");
+            Object semaphore = new Object();
+            synchronized (semaphore)
+            {
+               semaphore.wait(waitTime * 1000);
+            }
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+	}
 	
 	public static void main(String[] args)
 	{
 		System.out.println("Start Testing TestConsumerLoader...");
+		TestConsumerLoader tester = new TestConsumerLoader();
 
 		if (ConsumerLoader.initialise(CONSUMER_ID))
 		{
@@ -74,22 +91,30 @@ public class TestConsumerLoader
 		}
 		
         // Put this agent to a blocking wait.....
-        try
-        {
-            Object semaphore = new Object();
-            synchronized (semaphore) // this will block until CTRL-C is pressed.
-            {
-                System.out.println("==================================================\nTestConsumerLoader is running (Press Ctrl-C to stop)\n==================================================");
-                semaphore.wait();
-            }
-        }
-        catch (Exception ex)
-        {
-            System.out.println("Blocking wait in TestConsumerLoader interrupted: " + ex.getMessage());
-            ex.printStackTrace();
-        }
+		long waitTime = 23; // seconds
+		tester.doWait(waitTime);
+		
+//        try
+//        {
+//            Object semaphore = new Object();
+//            synchronized (semaphore) // this will block until CTRL-C is pressed.
+//            {
+//                System.out.println("==================================================\nTestConsumerLoader is running (Press Ctrl-C to stop)\n==================================================");
+//                semaphore.wait();
+//            }
+//        }
+//        catch (Exception ex)
+//        {
+//            System.out.println("Blocking wait in TestConsumerLoader interrupted: " + ex.getMessage());
+//            ex.printStackTrace();
+//        }
         
 		ConsumerLoader.shutdown();
+		
+		// Wait some time to ensure all remaining threads are shut down...
+		tester.doWait(10);
+		
 		System.out.println("End Testing TestConsumerLoader.");
+		System.exit(0);
 	}
 }
