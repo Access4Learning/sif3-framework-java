@@ -28,11 +28,11 @@ import sif3.infra.rest.consumer.ConsumerLoader;
 public class TestConsumerLoader
 {
 	// Local
-//	private static final String CONSUMER_ID = "StudentConsumer";
+	private static final String CONSUMER_ID = "StudentConsumer";
 //    private static final String CONSUMER_ID = "RicOneConsumer";
 
 	// Broker
-	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
+//	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
 //	private static final String CONSUMER_ID = "QueueTestConsumer";
 
 	
@@ -91,7 +91,7 @@ public class TestConsumerLoader
 		}
 		
         // Put this agent to a blocking wait.....
-		long waitTime = 23; // seconds
+		long waitTime = 20; // seconds
 		tester.doWait(waitTime);
 		
 //        try
@@ -111,10 +111,7 @@ public class TestConsumerLoader
         
 		ConsumerLoader.shutdown();
 		
-		// Wait some time to ensure all remaining threads are shut down...
-		tester.doWait(10);
-		
 		System.out.println("End Testing TestConsumerLoader.");
-		System.exit(0);
+//		System.exit(0);
 	}
 }
