@@ -369,8 +369,16 @@ public class LocalMessageConsumer implements Runnable
     private void processError(ErrorInfo errorInfo)
     {
         logger.debug(consumerID + " has receive a DELAYED ERROR from its local consumer queue ID: "  + errorInfo.getMessageQueueReaderID());
-        DelayedConsumer delayedConsumer = (DelayedConsumer)minimalConsumer; 
-        delayedConsumer.onError(infraMapper.toErrorFromSIFErrorString(errorInfo.getPayload(), errorInfo.getMediaType(), new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not extract error from payload.", "Payload:\n"+errorInfo.getPayload())), extractDelayedReceiptInfo(errorInfo));
+        DelayedConsumer delayedConsumer = (DelayedConsumer)minimalConsumer;
+        
+        // If an error was returned then it is already unmarshalled and set in the errorInfo object. If it is null though
+        // then we set a dummy value...
+        ErrorDetails errorDetails = errorInfo.getErrorDetail();
+        if (errorDetails == null) // create dummy error as it seems something is wrong
+        {
+            errorDetails = new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not extract error from payload.");
+        }
+        delayedConsumer.onError(errorDetails, extractDelayedReceiptInfo(errorInfo));
     }
     
     /*

@@ -364,7 +364,10 @@ public class RemoteMessageQueueReader implements Runnable
 			//Populate ErrorInfo Object with base data.
 			ErrorInfo errorInfo = new ErrorInfo();
 			setResponseBaseData(errorInfo, response, MessageType.ERROR);
-			
+		     
+	        // response already has the error type!
+			errorInfo.setErrorDetail(response.getError());
+
 			// Is there a subscription for this Delayed ERROR type
 			LocalConsumerQueue localQueue = getQueueInfo().getLocalConsumerQueue(errorInfo.getZone().getId(), errorInfo.getContext().getId(), errorInfo.getServiceName(), errorInfo.getServiceType().name());
 			
