@@ -18,7 +18,11 @@
 
 package sif3.infra.rest.web;
 
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.EnumSet;
+import java.util.Enumeration;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration.Dynamic;
@@ -173,6 +177,10 @@ public class ProviderServletContext implements ServletContextListener
 		
         logger.debug("Release DB Connections....");
         HibernateUtil.shutdown();
+        
+        logger.debug("Unregister JDBC drivers that may have been used ....");
+        unregisterJDBCDrivers();
+        
         logger.info("Shutdown Provider: done.");
     }
     
@@ -222,6 +230,38 @@ public class ProviderServletContext implements ServletContextListener
         else
         {
             logger.info("Functional Services not enabled for this Provider.");
+        }
+    }
+    
+    
+    private void unregisterJDBCDrivers()
+    {
+        // Now de-register JDBC drivers in this context's ClassLoader: Get the webapp's ClassLoader
+        ClassLoader webAppClassLoader = Thread.currentThread().getContextClassLoader();
+        
+        // Loop through all drivers
+        Enumeration<Driver> drivers = DriverManager.getDrivers();
+        while (drivers.hasMoreElements())
+        {
+            Driver driver = drivers.nextElement();
+            if (driver.getClass().getClassLoader() == webAppClassLoader)
+            {
+                // This driver was registered by the webapp's ClassLoader, so deregister it:
+                try
+                {
+                    logger.info("Deregistering JDBC driver {}", driver);
+                    DriverManager.deregisterDriver(driver);
+                }
+                catch (SQLException ex)
+                {
+                    logger.error("Error deregistering JDBC driver {}", driver, ex);
+                }
+            }
+            else
+            {
+                // driver was not registered by the webapp's ClassLoader and may be in use elsewhere
+                logger.trace( "Not deregistering JDBC driver {} as it does not belong to this webapp's ClassLoader", driver);
+            }
         }
     }
 }
