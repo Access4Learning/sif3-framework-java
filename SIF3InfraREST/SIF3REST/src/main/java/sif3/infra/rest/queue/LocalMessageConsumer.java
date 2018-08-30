@@ -69,7 +69,8 @@ public class LocalMessageConsumer implements Runnable
 	private String consumerID;
 	private MinimalConsumer minimalConsumer;
 	private InfraDataModelMapper infraMapper = new InfraDataModelMapper();
-	
+    private boolean shutdownFlag = false;
+
 	/**
 	 * This method initialises a Consumer to be able to receive and process messages from the local event queue. The 'consumer' parameter is 
 	 * required by the local consumer as it invokes the consumer's methods for processing events or delayed responses.
@@ -103,6 +104,13 @@ public class LocalMessageConsumer implements Runnable
         }
     }
 	
+    public void shutdown()
+    {
+        logger.debug("Shutdown message received for LocalConsumerConsumer: "+consumerID);
+        localQueue.shutdown();
+        shutdownFlag = true;
+    }
+
 	/*-----------------*/
 	/* Private methods */
 	/*-----------------*/
@@ -112,9 +120,10 @@ public class LocalMessageConsumer implements Runnable
 	 */
 	private void consume() throws InterruptedException
 	{
-		while (true)
+		while (!shutdownFlag)
 		{
-            try {
+            try 
+            {
     			QueueMessage message = localQueue.blockingPull();
     			if (message != null)
     			{
@@ -140,7 +149,10 @@ public class LocalMessageConsumer implements Runnable
     			}
     			else
     			{
-    				logger.error(consumerID + " has encountered a problem receiving an message from its local consumer queue.");
+    			    if (!shutdownFlag)
+    			    {
+                        logger.error("LocalMessage Consumer " + consumerID + " has encountered a problem receiving an message from its local consumer queue.");    			        
+    			    }
     			}
             }
             catch (Exception ex)
@@ -152,11 +164,11 @@ public class LocalMessageConsumer implements Runnable
                 else
                 {
                     // Error should already have been logged. Just wait and try again
-                    logger.error(consumerID + " has encountered a problem receiving an message from its local consumer queue.", ex);
+                    logger.error("LocalMessage Consumer " + consumerID + " has encountered a problem receiving an message from its local consumer queue.", ex);
                 }
             }
-
 		}
+        logger.debug("LocalMessage Consumer " + consumerID + " stopped reading messages. Shutdown flag: "+shutdownFlag);
 	}
 	
 	/*---------------------*/

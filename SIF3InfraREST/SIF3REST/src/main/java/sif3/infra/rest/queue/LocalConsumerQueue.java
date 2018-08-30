@@ -19,11 +19,13 @@ package sif3.infra.rest.queue;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.CommonConstants;
 import sif3.infra.rest.queue.types.QueueMessage;
 
 
@@ -52,6 +54,8 @@ public class LocalConsumerQueue
 	
 	/* Properties used in future development once persistence will be implemented. */
     private String localQueueID;
+    
+    private boolean shutdownFlag = false;
     
 	@SuppressWarnings("unused")
     private String workingDir;
@@ -102,7 +106,7 @@ public class LocalConsumerQueue
 		}
 		catch (Exception ex)
 		{
-			logger.error("Failed to push the 'message' on to the LocalConsumerQueue: "+ex.getMessage(),ex);
+			logger.error("Failed to push the 'message' on to the "+getConsumerName()+": "+ex.getMessage(),ex);
 		}
 	}
 	
@@ -117,21 +121,73 @@ public class LocalConsumerQueue
 	{
 		try
 		{
-			return queue.take();
+			return blockingRead();
 		}
 		catch (Exception ex)
 		{
-			logger.error("Failed to pull a message off the the LocalConsumerQueue: "+ex.getMessage(),ex);
+			logger.error("Failed to pull a message off the "+getConsumerName()+": "+ex.getMessage(),ex);
 			return null;
 		}
 	}
 	
-	   /* (non-Javadoc)
+	public void shutdown()
+	{
+	    logger.debug("Shutdown message received for "+getConsumerName());
+	    shutdownFlag = true;
+	}
+	
+	/* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString()
     {
         return "LocalConsumerQueue [localQueueID=" + localQueueID + "]";
+    }
+    
+    /*---------------------*/
+    /*-- Private Methods --*/
+    /*---------------------*/
+    
+    /*
+     * This method will read from the queue for a max of CommonConstants.MAX_SLEEP_MILLISEC before it will check if a shutdown
+     * was requested. If it is it will return null otherwise it will continue to read until a proper message is available form the
+     * queue. If a message is available it will be returned.
+     * This method helps in the proper shutdown of consumer and local queues during the shutdown process. Without that approach
+     * this class which runs in its own thread never shuts down properly.
+     */
+    private QueueMessage blockingRead()
+    {
+        while (!shutdownFlag)
+        {
+            try
+            {
+                QueueMessage message = queue.poll(CommonConstants.MAX_SLEEP_MILLISEC, TimeUnit.MILLISECONDS);
+                
+                if (message != null) // we have received a message!
+                {
+                    return message;
+                }
+                
+                if (!shutdownFlag)
+                {
+                    logger.debug("No message received for "+getConsumerName()+". Go back to read again ...");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.error("Failed to pull a message off the "+getConsumerName()+": "+ex.getMessage(),ex);
+                return null;
+            }  
+        }
+        
+        // If we get here then the shutdown has been called!
+        logger.debug("Stop reading from "+getConsumerName()+". Shutdown Flag = "+shutdownFlag);
+        return null;
+    }
+    
+    private String getConsumerName()
+    {
+        return "LocalConsumerQueue: "+getLocalQueueID() + "("+Thread.currentThread().getId()+")";
     }
 }

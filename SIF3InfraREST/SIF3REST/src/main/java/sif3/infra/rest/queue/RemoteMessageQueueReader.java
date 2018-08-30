@@ -63,8 +63,6 @@ public class RemoteMessageQueueReader implements Runnable
 {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     
-    private final static long MAX_SLEEP_MILLISEC = 5000; 
-
 	private QueueInfo queueInfo = null;
     private ConsumerEnvironmentManager consumerEvnMgr = null;
 	private SIF3Session sif3Session = null;
@@ -226,7 +224,7 @@ public class RemoteMessageQueueReader implements Runnable
 
 	private void waitBeforeGetNext() //throws Exception
 	{
-		logger.debug("\n==========================\n"+getReaderID()+" for queue "+getQueueInfo().getQueue().getName()+ " will wait for "+getWaitTime()/CommonConstants.MILISEC+" seconds before attempting to get next message."+"\n==========================");
+		logger.debug("\n==========================\nRemote Reader "+getReaderID()+" for queue "+getQueueInfo().getQueue().getName()+ " will wait for "+getWaitTime()/CommonConstants.MILISEC+" seconds before attempting to get next message."+"\n==========================");
 		try
 		{
 		    // For efficient shutdown purpose and the way semaphores work we only sleep for a max of 5 sec. and then go
@@ -234,15 +232,15 @@ public class RemoteMessageQueueReader implements Runnable
 		    // sleep and finish off instead.
 		    
 		    // How many intervals of 5 secs to we have. 
-		    long intervals = getWaitTime() / MAX_SLEEP_MILLISEC;
-		    long reminder = getWaitTime() - (intervals * MAX_SLEEP_MILLISEC);
+		    long intervals = getWaitTime() / CommonConstants.MAX_SLEEP_MILLISEC;
+		    long reminder = getWaitTime() - (intervals * CommonConstants.MAX_SLEEP_MILLISEC);
 		    
 		    logger.debug("Num Intervals: "+intervals);
 		    logger.debug("Reminder in Secs: "+reminder/1000);
 		    
 		    for (long i = 0; i < intervals; i++)
 		    {
-		        doWait(MAX_SLEEP_MILLISEC);
+		        doWait(CommonConstants.MAX_SLEEP_MILLISEC);
 		        if (shutdownFlag)
 		        {
 		            break;
