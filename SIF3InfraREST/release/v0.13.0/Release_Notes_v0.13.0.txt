@@ -1,5 +1,5 @@
 ==============================================================
-Release Notes for v0.13.0 of SIF3 Framework (Aug 28, 2018)
+Release Notes for v0.13.0 of SIF3 Framework (Aug 30, 2018)
 ==============================================================
 
 Bug Fixes
@@ -10,6 +10,7 @@ Bug Fixes
 - Fixed GitHub issue #35 - Improve Queue Reader Exception Handling
 - Fixed GitHub issue #36 - Typo: 'SIF' in lower case in main pom.xml
 - Fixed GitHub issue #37 - Remote message readers not stopping
+- Fixed GitHub issue #38 - Delayed error responses not handled correctly
 
 New Functionality
 -----------------
