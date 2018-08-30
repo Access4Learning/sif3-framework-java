@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.CommonConstants;
 import sif3.common.exception.PersistenceException;
 import sif3.common.interfaces.HibernateProperties;
 import sif3.common.model.ServiceInfo;
@@ -257,6 +258,10 @@ public class ConsumerLoader
 
 		logger.debug("Release DB Connections....");
 		HibernateUtil.shutdown();
+		
+		// All done but some background threads may not have fully shut down (eg. ExecutorServices). These may sleep
+		// up to a given time CommonConstants.MAX_SLEEP_MILLISEC. So let's quickly wait for them and the conclude...
+		doWait(CommonConstants.MAX_SLEEP_MILLISEC);
 	}
   
 	private ConsumerEnvironment getConsumerEnvironment()
@@ -457,4 +462,19 @@ public class ConsumerLoader
 	{
 		return queueInfo.getQueue().getName()+" ("+queueInfo.getQueue().getQueueID()+")";
 	}	
+	
+    private void doWait(long millisecs)
+    {
+        Object semaphore = new Object();
+        synchronized (semaphore)
+        {
+            try
+            {
+                semaphore.wait(millisecs);
+            }
+            catch (InterruptedException ex)
+            {
+            }
+        }
+    }
 }
