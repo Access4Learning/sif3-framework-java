@@ -58,6 +58,8 @@ import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.rest.queue.LocalConsumerQueue;
 import sif3.infra.rest.queue.LocalMessageConsumer;
+import sif3.infra.rest.queue.QueueReaderInfo;
+import sif3.infra.rest.queue.RemoteMessageQueueReader;
 
 /**
  * It is expected that all consumer implementations extend this class. It has a set of abstract methods that need to be implemented by
@@ -79,7 +81,9 @@ public abstract class BaseConsumer implements MinimalConsumer
 
     /* The next two properties are used for delayed responses or events */ 
     private LocalConsumerQueue localConsumerQueue = null;
-    private ExecutorService service = null;
+//    private ExecutorService service = null;
+    
+    private QueueReaderInfo<LocalMessageConsumer> service = null;
 
     /*-------------------------------------------------------------*/
     /* Abstract method relating to general Consumer functionality. */
@@ -303,13 +307,16 @@ public abstract class BaseConsumer implements MinimalConsumer
     @Override
     public void finalise()
     {
-        logger.debug("Shut down Local Consumer Thread Pool for "+getConsumerName());
+        logger.debug("Shut down all Local Consumer Thread Pool for "+getConsumerName());
         if (service != null)
         {
-            service.shutdown();
-            service = null;
-        }    
-
+            for (LocalMessageConsumer localReader : service.getLinkedClasses())
+            {
+                localReader.shutdown();
+            }
+    
+            service.getService().shutdown();
+        }
         shutdown();
     }
 
@@ -346,15 +353,16 @@ public abstract class BaseConsumer implements MinimalConsumer
         int numThreads = getNumOfConsumerThreads();
         logger.debug("Start "+numThreads+" "+getConsumerName()+" threads.");
         logger.debug("Total number of threads before starting Local Queue for "+getConsumerName()+" "+Thread.activeCount());
-        service = Executors.newFixedThreadPool(numThreads);
+        
+        service = new QueueReaderInfo<LocalMessageConsumer>(Executors.newFixedThreadPool(numThreads), new ArrayList<LocalMessageConsumer>());
         for (int i = 0; i < numThreads; i++)
         {
             String consumerID = getConsumerName()+" "+(i+1);
             logger.debug("Start Consumer "+consumerID);
-            
             LocalMessageConsumer consumer = new LocalMessageConsumer(getLocalConsumerQueue(), consumerID, this);
-            service.execute(consumer);
-        }
+            service.getLinkedClasses().add(consumer);
+            service.getService().execute(consumer);
+       }
         logger.debug(numThreads+" "+getConsumerName()+" initilaised and started.");
         logger.debug("Total number of threads after starting Local Queue for "+getConsumerName()+" "+Thread.activeCount());
     }
