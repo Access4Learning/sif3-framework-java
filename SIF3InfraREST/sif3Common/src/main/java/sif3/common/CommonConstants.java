@@ -72,6 +72,9 @@ public class CommonConstants
 
 	/* SOAP transport String: Future Use */
 	public static final String SOAP_TRANSPORT_STR = "SOAP";
+	
+	/* Used in 'blocking' ExecutorService to allow a max sleep time before shutdown is checked */
+    public final static long MAX_SLEEP_MILLISEC = 5 * MILISEC; 
 
 	/*-----------------------------------------------------------*/
 	/* Constants defined by SIF3 Spec.                           */
