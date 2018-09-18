@@ -200,7 +200,7 @@ public class JobResource extends InfraResource
         
         try
         {
-            JobType finalJob = createJobInternal(payloadJob, responseParam);
+            JobType finalJob = createJobInternal(payloadJob, responseParam, true);
             return makeResponse(finalJob, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, responseParam, getInfraMarshaller());  
 
         }
@@ -271,7 +271,7 @@ public class JobResource extends InfraResource
         {
             try
             {
-                JobType finalJob = createJobInternal(payloadJob, responseParam);
+                JobType finalJob = createJobInternal(payloadJob, responseParam, true);
                 
                 //If we get here all is good. Make an entry in the statusList
                 statusList.add(new CreateOperationStatus(payloadJob.getId(), finalJob.getId(), Status.CREATED.getStatusCode()));
@@ -444,7 +444,7 @@ public class JobResource extends InfraResource
 
         try
         {
-            if (removeJobInternal(jobID, responseParam))
+            if (removeJobInternal(jobID, responseParam, true))
             {
                 return makeResopnseWithNoContent(false, ResponseAction.DELETE, responseParam);
             }
@@ -539,7 +539,7 @@ public class JobResource extends InfraResource
         {
             try
             {
-                if (removeJobInternal(jobID, responseParam))
+                if (removeJobInternal(jobID, responseParam, true))
                 {
                     statusList.add(new OperationStatus(jobID, Status.NO_CONTENT.getStatusCode()));
                 }
@@ -1224,7 +1224,7 @@ public class JobResource extends InfraResource
         return job;
     }
 
-    private JobType createJobInternal(JobType payloadJob, ResponseParameters responseParam) throws SIFException
+    private JobType createJobInternal(JobType payloadJob, ResponseParameters responseParam, boolean consumerRequested) throws SIFException
     {
         // Get the template for the job to be created and populate missing bits.
         JobType jobFromTemplate = null;
@@ -1274,7 +1274,7 @@ public class JobResource extends InfraResource
             }
             
             // Save the job data to the appropriate tables.
-            getProviderJobManager().saveNewJob(jobFromTemplate, getJobNamePlural(), getNotNullSIFZone(), getNotNullSIFContext(), envID, requestMetadata.getFingerprint());
+            getProviderJobManager().saveNewJob(jobFromTemplate, getJobNamePlural(), getNotNullSIFZone(), getNotNullSIFContext(), envID, requestMetadata.getFingerprint(), consumerRequested);
             
             return jobFromTemplate;
         }
@@ -1284,7 +1284,7 @@ public class JobResource extends InfraResource
         }
     }
 
-    private boolean removeJobInternal(String jobID, ResponseParameters responseParam) throws SIFException
+    private boolean removeJobInternal(String jobID, ResponseParameters responseParam, boolean consumerRequested) throws SIFException
     {
         // pass it to the specific provider class for additional processing.
         FunctionalServiceProvider provider = getFSProvider();
@@ -1310,7 +1310,7 @@ public class JobResource extends InfraResource
         boolean deletedInJobTable = false;
         try
         {
-            deletedInJobTable = getProviderJobManager().removeJob(jobID);
+            deletedInJobTable = getProviderJobManager().removeJob(jobID, consumerRequested);
 
         }
         catch (PersistenceException ex)
@@ -1478,7 +1478,7 @@ public class JobResource extends InfraResource
             StateType state = addStateToPhase(phase, newState);
             try
             {
-                getProviderJobManager().updateJob(jobInfo);
+                getProviderJobManager().updateJob(jobInfo, true);
             }
             catch (PersistenceException ex)
             {
