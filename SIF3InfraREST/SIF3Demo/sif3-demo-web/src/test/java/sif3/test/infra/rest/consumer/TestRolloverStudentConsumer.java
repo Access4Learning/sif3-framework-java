@@ -66,14 +66,14 @@ public class TestRolloverStudentConsumer
     private static final String UPDATE_PHASE_PAYLOAD = BASE_PATH+"/CreatePhasePayload.xml";
     private static final String DELETE_PHASE_PAYLOAD = BASE_PATH+"/DeletePhasePayload.xml";
     
-    private static final String JOB_ID = "9fce9406-27d5-467b-92cc-949fff41d4e4";
+    private static final String JOB_ID = "17c302dc-2a63-4af4-b020-bec34cacd2df";
    private static final String CONSUMER_ID = "StudentConsumer";
 //    private static final String CONSUMER_ID = "HITSStudentConsumer";
 //    private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
 //  private static final String CONSUMER_ID = "QueueTestConsumer";
 
     
-    private static final RequestType REQUEST_TYPE = RequestType.DELAYED;
+    private static final RequestType REQUEST_TYPE = RequestType.IMMEDIATE;
 
     private RolloverStudentConsumer getConsumer()
     {
@@ -508,7 +508,7 @@ public class TestRolloverStudentConsumer
             //
             // Job Operations
             //
-            tester.createJob(consumer);
+//            tester.createJob(consumer);
 //            tester.createJobs(consumer);
 
             
@@ -522,7 +522,7 @@ public class TestRolloverStudentConsumer
             //
             // Phase State Operations
             //
-//            tester.updateJobPhaseState(consumer, "newYearEnrolment", PhaseState.FAILED);
+            tester.updateJobPhaseState(consumer, "oldYearEnrolment", PhaseState.PENDING);
 //            tester.getJobPhaseStates(consumer, "newYearEnrolment");
         
             //
