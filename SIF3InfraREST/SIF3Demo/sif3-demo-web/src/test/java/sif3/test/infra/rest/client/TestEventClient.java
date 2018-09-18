@@ -30,6 +30,7 @@ import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues.EventAction;
+import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.SIFEvent;
 import sif3.infra.common.env.mgr.BrokeredProviderEnvironmentManager;
@@ -146,7 +147,7 @@ public class TestEventClient
 	
 	private void sendEvent(EventClient evtClt) throws ServiceInvokationException
 	{
-		System.out.println(evtClt.sendEvents(getEvents(), null, null, getOverrideHeaderProperties()));
+		System.out.println(evtClt.sendEvents(getEvents(), null, null, ServiceType.OBJECT, getOverrideHeaderProperties()));
 	}
 
 	
