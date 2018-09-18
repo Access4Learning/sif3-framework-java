@@ -154,6 +154,26 @@ public class TestJobService extends ServiceBaseTest
         List<SIF3JobEvent> jobEvents = service.retrieveJobEventsSince(changesSince, "RolloverStudents", "3ae742dc-0c74-444f-b761-560a9fec5178","auSchoolTestingZone", null, new PagingInfo(5, 2), AdapterType.ENVIRONMENT_PROVIDER);
         System.out.println("Job Events: "+jobEvents);        
     }
+    
+    public void testRetrieveJobEvents() throws Exception
+    {
+        AdapterType adapterType = AdapterType.ENVIRONMENT_PROVIDER;
+        String serviceType = "RolloverStudents";
+        List<SIF3JobEvent> jobEvents = service.retrieveJobEvents(serviceType, adapterType, true);
+        System.out.println("Events for Service " +serviceType + " and AdapterType " + adapterType + ":");
+        for (SIF3JobEvent event : jobEvents)
+        {
+            System.out.println("internalID=" + event.getInternalID() + 
+            ", eventType=" + event.getEventType() + 
+            ", zoneID=" + event.getZoneID() + 
+            ", contextID=" + event.getContextID() +
+            ", fingerprint=" + event.getFingerprint() + 
+            ", jobID=" + event.getJobID() + 
+            ", eventDate=" + event.getEventDate() + 
+            ", consumerRequested=" + event.isConsumerRequested());
+        }
+    }
+
 
     public void testRemoveExpiredJobs() throws Exception
     {
@@ -217,7 +237,8 @@ public class TestJobService extends ServiceBaseTest
 //            tester.testRemoveJobsWithoutChangeSince();
 //            tester.testRemoveCreatedJobsWithoutChangeSince();
 //            tester.testRemoveExpiredAndStaleJobs();
-            tester.testRetrieveJobEventsSince();
+//            tester.testRetrieveJobEventsSince();
+            tester.testRetrieveJobEvents();
 
             tester.shutdown();
         }
