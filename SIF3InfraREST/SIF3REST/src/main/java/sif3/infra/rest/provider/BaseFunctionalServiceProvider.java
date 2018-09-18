@@ -18,7 +18,9 @@
 
 package sif3.infra.rest.provider;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,17 +38,34 @@ import sif3.common.exception.PersistenceException;
 import sif3.common.exception.SIFException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
+import sif3.common.header.HeaderValues.ServiceType;
+import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.interfaces.ChangesSinceProvider;
+import sif3.common.interfaces.EventProvider;
 import sif3.common.interfaces.FunctionalServiceProvider;
+import sif3.common.interfaces.SIFEventIterator;
+import sif3.common.model.ACL.AccessRight;
+import sif3.common.model.ACL.AccessType;
 import sif3.common.model.ChangedSinceInfo;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
+import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
+import sif3.common.model.ServiceInfo;
+import sif3.common.model.ZoneContextInfo;
+import sif3.common.persist.model.SIF3Session;
+import sif3.common.persist.service.JobService;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
+import sif3.infra.common.env.mgr.BrokeredProviderEnvironmentManager;
+import sif3.infra.common.model.JobCollectionType;
 import sif3.infra.common.model.JobType;
+import sif3.infra.rest.client.EventClient;
+import sif3.infra.rest.provider.functional.JobEventData;
+import sif3.infra.rest.provider.functional.JobEventIterator;
+import sif3.infra.rest.provider.functional.JobEventWrapper;
 
 /**
  * This is the main class each specific provider of a given SIF Object type must extends to implement the CRUD operation as defined
@@ -56,12 +75,16 @@ import sif3.infra.common.model.JobType;
  *
  * @author Joerg Huber
  */
-public abstract class BaseFunctionalServiceProvider extends CoreProvider implements FunctionalServiceProvider, ChangesSinceProvider, Runnable
+public abstract class BaseFunctionalServiceProvider extends CoreProvider implements FunctionalServiceProvider, ChangesSinceProvider, EventProvider<JobCollectionType>
 {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
+    private final static int MAX_EVENTS = 10;
     
     private InfraMarshalFactory infraMarshaller =  new InfraMarshalFactory();
     private InfraUnmarshalFactory infraUnmarshaller =  new InfraUnmarshalFactory();
+    
+    private int maxObjectsInEvent = MAX_EVENTS;
+    private ArrayList<ZoneContextInfo> auditZones = null;
 
     /*
         The FunctionalServiceProvider interface defines a couple of method with "Object" as the parameter or return type. This
@@ -99,10 +122,34 @@ public abstract class BaseFunctionalServiceProvider extends CoreProvider impleme
             throws IllegalArgumentException, PersistenceException, SIFException;
 
     /**
+     * Shuts down the sub-class provider. This should release all associated resources with that provider.
+     */
+    public abstract void shutdown();
+ 
+    /**
      */
     public BaseFunctionalServiceProvider()
     {
 	    super();
+	    setMaxObjectsInEvent(getServiceProperties().getPropertyAsInt("job.event.maxObjects", getServiceName(), MAX_EVENTS));
+	    auditZones = getAuditZones();
+    }
+    
+    /* 0 = No events */
+    public int getEventFrequency()
+    {
+        return getServiceProperties().getPropertyAsInt("job.event.frequency", getServiceName(), CommonConstants.NO_EVENT);      
+    }
+
+    public int getEventDelay()
+    {
+        int delay = getServiceProperties().getPropertyAsInt("job.event.startup.delay", getServiceName(), CommonConstants.DEFAULT_EVENT_DELAY);
+        return (delay < CommonConstants.DEFAULT_EVENT_DELAY) ? CommonConstants.DEFAULT_EVENT_DELAY : delay;
+    }
+
+    public EventProvider<?> getEventProvider()
+    {
+        return BaseFunctionalServiceProvider.this;
     }
      
     /**
@@ -126,13 +173,13 @@ public abstract class BaseFunctionalServiceProvider extends CoreProvider impleme
     }
 
     /**
-     * This is not required for the Job as it is a known model.
+     * This is not required for the Job as it is a known model. Simply return an empty object.
      * 
      * @return See Desc.
      */
     public ModelObjectInfo getSingleObjectClassInfo()
     {
-        return null;
+        return new ModelObjectInfo(null, null);
     }
 
     public String getServiceName()
@@ -143,6 +190,16 @@ public abstract class BaseFunctionalServiceProvider extends CoreProvider impleme
     public ModelObjectInfo getCollectionObjectClassInfo()
     {
         return getMultiObjectClassInfo();
+    }
+    
+    public int getMaxObjectsInEvent()
+    {
+        return maxObjectsInEvent;
+    }
+
+    public void setMaxObjectsInEvent(int maxObjectsInEvent)
+    {
+        this.maxObjectsInEvent = maxObjectsInEvent;
     }
 
     /* (non-Javadoc)
@@ -192,7 +249,20 @@ public abstract class BaseFunctionalServiceProvider extends CoreProvider impleme
      */
     public void finalise()
     {
+        // Shut down event timer & task - thread
+        logger.debug("Finalise in BaseFunctionalProvider for "+getClass().getSimpleName() +" called.");
+
         // Call finalise on sub-class.
+    }
+    
+    /* (non-Javadoc)
+     * @see sif3.infra.rest.provider.CoreProvider#finaliseSubClass()
+     */
+    @Override
+    public void finaliseSubClass()
+    {
+        finalise();
+        shutdown();
     }
     
     /* (non-Javadoc)
@@ -261,22 +331,35 @@ public abstract class BaseFunctionalServiceProvider extends CoreProvider impleme
         }
     }
 
+    /*-------------------------------------*/
+    /* Implemented Event Interface Methods */
+    /*-------------------------------------*/
 
-    /*----------------------------------------*/
-    /* Implemented Method for Multi-threading */
-    /*----------------------------------------*/
-
-	/**
-	 * This method is all that is needed to run the provider in its own thread. The thread is executed at
-	 * given intervals driven by a property in the adapter's property file. The interval/frequency
-	 * defined in there is used to determine how often this thread is run.
-	 */
     @Override
-    public final synchronized void run()
+    public SIFEventIterator<JobCollectionType> getSIFEvents()
     {
-    	String providerName = getProviderName();
-    	
-		logger.debug(providerName+" started.");
+        return new JobEventIterator(getServiceName(), includeConsumerEvents(), getAdapterType(), getServiceProperties());
+    }
+
+    @Override
+    public SIFEvent<JobCollectionType> modifyBeforePublishing(SIFEvent<JobCollectionType> sifEvent, SIFZone zone, SIFContext context, HeaderProperties customHTTPHeaders)
+    {
+        return sifEvent;
+    }
+
+    @Override
+    public void onEventError(SIFEvent<JobCollectionType> sifEvent, SIFZone zone, SIFContext context)
+    {
+        // Events are not published. Report to error log but don't mark them as 'published'.
+        ArrayList<String> ids = new ArrayList<String>();
+        if ((sifEvent != null) && (sifEvent.getSIFObjectList() != null))
+        {
+            for (JobType job : sifEvent.getSIFObjectList().getJob())
+            {
+                ids.add(job.getId());
+            }
+        }
+        logger.error("Failed to events to zone = "+zone.getUniqueName() + " and Context = " + context.getUniqueName()+ "\n Internal Job Id that failed:\n"+ids);
     }
 
     /*---------------------------------------------------------------------------------------------------------------
@@ -294,24 +377,139 @@ public abstract class BaseFunctionalServiceProvider extends CoreProvider impleme
         return getProviderEnvironment().getJobEndStates().contains(state);
     }
     
+    /*---------------------------------------------------------------------------------------------------------------
+     * Methods specific for this class
+     *-------------------------------------------------------------------------------------------------------------*/
+    public void broadcastEvents()
+    {
+        int totalRecordsForFingerprintZones = 0;
+        int failedRecordsForFingerprintZones = 0;
+        int totalRecordsForAuditZones = 0;
+        int failedRecordsForAuditZones = 0;
+        boolean consumerRequestedProperty = getConsumerRequestetProperty();
+        boolean includeConsumeRequested = includeConsumerEvents();
+        
+        logger.debug("================================ broadcastEvents() called for provider "+getPrettyName());
+        logger.info("Audit Zone List: "+auditZones);
+        logger.debug("Include Consumer Events: "+includeConsumeRequested);
+        logger.info("Max objects per SIF Event: "+getMaxObjectsInEvent());
+        
+        BrokeredProviderEnvironmentManager envMgr = getBrokeredEnvironmentManager();
+        if (envMgr == null) // not a brokered environment. Cannot sent events!
+        {
+            return; // error already logged.
+        }
+        
+        SIF3Session sif3Session = envMgr.getSIF3Session();
+        List<ServiceInfo> servicesForProvider = getServicesForProvider(sif3Session, ServiceType.FUNCTIONAL);
+        
+        // If there are no services for this provider defined then we don't need to get any events at all.
+        if ((servicesForProvider == null) || (servicesForProvider.size() == 0))
+        {
+            logger.info("This emvironment does not have any zones and contexts defined for the "+getServiceName() + " service. No events can be sent.");
+            return;
+        }       
+ 
+        // lets start sending events....
+        try
+        {
+            // Let's get the Event Client
+            String serviceName = getServiceName();
+            EventClient evtClient = new EventClient(envMgr, getRequestMediaType(), getResponseMediaType(), serviceName, getMarshaller(), getCompressionEnabled());
+            JobEventIterator iterator = (JobEventIterator)getSIFEvents();
+            if (iterator != null)
+            {
+                while (iterator.hasNext())
+                {
+                    // We know it is a "custom" Job Event Iterator. Call specific method and then create necessary
+                    // SIFEvent<JobCollectionType>
+                    JobEventWrapper jobEventWrapper = iterator.getEvents(getMaxObjectsInEvent());
+                    
+                    // This should not return null since the hasNext() returned true, but just in case we check and exit the loop if it should return null. 
+                    // In this case we assume that there is no more data. We also log an error to make the coder aware of the issue.
+                    if (jobEventWrapper != null)
+                    {
+                        logger.debug("Number of "+serviceName+" Job Event Objects: " + jobEventWrapper.getEvents().size());
+                        
+                        // Do we need to send events to audit zones
+                        if ((auditZones != null) && (auditZones.size() > 0))
+                        {
+                            // first create SIFEvent<JobCollectionType> which is what we send
+                            SIFEvent<JobCollectionType> events = getEventsFromWrapper(jobEventWrapper, false, false);
+                            for (ZoneContextInfo zoneCtxInfo : auditZones)
+                            {
+                                // Check if provider has rights to publish to given zone and context
+                                if (sif3Session.hasAccess(AccessRight.PROVIDE, AccessType.APPROVED, serviceName, null, zoneCtxInfo.getZone(), zoneCtxInfo.getContext()))
+                                {
+                                    failedRecordsForAuditZones = failedRecordsForAuditZones + prepareEventAndSend(evtClient, events, zoneCtxInfo.getZone(), zoneCtxInfo.getContext());                                        
+                                    totalRecordsForAuditZones = totalRecordsForAuditZones + events.getListSize();
+                                }
+                                else
+                                {
+                                    logNoAccessRight(zoneCtxInfo.getZone(), zoneCtxInfo.getContext());
+                                }
+                            }
+                        }
+                        
+                        // Send to fingerprint:  We may need to filter consumerEvents now...
+                        SIFEvent<JobCollectionType> events = getEventsFromWrapper(jobEventWrapper, !consumerRequestedProperty, true);
+                        
+                        // Check if there are actually any events to be sent. Could be none if events are
+                        // consumerRequested only.
+                        if (events.getListSize() > 0)
+                        {
+                            logger.debug("Job Event holds "+events.getListSize()+" Objects for Consumer with Fingerprint = "+events.getFingerprint());
+                            // Do we have access rights for the requested zone/context (we should but just in case...)
+                            // Check if provider has rights to publish to given zone and context
+                            if (sif3Session.hasAccess(AccessRight.PROVIDE, AccessType.APPROVED, serviceName, null, jobEventWrapper.getZoneContext().getZone(), jobEventWrapper.getZoneContext().getContext()))
+                            {
+                                failedRecordsForFingerprintZones = failedRecordsForFingerprintZones + prepareEventAndSend(evtClient, events, jobEventWrapper.getZoneContext().getZone(), jobEventWrapper.getZoneContext().getContext());                                        
+                                totalRecordsForFingerprintZones = totalRecordsForFingerprintZones + events.getListSize();
+                            }
+                            else
+                            {
+                                logNoAccessRight(jobEventWrapper.getZoneContext().getZone(), jobEventWrapper.getZoneContext().getContext());
+                            }
+                        }
+                        else
+                        {
+                            logger.debug("There are currently no events required to be sent to the consumer with the fingerprint = "+events.getFingerprint()+".");
+                        }
+                        
+                        // all is sent. We need to mark the events as published.
+                        markEventsAsPublished(jobEventWrapper);                            
+                    }
+                    else
+                    {
+                        logger.error("iterator.hasNext() has returned true but iterator.getEvent() has retrurned null => no further events are broadcasted.");
+                        break;
+                    }
+                }
+                iterator.releaseResources();
+            }
+            else
+            {
+                logger.info("getSIFEvents() for provider "+getPrettyName()+" returned null. Currently no events to be sent.");
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.error("Failed to retrieve events for provider "+getPrettyName()+": "+ex.getMessage(), ex);                               
+        }
+        
+        logger.info("Total SIF Event Objects broadcasted to Fingerprint Zones: "+totalRecordsForFingerprintZones);
+        logger.info("Total SIF Event Objects failed for Fingerprint Zones    : "+failedRecordsForFingerprintZones);
+        if ((auditZones != null) && (auditZones.size() > 0))
+        {
+            logger.info("Total SIF Event Objects broadcasted to Audit Zone(s)    : "+totalRecordsForAuditZones);
+            logger.info("Total SIF Event Objects failed for Audit Zone(s)        : "+failedRecordsForAuditZones);
+        }
+        logger.debug("================================ Finished broadcastEvents() for provider "+getPrettyName());
+    }
+    
     /*---------------------*/
     /*-- Private methods --*/
-    /*---------------------*/
-    
-	/* 0 = No events */
-	@SuppressWarnings("unused")
-    private int getEventFrequency(String providerName)
-	{
-    	return getServiceProperties().getPropertyAsInt(CommonConstants.FREQ_PROPERTY, providerName, CommonConstants.NO_EVENT);    	
-	}
-
-	@SuppressWarnings("unused")
-    private int getEventDelay(String providerName)
-	{
-    	int delay = getServiceProperties().getPropertyAsInt(CommonConstants.EVENT_DELAY_PROPERTY, providerName, CommonConstants.DEFAULT_EVENT_DELAY);
-    	return (delay < CommonConstants.DEFAULT_EVENT_DELAY) ? CommonConstants.DEFAULT_EVENT_DELAY : delay;
-	}
-	
+    /*---------------------*/   
 	 private Date getChangesSince(ChangedSinceInfo changedSinceInfo)
 	 {
 	     try
@@ -332,4 +530,99 @@ public abstract class BaseFunctionalServiceProvider extends CoreProvider impleme
 	     
 	     return changesSince.getTime() < oldestValidDate.getTime();
 	 }
+	 
+	 private SIFEvent<JobCollectionType> getEventsFromWrapper(JobEventWrapper jobEventWrapper, boolean providerEventsOnly, boolean includeFingerprint)
+	 {
+	     SIFEvent<JobCollectionType> events = new SIFEvent<JobCollectionType>();
+	     events.setSIFObjectList(new JobCollectionType());
+	     events.setEventAction(jobEventWrapper.getEventAction());
+	     events.setUpdateType(UpdateType.FULL);
+	     if (includeFingerprint)
+	     {
+	         events.setFingerprint(jobEventWrapper.getFingerprint());
+	     }
+	     for (JobEventData jobEventData : jobEventWrapper.getEvents())
+	     {
+	         if (!providerEventsOnly || !jobEventData.isConsumerEvent())
+	         {
+	             events.getSIFObjectList().getJob().add(jobEventData.getJobData());
+	         }
+	     }
+	     events.setListSize(events.getSIFObjectList().getJob().size());
+	     
+	     return events;
+	 }
+	 
+    /*
+     * Return the number of failed records. If 0 is return all then the event with its content is sent successfully.
+     */
+    private int prepareEventAndSend(EventClient evtClient, SIFEvent<JobCollectionType> sifEvents, SIFZone zone, SIFContext context)
+    {
+        int failedRecords = 0;
+        HeaderProperties customHTTPHeaders = new HeaderProperties();
+        if (!sendEvents(evtClient, sifEvents, zone, context, ServiceType.FUNCTIONAL, customHTTPHeaders))
+        {
+            //Report back to the caller. This should also give the event back to the caller.
+            onEventError(sifEvents, zone, context);
+            failedRecords = ((sifEvents != null) ? sifEvents.getListSize() : 0);
+        }
+        
+        return failedRecords;
+    }
+
+    private void markEventsAsPublished(JobEventWrapper jobEventWrapper)
+    {
+        JobService service = new JobService();
+        for (JobEventData jobEventData : jobEventWrapper.getEvents())
+        {
+            try
+            {
+                service.markJobEventAsPublished(jobEventData.getInternalJobID());
+            }
+            catch (Exception ex)
+            {
+                logger.debug("Failed to mark job event with internal ID = " + jobEventData.getInternalJobID() +" as published: "+ex.getMessage(), ex);
+            }
+        }
+    }
+
+    private ArrayList<ZoneContextInfo> getAuditZones()
+    {
+        ArrayList<ZoneContextInfo> auditZones = null;
+        String auditZoneStr = getServiceProperties().getPropertyAsString("job.event.auditZones", getServiceName(), null);      
+        if (auditZoneStr != null)
+        {
+            auditZones = new ArrayList<ZoneContextInfo>();
+            String[] auditZoneArr = auditZoneStr.split(",");
+            for (String zoneCtxStr : auditZoneArr)
+            {
+                ZoneContextInfo zoneContext = new ZoneContextInfo();
+                String[] zoneCtxInfo = zoneCtxStr.split("\\|");
+                zoneContext.setZone(new SIFZone(zoneCtxInfo[0].trim()));
+                if (zoneCtxInfo.length > 1) // we have a context
+                {
+                    zoneContext.setContext(new SIFContext(zoneCtxInfo[1].trim()));
+                }
+                else // default context
+                {
+                    zoneContext.setContext(new SIFContext(CommonConstants.DEFAULT_CONTEXT_NAME));
+                }
+                auditZones.add(zoneContext);
+            }
+        }
+        return auditZones;
+    }
+
+    private boolean includeConsumerEvents()
+    {
+        boolean includeConsumeRequested = getConsumerRequestetProperty();
+
+        // If we have auditZone we do need all events for these regardless of the property job.event.includeConsumerRequested
+        return (auditZones != null) || includeConsumeRequested;
+    }
+     
+    private boolean getConsumerRequestetProperty()
+    {
+        return getServiceProperties().getPropertyAsBool("job.event.includeConsumerRequested", getServiceName(), false);
+    }
 }

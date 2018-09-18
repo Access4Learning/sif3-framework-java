@@ -18,9 +18,6 @@
 
 package sif3.infra.rest.provider;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +34,6 @@ import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
-import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
 
 /**
  * This is the main class each specific provider of a given SIF Object type must extends to implement the CRUD operation as defined
@@ -47,13 +43,16 @@ import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
  *
  * @author Joerg Huber
  */
-public abstract class BaseProvider extends CoreProvider implements Provider, Runnable
+public abstract class BaseProvider extends CoreProvider implements Provider
 {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
+    
+    /**
+     * Shuts down the sub-class provider. This should release all associated resources with that provider.
+     */
+    public abstract void shutdown();
 
-	private Timer eventTimer = null;
-	private TimerTask eventTimerTask = null;
-	
+
     /**
      */
     public BaseProvider()
@@ -88,6 +87,23 @@ public abstract class BaseProvider extends CoreProvider implements Provider, Run
     {
         return getMultiObjectClassInfo();
     }
+    
+    /* 0 = No events */
+    public int getEventFrequency()
+    {
+        return getServiceProperties().getPropertyAsInt(CommonConstants.FREQ_PROPERTY, getProviderName(), CommonConstants.NO_EVENT);      
+    }
+
+    public int getEventDelay()
+    {
+        int delay = getServiceProperties().getPropertyAsInt(CommonConstants.EVENT_DELAY_PROPERTY, getProviderName(), CommonConstants.DEFAULT_EVENT_DELAY);
+        return (delay < CommonConstants.DEFAULT_EVENT_DELAY) ? CommonConstants.DEFAULT_EVENT_DELAY : delay;
+    }
+
+    public EventProvider<?> getEventProvider()
+    {
+        return (BaseEventProvider<?>)BaseProvider.this;
+    }
 
     /**
      * (non-Javadoc)
@@ -95,22 +111,19 @@ public abstract class BaseProvider extends CoreProvider implements Provider, Run
      */
     public void finalise()
     {
-    	// Shut down event timer & task - thread
-    	if (eventTimerTask != null)
-    	{
-    		logger.debug("Shut Down event task for: "+getProviderName());
-    		eventTimerTask.cancel();
-    		eventTimerTask = null;
-    	}
-    	if (eventTimer != null)
-    	{
-    		logger.debug("Shut Down event timer for: "+getProviderName());
-    		eventTimer.cancel();
-    		eventTimer.purge();
-    		eventTimer = null;
-    	}
-    	
+        // Shut down event timer & task - thread
+        logger.debug("Finalise in BaseProvider for "+getClass().getSimpleName() +" called.");
     	// Call finalise on sub-class.
+    }
+    
+    /* (non-Javadoc)
+     * @see sif3.infra.rest.provider.CoreProvider#finaliseSubClass()
+     */
+    @Override
+    public void finaliseSubClass()
+    {
+        finalise();
+        shutdown();
     }
     
     /* (non-Javadoc)
@@ -123,101 +136,7 @@ public abstract class BaseProvider extends CoreProvider implements Provider, Run
         return getCustomServiceInfo(zone, context, pagingInfo, metadata);
     }
 
-    /*----------------------------------------*/
-    /* Implemented Method for Multi-threading */
-    /*----------------------------------------*/
-
-	/**
-	 * This method is all that is needed to run the provider in its own thread. The thread is executed at
-	 * given intervals driven by a property in the adapter's property file. The interval/frequency
-	 * defined in there is used to determine how often this thread is run.
-	 */
-    @Override
-    public final synchronized void run()
-    {
-    	String providerName = getProviderName();
-    	boolean checkEnvType = getServiceProperties().getPropertyAsBool("provider.check.envType", true);
-    	
-		logger.debug("Start "+providerName+ " thread....");
-    	
-    	//Only if environment does support events we will start the event manager
-    	if (getProviderEnvironment().getEventsSupported())
-    	{	
-        	// If this is a DIRECT environment then events are not supported, yet.
-        	if ((getProviderEnvironment().getEnvironmentType() == EnvironmentType.DIRECT) && checkEnvType)
-        	{
-            	logger.info("The DIRECT Provider for this framework does NOT support events, yet.");
-        	}
-        	else
-        	{
-            	// Check if the provider implements the events interface. Only then events might be required.
-    	    	if (EventProvider.class.isAssignableFrom(getClass()))
-    	    	{
-		        	int frequency = getEventFrequency(providerName);    	
-		    		if (frequency != CommonConstants.NO_EVENT)
-		    		{
-			    		logger.debug("Events supported for this "+providerName+". Start up event thread.");
-		    	    	startupEventManager(providerName, frequency);
-		    		}
-		    		else
-		    		{
-			    		logger.info("Events supported for  "+providerName+" but currently turned off (frequency=0)");
-		    		}
-    	    	}
-    	    	else
-    	    	{
-    	        	logger.debug("Events NOT supported for "+providerName+". Provider does not implement EventProvider interface.");
-    	    	}
-        	}
-    	}
-    	else
-    	{
-        	logger.debug("Environment "+getProviderEnvironment().getEnvironmentName()+ " does NOT support events.");    		
-    	}
-		logger.debug(providerName+" started.");
-    }
-
     /*---------------------*/
     /*-- Private methods --*/
     /*---------------------*/
-
-	/**
-	 * This method initialises and schedules the event producer task.
-	 */
-    //TODO: JH - Consider if I should use Executors.newSingleThreadScheduledExecutor style task/timers here.
-	private void startupEventManager(String providerName, int frequencyInSec)
-	{
-		int period = frequencyInSec * CommonConstants.MILISEC;  // repeat every so often (multiply with milliseconds).
-		int delayInSec = getEventDelay(providerName);
-		
-		logger.info(providerName+".startupEventManager: Event Frequency = " + frequencyInSec + " secs; Event Startup Delay = "+delayInSec+" secs.");
-		if (eventTimerTask == null) // not created started
-		{
-			eventTimerTask = new TimerTask() 
-			{
-				public void run() 
-				{
-					logger.debug("Start Event Timer Task for "+getMultiObjectClassInfo().getObjectName()+".");
-					((BaseEventProvider<?>)BaseProvider.this).broadcastEvents();
-				}
-			};
-			
-			// Now start scheduling events
-			logger.debug("Start sending "+getMultiObjectClassInfo().getObjectName()+" events... (Total running threads = "+Thread.activeCount()+")");
-			eventTimer = new Timer(true);
-			eventTimer.scheduleAtFixedRate(eventTimerTask, delayInSec * CommonConstants.MILISEC, period);
-		}
-	}
-	
-	/* 0 = No events */
-	private int getEventFrequency(String providerName)
-	{
-    	return getServiceProperties().getPropertyAsInt(CommonConstants.FREQ_PROPERTY, providerName, CommonConstants.NO_EVENT);    	
-	}
-
-	private int getEventDelay(String providerName)
-	{
-    	int delay = getServiceProperties().getPropertyAsInt(CommonConstants.EVENT_DELAY_PROPERTY, providerName, CommonConstants.DEFAULT_EVENT_DELAY);
-    	return (delay < CommonConstants.DEFAULT_EVENT_DELAY) ? CommonConstants.DEFAULT_EVENT_DELAY : delay;
-	}
 }
