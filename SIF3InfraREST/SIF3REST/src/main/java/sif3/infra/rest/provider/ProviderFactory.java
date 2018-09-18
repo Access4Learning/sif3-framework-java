@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.conversion.ModelObjectInfo;
+import sif3.common.interfaces.EventProvider;
 
 /**
  * This is the provider factory. Each provider deals with a number of objects (i.e. StudentPersonal, SchoolInfo etc). 
@@ -49,7 +50,7 @@ public class ProviderFactory
 	private static ProviderFactory factory = null;
 	
 	// Active Providers for event publishing. These providers run in the background as an independent thread.
-	private HashMap<ModelObjectInfo, BaseProvider> eventProviders = new HashMap<ModelObjectInfo, BaseProvider>();
+    private HashMap<ModelObjectInfo, EventProvider<?>> eventProviders = new HashMap<ModelObjectInfo, EventProvider<?>>();
 	
 	// Known providers that can be instantiated for standard request/response
 	private HashMap<ModelObjectInfo, ProviderClassInfo> providerClasses = new HashMap<ModelObjectInfo, ProviderClassInfo>();
@@ -96,12 +97,12 @@ public class ProviderFactory
         {
             if (factory != null)
             {
-                for (BaseProvider provider : factory.eventProviders.values())
+                for (EventProvider<?> provider : factory.eventProviders.values())
                 {
                     try
                     {
                         logger.debug("Finalise provider " + provider.getMultiObjectClassInfo().getObjectName() + "...");
-                        provider.finalise();
+                        ((CoreProvider)provider).finaliseCoreProvider();
                     }
                     catch (Exception ex)
                     {
@@ -205,10 +206,10 @@ public class ProviderFactory
                         providerClasses.put(objectInfo, providerClassInfo);
 
                         // So far only Object Services (BaseProvider) support events.
-                        if (classObj instanceof BaseProvider)
+                        if (classObj instanceof EventProvider)
                         {
                             // Add it to hasmap for background threads
-                            eventProviders.put(objectInfo, (BaseProvider)provider);
+                            eventProviders.put(objectInfo, (EventProvider<?>)provider);
                         }
                     }
                     else
@@ -239,14 +240,15 @@ public class ProviderFactory
 		logger.debug("Start up delay between providers is: "+delay+" seconds");
 
 		int i = 0;
-		for (BaseProvider provider : eventProviders.values())
+        for (EventProvider<?> provider : eventProviders.values())
 		{	
 			// Create thread in thread pool
 			providerService = Executors.newSingleThreadScheduledExecutor();
 			
 			// Ensure there is 10 seconds between the start of each publisher so that they don't hammer
 			// the system at the same time during startup. Startup thread on thread pool.
-			providerService.schedule(provider, i*delay, TimeUnit.SECONDS);
+//            ScheduledFuture<?> future = providerService.schedule((CoreProvider)provider, i*delay, TimeUnit.SECONDS);
+			providerService.schedule((CoreProvider)provider, i*delay, TimeUnit.SECONDS);
 			i++;
 		}	
 	}
