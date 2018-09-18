@@ -128,7 +128,7 @@ public abstract class BaseJobManager implements JobManager
      * @see sif3.infra.common.interfaces.JobManager#saveNewJob(sif3.infra.common.model.JobType)
      */
     @Override
-    public void saveNewJob(JobType newJob, String serviceName, SIFZone zone, SIFContext context, String environmentID, String fingerprint) throws PersistenceException
+    public void saveNewJob(JobType newJob, String serviceName, SIFZone zone, SIFContext context, String environmentID, String fingerprint, boolean consumerRequested) throws PersistenceException
     {
         String jobXML = null;
         try
@@ -166,20 +166,7 @@ public abstract class BaseJobManager implements JobManager
         
         if (addToChangeLog())
         {
-            service.createJobEvent(sif3Job, EventAction.CREATE, true);
-//            SIF3JobEvent event = new SIF3JobEvent();
-//            event.setAdapterType(getAdapterType().name());
-//            event.setContextID(context.getId());
-//            event.setZoneID(zone.getId());
-//            event.setEnvironmentID(environmentID);
-//            event.setFingerprint(fingerprint);
-//            event.setJobID(newJob.getId());
-//            event.setServiceName(serviceName);
-//            event.setEventType(JobEventType.C.name());
-//            event.setToFingerPrintOnly(true);
-//            event.setJobXML(jobXML);
-//            
-//            service.createJobEvent(event);
+            service.createJobEvent(sif3Job, EventAction.CREATE, true, consumerRequested);
         }
     }
     
@@ -187,7 +174,7 @@ public abstract class BaseJobManager implements JobManager
      * @see sif3.infra.common.interfaces.JobManager#removeJob(java.lang.String, sif3.common.model.SIFZone, sif3.common.model.SIFContext, java.lang.String, java.lang.String)
      */
     @Override
-    public boolean removeJob(String jobID) throws PersistenceException
+    public boolean removeJob(String jobID, boolean consumerRequested) throws PersistenceException
     {
         JobService service = getService();
         SIF3Job sif3Job = service.getJobByUUID(jobID, getAdapterType());
@@ -202,21 +189,7 @@ public abstract class BaseJobManager implements JobManager
         
         if (addToChangeLog())
         {
-            service.createJobEvent(sif3Job, EventAction.DELETE, true);
-//            
-//            SIF3JobEvent event = new SIF3JobEvent();
-//            event.setAdapterType(getAdapterType().name());
-//            event.setContextID(sif3Job.getContextID());
-//            event.setZoneID(sif3Job.getZoneID());
-//            event.setEnvironmentID(sif3Job.getEnvironmentID());
-//            event.setFingerprint(sif3Job.getFingerprint());
-//            event.setJobID(sif3Job.getJobID());
-//            event.setServiceName(sif3Job.getServiceName());
-//            event.setEventType(JobEventType.D.name());
-//            event.setToFingerPrintOnly(true);
-//            event.setJobXML(sif3Job.getJobXML());
-//            
-//            service.createJobEvent(event);
+            service.createJobEvent(sif3Job, EventAction.DELETE, true, consumerRequested);
         }
         
         return true;

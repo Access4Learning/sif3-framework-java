@@ -72,7 +72,7 @@ public abstract class BaseProviderJobManager extends BaseJobManager implements P
             {
                 jobInfo.getDBJob().setCurrentState(newState.name());
                 jobInfo.getXMLJob().setState(JobStateType.valueOf(newState.name()));
-                updateJob(jobInfo);
+                updateJob(jobInfo, false);
             }
             else if (jobInfo.isXMLValid()) // we don't have a valid XML. Cannot update state
             {
@@ -99,7 +99,7 @@ public abstract class BaseProviderJobManager extends BaseJobManager implements P
                 if (phase != null) // add the state
                 {
                     addStateToPhase(phase, newPhaseState);
-                    updateJob(jobInfo);
+                    updateJob(jobInfo, false);
                 }
             }
             else if (jobInfo.isXMLValid()) // we don't have a valid XML. Cannot update state
@@ -139,7 +139,7 @@ public abstract class BaseProviderJobManager extends BaseJobManager implements P
             
             if (valuesUpdated)
             {
-                updateJob(jobInfo);
+                updateJob(jobInfo, false);
             }
         }
         else if (jobInfo.isXMLValid()) // we don't have a valid XML. Cannot update state
@@ -152,7 +152,7 @@ public abstract class BaseProviderJobManager extends BaseJobManager implements P
      * @see sif3.infra.common.interfaces.ProviderJobManager#updateJob(sif3.infra.common.env.types.ExtendedJobInfo)
      */
     @Override
-    public void updateJob(ExtendedJobInfo jobInfo) throws PersistenceException
+    public void updateJob(ExtendedJobInfo jobInfo, boolean consumerRequested) throws PersistenceException
     {
         JobService service = getService();
         if (jobInfo != null)
@@ -167,7 +167,7 @@ public abstract class BaseProviderJobManager extends BaseJobManager implements P
             
             if (getJobEnabled()) // Create UPDATE event.
             {   
-                service.createJobEvent(jobInfo.getDBJob(), EventAction.UPDATE, true);
+                service.createJobEvent(jobInfo.getDBJob(), EventAction.UPDATE, true, consumerRequested);
             }
         }
      }
