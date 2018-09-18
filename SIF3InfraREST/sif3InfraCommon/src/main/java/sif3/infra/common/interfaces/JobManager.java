@@ -101,11 +101,12 @@ public interface JobManager
      * @param context The context for which the job is applicable.
      * @param environmentID The environment for which the job is applicable.
      * @param fingerprint The fingerprint of the Adapter that requested the job creation.
+     * @param consumerRequested Indicating if the request is caused by consumer.
      * 
      * @throws PersistenceException Some data could not be persisted. An error log entry is performed and the message of the exceptions 
      *                              holds some info.
      */
-    public void saveNewJob(JobType newJob, String serviceName, SIFZone zone, SIFContext context, String environmentID, String fingerprint) throws PersistenceException;
+    public void saveNewJob(JobType newJob, String serviceName, SIFZone zone, SIFContext context, String environmentID, String fingerprint, boolean consumerRequested) throws PersistenceException;
 
     /**
      * This method will attempt to remove the job for the given jobID (job RefID) from the SIF3_JOB table. If it exists it will also make a 
@@ -113,13 +114,14 @@ public interface JobManager
      * to the SIF3_JOB_EVENT table.
      * 
      * @param jobID The refID of the job to be removed.
+     * @param consumerRequested Indicating if the request is caused by consumer.
      * 
      * @return TRUE: Job is removed and optional an entry is made in the event table. FALSE: Job did not exist. No changes are performed.
      * 
      * @throws PersistenceException Some data could not be persisted/removed. An error log entry is performed and the message of the exceptions 
      *                              holds some info.
      */
-    public boolean removeJob(String jobID) throws PersistenceException;
+    public boolean removeJob(String jobID, boolean consumerRequested) throws PersistenceException;
 
     /**
      * This method will attempt to get the job for the given jobID (job RefID) from the SIF3_JOB table. If it exists it will return the job 

@@ -81,10 +81,11 @@ public interface ProviderJobManager extends JobManager
      * all the latest values after this call.
      * 
      * @param jobInfo The job data that needs to be persisted. If null then no action is taken.
+     * @param consumerRequested Indicating if the update request is caused by consumer.
      * 
      * @throws PersistenceException Job can not be updated due to a DB access issue.
      */
-    public void updateJob(ExtendedJobInfo jobInfo) throws PersistenceException;
+    public void updateJob(ExtendedJobInfo jobInfo, boolean consumerRequested) throws PersistenceException;
     
     /**
      * This method returns all Jobs that have had any changes applied to them on or after the 'changesSince' date. The number 
