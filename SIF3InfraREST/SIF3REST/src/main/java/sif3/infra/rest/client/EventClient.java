@@ -23,12 +23,18 @@ import java.net.URI;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.WebResource.Builder;
+
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
 import sif3.common.header.HeaderValues.EventAction;
+import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.SIFContext;
@@ -38,11 +44,6 @@ import sif3.common.ws.BaseResponse;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.interfaces.ClientEnvironmentManager;
-import au.com.systemic.framework.utils.StringUtils;
-
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.WebResource.Builder;
 
 /**
  * This class implements the function(s) required to publish REST SIF3 Events to a environment provider and/or broker. The event interface
@@ -112,6 +113,7 @@ public class EventClient extends BaseClient
 	 * @param event The event to be sent.
 	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
 	 * @param context The context for which this operation shall be invoked. Can be null which indicates the DEFAULT context.
+     * @param serviceType The service type of the event (eg. OBJECT, FUNCTIONAL etc).
 	 * @param customHdrFields Custom HTTP header fields to be added to the request.
 	 *
 	 * @return BaseResponse Object holding appropriate values and results of the call. This call won't return any data model objects, just
@@ -119,7 +121,7 @@ public class EventClient extends BaseClient
 	 * 
 	 * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
      */
-	public BaseResponse sendEvents(SIFEvent<?> event, SIFZone zone, SIFContext context, HeaderProperties customHdrFields) throws ServiceInvokationException
+	public BaseResponse sendEvents(SIFEvent<?> event, SIFZone zone, SIFContext context, ServiceType serviceType, HeaderProperties customHdrFields) throws ServiceInvokationException
 	{
 		if (allOK) // Only send events if all is fine.
 		{
@@ -143,15 +145,10 @@ public class EventClient extends BaseClient
 			{
 				// Don't set zone & context here. They are header parameters in the case of events.
 			    String payloadStr = getDataModelMarshaller().marshal(event.getSIFObjectList(), getRequestMediaType());
-	
-//				if (logger.isDebugEnabled())
-//				{
-//					logger.debug("sendEvents: Payload to send:\n"+payloadStr);
-//				}
-				HeaderProperties headerProps = getEventHeaders(event.getEventAction(),	event.getUpdateType(), event.getFingerprint(), zone, context, customHdrFields);
+				HeaderProperties headerProps = getEventHeaders(event.getEventAction(),	event.getUpdateType(), event.getFingerprint(), zone, context, serviceType, customHdrFields);
 				
 				Builder builder = setRequestHeaderAndMediaTypes(service, headerProps, false, false, true);
-				logger.debug("Send "+serviceName+" Event with payload size: "+payloadStr.length()+" to Zone = "+((zone == null) ? "default" : zone.getId())+" and Context = "+((context == null) ? "DEFAULT" : context.getId()));
+				logger.debug("Send "+serviceName+" Event to Zone = "+((zone == null) ? "default" : zone.getId())+" and Context = "+((context == null) ? "DEFAULT" : context.getId()));
 				ClientResponse response = builder.post(ClientResponse.class, payloadStr);
 				logger.debug("Receive Event Response Status: "+response.getStatus());
 	
@@ -186,7 +183,7 @@ public class EventClient extends BaseClient
 	 * @param context The context for this event. Can be null.
 	 * @return
 	 */
-	private HeaderProperties getEventHeaders(EventAction eventAction, UpdateType updateType, String fingerprint, SIFZone zone, SIFContext context, HeaderProperties overrideHdrFields)
+	private HeaderProperties getEventHeaders(EventAction eventAction, UpdateType updateType, String fingerprint, SIFZone zone, SIFContext context, ServiceType serviceType, HeaderProperties overrideHdrFields)
 	{
 		// Set the override header fields
 		HeaderProperties hdrProperties = (overrideHdrFields != null) ? new HeaderProperties(overrideHdrFields.getHeaderProperties()) : new HeaderProperties();
@@ -197,7 +194,7 @@ public class EventClient extends BaseClient
 		// Add event specific properties
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_MESSAGE_TYPE, HeaderValues.MessageType.EVENT.name());
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_EVENT_ACTION, eventAction.name());
-		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, HeaderValues.ServiceType.OBJECT.name());
+		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, serviceType.name());
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_NAME, serviceName);
 						
 		if (eventAction == EventAction.UPDATE)
