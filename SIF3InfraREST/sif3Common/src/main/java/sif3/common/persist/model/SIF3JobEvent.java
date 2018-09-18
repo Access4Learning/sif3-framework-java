@@ -36,6 +36,7 @@ public class SIF3JobEvent extends JobBase implements Serializable
     private String eventType = null; // U=Update, C=Create, D=Delete
     private boolean fullUpdate = Boolean.TRUE; // TRUE = Update event is full update; FALSE = Update is partial
     private boolean toFingerPrintOnly = Boolean.TRUE; // TRUE = Include fingerprint in event; FALSE = May not include fingerprint
+    private boolean consumerRequested = Boolean.TRUE; // TRUE = consumer requested an operation on the job
     private boolean published = Boolean.FALSE; // TRUE = Event is already published; FALSE = Event isn't published, yet.
     private Date publishedDate = null; // Date when event has been sent/published to event end-point.
     
@@ -44,7 +45,16 @@ public class SIF3JobEvent extends JobBase implements Serializable
         super();
     }
     
-    public SIF3JobEvent(SIF3Job job, EventAction eventType, boolean fingerprintOnly)
+    /**
+     * Creates a Job Event object for the given event type. It will set the fingerprint only and consumerRequested
+     * flags as given.
+     * 
+     * @param job Create an event with the data of the job.
+     * @param eventType The event type for this job event.
+     * @param fingerprintOnly TRUE then job event will be sent to fingerprint only (not yet used)
+     * @param consumerRequested Event was due to a consumer requested action on the job object.
+     */
+    public SIF3JobEvent(SIF3Job job, EventAction eventType, boolean fingerprintOnly, boolean consumerRequested)
     {
         if (job != null)
         {
@@ -57,6 +67,7 @@ public class SIF3JobEvent extends JobBase implements Serializable
             setJobXML(job.getJobXML());
             setFingerprint(job.getFingerprint());
             setToFingerPrintOnly(fingerprintOnly);
+            setConsumerRequested(consumerRequested);
             setEventDate(new Date());
             setEventType(eventType.name().substring(0, 1));
             setFullUpdate(true);
@@ -109,6 +120,16 @@ public class SIF3JobEvent extends JobBase implements Serializable
         this.toFingerPrintOnly = toFingerPrintOnly;
     }
     
+    public boolean isConsumerRequested()
+    {
+        return consumerRequested;
+    }
+
+    public void setConsumerRequested(boolean consumerRequested)
+    {
+        this.consumerRequested = consumerRequested;
+    }
+
     public boolean isPublished()
     {
         return published;
@@ -133,8 +154,8 @@ public class SIF3JobEvent extends JobBase implements Serializable
     public String toString()
     {
         return "SIF3JobEvent [eventDate=" + eventDate + ", eventType=" + eventType + ", fullUpdate="
-                + fullUpdate + ", toFingerPrintOnly=" + toFingerPrintOnly + ", published="
-                + published + ", publishedDate=" + publishedDate + ", toString()="
-                + super.toString() + "]";
+                + fullUpdate + ", toFingerPrintOnly=" + toFingerPrintOnly + ", consumerRequested="
+                + consumerRequested + ", published=" + published + ", publishedDate="
+                + publishedDate + ", toString()=" + super.toString() + "]";
     }
 }

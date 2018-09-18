@@ -41,6 +41,7 @@ import sif3.common.model.PagingInfo;
 import sif3.common.persist.common.BasicTransaction;
 import sif3.common.persist.model.SIF3Job;
 import sif3.common.persist.model.SIF3JobEvent;
+import sif3.common.persist.model.SIF3JobEvent.JobEventType;
 
 /**
  * @author Joerg Huber
@@ -605,6 +606,7 @@ public class JobDAO extends BaseDAO
      * 
      * A few values will be defaulted if they are not set.<br/>
      * - toFingerPrintOnly defaults to TRUE: Only the consumer with that fingerprint will receive the event.
+     * - consumerRequested defaults to TRUE: Event was caused by consumer requested operation on job.
      * - fullUpdate defaults to TRUE: it is assumed that the entire Job Object is provided in case of an update event.<br/><br/>
      * 
      * The following values will be ignored and defaulted. The returned object will have them populated as followed:<br/>
@@ -712,6 +714,7 @@ public class JobDAO extends BaseDAO
      * @param job The job based on which an event shall be created. If null then no event is created and null is returned.
      * @param eventType The event type (CREATE, UPDATE, DELETE).
      * @param fingerprintOnly Indicating if the event is for the 'fingerprint' consumer only.
+     * @param consumerRequested Indicating if the event is caused by consumer requested operation on job.
      * 
      * @return The newly created job event. This has now the internalID and the event date and published populated. 
      *         The published will be set to FALSE and the event date will be set to current datetime.
@@ -719,7 +722,7 @@ public class JobDAO extends BaseDAO
      * @throws IllegalArgumentException If the tx is null or any of the rules listed above are not met.
      * @throws PersistenceException Could not access underlying data store.
      */
-    public SIF3JobEvent createJobEvent(BasicTransaction tx, SIF3Job job, EventAction eventType, boolean fingerprintOnly) throws IllegalArgumentException, PersistenceException
+    public SIF3JobEvent createJobEvent(BasicTransaction tx, SIF3Job job, EventAction eventType, boolean fingerprintOnly, boolean consumerRequested) throws IllegalArgumentException, PersistenceException
     {
         if (tx == null)
         {
@@ -728,7 +731,7 @@ public class JobDAO extends BaseDAO
         
         if (job != null)
         {
-             return createJobEvent(tx, new SIF3JobEvent(job, eventType, fingerprintOnly));           
+             return createJobEvent(tx, new SIF3JobEvent(job, eventType, fingerprintOnly, consumerRequested));           
         }
         else
         {
@@ -875,22 +878,91 @@ public class JobDAO extends BaseDAO
             criteria.addOrder(Order.asc("eventDate"));
            
             @SuppressWarnings("unchecked")
-            List<SIF3JobEvent> jobEventss = criteria.list();
+            List<SIF3JobEvent> jobEvents = criteria.list();
             
             // Just in case test for null....
-            if (jobEventss == null)
+            if (jobEvents == null)
             {
-                jobEventss = new ArrayList<SIF3JobEvent>();
+                jobEvents = new ArrayList<SIF3JobEvent>();
             }
             
-            return jobEventss;
+            return jobEvents;
         }
         catch (HibernateException e)
         {
             throw new PersistenceException("Unable to retrieve Job Events since "+DateUtils.dateToString(changesSince, DateUtils.DISP_DATE_TIME_SEC)+" for fingerprint = '"+ fingerprint + ", zoneID = " + zoneID + ", contextID = "+ contextID + ", adapterType = '" + adapterType + "' and pagingInfo = "+pagingInfo+".", e);
         } 
-        
     }
 
-    
+    /*
+     *
+     */
+    public List<SIF3JobEvent> retrieveJobEvents(BasicTransaction tx, 
+                                                Date eventsBefore, 
+                                                String serviceName, 
+                                                AdapterType adapterType, 
+                                                JobEventType eventType, 
+                                                boolean includeConsumeRequested) throws IllegalArgumentException, PersistenceException
+    {
+        if (tx == null)
+        {
+            throw new IllegalArgumentException("Current transaction is null.");
+        }
+        if (adapterType == null)
+        {
+          throw new IllegalArgumentException("adapterType is null.");          
+        }
+        if (StringUtils.isEmpty(serviceName))
+        {
+          throw new IllegalArgumentException("serviceName is null or empty.");          
+        }
+        if (eventsBefore == null)
+        {
+          throw new IllegalArgumentException("eventsBefore is null.");          
+        }
+        if (eventType == null)
+        {
+          throw new IllegalArgumentException("eventType is null.");          
+        }
+
+        try
+        {
+            Criteria criteria = tx.getSession().createCriteria(SIF3JobEvent.class);
+            
+            criteria = criteria.add(Restrictions.le("eventDate", eventsBefore));
+            criteria = criteria.add(Restrictions.eq("adapterType", adapterType.name()));
+            criteria = criteria.add(Restrictions.eq("serviceName", serviceName));
+            criteria = criteria.add(Restrictions.eq("eventType", eventType.name()));
+            
+            if (!includeConsumeRequested) // only get provider initiated events
+            {
+                criteria = criteria.add(Restrictions.eq("consumerRequested", false));
+            }
+            
+            criteria = criteria.add(Restrictions.eq("published", false));
+           
+            
+            //Add orderBy to ensure consistent results
+            criteria.addOrder(Order.asc("zoneID")).addOrder(Order.asc("contextID")).addOrder(Order.asc("fingerprint")).addOrder(Order.asc("internalID"));
+           
+            @SuppressWarnings("unchecked")
+            List<SIF3JobEvent> jobEvents = criteria.list();
+            
+            // Just in case test for null....
+            if (jobEvents == null)
+            {
+                jobEvents = new ArrayList<SIF3JobEvent>();
+            }
+            
+            return jobEvents;
+        }
+        catch (HibernateException e)
+        {
+            throw new PersistenceException("Unable to retrieve Job Events for events before "+
+                                           DateUtils.dateToString(eventsBefore, DateUtils.DISP_DATE_TIME_SEC)+
+                                           " for adapterType = '" + adapterType + 
+                                           "', serviceName = '" + serviceName + 
+                                           "', eventType = '" + eventType + "'.", e);
+        } 
+    }
 }

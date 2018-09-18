@@ -184,6 +184,7 @@
         <property name="eventType" column="EVENT_TYPE" type="string" length="1"/>
         <property name="fullUpdate" column="FULL_UPDATE" type="boolean"/>
         <property name="toFingerPrintOnly" column="TO_FINGERPRINT_ONLY" type="boolean"/>
+        <property name="consumerRequested" column="CONSUMER_REQUESTED" type="boolean"/>
         <property name="published" column="EVENT_PUBLISHED" type="boolean"/>
         <property name="publishedDate" column="PUBLISHED_DATETIME" type="timestamp"/>
         <property name="jobXML" column="JOB_XML" type="text"/>

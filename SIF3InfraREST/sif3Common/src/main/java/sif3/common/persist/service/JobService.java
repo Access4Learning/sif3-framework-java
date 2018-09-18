@@ -17,6 +17,7 @@
  */
 package sif3.common.persist.service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import sif3.common.persist.dao.JobTemplateDAO;
 import sif3.common.persist.model.JobTemplate;
 import sif3.common.persist.model.SIF3Job;
 import sif3.common.persist.model.SIF3JobEvent;
+import sif3.common.persist.model.SIF3JobEvent.JobEventType;
 
 /**
  * @author Joerg Huber
@@ -442,6 +444,7 @@ public class JobService extends DBService
      * @param job The job based on which an event shall be created. If null then no event is created and null is returned.
      * @param eventType The event type (CREATE, UPDATE, DELETE).
      * @param fingerprintOnly Indicating if the event is for the 'fingerprint' consumer only.
+     * @param consumerRequested Indicating if the event is caused by consumer requested operation on job.
      * 
      * @return The newly created job event. This has now the internalID and the event date and published populated. 
      *         The published will be set to FALSE and the event date will be set to current datetime.
@@ -449,7 +452,7 @@ public class JobService extends DBService
      * @throws IllegalArgumentException If the tx is null or any of the rules listed above are not met.
      * @throws PersistenceException Could not access underlying data store.
      */
-    public SIF3JobEvent createJobEvent(SIF3Job job, EventAction eventType, boolean fingerprintOnly) throws IllegalArgumentException, PersistenceException
+    public SIF3JobEvent createJobEvent(SIF3Job job, EventAction eventType, boolean fingerprintOnly, boolean consumerRequested) throws IllegalArgumentException, PersistenceException
     {
         SIF3JobEvent row = null;
         BasicTransaction tx = null;
@@ -457,7 +460,7 @@ public class JobService extends DBService
         try
         {
             tx = startTransaction();
-            row = jobDAO.createJobEvent(tx, job, eventType, fingerprintOnly);
+            row = jobDAO.createJobEvent(tx, job, eventType, fingerprintOnly, consumerRequested);
             tx.commit();
         }
         catch (Exception ex)
@@ -561,4 +564,78 @@ public class JobService extends DBService
         
         return jobEvents;
     }
+    
+    /**
+     * This method returns all events in the SIF3_JOB_EVENT table that match the given parameters. If the 'includeConsumeRequested'
+     * is set to TRUE then all events initiated by the provider and consumer are returned. If 'includeConsumeRequested' is set
+     * to false only events caused by changes from the provider are returned. This behaviour is useful as in most cases the
+     * consumer, who requested an operation on a job, already has the response of the request and therefore has no need to receive
+     * an event about that action. The consumer only wants to know about events it has not initiated, meaning provider caused events.
+     * 
+     * @param eventsBefore Return events before this date.
+     * @param serviceName Events for the service to be returned.
+     * @param adapterType The adapter type which is ENVIRONMENT_PROVIDER for a direct environment or PROVIDER for a brokered
+     *                    environment.
+     * @param eventType The event type (Create, Update, Change) to be retrieved.
+     * @param includeConsumeRequested Include consumer caused events.
+     * 
+     * @return A list of events that match the criteria given by the parameters. The returned list is ordered by ZoneId, ContextId,
+     *         fingerprint & eventID (in this order). 
+     * 
+     * @throws IllegalArgumentException Any of the input parameters is null.
+     * @throws PersistenceException Failed to retrieve events due to a DB issue.
+     */
+    public List<SIF3JobEvent> retrieveJobEvents(Date eventsBefore, 
+                                                String serviceName, 
+                                                AdapterType adapterType, 
+                                                JobEventType eventType, 
+                                                boolean includeConsumeRequested) throws IllegalArgumentException, PersistenceException
+    {
+        List<SIF3JobEvent> jobEvents = null;
+        BasicTransaction tx = null;
+        try
+        {
+            tx = startTransaction();
+            jobEvents = jobDAO.retrieveJobEvents(tx, eventsBefore, serviceName, adapterType, eventType, includeConsumeRequested);
+            tx.commit();
+        }
+        catch (Exception ex)
+        {
+            rollback(tx);
+            exceptionMapper(ex, ex.getMessage(), false, false);
+        }
+        
+        return jobEvents;        
+    }
+    
+    /**
+     * This is a convenience method that is used to get a full list of events in the order of Create, Update and Delete before the
+     * current date and time. The final returned list has all Create events before the Update Events and then the Delete events.
+     * Within each event type the order is by ZoneId, ContextId, fingerprint & eventID. This list is intended to be used by the
+     * event publisher as it has the events already lined up as they should be published. 
+     * 
+     * @param serviceName Events for the service to be returned.
+     * @param adapterType The adapter type which is ENVIRONMENT_PROVIDER for a direct environment or PROVIDER for a brokered
+     *                    environment.
+     * @param includeConsumeRequested Include consumer caused events.
+     * 
+     * @return A list of events that match the criteria given by the parameters. Ordering of the returned list is outlined in the
+     *         description.
+     * 
+     * @throws IllegalArgumentException Any of the input parameters is null.
+     * @throws PersistenceException Failed to retrieve events due to a DB issue.
+     */
+    public List<SIF3JobEvent> retrieveJobEvents(String serviceName, AdapterType adapterType, boolean includeConsumeRequested) throws IllegalArgumentException, PersistenceException
+    {
+        List<SIF3JobEvent> finalJobEvents = new ArrayList<SIF3JobEvent>();
+        Date now = new Date();
+        
+        // Get all Create Events
+        finalJobEvents.addAll(retrieveJobEvents(now, serviceName, adapterType, JobEventType.C, includeConsumeRequested));
+        finalJobEvents.addAll(retrieveJobEvents(now, serviceName, adapterType, JobEventType.U, includeConsumeRequested));
+        finalJobEvents.addAll(retrieveJobEvents(now, serviceName, adapterType, JobEventType.D, includeConsumeRequested));
+
+        return finalJobEvents;
+    }
+
 }
