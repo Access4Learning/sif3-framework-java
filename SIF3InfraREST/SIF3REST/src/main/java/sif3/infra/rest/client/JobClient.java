@@ -544,11 +544,11 @@ public class JobClient extends BaseClient
      * 
      * @param phaseInfo Hold the jobID and phase name of the job from where the data shall be created. If the parameter or
      *                  any of its properties must not be null/empty.
-     * @param phaseData The data and its mime type that is given to the operation of this phase. The data property of this
-     *                  parameter can be null in cases where no data is provided to this phase. This is entirely valid according
-     *                  to the SIF Specification. If data is provided (as a String) then the mime type is set as well, by the consumer,
-     *                  to indicate the format of the data. The provider can us this mime type to unmarshal the data into the 
-     *                  appropriate internal structure.
+     * @param phaseDataRequest The data and its mime type that is given to the operation of this phase. The data property 
+     *                         of this parameter can be null in cases where no data is provided to this phase. This is 
+     *                         entirely valid according to the SIF Specification. If data is provided (as a String) then 
+     *                         the mime type is set as well, by the consumer, to indicate the format of the data. The 
+     *                         provider can us this mime type to unmarshal the data into the appropriate internal structure.
      * @param returnMimeType The mime type the response data is in. It is expected that the consumer provides that and the provider
      *                       should attempt to marshal the data to the given mime type and return the resulting string as
      *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
@@ -621,11 +621,11 @@ public class JobClient extends BaseClient
      *  
      * @param phaseInfo Hold the jobID and phase name of the job where the data shall be updated. If the parameter or
      *                  any of its properties must not be null/empty.
-     * @param phaseData The data and its mime type that is given to the operation of this phase. The data property of this
-     *                  parameter can be null in cases where no data is provided to this phase. This is entirely valid according
-     *                  to the SIF Specification. If data is provided (as a String) then the mime type is set as well, by the consumer,
-     *                  to indicate the format of the data. The provider can us this mime type to unmarshal the data into the 
-     *                  appropriate internal structure.
+     * @param phaseDataRequest The data and its mime type that is given to the operation of this phase. The data property 
+     *                         of this parameter can be null in cases where no data is provided to this phase. This is 
+     *                         entirely valid according to the SIF Specification. If data is provided (as a String) then 
+     *                         the mime type is set as well, by the consumer, to indicate the format of the data. The 
+     *                         provider can us this mime type to unmarshal the data into the appropriate internal structure.
      * @param returnMimeType The mime type the response data is in. It is expected that the consumer provides that and the provider
      *                       should attempt to marshal the data to the given mime type and return the resulting string as
      *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
@@ -700,11 +700,11 @@ public class JobClient extends BaseClient
      * 
      * @param phaseInfo Hold the jobID and phase name of the job where the data shall be deleted. If the parameter or
      *                  any of its properties must not be null/empty.
-     * @param phaseData The data and its mime type that is given to the operation of this phase. The data property of this
-     *                  parameter can be null in cases where no data is provided to this phase. This is entirely valid according
-     *                  to the SIF Specification. If data is provided (as a String) then the mime type is set as well, by the consumer,
-     *                  to indicate the format of the data. The provider can us this mime type to unmarshal the data into the 
-     *                  appropriate internal structure.
+     * @param phaseDataRequest The data and its mime type that is given to the operation of this phase. The data property 
+     *                         of this parameter can be null in cases where no data is provided to this phase. This is 
+     *                         entirely valid according to the SIF Specification. If data is provided (as a String) then 
+     *                         the mime type is set as well, by the consumer, to indicate the format of the data. The 
+     *                         provider can us this mime type to unmarshal the data into the appropriate internal structure.
      * @param returnMimeType The mime type the response data is in. It is expected that the consumer provides that and the provider
      *                       should attempt to marshal the data to the given mime type and return the resulting string as
      *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
@@ -831,7 +831,6 @@ public class JobClient extends BaseClient
      * 
      * @param phaseInfo Hold the jobID and phase name of the job where the states shall be retrieved. If the parameter or
      *                  any of its properties must not be null/empty.
-     * @param phaseName Name of the phase for which the state(s) shall be retrieved. If null then an error will be returned.
      * @param hdrProperties Header Properties to be added to the header of the request.
      * @param urlQueryParams URL query parameters to be added to the request. It is assumed that these are custom
      *                       URL query parameters. They are conveyed to the provider unchanged. URL query parameter

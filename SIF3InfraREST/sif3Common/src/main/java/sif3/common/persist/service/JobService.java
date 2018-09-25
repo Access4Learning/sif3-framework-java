@@ -200,7 +200,6 @@ public class JobService extends DBService
      * Updates a job with the given values. Note that the internalID must be set and have the value of an existing object. The job object is
      * updated with the exact values given. Please refer to the appropriate method in the JobDAO for details on pre- and post-conditions.<br/>
      * 
-     * @param tx The current transaction. Cannot be null.
      * @param job The job to be updated to the SIF3_JOB table.
      * 
      * @return The updated job. This has a new lastModified date which is now the current date.
