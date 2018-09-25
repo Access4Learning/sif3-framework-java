@@ -1,5 +1,5 @@
 ==============================================================
-Release Notes for v0.13.0 of SIF3 Framework (Sept 18, 2018)
+Release Notes for v0.13.0 of SIF3 Framework (Sept 25, 2018)
 ==============================================================
 
 Bug Fixes
@@ -18,7 +18,7 @@ New Functionality
   - Provider Side. This includes all CRUD operations for Job, Phases and Status. Also supported out-of-the box is "ChangesSince"
                    and publishing of events.
   - Consumer Side: This includes all CRUD operations for Job, Phases and Status. Also supported out-of-the box is "ChangesSince".
-                   Events are not yet supported.
+                   and event consuming.
 
 Changed Functionality
 ---------------------

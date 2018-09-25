@@ -165,7 +165,7 @@ project is upgraded properly to the new framework version.**
 **Please refer to the detailed release notes in "release/v0.12.0" carefully to ensure that your project is upgraded properly to the 
 new framework version.**
 
-## Version from Sept 18, 2018: v0.13.0 - Various changes
+## Version from Sept 25, 2018: v0.13.0 - Various changes
 - Fixed a number of minor issues.
 - Added SIFException to many Provider Interface methods to enable providers to throw a "generic" exceptions where the  
   provider can customise the HTTP Status Code and error message to be returned to the consumer.
