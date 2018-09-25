@@ -19,7 +19,6 @@ package sif3.infra.rest.consumer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.ws.rs.core.MediaType;
@@ -59,7 +58,6 @@ import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.rest.queue.LocalConsumerQueue;
 import sif3.infra.rest.queue.LocalMessageConsumer;
 import sif3.infra.rest.queue.QueueReaderInfo;
-import sif3.infra.rest.queue.RemoteMessageQueueReader;
 
 /**
  * It is expected that all consumer implementations extend this class. It has a set of abstract methods that need to be implemented by
