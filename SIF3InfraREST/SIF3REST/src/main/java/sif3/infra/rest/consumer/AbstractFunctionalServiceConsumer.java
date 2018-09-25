@@ -36,18 +36,23 @@ import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderProperties;
+import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.HeaderValues.ServiceType;
+import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.interfaces.DelayedConsumer;
+import sif3.common.interfaces.EventConsumer;
 import sif3.common.interfaces.FunctionalServiceConsumer;
 import sif3.common.model.ACL.AccessRight;
 import sif3.common.model.ACL.AccessType;
 import sif3.common.model.CustomParameters;
+import sif3.common.model.EventMetadata;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.SIFContext;
+import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceInfo;
 import sif3.common.model.URLQueryParameter;
@@ -88,7 +93,7 @@ import sif3.infra.rest.client.JobClient;
  * 
  * @author Joerg Huber
  */
-public abstract class AbstractFunctionalServiceConsumer extends BaseConsumer implements FunctionalServiceConsumer, DelayedConsumer
+public abstract class AbstractFunctionalServiceConsumer extends BaseConsumer implements FunctionalServiceConsumer, DelayedConsumer, EventConsumer<JobCollectionType>, Runnable
 {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -99,7 +104,7 @@ public abstract class AbstractFunctionalServiceConsumer extends BaseConsumer imp
     private UnmarshalFactory unmarshaller = new InfraUnmarshalFactory();
 
     /*--------------------------------------------------------------------*/
-    /* Abstract method relating to FUnctional Service Type functionality. */
+    /* Abstract method relating to Functional Service Type functionality. */
     /*--------------------------------------------------------------------*/
     /**
      * Must return the name of the Functional Service. This must match the value of an entry in the 
@@ -227,6 +232,33 @@ public abstract class AbstractFunctionalServiceConsumer extends BaseConsumer imp
      *                limited to the zoneId, contextId, original request ID etc. as well as all HTTP Headers of the response. 
      */
     public abstract void processDelayedPhaseDelete(PhaseInfo phaseInfo, PhaseDataResponse phaseDataResponse, DelayedResponseReceipt receipt);
+
+    /*------------------------------------------------------*/
+    /* Abstract method relating to Job Event functionality. */
+    /*------------------------------------------------------*/
+    /**
+     * This method is called when a consumer service has received a Job event. This class does implement the actual onEvent() 
+     * method from the event interface. It may do some additional work for house keeping purpose so the original onEvent() id processed
+     * as part of this class but then this method is called so that the actual consumer can do its work as required.
+     * 
+     * @param sifEvent The event data that has been received and shall be processed by the consumer. This parameter also holds
+     *                 the zone and context in the limitToZoneCtxList property. It will always only hold one entry in that
+     *                 list. So the zone can be retrieved with the following call: sifEvent.getLimitToZoneCtxList().get(0).getZone().
+     *                 However for simplicity reasons the zone and context is already extracted and passed to this method in the
+     *                 zone anc context parameter.
+     * @param zone The zone from which the event was received from. The framework ensures that this is never null.
+     * @param context The context from which the event was received from. The framework ensures that this is never null.
+     * @param metadata Additional metadata that is known for the event. Typical values include custom HTTP headers, sourceName etc.
+     * @param msgReadID The ID of the SIF queue reader. It is informative only and is only of use where there are multiple concurrent 
+     *                  subscribers on a message queue.
+     * @param consumerID The consumer ID that has been used to receive the event from the event queue. It is informative
+     *                   only and is only of use where there are multiple event subscribers enabled.
+     */
+    public abstract void processJobEvent(SIFEvent<JobCollectionType> sifEvent, SIFZone zone, SIFContext context, EventMetadata metadata, String msgReadID, String consumerID);
+
+    /*-------------------------*/
+    /* Implementation of Class */
+    /*-------------------------*/
 
     /**
      * Constructor.
@@ -564,6 +596,42 @@ public abstract class AbstractFunctionalServiceConsumer extends BaseConsumer imp
     public void onUpdateMany(MultiOperationStatusList<OperationStatus> statusList, DelayedResponseReceipt receipt)
     {
         //Job Objects cannot be updated. No implementation needed here.
+    }
+
+    /*------------------------------------*/
+    /* EventConsumer Interface Methods. --*/
+    /*------------------------------------*/
+   
+    @Override
+    public void onEvent(SIFEvent<JobCollectionType> sifEvent, EventMetadata metadata, String msgReadID, String consumerID)
+    {
+        if (sifEvent != null)
+        {
+            // We know from the framework that zone and context is never null. For the time being we just log the event.
+            processJobEvent(sifEvent, sifEvent.getLimitToZoneCtxList().get(0).getZone(), sifEvent.getLimitToZoneCtxList().get(0).getContext(), metadata, msgReadID, consumerID);
+        }
+    }
+
+    @Override
+    public SIFEvent<JobCollectionType> createEventObject(Object sifObjectList, EventAction eventAction, UpdateType updateType)
+    {
+        if (sifObjectList != null)
+        {
+            if (sifObjectList instanceof JobCollectionType)
+            {
+                int size = ((JobCollectionType)sifObjectList).getJob().size();
+                return new SIFEvent<JobCollectionType>((JobCollectionType)sifObjectList, eventAction, updateType, size);
+            }
+            else
+            {
+                logger.error("The given event data is not of type JobCollectionType as expected. Cannot create event object. Return null");
+            }
+        }
+        else
+        {
+            logger.error("The given job event data is null. Cannot create job event object. Return null");          
+        }
+        return null; // if something is wrong then we get here.
     }
 
     /*------------------------------------------------*/
@@ -1080,6 +1148,18 @@ public abstract class AbstractFunctionalServiceConsumer extends BaseConsumer imp
         return response;
     }
     
+    /*----------------------------------------*/
+    /* Implemented Method for Multi-threading */
+    /*----------------------------------------*/
+
+    /**
+     * This method is all that is needed to run the subscriber in its own thread.
+     */
+    @Override
+    public final void run()
+    {
+//      logger.debug("============================\n Start "+getConsumerName()+" worker thread.\n======================================");
+    }
     
     /*----------------------------*/
     /*-- Other required methods --*/
@@ -1126,7 +1206,7 @@ public abstract class AbstractFunctionalServiceConsumer extends BaseConsumer imp
      * implementations would not require any overriding of this method. If a specific implementation wishes to filter out
      * some of the environment provided subscriptions then the sub-class of this class should override this method.
      * 
-     * @param allServices A list of services for this that is allowed to subscribe to events across the environment of this consumer.
+     * @param envEventServices A list of services for this that is allowed to subscribe to events across the environment of this consumer.
      * 
      * @return The final list of services for which this consumer class shall subscribe to.
      */
@@ -1141,7 +1221,7 @@ public abstract class AbstractFunctionalServiceConsumer extends BaseConsumer imp
     protected final List<ServiceInfo> getEventServices()
     {
         //Note the service name is the name of the functional service
-        return filterEventServices(getAllApprovedServicesForRights(getServiceURLNamePlural(), ServiceType.OBJECT, AccessRight.SUBSCRIBE));
+        return filterEventServices(getAllApprovedServicesForRights(getServiceURLNamePlural(), ServiceType.FUNCTIONAL, AccessRight.SUBSCRIBE));
     }
 
     /*---------------------*/
