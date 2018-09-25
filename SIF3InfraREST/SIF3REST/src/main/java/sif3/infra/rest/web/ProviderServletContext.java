@@ -18,7 +18,11 @@
 
 package sif3.infra.rest.web;
 
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.EnumSet;
+import java.util.Enumeration;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration.Dynamic;
@@ -35,10 +39,13 @@ import sif3.common.interfaces.HibernateProperties;
 import sif3.common.persist.common.HibernateHelper;
 import sif3.common.persist.common.HibernateUtil;
 import sif3.infra.common.env.mgr.ProviderManagerFactory;
+import sif3.infra.common.env.types.EnvironmentInfo;
+import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.interfaces.EnvironmentConnector;
 import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.rest.env.connectors.EnvironmentConnectorFactory;
 import sif3.infra.rest.provider.ProviderFactory;
+import sif3.infra.rest.quarz.FunctionalServiceHouseKeeping;
 
 /**
  * This class is to initialise the provider at startup and clean up resources at shutdown.
@@ -54,6 +61,7 @@ public class ProviderServletContext implements ServletContextListener
 	private static final String SERVICE_PROPERTY_FILE_TAG = "SERVICE_PROPERTY_FILE";
 
    	private EnvironmentConnector connector = null;
+   	private FunctionalServiceHouseKeeping fsHouseKeeper = null;
 	
    	/*
    	 * (non-Javadoc)
@@ -127,6 +135,9 @@ public class ProviderServletContext implements ServletContextListener
 			
 			// If all is good till now we try to install the Auditor Filter
 			installAuditorFilter(servletCtxEvent, envMgr.getServiceProperties());
+			
+			// Setup back ground processes or Cron jobs
+			scheduleJobs(envMgr.getEnvironmentInfo());
 		}
 		logger.info("Initialise Provider sucessful: "+allOK);
 		
@@ -146,6 +157,12 @@ public class ProviderServletContext implements ServletContextListener
      */
     public void contextDestroyed(ServletContextEvent servletCtxEvent) 
     {
+        logger.info("Shutdown Functional Services Housekeeper...");
+        if (fsHouseKeeper != null)
+        {
+            fsHouseKeeper.shutdown();
+        }
+        
         logger.info("Shutdown Provider...");
         EnvironmentManager envMgr = ProviderManagerFactory.getEnvironmentManager();
 
@@ -160,6 +177,10 @@ public class ProviderServletContext implements ServletContextListener
 		
         logger.debug("Release DB Connections....");
         HibernateUtil.shutdown();
+        
+        logger.debug("Unregister JDBC drivers that may have been used ....");
+        unregisterJDBCDrivers();
+        
         logger.info("Shutdown Provider: done.");
     }
     
@@ -194,4 +215,53 @@ public class ProviderServletContext implements ServletContextListener
     	}
     }
     
+    private void scheduleJobs(EnvironmentInfo envInfo)
+    {
+        ProviderEnvironment providerEnvironment = (ProviderEnvironment)envInfo;
+        if (providerEnvironment.isJobEnabled())
+        {
+            logger.info("Install Functional Service HouseKeeping Job.");
+            fsHouseKeeper = new FunctionalServiceHouseKeeping();
+            if (!fsHouseKeeper.start(providerEnvironment))
+            {
+                logger.error("Failed to schedule Functional Service House Keeper. See previous error log entry for details.");
+            }
+        }
+        else
+        {
+            logger.info("Functional Services not enabled for this Provider.");
+        }
+    }
+    
+    
+    private void unregisterJDBCDrivers()
+    {
+        // Now de-register JDBC drivers in this context's ClassLoader: Get the webapp's ClassLoader
+        ClassLoader webAppClassLoader = Thread.currentThread().getContextClassLoader();
+        
+        // Loop through all drivers
+        Enumeration<Driver> drivers = DriverManager.getDrivers();
+        while (drivers.hasMoreElements())
+        {
+            Driver driver = drivers.nextElement();
+            if (driver.getClass().getClassLoader() == webAppClassLoader)
+            {
+                // This driver was registered by the webapp's ClassLoader, so deregister it:
+                try
+                {
+                    logger.info("Deregistering JDBC driver {}", driver);
+                    DriverManager.deregisterDriver(driver);
+                }
+                catch (SQLException ex)
+                {
+                    logger.error("Error deregistering JDBC driver {}", driver, ex);
+                }
+            }
+            else
+            {
+                // driver was not registered by the webapp's ClassLoader and may be in use elsewhere
+                logger.trace( "Not deregistering JDBC driver {} as it does not belong to this webapp's ClassLoader", driver);
+            }
+        }
+    }
 }

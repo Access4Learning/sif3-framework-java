@@ -39,6 +39,7 @@ import sif3.infra.common.env.types.AdapterEnvironmentStore;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.env.types.EnvironmentInfo;
 import sif3.infra.common.model.EnvironmentType;
+import sif3.infra.common.model.JobType;
 
 /**
  * Helper class for some operations required by the Environment Store (Consumer or Provider). Only used internal to the framework.
@@ -93,6 +94,11 @@ public class AdapterBaseEnvStoreOperations
 		return FileAndFolderUtils.doesFileExist(getFullTemplateFileName(templateFileName, adapterType, envType));
 	}
 
+    public boolean existJobTemplate(String jobTemplateFileName, AdapterType adapterType, sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType envType)
+    {
+        return FileAndFolderUtils.doesFileExist(getFullJobTemplateFileName(jobTemplateFileName, adapterType, envType));
+    }
+	
 	/**
 	 * 
 	 * @param envFileName The name of the environment file to load from template directory.
@@ -103,6 +109,17 @@ public class AdapterBaseEnvStoreOperations
 	{
 		return loadEnvironmentDataFromFile(getFullTemplateFileName(envFileName, adapterType, envType));
 	}
+
+    /**
+     * 
+     * @param jobTemplateFileName The name of the job template file to load from template/job directory.
+     * 
+     * @return Null => Failed to load data due to some error. See error log for details.
+     */
+    public JobType loadJobTemplateData(String jobTemplateFileName, AdapterType adapterType, sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType envType)
+    {
+        return loadJobDataFromFile(getFullJobTemplateFileName(jobTemplateFileName, adapterType, envType));
+    }
 
 	/**
 	 * Returns a SIF3Session for the given session token. If there is no such session then null is returned.
@@ -322,25 +339,22 @@ public class AdapterBaseEnvStoreOperations
 	 */
 	public EnvironmentType loadEnvironmentFromString(String envrionmentData)
 	{
-		if (envrionmentData != null)
-		{
-			InfraUnmarshalFactory unmarshaller = new InfraUnmarshalFactory();
-			try
-			{
-				return (EnvironmentType) unmarshaller.unmarshalFromXML(envrionmentData, EnvironmentType.class);
-			}
-			catch (Exception ex)
-			{
-				logger.error("Failed to successfully parse the XML content:\n"+envrionmentData);
-				return null;
-			}
-		}
-		else
-		{
-			logger.error("The provided environment data to parse is null.");
-			return null;
-		}
+	    return (EnvironmentType)loadInfraObjectFromString(envrionmentData, EnvironmentType.class);
 	}
+	
+	/**
+     * This method takes the given XML job string and converts it into a Infrastructure Job Type. If the string is null or
+     * invalid then an error is logged and null is returned. 
+     * 
+     * @param jobTemplateData XML formatted environment data as of the SIF3 spec.
+     * 
+     * @return See desc.
+     */
+    public JobType loadJobTemplateFromString(String jobTemplateData)
+    {
+        return (JobType)loadInfraObjectFromString(jobTemplateData, JobType.class);
+    }
+	
 
 	/**
 	 * Store the environment data (inclusive session info) to workstore for the given SIF3 session. All property of the session
@@ -421,36 +435,34 @@ public class AdapterBaseEnvStoreOperations
 	}
 
 	/**
-	 * @param fullName Full name of file (path, name and extension. It is expected this file to have XML content.
+	 * @param fullName Full name of file (path, name and extension). It is expected this file to have XML content.
 	 * 
 	 * @return Null => Failed to load data due to some error. See error log for details.
 	 */
 	protected EnvironmentType loadEnvironmentDataFromFile(String fullFileName)
 	{
-		if (FileAndFolderUtils.doesFileExist(fullFileName))
-		{
-			String xmlStr = getXMLFromFile(fullFileName);
-			if (xmlStr != null)
-			{
-				return loadEnvironmentFromString(xmlStr);
-			}
-			else
-			{
-				logger.error("The XML file "+fullFileName+" cannot be read. Check permissions and content.");				
-				return null;
-			}
-		}
-		else
-		{
-			logger.error("There is no XML file: "+fullFileName);
-			return null;
-		}
+        return (EnvironmentType)loadXMLDataFromFile(fullFileName, EnvironmentType.class);
 	}
-		
+	
+	/**
+     * @param fullName Full name of file (path, name and extension). It is expected this file to have XML content.
+     * 
+     * @return Null => Failed to load data due to some error. See error log for details.
+     */
+    protected JobType loadJobDataFromFile(String fullFileName)
+    {
+        return (JobType)loadXMLDataFromFile(fullFileName, JobType.class);
+    }
+
 	protected String getFullTemplateFileName(String envFileName, AdapterType adapterType, sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType envType)
 	{
 		return getFullFileName(getEnvironmentStore().getFullTemplateDirName(adapterType==AdapterType.CONSUMER, envType), envFileName);
 	}
+	
+    protected String getFullJobTemplateFileName(String jobFileName, AdapterType adapterType, sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType envType)
+    {
+        return getFullFileName(getEnvironmentStore().getFullJobTemplateDirName(adapterType == AdapterType.CONSUMER, envType), jobFileName);
+    }
 
 	protected String getFullFileName(String path, String envFileName)
 	{
@@ -468,4 +480,66 @@ public class AdapterBaseEnvStoreOperations
 	        sif3Session.setAuthenticationMethod(getEnvironmentInfo().getAuthMethod());
 	    }
 	}
+	
+    /*---------------------*/
+	/*-- Private Methods --*/
+    /*---------------------*/
+	
+    /**
+     * @param fullName Full name of file (path, name and extension). It is expected this file to have XML content.
+     * 
+     * @return Null => Failed to load data due to some error. See error log for details.
+     */
+    private Object loadXMLDataFromFile(String fullFileName, Class<?> clazz)
+    {
+        if (FileAndFolderUtils.doesFileExist(fullFileName))
+        {
+            String xmlStr = getXMLFromFile(fullFileName);
+            if (xmlStr != null)
+            {
+                return loadInfraObjectFromString(xmlStr, clazz);
+            }
+            else
+            {
+                logger.error("The XML file "+fullFileName+" cannot be read. Check permissions and content.");               
+                return null;
+            }
+        }
+        else
+        {
+            logger.error("There is no XML file: "+fullFileName);
+            return null;
+        }
+    }
+    
+
+    /*
+     * This method takes the given XML string and converts it into a Infrastructure object. If the string is null or
+     * invalid then an error is logged and null is returned. 
+     * 
+     * @param xmlData XML formatted data of a infrastructure object as of the SIF3 spec.
+     * 
+     * @return See desc.
+     */
+    private Object loadInfraObjectFromString(String xmlData, Class<?> clazz)
+    {
+        if (xmlData != null)
+        {
+            InfraUnmarshalFactory unmarshaller = new InfraUnmarshalFactory();
+            try
+            {
+                return unmarshaller.unmarshalFromXML(xmlData, clazz);
+            }
+            catch (Exception ex)
+            {
+                logger.error("Failed to successfully parse the XML content:\n"+xmlData);
+                return null;
+            }
+        }
+        else
+        {
+            logger.error("The provided environment data to parse is null.");
+            return null;
+        }
+    }
 }

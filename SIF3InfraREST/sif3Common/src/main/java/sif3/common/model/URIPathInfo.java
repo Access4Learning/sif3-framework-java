@@ -1,7 +1,7 @@
 /*
  * URIPathInfo.java Created: 1 Dec 2015
  * 
- * Copyright 2015 Systemic Pty Ltd
+ * Copyright 2015-2018 Systemic Pty Ltd
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -18,6 +18,9 @@ package sif3.common.model;
 
 import java.io.Serializable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.header.HeaderValues.ServiceType;
@@ -31,6 +34,8 @@ import sif3.common.header.HeaderValues.ServiceType;
  * 
  * Object Service: /SchoolInfos/1234;zoneId=ABC<br/>
  * Service Path: /SchoolInfos/1234-1245/StudentPersonal.xml;zoneId=ABC;contextId=DEFAULT<br/><br/>
+ * Job Object: /StudentRollover;zoneId=ABC;contextId=DEFUALT<br/><br/>
+ * Job Phase: /StudentRollover/<jobId>/<phaseName>;zoneId=ABC;contextId=DEFUALT<br/><br/>
  * 
  * @author Joerg Huber
  *
@@ -39,11 +44,14 @@ public class URIPathInfo implements Serializable
 {
     private static final long serialVersionUID  = -4769833196778943230L;
 
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+
     private String originalURLString = null;
-    private String serviceName       = null;  // Service Path => school/{}/students
+    private String serviceName       = null;  // Service Path => school/{}/students; Job & Object service it will be first segment
+    private String phaseName         = null;  // Only applicable for Functional Services.
     private ServiceType serviceType  = null;
     private String urlService        = null;  // Service Path => school/1224/students
-    private String resourceID        = null;
+    private String resourceID        = null;  // refId of object or job
     private SIFZone zone             = null;
     private SIFContext context       = CommonConstants.DEFAULT_CONTEXT;
     private URLQueryParameter queryParams = new URLQueryParameter();
@@ -51,11 +59,32 @@ public class URIPathInfo implements Serializable
 
 	/*
      * Typical example can be:
-     * /SchoolInfos/1234-1245/StudentPersonal.xml;zoneId=ABC;contextId=DEFUALT
+     * Servicepath: /SchoolInfos/1234-1245/StudentPersonal.xml;zoneId=ABC;contextId=DEFUALT
+     * Job Object: /StudentRollover;zoneId=ABC;contextId=DEFUALT
+     * Job Phase: /StudentRollover/<jobId>/<phaseName>;zoneId=ABC;contextId=DEFUALT
+     * 
+     * Because ServicePath and JobPhase paths look structurally the same the "serviceType" parameter is required to decide where
+     * values of the segment should be stored. If serviceType is empty or null "OBJECT" is assumed as per SIF Specification.
      */
-    public URIPathInfo(String relURLNoProtocol)
+    public URIPathInfo(String relURLNoProtocol, String serviceTypeStr)
     {
         originalURLString = new String(relURLNoProtocol);
+        if (StringUtils.notEmpty(serviceTypeStr))
+        {
+            try
+            {
+                this.serviceType = ServiceType.valueOf(serviceTypeStr.toUpperCase());
+            }
+            catch (Exception ex)
+            {
+                logger.error("Found invalid service type in request header. Assume OBJECT.");
+                this.serviceType = ServiceType.OBJECT;
+            }
+        }
+        else
+        {
+            this.serviceType = ServiceType.OBJECT;
+        }
 
         // Split on '?' to extract the URL Query parameters
         String[] components = relURLNoProtocol.split("\\?");
@@ -105,6 +134,11 @@ public class URIPathInfo implements Serializable
         return serviceName;
     }
 
+    public String getPhaseName()
+    {
+        return phaseName;
+    }
+
     public ServiceType getServiceType()
     {
         return serviceType;
@@ -133,11 +167,10 @@ public class URIPathInfo implements Serializable
     @Override
     public String toString()
     {
-	    return "URIPathInfo [originalURLString=" + originalURLString
-	            + ", serviceName=" + serviceName + ", serviceType="
-	            + serviceType + ", urlService=" + urlService + ", resourceID="
-	            + resourceID + ", zone=" + zone + ", context=" + context
-	            + ", queryParams=" + queryParams + "]";
+        return "URIPathInfo [originalURLString=" + originalURLString + ", serviceName="
+                + serviceName + ", phaseName=" + phaseName + ", serviceType=" + serviceType
+                + ", urlService=" + urlService + ", resourceID=" + resourceID + ", zone=" + zone
+                + ", context=" + context + ", queryParams=" + queryParams + "]";
     }
 
     private void setZoneOrContext(String zoneOrContextID)
@@ -155,27 +188,36 @@ public class URIPathInfo implements Serializable
 
     private void processServiceName(String segmentStr)
     {
-        // Check if we have more than one segment => ServicePath!
+        // Check if we have more than 3+ segments => ServicePath (3, 5, 7 etc segments) or Job Phase (exactly 3 segments)!
         String[] segments = segmentStr.split("/");
-        if (segments.length > 2)
+        if (segments.length > 2) // not an object service
         {
-            serviceName = "";
-            for (int i = 0; i < segments.length - 2; i += 2)
+            if (getServiceType() == ServiceType.SERVICEPATH)
             {
-                serviceName = serviceName + segments[i] + "/{}/";
-
+                serviceName = "";
+                for (int i = 0; i < segments.length - 2; i += 2)
+                {
+                    serviceName = serviceName + segments[i] + "/{}/";
+    
+                }
+                serviceName = serviceName + segments[segments.length - 1];
+//              serviceType = ServiceType.SERVICEPATH;
             }
-            serviceName = serviceName + segments[segments.length - 1];
-            serviceType = ServiceType.SERVICEPATH;
+            else // Job Phase
+            {
+                serviceName = segments[0];
+                resourceID = segments[1];
+                phaseName = segments[2];
+            }
         }
-        else
+        else // one or two segments is Object or Job (not job phase though!)
         {
             serviceName = segments[0];
             if (segments.length == 2)
             {
                 resourceID = segments[1];
             }
-            serviceType = ServiceType.OBJECT;
+//            serviceType = ServiceType.OBJECT;
         }
     }
     

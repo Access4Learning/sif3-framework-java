@@ -53,16 +53,19 @@ import sif3.common.header.HeaderValues;
 import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.HeaderValues.ResponseAction;
+import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.ResponseHeaderConstants;
+import sif3.common.interfaces.ChangesSinceProvider;
+import sif3.common.interfaces.Provider;
+import sif3.common.model.ACL.AccessRight;
+import sif3.common.model.ACL.AccessType;
 import sif3.common.model.AuthenticationInfo;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
-import sif3.common.model.ServiceRights.AccessRight;
-import sif3.common.model.ServiceRights.AccessType;
 import sif3.common.model.URLQueryParameter;
 import sif3.common.model.security.InternalSecurityServiceConstants;
 import sif3.common.model.security.SecurityServiceInfo;
@@ -319,10 +322,48 @@ public abstract class BaseResource
 		return sifContext;
 	}
 
+	/**
+	 * This method gets the ZONE from the request. If it is null it will look up the default zone and return that one. This ensures
+	 * that always a zone value is available
+	 * 
+	 * @return Zone from Request or Default Zone if not provided in request.
+	 */
+    public SIFZone getNotNullSIFZone()
+    {
+        SIFZone sifZone = getSifZone();
+        if (sifZone == null) // default zone => Get default zone from session
+        {
+            SIF3Session session = getSIF3SessionForRequest();
+            if (session != null)
+            {
+                sifZone = session.getDefaultZone();
+            }
+        }
+
+        return sifZone;
+    }
+	
 	public void setSifContext(SIFContext sifContext)
 	{
 		this.sifContext = sifContext;
 	}
+
+    /**
+     * This method gets the CONTEXT from the request. If it is null it will set it ti the default context and return that one. This ensures
+     * that always a context value is available
+     * 
+     * @return Context from Request or Default Context if not provided in request.
+     */
+    public SIFContext getNotNullSIFContext()
+    {
+        SIFContext sifContext = getSifContext();
+        if (sifContext == null) // Default Context
+        {
+            sifContext = CommonConstants.DEFAULT_CONTEXT;
+        }
+        
+        return sifContext;
+    }   
 
 	public boolean isSecure()
     {
@@ -454,7 +495,18 @@ public abstract class BaseResource
 	{
 		return makeFullResponse(null, Status.NO_CONTENT.getStatusCode(), null, isError, responseAction, customResponseParams, null);
 	}
-	
+
+	/**
+     * Create a HTTP Response without any content and a HTTP Status of 200 (OK). It will set some header properties as defined 
+     * in the SIF3 spec.
+     *  
+     * @return A HTTP Response to be sent back to the client.
+     */
+    public Response makeOKResopnseWithNoContent(ResponseAction responseAction, ResponseParameters customResponseParams)
+    {
+        return makeFullResponse(null, Status.NO_CONTENT.getStatusCode(), null, false, responseAction, customResponseParams, null);
+    }
+
 	/**
 	 * This method creates a HTTP response that adheres to the SIF3 specification. 
 	 * 
@@ -477,14 +529,15 @@ public abstract class BaseResource
 	 * @param data The data (payload) that shall be put into the response.
 	 * @param pagingInfo Paging Information to be added to the response header.
 	 * @param isError Indicator if the response is an error or a standard response.
+     * @param responseAction Indicator if the response action is QUERY or HEAD or something eles.
      * @param customResponseParams Set of custom http headers to be added to the response.
 	 * @param marshaller The marshaller that converts the 'data' into a valid media type.
 	 * 
 	 * @return A HTTP Response to be sent back to the client.
 	 */
-    public Response makePagedResponse(Object data, PagingInfo pagingInfo, boolean isError, ResponseParameters customResponseParams, MarshalFactory marshaller)
+    public Response makePagedResponse(Object data, PagingInfo pagingInfo, boolean isError, ResponseAction responseAction, ResponseParameters customResponseParams, MarshalFactory marshaller)
 	{
-		return makeFullResponse(data, Status.OK.getStatusCode(), pagingInfo, isError, ResponseAction.QUERY, customResponseParams, marshaller);
+		return makeFullResponse(data, Status.OK.getStatusCode(), pagingInfo, isError, responseAction, customResponseParams, marshaller);
 	}
 	
 	/*
@@ -582,6 +635,14 @@ public abstract class BaseResource
 		}
 		return makeResponse(deleteManyResponse, overallStatus.getStatusCode(), false, ResponseAction.DELETE, customResponseParams, infraMarshaller);
 	}
+	
+	/*
+	 * Helper Response for not yet supported functionality.
+	 */
+    public Response makeNotImplementedResponse(ResponseAction responseAction, ResponseParameters customResponseParams)
+    {
+        return makeErrorResponse(new ErrorDetails(CommonConstants.NOT_IMPLEMENTED, "Not Implemented, yet", "This functionality is not yet supported by this provider.", "Provider"), responseAction , customResponseParams);
+    }
 
 	/*-----------------------*/
 	/*-- Protected Methods --*/
@@ -619,7 +680,54 @@ public abstract class BaseResource
 	    return resourceIDs;
 	}
 	
-	/**
+    /*
+     * IllegalArgumentException if page number is <=0 which is not valid.
+     */
+    protected PagingInfo getPagingInfo() throws IllegalArgumentException
+    {
+        PagingInfo pagingInfo = new PagingInfo(getSIFHeaderProperties(), getQueryParameters());
+        if (pagingInfo.getPageSize() <= PagingInfo.NOT_DEFINED) // page size not defined. Pass null to provider.
+        {
+            pagingInfo = null;
+        }
+        else if (pagingInfo.getCurrentPageNo() <= 0)
+        {
+            throw new IllegalArgumentException("Page Number to be returned was set to "+pagingInfo.getCurrentPageNo()+". Must be "+CommonConstants.FIRST_PAGE+" or higher.");
+        }
+        else
+        {
+            pagingInfo = pagingInfo.clone(); // ensure that initial values are not overridden in case we need them later,
+        }
+        return pagingInfo;
+    }
+    
+    /*
+     * Can return null if the changesSinceMarker is not given. In this case we can also assume that the call
+     * is not for a changeSince request.
+     */
+    protected String getChangesSinceMarker()
+    {
+        return getQueryParameters().getQueryParam(CommonConstants.CHANGES_SINCE_MARKER_NAME);
+    }
+
+    /*
+     * If the given provider implements the ChangesSinceProvider then a casted provider is returned otherwise
+     * null is returned.
+     */
+    protected ChangesSinceProvider getChangesSinceProvider(Provider provider)
+    {
+        if (ChangesSinceProvider.class.isAssignableFrom(provider.getClass()))
+        {
+            return (ChangesSinceProvider)provider;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+
+    /**
 	 * This method returns a default ResponseParamtere object. It has the httpHeaderParams property defaulted to the values listed
 	 * in the "adapter.custom.response.headers" property of the providers property file. This method will never return null.
 	 * 
@@ -639,6 +747,7 @@ public abstract class BaseResource
 	 * rights for the requested service are at expected levels.
 	 * 
 	 * @param serviceName Service for which the access rights shall be checked.
+     * @param serviceType The type of the service. Eg. OBJECT, SERVICEPATH, FUNCTIONAL ...
 	 * @param right The access right (QUERY, UPDATE etc) that shall be checked for.
 	 * @param accessType The access level (SUPPORTED, APPROVED, etc) that must be met for the given service and right.
 	 * @param allowDelayed TRUE then the request operation allows delayed requests. In a DIRECT environment it is not supported at
@@ -649,7 +758,7 @@ public abstract class BaseResource
 	 * 
 	 * @return See desc
 	 */
-	protected ErrorDetails validClient(String serviceName, AccessRight right, AccessType accessType, boolean allowDelayed, boolean autoCreateAllowed)
+	protected ErrorDetails validClient(String serviceName, ServiceType serviceType, AccessRight right, AccessType accessType, boolean allowDelayed, boolean autoCreateAllowed)
 	{
 	    ErrorDetails error = validateSession(autoCreateAllowed);
 		if (error != null)
@@ -690,7 +799,7 @@ public abstract class BaseResource
 			SIFZone zone = getSifZone();
 			
 			//Check access rights
-			if (!sif3Session.hasAccess(right, accessType, serviceName, zone, context))
+			if (!sif3Session.hasAccess(right, accessType, serviceName, serviceType, zone, context))
 			{
 				String zoneID = (zone == null) ? "Default" : zone.getId();
 				String contextID = (context == null) ? CommonConstants.DEFAULT_CONTEXT_NAME : context.getId();
@@ -851,6 +960,15 @@ public abstract class BaseResource
 	/*-------------------------------*/
     /*-- Protected Utility Methods --*/
     /*-------------------------------*/
+	
+	/*
+	 * Checks if the "mustUseAdvisory" flag is set in the request. Returns true if set (eg. must use id given in object) or
+	 * false if set to false or missing (eg. provider must allocate new id).
+	 */
+	protected boolean getAdvisory()
+    {
+        return Boolean.valueOf(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, "false"));
+    }
 
 	/*
 	 * This methods attempts to extract some request information that should be passed to the provider. There is a distinct set
@@ -1408,7 +1526,14 @@ public abstract class BaseResource
 						// and hope the client can recover, is to use the marshaller's default media type.
 						finalMediaType = (marshaller.isSupported(finalMediaType)) ?  finalMediaType : marshaller.getDefault();
 					}
-					String payload = marshaller.marshal(data, finalMediaType);
+        			
+					boolean isAlreadyMarshalled = (data instanceof String); // indicates that data is already marshalled.
+					
+					String payload = null;
+					if (!isAlreadyMarshalled) // if not marshalled then do it now
+					{
+					    payload = marshaller.marshal(data, finalMediaType);
+					}
 					//System.out.println("==============================\nRespopnse Payload:\n"+payload+"\nSize String= "+payload.length()+"\nSize Bytes = "+payload.getBytes("UTF-8").length+"\n==============================");				
 					
 					//May want to reconsider if we really care about the content length...
@@ -1416,7 +1541,7 @@ public abstract class BaseResource
 //                    response = Response.status(status).entity(content);
 //                    allHeaders.setHeaderProperty(ResponseHeaderConstants.HDR_CONTENT_LENGTH, String.valueOf(content.length));
 
-					response = Response.status(status).entity(payload);
+					response = Response.status(status).entity(isAlreadyMarshalled ? data : payload);
 					
                     allHeaders.setHeaderProperty(HttpHeaders.CONTENT_TYPE, finalMediaType.toString());
 				}

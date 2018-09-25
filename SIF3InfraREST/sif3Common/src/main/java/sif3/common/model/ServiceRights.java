@@ -2,7 +2,7 @@
  * ServiceRights.java
  * Created: 30/12/2013
  *
- * Copyright 2013 Systemic Pty Ltd
+ * Copyright 2013-2018 Systemic Pty Ltd
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,31 @@
 
 package sif3.common.model;
 
-import java.io.Serializable;
-import java.util.HashMap;
+import sif3.common.CommonConstants.RightType;
 
 /**
  * @author Joerg Huber
  *
  */
-public class ServiceRights implements Serializable
+public class ServiceRights extends ACL
 {
+    private static final long serialVersionUID = -2047513444161793310L;
+
+    public ServiceRights()
+    {
+        super();
+    }
+    
+    /* (non-Javadoc)
+     * @see sif3.common.model.ACL#getRightType()
+     */
+    @Override
+    public RightType getRightType()
+    {
+        return RightType.SERVICE;
+    }
+    
+    /*
     private static final long serialVersionUID = 2972634204650446881L;
 
 	public enum AccessType {APPROVED, SUPPORTED, REJECTED, REQUESTED, UNSUPPORTED };
@@ -74,5 +90,5 @@ public class ServiceRights implements Serializable
 	    return "ServiceRights [rights=" + this.rights + "]";
     }
 	
-	
+	*/
 }

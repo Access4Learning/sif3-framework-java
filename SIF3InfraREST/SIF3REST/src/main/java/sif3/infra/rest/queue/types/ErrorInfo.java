@@ -18,6 +18,8 @@ package sif3.infra.rest.queue.types;
 
 import java.io.Serializable;
 
+import sif3.common.ws.ErrorDetails;
+
 /**
  * This class is a utility type to allow a consumer to package the actual ERROR data and related
  * information in one structure. This type uses the actual ERROR payload data as a String as it has been
@@ -33,4 +35,22 @@ import java.io.Serializable;
 public class ErrorInfo extends DelayedBaseInfo implements Serializable
 {
     private static final long serialVersionUID = 626191573052681937L;
+    
+    private ErrorDetails errorDetail = null;
+
+    public ErrorDetails getErrorDetail()
+    {
+        return errorDetail;
+    }
+
+    public void setErrorDetail(ErrorDetails errorDetail)
+    {
+        this.errorDetail = errorDetail;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "ErrorInfo [errorDetail=" + errorDetail + ", toString()=" + super.toString() + "]";
+    }
 }

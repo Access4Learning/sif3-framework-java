@@ -2,7 +2,7 @@
  * QueryProvider.java
  * Created: 05/01/2015
  *
- * Copyright 2015 Systemic Pty Ltd
+ * Copyright 2015-2018 Systemic Pty Ltd
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package sif3.common.interfaces;
 
 import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
+import sif3.common.exception.SIFException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
@@ -60,13 +61,16 @@ public interface QueryProvider extends Provider
 	 * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
 	 * @throws DataTooLargeException If the data that shall be returned is too large due to the query criteria or
 	 *                               values in the paging info.
+     * @throws SIFException Any other exception the implementation of that class wants to throw. This will be translated into proper
+     *                      SIF Error message that will be returned to the consumer.
 	 */
 	public Object retrieveByServicePath(QueryCriteria queryCriteria, 
 			                            SIFZone zone, 
 			                            SIFContext context, 
 			                            PagingInfo pagingInfo, 
 			                            RequestMetadata metadata, 
-			                            ResponseParameters customResponseParams) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
+			                            ResponseParameters customResponseParams) 
+			         throws PersistenceException, UnsupportedQueryException, DataTooLargeException, SIFException;
 
 	/**
 	 * This method is used to retrieve data based on the 'Query By Example' (QBE) concept. All objects that match the
@@ -91,11 +95,14 @@ public interface QueryProvider extends Provider
 	 * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
 	 * @throws DataTooLargeException If the data that shall be returned is too large due to the query criteria or
 	 *                               values in the paging info.
+     * @throws SIFException Any other exception the implementation of that class wants to throw. This will be translated into proper
+     *                      SIF Error message that will be returned to the consumer.
 	 */
 	public Object retrieveByQBE(Object exampleObject, 
             					SIFZone zone, 
             					SIFContext context, 
             					PagingInfo pagingInfo, 
             					RequestMetadata metadata,
-            					ResponseParameters customResponseParams) throws PersistenceException, UnsupportedQueryException, DataTooLargeException;
+            					ResponseParameters customResponseParams) 
+            		throws PersistenceException, UnsupportedQueryException, DataTooLargeException, SIFException;
 }

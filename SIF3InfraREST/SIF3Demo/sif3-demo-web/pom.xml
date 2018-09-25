@@ -51,7 +51,7 @@
 		<dependency>
 			<groupId>sifau</groupId>
 			<artifactId>sif3-au-datamodel</artifactId>
-			<version>3.4.2</version>
+			<version>3.4.3</version>
 		</dependency>
 
 		<!-- =============================== -->

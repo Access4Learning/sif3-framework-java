@@ -22,7 +22,6 @@ import java.util.List;
 import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.ServiceInvokationException;
-import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.model.CustomParameters;
@@ -69,7 +68,6 @@ public interface QueryConsumer
 	 * @return A list of responses with one response for each zone/context combination. The data in the response is a "collection-type" style 
 	 *         object as defined in the data model (i.e. StudentPersonals).
 	 *         
-	 * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
 	 * @throws PersistenceException Some data could not be persisted. An error log entry is performed and the message of the exceptions holds some info.
 	 * @throws ServiceInvokationException Service on provider could not be executed. See error log for details.
 	 */
@@ -78,7 +76,7 @@ public interface QueryConsumer
 												List<ZoneContextInfo> zoneCtxList, 
 												RequestType requestType, 
 												QueryIntention queryIntention, 
-												CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException;
+												CustomParameters customParameters) throws PersistenceException, ServiceInvokationException;
 
 	/**
 	 * This method is used to retrieve data based on the 'Query By Example' (QBE) concept. All objects that match the
@@ -106,7 +104,6 @@ public interface QueryConsumer
 	 * 
 	 * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is 
 	 *                              performed and the  message of the exceptions holds some info.
-	 * @throws UnsupportedQueryException The query provided with this request is not supported (NOT YET IMPLEMENTED FUNCTIONALITY)
 	 * @throws DataTooLargeException If the data that shall be returned is too large due to the query criteria or
 	 *                               values in the paging info.
 	 */
@@ -115,5 +112,5 @@ public interface QueryConsumer
             							List<ZoneContextInfo> zoneCtxList, 
             							RequestType requestType, 
             							QueryIntention queryIntention, 
-            							CustomParameters customParameters) throws PersistenceException, UnsupportedQueryException, ServiceInvokationException;
+            							CustomParameters customParameters) throws PersistenceException, ServiceInvokationException;
 }

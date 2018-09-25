@@ -1,0 +1,29 @@
+<job xmlns="http://www.sifassociation.org/infrastructure/3.2.1">
+	<name>rolloverStudent</name>
+	<description>Rollover Student from year X to year Y</description>
+	<initialization>
+		<!-- phaseName>initial-parameters</phaseName -->
+
+		<payload xsi:type="propertiesType" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+			<property name="contextId">future</property>
+			<property name="initiator">user1</property>
+			<property name="from">vendora</property>
+			<property name="to">3pi</property>
+			<property name="year">2018</property>
+		</payload>
+		<!--
+		<payload>
+			<parameters>
+				<parameter>
+					<key>oldYear</key>
+					<value>2017</value>
+				</parameter>
+				<parameter>
+					<key>newYear</key>
+					<value>2018</value>
+				</parameter>
+			</parameters>
+		</payload>
+		-->
+	</initialization>
+</job>

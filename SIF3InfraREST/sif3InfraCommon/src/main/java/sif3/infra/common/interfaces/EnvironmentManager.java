@@ -2,7 +2,7 @@
  * EnvironmentManager.java
  * Created: 15/03/2014
  *
- * Copyright 2014 Systemic Pty Ltd
+ * Copyright 2014-2018 Systemic Pty Ltd
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,12 @@ package sif3.infra.common.interfaces;
 
 import java.util.Date;
 
+import au.com.systemic.framework.utils.AdvancedProperties;
+import sif3.common.CommonConstants.AdapterType;
 import sif3.common.persist.model.SIF3Session;
 import sif3.infra.common.env.types.EnvironmentInfo;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
-import au.com.systemic.framework.utils.AdvancedProperties;
+import sif3.infra.common.model.JobType;
 
 /**
  * This interface defines all methods required by this framework in relation to any environment managers (consumer, provider, direct,
@@ -52,6 +54,13 @@ public interface EnvironmentManager
 	 * @return See desc.
 	 */
 	public AdvancedProperties getServiceProperties();
+	
+	/**
+	 * returns the adapter type for this environment manager.
+	 * 
+	 * @return See Desc.
+	 */
+	public AdapterType getAdapterType();
 	
 	/**
 	 * This method should return an active, existing and already loaded, session from the session store for the given sessionToken.
@@ -92,6 +101,26 @@ public interface EnvironmentManager
 	 */
 	public boolean updateSessionSecurityInfo(String sessionToken, String securityToken, Date securityExpiryDate);
 
+    /**
+     * This method will attempt to load the job template from the underlying job template store.
+     * If there is no job template for the given urlName or an error occurs accessing  the store then null is returned.
+     *  
+     * @param urlName The unique name of the job template as given in the job URL for which the template shall be
+     *                retrieved. A job URL is generally of the form .../job/<uniqueJobName>/... The uniqueJobName is what the
+     *                URL name refers to and is the same value as in the SIF3_JOB_TEMPLATE table in the column JOB_URL_NAME.
+     * 
+     * @return See desc.
+     */
+    public JobType getJobTemplate(String urlName);
+    
+    /**
+     * Returns the Job Manager for this environment manager. The Job Manager abstracts a number of useful functions relating to
+     * functional services and how they are managed in the data stores and event management.
+     * 
+     * @return See desc.
+     */
+    public JobManager getJobManager();
+	
 	/**
 	 * This method must return the environment type of the given environment manager. Note for providers this must always be set. For
 	 * consumer this is mostly irrelevant as they behave the same independent if it is a brokered or direct environment. For consumers

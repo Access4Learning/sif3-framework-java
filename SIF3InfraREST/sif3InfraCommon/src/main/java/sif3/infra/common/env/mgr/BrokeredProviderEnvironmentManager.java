@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.PersistenceException;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.model.security.TokenInfo;
@@ -36,9 +37,11 @@ import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.env.types.EnvironmentInfo;
 import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.interfaces.ClientEnvironmentManager;
+import sif3.infra.common.interfaces.ProviderJobManager;
 import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.common.model.InfrastructureServiceType;
 import sif3.infra.common.model.InfrastructureServicesType;
+import sif3.infra.common.model.JobType;
 import sif3.infra.common.utils.SIFSessionUtils;
 
 /**
@@ -50,7 +53,7 @@ import sif3.infra.common.utils.SIFSessionUtils;
  * 
  * @author Joerg Huber
  */
-public class BrokeredProviderEnvironmentManager implements ClientEnvironmentManager
+public class BrokeredProviderEnvironmentManager extends BaseEnvironmentManager implements ClientEnvironmentManager
 {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -119,6 +122,11 @@ public class BrokeredProviderEnvironmentManager implements ClientEnvironmentMana
     public AdvancedProperties getServiceProperties()
     {
 	    return envOps.getServiceProperties();
+    }
+    
+    public ProviderJobManager getJobManager()
+    {
+        return (ProviderJobManager)super.getJobManager();
     }
 
 	/* (non-Javadoc)
@@ -309,11 +317,26 @@ public class BrokeredProviderEnvironmentManager implements ClientEnvironmentMana
 			return true; // no such session/environment => no action taken.
 		}
 	}
+	
+    /* (non-Javadoc)
+     * @see sif3.infra.common.interfaces.EnvironmentManager#getJobTemplate(java.lang.String)
+     */
+    @Override
+    public JobType getJobTemplate(String urlName)
+    {
+        return getJobTemplate(urlName, getAdapterType(), envOps);
+    }
+    
+    @Override
+    public AdapterType getAdapterType()
+    {
+        return  AdapterType.PROVIDER;
+    }
 
 	@Override
     public String toString()
     {
-      return "ConsumerEnvironmentManager [sif3Session=" + sif3Session + "]";
+      return "BrokeredEnvironmentManager [sif3Session=" + sif3Session + "]";
     }
 
 	/*---------------------*/
@@ -327,6 +350,7 @@ public class BrokeredProviderEnvironmentManager implements ClientEnvironmentMana
 		super();
 		this.adapterFileNameWithoutExt = adapterFileNameWithoutExt;
 		this.envOps = new BrokeredProviderEnvStoreOps(adapterFileNameWithoutExt);
+		setJobManager(new BrokeredProviderJobManager(getEnvironmentInfo()));
 	}
 	
 	private boolean existsSIF3SessionInSessionStore()

@@ -1,39 +1,86 @@
 ==============================================================
-Release Notes for v0.13.0 of SIF3 Framework (MMM DD, 2017)
+Release Notes for v0.13.0 of SIF3 Framework (Sept 25, 2018)
 ==============================================================
 
 Bug Fixes
 ---------
-- Fixed an issue with the DatuUtils class where ISO 8601 Dates didn't convert correctly to Zulu (GMT) Date and Time.
+- Fixed an issue with the DateUtils class where ISO 8601 Dates didn't convert correctly to Zulu (GMT) Date and Time.
+- Fixed issue where new 'changesSinceMarker' wasn't returned in the changes since request.
+- Fixed GitHub issue #34 - Provider in Brokered Environment over eager properties validation.
+- Fixed GitHub issue #35 - Improve Queue Reader Exception Handling
+- Fixed GitHub issue #36 - Typo: 'SIF' in lower case in main pom.xml
+- Fixed GitHub issue #37 - Remote message readers not stopping
+- Fixed GitHub issue #38 - Delayed error responses not handled correctly
 
 New Functionality
 -----------------
-- TBD.
+- Functional Services (Usage of this functionality is detailed in the developer's guide in section 5.11):
+  - Provider Side. This includes all CRUD operations for Job, Phases and Status. Also supported out-of-the box is "ChangesSince"
+                   and publishing of events.
+  - Consumer Side: This includes all CRUD operations for Job, Phases and Status. Also supported out-of-the box is "ChangesSince".
+                   and event consuming.
 
 Changed Functionality
 ---------------------
-- None.
+- Added SIFException to many Provider Interface methods to enable providers to throw a "generic" exceptions where the provider can customise
+  the HTTP Status Code and error message to be returned to the consumer. This enables implementers of providers to easy create custom error 
+  messages that are not defaulted or covered by the framework.
+  This change may break some or all provider classes (compiler error). To rectify the issue simply add the SIFException to the list of
+  exceptions defined by appropriate provider class method. For example if the implementations uses service paths and therefore must implement
+  retrieveByServicePath() method you would change the method signature in your implementation class 
+  from:
+     public Object retrieveByServicePath(...) throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+     {
+     }
+  
+  to (note the additional SIFException in the 'throws' clause):
+     public Object retrieveByServicePath(...) throws PersistenceException, UnsupportedQueryException, DataTooLargeException, SIFException
+     {
+     }
+  
+  In many cases no errors are shown though because adding an exception to an interface class will not break implementations immediately. However
+  if your implementation wants to make use of the new SIFException it must be added in the signature of the appropriate method as listed in the
+  corresponding interface class. The change would be the same as listed above.
+  
+  Affected interfaces are: Provider, ChangesSinceProvider, QueryProvider
+ 
+- A number of exceptions have changed to extend the new SIFException. This should not break your code as special care has been taken to keep
+  the standard exception functionality. However if something should break (eg. not compile) then it is suggested to check the appropriate 
+  exception's documentation.
+  The motivation for that change is the streamlining of the exception handling on the providers since many of these exceptions need to be
+  translated into SIF Error Messages and then be returned to the consumer.
+  
+  The following exceptions do now extend SIFException (note not all of them were available in previous versions of the framework):
+  - UnsupportedQueryException
+  - ExpiredException (NEW: used in Changes Since method)
+  - ResourceNotFoundException (NEW: currently only used internally but may be available in future for some methods)
+  - DataTooLargeException
 
 Removed Artifacts/Functionality
 -------------------------------
 - None
 
---------------------------
+
+==========================
 -- Upgrade Instructions --
---------------------------
+==========================
 
-----------------------------
--- Infrastructure Upgrade --
-----------------------------
+Infrastructure Upgrade 
+----------------------
+With the addition of the Functional Services capabilities additional tables need to be created in the infrastructure schema/database.
+The script can be found in the directory <frameworkInstall>/DB/DDL/Datafix/current/v0.12.0-v0.13.0. Run the script
+with the name Datafix_Job_<dbType>.sql. If you use a database other than the ones that have an update script provided you should be 
+able to derive your script based on one of the provided one's.
 
-
---------------------
 Upgrade your Project
 --------------------
 Once the above steps are done you can upgrade your project with the latest libraries of the framework as stated below:
 
 Ant:
-Drop the latest framework library into your project's lib directory/directories
+Drop the latest framework library into your project's lib directory/directories. Also take note of the '3rd Party Library
+Update' section below. Quartz v2.3.0 is used and has dependencies on other 3rd party library. It might be necessary that
+you need to add additional libraries to your project to resolve such dependencies. The dependencies can be found on this
+site: https://mvnrepository.com/artifact/org.quartz-scheduler/quartz/2.3.0
 
 Maven:
 Use the latest maven dependency
@@ -43,12 +90,10 @@ Use the latest maven dependency
    <version>0.13.0</version>
 </dependency>
 
-------------------------
--- Data Model Upgrade --
-------------------------
+Data Model Upgrade
+------------------
 None.
 
-------------------------------
--- 3rd Party Library Update --
-------------------------------
-None.
+3rd Party Library Update
+------------------------
+The framework has a new dependency on Quartz. This has been added accordingly to the appropriate pom.xml.

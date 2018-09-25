@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.PersistenceException;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.model.security.TokenInfo;
@@ -38,6 +39,7 @@ import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.common.model.InfrastructureServiceType;
 import sif3.infra.common.model.InfrastructureServicesType;
+import sif3.infra.common.model.JobType;
 import sif3.infra.common.utils.SIFSessionUtils;
 
 /**
@@ -48,7 +50,7 @@ import sif3.infra.common.utils.SIFSessionUtils;
  * 
  * @author Joerg Huber
  */
-public class ConsumerEnvironmentManager implements ClientEnvironmentManager
+public class ConsumerEnvironmentManager extends BaseEnvironmentManager implements ClientEnvironmentManager
 {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -119,7 +121,12 @@ public class ConsumerEnvironmentManager implements ClientEnvironmentManager
 	    return envOps.getServiceProperties();
     }
 
-	/* (non-Javadoc)
+    public ConsumerJobManager getJobManager()
+    {
+        return (ConsumerJobManager)super.getJobManager();
+    }
+    
+ 	/* (non-Javadoc)
      * @see sif3.infra.common.interfaces.EnvironmentManager#getSessionBySessionToken(java.lang.String)
      */
     @Override
@@ -308,7 +315,23 @@ public class ConsumerEnvironmentManager implements ClientEnvironmentManager
 		}
 	}
 
-	@Override
+    /* (non-Javadoc)
+     * @see sif3.infra.common.interfaces.EnvironmentManager#getJobTemplate(java.lang.String)
+     */
+    @Override
+    public JobType getJobTemplate(String urlName)
+    {
+        return getJobTemplate(urlName, getAdapterType(), envOps);
+    }
+    
+    @Override
+    public AdapterType getAdapterType()
+    {
+        return  AdapterType.CONSUMER;
+    }
+
+
+    @Override
     public String toString()
     {
       return "ConsumerEnvironmentManager [sif3Session=" + sif3Session + "]";
@@ -325,6 +348,7 @@ public class ConsumerEnvironmentManager implements ClientEnvironmentManager
 		super();
 		this.adapterFileNameWithoutExt = adapterFileNameWithoutExt;
 		this.envOps = new ConsumerEnvironmentStoreOperations(adapterFileNameWithoutExt);
+        setJobManager(new ConsumerJobManager(getEnvironmentInfo()));
 	}
 	
 	private boolean existsSIF3SessionInSessionStore()

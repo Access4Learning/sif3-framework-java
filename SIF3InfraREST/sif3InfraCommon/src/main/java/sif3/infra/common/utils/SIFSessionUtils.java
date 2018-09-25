@@ -92,7 +92,7 @@ public class SIFSessionUtils
 								}
 								catch (Exception ex) // log error and assume it is OBJECT
 								{
-									logger.warn("The service '"+service.getName()+"' for environment '"+sif3Session.getEnvironmentName()+"' has an invalid 'type' of '"+service.getType().trim()+"' set. Valid values are: OBJECT, FUNCTION, UTILITY, SERVICEPATH and XQUERYTEMPLATE.");
+									logger.warn("The service '"+service.getName()+"' for environment '"+sif3Session.getEnvironmentName()+"' has an invalid 'type' of '"+service.getType().trim()+"' set. Valid values are: OBJECT, FUNCTIONAL, UTILITY, SERVICEPATH and XQUERYTEMPLATE.");
 									serviceType = ServiceType.OBJECT;
 								}
 							}

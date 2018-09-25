@@ -49,7 +49,13 @@ public class DelayedBaseReceipt implements Serializable
     // The Service Name of the request
     private String serviceName = null;
     
-    // The serviceType (OBJECT, SERVICEPATH etc).
+    // The delayed response to a functional service phase must hold the jobID which is the resourceID
+    private String resourceID = null;
+
+    // The delayed response to a functional service phase must hold the phase name
+    private String phaseName = null;
+
+    // The serviceType (OBJECT, SERVICEPATH, FUNCTIONAL etc).
     private ServiceType serviceType = ServiceType.OBJECT;
     
     // Holds the type originally requested operation (i.e. CREATE, QUERY ...)
@@ -119,6 +125,26 @@ public class DelayedBaseReceipt implements Serializable
         this.serviceName = serviceName;
     }
 
+    public String getResourceID()
+    {
+        return resourceID;
+    }
+
+    public void setResourceID(String resourceID)
+    {
+        this.resourceID = resourceID;
+    }
+
+    public String getPhaseName()
+    {
+        return phaseName;
+    }
+
+    public void setPhaseName(String phaseName)
+    {
+        this.phaseName = phaseName;
+    }
+
     /**
      * @return the serviceType
      */
@@ -148,10 +174,10 @@ public class DelayedBaseReceipt implements Serializable
 	@Override
     public String toString()
     {
-	    return "DelayedBaseReceipt [requestGUID=" + requestGUID + ", zone="
-	            + zone + ", context=" + context + ", serviceName="
-	            + serviceName + ", serviceType=" + serviceType
-	            + ", requestedAction=" + requestedAction + "]";
+        return "DelayedBaseReceipt [requestGUID=" + requestGUID + ", zone=" + zone + ", context="
+                + context + ", serviceName=" + serviceName + ", resourceID=" + resourceID
+                + ", phaseName=" + phaseName + ", serviceType=" + serviceType + ", requestedAction="
+                + requestedAction + "]";
     }
 
 }

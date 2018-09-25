@@ -39,6 +39,7 @@ import sif3.common.CommonConstants;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
+import sif3.common.exception.SIFException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.exception.UnsupportedQueryException;
@@ -339,7 +340,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 
     	if (pagingInfo == null)
     	{
-    		throw new DataTooLargeException("No paging info is provided. Please provide navigationPage and navigationPageSize.");
+    		throw new DataTooLargeException("No paging info is provided.", "Please provide navigationPage and navigationPageSize.", "Provider ("+getProviderName()+")");
     	}
     	else
     	{
@@ -372,7 +373,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      */
     @Override
 	public Object retrieveByServicePath(QueryCriteria queryCriteria, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata, ResponseParameters customResponseParams) 
-    	throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+    	throws PersistenceException, UnsupportedQueryException, DataTooLargeException, SIFException
 	{
 		logger.debug("Performing query by service path.");
 		if (logger.isDebugEnabled())
@@ -407,12 +408,12 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
 		    }
 			else
 			{
-				throw new UnsupportedQueryException("The query condition (driven by the service path) "+queryCriteria+" is not supported by the provider.");
+				throw new UnsupportedQueryException("Unsupported ServicePath.", "The query condition (driven by the service path) "+queryCriteria+" is not supported by the provider.", "Provider ("+getProviderName()+")");
 			}
 		}
 		else // not supported query (only single level service path query supported by this provider)
 		{
-			throw new UnsupportedQueryException("The query condition (driven by the service path) "+queryCriteria+" is not supported by the provider.");
+			throw new UnsupportedQueryException("Unsupported ServicePath.", "The query condition (driven by the service path) "+queryCriteria+" is not supported by the provider.", "Provider ("+getProviderName()+")");
 		}
 	}
     
@@ -421,7 +422,7 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
      * @see sif3.common.interfaces.QueryProvider#retrieveByQBE(java.lang.Object, sif3.common.model.SIFZone, sif3.common.model.SIFContext, sif3.common.model.PagingInfo, sif3.common.model.RequestMetadata)
      */
     public Object retrieveByQBE(Object exampleObject, SIFZone zone, SIFContext context, PagingInfo pagingInfo, RequestMetadata metadata, ResponseParameters customResponseParams) 
-    	throws PersistenceException, UnsupportedQueryException, DataTooLargeException
+    	throws PersistenceException, UnsupportedQueryException, DataTooLargeException, SIFException
 	{
 		logger.debug("Performing QBE query for: "+exampleObject);
     	if (exampleObject instanceof StudentPersonalType)
