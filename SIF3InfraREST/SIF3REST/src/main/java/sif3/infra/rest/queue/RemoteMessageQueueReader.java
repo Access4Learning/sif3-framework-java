@@ -30,6 +30,7 @@ import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.MessageType;
 import sif3.common.header.HeaderValues.ResponseAction;
+import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.model.EventMetadata;
@@ -454,6 +455,7 @@ public class RemoteMessageQueueReader implements Runnable
 				
 				EventInfo eventInfo = new EventInfo(eventPayload, response.getMediaType(), eventAction, updateType, zone, context, metadata, getQueueReaderID());
 				eventInfo.setFingerprint(getHeaderValue(response, ResponseHeaderConstants.HDR_FINGERPRINT));
+				eventInfo.setServiceType(StringUtils.isEmpty(serviceType) ? ServiceType.OBJECT : ServiceType.valueOf(serviceType));
 				
 				logger.debug(getQueueReaderID()+": Attempts to push Event to local queue...");
 				localQueue.blockingPush(eventInfo);

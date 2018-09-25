@@ -30,7 +30,6 @@ import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.header.HeaderValues.ServiceType;
-import sif3.common.interfaces.Consumer;
 import sif3.common.interfaces.DelayedConsumer;
 import sif3.common.interfaces.EventConsumer;
 import sif3.common.interfaces.MinimalConsumer;
@@ -388,10 +387,9 @@ public class LocalMessageConsumer implements Runnable
      */
     private Object makeDataModelObject(MinimalConsumer miniConsumer, String payload, MediaType mediaType)
     {
-        Consumer consumer = (Consumer)miniConsumer;
         try
         {
-            return consumer.getUnmarshaller().unmarshal(payload, consumer.getMultiObjectClassInfo().getObjectType(), mediaType);
+            return miniConsumer.getUnmarshaller().unmarshal(payload, miniConsumer.getMultiObjectClassInfo().getObjectType(), mediaType);
         }
         catch (UnmarshalException ex)
         {
