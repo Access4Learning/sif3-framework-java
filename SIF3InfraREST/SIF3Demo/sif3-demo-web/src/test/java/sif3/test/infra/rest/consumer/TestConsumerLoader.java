@@ -28,12 +28,12 @@ import sif3.infra.rest.consumer.ConsumerLoader;
 public class TestConsumerLoader
 {
 	// Local
-	private static final String CONSUMER_ID = "StudentConsumer";
+//	private static final String CONSUMER_ID = "StudentConsumer";
 //    private static final String CONSUMER_ID = "RicOneConsumer";
 
 	// Broker
 //	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
-//	private static final String CONSUMER_ID = "QueueTestConsumer";
+	private static final String CONSUMER_ID = "QueueTestConsumer";
 
 	
 	  public void stopService(String serviceID)
@@ -92,22 +92,22 @@ public class TestConsumerLoader
 		
         // Put this agent to a blocking wait.....
 		long waitTime = 20; // seconds
-		tester.doWait(waitTime);
+//		tester.doWait(waitTime); // to test shutdown procedure
 		
-//        try
-//        {
-//            Object semaphore = new Object();
-//            synchronized (semaphore) // this will block until CTRL-C is pressed.
-//            {
-//                System.out.println("==================================================\nTestConsumerLoader is running (Press Ctrl-C to stop)\n==================================================");
-//                semaphore.wait();
-//            }
-//        }
-//        catch (Exception ex)
-//        {
-//            System.out.println("Blocking wait in TestConsumerLoader interrupted: " + ex.getMessage());
-//            ex.printStackTrace();
-//        }
+        try
+        {
+            Object semaphore = new Object();
+            synchronized (semaphore) // this will block until CTRL-C is pressed.
+            {
+                System.out.println("==================================================\nTestConsumerLoader is running (Press Ctrl-C to stop)\n==================================================");
+                semaphore.wait();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.out.println("Blocking wait in TestConsumerLoader interrupted: " + ex.getMessage());
+            ex.printStackTrace();
+        }
         
 		ConsumerLoader.shutdown();
 		
