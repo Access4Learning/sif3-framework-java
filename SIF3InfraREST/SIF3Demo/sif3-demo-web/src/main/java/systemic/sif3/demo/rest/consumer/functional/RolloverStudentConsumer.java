@@ -47,7 +47,6 @@ public class RolloverStudentConsumer extends BaseFunctionalConsumer
         return "RolloverStudent";
     }
 
-
     /* (non-Javadoc)
      * @see sif3.infra.rest.consumer.BaseConsumer#shutdown()
      */
