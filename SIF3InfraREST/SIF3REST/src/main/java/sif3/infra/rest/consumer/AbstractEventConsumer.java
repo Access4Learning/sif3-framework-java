@@ -66,11 +66,8 @@ public abstract class AbstractEventConsumer<L> extends AbstractConsumer implemen
 	 * @see sif3.common.interfaces.EventConsumer#onEvent(sif3.common.model.SIFEvent, sif3.common.model.EventMetadata, java.lang.String, java.lang.String)
 	 */
 	@Override
-//	public void onEvent(SIFEvent<L> sifEvent, SIFZone zone, SIFContext context, EventMetadata metadata, String msgReadID, String consumerID)
     public void onEvent(SIFEvent<L> sifEvent, EventMetadata metadata, String msgReadID, String consumerID)
 	{
-		// Right now all that is required is to call the abstract processEvent() method.
-//		processEvent(sifEvent, zone, context, metadata, msgReadID, consumerID);
         processEvent(sifEvent, metadata, msgReadID, consumerID);
 	}
 
@@ -126,7 +123,9 @@ public abstract class AbstractEventConsumer<L> extends AbstractConsumer implemen
      */
 	protected final List<ServiceInfo> getEventServices()
 	{
-		return filterEventServices(getAllApprovedServicesForRights(getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, AccessRight.SUBSCRIBE));
+	    List<ServiceInfo> eventServices = getAllApprovedServicesForRights(getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, AccessRight.SUBSCRIBE);
+	    
+	    return filterEventServices(eventServices);
 	}
 
 	/*---------------------*/
