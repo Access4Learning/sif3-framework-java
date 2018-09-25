@@ -113,12 +113,11 @@ public class JobResource extends InfraResource
     private FunctionalServiceProvider fsProvider = null;
 
     /**
-     * @param uriInfo
-     * @param requestHeaders
-     * @param request
-     * @param servicePrefixPath
-     * @param zoneID
-     * @param contextID
+     * @param uriInfo URI of service.
+     * @param requestHeaders Headers
+     * @param request Original request object
+     * @param zoneID Matrix Parameter Zone ID
+     * @param contextID Matrix Parameter Context ID
      */
     public JobResource(@Context UriInfo uriInfo,
                        @Context HttpHeaders requestHeaders,
