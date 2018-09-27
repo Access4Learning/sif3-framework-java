@@ -66,7 +66,7 @@ public class PagingInfo implements Serializable
 	 * Constructor
 	 * 
 	 * @param pageSize The number of object per page
-	 * @param currentPageNo The number/index of the page to be returned. Starts with 0!
+	 * @param currentPageNo The number/index of the page to be returned. Starts with 1!
 	 */
 	public PagingInfo(int pageSize, int currentPageNo)
 	{
@@ -78,7 +78,7 @@ public class PagingInfo implements Serializable
    * Constructor
    * 
    * @param pageSize The number of object per page
-   * @param currentPageNo The number/index of the page to be returned. Starts with 0!
+   * @param currentPageNo The number/index of the page to be returned. Starts with 1!
    * @param totalObjects The total number of objects available for the 'query': count(*)
    */
 	public PagingInfo(int pageSize, int currentPageNo, int totalObjects)
@@ -92,7 +92,7 @@ public class PagingInfo implements Serializable
      * Constructor
      * 
      * @param pageSize The number of object per page
-     * @param currentPageNo The number/index of the page to be returned. Starts with 0!
+     * @param currentPageNo The number/index of the page to be returned. Starts with 1!
      * @param totalObjects The total number of objects available for the 'query': count(*)
      * @param navigationId The navigation ID as returned by a provider in the HTTP response. 
      */
@@ -223,9 +223,9 @@ public class PagingInfo implements Serializable
     }
 	
 	/**
-	 * Set the page to be returned. Starts with 0, so to return the first page set this value to 0.
+	 * Set the page to be returned. Starts with 1, so to return the first page set this value to 1.
 	 * 
-	 * @param currentPageNo See desc. Default = 0.
+	 * @param currentPageNo See desc. Default = 1.
 	 */
 	public void setCurrentPageNo(int currentPageNo)
     {
@@ -243,7 +243,7 @@ public class PagingInfo implements Serializable
     }
 
   /**
-   * This method returns the total number of pages based on the page size and the total number objects. If either if these two values is negative
+   * This method returns the total number of pages based on the page size and the total number objects. If either of these two values is negative
    * then it indicates that they are not defined and NOT_DEFINED (-1) is returned. If both of these values are given then the appropriate max
    * number of pages value is returned.
    * 

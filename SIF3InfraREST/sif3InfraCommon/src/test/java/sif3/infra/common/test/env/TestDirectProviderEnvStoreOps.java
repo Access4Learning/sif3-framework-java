@@ -37,7 +37,7 @@ import sif3.infra.common.model.ProductIdentityType;
  * @author Joerg Huber
  *
  */
-public class TestDirectProviderEnvStoreOps
+public class TestDirectProviderEnvStoreOps extends TestBase
 {
 	private static final long MINUTE = 1000*60;
 	private static final AdapterType PROVIDER = AdapterType.ENVIRONMENT_PROVIDER;
@@ -48,6 +48,7 @@ public class TestDirectProviderEnvStoreOps
 	
 //	private static final String TEMPLATE_FILE_NAME="systemicDemoBrokerResponse.xml";
     private static final String TEMPLATE_FILE_NAME="devLocal.xml";
+    private static final String JOB_TEMPLATE_FILE_NAME="rolloverStudentJob.xml";
 	private static final String SERVICE_NAME="StudentProvider";
 
 	private static ObjectFactory objFactory = new ObjectFactory();
@@ -63,32 +64,9 @@ public class TestDirectProviderEnvStoreOps
 
 	public TestDirectProviderEnvStoreOps()
 	{
-        HibernateUtil.initialise(null);
+//        HibernateUtil.initialise(null);
+        super();
 		envOps = new DirectProviderEnvStoreOps(SERVICE_NAME);
-	}
-
-	private void printEnvironment(EnvironmentType env)
-	{
-		if (env == null)
-		{
-			System.out.println("Environment is null!");
-		}
-		else
-		{
-			try
-			{
-				InfraMarshalFactory marshaller = new InfraMarshalFactory();
-				System.out.println("Environment as XML:\n"+marshaller.marshalToXML(env));
-			}
-			catch (MarshalException ex)
-			{
-				ex.printStackTrace();
-			}
-      catch (UnsupportedMediaTypeExcpetion ex)
-      {
-        ex.printStackTrace();
-      }
-		}
 	}
 
 	private EnvironmentType getInputEnvironment()
@@ -121,10 +99,21 @@ public class TestDirectProviderEnvStoreOps
 		System.out.println("Does "+TEMPLATE_FILE_NAME+" exist in template directory: "+envOps.existEnvironmentTemplate(TEMPLATE_FILE_NAME));
 	}
 	
-	private void testLoadEnvironmentTemplate()
+    private void testExistJobTemplate()
+    {
+        System.out.println("Job Template XML for "+JOB_TEMPLATE_FILE_NAME+" exists: "+envOps.existJobTemplate(JOB_TEMPLATE_FILE_NAME));
+    }
+
+    private void testLoadEnvironmentTemplate()
 	{
-		printEnvironment(envOps.loadEnvironmentFromTemplate(TEMPLATE_FILE_NAME));
+        printInfraObjectAsXML(envOps.loadEnvironmentFromTemplate(TEMPLATE_FILE_NAME));
 	}
+
+    
+    private void testLoadJobTemplate()
+    {
+        printInfraObjectAsXML(envOps.loadJobFromTemplate(JOB_TEMPLATE_FILE_NAME));
+    }
 
 	private void testExistEnvInWorkstore()
 	{
@@ -142,7 +131,7 @@ public class TestDirectProviderEnvStoreOps
 	{
 		try
         {
-	        printEnvironment(envOps.loadEnvironmentFromWorkstore(new EnvironmentKey(SOLUTION_NAME, APPLICATION_KEY, null, null), null, USE_HTTPS));
+		    printInfraObjectAsXML(envOps.loadEnvironmentFromWorkstore(new EnvironmentKey(SOLUTION_NAME, APPLICATION_KEY, null, null), null, USE_HTTPS));
         }
         catch (Exception ex)
         {
@@ -164,7 +153,7 @@ public class TestDirectProviderEnvStoreOps
 	{
 //		EnvironmentType inputEnv = envOps.loadEnvironmentFromTemplate(TEMPLATE_FILE_NAME); // use this if BROKERED
 		EnvironmentType inputEnv = getInputEnvironment(); // use this for DIRECT
-		printEnvironment(envOps.createEnvironmentAndSession(inputEnv, null, USE_HTTPS));
+		printInfraObjectAsXML(envOps.createEnvironmentAndSession(inputEnv, null, USE_HTTPS));
 	}
 
 	private void testCreateSession()
@@ -205,15 +194,19 @@ public class TestDirectProviderEnvStoreOps
 		System.out.println("Start Testing ProviderEnvironmentStoreOperations...");
 		
 //		tester.testExistEnvironmentTemplate();
+//        tester.testExistJobTemplate();
 //		tester.testLoadEnvironmentTemplate();
+	    tester.testLoadJobTemplate();
 //		tester.testExistEnvInWorkstore();
 //		tester.testLoadEnvironmentFromWorkstore();
 //		tester.testCreateEnvironment();
-		tester.testCreateSession();
+//		tester.testCreateSession();
 //		tester.testRemoveEnvFromWorkstoreByEnvID();
 //		tester.testRemoveEnvFromWorkstoreBySessionToken();
 //		tester.testUpdateSessionSecurityInfo();
 		
+        tester.shutdown();
+
 		System.out.println("End Testing ProviderEnvironmentStoreOperations.");
 	}
 }

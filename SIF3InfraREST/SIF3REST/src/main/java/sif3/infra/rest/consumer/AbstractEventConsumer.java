@@ -22,13 +22,10 @@ import java.util.List;
 
 import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.interfaces.EventConsumer;
+import sif3.common.model.ACL.AccessRight;
 import sif3.common.model.EventMetadata;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.ServiceInfo;
-import sif3.common.model.ServiceRights;
-import sif3.common.model.ServiceRights.AccessRight;
-import sif3.common.persist.model.SIF3Session;
-import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 
 /**
  * This is the core class that a developer will use to implement for a consumer that shall subscribe to events. Each consumer for each object 
@@ -69,11 +66,8 @@ public abstract class AbstractEventConsumer<L> extends AbstractConsumer implemen
 	 * @see sif3.common.interfaces.EventConsumer#onEvent(sif3.common.model.SIFEvent, sif3.common.model.EventMetadata, java.lang.String, java.lang.String)
 	 */
 	@Override
-//	public void onEvent(SIFEvent<L> sifEvent, SIFZone zone, SIFContext context, EventMetadata metadata, String msgReadID, String consumerID)
     public void onEvent(SIFEvent<L> sifEvent, EventMetadata metadata, String msgReadID, String consumerID)
 	{
-		// Right now all that is required is to call the abstract processEvent() method.
-//		processEvent(sifEvent, zone, context, metadata, msgReadID, consumerID);
         processEvent(sifEvent, metadata, msgReadID, consumerID);
 	}
 
@@ -129,11 +123,12 @@ public abstract class AbstractEventConsumer<L> extends AbstractConsumer implemen
      */
 	protected final List<ServiceInfo> getEventServices()
 	{
-		SIF3Session sif3Session = ConsumerEnvironmentManager.getInstance().getSIF3Session();
-		return filterEventServices(sif3Session.getServiceInfoForService(getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, AccessRight.SUBSCRIBE, ServiceRights.AccessType.APPROVED));
+	    List<ServiceInfo> eventServices = getAllApprovedServicesForRights(getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT, AccessRight.SUBSCRIBE);
+	    
+	    return filterEventServices(eventServices);
 	}
 
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-	}
+}

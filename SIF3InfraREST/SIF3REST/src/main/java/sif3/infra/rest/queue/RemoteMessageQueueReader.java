@@ -30,6 +30,7 @@ import sif3.common.exception.ServiceInvokationException;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.MessageType;
 import sif3.common.header.HeaderValues.ResponseAction;
+import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.model.EventMetadata;
@@ -62,16 +63,17 @@ import sif3.infra.rest.queue.types.ResponseInfo;
 public class RemoteMessageQueueReader implements Runnable
 {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-
+    
 	private QueueInfo queueInfo = null;
     private ConsumerEnvironmentManager consumerEvnMgr = null;
 	private SIF3Session sif3Session = null;
 	private int readerID;
 	private String lastMsgeID = null;
 	private int waitTime = 0; // milliseconds
+	private boolean shutdownFlag = false;
 
 	private MessageClient client = null;
-
+	
 	/**
 	 * Constructs a RemoteMessageQueueReader for the queue identified through the queueListenerInfo parameter for the given session and consumer 
 	 * configuration.
@@ -109,8 +111,8 @@ public class RemoteMessageQueueReader implements Runnable
 
 	public void shutdown()
 	{
-		// nothing to do at the moment
-		logger.debug("Shutdown Message Reader wit ID = " + getReaderID() + " for queue = " + getQueueInfo().getQueue().getName());
+		logger.debug("Shutdown Message sent to Remote Reader with ID = " + getReaderID() + " for queue = " + getQueueInfo().getQueue().getName());
+		shutdownFlag = true;
 	}
 	
 	/* (non-Javadoc)
@@ -120,7 +122,14 @@ public class RemoteMessageQueueReader implements Runnable
     public void run()
     {
     	logger.debug("Message Queue Reader "+getReaderID()+" starts reading messages for queue "+getQueueInfo().getQueue().getName()+"...");
-    	startReading();
+        try
+        {
+            startReading();
+        }
+        catch (InterruptedException ex)
+        {
+            logger.error("Thread interupted - application shutting down?", ex);
+        }
     }
 
 	/*---------------------*/
@@ -129,11 +138,11 @@ public class RemoteMessageQueueReader implements Runnable
     /*
      * This is the actual core methods. It connect to the SIF Message queue and starts reading messages from it. 
      */
-	private void startReading()
+	private void startReading() throws InterruptedException
 	{
 		if (client != null) // indicating all good
 		{
-			while (true)
+			while (!shutdownFlag)
 			{
 				try
 				{
@@ -154,12 +163,21 @@ public class RemoteMessageQueueReader implements Runnable
 						processMessage(response);
 					}
 				}
-				catch (ServiceInvokationException ex)
-				{
-					// Error should already have been logged. Just wait and try again
-					waitBeforeGetNext();	  
-				}
+                catch (Exception ex)
+                {
+                    logger.debug("Message Reader '" + getReaderID() + "' (ThreadID:"+Thread.currentThread().getId()+") shutdown flag: "+shutdownFlag);
+                    // Error should already have been logged. Just wait and try again
+                    if ((ex != null) && (ex instanceof InterruptedException))
+                    {
+                        throw (InterruptedException) ex;
+                    }
+                    else
+                    {
+                        waitBeforeGetNext();
+                    }
+                }
 			}
+			logger.debug("Message Reader '" + getReaderID() + "' (ThreadID:"+Thread.currentThread().getId()+") stopped reading messages. Shutdown flag: "+shutdownFlag);
 		}
 	}
 
@@ -205,21 +223,56 @@ public class RemoteMessageQueueReader implements Runnable
 		return false;
 	}
 
-	private void waitBeforeGetNext()
+	private void waitBeforeGetNext() //throws Exception
 	{
-		logger.debug("\n==========================\n"+getReaderID()+" for queue "+getQueueInfo().getQueue().getName()+ " will wait for "+getWaitTime()/CommonConstants.MILISEC+" seconds before attempting to get next message."+"\n==========================");
+		logger.debug("\n==========================\nRemote Reader "+getReaderID()+" for queue "+getQueueInfo().getQueue().getName()+ " will wait for "+getWaitTime()/CommonConstants.MILISEC+" seconds before attempting to get next message."+"\n==========================");
 		try
 		{
-			Object semaphore = new Object();
-			synchronized (semaphore)
-			{
-				semaphore.wait(getWaitTime());
-			}
+		    // For efficient shutdown purpose and the way semaphores work we only sleep for a max of 5 sec. and then go
+		    // back to sleep if the waitTime isn't reached, yet. However if the shutdown flag is set we won't go back to
+		    // sleep and finish off instead.
+		    
+		    // How many intervals of 5 secs to we have. 
+		    long intervals = getWaitTime() / CommonConstants.MAX_SLEEP_MILLISEC;
+		    long reminder = getWaitTime() - (intervals * CommonConstants.MAX_SLEEP_MILLISEC);
+		    
+		    logger.debug("Num Intervals: "+intervals);
+		    logger.debug("Reminder in Secs: "+reminder/1000);
+		    
+		    for (long i = 0; i < intervals; i++)
+		    {
+		        doWait(CommonConstants.MAX_SLEEP_MILLISEC);
+		        if (shutdownFlag)
+		        {
+		            break;
+		        }
+		    }
+		    if ((!shutdownFlag) && (reminder > 0))
+		    {
+		        doWait(reminder);
+		    }
 		}
 		catch (Exception ex)
 		{
 			logger.error("Blocking wait in Message Reader '" + getReaderID() + "' for queue: " + getQueueInfo().getQueue().getName() + " interrupted: " + ex.getMessage(), ex);
 		}
+	}
+	
+	private void doWait(long millisecs)
+	{
+	    Object semaphore = new Object();
+        synchronized (semaphore)
+        {
+            try
+            {
+                logger.debug("Message Reader '" + getReaderID() + "' has mini sleep for " + millisecs/1000 + " seconds");
+                semaphore.wait(millisecs);
+            }
+            catch (InterruptedException ex)
+            {
+                logger.debug("Message Reader '" + getReaderID() + "' mini sleep interupted...: " + ex.getMessage());
+            }
+        }
 	}
 
 	/*
@@ -312,7 +365,10 @@ public class RemoteMessageQueueReader implements Runnable
 			//Populate ErrorInfo Object with base data.
 			ErrorInfo errorInfo = new ErrorInfo();
 			setResponseBaseData(errorInfo, response, MessageType.ERROR);
-			
+		     
+	        // response already has the error type!
+			errorInfo.setErrorDetail(response.getError());
+
 			// Is there a subscription for this Delayed ERROR type
 			LocalConsumerQueue localQueue = getQueueInfo().getLocalConsumerQueue(errorInfo.getZone().getId(), errorInfo.getContext().getId(), errorInfo.getServiceName(), errorInfo.getServiceType().name());
 			
@@ -340,17 +396,17 @@ public class RemoteMessageQueueReader implements Runnable
 	private void setResponseBaseData(DelayedBaseInfo baseInfo, Response response, MessageType messageType)
 	{
 		//First get all the info out from the relativeServicePath
-		URIPathInfo pathInfo = new URIPathInfo(getHeaderValue(response, ResponseHeaderConstants.HDR_REL_SERVICE_PATH));
+		URIPathInfo pathInfo = new URIPathInfo(getHeaderValue(response, ResponseHeaderConstants.HDR_REL_SERVICE_PATH), getHeaderValue(response, ResponseHeaderConstants.HDR_SERVICE_TYPE));
 		
 		baseInfo.setMessageType(messageType);
 		baseInfo.setRequestGUID(getHeaderValue(response, ResponseHeaderConstants.HDR_REQUEST_ID));
 		baseInfo.setServiceType(pathInfo.getServiceType());
+		baseInfo.setResourceID(pathInfo.getResourceID());
+		baseInfo.setPhaseName(pathInfo.getPhaseName());
 		baseInfo.setPayload((String)response.getDataObject());
 		baseInfo.setMediaType(response.getMediaType());
 		baseInfo.setZone(getSif3Session().getZone(pathInfo.getZone()));
 		baseInfo.setContext(getSif3Session().getContext(pathInfo.getContext()));
-//      baseInfo.setZone(getZone(pathInfo.getZone() != null ? pathInfo.getZone().getId() : null));
-//      baseInfo.setContext(getContext(pathInfo.getContext()!= null ? pathInfo.getContext().getId() : null));
 		baseInfo.setMessageQueueReaderID(getQueueReaderID());
 		baseInfo.setFullRelativeURL(pathInfo.getOriginalURLString());
 		baseInfo.setServiceName(pathInfo.getServiceName());
@@ -399,6 +455,7 @@ public class RemoteMessageQueueReader implements Runnable
 				
 				EventInfo eventInfo = new EventInfo(eventPayload, response.getMediaType(), eventAction, updateType, zone, context, metadata, getQueueReaderID());
 				eventInfo.setFingerprint(getHeaderValue(response, ResponseHeaderConstants.HDR_FINGERPRINT));
+				eventInfo.setServiceType(StringUtils.isEmpty(serviceType) ? ServiceType.OBJECT : ServiceType.valueOf(serviceType));
 				
 				logger.debug(getQueueReaderID()+": Attempts to push Event to local queue...");
 				localQueue.blockingPush(eventInfo);

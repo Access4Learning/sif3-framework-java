@@ -3,8 +3,8 @@
         <LocalId>98765</LocalId>
         <PersonInfo>
             <Name Type="LGL">
-                <FamilyName>DAVEY</FamilyName>
-                <GivenName>Tim</GivenName>
+				<FamilyName>Huber</FamilyName>
+				<GivenName>JŒRG</GivenName>
             </Name>
         </PersonInfo>
         <MostRecent>
@@ -16,8 +16,8 @@
         <LocalId>98765</LocalId>
         <PersonInfo>
             <Name Type="LGL">
-                <FamilyName>DAVEY</FamilyName>
-                <GivenName>Tim</GivenName>
+                <FamilyName>Marshall</FamilyName>
+                <GivenName>Linda</GivenName>
             </Name>
         </PersonInfo>
         <MostRecent>
@@ -55,8 +55,8 @@
         <LocalId></LocalId>
         <PersonInfo>
             <Name Type="LGL">
-                <FamilyName></FamilyName>
-                <GivenName></GivenName>
+                <FamilyName>OÂ¿Connor</FamilyName>
+                <GivenName>Sam</GivenName>
             </Name>
         </PersonInfo>
         <MostRecent>

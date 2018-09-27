@@ -90,8 +90,8 @@ public class TestAuthUtils
 	private void testHMACSHA256Token()
 	{
 //		String username = "TestSIS";
-		String username = "d394e915-ebb0-4c22-b4ec-8a0abed239df";
-		String password = "password";
+		String username = "27677240-0c2e-4e65-a47f-e3454e5234a1";
+		String password = "bijObw7aBbTB";
 //		String username = "new";
 //		String password = "guest";
 ///		String now = "2013-06-22T23:52-07";
@@ -185,10 +185,10 @@ public class TestAuthUtils
 //			tester.testGetBasicAuthToken();
 //			tester.testHMACSHA256();
 			//tester.testHMACSHA256Stress();
-//			tester.testHMACSHA256Token();
+			tester.testHMACSHA256Token();
 //			tester.testHMACSHA256TokenStress();
 //			tester.testExtractMethods();
-			tester.testGetPartsFromAuthToken();
+//			tester.testGetPartsFromAuthToken();
 		}
 		catch (Exception ex)
 		{

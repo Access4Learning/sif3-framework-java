@@ -72,6 +72,9 @@ public class CommonConstants
 
 	/* SOAP transport String: Future Use */
 	public static final String SOAP_TRANSPORT_STR = "SOAP";
+	
+	/* Used in 'blocking' ExecutorService to allow a max sleep time before shutdown is checked */
+    public final static long MAX_SLEEP_MILLISEC = 5 * MILISEC; 
 
 	/*-----------------------------------------------------------*/
 	/* Constants defined by SIF3 Spec.                           */
@@ -118,7 +121,22 @@ public class CommonConstants
 	 */
 	public enum QueuePollingType {IMMEDIATE, LONG};
 		
-	/*------------------------------------------------------------------------------------*/
+    /*
+     * Job states (for functional services)
+     */
+    public enum JobState {NOTSTARTED, INPROGRESS, COMPLETED, FAILED}
+
+    /*
+     * Phase states (for functional services)
+     */
+    public enum PhaseState {NOTAPPLICABLE, NOTSTARTED, PENDING, SKIPPED, INPROGRESS, COMPLETED, FAILED}
+    
+    /*
+     * ACLs are applied in many places. This enum defines the plaves where they can apply.
+     */
+    public enum RightType {SERVICE, PHASE, STATE};
+
+    /*------------------------------------------------------------------------------------*/
 	/* URL Query Parameter names in relation to security (special case for SIF Express) --*/
 	/*------------------------------------------------------------------------------------*/
 	public enum AuthenticationType {Basic, SIF_HMACSHA256, Other};
@@ -143,5 +161,6 @@ public class CommonConstants
 	/* HTTP Status that are not listed in the Response.Status class --*/
 	/*----------------------------------------------------------------*/
 	public static final int RESPONSE_TOO_LARGE = 413;
+	public static final int NOT_IMPLEMENTED = 501;
 	
 }

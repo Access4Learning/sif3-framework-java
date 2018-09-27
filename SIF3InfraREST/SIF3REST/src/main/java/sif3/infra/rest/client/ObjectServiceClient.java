@@ -17,10 +17,12 @@ package sif3.infra.rest.client;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
+
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
@@ -33,7 +35,6 @@ import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
-import sif3.common.model.ServiceInfo;
 import sif3.common.model.URLQueryParameter;
 import sif3.common.ws.BulkOperationResponse;
 import sif3.common.ws.CreateOperationStatus;
@@ -43,9 +44,6 @@ import sif3.common.ws.model.MultiOperationStatusList;
 import sif3.infra.common.interfaces.ClientEnvironmentManager;
 import sif3.infra.common.model.DeleteIdType;
 import sif3.infra.common.model.DeleteRequestType;
-
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 
 /**
  * This class is a core client class for all Object Services and their CRUD operations (request connector) for SIF3. It takes care of 
@@ -290,6 +288,9 @@ public class ObjectServiceClient extends BaseClient
 	 * @param serviceType Currently this should be OBJECT or SERVICPATH.
 	 * @param pagingInfo Page information to be set for the provider to determine which results to return.
 	 * @param hdrProperties Header Properties to be added to the header of the GET request.
+     * @param urlQueryParams URL query parameters to be added to the request. It is assumed that these are custom
+     *                       URL query parameters. They are conveyed to the provider unchanged. URL query parameter
+     *                       names are case sensitive. This parameter can be null.
 	 * @param returnObjectClass The class type into which the object shall be unmarshalled into. The final object is stored in the
 	 *                          returned Response object.
 	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
@@ -334,6 +335,9 @@ public class ObjectServiceClient extends BaseClient
 	 * @param exampleObject The example data model object. This must be the single object type.
 	 * @param pagingInfo Page information to be set for the provider to determine which results to return.
 	 * @param hdrProperties Header Properties to be added to the header of the GET request.
+     * @param urlQueryParams URL query parameters to be added to the request. It is assumed that these are custom
+     *                       URL query parameters. They are conveyed to the provider unchanged. URL query parameter
+     *                       names are case sensitive. This parameter can be null.
 	 * @param returnObjectClass The class type into which the object shall be unmarshalled into. The final object is stored in the
 	 *                          returned Response object.
 	 * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
@@ -481,9 +485,7 @@ public class ObjectServiceClient extends BaseClient
 	
 	/**
 	 * This invokes the REST PUT call. This method is used to delete many objects in one call as defined by the SIF3 spec. The
-	 * returned list of responses equate to one response per object in the given payload. The order of the responses is the same as the
-	 * order in the original payload. The first response in the BulkOperationResponse list is the response to the create of the first
-	 * object in the payload etc.<br/><br/>
+	 * returned list of responses equate to one response per object in the given payload.<br/><br/>
 	 * 
 	 * There is an issue with java.net.HttpURLConnection where it doesn't allow an payload for the HTTP DELETE operation. So currently 
 	 * the implementation of the removeMany fakes such a behaviour and actually calls the HTTP PUT with a HTTP Header called 'methodOverride' as
@@ -549,7 +551,7 @@ public class ObjectServiceClient extends BaseClient
 	}
 
 	/*-----------------------------------*/
-    /*-- Get Service Infor (HTTP HEAD) --*/
+    /*-- Get Service Info (HTTP HEAD) --*/
     /*-----------------------------------*/
     /**
      * Will invoke the REST HEAD call. It will not return a payload as per HTTP Specification of the HEAD method. It will
@@ -563,6 +565,9 @@ public class ObjectServiceClient extends BaseClient
      *                    the service path name as in the Environment ACL (i.e. schools/{}/students).
      * @param pagingInfo Page information to be set for the provider to determine which results to return.
      * @param hdrProperties Header Properties to be added to the header of the GET request.
+     * @param urlQueryParams URL query parameters to be added to the request. It is assumed that these are custom
+     *                       URL query parameters. They are conveyed to the provider unchanged. URL query parameter
+     *                       names are case sensitive. This parameter can be null.
      * @param zone The zone for which this operation shall be invoked. Can be null which indicates the DEFAULT zone.
      * @param context The context for which this operation shall be invoked. Can be null which indicates the DEFAULT context.
      * 
@@ -591,68 +596,66 @@ public class ObjectServiceClient extends BaseClient
         }
     }
 
-	
-	
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-	private BulkOperationResponse<CreateOperationStatus> setCreateBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
-	{
-		BulkOperationResponse<CreateOperationStatus> response = new BulkOperationResponse<CreateOperationStatus>();
-		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, true, requestType, service.getURI().toString());
-		if ((clientResponse.getStatusInfo().getStatusCode() == Status.OK.getStatusCode()) || 
-            (clientResponse.getStatusInfo().getStatusCode() == Status.CREATED.getStatusCode()) ||
-			(clientResponse.getStatusInfo().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
-			(clientResponse.getStatusInfo().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
-		{
-			if (response.getHasEntity())
-			{
-				String payload = clientResponse.getEntity(String.class);
-				MultiOperationStatusList<CreateOperationStatus> statusList = getInfraMapper().toStatusListFromSIFCreateString(payload, getResponseMediaType());
-				response.setError(statusList.getError());
-				response.setOperationStatuses(statusList.getOperationStatuses());
-			}			
-		}
-		else// We are dealing with an error case.
-		{
-			setErrorResponse(response, clientResponse);
-		}
-		
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("Response from REST Call:\n"+response);
-		}
-		return response;
-	}
+//	private BulkOperationResponse<CreateOperationStatus> setCreateBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
+//	{
+//		BulkOperationResponse<CreateOperationStatus> response = new BulkOperationResponse<CreateOperationStatus>();
+//		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, true, requestType, service.getURI().toString());
+//		if ((clientResponse.getStatusInfo().getStatusCode() == Status.OK.getStatusCode()) || 
+//            (clientResponse.getStatusInfo().getStatusCode() == Status.CREATED.getStatusCode()) ||
+//			(clientResponse.getStatusInfo().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
+//			(clientResponse.getStatusInfo().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
+//		{
+//			if (response.getHasEntity())
+//			{
+//				String payload = clientResponse.getEntity(String.class);
+//				MultiOperationStatusList<CreateOperationStatus> statusList = getInfraMapper().toStatusListFromSIFCreateString(payload, getResponseMediaType());
+//				response.setError(statusList.getError());
+//				response.setOperationStatuses(statusList.getOperationStatuses());
+//			}			
+//		}
+//		else// We are dealing with an error case.
+//		{
+//			setErrorResponse(response, clientResponse);
+//		}
+//		
+//		if (logger.isDebugEnabled())
+//		{
+//			logger.debug("Response from REST Call:\n"+response);
+//		}
+//		return response;
+//	}
 
-	private BulkOperationResponse<OperationStatus> setDeleteBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
-	{
-		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
-		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, true, requestType, service.getURI().toString());
-		if ((clientResponse.getStatusInfo().getStatusCode() == Status.OK.getStatusCode()) || 
-			(clientResponse.getStatusInfo().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
-			(clientResponse.getStatusInfo().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
-		{
-			if (response.getHasEntity())
-			{
-				String payload = clientResponse.getEntity(String.class);
-				MultiOperationStatusList<OperationStatus> statusList = getInfraMapper().toStatusListFromSIFDeleteString(payload, getResponseMediaType());
-				response.setError(statusList.getError());
-				response.setOperationStatuses(statusList.getOperationStatuses());
-				
-			}			
-		}
-		else// We are dealing with an error case.
-		{
-			setErrorResponse(response, clientResponse);
-		}
-		
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("Response from REST Call:\n"+response);
-		}
-		return response;
-	}
+//	private BulkOperationResponse<OperationStatus> setDeleteBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
+//	{
+//		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
+//		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, true, requestType, service.getURI().toString());
+//		if ((clientResponse.getStatusInfo().getStatusCode() == Status.OK.getStatusCode()) || 
+//			(clientResponse.getStatusInfo().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
+//			(clientResponse.getStatusInfo().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
+//		{
+//			if (response.getHasEntity())
+//			{
+//				String payload = clientResponse.getEntity(String.class);
+//				MultiOperationStatusList<OperationStatus> statusList = getInfraMapper().toStatusListFromSIFDeleteString(payload, getResponseMediaType());
+//				response.setError(statusList.getError());
+//				response.setOperationStatuses(statusList.getOperationStatuses());
+//				
+//			}			
+//		}
+//		else// We are dealing with an error case.
+//		{
+//			setErrorResponse(response, clientResponse);
+//		}
+//		
+//		if (logger.isDebugEnabled())
+//		{
+//			logger.debug("Response from REST Call:\n"+response);
+//		}
+//		return response;
+//	}
 
 	private BulkOperationResponse<OperationStatus> setUpdateBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
 	{
@@ -682,55 +685,38 @@ public class ObjectServiceClient extends BaseClient
 		return response;
 	}
 	
-	private void addPagingInfoToHeaders(PagingInfo pagingInfo, HeaderProperties hdrProperties)
-	{	
-		if (pagingInfo != null)
-		{
-		  	Map<String, String> queryParameters = pagingInfo.getRequestValues();
-			for (String key : queryParameters.keySet())
-			{
-			  hdrProperties.setHeaderProperty(key, queryParameters.get(key));
-			}
-		}
-	}
-	
-	private void addDelayedInfo(HeaderProperties hdrProperties, SIFZone zone, SIFContext context, String serviceName, ServiceType serviceType, RequestType requestType)
-	{
-		if (requestType == RequestType.DELAYED)
-		{
-			ServiceInfo serviceInfo = getSIF3Session().getServiceInfoForService(zone, context, serviceName, serviceType);
-			if (serviceInfo != null)
-			{
-				if ((serviceInfo.getRemoteQueueInfo() != null) && (serviceInfo.getRemoteQueueInfo().getQueueID() != null))
-				{
-					hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_QUEUE_ID, serviceInfo.getRemoteQueueInfo().getQueueID());
-				}
-				else // should not be the case if all is called properly but you never know...
-				{
-					logger.error("No SIF Queue configured environment with Service Name = "+serviceName+", Service Type = "+serviceType+", Zone = "+zone.getId()+" and Context = "+context.getId());
-				}
-			}
-			else // should not be the case if all is called properly but you never know... 
-			{
-				logger.error("No valid service listed in environment ACL for Service Name = "+serviceName+", Service Type = "+serviceType+", Zone = "+zone.getId()+" and Context = "+context.getId());
-			}
-		}
-	}
-	
-	/*
-	 * This method will add the authentication header properties to the given set of header properties. The final set of header
-	 * properties is then returned.
-	 */
-    private HeaderProperties addAuthenticationHdrProps(HeaderProperties hdrProperties)
-    {
-        if (hdrProperties == null)
-        {
-            hdrProperties = new HeaderProperties();
-        }
-        
-        // Add Authentication info to existing header properties
-        hdrProperties.addHeaderProperties(createAuthenticationHdr(false, null));
-        
-        return hdrProperties;
-    }
+//	private void addPagingInfoToHeaders(PagingInfo pagingInfo, HeaderProperties hdrProperties)
+//	{	
+//		if (pagingInfo != null)
+//		{
+//		  	Map<String, String> queryParameters = pagingInfo.getRequestValues();
+//			for (String key : queryParameters.keySet())
+//			{
+//			  hdrProperties.setHeaderProperty(key, queryParameters.get(key));
+//			}
+//		}
+//	}
+//	
+//	private void addDelayedInfo(HeaderProperties hdrProperties, SIFZone zone, SIFContext context, String serviceName, ServiceType serviceType, RequestType requestType)
+//	{
+//		if (requestType == RequestType.DELAYED)
+//		{
+//			ServiceInfo serviceInfo = getSIF3Session().getServiceInfoForService(zone, context, serviceName, serviceType);
+//			if (serviceInfo != null)
+//			{
+//				if ((serviceInfo.getRemoteQueueInfo() != null) && (serviceInfo.getRemoteQueueInfo().getQueueID() != null))
+//				{
+//					hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_QUEUE_ID, serviceInfo.getRemoteQueueInfo().getQueueID());
+//				}
+//				else // should not be the case if all is called properly but you never know...
+//				{
+//					logger.error("No SIF Queue configured environment with Service Name = "+serviceName+", Service Type = "+serviceType+", Zone = "+zone.getId()+" and Context = "+context.getId());
+//				}
+//			}
+//			else // should not be the case if all is called properly but you never know... 
+//			{
+//				logger.error("No valid service listed in environment ACL for Service Name = "+serviceName+", Service Type = "+serviceType+", Zone = "+zone.getId()+" and Context = "+context.getId());
+//			}
+//		}
+//	}
 }

@@ -74,5 +74,7 @@ public interface EventProvider<L> extends DataModelLink
 	 * @param context The context for which the events applied to. This parameter value can be null which indicated the default context.
 	 */
 	public void onEventError(SIFEvent<L> sifEvent, SIFZone zone, SIFContext context);
+	
+	public void broadcastEvents();
 
 }

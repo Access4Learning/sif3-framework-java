@@ -45,7 +45,13 @@ public class DelayedBaseInfo extends QueueMessage implements Serializable
     
 	// The Service Name of the request (StudentPersonals, SchoolInfos/{}/StudentPersonals etc are valid names)
     private String serviceName = null;
-    
+
+    // Job Phases or potentially future other service types may have a resourceID for which the delayed response is for.
+    private String resourceID = null;
+
+    // Functional Services can have delayed request/response for phases.
+    private String phaseName = null;
+
     // The Service Name with real URL (StudentPersonals, SchoolInfos/1234-8826ABCD-1234/StudentPersonals etc are valid values)
     private String urlService = null;
     
@@ -83,6 +89,25 @@ public class DelayedBaseInfo extends QueueMessage implements Serializable
 		this.serviceName = serviceName;
 	}
 
+    public String getResourceID()
+    {
+        return resourceID;
+    }
+
+    public void setResourceID(String resourceID)
+    {
+        this.resourceID = resourceID;
+    }
+
+    public String getPhaseName()
+    {
+        return phaseName;
+    }
+
+    public void setPhaseName(String phaseName)
+    {
+        this.phaseName = phaseName;
+    }
 
 	public HeaderProperties getHttpHeaders()
 	{
@@ -151,11 +176,10 @@ public class DelayedBaseInfo extends QueueMessage implements Serializable
 	@Override
     public String toString()
     {
-	    return "DelayedBaseInfo [requestGUID=" + requestGUID
-	            + ", fullRelativeURL=" + fullRelativeURL + ", serviceName="
-	            + serviceName + ", urlService=" + urlService
-	            + ", responseAction=" + responseAction + ", httpHeaders="
-	            + httpHeaders + ", queryParameters=" + queryParameters
-	            + ", toString()=" + super.toString() + "]";
+        return "DelayedBaseInfo [requestGUID=" + requestGUID + ", fullRelativeURL="
+                + fullRelativeURL + ", serviceName=" + serviceName + ", resourceID=" + resourceID
+                + ", phaseName=" + phaseName + ", urlService=" + urlService + ", responseAction="
+                + responseAction + ", httpHeaders=" + httpHeaders + ", queryParameters="
+                + queryParameters + ", toString()=" + super.toString() + "]";
     }
 }

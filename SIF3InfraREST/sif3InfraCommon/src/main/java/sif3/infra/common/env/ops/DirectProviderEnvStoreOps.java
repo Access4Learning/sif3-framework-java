@@ -41,6 +41,7 @@ import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.common.model.EnvironmentTypeType;
 import sif3.infra.common.model.InfrastructureServiceType;
 import sif3.infra.common.model.InfrastructureServicesType;
+import sif3.infra.common.model.JobType;
 
 /**
  * This class implements operations required by a direct environment provider. They are quite distinct and therefore warrant having its own
@@ -75,7 +76,20 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 	    return existEnvironmentTemplate(templateFileName, AdapterType.ENVIRONMENT_PROVIDER, sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType.DIRECT);
     }
 
-	/**
+    /**
+     * Check of a job template for the given filename exists. TRUE: it exists, FALSE it doesn't.
+     * 
+     * @param jobTemplateFileName The name of the job template file to check for in template/job directory. This name must 
+     *                             include the extension ".xml".
+     * 
+     * @return TRUE: Job Template exists. FALSE: The job template for the given file name doen't exists.
+     */
+    public boolean existJobTemplate(String jobTemplateFileName)
+    {
+        return existJobTemplate(jobTemplateFileName, AdapterType.ENVIRONMENT_PROVIDER, sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType.DIRECT);
+    }
+
+    /**
 	 * This method loads the given environment from the template store and returns it. If no such environment exists then null 
 	 * is returned.
 	 * 
@@ -86,6 +100,19 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
     public EnvironmentType loadEnvironmentFromTemplate(String envFileName)
     {
 	    return loadTemplateEnvironmentData(envFileName, AdapterType.ENVIRONMENT_PROVIDER, sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType.DIRECT);
+    }
+
+    /**
+     * This method loads the given job from the template store and returns it. If no such job exists then null 
+     * is returned.
+     * 
+     * @param jobTemplateFileName The name of the job template file to load from template directory. This name must include the extension ".xml".
+     * 
+     * @return Null => Failed to load data due to some error. See error log for details.
+     */
+    public JobType loadJobFromTemplate(String jobTemplateFileName)
+    {
+        return loadJobTemplateData(jobTemplateFileName, AdapterType.ENVIRONMENT_PROVIDER, sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType.DIRECT);
     }
 
 	/**

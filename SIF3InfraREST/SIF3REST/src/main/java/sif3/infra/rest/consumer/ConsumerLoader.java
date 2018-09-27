@@ -19,7 +19,6 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
@@ -27,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.CommonConstants;
 import sif3.common.exception.PersistenceException;
 import sif3.common.interfaces.HibernateProperties;
 import sif3.common.model.ServiceInfo;
@@ -37,6 +37,7 @@ import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.interfaces.EnvironmentConnector;
 import sif3.infra.rest.env.connectors.EnvironmentConnectorFactory;
 import sif3.infra.rest.queue.LocalConsumerQueue;
+import sif3.infra.rest.queue.QueueReaderInfo;
 import sif3.infra.rest.queue.RemoteMessageQueueReader;
 import sif3.infra.rest.queue.connectors.ConsumerQueueConnector;
 import sif3.infra.rest.queue.connectors.ConsumerSubscriptionConnector;
@@ -69,9 +70,10 @@ public class ConsumerLoader
     private ConsumerSubscriptionConnector subscriptionConnector = null;
     private List<AbstractEventConsumer<?>> eventConsumers = new ArrayList<AbstractEventConsumer<?>>();
     private List<AbstractConsumer> crudConsumers = new ArrayList<AbstractConsumer>();
+    private List<AbstractFunctionalServiceConsumer> fsServiceConsumers = new ArrayList<AbstractFunctionalServiceConsumer>();
   
-    private List<ExecutorService> msgReaderServices = new ArrayList<ExecutorService>();
-  
+    private List<QueueReaderInfo<RemoteMessageQueueReader>> msgReaderServices = new ArrayList<QueueReaderInfo<RemoteMessageQueueReader>>();
+
     /**
      * Initialises the consumer based on the given property file. If anything fails to initialise then an error is logged and this method
      * returns false. The consumer should not really continue in such a case as its behaviour is not defined and most likely will throw
@@ -202,11 +204,16 @@ public class ConsumerLoader
 		ConsumerEnvironmentManager envMgr = ConsumerEnvironmentManager.getInstance();
 
 		logger.debug("Shut down all remote message queue reader threads...");
-		for (ExecutorService service : msgReaderServices)
+		for (QueueReaderInfo<RemoteMessageQueueReader> remoteReaderInfo : msgReaderServices)
 		{
-			service.shutdown();
+		    for (RemoteMessageQueueReader remoteReader : remoteReaderInfo.getLinkedClasses())
+		    {
+		        remoteReader.shutdown();
+		    }
+    
+		    remoteReaderInfo.getService().shutdown();
 		}
-		
+
 		logger.debug("Shut down each consumer ...");
 		for (AbstractConsumer consumer : crudConsumers)
 		{
@@ -220,7 +227,13 @@ public class ConsumerLoader
 			consumer.finalise();
 		}
 
-		if (getConsumerEnvironment().getEventsEnabled() || (getConsumerEnvironment().getDelayedEnabled()))
+        for (AbstractFunctionalServiceConsumer consumer : fsServiceConsumers)
+        {
+            logger.debug("Shutdown " + consumer.getClass().getSimpleName());
+            consumer.finalise();
+        }
+
+        if (getConsumerEnvironment().getEventsEnabled() || (getConsumerEnvironment().getDelayedEnabled()))
 		{
     		logger.debug("Shutdown Event Subscription Connector...");
     		if (subscriptionConnector != null)
@@ -245,6 +258,10 @@ public class ConsumerLoader
 
 		logger.debug("Release DB Connections....");
 		HibernateUtil.shutdown();
+		
+		// All done but some background threads may not have fully shut down (eg. ExecutorServices). These may sleep
+		// up to a given time CommonConstants.MAX_SLEEP_MILLISEC. So let's quickly wait for them and the conclude...
+		doWait(CommonConstants.MAX_SLEEP_MILLISEC);
 	}
   
 	private ConsumerEnvironment getConsumerEnvironment()
@@ -264,28 +281,36 @@ public class ConsumerLoader
 		List<LocalQueueServiceInfo> allLocalQueueEventServices = new ArrayList<LocalQueueServiceInfo>();
 		List<LocalQueueServiceInfo> allLocalQueueCRUDServices = new ArrayList<LocalQueueServiceInfo>();
 
-		for (AbstractEventConsumer<?> consumer : eventConsumers)
-		{
-		    // Get Event services for this consumer
-			if (getConsumerEnvironment().getEventsEnabled())
-			{
-				addServices(allLocalQueueEventServices, consumer.getEventServices(), consumer.getLocalConsumerQueue());
-			}
-		    
-		    // Get CRUD services for this consumer
-			if (getConsumerEnvironment().getDelayedEnabled())
-			{
-				addServices(allLocalQueueCRUDServices, consumer.getAllApprovedCRUDServices(), consumer.getLocalConsumerQueue());
-			}
-		}
+        // Get all services for all Event ONLY consumers
+        if (getConsumerEnvironment().getEventsEnabled())
+        {
+            for (AbstractEventConsumer<?> consumer : eventConsumers)
+            {
+                addServices(allLocalQueueEventServices, consumer.getEventServices(), consumer.getLocalConsumerQueue());
+            }
+            for (AbstractFunctionalServiceConsumer consumer : fsServiceConsumers)
+            {
+                addServices(allLocalQueueEventServices, consumer.getEventServices(), consumer.getLocalConsumerQueue());
+            }
+        }
 		
-		// Get all services for all CRUD ONLY consumers
+		// Get all services for all CRUD consumers
 		if (getConsumerEnvironment().getDelayedEnabled())
 		{
     		for (AbstractConsumer consumer : crudConsumers)
     		{
                 addServices(allLocalQueueCRUDServices, consumer.getAllApprovedCRUDServices(), consumer.getLocalConsumerQueue());
     		}
+    		
+            for (AbstractFunctionalServiceConsumer consumer : fsServiceConsumers)
+            {
+                addServices(allLocalQueueCRUDServices, consumer.getAllApprovedCRUDServices(), consumer.getLocalConsumerQueue());
+            }
+
+            for (AbstractEventConsumer<?> consumer : eventConsumers)
+            {
+                addServices(allLocalQueueCRUDServices, consumer.getAllApprovedCRUDServices(), consumer.getLocalConsumerQueue());
+            }
 		}
 		
 		if (logger.isDebugEnabled())
@@ -347,20 +372,23 @@ public class ConsumerLoader
 
 	/*
 	 * Will initialise the threads and add them to the local consumer queue.
+	 *
 	 */
-	private ExecutorService startRemoteMessageReaderThreads(QueueInfo queueInfo, int numThreads)
+    private QueueReaderInfo<RemoteMessageQueueReader> startRemoteMessageReaderThreads(QueueInfo queueInfo, int numThreads)
 	{
 		String remoteQueueName = getRemoteQueueName(queueInfo);
 		logger.debug("Start "+numThreads+" message readers for "+remoteQueueName);
 		logger.debug("Total number of threads before starting message readers for "+remoteQueueName+" "+Thread.activeCount());
-		ExecutorService service = Executors.newFixedThreadPool(numThreads);
+		
+		QueueReaderInfo<RemoteMessageQueueReader> queueReaderInfo = new QueueReaderInfo<RemoteMessageQueueReader>(Executors.newFixedThreadPool(numThreads), new ArrayList<RemoteMessageQueueReader>());
 		for (int i = 0; i < numThreads; i++)
 		{
 			try
 			{
 				RemoteMessageQueueReader remoteReader = new RemoteMessageQueueReader(queueInfo, i);
 				logger.debug("Start Remote Reader "+remoteQueueName+" "+i);
-				service.execute(remoteReader);
+				queueReaderInfo.getLinkedClasses().add(remoteReader);
+				queueReaderInfo.getService().execute(remoteReader);
 			}
 			catch (Exception ex)
 			{
@@ -369,7 +397,7 @@ public class ConsumerLoader
 		}
 		logger.debug(numThreads+" "+remoteQueueName+" message readers initilaised and started.");
 		logger.debug("Total number of threads after starting message readers for "+remoteQueueName+" "+Thread.activeCount());
-		return service;
+		return queueReaderInfo;
 	}
 	
 	private void initialiseConsumers(AdvancedProperties adapterProps)
@@ -400,9 +428,14 @@ public class ConsumerLoader
 					logger.debug("Added " + classObj.getClass().getSimpleName() + " to crudConsumer only list");
 					crudConsumers.add((AbstractConsumer) classObj);
 				}
+				else if (classObj instanceof AbstractFunctionalServiceConsumer)
+				{
+                    logger.debug("Added " + classObj.getClass().getSimpleName() + " to fsServiceConsumers list");
+                    fsServiceConsumers.add((AbstractFunctionalServiceConsumer) classObj);
+				}
 				else
 				{
-					logger.error("Consumer class " + className + " doesn't extend AbstractConsumer or AbstractEventConsumer. Cannot initialse the Consumer.");
+					logger.error("Consumer class " + className + " doesn't extend AbstractConsumer, AbstractEventConsumer of AbstractFunctionalServiceConsumer. Cannot initialse the Consumer.");
 				}
 			}
 			catch (Exception ex)
@@ -429,4 +462,19 @@ public class ConsumerLoader
 	{
 		return queueInfo.getQueue().getName()+" ("+queueInfo.getQueue().getQueueID()+")";
 	}	
+	
+    private void doWait(long millisecs)
+    {
+        Object semaphore = new Object();
+        synchronized (semaphore)
+        {
+            try
+            {
+                semaphore.wait(millisecs);
+            }
+            catch (InterruptedException ex)
+            {
+            }
+        }
+    }
 }

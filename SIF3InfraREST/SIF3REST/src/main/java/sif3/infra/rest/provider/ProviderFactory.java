@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import au.com.systemic.framework.utils.AdvancedProperties;
 import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.conversion.ModelObjectInfo;
-import sif3.common.interfaces.Provider;
+import sif3.common.interfaces.EventProvider;
 
 /**
  * This is the provider factory. Each provider deals with a number of objects (i.e. StudentPersonal, SchoolInfo etc). 
@@ -50,7 +50,7 @@ public class ProviderFactory
 	private static ProviderFactory factory = null;
 	
 	// Active Providers for event publishing. These providers run in the background as an independent thread.
-	private HashMap<ModelObjectInfo, BaseProvider> eventProviders = new HashMap<ModelObjectInfo, BaseProvider>();
+    private HashMap<ModelObjectInfo, EventProvider<?>> eventProviders = new HashMap<ModelObjectInfo, EventProvider<?>>();
 	
 	// Known providers that can be instantiated for standard request/response
 	private HashMap<ModelObjectInfo, ProviderClassInfo> providerClasses = new HashMap<ModelObjectInfo, ProviderClassInfo>();
@@ -97,12 +97,12 @@ public class ProviderFactory
         {
             if (factory != null)
             {
-                for (BaseProvider provider : factory.eventProviders.values())
+                for (EventProvider<?> provider : factory.eventProviders.values())
                 {
                     try
                     {
                         logger.debug("Finalise provider " + provider.getMultiObjectClassInfo().getObjectName() + "...");
-                        provider.finalise();
+                        ((CoreProvider)provider).finaliseCoreProvider();
                     }
                     catch (Exception ex)
                     {
@@ -133,14 +133,14 @@ public class ProviderFactory
 	}
 	
 	/**
-	 * This method is intended to be used to get a new instance of an object provider class to be used for request/response methods.
+	 * This method is intended to be used to get a new instance of an provider class to be used for request/response methods.
 	 * If provider doesn't exist for the given objectInfo then null is returned.
 	 * 
 	 * @param objectInfo must have at least the ObjectName property set otherwise null is returned and an error is logged.
 	 * 
 	 * @return See desc.
 	 */
-	public Provider getProvider(ModelObjectInfo objectInfo)
+	public Object getProvider(ModelObjectInfo objectInfo)
 	{
         if ((objectInfo != null) && (StringUtils.notEmpty(objectInfo.getObjectName())))
         {
@@ -149,7 +149,7 @@ public class ProviderFactory
             {
                 try
                 {
-                    return (BaseProvider) providerClassInfo.getClassInstance(null);
+                    return providerClassInfo.getClassInstance(null);
                 }
                 catch (Exception ex)
                 {
@@ -196,17 +196,21 @@ public class ProviderFactory
                 Object classObj = providerClassInfo.getClassInstance(null);
 
                 // Set properties and add it to correct structure
-                if (classObj instanceof BaseProvider)
+                if (classObj instanceof CoreProvider)
                 {
-                    BaseProvider provider = (BaseProvider) classObj;
-                    ModelObjectInfo objectInfo = provider.getMultiObjectClassInfo();
+                    CoreProvider provider = (CoreProvider) classObj;
+                    ModelObjectInfo objectInfo = provider.getCollectionObjectClassInfo();
                     if ((objectInfo != null) && (StringUtils.notEmpty(objectInfo.getObjectName())))
                     {
                         // First add it to the standard request/response hashmap
                         providerClasses.put(objectInfo, providerClassInfo);
 
-                        // Add it to hasmap for background threads
-                        eventProviders.put(objectInfo, provider);
+                        // So far only Object Services (BaseProvider) support events.
+                        if (classObj instanceof EventProvider)
+                        {
+                            // Add it to hasmap for background threads
+                            eventProviders.put(objectInfo, (EventProvider<?>)provider);
+                        }
                     }
                     else
                     {
@@ -236,14 +240,15 @@ public class ProviderFactory
 		logger.debug("Start up delay between providers is: "+delay+" seconds");
 
 		int i = 0;
-		for (BaseProvider provider : eventProviders.values())
+        for (EventProvider<?> provider : eventProviders.values())
 		{	
 			// Create thread in thread pool
 			providerService = Executors.newSingleThreadScheduledExecutor();
 			
 			// Ensure there is 10 seconds between the start of each publisher so that they don't hammer
 			// the system at the same time during startup. Startup thread on thread pool.
-			providerService.schedule(provider, i*delay, TimeUnit.SECONDS);
+//            ScheduledFuture<?> future = providerService.schedule((CoreProvider)provider, i*delay, TimeUnit.SECONDS);
+			providerService.schedule((CoreProvider)provider, i*delay, TimeUnit.SECONDS);
 			i++;
 		}	
 	}

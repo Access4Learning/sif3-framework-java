@@ -20,10 +20,10 @@ package sif3.common.model;
 
 import java.io.Serializable;
 
-import sif3.common.header.HeaderValues.ServiceType;
-import sif3.common.model.ServiceRights.AccessRight;
-import sif3.common.model.ServiceRights.AccessType;
 import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.header.HeaderValues.ServiceType;
+import sif3.common.model.ACL.AccessRight;
+import sif3.common.model.ACL.AccessType;
 
 /**
  * This class is a POJO for service information as provided by the Environment. Each environment has a list of services and each service 

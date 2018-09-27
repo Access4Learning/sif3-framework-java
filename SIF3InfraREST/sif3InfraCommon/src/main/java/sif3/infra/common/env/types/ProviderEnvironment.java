@@ -19,8 +19,10 @@
 package sif3.infra.common.env.types;
 
 import java.net.URI;
+import java.util.HashSet;
 
 import sif3.common.CommonConstants.AuthenticationType;
+import sif3.common.CommonConstants.JobState;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues.UpdateType;
 
@@ -34,6 +36,7 @@ import sif3.common.header.HeaderValues.UpdateType;
 public class ProviderEnvironment extends EnvironmentInfo
 {
     private static final long serialVersionUID = 6469968451023182574L;
+    public static final String JOB_HOUSEKEEPING_CRON = "0 0 2 * * ?"; // once a day at 2am
     
 	private boolean              connected              = false;
 	private String               templateXMLFileName    = null;
@@ -45,6 +48,14 @@ public class ProviderEnvironment extends EnvironmentInfo
 	private String accessTokenAuthMethod = AuthenticationType.Basic.name(); // Default Auth Method if accessToken is used.
 	private boolean              allowAuthOnURL         = false;
 	private HeaderProperties     customResponseHeaders  = new HeaderProperties(); 
+	
+	// Functional Service Properties
+	private boolean              jobEnabled             = false; // default 
+    private HashSet<JobState>    jobEndStates           = new HashSet<JobState>();
+	private int                  jobEventFrequency      = 900; // default is 15 min = 900 seconds
+	private int                  jobEventKeepDays       = 30; // default 30 days
+    private int                  jobKeepDays            = 30; // default 30 days
+	private String               jobHousekeepingCron    = JOB_HOUSEKEEPING_CRON;
 	
     /**
 	 * Constructor
@@ -168,19 +179,6 @@ public class ProviderEnvironment extends EnvironmentInfo
     	this.accessTokenAuthMethod = accessTokenAuthMethod;
     }
 
-//	// authMethod for accessToken: Valid values are what is listed in AuthenticationUtils.AuthenticationMethod (case sensitive!!!)
-//	public void setAccessTokenAuthMethod(String accessTokenAuthMethod)
-//    {
-//		try
-//		{
-//			this.accessTokenAuthMethod = AuthenticationMethod.valueOf(accessTokenAuthMethod);
-//		}
-//		catch (Exception ex)
-//		{
-//			this.accessTokenAuthMethod = AuthenticationMethod.Bearer;
-//		}
-//    }
-	
     public boolean getAllowAuthOnURL()
     {
         return allowAuthOnURL;
@@ -213,20 +211,80 @@ public class ProviderEnvironment extends EnvironmentInfo
             this.customResponseHeaders = customResponseHeaders;
         }
     }
+    
+    public HashSet<JobState> getJobEndStates()
+    {
+        return jobEndStates;
+    }
 
-	@Override
+    public void setJobEndStates(HashSet<JobState> jobEndStates)
+    {
+        this.jobEndStates = jobEndStates;
+    }
+
+
+    public boolean isJobEnabled()
+    {
+        return jobEnabled;
+    }
+
+    public void setJobEnabled(boolean jobEnabled)
+    {
+        this.jobEnabled = jobEnabled;
+    }
+
+    public int getJobEventFrequency()
+    {
+        return jobEventFrequency;
+    }
+
+    public void setJobEventFrequency(int jobEventFrequency)
+    {
+        this.jobEventFrequency = jobEventFrequency;
+    }
+
+    public int getJobKeepDays()
+    {
+        return jobKeepDays;
+    }
+
+    public void setJobKeepDays(int jobKeepDays)
+    {
+        this.jobKeepDays = jobKeepDays;
+    }
+
+    public int getJobEventKeepDays()
+    {
+        return jobEventKeepDays;
+    }
+
+    public void setJobEventKeepDays(int jobEventKeepDays)
+    {
+        this.jobEventKeepDays = jobEventKeepDays;
+    }
+
+    public String getJobHousekeepingCron()
+    {
+        return jobHousekeepingCron;
+    }
+
+    public void setJobHousekeepingCron(String jobHousekeepingCron)
+    {
+        this.jobHousekeepingCron = jobHousekeepingCron;
+    }
+
+    @Override
     public String toString()
     {
-        return "ProviderEnvironment [connected=" + connected
-                + ", templateXMLFileName=" + templateXMLFileName
-                + ", secureConnectorBaseURI=" + secureConnectorBaseURI
-                + ", connectorBaseURI=" + connectorBaseURI
-                + ", eventsSupported=" + eventsSupported
-                + ", defaultUpdateType=" + defaultUpdateType
-                + ", autoCreateEnvironment=" + autoCreateEnvironment
-                + ", accessTokenAuthMethod=" + accessTokenAuthMethod
-                + ", allowAuthOnURL=" + allowAuthOnURL
-                + ", customResponseHeaders=" + customResponseHeaders
-                + ", toString()=" + super.toString() + "]";
+        return "ProviderEnvironment [connected=" + connected + ", templateXMLFileName="
+                + templateXMLFileName + ", secureConnectorBaseURI=" + secureConnectorBaseURI
+                + ", connectorBaseURI=" + connectorBaseURI + ", eventsSupported=" + eventsSupported
+                + ", defaultUpdateType=" + defaultUpdateType + ", autoCreateEnvironment="
+                + autoCreateEnvironment + ", accessTokenAuthMethod=" + accessTokenAuthMethod
+                + ", allowAuthOnURL=" + allowAuthOnURL + ", customResponseHeaders="
+                + customResponseHeaders + ", jobEnabled=" + jobEnabled + ", jobEndStates="
+                + jobEndStates + ", jobEventFrequency=" + jobEventFrequency + ", jobEventKeepDays="
+                + jobEventKeepDays + ", jobKeepDays=" + jobKeepDays + ", jobHousekeepingCron="
+                + jobHousekeepingCron + ", toString()=" + super.toString() + "]";
     }
 }

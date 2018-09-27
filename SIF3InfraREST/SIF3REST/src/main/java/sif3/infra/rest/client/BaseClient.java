@@ -21,6 +21,7 @@ package sif3.infra.rest.client;
 import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -48,11 +49,14 @@ import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues;
 import sif3.common.header.HeaderValues.MessageType;
 import sif3.common.header.HeaderValues.RequestType;
+import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.model.AuthenticationInfo;
+import sif3.common.model.PagingInfo;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.ServiceInfo;
 import sif3.common.model.URLQueryParameter;
 import sif3.common.model.delayed.DelayedRequestReceipt;
 import sif3.common.model.security.TokenCoreInfo;
@@ -63,8 +67,12 @@ import sif3.common.security.AbstractSecurityService;
 import sif3.common.security.SecurityServiceFactory;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.BaseResponse;
+import sif3.common.ws.BulkOperationResponse;
+import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
+import sif3.common.ws.OperationStatus;
 import sif3.common.ws.Response;
+import sif3.common.ws.model.MultiOperationStatusList;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.env.types.EnvironmentInfo;
@@ -317,34 +325,79 @@ public abstract class BaseClient
 	/*-----------------------*/
 	protected WebResource buildURI(WebResource svc, String relURI, String resourceID, SIFZone zone, SIFContext ctx, URLQueryParameter urlQueryParams)
 	{
-		UriBuilder uriBuilder = svc.getUriBuilder();
-		if (StringUtils.notEmpty(relURI))
-		{
-			uriBuilder.path(relURI);
-		}
-		if (StringUtils.notEmpty(resourceID))
-		{
-			uriBuilder.path(resourceID);
-		}
-		if ((zone != null) && (StringUtils.notEmpty(zone.getId())))
-		{
-			uriBuilder.matrixParam("zoneId", zone.getId());
-		}
-		if ((ctx != null) && (StringUtils.notEmpty(ctx.getId())))
-		{
-			uriBuilder.matrixParam("contextId", ctx.getId());
-		}
-		
-		//Add custom URL Query Parameters.
-		if ((urlQueryParams != null) && (urlQueryParams.getQueryParams() != null))
-		{
-			for (String paramName : urlQueryParams.getQueryParams().keySet())
-			{
-				uriBuilder = uriBuilder.queryParam(paramName, urlQueryParams.getQueryParam(paramName));
-			}
-		}
+	    return buildURI(svc, zone, ctx, urlQueryParams, relURI, resourceID);
+//		UriBuilder uriBuilder = svc.getUriBuilder();
+//		if (StringUtils.notEmpty(relURI))
+//		{
+//			uriBuilder.path(relURI);
+//		}
+//		if (StringUtils.notEmpty(resourceID))
+//		{
+//			uriBuilder.path(resourceID);
+//		}
+//		if ((zone != null) && (StringUtils.notEmpty(zone.getId())))
+//		{
+//			uriBuilder.matrixParam("zoneId", zone.getId());
+//		}
+//		if ((ctx != null) && (StringUtils.notEmpty(ctx.getId())))
+//		{
+//			uriBuilder.matrixParam("contextId", ctx.getId());
+//		}
+//		
+//		//Add custom URL Query Parameters.
+//		if ((urlQueryParams != null) && (urlQueryParams.getQueryParams() != null))
+//		{
+//			for (String paramName : urlQueryParams.getQueryParams().keySet())
+//			{
+//				uriBuilder = uriBuilder.queryParam(paramName, urlQueryParams.getQueryParam(paramName));
+//			}
+//		}
+//
+//		return svc.uri(uriBuilder.build());
+	}
 
-		return svc.uri(uriBuilder.build());
+	protected WebResource buildURI(WebResource svc, SIFZone zone, SIFContext ctx, URLQueryParameter urlQueryParams, String... uriSegments)
+    {
+        UriBuilder uriBuilder = svc.getUriBuilder();
+        addPathSegments(uriBuilder, uriSegments);
+        if ((zone != null) && (StringUtils.notEmpty(zone.getId())))
+        {
+            uriBuilder.matrixParam("zoneId", zone.getId());
+        }
+        if ((ctx != null) && (StringUtils.notEmpty(ctx.getId())))
+        {
+            uriBuilder.matrixParam("contextId", ctx.getId());
+        }
+        
+        //Add custom URL Query Parameters.
+        if ((urlQueryParams != null) && (urlQueryParams.getQueryParams() != null))
+        {
+            for (String paramName : urlQueryParams.getQueryParams().keySet())
+            {
+                uriBuilder = uriBuilder.queryParam(paramName, urlQueryParams.getQueryParam(paramName));
+            }
+        }
+
+        return svc.uri(uriBuilder.build());
+    }
+	
+	/**
+	 * This method will add each element of the segments list to the URI. If a segment is null or empty it will be ignored.
+	 * After this call the uriBuilder will contain the full path of the URI made of all the segments.
+	 * 
+     * @param uriBuilder The uriBuilder to be built up with the segments.
+	 * @param segments The segments to be added to the URI.
+	 * 
+	 */
+	protected void addPathSegments(UriBuilder uriBuilder, String... segments)
+	{
+	    for (String segment : segments)
+	    {
+	        if (StringUtils.notEmpty(segment))
+	        {
+	            uriBuilder.path(segment);
+	        }
+	    }
 	}
 
 	protected WebResource buildURI(WebResource svc, String relURI)
@@ -352,12 +405,133 @@ public abstract class BaseClient
 		return buildURI(svc, relURI, null, null, null, null);
 	}
 		
-	
+
+    /**
+     * This method will set the valid/accepted media type for this service. It will then add all header properties given to this
+     * method to the service. Further will also add some "default" header properties such MessageID, timestamp if it is not set yet, and
+     * if required a request ID. For it to be a valid SIF3 service it is expected that the authentication token is already part
+     * of the given header properties. It WON'T be added as part of this method. It is expected that the request and response 
+     * mime type parameters are in its correct form. They will not be modified as used as given (i.e. no character encoding
+     * will be added). If they are null though then the framework's request and response mime type will be used as set 
+     * in consumer properties file. It will also add any character encoding information to the mime types as set by the framework's 
+     * consumer properties file.
+     * 
+     * @param service The service to which media type and header properties shall be added.
+     * @param requestMediaType The mime type of the request. If it is not provided it will default to the
+     *                         internally determined value given by the getRequestMediaType() method and potential 
+     *                         character encoding might be added. 
+     * @param responseMediaType The mime type of the response. If it is not provided it will default to the
+     *                          internally determined value given by the getResponseMediaType() method and potential 
+     *                          character encoding might be added.
+     * @param hdrProperties A set of defined header properties. Should really hold the authentication related properties!
+     * @param requestType The request type to be set in the HTTP headers.
+     * @param includeRequestID TRUE: Add a generated request ID header property
+     * @param includeFingerprint TRUE: Fingerprint will be retrieved from current session. Note for a provider this will be
+     *                                 the provider's fingerprint! This is generally not desired for events. In this case
+     *                                 this parameter should be set to FALSE.
+     *                           FALSE: Fingerprint from the current session will not be added to the HTTP headers.
+     * @hasPayload TRUE: The request will contain a payload. Required for compression header settings
+     *             FALSE: The request is payload free.
+     * 
+     * @return A builder class on which a HTTP operation can be invoked on.
+     */
+	protected Builder setRequestHeaderAndMediaTypes(WebResource service,
+	                                                MediaType requestMediaType,
+	                                                MediaType responseMediaType,
+	                                                HeaderProperties hdrProperties, 
+	                                                RequestType requestType, 
+	                                                boolean includeRequestID, 
+	                                                boolean includeFingerprint, 
+	                                                boolean hasPayload)
+	{
+        String charEncoding = getClientEnvMgr().getEnvironmentInfo().getCharsetEncoding();
+        
+        // Check if we have a request & response media type. If not use the framework's value otherwise use the value given.
+        MediaType finalRequestMediaType = requestMediaType == null ? addEncoding(getRequestMediaType(), charEncoding) : requestMediaType;
+        MediaType finalResponseMediaType = responseMediaType == null ? addEncoding(getResponseMediaType(), charEncoding) : responseMediaType;
+        
+        Builder builder = service.type(finalRequestMediaType).accept(finalResponseMediaType);
+        
+        // Set some specific SIF HTTP header. First ensure that we have a valid header property structure
+        if (hdrProperties == null)
+        {
+            hdrProperties = new HeaderProperties();
+        }
+        
+        // Always set the requestId and messageId.
+        hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_MESSAGE_ID, UUIDGenerator.getUUID());
+        //builder = builder.header(RequestHeaderConstants.HDR_MESSAGE_ID, UUIDGenerator.getUUID());
+        
+        // Set the request type.
+        hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE, ((requestType == null) ? RequestType.IMMEDIATE.name() : requestType.name()));
+        
+        // Add fingerprint to HTTP Header if it is known and not yet set. Note for events this value might already be set, so we
+        // should not override it! This should be indicated with the includeFingerprint parameter that would be set to false!
+        if (includeFingerprint)
+        {
+            if (hdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_FINGERPRINT) == null)
+            {
+                if ((getClientEnvMgr().getSIF3Session() != null) && (getClientEnvMgr().getSIF3Session().getFingerprint() != null))
+                {
+                    hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_FINGERPRINT, getClientEnvMgr().getSIF3Session().getFingerprint());
+                }
+            }
+        }
+        
+        // Sometimes the request ID is not required (i.e. events)
+        if (includeRequestID)
+        {
+            hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_ID, UUIDGenerator.getUUID());
+         }
+        
+        // timestamp header must be set but only if it is not set, yet. If the authentication method is SIF_HMACSHA256
+        // then this property should already be set! Don't override because it is critical to the hash of the authentication token. 
+        if (hdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME) == null) // not set yet
+        {
+            hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME, DateUtils.nowAsISO8601());
+        }
+        
+        // Compression related headers
+        if (getUseCompression())
+        {
+            // Request encoding
+            if (hasPayload)
+            {
+                hdrProperties.setHeaderProperty(HttpHeaders.CONTENT_ENCODING, HeaderValues.EncodingType.gzip.name());
+            }
+            
+            //Accepted encodings for response
+            hdrProperties.setHeaderProperty(HttpHeaders.ACCEPT_ENCODING, HeaderValues.ACCEPT_ENCODING_ALL); 
+        }
+
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Final set of HTTP Headers to be used in request: "+hdrProperties);
+        }
+        
+        if ((hdrProperties != null) && (hdrProperties.getHeaderProperties() != null) && (!hdrProperties.getHeaderProperties().isEmpty()))
+        {
+            HashMap<String, String> hdrMap = hdrProperties.getHeaderProperties();
+            for (String hdrPropertyName : hdrMap.keySet())
+            {
+                String hdrPropertyValue = hdrMap.get(hdrPropertyName);
+                if (StringUtils.notEmpty(hdrPropertyValue))
+                {
+                    builder = builder.header(hdrPropertyName, hdrPropertyValue);
+                }
+            }
+        }
+
+        return builder;
+	}
+
 	/**
 	 * This method will set the valid/accepted media type for this service. It will then add all header properties given to this
 	 * method to the service. Further will also add some "default" header properties such MessageID, timestamp if it is not set yet, and
 	 * if required a request ID. For it to be a valid SIF3 service it is expected that the authentication token is already part
-	 * of the given header properties. It WON'T be added as part of this method.
+	 * of the given header properties. It WON'T be added as part of this method. It will use the request and response mime type
+	 * as set by the framework's consumer properties file. It will also add any character encoding information to the mime types as
+	 * set by the framework's consumer properties file.
 	 * 
 	 * @param service The service to which media type and header properties shall be added.
 	 * @param hdrProperties A set of defined header properties. Should really hold the authentication related properties!
@@ -374,82 +548,7 @@ public abstract class BaseClient
 	 */
 	protected Builder setRequestHeaderAndMediaTypes(WebResource service, HeaderProperties hdrProperties, RequestType requestType, boolean includeRequestID, boolean includeFingerprint, boolean hasPayload)
 	{
-	    String charEncoding = getClientEnvMgr().getEnvironmentInfo().getCharsetEncoding();
-		Builder builder = service.type(addEncoding(getRequestMediaType(), charEncoding)).accept(addEncoding(getResponseMediaType(), charEncoding));
-		
-		// Set some specific SIF HTTP header. First ensure that we have a valid header property structure
-		if (hdrProperties == null)
-		{
-			hdrProperties = new HeaderProperties();
-		}
-		
-		// Always set the requestId and messageId.
-		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_MESSAGE_ID, UUIDGenerator.getUUID());
-		//builder = builder.header(RequestHeaderConstants.HDR_MESSAGE_ID, UUIDGenerator.getUUID());
-		
-		// Set the request type.
-		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_TYPE, ((requestType == null) ? RequestType.IMMEDIATE.name() : requestType.name()));
-		
-		// Add fingerprint to HTTP Header if it is known and not yet set. Note for events this value might already be set, so we
-		// should not override it! This should be indicated with the includeFingerprint parameter that would be set to false!
-		if (includeFingerprint)
-		{
-    		if (hdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_FINGERPRINT) == null)
-    		{
-        		if ((getClientEnvMgr().getSIF3Session() != null) && (getClientEnvMgr().getSIF3Session().getFingerprint() != null))
-        		{
-        		    hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_FINGERPRINT, getClientEnvMgr().getSIF3Session().getFingerprint());
-        		}
-    		}
-		}
-		
-		// Sometimes the request ID is not required (i.e. events)
-		if (includeRequestID)
-		{
-			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_REQUEST_ID, UUIDGenerator.getUUID());
-			//builder = builder.header(RequestHeaderConstants.HDR_REQUEST_ID, UUIDGenerator.getUUID());
-		}
-		
-		// timestamp header must be set but only if it is not set, yet. If the authentication method is SIF_HMACSHA256
-		// then this property should already be set! Don't override because it is critical to the hash of the authentication token. 
-		if (hdrProperties.getHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME) == null) // not set yet
-		{
-			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_DATE_TIME, DateUtils.nowAsISO8601());
-			//builder = builder.header(RequestHeaderConstants.HDR_DATE_TIME, DateUtils.nowAsISO8601());
-		}
-		
-		// Compression related headers
-		if (getUseCompression())
-		{
-			// Request encoding
-			if (hasPayload)
-			{
-				hdrProperties.setHeaderProperty(HttpHeaders.CONTENT_ENCODING, HeaderValues.EncodingType.gzip.name());
-			}
-			
-			//Accepted encodings for response
-			hdrProperties.setHeaderProperty(HttpHeaders.ACCEPT_ENCODING, HeaderValues.ACCEPT_ENCODING_ALL);	
-		}
-
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("Final set of HTTP Headers to be used in request: "+hdrProperties);
-		}
-		
-		if ((hdrProperties != null) && (hdrProperties.getHeaderProperties() != null) && (!hdrProperties.getHeaderProperties().isEmpty()))
-		{
-			HashMap<String, String> hdrMap = hdrProperties.getHeaderProperties();
-			for (String hdrPropertyName : hdrMap.keySet())
-			{
-				String hdrPropertyValue = hdrMap.get(hdrPropertyName);
-				if (StringUtils.notEmpty(hdrPropertyValue))
-				{
-					builder = builder.header(hdrPropertyName, hdrPropertyValue);
-				}
-			}
-		}
-
-		return builder;
+	    return setRequestHeaderAndMediaTypes(service, null, null, hdrProperties, requestType, includeRequestID, includeFingerprint, hasPayload);
 	}	
 	
 	/**
@@ -484,6 +583,27 @@ public abstract class BaseClient
 
 		return hdrProps;
 	}
+	
+	/**
+     * This method will add the authentication header properties to the given set of header properties. The final set of header
+     * properties is then returned.
+     * 
+     * @hdrProperties A set of header properties to which the authentication header shall be added. If it is null then a new set of header porperties
+     *                will be returned that only holds the authentication header values.
+     */
+    protected HeaderProperties addAuthenticationHdrProps(HeaderProperties hdrProperties)
+    {
+        if (hdrProperties == null)
+        {
+            hdrProperties = new HeaderProperties();
+        }
+        
+        // Add Authentication info to existing header properties
+        hdrProperties.addHeaderProperties(createAuthenticationHdr(false, null));
+        
+        return hdrProperties;
+    }
+
 
 	protected HeaderProperties extractHeaderInfo(ClientResponse clientResponse)
 	{
@@ -497,6 +617,41 @@ public abstract class BaseClient
 				
 		return hdrProps;
 	}
+	
+	protected void addPagingInfoToHeaders(PagingInfo pagingInfo, HeaderProperties hdrProperties)
+    {   
+        if (pagingInfo != null)
+        {
+            Map<String, String> queryParameters = pagingInfo.getRequestValues();
+            for (String key : queryParameters.keySet())
+            {
+              hdrProperties.setHeaderProperty(key, queryParameters.get(key));
+            }
+        }
+    }
+    
+	protected void addDelayedInfo(HeaderProperties hdrProperties, SIFZone zone, SIFContext context, String serviceName, ServiceType serviceType, RequestType requestType)
+    {
+        if (requestType == RequestType.DELAYED)
+        {
+            ServiceInfo serviceInfo = getSIF3Session().getServiceInfoForService(zone, context, serviceName, serviceType);
+            if (serviceInfo != null)
+            {
+                if ((serviceInfo.getRemoteQueueInfo() != null) && (serviceInfo.getRemoteQueueInfo().getQueueID() != null))
+                {
+                    hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_QUEUE_ID, serviceInfo.getRemoteQueueInfo().getQueueID());
+                }
+                else // should not be the case if all is called properly but you never know...
+                {
+                    logger.error("No SIF Queue configured environment with Service Name = "+serviceName+", Service Type = "+serviceType+", Zone = "+zone.getId()+" and Context = "+context.getId());
+                }
+            }
+            else // should not be the case if all is called properly but you never know... 
+            {
+                logger.error("No valid service listed in environment ACL for Service Name = "+serviceName+", Service Type = "+serviceType+", Zone = "+zone.getId()+" and Context = "+context.getId());
+            }
+        }
+    }
 	
 	/*
      * Convenience method for calls that do not support DELAYED request/responses.
@@ -573,6 +728,64 @@ public abstract class BaseClient
 		}
 		return response;
 	}
+	
+	protected BulkOperationResponse<CreateOperationStatus> setCreateBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
+    {
+        BulkOperationResponse<CreateOperationStatus> response = new BulkOperationResponse<CreateOperationStatus>();
+        setBaseResponseData(response, clientResponse, requestHeaders, zone, context, true, requestType, service.getURI().toString());
+        if ((clientResponse.getStatusInfo().getStatusCode() == Status.OK.getStatusCode()) || 
+            (clientResponse.getStatusInfo().getStatusCode() == Status.CREATED.getStatusCode()) ||
+            (clientResponse.getStatusInfo().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
+            (clientResponse.getStatusInfo().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
+        {
+            if (response.getHasEntity())
+            {
+                String payload = clientResponse.getEntity(String.class);
+                MultiOperationStatusList<CreateOperationStatus> statusList = getInfraMapper().toStatusListFromSIFCreateString(payload, getResponseMediaType());
+                response.setError(statusList.getError());
+                response.setOperationStatuses(statusList.getOperationStatuses());
+            }           
+        }
+        else// We are dealing with an error case.
+        {
+            setErrorResponse(response, clientResponse);
+        }
+        
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Response from REST Call:\n"+response);
+        }
+        return response;
+    }
+
+	protected BulkOperationResponse<OperationStatus> setDeleteBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
+    {
+        BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
+        setBaseResponseData(response, clientResponse, requestHeaders, zone, context, true, requestType, service.getURI().toString());
+        if ((clientResponse.getStatusInfo().getStatusCode() == Status.OK.getStatusCode()) || 
+            (clientResponse.getStatusInfo().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
+            (clientResponse.getStatusInfo().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
+        {
+            if (response.getHasEntity())
+            {
+                String payload = clientResponse.getEntity(String.class);
+                MultiOperationStatusList<OperationStatus> statusList = getInfraMapper().toStatusListFromSIFDeleteString(payload, getResponseMediaType());
+                response.setError(statusList.getError());
+                response.setOperationStatuses(statusList.getOperationStatuses());
+                
+            }           
+        }
+        else// We are dealing with an error case.
+        {
+            setErrorResponse(response, clientResponse);
+        }
+        
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Response from REST Call:\n"+response);
+        }
+        return response;
+    }
 
 	/*
 	 * This method cannot set the serviceName and serviceType in the Delayed Response Receipt property. It must be set by the caller of this method as this

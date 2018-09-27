@@ -1,0 +1,53 @@
+<job xmlns="http://www.sifassociation.org/infrastructure/3.2.1">
+	<name>rolloverStudent</name>
+	<description>Rollover Student from year X to year Y</description>
+	<state>NOTSTARTED</state>
+	<stateDescription>Not Started</stateDescription>
+	<!-- created></created -->
+	<!-- lastModified></lastModified -->
+	<timeout>P30D</timeout> <!-- Period = 30 Days -->
+	<phases>
+		<phase>
+			<name>oldYearEnrolment</name>
+			<states>
+				<state> 
+					<type>NOTSTARTED</type>
+					<!-- 
+					<created>2016-03-09T09:00:00</created>
+					<lastModified>2016-03-09T09:00:01</lastModified>
+					<description>Not yet started</description>
+					 -->
+				</state>
+			</states>
+			<required>true</required>
+			<rights>
+				<right type="UPDATE">APPROVED</right> <!-- update existing enrolment => end-date it -->
+			</rights>
+			<statesRights>
+			    <right type="QUERY">APPROVED</right>
+				<right type="CREATE">APPROVED</right>
+			</statesRights>
+		</phase>
+		<phase>
+			<name>newYearEnrolment</name>
+			<states>
+				<state>
+					<type>NOTSTARTED</type>
+					<!-- 
+					<created>2016-03-09T09:00:02</created>
+					<lastModified>2016-03-09T09:59:58</lastModified>
+					<description>Not yet started</description>
+					 -->
+				</state>
+			</states>
+			<required>true</required>
+			<rights>
+				<right type="CREATE">APPROVED</right> <!-- create new enrolment -->
+			</rights>
+			<statesRights>
+			    <right type="QUERY">APPROVED</right>
+				<right type="CREATE">APPROVED</right>
+			</statesRights>
+		</phase>
+	</phases>
+</job>
