@@ -28,12 +28,12 @@ import sif3.infra.rest.consumer.ConsumerLoader;
 public class TestConsumerLoader
 {
 	// Local
-//	private static final String CONSUMER_ID = "StudentConsumer";
+	private static final String CONSUMER_ID = "StudentConsumer";
 //    private static final String CONSUMER_ID = "RicOneConsumer";
 
 	// Broker
 //	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
-	private static final String CONSUMER_ID = "QueueTestConsumer";
+//	private static final String CONSUMER_ID = "QueueTestConsumer";
 
 	
 	  public void stopService(String serviceID)
