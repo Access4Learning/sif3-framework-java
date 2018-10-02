@@ -1,0 +1,56 @@
+==============================================================
+Release Notes for v0.14.0 of SIF3 Framework (MMM DD, 2018)
+==============================================================
+
+Bug Fixes
+---------
+None
+
+New Functionality
+-----------------
+None
+
+Changed Functionality
+---------------------
+None
+
+Removed Artifacts/Functionality
+-------------------------------
+None
+
+
+==========================
+-- Upgrade Instructions --
+==========================
+
+****************************************************************************************************
+* AS OF THIS VERSION ALL FRAMEWORK LIBRARIES ARE COMPILED WITH JAVA 8. THE FRAMEWORK MAY NO LONGER *
+* SUPPORT OR RUN ON ENVIRONMENTS WITH JAVA VERSIONS OLDER THAN JAVA 8.                             *
+****************************************************************************************************
+
+Infrastructure Upgrade 
+----------------------
+None
+
+Upgrade your Project
+--------------------
+Once the above steps are done you can upgrade your project with the latest libraries of the framework as stated below:
+
+Ant:
+Drop the latest framework library into your project's lib directory/directories. 
+
+Maven:
+Use the latest maven dependency
+<dependency>
+   <groupId>sif3.framework</groupId>
+   <artifactId>sif3-infra-rest</artifactId>
+   <version>0.14.0</version>
+</dependency>
+
+Data Model Upgrade
+------------------
+None.
+
+3rd Party Library Update
+------------------------
+None.
