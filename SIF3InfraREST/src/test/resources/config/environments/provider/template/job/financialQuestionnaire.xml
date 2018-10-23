@@ -1,0 +1,72 @@
+<job xmlns="http://www.sifassociation.org/infrastructure/3.2.1">
+	<name>FinancialQuestionnaire</name>
+	<description>Workflow for AG Financial Questionnaire</description>
+	<state>NOTSTARTED</state>
+	<stateDescription>Not Started</stateDescription>
+	<timeout>P30D</timeout> <!-- Period = 30 Days -->
+	<phases>
+		<phase>
+			<name>submitFQ</name>
+			<states>
+				<state> 
+					<type>NOTSTARTED</type>
+				</state>
+			</states>
+			<required>true</required>
+			<rights>
+				<right type="CREATE">APPROVED</right>
+			</rights>
+			<statesRights>
+			    <right type="QUERY">APPROVED</right>
+				<right type="CREATE">APPROVED</right>
+			</statesRights>
+		</phase>
+		<phase>
+			<name>validation</name>
+			<states>
+				<state> 
+					<type>NOTSTARTED</type>
+				</state>
+			</states>
+			<required>true</required>
+			<rights>
+				<right type="QUERY">APPROVED</right>
+			</rights>
+			<statesRights>
+			    <right type="QUERY">APPROVED</right>
+			</statesRights>
+		</phase>
+		<phase>
+			<name>retriveStatusReport</name>
+			<states>
+				<state>
+					<type>NOTSTARTED</type>
+				</state>
+			</states>
+			<required>true</required>
+			<rights>
+				<right type="QUERY">APPROVED</right>
+			</rights>
+			<statesRights>
+			    <right type="QUERY">APPROVED</right>
+				<right type="CREATE">APPROVED</right>
+			</statesRights>
+		</phase>
+		<phase>
+			<name>submitDeclaration</name>
+			<states>
+				<state>
+					<type>NOTSTARTED</type>
+				</state>
+			</states>
+			<required>true</required>
+			<rights>
+				<right type="CREATE">APPROVED</right>
+			</rights>
+			<statesRights>
+			    <right type="QUERY">APPROVED</right>
+				<right type="CREATE">APPROVED</right>
+			</statesRights>
+		</phase>
+	</phases>
+</job>
