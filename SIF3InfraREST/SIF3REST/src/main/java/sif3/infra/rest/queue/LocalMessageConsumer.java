@@ -306,15 +306,30 @@ public class LocalMessageConsumer implements Runnable
         	{
         	    Object payloadObject = null;
         	    
-                if (responseInfo.getServiceType() == ServiceType.FUNCTIONAL) 
+                switch (responseInfo.getServiceType())
                 {
-                    payloadObject = makeFunctionalServiceObject(responseInfo.getPayload(), responseInfo.getMediaType(), isPhaseObject, false);
+                    case OBJECT: // no code here as it is the same as the SERVICEPATH below!
+                    case SERVICEPATH:
+                    {
+                        payloadObject = makeDataModelObject(minimalConsumer, responseInfo.getPayload(), responseInfo.getMediaType());
+                        break;
+                    }
+                    case FUNCTIONAL:
+                    {
+                        payloadObject = makeFunctionalServiceObject(responseInfo.getPayload(), responseInfo.getMediaType(), isPhaseObject, false);
+                        break;
+                    }
+                    case XQUERYTEMPLATE:
+                    {
+                        // Payload must remain a string. So there is no action required for this service type!
+                        break;
+                    }
+                    default:
+                    {
+                        logger.error("Received a Query Response for a Servic Type ("+responseInfo.getServiceType()+") that is not yet supported with this framework. Ignore message:\n"+responseInfo);
+                    }
                 }
-                else
-                {
-                    payloadObject = makeDataModelObject(minimalConsumer, responseInfo.getPayload(), responseInfo.getMediaType());
-                }
-
+        	    
         	    if (payloadObject instanceof ErrorDetails)
         	    {
         	        // Something is not good at all. We send the error to the consumer.
@@ -336,6 +351,11 @@ public class LocalMessageConsumer implements Runnable
         			    delayedConsumer.onServicePath(payloadObject, new QueryCriteria(responseInfo.getUrlService()), paging, delayedReceipt);
         				break;
         			}
+                    case XQUERYTEMPLATE:
+                    {
+                        delayedConsumer.onQuery(payloadObject, paging, delayedReceipt);
+                        break;
+                    }
         			case FUNCTIONAL:
         			{
                         if (!isPhaseObject)

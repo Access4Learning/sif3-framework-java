@@ -339,7 +339,7 @@ public class RemoteMessageQueueReader implements Runnable
 			{
 				logger.info("Received a DELAYED Response for which there is no consumer registered. Discard the following RESPONSE:\n" + response);
 			}
-			else // Create event object and send it to eventConsumer
+			else // Create message object and send it to blocking queue
 			{
 				logger.debug(getReaderID()+": Attempts to push DELAYED Response to local queue...");
 				localQueue.blockingPush(responseInfo);
