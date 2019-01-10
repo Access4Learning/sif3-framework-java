@@ -57,7 +57,6 @@ import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.interfaces.ChangesSinceProvider;
-import sif3.common.interfaces.Provider;
 import sif3.common.model.ACL.AccessRight;
 import sif3.common.model.ACL.AccessType;
 import sif3.common.model.AuthenticationInfo;
@@ -99,6 +98,7 @@ import sif3.infra.common.model.ProductIdentityType;
 import sif3.infra.common.model.UpdateResponseType;
 import sif3.infra.common.model.UpdateType;
 import sif3.infra.common.model.UpdatesType;
+import sif3.infra.rest.provider.CoreProvider;
 import sif3.infra.rest.resource.audit.AuditableResource;
 
 /**
@@ -145,8 +145,9 @@ public abstract class BaseResource
 	private MediaType responseMediaType = null;
 	private MediaType urlPostfixMimeType = null;
 	private AbstractSecurityService securityService = null;
+	private ServiceType serviceType = null;
 	
-	public abstract EnvironmentManager getEnvironmentManager();
+    public abstract EnvironmentManager getEnvironmentManager();
 
 	/**
 	 * The marshaller of the data model. The BaseResource class needs access in various places to the data model's marshaller functions.
@@ -196,6 +197,21 @@ public abstract class BaseResource
 	    {
 	      setSifContext(new SIFContext(contextID));
 	    }
+	    
+	    // Extract serviceType from HTTP header. Pure convenience for the getServiceType() method.
+	    try
+	    {
+	        String serviceTypeStr = getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE);
+	        if (StringUtils.notEmpty(serviceTypeStr))
+	        {
+	            serviceType = ServiceType.valueOf(serviceTypeStr.trim().toUpperCase());
+	        }
+	    }
+	    catch (IllegalArgumentException ex)
+	    {
+	        logger.warn("An unknown vale for the HTTP Header 'serviceType' was provided. Valid values are: "+StringUtils.getNamesForEnum(ServiceType.class));
+	    }
+	    
 	    if (getAuthInfo() == null)
 	    {
 	    	logger.error("No authetication information found.");
@@ -222,6 +238,7 @@ public abstract class BaseResource
 			logger.debug("URL Query Params   : " + getQueryParameters());
 			logger.debug("Zone ID            : " + getSifZone());
 			logger.debug("ContextID          : " + getSifContext());
+            logger.debug("Service Type       : " + getServiceType());
 			logger.debug("Security Service   : " + ((getSecurityService() == null) ? null : getSecurityService().getClass().getSimpleName()));
 			logger.debug("Resource Init ok   : " + allOK);
 		}
@@ -280,7 +297,23 @@ public abstract class BaseResource
     	return this.allHTTPHdrProperties;
     }
 
-	/*
+	/**
+	 * Returns the serviceType as given in the HTTP Header serviceType. This is a convenience method. If the service
+	 * type is not set (eg. infrastructure services, utility services) then null is returned.
+	 * 
+	 * @return
+	 */
+    public ServiceType getServiceType()
+    {
+        return serviceType;
+    }
+
+	public void setServiceType(ServiceType serviceType)
+    {
+        this.serviceType = serviceType;
+    }
+
+    /*
 	 * If the request media type is not set it will try to get the media type from the URL Postfix. If that is not set either then XML is returned
 	 */
 	public MediaType getRequestMediaType()
@@ -714,7 +747,7 @@ public abstract class BaseResource
      * If the given provider implements the ChangesSinceProvider then a casted provider is returned otherwise
      * null is returned.
      */
-    protected ChangesSinceProvider getChangesSinceProvider(Provider provider)
+    protected ChangesSinceProvider getChangesSinceProvider(CoreProvider provider)
     {
         if (ChangesSinceProvider.class.isAssignableFrom(provider.getClass()))
         {
@@ -894,7 +927,7 @@ public abstract class BaseResource
 	{
 		if ((getAuthInfo().getSecurityServiceInfo() == null) || StringUtils.isEmpty(getAuthInfo().getSecurityServiceInfo().getAuthenticationMethod()))
 		{
-			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No Authentication Method set.", "Choose between Basic, SIF_HMACSHA256 or External Security as Authentication Method. Refer to SIF3 Specification for details.");
+			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No Authentication Method set. Choose between Basic, SIF_HMACSHA256 or External Security as Authentication Method. Refer to SIF3 Specification for details.", "Provider side check.");
 		}
 
 		if (getAuthInfo().getSecurityServiceInfo().getAuthenticationType() == AuthenticationType.Other)
@@ -1331,10 +1364,10 @@ public abstract class BaseResource
 		
 		requestMediaType = validateAndExtractMimeType(unmarshaller, requestMediaType, urlPostfixMimeType, useDefaults);
 
-		// set it to the value of the request if it is not set or wildcard
+		// set it to the value of the request if it is not set or wildcard. If request is not set (eg. for HTTP GET) use default of XML
 		if ((responseMediaType == null) || (responseMediaType.isWildcardType()))
 		{
-			responseMediaType = requestMediaType;
+			responseMediaType = requestMediaType == null ? MediaType.APPLICATION_XML_TYPE : requestMediaType;
 		}
 
 		responseMediaType = validateAndExtractMimeType(marshaller, responseMediaType, urlPostfixMimeType, useDefaults);
