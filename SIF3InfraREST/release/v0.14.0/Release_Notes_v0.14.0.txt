@@ -1,14 +1,21 @@
 ==============================================================
-Release Notes for v0.14.0 of SIF3 Framework (MMM DD, 2018)
+Release Notes for v0.14.0 of SIF3 Framework (MMM DD, 2019)
 ==============================================================
+
+****************************************************************************************************
+* AS OF THIS VERSION ALL FRAMEWORK LIBRARIES ARE COMPILED WITH JAVA 8. THE FRAMEWORK MAY NO LONGER *
+* SUPPORT OR RUN ON ENVIRONMENTS WITH JAVA VERSIONS OLDER THAN JAVA 8.                             *
+****************************************************************************************************
 
 Bug Fixes
 ---------
-None
+- Fixed issue where "Local Queue Consumer" threads were started each time a consumer class was instantiated. They are now
+  correctly started at the time the consumer loader class is executed but not when a consumer is initiated.
 
 New Functionality
 -----------------
-None
+- Added Named Query functionality (Consumer & Provider). For details on how to use Named Queries, please refer to section x.x
+  in the Developer's Guide.
 
 Changed Functionality
 ---------------------
@@ -22,11 +29,6 @@ None
 ==========================
 -- Upgrade Instructions --
 ==========================
-
-****************************************************************************************************
-* AS OF THIS VERSION ALL FRAMEWORK LIBRARIES ARE COMPILED WITH JAVA 8. THE FRAMEWORK MAY NO LONGER *
-* SUPPORT OR RUN ON ENVIRONMENTS WITH JAVA VERSIONS OLDER THAN JAVA 8.                             *
-****************************************************************************************************
 
 Infrastructure Upgrade 
 ----------------------
