@@ -490,7 +490,7 @@ public class JobResource extends InfraResource
             logger.debug("Update Single Job "+getJobNamePlural()+" (REST PUT) for Job with ID = "+jobID+", URL Postfix mimeType = "+mimeType+"' and input data: " + payload);
         }
         
-        ErrorDetails error = new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "The Job Object cannot be updated.", "Use updates to Phases or Status of a Job instead.");
+        ErrorDetails error = new ErrorDetails(Status.FORBIDDEN.getStatusCode(), "The Job Object cannot be updated.", "Use updates to Phases or Status of a Job instead.");
         return makeErrorResponse(error, ResponseAction.UPDATE, getInitialCustomResponseParameters());
     }
     
@@ -508,7 +508,7 @@ public class JobResource extends InfraResource
             }
             else
             {
-                ErrorDetails error = new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "The Job Objects cannot be updated.", "Use updates to Phases or Status of Job(s) instead.");
+                ErrorDetails error = new ErrorDetails(Status.FORBIDDEN.getStatusCode(), "The Job Objects cannot be updated.", "Use updates to Phases or Status of Job(s) instead.");
                 return makeErrorResponse(error, ResponseAction.UPDATE, getInitialCustomResponseParameters());
             }
         }
