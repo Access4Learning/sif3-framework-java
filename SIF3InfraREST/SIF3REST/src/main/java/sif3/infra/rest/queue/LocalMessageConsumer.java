@@ -36,6 +36,7 @@ import sif3.common.interfaces.MinimalConsumer;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.SIFEvent;
+import sif3.common.model.StringPayload;
 import sif3.common.model.ZoneContextInfo;
 import sif3.common.model.delayed.DelayedResponseReceipt;
 import sif3.common.model.job.PhaseInfo;
@@ -44,6 +45,7 @@ import sif3.common.ws.job.PhaseDataResponse;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.model.JobCollectionType;
 import sif3.infra.rest.consumer.AbstractFunctionalServiceConsumer;
+import sif3.infra.rest.consumer.AbstractNamedQueryConsumer;
 import sif3.infra.rest.mapper.InfraDataModelMapper;
 import sif3.infra.rest.queue.types.DelayedBaseInfo;
 import sif3.infra.rest.queue.types.ErrorInfo;
@@ -353,7 +355,9 @@ public class LocalMessageConsumer implements Runnable
         			}
                     case XQUERYTEMPLATE:
                     {
-                        delayedConsumer.onQuery(payloadObject, paging, delayedReceipt);
+                        AbstractNamedQueryConsumer nqc = (AbstractNamedQueryConsumer)minimalConsumer;
+                        nqc.processDelayedNamedQuery(new StringPayload(responseInfo.getPayload(), responseInfo.getMediaType()), paging, delayedReceipt);
+
                         break;
                     }
         			case FUNCTIONAL:
