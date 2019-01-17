@@ -526,7 +526,7 @@ public class StringUtils
    * "enum1,enum2,..."<br/>
    * The call would be getNamesForEnum(MyEnum.class).
    * 
-   * @param The enum class to convert into a pretty string.
+   * @param enumClass The enum class to convert into a pretty string.
    * 
    * @return See desc.
    */
