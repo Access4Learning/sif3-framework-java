@@ -20,7 +20,10 @@ import systemic.sif3.demo.rest.consumer.namedquery.StudentsInYearConsumer;
 public class TestStudentsInYearConsumer
 {
     private static final String CONSUMER_ID = "StudentConsumer";
+//    private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
+
     private static final RequestType REQUEST_TYPE = RequestType.IMMEDIATE;
+//    private static final RequestType REQUEST_TYPE = RequestType.DELAYED;
 
     private StudentsInYearConsumer getConsumer()
     {
@@ -117,13 +120,13 @@ public class TestStudentsInYearConsumer
             System.out.println("Consumer loaded successfully. Environment Data:\n"+ConsumerEnvironmentManager.getInstance().getEnvironmentInfo());
         
             StudentsInYearConsumer consumer = tester.getConsumer();
-            StudentsInYearConsumer consumer2 = tester.getConsumer();
+//            StudentsInYearConsumer consumer2 = tester.getConsumer();
 
             //
             // Get Students
             //
             tester.getStudentsInYear(consumer);
-            tester.getStudentsInYear(consumer2);
+//            tester.getStudentsInYear(consumer2);
 
             // Put this agent to a blocking wait.....
             if (true)
