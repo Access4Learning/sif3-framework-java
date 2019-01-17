@@ -1,5 +1,5 @@
 ==============================================================
-Release Notes for v0.14.0 of SIF3 Framework (MMM DD, 2019)
+Release Notes for v0.14.0 of SIF3 Framework (Jan 22, 2019)
 ==============================================================
 
 ****************************************************************************************************
@@ -14,7 +14,7 @@ Bug Fixes
 
 New Functionality
 -----------------
-- Added Named Query functionality (Consumer & Provider). For details on how to use Named Queries, please refer to section x.x
+- Added Named Query functionality (Consumer & Provider). For details on how to use Named Queries, please refer to section 5.12
   in the Developer's Guide.
 
 Changed Functionality
