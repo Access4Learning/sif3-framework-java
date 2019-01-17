@@ -301,7 +301,7 @@ public abstract class BaseResource
 	 * Returns the serviceType as given in the HTTP Header serviceType. This is a convenience method. If the service
 	 * type is not set (eg. infrastructure services, utility services) then null is returned.
 	 * 
-	 * @return
+	 * @return The service type as in the HTTP header serviceType. Should default to OBJECT.
 	 */
     public ServiceType getServiceType()
     {
