@@ -265,12 +265,12 @@ public class RemoteMessageQueueReader implements Runnable
         {
             try
             {
-                logger.debug("Message Reader '" + getReaderID() + "' has mini sleep for " + millisecs/1000 + " seconds");
+                logger.debug("Message Reader '" + getReaderID() + "' on queue " + getQueueInfo().getQueue().getName() + " has mini sleep for " + millisecs/1000 + " seconds");
                 semaphore.wait(millisecs);
             }
             catch (InterruptedException ex)
             {
-                logger.debug("Message Reader '" + getReaderID() + "' mini sleep interupted...: " + ex.getMessage());
+                logger.debug("Message Reader '" + getReaderID() + "' on queue " + getQueueInfo().getQueue().getName() + " mini sleep interupted...: " + ex.getMessage());
             }
         }
 	}
