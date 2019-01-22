@@ -17,7 +17,7 @@
 	<!-- =========== -->
 	<groupId>sif3.framework</groupId>
 	<artifactId>sif3-framework</artifactId>
-	<version>0.13.0-beta</version>
+	<version>0.14.0-beta</version>
 	<packaging>pom</packaging>
 	
 	<!-- ===================================== -->
@@ -27,8 +27,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- Set the Java Version compliance -->
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		
 		<!-- Hardcoded Variable for the non-maven library location -->
 		<!--project.lib.dir>C:/DEV/workspaces/jbds10.1.0/sif3-framework/lib</project.lib.dir-->
@@ -61,7 +61,7 @@
 			<dependency>
 				<groupId>sifau</groupId>
 				<artifactId>sif3-au-datamodel</artifactId>
-				<version>3.4.3</version>
+				<version>3.4.4</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -166,11 +166,11 @@
 							<id>install-external-au-datamodel</id>
 							<phase>clean</phase>
 							<configuration>
-								<file>${project.lib.dir}/datamodel/sifDataModel_au3.4.3.jar</file>
+								<file>${project.lib.dir}/datamodel/sifDataModel_au3.4.4.jar</file>
 								<repositoryLayout>default</repositoryLayout>
 								<groupId>sifau</groupId>
 								<artifactId>sif3-au-datamodel</artifactId>
-								<version>3.4.3</version>
+								<version>3.4.4</version>
 								<packaging>jar</packaging>
 								<generatePom>true</generatePom>
 							</configuration>

@@ -265,12 +265,12 @@ public class RemoteMessageQueueReader implements Runnable
         {
             try
             {
-                logger.debug("Message Reader '" + getReaderID() + "' has mini sleep for " + millisecs/1000 + " seconds");
+                logger.debug("Message Reader '" + getReaderID() + "' on queue " + getQueueInfo().getQueue().getName() + " has mini sleep for " + millisecs/1000 + " seconds");
                 semaphore.wait(millisecs);
             }
             catch (InterruptedException ex)
             {
-                logger.debug("Message Reader '" + getReaderID() + "' mini sleep interupted...: " + ex.getMessage());
+                logger.debug("Message Reader '" + getReaderID() + "' on queue " + getQueueInfo().getQueue().getName() + " mini sleep interupted...: " + ex.getMessage());
             }
         }
 	}
@@ -339,7 +339,7 @@ public class RemoteMessageQueueReader implements Runnable
 			{
 				logger.info("Received a DELAYED Response for which there is no consumer registered. Discard the following RESPONSE:\n" + response);
 			}
-			else // Create event object and send it to eventConsumer
+			else // Create message object and send it to blocking queue
 			{
 				logger.debug(getReaderID()+": Attempts to push DELAYED Response to local queue...");
 				localQueue.blockingPush(responseInfo);

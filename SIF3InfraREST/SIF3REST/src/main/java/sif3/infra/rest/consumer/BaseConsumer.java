@@ -112,7 +112,18 @@ public abstract class BaseConsumer implements MinimalConsumer
         
         // Set some properties at this stage for simplicity reasons.
         checkACL = getConsumerEnvironment().getCheckACL();
-        
+    }
+    
+    /*
+     * This method should never be called by an actual consumer. It is purely there fore housekeeping and is only
+     * called by the ComsumerLoader to initialise consumer with internal queues and threads. It is "protected" because it is
+     * called from the ConsumerLoader.
+     * 
+     * This method cannot be part of the constructor otherwise all local queues are created over and over again as the consumer
+     * classes are instantiated by an adapter.
+     */
+    protected void initLocalConsumerQueues()
+    {
         if (getConsumerEnvironment().getEventsEnabled() || getConsumerEnvironment().getDelayedEnabled())
         {
             logger.debug("Events and/or Delayed Responses enabled => start local consumer queue for "+getConsumerName());
@@ -121,8 +132,9 @@ public abstract class BaseConsumer implements MinimalConsumer
         else
         {
             logger.debug("Events AND Delayed Responses are disabled. Local consumer queues and threads are not started.");
-        }       
+        } 
     }
+    
 
     /*-------------------------------*/
     /* Useful 'Housekeeping' methods */

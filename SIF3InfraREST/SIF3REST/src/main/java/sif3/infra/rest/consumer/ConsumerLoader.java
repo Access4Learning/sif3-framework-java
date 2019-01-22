@@ -71,6 +71,7 @@ public class ConsumerLoader
     private List<AbstractEventConsumer<?>> eventConsumers = new ArrayList<AbstractEventConsumer<?>>();
     private List<AbstractConsumer> crudConsumers = new ArrayList<AbstractConsumer>();
     private List<AbstractFunctionalServiceConsumer> fsServiceConsumers = new ArrayList<AbstractFunctionalServiceConsumer>();
+    private List<AbstractNamedQueryConsumer> nqConsumers = new ArrayList<AbstractNamedQueryConsumer>();
   
     private List<QueueReaderInfo<RemoteMessageQueueReader>> msgReaderServices = new ArrayList<QueueReaderInfo<RemoteMessageQueueReader>>();
 
@@ -233,6 +234,12 @@ public class ConsumerLoader
             consumer.finalise();
         }
 
+        for (AbstractNamedQueryConsumer consumer : nqConsumers)
+        {
+            logger.debug("Shutdown " + consumer.getClass().getSimpleName());
+            consumer.finalise();
+        }
+
         if (getConsumerEnvironment().getEventsEnabled() || (getConsumerEnvironment().getDelayedEnabled()))
 		{
     		logger.debug("Shutdown Event Subscription Connector...");
@@ -303,6 +310,11 @@ public class ConsumerLoader
     		}
     		
             for (AbstractFunctionalServiceConsumer consumer : fsServiceConsumers)
+            {
+                addServices(allLocalQueueCRUDServices, consumer.getAllApprovedCRUDServices(), consumer.getLocalConsumerQueue());
+            }
+
+            for (AbstractNamedQueryConsumer consumer : nqConsumers)
             {
                 addServices(allLocalQueueCRUDServices, consumer.getAllApprovedCRUDServices(), consumer.getLocalConsumerQueue());
             }
@@ -400,7 +412,7 @@ public class ConsumerLoader
 		return queueReaderInfo;
 	}
 	
-	private void initialiseConsumers(AdvancedProperties adapterProps)
+    private void initialiseConsumers(AdvancedProperties adapterProps)
 	{
 		List<String> classList = adapterProps.getFromCommaSeparated("consumer.classes");
 		String basePackageName = makePackageName(adapterProps.getPropertyAsString("consumer.basePackageName", ""));
@@ -416,6 +428,9 @@ public class ConsumerLoader
 
 				// Instantiate class.
 				Object classObj = ct.newInstance();
+				
+				// Init local queues. Must be called here as it is not part of the constructor.
+				((BaseConsumer)classObj).initLocalConsumerQueues();
 				
 				// Set properties and add it to correct structure
 				if (classObj instanceof AbstractEventConsumer)
@@ -433,9 +448,14 @@ public class ConsumerLoader
                     logger.debug("Added " + classObj.getClass().getSimpleName() + " to fsServiceConsumers list");
                     fsServiceConsumers.add((AbstractFunctionalServiceConsumer) classObj);
 				}
+                else if (classObj instanceof AbstractNamedQueryConsumer)
+                {
+                    logger.debug("Added " + classObj.getClass().getSimpleName() + " to nqConsumers list");
+                    nqConsumers.add((AbstractNamedQueryConsumer) classObj);
+                }
 				else
 				{
-					logger.error("Consumer class " + className + " doesn't extend AbstractConsumer, AbstractEventConsumer of AbstractFunctionalServiceConsumer. Cannot initialse the Consumer.");
+					logger.error("Consumer class " + className + " doesn't extend AbstractConsumer, AbstractEventConsumer, AbstractFunctionalServiceConsumer or AbstractNamedQueryConsumer. Cannot initialse the Consumer.");
 				}
 			}
 			catch (Exception ex)

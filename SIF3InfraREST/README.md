@@ -25,7 +25,7 @@ Project (note that the version number will change over time):
 <dependency>
    <groupId>sif3.framework</groupId>
    <artifactId>sif3-infra-rest</artifactId>
-   <version>0.13.0</version>
+   <version>0.14.0</version>
 </dependency>
 ```
 
@@ -173,6 +173,16 @@ new framework version.**
   section 5.11.
 
 **Please refer to the detailed release notes in "release/v0.13.0" carefully to ensure that your project is upgraded properly to the new framework version.**
+
+## Version from Jan 22, 2019: v0.14.0 - Various changes
+___
+**AS OF THIS VERSION ALL FRAMEWORK LIBRARIES ARE COMPILED WITH JAVA 8. THE FRAMEWORK MAY NO LONGER SUPPORT OR RUN ON JAVA VERSIONS OLDER THAN JAVA 8.**
+___
+- Updated some test cases to use SIF AU 3.4.4 data model (draft)
+- Added Named Query functionality (Consumer & Provider). For details on how to use Named Queries, please refer to section 5.12
+  in the Developer's Guide.
+
+**Please refer to the detailed release notes in "release/v0.14.0" carefully to ensure that your project is upgraded properly to the new framework version.**
 
 # Download Instructions
 How to download this project:

@@ -18,6 +18,7 @@
 
 package sif3.infra.rest.resource;
 
+import java.util.HashMap;
 import java.util.List;
 
 import javax.ws.rs.DELETE;
@@ -57,7 +58,9 @@ import sif3.common.model.ACL.AccessRight;
 import sif3.common.model.ACL.AccessType;
 import sif3.common.model.ChangedSinceInfo;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.QueryTemplateInfo;
 import sif3.common.model.ResponseParameters;
+import sif3.common.model.StringPayload;
 import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
@@ -65,7 +68,9 @@ import sif3.infra.common.env.mgr.ProviderManagerFactory;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
 import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.rest.provider.BaseProvider;
+import sif3.infra.rest.provider.CoreProvider;
 import sif3.infra.rest.provider.ProviderFactory;
+import sif3.infra.rest.provider.namedquery.BaseNamedQueryProvider;
 import sif3.infra.rest.resource.helper.ServicePathQueryParser;
 
 /**
@@ -89,10 +94,12 @@ import sif3.infra.rest.resource.helper.ServicePathQueryParser;
 public class DataModelResource extends BaseResource
 {
 	private String dmObjectNamePlural = null; // This is also expected to be the key into the provider factory.
-	private Provider provider = null;
+//	private Provider provider = null;
+	private CoreProvider provider = null;
 	private ServicePathQueryParser parser = null;
+	boolean isNamedQuery = false; // assume it is a Object service of not provided.
 
-	/**
+    /**
 	 * Initialises an Object Provider Resource. All the parameters are automatically injected by the Jersey Framework.
 	 * 
 	 * @param uriInfo Extracted from the request.
@@ -113,7 +120,7 @@ public class DataModelResource extends BaseResource
     {
 	    super(uriInfo, requestHeaders, request, "requests", zoneID, contextID);
 
-		parser = new ServicePathQueryParser(uriInfo);
+  		parser = new ServicePathQueryParser(uriInfo);
 		if (parser.isServicePath())
 		{
 			this.dmObjectNamePlural = parser.getObjectNamePlural();
@@ -121,29 +128,51 @@ public class DataModelResource extends BaseResource
 			{
 				logger.debug("ServicePath Request: "+parser);
 			}
+			
+			setServiceType(ServiceType.SERVICEPATH);
 		}
 		else
 		{
 			this.dmObjectNamePlural = objectNamePlural;
+			
+			// We may still have a OBJECT or XQUERYTEMPLATE service.
+			if (getServiceType() == null) // Default to OBJECT
+			{
+			    setServiceType(ServiceType.OBJECT);
+			}
 		}
 		
-		if (logger.isDebugEnabled())
-		{
-			logger.debug("Service to use: "+dmObjectNamePlural);
-		}
-	    
 	    // Provider Factory should already be initialised. If not it will be done now...
-	    provider = (BaseProvider) ProviderFactory.getInstance().getProvider(new ModelObjectInfo(this.dmObjectNamePlural, null));
-	    if (provider != null)
-	    {
-	    	determineMediaTypes(provider.getMarshaller(), provider.getUnmarshaller(), false);
-	    }
-	    else
-	    {
-	        determineMediaTypes(null, null, false);
-	    }
+        setNamedQuery(getServiceType() == ServiceType.XQUERYTEMPLATE);
+        
+        if (isNamedQuery())
+        {
+            setProvider((BaseNamedQueryProvider) ProviderFactory.getInstance().getProvider(new ModelObjectInfo(this.dmObjectNamePlural, null)));
+            if (this.provider != null)
+            {
+                determineMediaTypes(getNamedQueryProvider().getMarshaller(), getNamedQueryProvider().getUnmarshaller(), false);
+            }
+            else
+            {
+                determineMediaTypes(null, null, false);
+            }
+        }
+        else
+        {
+            setProvider((BaseProvider) ProviderFactory.getInstance().getProvider(new ModelObjectInfo(this.dmObjectNamePlural, null)));
+            if (this.provider != null)
+            {
+                determineMediaTypes(getObjectProvider().getMarshaller(), getObjectProvider().getUnmarshaller(), false);
+            }
+            else
+            {
+                determineMediaTypes(null, null, false);
+            }
+        }
+        
 		if (logger.isDebugEnabled())
 		{
+            logger.debug("Service to use: "+(getServiceType() == ServiceType.SERVICEPATH ? parser.getServicePath() : dmObjectNamePlural)+" ("+getServiceType()+")");
 			logger.debug("Request Media Type : " + getRequestMediaType());
 			logger.debug("Response Media Type: " + getResponseMediaType());
 		}
@@ -169,7 +198,7 @@ public class DataModelResource extends BaseResource
 	@Override
     public MarshalFactory getMarshaller()
     {
-		return (getProvider() != null) ? getProvider().getMarshaller() : null;
+		return (getObjectProvider() != null) ? getObjectProvider().getMarshaller() : null;
     }
 
 	/*
@@ -179,7 +208,7 @@ public class DataModelResource extends BaseResource
 	@Override
     public UnmarshalFactory getUnmarshaller()
     {
-		return (getProvider() != null) ? getProvider().getUnmarshaller() : null;
+		return (getObjectProvider() != null) ? getObjectProvider().getUnmarshaller() : null;
     }
      
     // -------------------------------------------------//
@@ -196,13 +225,18 @@ public class DataModelResource extends BaseResource
 		
 		ResponseParameters responseParam = getInitialCustomResponseParameters();
 		
+		if (getServiceType() == ServiceType.XQUERYTEMPLATE)
+		{
+		    return makeErrorResponse(createErrorForUnsupportedOperation(dmObjectNamePlural, getServiceType(), AccessRight.CREATE), ResponseAction.CREATE, responseParam);
+		}
+		
 		ErrorDetails error = validClient(dmObjectNamePlural, ServiceType.OBJECT, getRight(AccessRight.CREATE), AccessType.APPROVED, false, true);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.CREATE, responseParam);
 		}
 				
-		Provider provider = getProvider();
+		Provider provider = getObjectProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
 			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.CREATE, responseParam);			
@@ -239,7 +273,7 @@ public class DataModelResource extends BaseResource
 	@POST
 	public Response createMany(String payload)
 	{
-		// Check what is really required: GET (QBE functionality) or POST (Create functionality)
+	    // Check what is really required: GET (QBE functionality) or POST (Create functionality)
 		boolean isQBE = HeaderValues.MethodType.GET.name().equalsIgnoreCase(getSIFHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE));
 
 		if (logger.isDebugEnabled())
@@ -254,6 +288,11 @@ public class DataModelResource extends BaseResource
 			}
 		}
 		
+        if (getServiceType() == ServiceType.XQUERYTEMPLATE)
+        {
+            return makeErrorResponse(createErrorForUnsupportedOperation(dmObjectNamePlural, getServiceType(), AccessRight.CREATE), ResponseAction.CREATE, getInitialCustomResponseParameters());
+        }
+        
 		ErrorDetails error = validClient(dmObjectNamePlural, ServiceType.OBJECT, ((isQBE) ? getRight(AccessRight.QUERY) : getRight(AccessRight.CREATE)), AccessType.APPROVED, true, true);
 		if (error != null) // Not allowed to access!
 		{
@@ -261,7 +300,7 @@ public class DataModelResource extends BaseResource
 			return makeErrorResponse(error, ((isQBE) ? ResponseAction.QUERY : ResponseAction.CREATE), getInitialCustomResponseParameters());
 		}
 
-		Provider provider = getProvider();
+		Provider provider = getObjectProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
 			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ((isQBE) ? ResponseAction.QUERY : ResponseAction.CREATE), getInitialCustomResponseParameters());			
@@ -284,13 +323,18 @@ public class DataModelResource extends BaseResource
 
 		ResponseParameters responseParam = getInitialCustomResponseParameters();
 
-		ErrorDetails error = validClient(dmObjectNamePlural, ServiceType.OBJECT, getRight(AccessRight.QUERY), AccessType.APPROVED, false, true);
+        if (getServiceType() == ServiceType.XQUERYTEMPLATE)
+        {
+            return makeErrorResponse(createErrorForUnsupportedOperation(dmObjectNamePlural, getServiceType(), AccessRight.QUERY), ResponseAction.QUERY, responseParam);
+        }
+
+        ErrorDetails error = validClient(dmObjectNamePlural, ServiceType.OBJECT, getRight(AccessRight.QUERY), AccessType.APPROVED, false, true);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.QUERY, responseParam);
 		}
 
-		Provider provider = getProvider();
+		Provider provider = getObjectProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
 			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.QUERY, responseParam);			
@@ -349,7 +393,7 @@ public class DataModelResource extends BaseResource
 			return makeErrorResponse(error, ResponseAction.QUERY, responseParam);
 		}
 
-		Provider provider = getProvider();
+		Provider provider = getObjectProvider();
 		if (provider == null || !QueryProvider.class.isAssignableFrom(provider.getClass()))
 		{
 			return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "The " + parser.getObjectNamePlural() + " provider does not support this ServicePath."), ResponseAction.QUERY, responseParam);
@@ -399,16 +443,16 @@ public class DataModelResource extends BaseResource
 	
         ResponseParameters responseParam = getInitialCustomResponseParameters();
 
-        ErrorDetails error = validClient(dmObjectNamePlural, ServiceType.OBJECT, getRight(AccessRight.QUERY), AccessType.APPROVED, true, true);
+        ErrorDetails error = validClient(dmObjectNamePlural, getServiceType(), getRight(AccessRight.QUERY), AccessType.APPROVED, true, true);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.QUERY, responseParam);
 		}
-		
-		Provider provider = getProvider();
+
+		CoreProvider provider = isNamedQuery() ? getNamedQueryProvider() : getObjectProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.QUERY, responseParam);			
+			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" and service type "+getServiceType()+" available.",null,"Provider"), ResponseAction.QUERY, responseParam);			
 		}
 	
 		PagingInfo pagingInfo = null;
@@ -454,7 +498,7 @@ public class DataModelResource extends BaseResource
                             responseParam.addHTTPHeaderParameter(ResponseHeaderConstants.HDR_CHANGES_SINCE_MARKER, newChangesSinceMarker);
                         }
                         
-                        return makePagedResponse(returnObj, pagingInfo, false, ResponseAction.QUERY, responseParam, provider.getMarshaller()); 
+                        return makePagedResponse(returnObj, pagingInfo, false, ResponseAction.QUERY, responseParam, ((BaseProvider)provider).getMarshaller()); 
 		                
 		            }
 		            else // changes since is not supported => Error
@@ -470,25 +514,42 @@ public class DataModelResource extends BaseResource
 		            }
 		            else // All good.
 		            {
-		                Object returnObj = provider.retrieve(getNotNullSIFZone(), getNotNullSIFContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true), responseParam);
-		                return makePagedResponse(returnObj, pagingInfo, false, ResponseAction.QUERY, responseParam, provider.getMarshaller());	
+		                if (isNamedQuery())
+		                {
+		                    QueryTemplateInfo queryTemplateInfo = new QueryTemplateInfo(provider.getServiceName());
+		                    if ((getQueryParameters() != null) && (getQueryParameters().getQueryParams() != null))
+		                    {
+		                        queryTemplateInfo.setQueryParameters(new HashMap<String, String>(getQueryParameters().getQueryParams()));
+		                    }
+		                    StringPayload response = ((BaseNamedQueryProvider)provider).retrieveData(queryTemplateInfo , getNotNullSIFZone(), getNotNullSIFContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true), responseParam, getResponseMediaType());
+		                    return makePagedResponse((response != null ? response.getData() : null), pagingInfo, false, ResponseAction.QUERY, responseParam, null);
+		                }
+		                else // Standard Object Service.
+		                {
+	                        Object returnObj = ((BaseProvider)provider).retrieve(getNotNullSIFZone(), getNotNullSIFContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true), responseParam);
+	                        return makePagedResponse(returnObj, pagingInfo, false, ResponseAction.QUERY, responseParam, ((BaseProvider)provider).getMarshaller());  
+		                }
 		            }
 		        }
 		    }
 		}
 		catch (PersistenceException ex)
 		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "+provider.getMultiObjectClassInfo().getObjectName()+" with Paging Information: "+pagingInfo+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY, responseParam);			
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "+provider.getServiceName()+" with Paging Information: "+pagingInfo+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY, responseParam);			
 		}
 		catch (IllegalArgumentException ex)
 		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "+provider.getMultiObjectClassInfo().getObjectName()+" with Paging Information: "+pagingInfo+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY, responseParam);			
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to retrieve "+provider.getServiceName()+" with Paging Information: "+pagingInfo+". Problem reported: "+ex.getMessage()), ResponseAction.QUERY, responseParam);			
 		}
+        catch (UnsupportedMediaTypeExcpetion ex)
+        {
+            return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not retrieve data.", "Failed to retrieve data for service "+provider.getServiceName()+" with Paging Information: "+pagingInfo+". Requested Mime type "+getResponseMediaType().toString()+" is not supported: "+ex.getMessage(), "Provider ("+provider.getClass().getSimpleName()+")"), ResponseAction.QUERY, responseParam);           
+        }
         catch (SIFException ex)
         {
             if (StringUtils.isEmpty(ex.getErrorDetails().getScope()))
             {
-                ex.getErrorDetails().setScope("Provider ("+provider.getMultiObjectClassInfo().getObjectName()+")");
+                ex.getErrorDetails().setScope("Provider ("+provider.getServiceName()+")");
             }
             return makeErrorResponse(ex.getErrorDetails(), ResponseAction.QUERY, responseParam);
         }
@@ -509,13 +570,18 @@ public class DataModelResource extends BaseResource
 		
         ResponseParameters responseParam = getInitialCustomResponseParameters();
 
+        if (getServiceType() == ServiceType.XQUERYTEMPLATE)
+        {
+            return makeErrorResponse(createErrorForUnsupportedOperation(dmObjectNamePlural, getServiceType(), AccessRight.UPDATE), ResponseAction.UPDATE, getInitialCustomResponseParameters());
+        }
+        
         ErrorDetails error = validClient(dmObjectNamePlural, ServiceType.OBJECT, getRight(AccessRight.UPDATE), AccessType.APPROVED, false, true);
 		if (error != null) // Not allowed to access!
 		{
 			return makeErrorResponse(error, ResponseAction.UPDATE, responseParam);
 		}
 
-		Provider provider = getProvider();
+		Provider provider = getObjectProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
 			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.UPDATE, responseParam);			
@@ -576,6 +642,11 @@ public class DataModelResource extends BaseResource
 			}
 		}
 		
+        if (getServiceType() == ServiceType.XQUERYTEMPLATE)
+        {
+            return makeErrorResponse(createErrorForUnsupportedOperation(dmObjectNamePlural, getServiceType(), (doDelete) ? AccessRight.DELETE : AccessRight.UPDATE), (doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE, getInitialCustomResponseParameters());
+        }
+        
 		ErrorDetails error = validClient(dmObjectNamePlural, ServiceType.OBJECT, ((doDelete) ? getRight(AccessRight.DELETE) : getRight(AccessRight.UPDATE)), AccessType.APPROVED, true, true);
 		if (error != null) // Not allowed to access!
 		{
@@ -583,7 +654,7 @@ public class DataModelResource extends BaseResource
 			return makeErrorResponse(error, ((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE), getInitialCustomResponseParameters());
 		}
 
-		Provider provider = getProvider();
+		Provider provider = getObjectProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
 			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ((doDelete) ? ResponseAction.DELETE : ResponseAction.UPDATE), getInitialCustomResponseParameters());			
@@ -606,6 +677,11 @@ public class DataModelResource extends BaseResource
 		
         ResponseParameters responseParam = getInitialCustomResponseParameters();
 
+        if (getServiceType() == ServiceType.XQUERYTEMPLATE)
+        {
+            return makeErrorResponse(createErrorForUnsupportedOperation(dmObjectNamePlural, getServiceType(), AccessRight.DELETE), ResponseAction.DELETE, responseParam);
+        }
+        
         ErrorDetails error = validClient(dmObjectNamePlural, ServiceType.OBJECT, getRight(AccessRight.DELETE), AccessType.APPROVED, false, true);
 		if (error != null) // Not allowed to access!
 		{
@@ -613,7 +689,7 @@ public class DataModelResource extends BaseResource
 			return makeErrorResponse(error, ResponseAction.DELETE, responseParam);
 		}
 
-		Provider provider = getProvider();
+		Provider provider = getObjectProvider();
 		if (provider == null) // error already logged but we must return an error response for the caller
 		{
 			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "No Provider for "+dmObjectNamePlural+" available."), ResponseAction.DELETE, responseParam);			
@@ -681,13 +757,18 @@ public class DataModelResource extends BaseResource
             logger.debug("Get Service Info (REST HEAD)");
         }
     
+        if (getServiceType() == ServiceType.XQUERYTEMPLATE)
+        {
+            return makeErrorResponse(createErrorForUnsupportedOperation(dmObjectNamePlural, getServiceType(), AccessRight.QUERY), ResponseAction.HEAD, getInitialCustomResponseParameters());
+        }
+
         ErrorDetails error = validClient(dmObjectNamePlural, ServiceType.OBJECT, getRight(AccessRight.QUERY), AccessType.APPROVED, true, true);
         if (error != null) // Not allowed to access!
         {
             return makeResponse(null, error.getErrorCode(), true, ResponseAction.HEAD, getInitialCustomResponseParameters(), null);
         }
         
-        Provider provider = getProvider();
+        BaseProvider provider = getObjectProvider();
         if (provider == null) // error already logged but we must return an error response for the caller
         {
             return makeResponse(null, Status.SERVICE_UNAVAILABLE.getStatusCode(), true, ResponseAction.HEAD, getInitialCustomResponseParameters(), null);
@@ -773,7 +854,7 @@ public class DataModelResource extends BaseResource
         ErrorDetails error = validClient(dmObjectNamePlural, ServiceType.OBJECT, getRight(AccessRight.QUERY), AccessType.APPROVED, false, true);
         if (error != null) // Not allowed to access!
         {
-            return makeResponse(null, error.getErrorCode(), true, ResponseAction.QUERY, getInitialCustomResponseParameters(), null);
+            return makeResponse(null, error.getErrorCode(), true, ResponseAction.HEAD, getInitialCustomResponseParameters(), null);
         }
         return makeResponse(null, Status.NO_CONTENT.getStatusCode(), false, ResponseAction.QUERY, getInitialCustomResponseParameters(), null);
     }
@@ -812,14 +893,40 @@ public class DataModelResource extends BaseResource
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-	private Provider getProvider()
+    private void setProvider(CoreProvider provider)
+    {
+        this.provider = provider;
+    }
+    
+//    private Provider getProvider()
+	private CoreProvider getProvider()
 	{
-		if (provider == null) // No provider known for this Object Type! This is an issue and needs to be logged.
+		if (this.provider == null) // No provider known for this Object Type! This is an issue and needs to be logged.
 		{
-			logger.error("No Provider known for the object with the name: "+dmObjectNamePlural);
+			logger.error("No Provider known for the service with the name: "+dmObjectNamePlural + " and service type: "+getServiceType());
 		}
-		return provider;
+		return this.provider;
 	}
+	
+	private BaseProvider getObjectProvider()
+	{
+	    return (BaseProvider)getProvider();
+	}
+	
+    private BaseNamedQueryProvider getNamedQueryProvider()
+    {
+        return (BaseNamedQueryProvider)getProvider();
+    }
+
+    private boolean isNamedQuery()
+    {
+        return isNamedQuery;
+    }
+
+    private void setNamedQuery(boolean isNamedQuery)
+    {
+        this.isNamedQuery = isNamedQuery;
+    }
 
 	/*
 	 * This method is a helper to determine what the actual access right is. If a provider is a direct provider an access right is the actual
@@ -1066,5 +1173,13 @@ public class DataModelResource extends BaseResource
             return makeErrorResponse(ex.getErrorDetails(), ResponseAction.QUERY, responseParam);
         }
 	}
+
+	   /*
+     * Convenience method to create a nice error message for non-supported operations of a service.
+     */
+    private ErrorDetails createErrorForUnsupportedOperation(String serviceName, ServiceType serviceType, AccessRight accessRight)
+    {
+        return new ErrorDetails(Status.FORBIDDEN.getStatusCode(), accessRight.name() + " operation not supported.", "This operation is not supported for the service '"+serviceName+"' and service type "+serviceType+".", "Provider side check.");                   
+    }
 
 }

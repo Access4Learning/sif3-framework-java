@@ -168,12 +168,14 @@ public class TestRolloverStudentConsumer
             
             org.w3c.dom.Element child = domDocument.createElement("property");
             child.setAttribute("name", "contextId");
-            child.setTextContent("future");
+//            child.setTextContent("future");
+            child.appendChild(domDocument.createTextNode("future"));
             rootElement.appendChild(child);
             
             child = domDocument.createElement("property");
             child.setAttribute("name", "initiator");
-            child.setTextContent("user1");
+//            child.setTextContent("user1");
+            child.appendChild(domDocument.createTextNode("user1"));
             rootElement.appendChild(child);
                 
             return rootElement;
@@ -508,7 +510,7 @@ public class TestRolloverStudentConsumer
             //
             // Job Operations
             //
-//            tester.createJob(consumer);
+            tester.createJob(consumer);
 //            tester.createJobs(consumer);
 
             
@@ -522,7 +524,7 @@ public class TestRolloverStudentConsumer
             //
             // Phase State Operations
             //
-            tester.updateJobPhaseState(consumer, "oldYearEnrolment", PhaseState.PENDING);
+//            tester.updateJobPhaseState(consumer, "oldYearEnrolment", PhaseState.PENDING);
 //            tester.getJobPhaseStates(consumer, "newYearEnrolment");
         
             //

@@ -20,11 +20,13 @@ package sif3.common.ws.job;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
+import sif3.common.model.StringPayload;
+
 /**
  * @author Joerg Huber
  *
  */
-public class PhaseDataResponse extends PhaseData
+public class PhaseDataResponse extends StringPayload
 {
     private static final long serialVersionUID = 3148009552559307122L;
     

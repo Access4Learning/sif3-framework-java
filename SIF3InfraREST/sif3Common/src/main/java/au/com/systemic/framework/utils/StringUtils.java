@@ -517,5 +517,35 @@ public class StringUtils
      ex.printStackTrace(new PrintWriter(sw));
      
      return sw.toString();
-  }  
+  }
+  
+  /**
+   * Pure convenience method for pretty print of enum list. If your enum is defined as<br/>
+   * enum MyEnum {enum1, enum2, ...}<br/>
+   * then this method will return:<br/>
+   * "enum1,enum2,..."<br/>
+   * The call would be getNamesForEnum(MyEnum.class).
+   * 
+   * @param enumClass The enum class to convert into a pretty string.
+   * 
+   * @return See desc.
+   */
+  public static String getNamesForEnum(Class<? extends Enum<?>> enumClass) 
+  {
+      StringBuffer prettyEnum = new StringBuffer();
+      
+      Enum<?>[] enumArray = enumClass.getEnumConstants();
+      for (Enum<?> enumValue : enumArray)
+      {
+          if (prettyEnum.length() > 0)
+          {
+              prettyEnum.append(",");
+          }
+          prettyEnum.append(enumValue.name());
+      }
+      
+      return prettyEnum.toString();
+  }
+  
+
 }

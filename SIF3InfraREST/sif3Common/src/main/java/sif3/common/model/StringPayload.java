@@ -1,6 +1,6 @@
 /*
- * PhaseData.java
- * Created: 19 Jun 2018
+ * StringPayload.java
+ * Created: 11 Dec 2018
  *
  * Copyright 2018 Systemic Pty Ltd
  * 
@@ -15,34 +15,36 @@
  * the License. 
  */
 
-package sif3.common.ws.job;
+package sif3.common.model;
 
 import java.io.Serializable;
 
 import javax.ws.rs.core.MediaType;
 
 /**
- * This class encapsulates typical data that is passed from/to a phase of a functional service. Almost all phase operations deal
- * with some data, either in the request, the response or both. The framework is data model agnostic and therefore doesn't
- * know what payloads are passed to or from a phase. The data is passed around in its raw String representation with the applicable
- * mime type, so that the recipient of the data knows how what it deals with.
+ * This class encapsulates typical data that is passed from/to an end-point where little is known about the actual object. 
+ * There are many places in the SIF Specification where any data can be passed around not just data defined in the SIF
+ * Data Model. Such data can be passed in a payload for a request or a response. For these services (eg. phases of a functional
+ * service or responses to a named queries) the framework must support as data model agnostic representation of a payload. 
+ * This class enables data to be passed around in its raw String representation with the applicable mime type, so that the 
+ * recipient of the data knows how what it deals with. It is the responsibility of the recipient of such a "string" payload 
+ * to marshal it into a known data structure using the given mime type.
  * 
  * @author Joerg Huber
- *
  */
-public class PhaseData implements Serializable
+public class StringPayload implements Serializable
 {
-    private static final long serialVersionUID = -4749828404357889220L;
+    private static final long serialVersionUID = 7279610736312134859L;
 
     private String data = null;
     private MediaType mimeType = null;
     
-    public PhaseData()
+    public StringPayload()
     {
         this(null, null);
     }
     
-    public PhaseData(String data, MediaType mimeType)
+    public StringPayload(String data, MediaType mimeType)
     {
         super();
         this.data = data;
@@ -72,6 +74,6 @@ public class PhaseData implements Serializable
     @Override
     public String toString()
     {
-        return "PhaseData [data=" + data + ", mimeType=" + mimeType + "]";
+        return "StringPayload [data=" + data + ", mimeType=" + mimeType + "]";
     }
 }

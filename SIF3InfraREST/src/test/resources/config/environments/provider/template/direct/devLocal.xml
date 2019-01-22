@@ -89,7 +89,7 @@
                   <rights>
                     <right type="QUERY">APPROVED</right>
                     <right type="CREATE">APPROVED</right>
-                    <right type="UPDATE">APPROVED</right>
+                    <right type="UPDATE">REJECTED</right>
                     <right type="DELETE">APPROVED</right>
                     <right type="PROVIDE">REJECTED</right>
                     <right type="SUBSCRIBE">APPROVED</right>
@@ -105,6 +105,11 @@
                     <right type="PROVIDE">SUPPORTED</right>
                     <right type="SUBSCRIBE">SUPPORTED</right>
                     <right type="ADMIN">APPROVED</right>
+                  </rights>
+                </service>
+                <service name="StudentsInYear" contextId="DEFAULT" type="XQUERYTEMPLATE">
+                  <rights>
+                    <right type="QUERY">APPROVED</right>
                   </rights>
                 </service>
             </services>            
