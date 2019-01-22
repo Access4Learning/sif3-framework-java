@@ -19,8 +19,8 @@ import systemic.sif3.demo.rest.consumer.namedquery.StudentsInYearConsumer;
 
 public class TestStudentsInYearConsumer
 {
-    private static final String CONSUMER_ID = "StudentConsumer";
-//    private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
+//    private static final String CONSUMER_ID = "StudentConsumer";
+    private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
 
     private static final RequestType REQUEST_TYPE = RequestType.IMMEDIATE;
 //    private static final RequestType REQUEST_TYPE = RequestType.DELAYED;
@@ -125,7 +125,7 @@ public class TestStudentsInYearConsumer
             //
             // Get Students
             //
-            tester.getStudentsInYear(consumer);
+//            tester.getStudentsInYear(consumer);
 //            tester.getStudentsInYear(consumer2);
 
             // Put this agent to a blocking wait.....
