@@ -69,8 +69,8 @@ public class RequestHeaderConstants
 	/*---------------------------------------------------------*/
 	public static final String HDR_SERVICE_NAME= "serviceName"; // i.e. StudentPersonals
 	public static final String HDR_UPDATE_TYPE = "replacement"; // FULL, PARTIAL (see HeaderValues.UpdateType)
-	public static final String HDR_CONTEXT_ID = "contextId";
-	public static final String HDR_ZONE_ID = "zoneId";
+	public static final String HDR_CONTEXT_ID = CommonConstants.MATRIX_CONTEX_ID;
+	public static final String HDR_ZONE_ID = CommonConstants.MATRIX_ZONE_ID;
 	public static final String HDR_EVENT_ACTION = "eventAction"; // CREATE, UPDATE, DELETE (see HeaderValues.EventAction)
 	public static final String HDR_CONSUMER_ID = "connectionId"; // Used by getMessage() on queue to identify the thread that queries 
 	

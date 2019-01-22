@@ -115,8 +115,8 @@ public class DataModelResource extends BaseResource
 			                 @Context Request request,
 			                 @PathParam("dmObjectNamePlural") String objectNamePlural,
 			                 @PathParam("mimeType") String mimeType,
-			                 @MatrixParam("zoneId") String zoneID,
-			                 @MatrixParam("contextId") String contextID)
+			                 @MatrixParam(CommonConstants.MATRIX_ZONE_ID) String zoneID,
+			                 @MatrixParam(CommonConstants.MATRIX_CONTEX_ID) String contextID)
     {
 	    super(uriInfo, requestHeaders, request, "requests", zoneID, contextID);
 
