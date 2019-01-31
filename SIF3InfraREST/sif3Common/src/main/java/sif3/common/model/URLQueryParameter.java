@@ -16,6 +16,8 @@
 package sif3.common.model;
 
 import java.io.Serializable;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -80,20 +82,38 @@ public class URLQueryParameter implements Serializable
 	}
 
 	/**
-	 * This method sets a given query parameter (name) to the given value.
+	 * This method sets a given query parameter (name) to the given value. The value will not be URL encoded.
 	 * 
 	 * @param name
 	 * @param value
 	 */
 	public void setQueryParam(String name, String value)
 	{
-		if (queryParams == null)
-		{
-			queryParams = new HashMap<String, String>();
-		}
-		queryParams.put(name, value);
+	    setQueryParam(name, value, false);
 	}
-
+	
+    /**
+     * This method sets a given query parameter (name) to the given value and will URL encode it if urlEncoded is true.
+     * 
+     * @param name
+     * @param value
+     * @param urlEncoded TRUE: will URL encode the value first. FALSE: value remains untouched.
+     */
+    public void setQueryParam(String name, String value, boolean urlEncoded)
+    {
+        if (queryParams == null)
+        {
+            queryParams = new HashMap<String, String>();
+        }
+        
+        try
+        { 
+            queryParams.put(name, (urlEncoded && (value != null)) ? URLEncoder.encode(value, "UTF-8") : value);
+        }
+        catch (Exception ex) {}
+    }
+	
+	
 	/**
 	 * This method removes the given parameter form the list of URL query parameters. If the name is
 	 * null or does not exits in the list of URL query parameters then no action is taken.
@@ -125,6 +145,33 @@ public class URLQueryParameter implements Serializable
 
 		return null;
 	}
+
+    /**
+     * This method returns the value of the given URL query parameter as a string. If no URL query parameter with that name
+     * exists then null is returned. The parameterName is case sensitive. The returned string is in its raw format if 
+     * urlDecode= false otherwise URL decoding is applied before it is returned.
+     * 
+     * @param name Name of the URL query parameter for which the value shall be returned.
+     * @param urlDecode TRUE: value will be URL decoded. FALSE: value remains in its raw format.
+     * 
+     * @return See desc.
+     */
+    public String getQueryParam(String name, boolean urlDecode)
+    {
+        if (queryParams != null)
+        {
+            try
+            {
+                return (urlDecode) ? URLDecoder.decode(queryParams.get(name), "UTF-8") : queryParams.get(name);
+            }
+            catch (Exception ex) // return raw value
+            {
+                return queryParams.get(name);
+            }
+        }
+
+        return null;
+    }
 
 	@Override
 	public String toString()
