@@ -25,7 +25,7 @@ Project (note that the version number will change over time):
 <dependency>
    <groupId>sif3.framework</groupId>
    <artifactId>sif3-infra-rest</artifactId>
-   <version>0.14.0</version>
+   <version>0.14.1</version>
 </dependency>
 ```
 
@@ -183,6 +183,12 @@ ___
   in the Developer's Guide.
 
 **Please refer to the detailed release notes in "release/v0.14.0" carefully to ensure that your project is upgraded properly to the new framework version.**
+
+## Version from Jan 31, 2019: v0.14.1 - Various minor changes & additions
+- Added supporting methods for Dynamic Query functionality.
+- Some minor bug fixes. 
+
+**Please refer to the detailed release notes in "release/v0.14.1" carefully to ensure that your project is upgraded properly to the new framework version.**
 
 # Download Instructions
 How to download this project:

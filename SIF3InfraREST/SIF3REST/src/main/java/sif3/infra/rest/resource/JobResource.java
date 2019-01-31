@@ -124,8 +124,8 @@ public class JobResource extends InfraResource
                        @Context Request request,
                        @PathParam("jobNamePlural") String jobNamePlural,
                        @PathParam("mimeType") String mimeType,
-                       @MatrixParam("zoneId") String zoneID,
-                       @MatrixParam("contextId") String contextID)
+                       @MatrixParam(CommonConstants.MATRIX_ZONE_ID) String zoneID,
+                       @MatrixParam(CommonConstants.MATRIX_CONTEX_ID) String contextID)
     {
         super(uriInfo, requestHeaders, request, "services", zoneID, contextID);
 

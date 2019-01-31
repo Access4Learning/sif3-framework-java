@@ -40,6 +40,7 @@ import com.sun.jersey.api.client.config.ClientConfig;
 
 import au.com.systemic.framework.utils.DateUtils;
 import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
@@ -362,11 +363,11 @@ public abstract class BaseClient
         addPathSegments(uriBuilder, uriSegments);
         if ((zone != null) && (StringUtils.notEmpty(zone.getId())))
         {
-            uriBuilder.matrixParam("zoneId", zone.getId());
+            uriBuilder.matrixParam(CommonConstants.MATRIX_ZONE_ID, zone.getId());
         }
         if ((ctx != null) && (StringUtils.notEmpty(ctx.getId())))
         {
-            uriBuilder.matrixParam("contextId", ctx.getId());
+            uriBuilder.matrixParam(CommonConstants.MATRIX_CONTEX_ID, ctx.getId());
         }
         
         //Add custom URL Query Parameters.

@@ -309,8 +309,11 @@ public class TestStudentPersonalConsumer
 			params.addHTTPHeaderParameter("customHdr", "Go all the way to Provider");
 			
 			// Set some custom URL query Params
-			params.addURLQueryParameter("ChangedSince", "01/05/2015");
+			params.addURLQueryParameter("ChangedSince", "01/05/2015"); // will not url encode
 			params.addURLQueryParameter("myURLQueryParam", "show in provider");
+			
+			params.addURLQueryParameter(CommonConstants.WHERE_CALUSE, "[(studentssections/section=\"CIS 101\")]", false);
+			params.addURLQueryParameter(CommonConstants.ORDER_CALUSE, "[primarysortfield=asc;secondarysortfield=desc]", true);
 
 			List<ZoneContextInfo> envZoneCtxList = null;
 			envZoneCtxList = new ArrayList<ZoneContextInfo>();
@@ -514,7 +517,7 @@ public class TestStudentPersonalConsumer
 			StudentPersonalConsumer consumer = tester.getConsumer();
   		
 //            tester.getStudent(consumer);
-//            tester.getStudents(consumer, true);
+            tester.getStudents(consumer, true);
 //            tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
 //            tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
 //            tester.getStudentsByServicePath("RoomInfos", "24ed508e1ed04bba82198233efa55859", consumer);

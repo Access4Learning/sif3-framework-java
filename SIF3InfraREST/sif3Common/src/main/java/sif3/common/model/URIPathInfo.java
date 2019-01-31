@@ -176,11 +176,11 @@ public class URIPathInfo implements Serializable
     private void setZoneOrContext(String zoneOrContextID)
     {
         String[] parts = zoneOrContextID.split("=");
-        if ("zoneId".equals(parts[0]))
+        if (CommonConstants.MATRIX_ZONE_ID.equals(parts[0]))
         {
             zone = new SIFZone(parts[1]);
         }
-        if ("contextId".equals(parts[0]))
+        if (CommonConstants.MATRIX_CONTEX_ID.equals(parts[0]))
         {
             context = new SIFContext(parts[1]);
         }

@@ -109,17 +109,35 @@ public class RequestParameters implements Serializable
      * This method adds the given parameter and value to the list of URL query parameters. If there is already a parameter
      * with that name then it will be overridden. The parameterName is case sensitive, so 'Param1' and 'param1' as the 
      * parameter name are treated as two different parameters. This behaviour matches the HTTP specification. If any of the
-     * two parameters is empty or null then they are not added to the list of URL query parameters.
+     * two parameters is empty or null then they are not added to the list of URL query parameters. Note that the value
+     * will remain untouched, meaning it will not be URL encoded. It is the responsibility of the caller to either
+     * encode the value first or call the method addURLQueryParameter(String parameterName, String value, boolean urlEncode)
+     * with urlEncode=TRUE.
      * 
      * @param parameterName The name of the URL query parameter.
      * @param value The value of the URL query parameter.
      */
     public void addURLQueryParameter(String parameterName, String value)
     {
-    	if (StringUtils.notEmpty(parameterName) && StringUtils.notEmpty(value))
-    	{
-    		getQueryParams().setQueryParam(parameterName, value);
-    	}
+        addURLQueryParameter(parameterName,value, false);
+    }
+   
+    /**
+     * This method adds the given parameter and value to the list of URL query parameters. If the urlEncode is set to
+     * TRUE then the value will be URL encoded. If it is set to FALSE it will remain as is. If there is already a parameter
+     * with that name then it will be overridden. The parameterName is case sensitive, so 'Param1' and 'param1' as the 
+     * parameter name are treated as two different parameters. This behaviour matches the HTTP specification. If any of the
+     * two parameters is empty or null then they are not added to the list of URL query parameters.
+     * 
+     * @param parameterName The name of the URL query parameter.
+     * @param value The value of the URL query parameter.
+     */
+    public void addURLQueryParameter(String parameterName, String value, boolean urlEncode)
+    {
+        if (StringUtils.notEmpty(parameterName) && StringUtils.notEmpty(value))
+        {
+            getQueryParams().setQueryParam(parameterName, value, urlEncode);
+        }
     }
     
     /**
@@ -136,7 +154,8 @@ public class RequestParameters implements Serializable
     
     /**
      * This method returns the value of the given URL query parameter as a string. If no URL query parameter with that name
-     * exists then null is returned. The parameterName is case sensitive.
+     * exists then null is returned. The parameterName is case sensitive. The returned string is in its raw format, meaning
+     * no URL decoding is performed.
      * 
      * @param parameterName Name of the URL query parameter for which the value shall be returned.
      * 
@@ -144,8 +163,25 @@ public class RequestParameters implements Serializable
      */
     public String getURLQueryParameter(String parameterName)
     {
-    	return getQueryParams().getQueryParam(parameterName); //null check is done in the getQueryParam() method
+    	return getURLQueryParameter(parameterName, false); //null check is done in the getQueryParam() method
     }
+    
+    
+    /**
+     * This method returns the value of the given URL query parameter as a string. If no URL query parameter with that name
+     * exists then null is returned. The parameterName is case sensitive. The returned string is in its raw format if 
+     * urlDecode= false otherwise URL decoding is applied before it is returned.
+     * 
+     * @param parameterName Name of the URL query parameter for which the value shall be returned.
+     * @param urlDecode TRUE: value will be URL decoded. FALSE: value remains in its raw format.
+     * 
+     * @return See desc.
+     */
+    public String getURLQueryParameter(String parameterName, boolean urlDecode)
+    {
+        return getQueryParams().getQueryParam(parameterName, urlDecode); //null check is done in the getQueryParam() method
+    }
+
     
     /**
      * This method return true if a given URL query parameter is already part of the list. If it doesn't exist then false
