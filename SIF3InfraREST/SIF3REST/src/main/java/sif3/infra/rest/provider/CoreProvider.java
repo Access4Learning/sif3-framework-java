@@ -35,23 +35,24 @@ import sif3.common.exception.PersistenceException;
 import sif3.common.exception.SIFException;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
-import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.HeaderValues.ServiceType;
+import sif3.common.header.RequestHeaderConstants;
 import sif3.common.interfaces.EventProvider;
+import sif3.common.model.ACL.AccessRight;
+import sif3.common.model.ACL.AccessType;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.RequestMetadata;
+import sif3.common.model.RequestParameters;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceInfo;
-import sif3.common.model.ACL.AccessRight;
-import sif3.common.model.ACL.AccessType;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.BaseResponse;
 import sif3.infra.common.env.mgr.BrokeredProviderEnvironmentManager;
 import sif3.infra.common.env.mgr.ProviderManagerFactory;
-import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
+import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.interfaces.EnvironmentManager;
 import sif3.infra.common.interfaces.ProviderJobManager;
 import sif3.infra.rest.client.EventClient;
@@ -201,6 +202,52 @@ public abstract class CoreProvider implements Runnable
     public String getProviderName()
     {
         return getClass().getSimpleName();
+    }
+    
+    /**
+     * This method will retrieve the value of the "where" URL Query Parameter. This parameters is a special parameter supported
+     * by the SIF 3.x specification. It allows consumers to provide a "where" clause when retrieving data from a SIF end-point.
+     * If the "where" parameter is not provided by the consumer then null is returned. It is important to not that the
+     * "where" parameter will use xPath notation and can be quite complex. It is up to the provider implementation to process that
+     * xPath with its own toolset. This method simply returns the value of the URL query parameter as a string. Further the value of
+     * the parameter might be urlEndcoded. The urlDecode parameter indicates if the value shall be returned in its raw form or if it
+     * shall be URL decoded before it is returned. If the value fails to URL decode due to an invalid format then the raw value
+     * is returned and an error will be logged.
+     * 
+     * @param requestParams The framework will have this value as part of each request. Generally this is part of the 
+     *                       RequestMetadata parameter of each provider method.
+     *                       
+     * @param urlDecode TRUE: The value of the "where" URL query parameter will be decoded before returned. FALSE: value will remain
+     *                  unaltered (e.g. will be returned in its raw format as received).                     
+     * 
+     * @return See desc.
+     */
+    public String getWhereClause(RequestParameters requestParams, boolean urlDecode)
+    {
+        return getURLQueryParam(requestParams, CommonConstants.WHERE_CALUSE, urlDecode);
+    }
+    
+    /**
+     * This method will retrieve the value of the "order" URL Query Parameter. This parameters is a special parameter supported
+     * by the SIF 3.x specification. It allows consumers to provide a "order" clause when retrieving data from a SIF end-point.
+     * If the "order" parameter is not provided by the consumer then null is returned. It is important to not that the
+     * "order" parameter will use xPath notation and can be quite complex. It is up to the provider implementation to process that
+     * xPath with its own toolset. This method simply returns the value of the URL query parameter as a string. Further the value of
+     * the parameter might be urlEndcoded. The urlDecode parameter indicates if the value shall be returned in its raw form or if it
+     * shall be URL decoded before it is returned. If the value fails to URL decode due to an invalid format then the raw value
+     * is returned and an error will be logged.
+     * 
+     * @param requestParams The framework will have this value as part of each request. Generally this is part of the 
+     *                       RequestMetadata parameter of each provider method.
+     *                       
+     * @param urlDecode TRUE: The value of the "order" URL query parameter will be decoded before returned. FALSE: value will remain
+     *                  unaltered (e.g. will be returned in its raw format as received).                     
+     * 
+     * @return See desc.
+     */
+    public String getOrderClause(RequestParameters requestParams, boolean urlDecode)
+    {
+        return getURLQueryParam(requestParams, CommonConstants.ORDER_CALUSE, urlDecode);        
     }
     
     /*------------------------------------------------------------------------------------------------------------------------
@@ -463,6 +510,18 @@ public abstract class CoreProvider implements Runnable
         logger.debug("The "+getProviderName()+" does not have the ACL entry PROVIDE = APPROVED for service = " + getServiceName() + " for the Zone = "+ zoneID + " and the Context = " + contextID + ". Events are NOT sent to this zone and context.");
     }
     
+    protected String getURLQueryParam(RequestParameters requestParams, String paramName, boolean urlDecode)
+    {
+        String value = null;
+        
+        if (requestParams != null)
+        {
+            value = requestParams.getURLQueryParameter(paramName, urlDecode);
+        }
+        
+        return value;
+    }
+
     /*---------------------*/
     /*-- Private Methods --*/
     /*---------------------*/ 
