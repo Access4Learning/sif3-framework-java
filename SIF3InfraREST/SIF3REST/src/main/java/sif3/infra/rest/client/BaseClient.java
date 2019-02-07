@@ -742,6 +742,10 @@ public abstract class BaseClient
             if (response.getHasEntity())
             {
                 String payload = clientResponse.getEntity(String.class);
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Payload received for Create Multiple REST Call:\n"+payload);
+                }
                 MultiOperationStatusList<CreateOperationStatus> statusList = getInfraMapper().toStatusListFromSIFCreateString(payload, getResponseMediaType());
                 response.setError(statusList.getError());
                 response.setOperationStatuses(statusList.getOperationStatuses());
