@@ -1,5 +1,5 @@
 ==============================================================
-Release Notes for v0.14.1 of SIF3 Framework (Jan 31, 2019)
+Release Notes for v0.14.1 of SIF3 Framework (Feb 14, 2019)
 ==============================================================
 
 Bug Fixes
@@ -47,7 +47,8 @@ Use the latest maven dependency
 
 Data Model Upgrade
 ------------------
-None.
+Updated to officially released SIF AU 3.4.4. Note this only affects demo and test code but not actual framework code 
+or libraries.
 
 3rd Party Library Update
 ------------------------

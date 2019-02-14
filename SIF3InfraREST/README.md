@@ -184,7 +184,7 @@ ___
 
 **Please refer to the detailed release notes in "release/v0.14.0" carefully to ensure that your project is upgraded properly to the new framework version.**
 
-## Version from Jan 31, 2019: v0.14.1 - Various minor changes & additions
+## Version from Feb 14, 2019: v0.14.1 - Various minor changes & additions
 - Added supporting methods for Dynamic Query functionality.
 - Some minor bug fixes. 
 
