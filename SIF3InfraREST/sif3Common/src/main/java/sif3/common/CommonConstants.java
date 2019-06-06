@@ -103,7 +103,7 @@ public class CommonConstants
 	public static int FIRST_PAGE = 1;
 	
 	/*----------------------------------------------------------*/
-	/* System Wide Enum Types that are not part of any Headers */
+	/* System wide Enum Types that are not part of any Headers */
 	/*----------------------------------------------------------*/
 	
 	/*
@@ -149,13 +149,19 @@ public class CommonConstants
     /* URL Query Parameter names as defined by SIF Specification --*/
     /*-------------------------------------------------------------*/
     public static final String CHANGES_SINCE_MARKER_NAME = "changesSinceMarker";
+    
+    /*---------------------------------------------------------------------------------*/
+    /* URL Query Parameter names for Dynamic Queries as defined by SIF Specification --*/
+    /*---------------------------------------------------------------------------------*/
+    public static final String WHERE_CALUSE = "where";
+    public static final String ORDER_CALUSE = "order";
 	
-
 	/*---------------------------*/
 	/* Matrix Parameter names  --*/
 	/*---------------------------*/
 	public static final String MATRIX_DELETE_MSGID = "deleteMessageId"; // For message client.
-	
+    public static final String MATRIX_ZONE_ID = "zoneId"; 	
+    public static final String MATRIX_CONTEX_ID = "contextId";   
 
 	/*----------------------------------------------------------------*/
 	/* HTTP Status that are not listed in the Response.Status class --*/

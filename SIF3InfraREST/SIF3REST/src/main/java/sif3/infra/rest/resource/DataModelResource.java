@@ -115,8 +115,8 @@ public class DataModelResource extends BaseResource
 			                 @Context Request request,
 			                 @PathParam("dmObjectNamePlural") String objectNamePlural,
 			                 @PathParam("mimeType") String mimeType,
-			                 @MatrixParam("zoneId") String zoneID,
-			                 @MatrixParam("contextId") String contextID)
+			                 @MatrixParam(CommonConstants.MATRIX_ZONE_ID) String zoneID,
+			                 @MatrixParam(CommonConstants.MATRIX_CONTEX_ID) String contextID)
     {
 	    super(uriInfo, requestHeaders, request, "requests", zoneID, contextID);
 
@@ -147,17 +147,22 @@ public class DataModelResource extends BaseResource
         
         if (isNamedQuery())
         {
-            setProvider((BaseNamedQueryProvider) ProviderFactory.getInstance().getProvider(new ModelObjectInfo(this.dmObjectNamePlural, null)));
-            if (this.provider != null)
+            Object tmpProvider = ProviderFactory.getInstance().getProvider(new ModelObjectInfo(this.dmObjectNamePlural, null));
+            
+            // It is possible that there is no provider for the given XQUERYTEMPLATE but an Object service, so we
+            // must check the class first before assigning. This can happen if a consumer sends the wrong serviceType!
+            if (tmpProvider instanceof BaseNamedQueryProvider) // ok we are good
             {
+                setProvider((BaseNamedQueryProvider)tmpProvider);
                 determineMediaTypes(getNamedQueryProvider().getMarshaller(), getNamedQueryProvider().getUnmarshaller(), false);
             }
-            else
+            else // we don't have a named query provider for the given name
             {
+                logger.error("Received a XQUERYTEMPLATE request for "+this.dmObjectNamePlural+" but there is no NamedQueryProvider implementation availble.");
                 determineMediaTypes(null, null, false);
             }
         }
-        else
+        else // Object Provider
         {
             setProvider((BaseProvider) ProviderFactory.getInstance().getProvider(new ModelObjectInfo(this.dmObjectNamePlural, null)));
             if (this.provider != null)

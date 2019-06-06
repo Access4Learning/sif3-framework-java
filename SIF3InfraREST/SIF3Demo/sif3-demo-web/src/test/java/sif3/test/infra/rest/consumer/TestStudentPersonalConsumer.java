@@ -205,11 +205,14 @@ public class TestStudentPersonalConsumer
 	  {
 	    System.out.println("Start 'Delete Students (Multi)' in all connected environments...");
 	    ArrayList<String> resourceIDs = new ArrayList<String>();
-	    resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
-		resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
-		resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
-		resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
-		resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
+	    resourceIDs.add("df789e1c-dfe7-4c18-8ef0-d907b81ea61e");
+        resourceIDs.add("abc89e1c-34e7-4cde-908a-d9abc81ea09a");
+        resourceIDs.add("ff789e1c-dfe7-4c18-8ef0-d907b81ea61e");
+//		resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
+//      resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
+//		resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
+//		resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
+//		resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
 	    
 	    try
 	    {
@@ -309,8 +312,11 @@ public class TestStudentPersonalConsumer
 			params.addHTTPHeaderParameter("customHdr", "Go all the way to Provider");
 			
 			// Set some custom URL query Params
-			params.addURLQueryParameter("ChangedSince", "01/05/2015");
+			params.addURLQueryParameter("ChangedSince", "01/05/2015"); // will not url encode
 			params.addURLQueryParameter("myURLQueryParam", "show in provider");
+			
+			params.addURLQueryParameter(CommonConstants.WHERE_CALUSE, "[(studentssections/section=\"CIS 101\")]", false);
+			params.addURLQueryParameter(CommonConstants.ORDER_CALUSE, "[primarysortfield=asc;secondarysortfield=desc]", true);
 
 			List<ZoneContextInfo> envZoneCtxList = null;
 			envZoneCtxList = new ArrayList<ZoneContextInfo>();

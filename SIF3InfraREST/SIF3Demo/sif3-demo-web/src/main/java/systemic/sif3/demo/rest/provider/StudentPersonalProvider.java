@@ -328,6 +328,8 @@ public class StudentPersonalProvider extends AUDataModelProviderWithEvents<Stude
     	logger.debug("Retrieve Students for "+getZoneAndContext(zone, context)+" and RequestMetadata = "+metadata);
     	logger.debug("ChangedSince Date: "+metadata.getRequestParameter("ChangedSince"));
     	logger.debug("Custom HTTP Header (customHdr): "+metadata.getHTTPParameter("customHdr"));
+        logger.debug("where clause: "+getWhereClause(metadata.getRequestParameters(), true));
+        logger.debug("order clause: "+getOrderClause(metadata.getRequestParameters(), true));
 
         // Should go all the way to consumer
         customResponseParams.addHTTPHeaderParameter("testHTTPResponseParam", "testValue");

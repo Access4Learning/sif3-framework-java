@@ -668,6 +668,11 @@ public class ObjectServiceClient extends BaseClient
 			if (response.getHasEntity())
 			{
 				String payload = clientResponse.getEntity(String.class);
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Payload received for Update Multiple REST Call:\n"+payload);
+                }
+
 				MultiOperationStatusList<OperationStatus> statusList = getInfraMapper().toStatusListFromSIFUpdateString(payload, getResponseMediaType());
 				response.setError(statusList.getError());
 				response.setOperationStatuses(statusList.getOperationStatuses());

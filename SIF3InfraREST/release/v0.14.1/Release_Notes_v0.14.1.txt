@@ -1,0 +1,55 @@
+==============================================================
+Release Notes for v0.14.1 of SIF3 Framework (Feb 14, 2019)
+==============================================================
+
+Bug Fixes
+---------
+- Fixed minor issue when XQUERYTEMPLATE was called for an Object Service.
+
+New Functionality
+-----------------
+- Provider side support to easy extract "where" and "order" URL Query Parameters from a request. Helps in "Dynamic Query" requests.
+  See Developer's Guide section 5.13 for details.
+- Consumer side support to easy provide "where" and "order" URL Query Parameters for a request. Helps in "Dynamic Query" requests.
+  See Developer's Guide section 5.13 for details.
+
+Changed Functionality
+---------------------
+- None
+
+Removed Artifacts/Functionality
+-------------------------------
+- None
+
+
+==========================
+-- Upgrade Instructions --
+==========================
+
+Infrastructure Upgrade 
+----------------------
+None
+
+Upgrade your Project
+--------------------
+Once the above steps are done you can upgrade your project with the latest libraries of the framework as stated below:
+
+Ant:
+Drop the latest framework library into your project's lib directory/directories. 
+
+Maven:
+Use the latest maven dependency
+<dependency>
+   <groupId>sif3.framework</groupId>
+   <artifactId>sif3-infra-rest</artifactId>
+   <version>0.14.1</version>
+</dependency>
+
+Data Model Upgrade
+------------------
+Updated to officially released SIF AU 3.4.4. Note this only affects demo and test code but not actual framework code 
+or libraries.
+
+3rd Party Library Update
+------------------------
+None.
