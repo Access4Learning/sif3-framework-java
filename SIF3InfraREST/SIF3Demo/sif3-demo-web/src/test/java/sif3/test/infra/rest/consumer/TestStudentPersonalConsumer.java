@@ -205,11 +205,14 @@ public class TestStudentPersonalConsumer
 	  {
 	    System.out.println("Start 'Delete Students (Multi)' in all connected environments...");
 	    ArrayList<String> resourceIDs = new ArrayList<String>();
-	    resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
-		resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
-		resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
-		resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
-		resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
+	    resourceIDs.add("df789e1c-dfe7-4c18-8ef0-d907b81ea61e");
+        resourceIDs.add("abc89e1c-34e7-4cde-908a-d9abc81ea09a");
+        resourceIDs.add("ff789e1c-dfe7-4c18-8ef0-d907b81ea61e");
+//		resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
+//      resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
+//		resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
+//		resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
+//		resourceIDs.add(UUIDGenerator.getSIF2GUIDUpperCase());
 	    
 	    try
 	    {
@@ -517,7 +520,7 @@ public class TestStudentPersonalConsumer
 			StudentPersonalConsumer consumer = tester.getConsumer();
   		
 //            tester.getStudent(consumer);
-            tester.getStudents(consumer, true);
+//            tester.getStudents(consumer, true);
 //            tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
 //            tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
 //            tester.getStudentsByServicePath("RoomInfos", "24ed508e1ed04bba82198233efa55859", consumer);
