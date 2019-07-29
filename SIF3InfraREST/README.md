@@ -186,9 +186,16 @@ ___
 
 ## Version from Feb 14, 2019: v0.14.1 - Various minor changes & additions
 - Added supporting methods for Dynamic Query functionality.
-- Some minor bug fixes. 
+- Some minor bug fixes.
 
-**Please refer to the detailed release notes in "release/v0.14.1" carefully to ensure that your project is upgraded properly to the new framework version.**
+**Please refer to the detailed release notes in "release/v0.14.1" to ensure that your project is upgraded properly to the new framework version.**
+
+## Version from Jul 29, 2019: v0.15.0 - Upgrade to SIF 3.3 Infrastructure
+- Updated framework to be used with SIF Infrastructure 3.3. This only includes the usage of the new namespace and
+  Infrastructure XSDs but not new SIF 3.3 functionality such as Privacy Services, Data Model Schema negotiation etc.
+  Some of the new functionality might be added in later versions of the framework.
+
+**Please refer to the detailed release notes in "release/v0.15.0" to ensure that your project is upgraded properly to the new framework version.**
 
 # Download Instructions
 How to download this project:
