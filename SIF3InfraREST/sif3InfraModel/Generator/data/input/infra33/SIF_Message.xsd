@@ -1,0 +1,5618 @@
+<!--
+		SIF Infrastructure Specification 3.3
+
+		(July 27, 2019)
+		
+		Infrastructure Version: 3.3
+	-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sifassociation.org/infrastructure/3.3" targetNamespace="http://www.sifassociation.org/infrastructure/3.3" elementFormDefault="qualified" version="3.3"
+>
+  <!--SIFInfrastructureServices-->
+
+
+  <!--environment-->
+
+  <xs:complexType name="environmentType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>The Consumer Environment Service is the gateway to all other services. It scopes the Consumer's possible interactions with the infrastructure and any Provider Services accessible from it. The Environment Service provides the set of (possibly customized) information the Application needs to interoperate successfully.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="fingerprint" minOccurs="0" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Unique environment identifier that can be safely shared with others. In order to not compromise security it MUST NOT match the environment's refId, sessionToken, userToken, or applicationKey.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="sessionToken" minOccurs="0" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="solutionId" minOccurs="0" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The solution the Application would like to participate in. This is optional only, is advisory, and may be ignored by the Administrator. If processed it may be reflected in the URLs of the infrastructure services which are provided in the consumerEnvironment.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="defaultZone" minOccurs="0" type="zoneType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="authenticationMethod" minOccurs="0" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Defines the way in which the applicationKey can be used to enforce security.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="instanceId" minOccurs="0" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="userToken" minOccurs="0" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="consumerName" minOccurs="0" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A descriptive name for the application that will be readily identifiable to Zone Administrators if it becomes a Registered Consumer</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="applicationInfo" minOccurs="0" type="applicationInfoType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="infrastructureServices" minOccurs="0" type="infrastructureServicesType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="provisionedZones" minOccurs="0" type="provisionedZonesType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="type" use="optional" type="environmentTypeType">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="id" use="optional" type="uuidType">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:element name="environment" type="environmentType">
+    <xs:key name="environmentKey1">
+      <xs:selector xpath="." />
+      <xs:field xpath="@id" />
+    </xs:key>
+  </xs:element>
+
+  <xs:complexType name="environmentCollectionType">
+    <xs:sequence>
+      <xs:element name="environment" type="environmentType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="environments" type="environmentCollectionType" />
+
+
+  <!--provisionRequest-->
+
+  <xs:complexType name="provisionRequestType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>If an Environment supports self-provisioning Consumers than either this section must initially contain all the rights the Consumer has to all Services in all Zones, or the provisionRequests Infrastructure Service must be present in the Consumer's Environment to allow additional rights to be obtained.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="provisionedZones" type="provisionedZonesType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A specific Zone defined for this environment.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="optional" type="uuidType">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating>Low</privacyRating>
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="completionStatus" use="optional">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="ACCEPTED" />
+          <xs:enumeration value="MIXED" />
+          <xs:enumeration value="REJECTED" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:element name="provisionRequest" type="provisionRequestType">
+    <xs:key name="provisionRequestKey1">
+      <xs:selector xpath="." />
+      <xs:field xpath="@id" />
+    </xs:key>
+  </xs:element>
+
+  <xs:complexType name="provisionRequestCollectionType">
+    <xs:sequence>
+      <xs:element name="provisionRequest" type="provisionRequestType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="provisionRequests" type="provisionRequestCollectionType" />
+
+
+  <!--queue-->
+
+  <xs:complexType name="queueType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>The Queues Service supports creation, deletion and querying of Queue (Instance) / Queue Messages Service pairs.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="polling" minOccurs="0">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Determines, when no messages are queued, whether the Consumer will have to periodically reissue Polling Requests at timed intervals or can reissue a Polling Request immediately.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="IMMEDIATE" />
+            <xs:enumeration value="LONG" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="ownerId" minOccurs="0" type="uuidType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>C</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The Environment ID of the owning Consumer for which this Queue is buffering messages. It is not specified at Queue create time, but is returned as part of the response to a query operation, and serves to allow an administrative application to identify which application the Queue instance is assigned to.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="name" minOccurs="0" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A name which the Consumer assigns to the Queue. It is useful for reporting purposes, but is not guaranteed to be unique.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="queueUri" minOccurs="0" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The URI of the Messages Service associated with the Queue instance. This is the endpoint where the 'get next message' requests are issued.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ownerUri" minOccurs="0" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>When present, this contains the URL which the Queue instance will use when it determines the owner needs to be asynchronously alerted that a new message has arrived in the Queue.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="idleTimeout" minOccurs="0" type="xs:unsignedInt">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Is the maximum time in seconds the Messages Service will wait for a message to arrive, before returning an HTTPS Response of 'no message seen' to the Consumer.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="minWaitTime" minOccurs="0" type="xs:unsignedInt">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>C</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>indicates the minimum time in seconds that the Consumer should wait after receiving a 'no message seen' response to a previous query, before posting another.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="maxConcurrentConnections" minOccurs="0" type="xs:unsignedInt">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Number of (properly identified) concurrent connections supported by (the consumer, if suggested, and) the queue.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="created" minOccurs="0" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Time that Queue Instance was Created</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="lastAccessed" minOccurs="0" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Time that Queue Instance was last Accessed and a message was dequeued.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="lastModified" minOccurs="0" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Time that Queue Instance was last Modified by receiving a new incoming message.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="messageCount" minOccurs="0" type="xs:unsignedInt">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The number of messages currently residing in the Queue.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="optional" type="uuidType">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:element name="queue" type="queueType">
+    <xs:key name="queueKey1">
+      <xs:selector xpath="." />
+      <xs:field xpath="@id" />
+    </xs:key>
+  </xs:element>
+
+  <xs:complexType name="queueCollectionType">
+    <xs:sequence>
+      <xs:element name="queue" type="queueType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="queues" type="queueCollectionType" />
+
+
+  <!--subscription-->
+
+  <xs:complexType name="subscriptionType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>A Consumer uses the Subscriptions Infrastructure Service to subscribe to Events published by one or more Service Providers.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="zoneId" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="contextId" minOccurs="0" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The unique identity of a context element, which is associated with a Provider of this name and type operating in a Zone with this ID.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="serviceType" type="serviceTypeType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The type of the Service</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="serviceName" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The name of the Service. For utilities, this is fixed to one of the defined set of Utility Service Names. For objects and functions, it is defined by the Data Model.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="queueId" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Specifies which queues you want data associated with this subscription published to.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="optional" type="uuidType">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:element name="subscription" type="subscriptionType">
+    <xs:key name="subscriptionKey1">
+      <xs:selector xpath="." />
+      <xs:field xpath="@id" />
+    </xs:key>
+  </xs:element>
+
+  <xs:complexType name="subscriptionCollectionType">
+    <xs:sequence>
+      <xs:element name="subscription" type="subscriptionType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="subscriptions" type="subscriptionCollectionType" />
+
+
+  <!--job-->
+
+  <xs:complexType name="jobType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>All functional services must use this object design to track state. While Events may be published back to the objects creator, they must not be published to the Consumer when the event was generated based on its request (since results were included in the response). Each functional service should define the expectations of how management of the job is managed for both the Consumer and Provider. For instance, certain optional fields may need to be included in-order-to successfully cause a job to be created.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="name" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The name of the job, e.g. "grading" or "sre".</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="description" minOccurs="0" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A description of the job, e.g. "Bowers Elementary School Final Marks"</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="state" minOccurs="0" type="jobStateType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The current enumerable state of the job.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="stateDescription" minOccurs="0" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A descriptive message elaborating on the current state, e.g. if the current state is "FAILED" the stateDescription may be "Timeout occured".</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="created" minOccurs="0" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The datetime this job was created.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="lastModified" minOccurs="0" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The datetime this job was last modified.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="timeout" minOccurs="0" type="xs:duration">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The ammount of time after creation before this job is automatically deleted.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="phases" minOccurs="0" type="phaseCollectionType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The phases that make up this job.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="initialization" minOccurs="0" type="initializationType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="optional" type="uuidType">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:element name="job" type="jobType">
+    <xs:key name="jobKey1">
+      <xs:selector xpath="." />
+      <xs:field xpath="@id" />
+    </xs:key>
+  </xs:element>
+
+  <xs:complexType name="jobCollectionType">
+    <xs:sequence>
+      <xs:element name="job" type="jobType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="jobs" type="jobCollectionType" />
+
+
+  <!--state-->
+
+  <xs:complexType name="stateType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>For states updatable by the Consumer, it creates a new state much like it would a single object. The actual result (state or error) is included in the response. Each functional service should define the expectations for which Adaptor is responsible for updating the phase status. NOTE: The "states" collection represented here is reserved for future capabilities.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="type" type="phaseStateType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The type of this State object.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="created" minOccurs="0" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The datetime this job was created.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="lastModified" minOccurs="0" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The datetime this job was last modified.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="description" minOccurs="0" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A descriptive message ellaborating the condition of this state, e.g. if the state is "FAILED" the stateDescription may be "Timeout occured".</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="optional" type="uuidType">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:element name="state" type="stateType">
+    <xs:key name="stateKey1">
+      <xs:selector xpath="." />
+      <xs:field xpath="@id" />
+    </xs:key>
+  </xs:element>
+
+  <xs:complexType name="stateCollectionType">
+    <xs:sequence>
+      <xs:element name="state" type="stateType" minOccurs="1" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="states" type="stateCollectionType" />
+
+
+  <!--UtilityServices-->
+
+
+  <!--alert-->
+
+  <xs:complexType name="alertType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>Alerts form a system wide log that can be protected, as it may contain sensitive data. Ideally an Alert should contain as much identifying information about the problem being reported as possible.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="reporter" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>External identification of the Application (Consumer or Provider) reporting this Alert.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="cause" minOccurs="0" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>External identification of the cause of the Alert.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="exchange">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The exchange (or lack of exchange) responsible for generating the Alert.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="REQUEST" />
+            <xs:enumeration value="RESPONSE" />
+            <xs:enumeration value="EVENT" />
+            <xs:enumeration value="TIMEOUT" />
+            <xs:enumeration value="OTHER" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="level">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The level of the Alert.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="INFO" />
+            <xs:enumeration value="STATECHANGE" />
+            <xs:enumeration value="EVENT" />
+            <xs:enumeration value="WARNING" />
+            <xs:enumeration value="ERROR" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="description" minOccurs="0" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A description of the reason for the Alert.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="messageID" minOccurs="0" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>C</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>If available, the ID of the Message causing the problem.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="body" minOccurs="0" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The internals of the offending message or a more complete description of the information or state change. Usage of the CDATA designation is recommended in order to make the XML contents more readable to humans. </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="error" minOccurs="0" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Detailed error results such as a stack trace.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="xpath" minOccurs="0" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>An indicator of the specific element that was in error (or contributed to the problem. [NEEDS TO BE CHANGED TO the SIF XPATH TYPE]</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="category" minOccurs="0" type="xs:unsignedInt">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>C</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>If the Alert Level is an error, this value must be the SIF 3.0.1 Error Category corresponding to the type of Error being reported</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="code" minOccurs="0" type="xs:unsignedInt">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>C</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>If the Alert Level is an error, this value must be the SIF 3.0.1 Error Code corresponding to the type of Error being reported.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="internal" minOccurs="0" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Code internal to the reporter.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="optional" type="uuidType">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:element name="alert" type="alertType">
+    <xs:key name="alertKey1">
+      <xs:selector xpath="." />
+      <xs:field xpath="@id" />
+    </xs:key>
+  </xs:element>
+
+  <xs:complexType name="alertCollectionType">
+    <xs:sequence>
+      <xs:element name="alert" type="alertType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="alerts" type="alertCollectionType" />
+
+
+  <!--codeSet-->
+
+  <xs:complexType name="codeSetType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>The Code Set Registry Service provides a way for all legal codes to be defined outside of the SIF Specification while allowing changes (additions and replacements) of external code set values to be easily verified by the recipient so as not to break existing Consumer / Provider interoperability.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="zone" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>If this is tied to a specific zone it is specified here, otherwise "environment-global" indicates applicability to all zones in the Environment.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="version" type="versionType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The official major, minor, and revision version of the code set.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="timestamp" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The date and time of the last change to this code set. So that only updates can be queried efficiently (where applicable).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="source" minOccurs="0" type="uriType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>C</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>URL to an external code set whose values are not (yet) present in the system.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="codeItems" minOccurs="0" type="codeItemsType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="optional">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:annotation>
+            <xs:appinfo>
+              <sifChar>O</sifChar>
+              <privacyRating />
+            </xs:appinfo>
+            <xs:documentation />
+          </xs:annotation>
+          <xs:minLength value="0" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+          <xs:maxLength value="128" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:element name="codeSet" type="codeSetType">
+    <xs:key name="codeSetKey1">
+      <xs:selector xpath="." />
+      <xs:field xpath="@id" />
+    </xs:key>
+  </xs:element>
+
+  <xs:complexType name="codeSetCollectionType">
+    <xs:sequence>
+      <xs:element name="codeSet" type="codeSetType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="codeSets" type="codeSetCollectionType" />
+
+
+  <!--namespace-->
+
+  <xs:complexType name="namespaceType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>The Namespaces Registry contains the set of XML namespace URIs and their corresponding schema location URLs that are currently valid within the Environment.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="zone" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>If this namespace is tied to a specific zone it is specified here.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="uri">
+        <xs:simpleType>
+          <xs:restriction base="xs:anyURI">
+            <xs:annotation>
+              <xs:appinfo>
+                <sifChar>M</sifChar>
+                <privacyRating />
+              </xs:appinfo>
+              <xs:documentation>The namespace URI of the retrieved URL.</xs:documentation>
+            </xs:annotation>
+            <xs:maxLength value="2048" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="url">
+        <xs:simpleType>
+          <xs:restriction base="xs:anyURI">
+            <xs:annotation>
+              <xs:appinfo>
+                <sifChar>M</sifChar>
+                <privacyRating />
+              </xs:appinfo>
+              <xs:documentation>The URL of the specified namespace URI.</xs:documentation>
+            </xs:annotation>
+            <xs:maxLength value="2048" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="optional" type="uuidType">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:element name="namespace" type="namespaceType">
+    <xs:key name="namespaceKey1">
+      <xs:selector xpath="." />
+      <xs:field xpath="@id" />
+    </xs:key>
+  </xs:element>
+
+  <xs:complexType name="namespaceCollectionType">
+    <xs:sequence>
+      <xs:element name="namespace" type="namespaceType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="namespaces" type="namespaceCollectionType" />
+
+
+  <!--provider-->
+
+  <xs:complexType name="providerType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>All potentially accessible Services have an entry in the Providers Registry (including the Providers Registry Utility Service itself), although full or even partial Consumer access to that Service is determined by the access rights currently granted in the Consumer's Environment object, and is not guaranteed.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="serviceType" type="serviceTypeType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The generic type of Service being provided.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="serviceName" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The name of the Service or the Service Path being provided.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="contextId" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The name of the Service Context being provided.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="zoneId" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The Zone in which the Service Context is being provided.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="providerName" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The name of the Service Provider as it would be referred to by the administrator of the Zone (ex: RamseySIS).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="querySupport" type="querySupportType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="mimeTypes" minOccurs="0" type="mediaTypesType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="endPoint" minOccurs="0" type="protocolType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>C</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>In a Brokered Environment, this element contains the URL where all requests for this Service Provider should be re-invoked by the Connector</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="optional" type="uuidType">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:element name="provider" type="providerType">
+    <xs:key name="providerKey1">
+      <xs:selector xpath="." />
+      <xs:field xpath="@id" />
+    </xs:key>
+  </xs:element>
+
+  <xs:complexType name="providerCollectionType">
+    <xs:sequence>
+      <xs:element name="provider" type="providerType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="providers" type="providerCollectionType" />
+
+
+  <!--xquery-->
+
+  <xs:complexType name="xqueryType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>This collection defines the entire set of named queries that Consumers may legally issue for execution by Service Providers. A Consumer specifies the ID of a Named XQuery in a Query Request to a specific Service Provider, along with a set of values for any associated script parameters.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="type">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Determines if the query may be sent to a data provider or if it requires the extended XQuery mechanism.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="SINGULAR" />
+            <xs:enumeration value="FORMULA" />
+            <xs:enumeration value="EXTENDED" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="status">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Communicates if the query has been inspected for data hiding and the results of that assessment.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="PENDING" />
+            <xs:enumeration value="APPROVED" />
+            <xs:enumeration value="DISALLOWED" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="qualifier" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <sifChar>O</sifChar>
+                <privacyRating />
+              </xs:appinfo>
+              <xs:documentation>If status is DISALLOWED this element optionally contains the reason.</xs:documentation>
+            </xs:annotation>
+            <xs:minLength value="0" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+            <xs:maxLength value="1024" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="description" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <sifChar>O</sifChar>
+                <privacyRating />
+              </xs:appinfo>
+              <xs:documentation>Human readable description of the XQuery's intended behavior.</xs:documentation>
+            </xs:annotation>
+            <xs:maxLength value="1024" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+            <xs:minLength value="0" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="script">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <sifChar>M</sifChar>
+                <privacyRating />
+              </xs:appinfo>
+              <xs:documentation>The text of the XQuery which MAY accept parameters. Usage of the CDATA designation is recommended.</xs:documentation>
+            </xs:annotation>
+            <xs:minLength value="0" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="parameters" type="parametersType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="returnType" nillable="true" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The fully qualified name of the root element returned by this service. Example: http://www.sifassociation.org/datamodel/na/3.3:students </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="optional" type="xs:token">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>C</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation>The unique ID of the XQuery Template, which is contained in the Query Request URL when this template is being utilized. "Suggested" by the Consumer issuing the create Request, or pre-set in accordance with the binding requirements of a particular SIF release. This is NOT required to be a UUID, and must be provided as the Service Identifier in every Query URL which invokes this Template. Ex: "StudentSnapshot". </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:element name="xquery" type="xqueryType">
+    <xs:key name="xqueryKey1">
+      <xs:selector xpath="." />
+      <xs:field xpath="@id" />
+    </xs:key>
+  </xs:element>
+
+  <xs:complexType name="xqueryCollectionType">
+    <xs:sequence>
+      <xs:element name="xquery" type="xqueryType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="xquerys" type="xqueryCollectionType" />
+
+
+  <!--zone-->
+
+  <xs:complexType name="zoneType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>Zone identifiers are chosen by the administrator and can follow any convention that best meets the needs of the deploying organization. The Zone in which the Service is to be found always qualifies every Consumer request for any Provider Service. Each Service Consumer is assigned a "default" Zone at Registration time, which is used whenever a specific Zone is not explicitly included in one of its Provider Service Requests.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="description" minOccurs="0" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A short (possibly multi-sentence) description of the Zone</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="properties" minOccurs="0" type="propertiesType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="optional" type="xs:token">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:element name="zone" type="zoneType">
+    <xs:key name="zoneKey1">
+      <xs:selector xpath="." />
+      <xs:field xpath="@id" />
+    </xs:key>
+  </xs:element>
+
+  <xs:complexType name="zoneCollectionType">
+    <xs:sequence>
+      <xs:element name="zone" type="zoneType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="zones" type="zoneCollectionType" />
+
+
+  <!--PrivacyServices-->
+
+
+  <!--pod-->
+
+  <xs:complexType name="podType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating>Low</privacyRating>
+      </xs:appinfo>
+      <xs:documentation>This object contains information about privacy obligations.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="podStatus">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating>Low</privacyRating>
+          </xs:appinfo>
+          <xs:documentation>The status value for this POD.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="Live" />
+            <xs:enumeration value="Draft" />
+            <xs:enumeration value="Pending" />
+            <xs:enumeration value="Expired" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="podToken" type="gCoreLocalIdType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating>Low</privacyRating>
+          </xs:appinfo>
+          <xs:documentation>The token reference for the POD.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="podVersion" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating>Low</privacyRating>
+          </xs:appinfo>
+          <xs:documentation>The POD version number. PODs are expected to change over time.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="partyId" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating>Low</privacyRating>
+          </xs:appinfo>
+          <xs:documentation>The name of the party (typically the data processor) which will receive the data from the school, district or state and has entered into an agreement to process the data and respect the privacy obligations of the data.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="privacyList" type="privacyListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating>Low</privacyRating>
+          </xs:appinfo>
+          <xs:documentation>The set of privacy controls, laws and obligations which apply in this POD. There may be multiple sets which apply.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="required" type="uuidType">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>M</sifChar>
+          <privacyRating>Low</privacyRating>
+        </xs:appinfo>
+        <xs:documentation>The ID (GUID) that uniquely identifies this object.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:element name="pod" type="podType">
+    <xs:key name="podKey1">
+      <xs:selector xpath="." />
+      <xs:field xpath="@id" />
+    </xs:key>
+  </xs:element>
+
+  <xs:complexType name="podCollectionType">
+    <xs:sequence>
+      <xs:element name="pod" type="podType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="pods" type="podCollectionType" />
+
+
+  <!--Request-->
+
+
+  <!--deleteRequest-->
+
+  <xs:complexType name="deleteRequestType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>A "deleteRequest" element, which consists of multiple, "delete" object ids. Since REST conventions do not support payloads on HTTP DELETE messages, all multi-object Delete Requests are conveyed via an HTTP PUT message containing an additional HTTP Header Field value of methodOverride set to DELETE.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="deletes" type="deleteIdCollectionType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="deleteRequest" type="deleteRequestType" />
+
+  <xs:complexType name="deleteRequestCollectionType">
+    <xs:sequence>
+      <xs:element name="deleteRequest" type="deleteRequestType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="deleteRequests" type="deleteRequestCollectionType" />
+
+
+  <!--Response-->
+
+
+  <!--createResponse-->
+
+  <xs:complexType name="createResponseType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>An HTTP Response with a status of 200 and a payload consisting of a single "createResponse" element. This includes, for each requested object successfully created, an internal status of 201 and the service-assigned refId. Any requested object that failed to be created is indicated by an error statusCode and a corresponding error payload.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="creates" type="createsType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="createResponse" type="createResponseType" />
+
+  <xs:complexType name="createResponseCollectionType">
+    <xs:sequence>
+      <xs:element name="createResponse" type="createResponseType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="createResponses" type="createResponseCollectionType" />
+
+
+  <!--deleteResponse-->
+
+  <xs:complexType name="deleteResponseType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>An HTTP Response with a status of 200 (success). It contains a payload consisting of a single "deleteResponse" element.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="deletes" type="deleteStatusCollectionType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="deleteResponse" type="deleteResponseType" />
+
+  <xs:complexType name="deleteResponseCollectionType">
+    <xs:sequence>
+      <xs:element name="deleteResponse" type="deleteResponseType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="deleteResponses" type="deleteResponseCollectionType" />
+
+
+  <!--error-->
+
+  <xs:complexType name="errorType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="code" type="xs:unsignedInt">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Corresponds to the value contained in the HTTPS Header Status-Code" field in which the Error Object is the payload.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="scope" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Attempted operation. Ex: "Modify Student"</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="message" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A simple, easy to understand, compact description of the error. The primary consumer of this message is the application user. Example: "Unable to open database."</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="description" minOccurs="0" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>An optional error description that is more complete and technical in nature. It is to be used as a diagnostic message in trouble-shooting procedures. Example: "The 'Students' table is opened in exclusive mode by user 'ADM1' (dbm.cpp, line 300)."</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="optional" type="xs:token">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:element name="error" type="errorType">
+    <xs:key name="errorKey1">
+      <xs:selector xpath="." />
+      <xs:field xpath="@id" />
+    </xs:key>
+  </xs:element>
+
+  <xs:complexType name="errorCollectionType">
+    <xs:sequence>
+      <xs:element name="error" type="errorType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="errors" type="errorCollectionType" />
+
+
+  <!--updateResponse-->
+
+  <xs:complexType name="updateResponseType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>An HTTP Response with a status of 200 (success) and a location corresponding to the URL of the first successfully modified object. It contains a payload consisting of a single "updateResponse" element.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="updates" type="updatesType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="updateResponse" type="updateResponseType" />
+
+  <xs:complexType name="updateResponseCollectionType">
+    <xs:sequence>
+      <xs:element name="updateResponse" type="updateResponseType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="updateResponses" type="updateResponseCollectionType" />
+
+
+  <!--gCoreEmailListType-->
+
+  <xs:complexType name="gCoreEmailListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>A list of e-mail addresses associated with an individual or organization.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="email" maxOccurs="unbounded" type="gCoreEmailType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--gCoreEmailType-->
+
+  <xs:simpleType name="gCoreEmailType">
+    <xs:restriction base="xs:normalizedString">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>M</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation>This element represents an e-mail address of one of a number of types and occurs in objects such as
+        StudentPersonal, StaffPersonal, StudentContactPersonal, etc..</xs:documentation>
+      </xs:annotation>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!--gCorePhoneNumberListType-->
+
+  <xs:complexType name="gCorePhoneNumberListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>Lists phone numbers associated with an entity.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="phoneNumber" maxOccurs="unbounded" type="gCorePhoneNumberType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--gCorePhoneNumberType-->
+
+  <xs:complexType name="gCorePhoneNumberType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>This element represents a phone number and occurs within objects such as StudentPersonal, StaffPersonal, etc.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="number" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Phone number.  Free-form, but typical Australian formats include:</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="extension" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Phone number extension.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="listedStatus" minOccurs="0" nillable="true">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Indicates whether or not the phone number is available to the public.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="Y" />
+            <xs:enumeration value="N" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="preference" minOccurs="0" nillable="true" type="xs:unsignedInt">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Preference number indicating an order in which phone numbers should be used when contacting person.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--gCoreNameType-->
+
+  <xs:complexType name="gCoreNameType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>
+        Core Name Type or Name elements, primarily to allow structure to be leveraged with different Type attribute values.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="title" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A title or prefix associated with the name. If any of: Mr, Mrs, Ms, Miss, Rev, Fr, Dr, Prof, Hon, Sir, Lord, Lady - these must be as shown, otherwise free text. Note that title is not applicable to learners. </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="familyName" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>C</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Family name. That part of the person's name which is used to describe family, clan, tribal group, or marital association. Note that this element is required when known. However, it may not be possible to know the family name in which case you should add the available information to the FullName element. </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="givenName" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>C</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Given name of the person. Note that this element is required if known. However, it may not be possible to know the given name in which case you should add the available information to the FullName element. </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="otherGivenNames" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>All other given or middle names, each separated with a single space character. </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="familyNameFirst" minOccurs="0" nillable="true">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>An indicator used to identify the naming conventions used by some predominantly non-European, ethnic or language groups and related to the display nature of a name. </xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="Y" />
+            <xs:enumeration value="N" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="preferredName" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The given name preferred most by the person (as written). </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--gCoreContactInfoType-->
+
+  <xs:complexType name="gCoreContactInfoType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>Common element used to supply information for a contact person at a school, LEA, or other institution.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="name" type="gCoreNameType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="positionTitle" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The contact person's position title.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="role" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Role played by this contact in this instance.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="registrationDetails" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Registration Details of the Contact.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="qualifications" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Qualifications of the Contact.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="address" minOccurs="0" nillable="true" type="gCoreAddressType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Address of the contact.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="emailList" minOccurs="0" nillable="true" type="gCoreEmailListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>List of Email elements.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="phoneNumberList" minOccurs="0" nillable="true" type="gCorePhoneNumberListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>List of PhoneNumber elements.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--gCoreAddressType-->
+
+  <xs:complexType name="gCoreAddressType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar>M</sifChar>
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>This element contains address data.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="effectiveFromDate" minOccurs="0" nillable="true" type="xs:date">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Date the address became active.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="effectiveToDate" minOccurs="0" nillable="true" type="xs:date">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Date the address ceases to be active.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="line1" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Address line 1.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="line2" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Address line 2.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="line3" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Address line 3.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="city" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The city or Suburb part of the address.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="stateProvince" minOccurs="0" nillable="true" type="gCoreStateProvinceType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>C</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The state or province  or county.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="country" minOccurs="0" nillable="true" type="gCoreCountryType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The country code.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="postalCode" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The ZIP/postal code.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--gCoreAddressListType-->
+
+  <xs:complexType name="gCoreAddressListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>A list of Address elements.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="address" maxOccurs="unbounded" type="gCoreAddressType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--gCoreCountryType-->
+
+  <xs:simpleType name="gCoreCountryType">
+    <xs:restriction base="xs:normalizedString">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar />
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation>A country code or name.</xs:documentation>
+      </xs:annotation>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!--gCoreLocalIdType-->
+
+  <xs:simpleType name="gCoreLocalIdType">
+    <xs:restriction base="xs:normalizedString">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar />
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation>
+        This is a common element used to define the locally assigned identifier associated with an entity. 
+      </xs:documentation>
+      </xs:annotation>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!--gCoreStateProvinceIdType-->
+
+  <xs:simpleType name="gCoreStateProvinceIdType">
+    <xs:restriction base="xs:normalizedString">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar />
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation>The identifier for this entity as assigned by the state or province.</xs:documentation>
+      </xs:annotation>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!--gCoreStateProvinceType-->
+
+  <xs:simpleType name="gCoreStateProvinceType">
+    <xs:restriction base="xs:normalizedString">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar />
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation>A state or province code. Note: When dealing with countries other than Australia, state/province codes/values other than those referenced here can be used.</xs:documentation>
+      </xs:annotation>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!--gCoreGenderType-->
+
+  <xs:simpleType name="gCoreGenderType">
+    <xs:restriction base="xs:token">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar />
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+      <xs:enumeration value="M" />
+      <xs:enumeration value="F" />
+      <xs:enumeration value="X" />
+      <xs:enumeration value="U" />
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!--privacyListType-->
+
+  <xs:complexType name="privacyListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="privacy" minOccurs="0" maxOccurs="unbounded" type="privacyType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--privacyType-->
+
+  <xs:complexType name="privacyType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="default">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Is this the default privacy template?</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="Y" />
+            <xs:enumeration value="N" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="appIDList" minOccurs="0" nillable="true" type="appIDListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The list of applications in this contract.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="adapterFingerprintList" minOccurs="0" nillable="true" type="adapterFingerprintListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A list of fingerprints.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="zoneContextList" minOccurs="0" nillable="true" type="zoneContextListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A list zones and contexts where this POD applies.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="endpointList" minOccurs="0" nillable="true" type="endpointListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A list of endpoints that are covered by this POD.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="dataModelNamespace" minOccurs="0" nillable="true" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Namespace associated with the relevant datamodel.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="dataModelVersionMin" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Minimum data model version.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="dataModelVersionMax" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Maximum data model version.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="privacyObligationsDocument" minOccurs="0" nillable="true" type="privacyObligationsDocumentType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The legal and technical requirements that are required to be met to satisfy privacy and security concerns.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--privacyObligationsDocumentType-->
+
+  <xs:complexType name="privacyObligationsDocumentType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="contract" minOccurs="0" nillable="true" type="contractType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The details of the contract the POD has been derived from.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="legalRequirements" minOccurs="0" nillable="true" type="legalRequirementsType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Legal Requirements Container.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="technicalRequirements" minOccurs="0" nillable="true" type="technicalRequirementsType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Technical Requirements Container.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="dataController" minOccurs="0" nillable="true" type="dataControllerType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The data controller, "means the natural or legal person, public authority, agency or other body which, alone or jointly with others, determines the purposes and means of the processing of personal data", see GDPR.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="dataProcessor" minOccurs="0" nillable="true" type="dataProcessorType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The data processor, "means a natural or legal person, public authority, agency or other body which processes personal data on behalf of the controller", see GDPR.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="dataSubProcessorList" minOccurs="0" nillable="true" type="dataSubProcessorListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The list of data sub-Processors who are the bodies that process data on behalf of the Data Processor.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--contractType-->
+
+  <xs:complexType name="contractType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar>O</sifChar>
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>The details of the contract the POD has been derived from.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="contractURI" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>URI Associated with contract</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="contractName" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Name associated with contract</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="dateValidFrom" type="xs:date">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Date the contract is valid from.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="dateValidTo" minOccurs="0" nillable="true" type="xs:date">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Date the contract is valid to.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="contractVersion" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Version of contract that this POD applies to.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="lawList" type="lawListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>List of laws covered referenced by the contract.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="studentDataIPRights" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Who owns the IP rights of this contract?</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--lawListType-->
+
+  <xs:complexType name="lawListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>A list of parties and data sharing permissions.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="law" minOccurs="0" maxOccurs="unbounded" type="lawType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A law that applies to this contract.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--lawType-->
+
+  <xs:complexType name="lawType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>Information about the specific law.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="lawName" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Common name for this law.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="lawDescription" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Details of the law.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--legalRequirementsType-->
+
+  <xs:complexType name="legalRequirementsType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>Contains a list of the legal clauses within the contract.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="clauseList" type="clauseListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A list of the legal clauses within the contract.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--clauseListType-->
+
+  <xs:complexType name="clauseListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>A list of the legal clauses within the contract.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="clause" minOccurs="0" maxOccurs="unbounded" type="clauseType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Details of a legal clause within the contract.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--clauseType-->
+
+  <xs:complexType name="clauseType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>Details of a legal clause within the contract.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="clauseLabel" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The label which should include a brief description.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="clauseReference" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The formal clause reference.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="clauseContent" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The actual detailed content of the clause.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="obligationList" minOccurs="0" nillable="true" type="obligationListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>List of obligations.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--benchmarkListType-->
+
+  <xs:complexType name="benchmarkListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>A List of benchmarks - where a benchmark is a set of technical or process standards to ensure the clause is met.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="benchmark" minOccurs="0" maxOccurs="unbounded" type="benchmarkType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A benchmark is a set of technical or process standards to ensure the clause is met.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--benchmarkType-->
+
+  <xs:complexType name="benchmarkType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>A set of technical or process standards to ensure the clause is met.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="benchmarkName" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The name of the Benchmark</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="benchmarkId" minOccurs="0" nillable="true" type="gCoreLocalIdType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The local id of the benchmark.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="benchmarkDescription" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A description of what the benchmark is and how it should be applied.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="benchmarkURL" minOccurs="0" nillable="true" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A link to any authoritative source of the benchmark.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--obligationListType-->
+
+  <xs:complexType name="obligationListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>A list of requirements imposed by the contract.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="obligation" minOccurs="0" maxOccurs="unbounded" type="obligationType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A requirement imposed by the contract.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--obligationType-->
+
+  <xs:complexType name="obligationType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>A requirement imposed by the contract.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="obligationDescription" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A description of the requirment imposed by the contract.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="obligationURL" minOccurs="0" nillable="true" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A link to any authoritative source of the obligation.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="benchmarkList" minOccurs="0" nillable="true" type="benchmarkListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A list of benchmarks associated with the obligation.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--technicalRequirementsType-->
+
+  <xs:complexType name="technicalRequirementsType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>Details of technical requirements that need to be met to achieve the POD.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="dataAccess" minOccurs="0" nillable="true" type="dataAccessType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A list of the data that can be accessed and any rules that specifically apply.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="conditionList" minOccurs="0" nillable="true" type="conditionListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="dataSubject" minOccurs="0" nillable="true" type="dataSubjectType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The specific clauses obligations and benchmarks that applies to the subject - teacher, student or parent.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="dataDeletion" minOccurs="0" nillable="true" type="dataDeletionType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Details and requirements for data deletion.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="securityTechnologyList" minOccurs="0" nillable="true" type="securityTechnologyListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--dataAccessType-->
+
+  <xs:complexType name="dataAccessType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>A list of the data that can be accessed and any rules that specifically apply.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="clauseList" minOccurs="0" nillable="true" type="clauseListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A list of clauses that specifically apply to these technical requirements.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="fieldList" minOccurs="0" nillable="true" type="fieldListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A list of fields that can be accessed under this POD.  Equivalent to a "green list".</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--dataSubjectType-->
+
+  <xs:complexType name="dataSubjectType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>The specific clauses obligations and benchmarks that applies to the subject - teacher, student or parent.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="clauseList" minOccurs="0" nillable="true" type="clauseListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="benchmarkList" minOccurs="0" nillable="true" type="benchmarkListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="fieldList" minOccurs="0" nillable="true" type="fieldListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A list of fields that can be accessed under this POD.  Equivalent to a "green list".</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="respondInDays" minOccurs="0" nillable="true" type="xs:integer">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>n how many days should any request for information around this data subject be responded to?</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="requirePortability" minOccurs="0" nillable="true">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Do all the rules surrounding this data need to be ported with any data that is transmeitted?</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="Y" />
+            <xs:enumeration value="N" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--dataDeletionType-->
+
+  <xs:complexType name="dataDeletionType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>Details and requirements for data deletion.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="deleteData" minOccurs="0" nillable="true">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Must data be deleted when no longer required to the primary purpose?</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="Y" />
+            <xs:enumeration value="N" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="dataRetention" minOccurs="0" nillable="true" type="xs:integer">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>If allowed, how long can the data be retained for when no longer required for the primary purpose?</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="deleteBy" minOccurs="0" nillable="true" type="xs:date">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>By which specific date should this data be removed from systems?</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="partyToDeleteData" minOccurs="0" nillable="true" type="partyToDeleteDataType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Who is responsible for deletion of this data?</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="respondInDays" minOccurs="0" nillable="true" type="xs:integer">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>In how many days should any request for information around this data and it's deletion be responded to?</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="requirePortability" minOccurs="0" nillable="true">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Do all the rules surrounding this data need to be ported with any data that is transmeitted?</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="Y" />
+            <xs:enumeration value="N" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--partyToDeleteDataType-->
+
+  <xs:complexType name="partyToDeleteDataType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>Who is responsible for deletion of this data?</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="organisation" minOccurs="0" nillable="true" type="gCoreLocalIdType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="deletecontactInfo" minOccurs="0" nillable="true" type="gCoreContactInfoType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--securityTechnologyListType-->
+
+  <xs:complexType name="securityTechnologyListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="securityTechnology" minOccurs="0" maxOccurs="unbounded" type="securityTechnologyType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--securityTechnologyType-->
+
+  <xs:complexType name="securityTechnologyType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="clauseList" minOccurs="0" nillable="true" type="clauseListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="technologyName" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="technologyDescription" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="referenceURL" minOccurs="0" nillable="true" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="versionMin" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--fieldListType-->
+
+  <xs:complexType name="fieldListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>A list of fields that can be accessed under this POD.  Equivalent to a "green list".</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="field" minOccurs="0" maxOccurs="unbounded" type="fieldType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Details of a field that can be accessed under this POD, equivalent to an element in a "green list".</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--fieldType-->
+
+  <xs:complexType name="fieldType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>Details of a field that can be accessed under this POD, equivalent to an element in a "green list".</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="fieldName" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Name of the "green listed field"</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="controlrights" minOccurs="0" nillable="true">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>What are the control rights around this "green listed field"?</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="R" />
+            <xs:enumeration value="RW" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--dataControllerType-->
+
+  <xs:complexType name="dataControllerType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>The data controller, "means the natural or legal person, public authority, agency or other body which, alone or jointly with others, determines the purposes and means of the processing of personal data", see GDPR.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="dataControllerName" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Name of the data controller.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="privacyPolicyURL" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>URL Associated with contract</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="privacyContact" minOccurs="0" maxOccurs="unbounded" type="gCoreContactInfoType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The details of the privacy contact.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="issuesNotificationContact" minOccurs="0" maxOccurs="unbounded" type="gCoreContactInfoType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The details of the individual to be contacted if there are issues in fulfilling the obligations of the contract.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--dataSubProcessorListType-->
+
+  <xs:complexType name="dataSubProcessorListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>The list of data sub-Processors who are the bodies that process data on behalf of the Data Processor.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="dataSubProcessor" minOccurs="0" maxOccurs="unbounded" type="dataSubProcessorType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A data sub-Processors who are the bodies that process data on behalf of the Data Processor.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--dataProcessorType-->
+
+  <xs:complexType name="dataProcessorType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>The data processor, "means a natural or legal person, public authority, agency or other body which processes personal data on behalf of the controller", see GDPR.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="dataProcessorName" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Name of the Data Processor.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="privacyPolicyURL" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>URL Associated with contract</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="privacyContact" minOccurs="0" maxOccurs="unbounded" type="gCoreContactInfoType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The details of the privacy contact.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="notifyDataControllerOnAccessRequests" minOccurs="0" nillable="true">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Do we need to advise the data controller of access requests?</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="Y" />
+            <xs:enumeration value="N" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="dataProcessorContactForAccessRequests" minOccurs="0" maxOccurs="unbounded" type="gCoreContactInfoType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The details of the person to contact for access requests.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="purposeList" minOccurs="0" nillable="true" type="purposeListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A list or purposes for which the data may be used.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="alternatePurposeList" minOccurs="0" nillable="true" type="alternatePurposeListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Alternate purposes for which the data may be used.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="deidentifiedPurposeList" minOccurs="0" nillable="true" type="deidentifiedPurposeListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The purposes for which deidentified data is able to be used (if any).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="dataUsageMarketingAllowed" minOccurs="0" nillable="true">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Can the data be used for marketing purposes?</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="Y" />
+            <xs:enumeration value="N" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="personalInformationUpdatedFromSource" minOccurs="0" nillable="true" type="xs:integer">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The frequency at which personal information is to be updated from source systems.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="dataBreachNotification" minOccurs="0" nillable="true">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>In the event there is a breach event is notification of the breach contact required?</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="Y" />
+            <xs:enumeration value="N" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="dataBreachContact" minOccurs="0" maxOccurs="unbounded" type="gCoreContactInfoType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Contact details for the individual/s to be notified in the event of a data breach.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="employeesMustComplyWithAgreement" minOccurs="0" nillable="true">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Must employees of the data controller comply the with agreement?</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="Y" />
+            <xs:enumeration value="N" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="employeeConfidentialityAgreement" minOccurs="0" nillable="true">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation> Are employees of the data controller required to comply with a confidentiality agreement?</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="Y" />
+            <xs:enumeration value="N" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="employeeTrainingList" minOccurs="0" nillable="true" type="employeeTrainingListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A list of the data controller employee’s training requirements.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="passwordEmployeeAccessStandard" minOccurs="0" nillable="true" type="passwordEmployeeAccessStandardType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A list of the data controller employee’s password access standards.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="securityTestRequiredList" minOccurs="0" nillable="true" type="securityTestRequiredListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A list of security testing required to be completed by the data controller.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="countryImpactedList" minOccurs="0" nillable="true" type="countryImpactedListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>List of impacted countries in or through which the data transits or is stored.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--dataSubProcessorType-->
+
+  <xs:complexType name="dataSubProcessorType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>Details of organisations who process data on behalf of the data processor.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="subProcessorName" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Name of the sub processor.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="privacyPolicyURL" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>URL Associated with contract</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="privacyContact" minOccurs="0" maxOccurs="unbounded" type="gCoreContactInfoType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Details of the data sub processor's privacy contact.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="purposeList" minOccurs="0" nillable="true" type="purposeListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The purpose for which data is supplied to the data sub processor by the data processor.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--appIDListType-->
+
+  <xs:complexType name="appIDListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>List of application identifiers.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="appID" minOccurs="0" maxOccurs="unbounded" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>An application identifier.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--adapterFingerprintListType-->
+
+  <xs:complexType name="adapterFingerprintListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="adapterFingerprint" minOccurs="0" maxOccurs="unbounded" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>An opaque marker that represents the amalgam of all underlying PODs tied to a specific DataProcessor-DataController relationship.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--deidentifiedPurposeListType-->
+
+  <xs:complexType name="deidentifiedPurposeListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>The purposes for which deidentified data is able to be used (if any).</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="deidentifiedPurpose" minOccurs="0" maxOccurs="unbounded" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The purpose for which deidentified data is able to be used (if any).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--purposeListType-->
+
+  <xs:complexType name="purposeListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>A list of the purposes for which data is may be used.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="purpose" minOccurs="0" maxOccurs="unbounded" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The purpose for which data may be used.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--alternatePurposeListType-->
+
+  <xs:complexType name="alternatePurposeListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>Alternate purposes for which the data may be used.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="alternatePurpose" minOccurs="0" maxOccurs="unbounded" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Alternate purpose for which the data may be used.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--conditionListType-->
+
+  <xs:complexType name="conditionListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="condition" minOccurs="0" maxOccurs="unbounded" type="conditionType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--conditionType-->
+
+  <xs:complexType name="conditionType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="typeOfCondition" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="conditionName" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="conditionDescription" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="propertyList" minOccurs="0" nillable="true" type="propertyNVListType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--zoneContextListType-->
+
+  <xs:complexType name="zoneContextListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="zoneContext" minOccurs="0" maxOccurs="unbounded" type="zoneContextType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--zoneContextType-->
+
+  <xs:complexType name="zoneContextType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>A Zone and/or Context related to a POD.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="zoneId" minOccurs="0" nillable="true" type="gCoreLocalIdType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="contextId" minOccurs="0" nillable="true" type="gCoreLocalIdType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--endpointListType-->
+
+  <xs:complexType name="endpointListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="endpoint" minOccurs="0" maxOccurs="unbounded" type="endpointType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>An endpoint covered by the POD.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--endpointType-->
+
+  <xs:complexType name="endpointType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>A type of endpoint.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="endpointURL" minOccurs="0" nillable="true" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The url of the endpoint.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="endpointProviderName" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The name of the provider of the endpoint.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--employeeTrainingListType-->
+
+  <xs:complexType name="employeeTrainingListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="employeeTraining" minOccurs="0" maxOccurs="unbounded" type="employeeTrainingType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--employeeTrainingType-->
+
+  <xs:complexType name="employeeTrainingType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="trainingName" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="trainingURL" minOccurs="0" nillable="true" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--passwordEmployeeAccessStandardType-->
+
+  <xs:complexType name="passwordEmployeeAccessStandardType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="standardName" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Name of the standard used for access.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="standardURL" minOccurs="0" nillable="true" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A link to an authoritative source for this standard.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--countryImpactedListType-->
+
+  <xs:complexType name="countryImpactedListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>List of impacted countries in or through which the data transits or is stored.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="countryImpacted" minOccurs="0" maxOccurs="unbounded" type="countryImpactedType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Name of a country impacted in or through which the data transits or is stored.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--countryImpactedType-->
+
+  <xs:complexType name="countryImpactedType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="country" minOccurs="0" nillable="true" type="gCoreCountryType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Name of a country impacted in or through which the data transits or is stored.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="usage" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Details of the usage within the country, how the data is handled e.g. stored permanently, operational store, back-up, archived, etc.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--securityTestRequiredListType-->
+
+  <xs:complexType name="securityTestRequiredListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="securityTestRequired" minOccurs="0" maxOccurs="unbounded" type="securityTestRequiredType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Details of the security test required.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--securityTestRequiredType-->
+
+  <xs:complexType name="securityTestRequiredType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation>Details of the security test required.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="testType" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Type of the test.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="testFrequency" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>How often does this test need to be performed?</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="remediationRequiredIn" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>RNumber of days remediation for any inadequacies has to be completed with in.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="shareResults" minOccurs="0" nillable="true">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Are the results of this security test allowed to be shared?</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="Y" />
+            <xs:enumeration value="N" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--propertyNVListType-->
+
+  <xs:complexType name="propertyNVListType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="property" minOccurs="0" maxOccurs="unbounded" type="propertyNVType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--propertyNVType-->
+
+  <xs:complexType name="propertyNVType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="propertyName" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="propertyValue" minOccurs="0" nillable="true" type="xs:normalizedString">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--DefinedProtocolsType-->
+
+  <xs:simpleType name="DefinedProtocolsType">
+    <xs:restriction base="xs:token">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar />
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation>The transport protocols defined in SIF.</xs:documentation>
+      </xs:annotation>
+      <xs:enumeration value="HTTPS" />
+      <xs:enumeration value="HTTP" />
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!--ExtendedContentType-->
+
+  <xs:complexType name="ExtendedContentType">
+    <xs:complexContent mixed="true" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:restriction base="xs:anyType">
+        <xs:sequence>
+          <xs:any processContents="lax" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+
+  <!--SelectedContentType-->
+
+  <xs:complexType name="SelectedContentType">
+    <xs:complexContent mixed="true" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:restriction base="xs:anyType">
+        <xs:sequence>
+          <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+
+  <!--provisionedZonesType-->
+
+  <xs:complexType name="provisionedZonesType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="provisionedZone" maxOccurs="unbounded" type="provisionedZoneType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A specific Zone defined for this environment.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--provisionedZoneType-->
+
+  <xs:complexType name="provisionedZoneType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="services" minOccurs="0" type="servicesType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>M</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation>The unique id of the Zone, and the key to the Zone element in the Zone Registry.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+
+  <!--createsType-->
+
+  <xs:complexType name="createsType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="create" maxOccurs="unbounded" type="createType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--createType-->
+
+  <xs:complexType name="createType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="error" minOccurs="0" type="errorType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="optional" type="xs:token">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="advisoryId" use="required" type="xs:token">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>M</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="statusCode" use="optional">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:annotation>
+            <xs:appinfo>
+              <sifChar>O</sifChar>
+              <privacyRating />
+            </xs:appinfo>
+            <xs:documentation />
+          </xs:annotation>
+          <xs:pattern value="[24-5][0-9]{2}" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+
+
+  <!--deleteIdCollectionType-->
+
+  <xs:complexType name="deleteIdCollectionType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="delete" maxOccurs="unbounded" type="deleteIdType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--environmentTypeType-->
+
+  <xs:simpleType name="environmentTypeType">
+    <xs:restriction base="xs:token">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+      <xs:enumeration value="DIRECT" />
+      <xs:enumeration value="BROKERED" />
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!--jobStateType-->
+
+  <xs:simpleType name="jobStateType">
+    <xs:restriction base="xs:token">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+      <xs:enumeration value="NOTSTARTED" />
+      <xs:enumeration value="INPROGRESS" />
+      <xs:enumeration value="COMPLETED" />
+      <xs:enumeration value="FAILED" />
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!--phaseCollectionType-->
+
+  <xs:complexType name="phaseCollectionType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="phase" maxOccurs="unbounded" type="phaseType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--phaseType-->
+
+  <xs:complexType name="phaseType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="name" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The name of the Phase unique within the context of the owning job.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="states" type="stateCollectionType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A collection of the states the Phase has been through, must initially contain a NOTAPPLICABLE or NOTSTARTED state.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="required" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Whether or not this phase is required for the job to complete successfully.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="rights" type="rightsType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Access rights given to the consumer for this phase.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="statesRights" type="rightsType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Access rights given to the consumer for each state.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--initializationType-->
+
+  <xs:complexType name="initializationType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="phaseName" minOccurs="0" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Name of initialization phase the payload corresponds to.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="payload" type="xs:anyType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Information matching the initialization phase, should result in corresponding phase having an INPROGRESS, COMPLETED, or FAILED state.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--phaseStateType-->
+
+  <xs:simpleType name="phaseStateType">
+    <xs:restriction base="xs:token">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+      <xs:enumeration value="NOTAPPLICABLE" />
+      <xs:enumeration value="NOTSTARTED" />
+      <xs:enumeration value="PENDING" />
+      <xs:enumeration value="SKIPPED" />
+      <xs:enumeration value="INPROGRESS" />
+      <xs:enumeration value="COMPLETED" />
+      <xs:enumeration value="FAILED" />
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!--enumerationsType-->
+
+  <xs:complexType name="enumerationsType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="enumeration" maxOccurs="unbounded" type="enumerationType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Individual setting</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--enumerationType-->
+
+  <xs:complexType name="enumerationType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="value" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>An acceptable parameter value for this query.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="code" minOccurs="0" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>C</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>If enumerated value has an equivalent code, this field may be used for conversion.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--parametersType-->
+
+  <xs:complexType name="parametersType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="parameter" minOccurs="0" maxOccurs="unbounded" type="parameterType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>OR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Individual setting</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--parameterType-->
+
+  <xs:complexType name="parameterType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="name" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The name of the query parameter to be passed in.  Note:  Must not conflict with any other query parameter name.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="type" minOccurs="0" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>A well understood type that MAY be used for parameter validation.  Example:  xs:unsignedInt.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="default" minOccurs="0" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Value to be supplied for this parameter if the submitter omits it.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="description" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:normalizedString">
+            <xs:annotation>
+              <xs:appinfo>
+                <sifChar>O</sifChar>
+                <privacyRating />
+              </xs:appinfo>
+              <xs:documentation>An explanation of what this parameter represents.</xs:documentation>
+            </xs:annotation>
+            <xs:minLength value="0" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+            <xs:maxLength value="1024" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="required" minOccurs="0" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Indicator as to if this parameter is required.  If omitted, the parameter is assumed to be required!.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="enumerations" minOccurs="0" type="enumerationsType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="range" minOccurs="0" type="rangeType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="minLength" minOccurs="0" type="xs:unsignedInt">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The minimum length for values of this parameter.  If omitted, zero.  May be functionally different because of other restrictions.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="maxLength" minOccurs="0" type="xs:unsignedInt">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The maximum length for values of this parameter.  If omitted, unbounded.  May be functionally different because of other restrictions.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--propertiesType-->
+
+  <xs:complexType name="propertiesType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="property" maxOccurs="unbounded" type="propertyType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Individual setting</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--rangeType-->
+
+  <xs:complexType name="rangeType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="start" type="xs:long">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>If a numeric range is used, this holds the inclusive starting value.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="end" type="xs:long">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>If a numeric range is used, this holds the inclusive ending value.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--propertyType-->
+
+  <xs:complexType name="propertyType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:extension base="xs:normalizedString">
+        <xs:attribute name="name" use="required" type="xs:string">
+          <xs:annotation>
+            <xs:appinfo>
+              <sifChar>M</sifChar>
+              <privacyRating />
+            </xs:appinfo>
+            <xs:documentation>Name/Value pair.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+
+  <!--applicationInfoType-->
+
+  <xs:complexType name="applicationInfoType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="applicationKey" minOccurs="0" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>An opaque (to the SIF standard) element which contains any required Consumer authentication information. The content of this element is site-specific. For a Direct Environment which accepts Consumer Registration Requests from a mobile application, this element might contain a combination of the User ID and Password.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="supportedInfrastructureVersion" minOccurs="0" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The version of the SIF infrastructure which the Consumer supports.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="dataModelNamespace" minOccurs="0" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The namespace of the data payloads conveyed by this environment. Returns may be of a diffrent minor version. Utility payloads will be of the infrastructure namespace.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="transport" minOccurs="0" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The transport which the Consumer expects the infrastructure to use to interoperate with it. The default is whichever transport the create request was issued on</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="applicationProduct" minOccurs="0" type="productIdentityType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="adapterProduct" minOccurs="0" type="productIdentityType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--productIdentityType-->
+
+  <xs:complexType name="productIdentityType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="vendorName" minOccurs="0" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The name of the company supplying this Product.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="productName" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The name of the Product</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="productVersion" minOccurs="0" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The format of this field is undefined, but it should match the format used in the agent's conformance statement, if the agent is SIF Certified.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="iconURI" minOccurs="0" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>HTTP URL referencing an icon for graphical representation of the application/agent. Should range from 16x16 pixels to 128x128 pixels and be of an image MIME type commonly supported by Web browsers (e.g. PNG, JPEG, GIF).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--servicesType-->
+
+  <xs:complexType name="servicesType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="service" maxOccurs="unbounded" type="serviceType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--serviceType-->
+
+  <xs:complexType name="serviceType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="rights" type="rightsType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="type" use="required" type="serviceTypeType">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>M</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="name" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>M</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation>The name of the Service. For utilities, this is fixed to one of the defined set of Utility Service Names. For objects and functions, it is defined by the Data Model.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="contextId" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>M</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation>The unique identity of a context element, which is associated with a Provider of this name and type operating in a Zone with this ID. All Services with the same name in the same Zone must have different Context IDs. Only one such Service can have no Context.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+
+  <!--rightsType-->
+
+  <xs:complexType name="rightsType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="right" maxOccurs="unbounded" type="rightType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--rightValueType-->
+
+  <xs:simpleType name="rightValueType">
+    <xs:restriction base="xs:token">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar />
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+      <xs:enumeration value="APPROVED" />
+      <xs:enumeration value="SUPPORTED" />
+      <xs:enumeration value="REJECTED" />
+      <xs:enumeration value="UNSUPPORTED" />
+      <xs:enumeration value="REQUESTED" />
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!--rightType-->
+
+  <xs:complexType name="rightType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <!--isComplexType(rightValueType) = false-->
+    <xs:simpleContent>
+      <xs:extension base="rightValueType">
+        <xs:attribute name="type" use="required">
+          <xs:annotation>
+            <xs:appinfo>
+              <sifChar>M</sifChar>
+              <privacyRating />
+            </xs:appinfo>
+            <xs:documentation>The type of the requested Access Right</xs:documentation>
+          </xs:annotation>
+          <xs:simpleType>
+            <xs:restriction base="xs:token">
+              <xs:enumeration value="QUERY" />
+              <xs:enumeration value="CREATE" />
+              <xs:enumeration value="UPDATE" />
+              <xs:enumeration value="DELETE" />
+              <xs:enumeration value="SUBSCRIBE" />
+              <xs:enumeration value="PROVIDE" />
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+
+  <!--serviceTypeType-->
+
+  <xs:simpleType name="serviceTypeType">
+    <xs:restriction base="xs:token">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+      <xs:enumeration value="UTILITY" />
+      <xs:enumeration value="OBJECT" />
+      <xs:enumeration value="FUNCTIONAL" />
+      <xs:enumeration value="SERVICEPATH" />
+      <xs:enumeration value="XQUERYTEMPLATE" />
+      <xs:enumeration value="SERVICE" />
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!--infrastructureServicesType-->
+
+  <xs:complexType name="infrastructureServicesType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="infrastructureService" minOccurs="2" maxOccurs="unbounded" type="infrastructureServiceType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>There must be an InfrastructureService element present for each defined Infrastructure Service. The value of each InfrastructureService Property value subelement defines the URL location of that Infrastructure Service.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--infrastructureServiceType-->
+
+  <xs:complexType name="infrastructureServiceType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:extension base="xs:normalizedString">
+        <xs:attribute name="name" use="optional" type="infrastructureServiceNamesType">
+          <xs:annotation>
+            <xs:appinfo>
+              <sifChar>O</sifChar>
+              <privacyRating />
+            </xs:appinfo>
+            <xs:documentation />
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+
+  <!--infrastructureServiceNamesType-->
+
+  <xs:simpleType name="infrastructureServiceNamesType">
+    <xs:restriction base="xs:token">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+      <xs:enumeration value="environment" />
+      <xs:enumeration value="provisionRequests" />
+      <xs:enumeration value="requestsConnector" />
+      <xs:enumeration value="eventsConnector" />
+      <xs:enumeration value="queues" />
+      <xs:enumeration value="subscriptions" />
+      <xs:enumeration value="servicesConnector" />
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!--uuidType-->
+
+  <xs:simpleType name="uuidType">
+    <xs:restriction>
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:annotation>
+            <xs:appinfo>
+              <sifChar>O</sifChar>
+              <privacyRating />
+            </xs:appinfo>
+            <xs:documentation />
+          </xs:annotation>
+          <xs:pattern value="[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[14][a-fA-F0-9]{3}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!--versionType-->
+
+  <xs:simpleType name="versionType">
+    <xs:restriction>
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:annotation>
+            <xs:appinfo>
+              <sifChar>O</sifChar>
+              <privacyRating />
+            </xs:appinfo>
+            <xs:documentation />
+          </xs:annotation>
+          <xs:pattern value="[0-9]{1,3}[.][0-9]{1,3}([.][0-9]{1,3})?" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!--uriType-->
+
+  <xs:simpleType name="uriType">
+    <xs:restriction base="xs:anyURI">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <!--aliasesType-->
+
+  <xs:complexType name="aliasesType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="alias" maxOccurs="unbounded" type="aliasType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--querySupportType-->
+
+  <xs:complexType name="querySupportType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="dynamicQuery" minOccurs="0" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>True if this service is capable of honoring the "where" parameter.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="queryByExample" minOccurs="0" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>True if this service is capable of honoring query by example payloads.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="changesSinceMarker" minOccurs="0" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>True if this service is capable of supporting Changes Since Queries.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="paged" minOccurs="0" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>True if this service is capable of responding to Paged Query Requests (both Interactive and Batch).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="maxPageSize" minOccurs="0" type="xs:unsignedInt">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>C</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>If Paged Queries are supported, this is the maximum number of Objects that will be returned on a Page of Query results.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="totalCount" minOccurs="0" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="applicationProduct" minOccurs="0" type="productIdentityType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>C</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Application Vendor Identification</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="adapterProduct" minOccurs="0" type="productIdentityType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Adapter Vendor Identification</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--aliasType-->
+
+  <xs:complexType name="aliasType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="code" type="codeType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="source" minOccurs="0" nillable="true" type="uriType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>URL where the related abbreviation comes from.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="namespace" minOccurs="0" nillable="true" type="uriType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Namespace where the related abbreviation comes from.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--codeItemType-->
+
+  <xs:complexType name="codeItemType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="code" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Official abbreviation for the given value.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="source" minOccurs="0" nillable="true" type="uriType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>URL where the related abbreviation comes from.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="namespace" minOccurs="0" nillable="true" type="uriType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Namespace where the related abbreviation comes from.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="value" nillable="true">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:annotation>
+              <xs:appinfo>
+                <sifChar>M</sifChar>
+                <privacyRating />
+              </xs:appinfo>
+              <xs:documentation>What the code represents.</xs:documentation>
+            </xs:annotation>
+            <xs:minLength value="0" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+            <xs:maxLength value="128" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="description" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:normalizedString">
+            <xs:annotation>
+              <xs:appinfo>
+                <sifChar>O</sifChar>
+                <privacyRating />
+              </xs:appinfo>
+              <xs:documentation>Human readable explanation of what the code represents.</xs:documentation>
+            </xs:annotation>
+            <xs:minLength value="0" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+            <xs:maxLength value="1024" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="definition" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:normalizedString">
+            <xs:annotation>
+              <xs:appinfo>
+                <sifChar>O</sifChar>
+                <privacyRating />
+              </xs:appinfo>
+              <xs:documentation>Human readable explanation provided by the source!</xs:documentation>
+            </xs:annotation>
+            <xs:minLength value="0" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+            <xs:maxLength value="4096" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="aliases" minOccurs="0" type="aliasesType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="action">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The last action to be taken for this code item.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="ADD" />
+            <xs:enumeration value="CHANGE" />
+            <xs:enumeration value="DEPRECATED" />
+            <xs:enumeration value="DELETE" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="timestamp" type="xs:dateTime">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The date and time of the last action taken on this code item. So that only updates can be queried efficiently (where applicable).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--codeType-->
+
+  <xs:complexType name="codeType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="old" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Indicates the alias code has been deprecated or deleted, even if it no longer appears in the register.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="official" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Indicates the alias code is an official one; however the locale uses this one to represent that concept, at least in part.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="value" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>Alternate abbreviation that might need to be more specific or correct.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--codeItemsType-->
+
+  <xs:complexType name="codeItemsType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="codeItem" maxOccurs="unbounded" type="codeItemType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--deleteStatusCollectionType-->
+
+  <xs:complexType name="deleteStatusCollectionType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="delete" maxOccurs="unbounded" type="deleteStatusType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--deleteStatusType-->
+
+  <xs:complexType name="deleteStatusType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="error" minOccurs="0" type="errorType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="optional" type="xs:token">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="statusCode" use="optional">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:annotation>
+            <xs:appinfo>
+              <sifChar>O</sifChar>
+              <privacyRating />
+            </xs:appinfo>
+            <xs:documentation />
+          </xs:annotation>
+          <xs:pattern value="[24-5][0-9]{2}" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+
+
+  <!--deleteIdType-->
+
+  <xs:complexType name="deleteIdType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:attribute name="id" use="required" type="xs:token">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>M</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+
+  <!--mediaTypesType-->
+
+  <xs:complexType name="mediaTypesType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="mediaType" maxOccurs="unbounded" type="xs:token">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>An Internet Media Type supported by this adaptor (for this service).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--protocolType-->
+
+  <xs:complexType name="protocolType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="location" type="xs:anyURI">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>M</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>The URL to use when sending Requests to a Provider</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="properties" minOccurs="0" nillable="true" type="propertiesType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation>May contain zero or more property elements containing name/value pairs describing any protocol settings required to ensure proper communication</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--updatesType-->
+
+  <xs:complexType name="updatesType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="update" maxOccurs="unbounded" type="updateType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>MR</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <!--updateType-->
+
+  <xs:complexType name="updateType">
+    <xs:annotation>
+      <xs:appinfo>
+        <sifChar />
+        <privacyRating />
+      </xs:appinfo>
+      <xs:documentation />
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="error" minOccurs="0" type="errorType">
+        <xs:annotation>
+          <xs:appinfo>
+            <sifChar>O</sifChar>
+            <privacyRating />
+          </xs:appinfo>
+          <xs:documentation />
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" use="optional" type="xs:token">
+      <xs:annotation>
+        <xs:appinfo>
+          <sifChar>O</sifChar>
+          <privacyRating />
+        </xs:appinfo>
+        <xs:documentation />
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="statusCode" use="optional">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:annotation>
+            <xs:appinfo>
+              <sifChar>O</sifChar>
+              <privacyRating />
+            </xs:appinfo>
+            <xs:documentation />
+          </xs:annotation>
+          <xs:pattern value="[24-5][0-9]{2}" xmlns:xs="http://www.w3.org/2001/XMLSchema" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+
+</xs:schema>
