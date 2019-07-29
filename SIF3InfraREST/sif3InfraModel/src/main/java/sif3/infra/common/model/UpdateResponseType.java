@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * An HTTP Response with a status of 200 (success) and a location corresponding to the URL of the first successfully modified object. It contains a payload consisting of a single “updateResponse” element.
+ * An HTTP Response with a status of 200 (success) and a location corresponding to the URL of the first successfully modified object. It contains a payload consisting of a single "updateResponse" element.
  * 
  * <p>Java class for updateResponseType complex type.
  * 
@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="updates" type="{http://www.sifassociation.org/infrastructure/3.2.1}updatesType"/>
+ *         &lt;element name="updates" type="{http://www.sifassociation.org/infrastructure/3.3}updatesType"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +29,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "updateResponseType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "updateResponseType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "updates"
 })
 public class UpdateResponseType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     protected UpdatesType updates;
 
     /**

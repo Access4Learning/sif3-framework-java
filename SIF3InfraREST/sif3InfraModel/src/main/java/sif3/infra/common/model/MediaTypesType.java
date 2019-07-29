@@ -13,6 +13,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * 
+ * 
  * <p>Java class for mediaTypesType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -32,12 +34,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "mediaTypesType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "mediaTypesType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "mediaType"
 })
 public class MediaTypesType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected List<String> mediaType;

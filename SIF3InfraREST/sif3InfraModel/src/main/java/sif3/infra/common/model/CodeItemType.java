@@ -2,11 +2,9 @@
 package sif3.infra.common.model;
 
 import java.util.Calendar;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
@@ -15,6 +13,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * 
+ * 
  * <p>Java class for codeItemType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -24,16 +24,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="code">
- *           &lt;simpleType>
- *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
- *               &lt;minLength value="1"/>
- *               &lt;maxLength value="16"/>
- *             &lt;/restriction>
- *           &lt;/simpleType>
- *         &lt;/element>
- *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.2.1}uriType" minOccurs="0"/>
- *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.2.1}uriType" minOccurs="0"/>
+ *         &lt;element name="code" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.3}uriType" minOccurs="0"/>
+ *         &lt;element name="namespace" type="{http://www.sifassociation.org/infrastructure/3.3}uriType" minOccurs="0"/>
  *         &lt;element name="value">
  *           &lt;simpleType>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -58,7 +51,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
- *         &lt;element name="aliases" type="{http://www.sifassociation.org/infrastructure/3.2.1}aliasesType" minOccurs="0"/>
+ *         &lt;element name="aliases" type="{http://www.sifassociation.org/infrastructure/3.3}aliasesType" minOccurs="0"/>
  *         &lt;element name="action">
  *           &lt;simpleType>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
@@ -79,7 +72,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "codeItemType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "codeItemType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "code",
     "source",
     "namespace",
@@ -92,24 +85,26 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class CodeItemType {
 
-    @XmlElement(required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     protected String code;
-    @XmlElementRef(name = "source", type = JAXBElement.class, required = false)
-    protected JAXBElement<String> source;
-    @XmlElementRef(name = "namespace", type = JAXBElement.class, required = false)
-    protected JAXBElement<String> namespace;
-    @XmlElement(required = true, nillable = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", nillable = true)
+    protected String source;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", nillable = true)
+    protected String namespace;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true, nillable = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String value;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String description;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String definition;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected AliasesType aliases;
-    @XmlElement(required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     protected String action;
-    @XmlElement(required = true, type = String.class)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true, type = String.class)
     @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
     protected Calendar timestamp;
@@ -143,10 +138,10 @@ public class CodeItemType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getSource() {
+    public String getSource() {
         return source;
     }
 
@@ -155,10 +150,10 @@ public class CodeItemType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setSource(JAXBElement<String> value) {
+    public void setSource(String value) {
         this.source = value;
     }
 
@@ -167,10 +162,10 @@ public class CodeItemType {
      * 
      * @return
      *     possible object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public JAXBElement<String> getNamespace() {
+    public String getNamespace() {
         return namespace;
     }
 
@@ -179,10 +174,10 @@ public class CodeItemType {
      * 
      * @param value
      *     allowed object is
-     *     {@link JAXBElement }{@code <}{@link String }{@code >}
+     *     {@link String }
      *     
      */
-    public void setNamespace(JAXBElement<String> value) {
+    public void setNamespace(String value) {
         this.namespace = value;
     }
 

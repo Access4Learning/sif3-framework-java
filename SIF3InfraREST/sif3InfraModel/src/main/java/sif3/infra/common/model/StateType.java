@@ -24,12 +24,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="type" type="{http://www.sifassociation.org/infrastructure/3.2.1}phaseStateType"/>
+ *         &lt;element name="type" type="{http://www.sifassociation.org/infrastructure/3.3}phaseStateType"/>
  *         &lt;element name="created" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
  *         &lt;element name="lastModified" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.2.1}uuidType" />
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.3}uuidType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -38,7 +38,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "stateType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "stateType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "type",
     "created",
     "lastModified",
@@ -46,17 +46,17 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class StateType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     protected PhaseStateType type;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", type = String.class)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", type = String.class)
     @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
     protected Calendar created;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", type = String.class)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", type = String.class)
     @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
     protected Calendar lastModified;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected String description;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)

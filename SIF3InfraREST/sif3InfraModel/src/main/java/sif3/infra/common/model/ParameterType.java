@@ -1,8 +1,6 @@
 
 package sif3.infra.common.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -14,6 +12,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * 
+ * 
  * <p>Java class for parameterType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -29,24 +29,14 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="description" minOccurs="0">
  *           &lt;simpleType>
  *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}normalizedString">
- *               &lt;maxLength value="1024"/>
  *               &lt;minLength value="0"/>
+ *               &lt;maxLength value="1024"/>
  *             &lt;/restriction>
  *           &lt;/simpleType>
  *         &lt;/element>
  *         &lt;element name="required" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="enumerations" minOccurs="0">
- *           &lt;complexType>
- *             &lt;complexContent>
- *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                 &lt;sequence>
- *                   &lt;element name="enumeration" type="{http://www.sifassociation.org/infrastructure/3.2.1}enumerationType" maxOccurs="unbounded"/>
- *                 &lt;/sequence>
- *               &lt;/restriction>
- *             &lt;/complexContent>
- *           &lt;/complexType>
- *         &lt;/element>
- *         &lt;element name="range" type="{http://www.sifassociation.org/infrastructure/3.2.1}rangeType" minOccurs="0"/>
+ *         &lt;element name="enumerations" type="{http://www.sifassociation.org/infrastructure/3.3}enumerationsType" minOccurs="0"/>
+ *         &lt;element name="range" type="{http://www.sifassociation.org/infrastructure/3.3}rangeType" minOccurs="0"/>
  *         &lt;element name="minLength" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *         &lt;element name="maxLength" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *       &lt;/sequence>
@@ -58,7 +48,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "parameterType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "parameterType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "name",
     "type",
     "_default",
@@ -71,31 +61,31 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class ParameterType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String name;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String type;
-    @XmlElement(name = "default", namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(name = "default", namespace = "http://www.sifassociation.org/infrastructure/3.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String _default;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     protected String description;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected Boolean required;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
-    protected ParameterType.Enumerations enumerations;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
+    protected EnumerationsType enumerations;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected RangeType range;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     @XmlSchemaType(name = "unsignedInt")
     protected Long minLength;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     @XmlSchemaType(name = "unsignedInt")
     protected Long maxLength;
 
@@ -224,10 +214,10 @@ public class ParameterType {
      * 
      * @return
      *     possible object is
-     *     {@link ParameterType.Enumerations }
+     *     {@link EnumerationsType }
      *     
      */
-    public ParameterType.Enumerations getEnumerations() {
+    public EnumerationsType getEnumerations() {
         return enumerations;
     }
 
@@ -236,10 +226,10 @@ public class ParameterType {
      * 
      * @param value
      *     allowed object is
-     *     {@link ParameterType.Enumerations }
+     *     {@link EnumerationsType }
      *     
      */
-    public void setEnumerations(ParameterType.Enumerations value) {
+    public void setEnumerations(EnumerationsType value) {
         this.enumerations = value;
     }
 
@@ -313,66 +303,6 @@ public class ParameterType {
      */
     public void setMaxLength(Long value) {
         this.maxLength = value;
-    }
-
-
-    /**
-     * <p>Java class for anonymous complex type.
-     * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
-     * <pre>
-     * &lt;complexType>
-     *   &lt;complexContent>
-     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *       &lt;sequence>
-     *         &lt;element name="enumeration" type="{http://www.sifassociation.org/infrastructure/3.2.1}enumerationType" maxOccurs="unbounded"/>
-     *       &lt;/sequence>
-     *     &lt;/restriction>
-     *   &lt;/complexContent>
-     * &lt;/complexType>
-     * </pre>
-     * 
-     * 
-     */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "enumeration"
-    })
-    public static class Enumerations {
-
-        @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
-        protected List<EnumerationType> enumeration;
-
-        /**
-         * Gets the value of the enumeration property.
-         * 
-         * <p>
-         * This accessor method returns a reference to the live list,
-         * not a snapshot. Therefore any modification you make to the
-         * returned list will be present inside the JAXB object.
-         * This is why there is not a <CODE>set</CODE> method for the enumeration property.
-         * 
-         * <p>
-         * For example, to add a new item, do as follows:
-         * <pre>
-         *    getEnumeration().add(newItem);
-         * </pre>
-         * 
-         * 
-         * <p>
-         * Objects of the following type(s) are allowed in the list
-         * {@link EnumerationType }
-         * 
-         * 
-         */
-        public List<EnumerationType> getEnumeration() {
-            if (enumeration == null) {
-                enumeration = new ArrayList<EnumerationType>();
-            }
-            return this.enumeration;
-        }
-
     }
 
 }

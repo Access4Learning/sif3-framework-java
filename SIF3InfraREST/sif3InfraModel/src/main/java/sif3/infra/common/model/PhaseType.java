@@ -11,6 +11,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * 
+ * 
  * <p>Java class for phaseType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -21,10 +23,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}token"/>
- *         &lt;element name="states" type="{http://www.sifassociation.org/infrastructure/3.2.1}stateCollectionType"/>
+ *         &lt;element name="states" type="{http://www.sifassociation.org/infrastructure/3.3}stateCollectionType"/>
  *         &lt;element name="required" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="rights" type="{http://www.sifassociation.org/infrastructure/3.2.1}rightsType"/>
- *         &lt;element name="statesRights" type="{http://www.sifassociation.org/infrastructure/3.2.1}rightsType"/>
+ *         &lt;element name="rights" type="{http://www.sifassociation.org/infrastructure/3.3}rightsType"/>
+ *         &lt;element name="statesRights" type="{http://www.sifassociation.org/infrastructure/3.3}rightsType"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -34,7 +36,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "phaseType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "phaseType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "name",
     "states",
     "required",
@@ -43,17 +45,17 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class PhaseType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String name;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     protected StateCollectionType states;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected boolean required;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     protected RightsType rights;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     protected RightsType statesRights;
 
     /**

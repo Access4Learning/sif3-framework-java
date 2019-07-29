@@ -39,7 +39,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *           &lt;/simpleType>
  *         &lt;/element>
  *       &lt;/sequence>
- *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.2.1}uuidType" />
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.3}uuidType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -48,20 +48,20 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "namespaceType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "namespaceType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "zone",
     "uri",
     "url"
 })
 public class NamespaceType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String zone;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     protected String uri;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     protected String url;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)

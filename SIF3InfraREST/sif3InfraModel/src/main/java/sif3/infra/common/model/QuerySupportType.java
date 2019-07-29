@@ -9,6 +9,8 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
+ * 
+ * 
  * <p>Java class for querySupportType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -24,8 +26,8 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="paged" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="maxPageSize" type="{http://www.w3.org/2001/XMLSchema}unsignedInt" minOccurs="0"/>
  *         &lt;element name="totalCount" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="applicationProduct" type="{http://www.sifassociation.org/infrastructure/3.2.1}productIdentityType" minOccurs="0"/>
- *         &lt;element name="adapterProduct" type="{http://www.sifassociation.org/infrastructure/3.2.1}productIdentityType" minOccurs="0"/>
+ *         &lt;element name="applicationProduct" type="{http://www.sifassociation.org/infrastructure/3.3}productIdentityType" minOccurs="0"/>
+ *         &lt;element name="adapterProduct" type="{http://www.sifassociation.org/infrastructure/3.3}productIdentityType" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -35,7 +37,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "querySupportType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "querySupportType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "dynamicQuery",
     "queryByExample",
     "changesSinceMarker",
@@ -47,22 +49,22 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class QuerySupportType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected Boolean dynamicQuery;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected Boolean queryByExample;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected Boolean changesSinceMarker;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected Boolean paged;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     @XmlSchemaType(name = "unsignedInt")
     protected Long maxPageSize;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected Boolean totalCount;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected ProductIdentityType applicationProduct;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected ProductIdentityType adapterProduct;
 
     /**

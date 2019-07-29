@@ -11,6 +11,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * 
+ * 
  * <p>Java class for enumerationType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -31,17 +33,17 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "enumerationType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "enumerationType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "value",
     "code"
 })
 public class EnumerationType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String value;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String code;

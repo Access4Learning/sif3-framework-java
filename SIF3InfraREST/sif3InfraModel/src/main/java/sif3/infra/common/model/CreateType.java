@@ -12,6 +12,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * 
+ * 
  * <p>Java class for createType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -21,10 +23,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="error" type="{http://www.sifassociation.org/infrastructure/3.2.1}errorType" minOccurs="0"/>
+ *         &lt;element name="error" type="{http://www.sifassociation.org/infrastructure/3.3}errorType" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}token" />
- *       &lt;attribute name="advisoryId" type="{http://www.w3.org/2001/XMLSchema}token" />
+ *       &lt;attribute name="advisoryId" use="required" type="{http://www.w3.org/2001/XMLSchema}token" />
  *       &lt;attribute name="statusCode">
  *         &lt;simpleType>
  *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
@@ -40,18 +42,18 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "createType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "createType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "error"
 })
 public class CreateType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected ErrorType error;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String id;
-    @XmlAttribute(name = "advisoryId")
+    @XmlAttribute(name = "advisoryId", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String advisoryId;

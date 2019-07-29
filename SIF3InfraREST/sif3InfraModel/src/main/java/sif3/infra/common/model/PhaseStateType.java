@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  * 
  */
-@XmlType(name = "phaseStateType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+@XmlType(name = "phaseStateType", namespace = "http://www.sifassociation.org/infrastructure/3.3")
 @XmlEnum
 public enum PhaseStateType {
 
