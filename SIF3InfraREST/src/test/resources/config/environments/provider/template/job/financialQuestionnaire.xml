@@ -1,4 +1,4 @@
-<job xmlns="http://www.sifassociation.org/infrastructure/3.2.1">
+<job xmlns="http://www.sifassociation.org/infrastructure/3.3">
 	<name>FinancialQuestionnaire</name>
 	<description>Workflow for AG Financial Questionnaire</description>
 	<state>NOTSTARTED</state>

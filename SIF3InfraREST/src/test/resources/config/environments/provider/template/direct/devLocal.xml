@@ -1,4 +1,4 @@
-<environment type="DIRECT" xmlns="http://www.sifassociation.org/infrastructure/3.2.1">
+<environment type="DIRECT" xmlns="http://www.sifassociation.org/infrastructure/3.3">
     <sessionToken></sessionToken>
     <solutionId>test</solutionId>
     <defaultZone id="auSchoolTestingZone">
