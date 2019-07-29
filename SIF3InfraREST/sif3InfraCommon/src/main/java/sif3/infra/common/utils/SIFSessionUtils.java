@@ -84,17 +84,9 @@ public class SIFSessionUtils
 							ServiceType serviceType = ServiceType.OBJECT;
 							boolean isDefaultCtx = false;
 							
-							if (StringUtils.notEmpty(service.getType()))
+							if (service.getType() != null)
 							{
-								try
-								{
-									serviceType = ServiceType.valueOf(service.getType().trim().toUpperCase());
-								}
-								catch (Exception ex) // log error and assume it is OBJECT
-								{
-									logger.warn("The service '"+service.getName()+"' for environment '"+sif3Session.getEnvironmentName()+"' has an invalid 'type' of '"+service.getType().trim()+"' set. Valid values are: OBJECT, FUNCTIONAL, UTILITY, SERVICEPATH and XQUERYTEMPLATE.");
-									serviceType = ServiceType.OBJECT;
-								}
+							    serviceType = ServiceType.valueOf(service.getType().name());
 							}
 							if (StringUtils.isEmpty(service.getContextId())) // no context provided then this service is valid for default context
 							{
@@ -114,7 +106,7 @@ public class SIFSessionUtils
 							{
 								for (RightType right : service.getRights().getRight())
 								{
-									if (!serviceInfo.setRight(right.getType(), right.getValue()))
+									if (!serviceInfo.setRight(right.getType(), right.getValue().name()))
 									{
 										logger.error("The service '"+service.getName()+"' for environment '"+sif3Session.getEnvironmentName()+"' has an invalid Acces Right type or value: Type = '"+ right.getType() +"' Value = '"+right.getValue()+"'. Contact your environment provider for details.");	
 									}

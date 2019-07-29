@@ -89,8 +89,8 @@ import sif3.infra.common.model.CreatesType;
 import sif3.infra.common.model.DeleteIdType;
 import sif3.infra.common.model.DeleteRequestType;
 import sif3.infra.common.model.DeleteResponseType;
-import sif3.infra.common.model.DeleteStatus;
-import sif3.infra.common.model.DeleteStatusCollection;
+import sif3.infra.common.model.DeleteStatusCollectionType;
+import sif3.infra.common.model.DeleteStatusType;
 import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.common.model.ErrorType;
 import sif3.infra.common.model.ObjectFactory;
@@ -652,12 +652,12 @@ public abstract class BaseResource
 	public Response makeDeleteMultipleResponse(List<OperationStatus> operationStatusList, Status overallStatus, ResponseParameters customResponseParams)
 	{
 		DeleteResponseType deleteManyResponse = infraObjectFactory.createDeleteResponseType();
-		deleteManyResponse.setDeletes(new DeleteStatusCollection());
-		List<DeleteStatus> deletes = deleteManyResponse.getDeletes().getDelete();
+		deleteManyResponse.setDeletes(new DeleteStatusCollectionType());
+		List<DeleteStatusType> deletes = deleteManyResponse.getDeletes().getDelete();
 		
 		for (OperationStatus opStatus : operationStatusList)
 		{
-			DeleteStatus deleteStatus = new DeleteStatus();
+		    DeleteStatusType deleteStatus = new DeleteStatusType();
 			deleteStatus.setId(opStatus.getResourceID());
 			deleteStatus.setStatusCode(Integer.toString(opStatus.getStatus()));
 			if (opStatus.getError() != null)

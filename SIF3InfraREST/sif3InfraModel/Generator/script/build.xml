@@ -80,5 +80,23 @@
 			<arg value="-npa"/>
 		</xjc>
 	</target>
-	
+
+    <!-- *********************************************** -->
+    <!-- Generate SIF 3.3 Infrastructure Objects -->
+    <!-- *********************************************** -->
+    <target name="generate-infra33+" depends="02-clean,init" description="Create all Infrastructure POJOs based on XSD Directory">
+        <echo message="Generate Pojos using JAXB for SIF 3.3 and after Infra for all XSDs in one go..."/>
+        <mkdir dir="${output.base.name}/${xsd.dir}"/>
+        <xjc destdir="${output.base.name}/${xsd.dir}" 
+                 package="sif3.infra.common.model" 
+                 extension="true" 
+                 header="false" 
+                 source="2.0">
+            <!-- must exclude the infrastructurecommontypes.xsd so that it all works. It will still create the classes of that -->
+            <!-- XSD because it is used as an include rather than import.                                                      -->
+            <schema  dir="${input.base.dir}/${xsd.dir}" includes="SIF_Message.xsd"/>
+            <binding dir="${basedir}" includes="infra33.xjb"/>
+            <arg value="-npa"/>
+        </xjc>
+    </target>
 </project>

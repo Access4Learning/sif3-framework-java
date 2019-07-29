@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="job" type="{http://www.sifassociation.org/infrastructure/3.2.1}jobType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="job" type="{http://www.sifassociation.org/infrastructure/3.3}jobType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +29,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "jobCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "jobCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "job"
 })
 public class JobCollectionType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected List<JobType> job;
 
     /**

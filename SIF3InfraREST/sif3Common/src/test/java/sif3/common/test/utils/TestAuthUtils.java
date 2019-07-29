@@ -90,8 +90,8 @@ public class TestAuthUtils
 	private void testHMACSHA256Token()
 	{
 //		String username = "TestSIS";
-		String username = "27677240-0c2e-4e65-a47f-e3454e5234a1";
-		String password = "bijObw7aBbTB";
+		String username = "06f5c971-c616-4d07-9131-440878e5ca53";
+		String password = "7VJsthrvgQiM";
 //		String username = "new";
 //		String password = "guest";
 ///		String now = "2013-06-22T23:52-07";

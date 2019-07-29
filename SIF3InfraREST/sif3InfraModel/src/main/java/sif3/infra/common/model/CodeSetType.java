@@ -25,12 +25,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="zone" type="{http://www.w3.org/2001/XMLSchema}token"/>
- *         &lt;element name="version" type="{http://www.sifassociation.org/infrastructure/3.2.1}versionType"/>
+ *         &lt;element name="version" type="{http://www.sifassociation.org/infrastructure/3.3}versionType"/>
  *         &lt;element name="timestamp" type="{http://www.w3.org/2001/XMLSchema}dateTime"/>
- *         &lt;sequence>
- *           &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.2.1}uriType" minOccurs="0"/>
- *           &lt;element name="codeItems" type="{http://www.sifassociation.org/infrastructure/3.2.1}codeItemsType" minOccurs="0"/>
- *         &lt;/sequence>
+ *         &lt;element name="source" type="{http://www.sifassociation.org/infrastructure/3.3}uriType" minOccurs="0"/>
+ *         &lt;element name="codeItems" type="{http://www.sifassociation.org/infrastructure/3.3}codeItemsType" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="id">
  *         &lt;simpleType>
@@ -48,7 +46,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "codeSetType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "codeSetType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "zone",
     "version",
     "timestamp",
@@ -57,18 +55,20 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class CodeSetType {
 
-    @XmlElement(required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String zone;
-    @XmlElement(required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     protected String version;
-    @XmlElement(required = true, type = String.class)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true, type = String.class)
     @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
     protected Calendar timestamp;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected String source;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected CodeItemsType codeItems;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)

@@ -25,11 +25,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *       &lt;sequence>
  *         &lt;element name="zoneId" type="{http://www.w3.org/2001/XMLSchema}token"/>
  *         &lt;element name="contextId" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
- *         &lt;element name="serviceType" type="{http://www.sifassociation.org/infrastructure/3.2.1}serviceTypeType"/>
+ *         &lt;element name="serviceType" type="{http://www.sifassociation.org/infrastructure/3.3}serviceTypeType"/>
  *         &lt;element name="serviceName" type="{http://www.w3.org/2001/XMLSchema}token"/>
  *         &lt;element name="queueId" type="{http://www.w3.org/2001/XMLSchema}token"/>
  *       &lt;/sequence>
- *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.2.1}uuidType" />
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.3}uuidType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -38,7 +38,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "subscriptionType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "subscriptionType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "zoneId",
     "contextId",
     "serviceType",
@@ -47,22 +47,21 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class SubscriptionType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String zoneId;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String contextId;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-    protected String serviceType;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
+    protected ServiceTypeType serviceType;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String serviceName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String queueId;
@@ -123,10 +122,10 @@ public class SubscriptionType {
      * 
      * @return
      *     possible object is
-     *     {@link String }
+     *     {@link ServiceTypeType }
      *     
      */
-    public String getServiceType() {
+    public ServiceTypeType getServiceType() {
         return serviceType;
     }
 
@@ -135,10 +134,10 @@ public class SubscriptionType {
      * 
      * @param value
      *     allowed object is
-     *     {@link String }
+     *     {@link ServiceTypeType }
      *     
      */
-    public void setServiceType(String value) {
+    public void setServiceType(ServiceTypeType value) {
         this.serviceType = value;
     }
 

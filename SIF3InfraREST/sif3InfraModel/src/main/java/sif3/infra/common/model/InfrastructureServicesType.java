@@ -10,6 +10,8 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
+ * 
+ * 
  * <p>Java class for infrastructureServicesType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -19,7 +21,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="infrastructureService" type="{http://www.sifassociation.org/infrastructure/3.2.1}infrastructureServiceType" maxOccurs="unbounded" minOccurs="2"/>
+ *         &lt;element name="infrastructureService" type="{http://www.sifassociation.org/infrastructure/3.3}infrastructureServiceType" maxOccurs="unbounded" minOccurs="2"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +31,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "infrastructureServicesType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "infrastructureServicesType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "infrastructureService"
 })
 public class InfrastructureServicesType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     protected List<InfrastructureServiceType> infrastructureService;
 
     /**

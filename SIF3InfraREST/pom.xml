@@ -17,7 +17,7 @@
 	<!-- =========== -->
 	<groupId>sif3.framework</groupId>
 	<artifactId>sif3-framework</artifactId>
-	<version>0.14.1-beta</version>
+	<version>0.15.0</version>
 	<packaging>pom</packaging>
 	
 	<!-- ===================================== -->
@@ -38,7 +38,7 @@
 		<auDMLibLocation>${project.lib.dir}/datamodel</auDMLibLocation>
 
 		<!-- The current SIF 3.x infrastructure version for which the library intended for. -->
-		<sifInfraVersion>3.2.1</sifInfraVersion>
+		<sifInfraVersion>3.3</sifInfraVersion>
 		
 		<!-- Final Jar name of all sub-modules follows a certain naming convention that includes the SIF infrastructure version. -->
 		<jarName.prefix>sif${sifInfraVersion}</jarName.prefix>

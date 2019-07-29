@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  * 
  */
-@XmlType(name = "jobStateType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+@XmlType(name = "jobStateType", namespace = "http://www.sifassociation.org/infrastructure/3.3")
 @XmlEnum
 public enum JobStateType {
 

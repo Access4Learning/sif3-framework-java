@@ -10,16 +10,18 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for deleteStatusCollection complex type.
+ * 
+ * 
+ * <p>Java class for securityTestRequiredListType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="deleteStatusCollection">
+ * &lt;complexType name="securityTestRequiredListType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="delete" type="{http://www.sifassociation.org/infrastructure/3.2.1}deleteStatus" maxOccurs="unbounded"/>
+ *         &lt;element name="securityTestRequired" type="{http://www.sifassociation.org/infrastructure/3.3}securityTestRequiredType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,41 +31,41 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "deleteStatusCollection", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
-    "delete"
+@XmlType(name = "securityTestRequiredListType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
+    "securityTestRequired"
 })
-public class DeleteStatusCollection {
+public class SecurityTestRequiredListType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
-    protected List<DeleteStatus> delete;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
+    protected List<SecurityTestRequiredType> securityTestRequired;
 
     /**
-     * Gets the value of the delete property.
+     * Gets the value of the securityTestRequired property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the delete property.
+     * This is why there is not a <CODE>set</CODE> method for the securityTestRequired property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getDelete().add(newItem);
+     *    getSecurityTestRequired().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link DeleteStatus }
+     * {@link SecurityTestRequiredType }
      * 
      * 
      */
-    public List<DeleteStatus> getDelete() {
-        if (delete == null) {
-            delete = new ArrayList<DeleteStatus>();
+    public List<SecurityTestRequiredType> getSecurityTestRequired() {
+        if (securityTestRequired == null) {
+            securityTestRequired = new ArrayList<SecurityTestRequiredType>();
         }
-        return this.delete;
+        return this.securityTestRequired;
     }
 
 }

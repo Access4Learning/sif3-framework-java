@@ -5,11 +5,11 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * 
+ * 
  * <p>Java class for codeType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -21,14 +21,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *       &lt;sequence>
  *         &lt;element name="old" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
  *         &lt;element name="official" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="value">
- *           &lt;simpleType>
- *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
- *               &lt;minLength value="1"/>
- *               &lt;maxLength value="16"/>
- *             &lt;/restriction>
- *           &lt;/simpleType>
- *         &lt;/element>
+ *         &lt;element name="value" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -38,17 +31,18 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "codeType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "codeType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "old",
     "official",
     "value"
 })
 public class CodeType {
 
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected boolean old;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected boolean official;
-    @XmlElement(required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     protected String value;
 
     /**

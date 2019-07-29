@@ -10,6 +10,8 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
+ * 
+ * 
  * <p>Java class for aliasesType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -19,7 +21,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="alias" type="{http://www.sifassociation.org/infrastructure/3.2.1}aliasType" maxOccurs="unbounded"/>
+ *         &lt;element name="alias" type="{http://www.sifassociation.org/infrastructure/3.3}aliasType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +31,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "aliasesType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "aliasesType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "alias"
 })
 public class AliasesType {
 
-    @XmlElement(required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     protected List<AliasType> alias;
 
     /**

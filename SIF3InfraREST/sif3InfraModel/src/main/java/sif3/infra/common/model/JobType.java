@@ -27,15 +27,15 @@ import javax.xml.datatype.Duration;
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}token"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="state" type="{http://www.sifassociation.org/infrastructure/3.2.1}jobStateType" minOccurs="0"/>
+ *         &lt;element name="state" type="{http://www.sifassociation.org/infrastructure/3.3}jobStateType" minOccurs="0"/>
  *         &lt;element name="stateDescription" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="created" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
  *         &lt;element name="lastModified" type="{http://www.w3.org/2001/XMLSchema}dateTime" minOccurs="0"/>
  *         &lt;element name="timeout" type="{http://www.w3.org/2001/XMLSchema}duration" minOccurs="0"/>
- *         &lt;element name="phases" type="{http://www.sifassociation.org/infrastructure/3.2.1}phaseCollectionType" minOccurs="0"/>
- *         &lt;element name="initialization" type="{http://www.sifassociation.org/infrastructure/3.2.1}initializationType" minOccurs="0"/>
+ *         &lt;element name="phases" type="{http://www.sifassociation.org/infrastructure/3.3}phaseCollectionType" minOccurs="0"/>
+ *         &lt;element name="initialization" type="{http://www.sifassociation.org/infrastructure/3.3}initializationType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.2.1}uuidType" />
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.3}uuidType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -44,7 +44,7 @@ import javax.xml.datatype.Duration;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "jobType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "jobType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "name",
     "description",
     "state",
@@ -57,29 +57,29 @@ import javax.xml.datatype.Duration;
 })
 public class JobType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String name;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected String description;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected JobStateType state;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected String stateDescription;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", type = String.class)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", type = String.class)
     @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
     protected Calendar created;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", type = String.class)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", type = String.class)
     @XmlJavaTypeAdapter(Adapter1 .class)
     @XmlSchemaType(name = "dateTime")
     protected Calendar lastModified;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected Duration timeout;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected PhaseCollectionType phases;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected InitializationType initialization;
     @XmlAttribute(name = "id")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)

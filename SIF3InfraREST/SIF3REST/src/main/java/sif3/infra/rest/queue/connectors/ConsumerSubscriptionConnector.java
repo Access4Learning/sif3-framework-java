@@ -25,6 +25,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.ServiceInvokationException;
@@ -41,6 +42,7 @@ import sif3.common.ws.Response;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.common.model.ObjectFactory;
+import sif3.infra.common.model.ServiceTypeType;
 import sif3.infra.common.model.SubscriptionCollectionType;
 import sif3.infra.common.model.SubscriptionType;
 import sif3.infra.rest.client.SubscriptionClient;
@@ -262,7 +264,10 @@ public class ConsumerSubscriptionConnector
 		subscriptionInfo.setContextId(subscriptionKey.getContextID());
 		subscriptionInfo.setZoneId(subscriptionKey.getZoneID());
 		subscriptionInfo.setServiceName(subscriptionKey.getServiceName());
-		subscriptionInfo.setServiceType(subscriptionKey.getServiceType());
+		if (StringUtils.notEmpty(subscriptionKey.getServiceType()))
+		{
+		    subscriptionInfo.setServiceType(ServiceTypeType.valueOf(subscriptionKey.getServiceType()));
+		}
 		subscriptionInfo.setQueueId(queueInfo.getQueue().getQueueID());		
 		Response response = subscriptionClient.subscribe(subscriptionInfo);
 		
@@ -288,7 +293,10 @@ public class ConsumerSubscriptionConnector
 			dbSubscription.setLastAccessed(new Date());
 			dbSubscription.setQueueID(subscription.getQueueId());
 			dbSubscription.setServiceName(subscription.getServiceName());
-			dbSubscription.setServiceType(subscription.getServiceType());
+			if (subscription.getServiceType() != null)
+		    {
+		        dbSubscription.setServiceType(subscription.getServiceType().name());
+		    }
 			dbSubscription.setSubscriptionID(subscription.getId());
 			dbSubscription.setZoneID(subscription.getZoneId());
 			

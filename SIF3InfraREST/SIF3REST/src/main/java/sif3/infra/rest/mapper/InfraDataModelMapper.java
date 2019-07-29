@@ -33,7 +33,7 @@ import sif3.infra.common.conversion.InfraUnmarshalFactory;
 import sif3.infra.common.model.CreateResponseType;
 import sif3.infra.common.model.CreateType;
 import sif3.infra.common.model.DeleteResponseType;
-import sif3.infra.common.model.DeleteStatus;
+import sif3.infra.common.model.DeleteStatusType;
 import sif3.infra.common.model.ErrorType;
 import sif3.infra.common.model.UpdateResponseType;
 import sif3.infra.common.model.UpdateType;
@@ -189,7 +189,7 @@ public class InfraDataModelMapper implements Serializable
 			else
 			{
 				statusList.setOperationStatuses(new ArrayList<OperationStatus>());
-				for (DeleteStatus deleteStatus : deleteManyResponse.getDeletes().getDelete())
+				for (DeleteStatusType deleteStatus : deleteManyResponse.getDeletes().getDelete())
 				{
 					OperationStatus opStatus = new OperationStatus();
 					opStatus.setResourceID(deleteStatus.getId());
