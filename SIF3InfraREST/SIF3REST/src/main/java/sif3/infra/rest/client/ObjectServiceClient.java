@@ -515,7 +515,7 @@ public class ObjectServiceClient extends BaseClient
 			
 			//Convert List of resources to DeletesTypes
 			DeleteRequestType deleteRequest = getInfraObjectFactory().createDeleteRequestType();
-			deleteRequest.setDeletes(getInfraObjectFactory().createDeleteIdCollection());
+			deleteRequest.setDeletes(getInfraObjectFactory().createDeleteIdCollectionType());
 			
 			if (resourceIDs != null)
 			{
