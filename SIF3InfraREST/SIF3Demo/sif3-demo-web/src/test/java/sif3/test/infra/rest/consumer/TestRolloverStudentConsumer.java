@@ -27,14 +27,16 @@ import org.jdom.Element;
 import org.jdom.output.DOMOutputter;
 
 import au.com.systemic.framework.utils.FileReaderWriter;
+import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.PhaseState;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues.RequestType;
-import sif3.common.model.AttributeValue;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.SchemaInfo;
 import sif3.common.model.URLQueryParameter;
 import sif3.common.model.ZoneContextInfo;
 import sif3.common.model.job.JobCreateRequestParameter;
@@ -59,14 +61,14 @@ import systemic.sif3.demo.rest.consumer.functional.RolloverStudentConsumer;
  */
 public class TestRolloverStudentConsumer
 {
-    private final static String PATH = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST";
+//    private final static String PATH = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST";
   
     private static final String BASE_PATH = "/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST/TestData/xml/input";
     private static final String CREATE_PHASE_PAYLOAD = BASE_PATH+"/CreatePhasePayload.xml";
     private static final String UPDATE_PHASE_PAYLOAD = BASE_PATH+"/CreatePhasePayload.xml";
     private static final String DELETE_PHASE_PAYLOAD = BASE_PATH+"/DeletePhasePayload.xml";
     
-    private static final String JOB_ID = "17c302dc-2a63-4af4-b020-bec34cacd2df";
+    private static final String JOB_ID = "44f97a1d-83b9-4d22-9a22-cfcaba6d27d4";
    private static final String CONSUMER_ID = "StudentConsumer";
 //    private static final String CONSUMER_ID = "HITSStudentConsumer";
 //    private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
@@ -426,8 +428,13 @@ public class TestRolloverStudentConsumer
             CustomParameters customParameters = new CustomParameters();
             customParameters.setHttpHeaderParams(hdrProps);
             customParameters.setQueryParams(urlQueryParams);
+            
+            // Set the mime type and schema. Note if this is different to the one in the consumer property file we need to set all both values
+            // for schema negotiation headers to be set correctly! Generally one should do this anyway regardless if these are the same of not.
+//            PayloadMetadata responsePayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE, new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, "AU-Custom", "3.3.4"));
+            PayloadMetadata responsePayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_JSON_TYPE, new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, "AU-Custom-json", "3.3.4"));
 
-            Response response = consumer.retrieveDataFromPhase(new PhaseInfo(JOB_ID, phaseName), MediaType.APPLICATION_XML_TYPE, new PagingInfo(5, 2), null, null, null, REQUEST_TYPE, customParameters);
+            Response response = consumer.retrieveDataFromPhase(new PhaseInfo(JOB_ID, phaseName), responsePayloadMetadata, new PagingInfo(5, 2), null, null, null, REQUEST_TYPE, customParameters);
             printResponse(response);
         }
         catch (Exception ex)
@@ -443,7 +450,17 @@ public class TestRolloverStudentConsumer
         try
         {
             String payload = getPhasePayload(CREATE_PHASE_PAYLOAD);
-            Response response = consumer.createDataInPhase(new PhaseInfo(JOB_ID, phaseName), new PhaseDataRequest(payload, MediaType.APPLICATION_XML_TYPE), MediaType.APPLICATION_XML_TYPE, false, null, null, REQUEST_TYPE, null);
+            
+            // Set the mime type and schema. Note if this is different to the one in the consumer property file we need to set all both values
+            // for schema negotiation headers to be set correctly! Generally one should do this anyway regardless if these are the same of not.
+            PayloadMetadata requestPayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE, new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, "AU-Custom", "3.3.4"));
+//            PayloadMetadata responsePayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE, new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, "AU-Custom", "3.3.4"));
+            SchemaInfo schemaInfo = new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, "au", "3.3.4");
+//            schemaInfo.setSchemaType(CommonConstants.SchemaType.goessner.name());
+//            PayloadMetadata responsePayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_JSON_TYPE, schemaInfo);
+            PayloadMetadata responsePayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE, schemaInfo);
+ 
+            Response response = consumer.createDataInPhase(new PhaseInfo(JOB_ID, phaseName), new PhaseDataRequest(payload, requestPayloadMetadata), responsePayloadMetadata, false, null, null, REQUEST_TYPE, null);
             
             printResponse(response);
         }
@@ -469,7 +486,17 @@ public class TestRolloverStudentConsumer
             customParameters.setQueryParams(urlQueryParams);
 
             String payload = getPhasePayload(UPDATE_PHASE_PAYLOAD);
-            Response response = consumer.updateDataInPhase(new PhaseInfo(JOB_ID, phaseName), new PhaseDataRequest(payload, MediaType.APPLICATION_XML_TYPE), MediaType.APPLICATION_XML_TYPE, null, null, REQUEST_TYPE, customParameters);
+            
+            // Example on how a specific non XM/JSON schema info can be used. Sending CSV schema info but accepting XML
+            // Note: Of the Functional Provider doesn't set the marshaller to CSV marschaller it will all get a bit confused and
+            // potentially the mime types don't really match. This is normal!
+//            PayloadMetadata payloadMetadata = new  PayloadMetadata(MediaType.TEXT_PLAIN_TYPE, new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, "au", "3.4.5"));
+//            payloadMetadata.getSchemaInfo().setSchemaType("csv");
+//            Response response = consumer.updateDataInPhase(new PhaseInfo(JOB_ID, phaseName), new PhaseDataRequest(payload, payloadMetadata), new PayloadMetadata(MediaType.APPLICATION_XML_TYPE), null, null, REQUEST_TYPE, customParameters);
+
+            // Example how a standard XML schema can be used. Since no schema info is set the framework will use the one specified in the
+            // adpater's property file.
+            Response response = consumer.updateDataInPhase(new PhaseInfo(JOB_ID, phaseName), new PhaseDataRequest(payload, new PayloadMetadata(MediaType.APPLICATION_XML_TYPE)), new PayloadMetadata(MediaType.APPLICATION_XML_TYPE), null, null, REQUEST_TYPE, customParameters);
             
             printResponse(response);
         }
@@ -485,8 +512,17 @@ public class TestRolloverStudentConsumer
         System.out.println("Start 'Delete Data in Phase' ...");
         try
         {
+//            String payload = null; //getPhasePayload(DELETE_PHASE_PAYLOAD);
             String payload = getPhasePayload(DELETE_PHASE_PAYLOAD);
-            Response response = consumer.deleteDataInPhase(new PhaseInfo(JOB_ID, phaseName), new PhaseDataRequest(payload, MediaType.APPLICATION_XML_TYPE), MediaType.APPLICATION_XML_TYPE, null, null, REQUEST_TYPE, null);
+            
+            // Set the mime type and schema. Note if this is different to the one in the consumer property file we need to set all both values
+            // for schema negotiation headers to be set correctly! Generally one should do this anyway regardless if these are the same of not.
+//            PayloadMetadata requestPayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE, null);
+//            PayloadMetadata responsePayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE,null);
+            PayloadMetadata requestPayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE, new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, "AU-Custom", "3.3.4"));
+            PayloadMetadata responsePayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE, new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, "AU-Custom", "3.3.4"));
+
+            Response response = consumer.deleteDataInPhase(new PhaseInfo(JOB_ID, phaseName), new PhaseDataRequest(payload, requestPayloadMetadata),responsePayloadMetadata, null, null, REQUEST_TYPE, null);
             printResponse(response);
         }
         catch (Exception ex)
@@ -510,7 +546,7 @@ public class TestRolloverStudentConsumer
             //
             // Job Operations
             //
-            tester.createJob(consumer);
+//            tester.createJob(consumer);
 //            tester.createJobs(consumer);
 
             
@@ -525,15 +561,16 @@ public class TestRolloverStudentConsumer
             // Phase State Operations
             //
 //            tester.updateJobPhaseState(consumer, "oldYearEnrolment", PhaseState.PENDING);
-//            tester.getJobPhaseStates(consumer, "newYearEnrolment");
+//            tester.getJobPhaseStates(consumer, "oldYearEnrolment");
         
             //
             // Phase Operations
             //
 //            tester.retriveFromPhase(consumer, "oldYearEnrolment");
-//            tester.createDataInPhase(consumer, "oldYearEnrolment");
+//            tester.createDataInPhase(consumer, "oldYearEnrolment"); // normally no rights for this on.
+//            tester.createDataInPhase(consumer, "newYearEnrolment");
 //            tester.updateDataInPhase(consumer, "oldYearEnrolment");
-//            tester.deleteDataInPhase(consumer, "oldYearEnrolment");
+            tester.deleteDataInPhase(consumer, "oldYearEnrolment");
 
             // Put this agent to a blocking wait.....
             if (true)
