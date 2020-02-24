@@ -1,4 +1,4 @@
-<job xmlns="http://www.sifassociation.org/infrastructure/3.2.1">
+<job xmlns="http://www.sifassociation.org/infrastructure/3.3">
 	<name>rolloverStudent</name>
 	<description>Rollover Student from year X to year Y</description>
 	<state>NOTSTARTED</state>
