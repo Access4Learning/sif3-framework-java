@@ -8,7 +8,10 @@ Bug Fixes
 
 New Functionality
 -----------------
-- None.
+- Added initial support for Schema Version Negotiation functionality. See Developer's Guide section 2.4 for further details. This
+  new functionality required minor changes to the Functional Service and Named Query interfaces. If your project uses any of these
+  then your code will break as the changes are "breaking changes". However there is a simple fix that is further detailed in below
+  sections. 
 
 Changed Functionality
 ---------------------
@@ -68,6 +71,32 @@ Use the latest maven dependency
    <artifactId>sif3-infra-rest</artifactId>
    <version>0.15.0</version>
 </dependency>
+
+Code Upgrade for changes to Functional Service and Named Query Interfaces
+-------------------------------------------------------------------------
+As part of the schema version negotiation functionality that has been added in this version of the framework some interfaces 
+required one parameter to be changed. Affected interfaces are:
+- FunctionalServiceConsumer
+- FunctionalServiceProvider
+- NamedQueryProvider
+
+A number of methods in the above interfaces used to have a parameter called "MediaType returnMimeType". This has been changed to a 
+parameter called "PayloadMetadata returnPayloadMetadata". If you have consumers or providers that extend the respective abstract 
+class a compilation error will be shown.
+
+Fix
+---
+To fix the above compilation error you need to do the following simple steps:
+1) Replace the parameter with the name and type "MediaType returnMimeType" with "PayloadMetadata returnPayloadMetadata".
+2) Where your code accessed the old parameter called "returnMimeType" you replace your code with "returnPayloadMetadata.getMimeType()".
+
+The above two steps should remove the compilation errors.
+
+Finally some methods of the mentioned interfaces return a structure that contains or extends a class called "StringPayload". This 
+class used to have a property called "MediaType mimeType". This has been replaced with "PayloadMetadata payloadMetadata". 
+As with the fix above you need to modify your code where you accessed "mimeType" with "payloadMetadata.getMimeType()" or 
+"payloadMetadata.setMimeType()".
+
 
 Data Model Upgrade
 ------------------

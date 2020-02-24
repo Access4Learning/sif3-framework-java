@@ -17,13 +17,12 @@ package sif3.infra.rest.queue.types;
 
 import java.io.Serializable;
 
-import javax.ws.rs.core.MediaType;
-
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.MessageType;
 import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.model.EventMetadata;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 
@@ -55,36 +54,35 @@ public class EventInfo extends QueueMessage implements Serializable
         this(null, null, null, null, null, null, null, null);
     }
 
-    public EventInfo(String payload, MediaType mediaType)
+    public EventInfo(String payload, PayloadMetadata payloadMetadata)
     {
-        this(payload, mediaType, null, null, null, null, null, null);
+        this(payload, payloadMetadata, null, null, null, null, null, null);
     }
 
-    public EventInfo(String payload, MediaType mediaType, EventAction eventAction)
+    public EventInfo(String payload, PayloadMetadata payloadMetadata, EventAction eventAction)
     {
-        this(payload, mediaType, eventAction, null, null, null, null, null);
+        this(payload, payloadMetadata, eventAction, null, null, null, null, null);
     }
 
-    public EventInfo(String payload, MediaType mediaType, EventAction eventAction,
-            UpdateType updateType)
+    public EventInfo(String payload, PayloadMetadata payloadMetadata, EventAction eventAction, UpdateType updateType)
     {
-        this(payload, mediaType, eventAction, updateType, null, null, null, null);
+        this(payload, payloadMetadata, eventAction, updateType, null, null, null, null);
     }
 
-    public EventInfo(String payload, MediaType mediaType, EventAction eventAction,
+    public EventInfo(String payload, PayloadMetadata payloadMetadata, EventAction eventAction,
             UpdateType updateType, SIFZone zone, SIFContext context)
     {
-        this(payload, mediaType, eventAction, updateType, zone, context, null, null);
+        this(payload, payloadMetadata, eventAction, updateType, zone, context, null, null);
     }
 
-    public EventInfo(String payload, MediaType mediaType, EventAction eventAction, UpdateType updateType, SIFZone zone, SIFContext context, EventMetadata eventMetadata)
+    public EventInfo(String payload, PayloadMetadata payloadMetadata, EventAction eventAction, UpdateType updateType, SIFZone zone, SIFContext context, EventMetadata eventMetadata)
     {
-        this(payload, mediaType, eventAction, updateType, zone, context, eventMetadata, null);
+        this(payload, payloadMetadata, eventAction, updateType, zone, context, eventMetadata, null);
     }
 
-    public EventInfo(String payload, MediaType mediaType, EventAction eventAction, UpdateType updateType, SIFZone zone, SIFContext context, EventMetadata eventMetadata, String messageQueueReaderID)
+    public EventInfo(String payload, PayloadMetadata payloadMetadata, EventAction eventAction, UpdateType updateType, SIFZone zone, SIFContext context, EventMetadata eventMetadata, String messageQueueReaderID)
     {
-        super(payload, mediaType, ServiceType.OBJECT, MessageType.EVENT, zone, context, messageQueueReaderID);
+        super(payload, payloadMetadata, ServiceType.OBJECT, MessageType.EVENT, zone, context, messageQueueReaderID);
         setEventAction(eventAction);
         setUpdateType(updateType);
         setEventMetadata(eventMetadata);

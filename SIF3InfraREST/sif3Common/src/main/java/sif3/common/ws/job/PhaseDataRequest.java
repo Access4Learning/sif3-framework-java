@@ -17,8 +17,7 @@
 
 package sif3.common.ws.job;
 
-import javax.ws.rs.core.MediaType;
-
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.StringPayload;
 
 /**
@@ -34,9 +33,9 @@ public class PhaseDataRequest extends StringPayload
         this(null, null);
     }
     
-    public PhaseDataRequest(String data, MediaType mimeType)
+    public PhaseDataRequest(String data, PayloadMetadata payloadMetadata)
     {
-        super(data, mimeType);
+        super(data, payloadMetadata);
     }
 
     @Override

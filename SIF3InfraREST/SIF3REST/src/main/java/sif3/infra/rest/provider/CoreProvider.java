@@ -41,11 +41,13 @@ import sif3.common.interfaces.EventProvider;
 import sif3.common.model.ACL.AccessRight;
 import sif3.common.model.ACL.AccessType;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.RequestParameters;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
+import sif3.common.model.SchemaInfo;
 import sif3.common.model.ServiceInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.BaseResponse;
@@ -264,6 +266,9 @@ public abstract class CoreProvider implements Runnable
      * env.userToken                 authenticatedUser
      * env.mediaType                 Content-Type, Accept
      * adapter.compression.enabled   Content-Encoding, Accept-Encoding
+     * env.schema.dm.domain    -.
+     * env.schema.dm.version    |->  content-profile, accept-profile
+     * env.schema.dm.json.type -'
      * 
      * Only properties that are not null or empty string will be set in the corresponding HTTP Header.
      *
@@ -331,6 +336,53 @@ public abstract class CoreProvider implements Runnable
     }
     
     /**
+     * If the property env.schema.enabled in the provider's property file is set to true then this method returns the SchemaInfo 
+     * made up of the following properties in the provider's property file:<br/>
+     * - env.schema.dm.domain <br/>
+     * - env.schema.dm.version <br/>
+     * - env.schema.dm.json.type <br/><br/>
+     *  
+     * If the env.schema.enabled in the provider's property file is set to false then null is returned as it is assumed that schema
+     * negotiation is not enabled for the given provider.<br/><br/>
+     * 
+     * The value returned, if any, is assumed to be the schema negotiation value to be set in the content-profile HTTP Header of
+     * requests that have a payload as part of the request.
+     * 
+     * @return See desc.
+     */
+    public SchemaInfo getRequestDMSchemaInfo()
+    {
+        if (getProviderEnvironment().isSchemaNegotiationEnabled())
+        {
+            return getProviderEnvironment().getDataModelSchemaInfo();
+        }
+        else
+        {
+            return null;
+        }
+    }
+    
+    /**
+     * If the property env.schema.enabled in the provider's property file is set to true then this method returns the SchemaInfo 
+     * made up of the following properties in the provider's property file:<br/>
+     * - env.schema.dm.domain <br/>
+     * - env.schema.dm.version <br/>
+     * - env.schema.dm.json.type <br/><br/>
+     *  
+     * If the env.schema.enabled in the provider's property file is set to false then null is returned as it is assumed that schema
+     * negotiation is not enabled for the given provider.<br/><br/>
+     * 
+     * The value returned, if any, is assumed to be the schema negotiation value to be set in the accept-profile HTTP Header of
+     * requests that have a payload in the response.
+     * 
+     * @return See desc.
+     */
+    public SchemaInfo getResponseDMSchemaInfo()
+    {
+        return getRequestDMSchemaInfo();
+    }
+
+    /**
      * This method returns the value of the adapter.compression.enabled property from the provider's property file. If 
      * that needs to be overridden by a specific implementation then the specific sub-class should override this method.
      * 
@@ -354,6 +406,24 @@ public abstract class CoreProvider implements Runnable
     /*------------------------------------------------------------------------------------------------------------------------
      * End of 'Dynamic' HTTP Header Field override section
      *-----------------------------------------------------------------------------------------------------------------------*/ 
+
+    /*------------------------------------------------------------------------------------------------------------------------
+     * Some convenience methods
+     *-----------------------------------------------------------------------------------------------------------------------*/ 
+    protected PayloadMetadata getDMPayloadMetadata()
+    {
+        return new PayloadMetadata(getRequestMediaType(), getRequestDMSchemaInfo());
+    }
+    
+    protected PayloadMetadata getInfraPayloadMetadata()
+    {
+        return new PayloadMetadata(getRequestMediaType(), getProviderEnvironment().getInfraModelSchemaInfo());
+    }
+    
+    /*------------------------------------------------------------------------------------------------------------------------
+     * End convenience methods
+     *-----------------------------------------------------------------------------------------------------------------------*/ 
+    
     
     public void finaliseCoreProvider()
     {

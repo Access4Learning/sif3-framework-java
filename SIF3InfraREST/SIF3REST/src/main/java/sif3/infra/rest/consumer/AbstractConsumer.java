@@ -40,10 +40,12 @@ import sif3.common.model.ACL.AccessRight;
 import sif3.common.model.ACL.AccessType;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.QueryPredicate;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.SchemaInfo;
 import sif3.common.model.ServiceInfo;
 import sif3.common.model.URLQueryParameter;
 import sif3.common.model.ZoneContextInfo;
@@ -59,9 +61,9 @@ import sif3.infra.common.env.types.ConsumerEnvironment;
 import sif3.infra.rest.client.ObjectServiceClient;
 
 /**
- * This is the core class that a developer will use to implement their consumers. Each consumer for each object type MUST extend this
- * class. It forms the link between the high level consumer implementation and the low level infrastructure functions which this class
- * abstracts.<br/>
+ * This is the core class that a developer will use to implement their object consumers. Each consumer for each object type MUST extend 
+ * this class. It forms the link between the high level consumer implementation and the low level infrastructure functions which this 
+ * class abstracts.<br/>
  * It forms the link between the SIF3 functions/infrastructure and the data model that shall be transported over the SIF3 
  * Infrastructure. The marshal and unmarshal factories required by this class as well as the two core abstract methods
  * getSingleObjectClassInfo() and getMultiObjectClassInfo() are the key to link between data model and infrastructure.<br/>
@@ -75,27 +77,6 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-	/* Below variables are for testing purposes only */
-//    private static Boolean testMode = null;
-    /* End Testing variables */
-
-//	private boolean checkACL = true;
-//	private boolean initOK = true;
-
-	/* The next two properties are used for delayed responses or events */ 
-//    private LocalConsumerQueue localConsumerQueue = null;
-//    private ExecutorService service = null;
-
-    /*-------------------------------------------------------------*/
-    /* Abstract method relating to general Consumer functionality. */
-    /*-------------------------------------------------------------*/
-
-//    /**
-//	 * This method is called when a consumer service is shut down. It can be used to free up internally allocated resources
-//	 * as well as clean-up other things.
-//	 */
-//	public abstract void shutdown();
-	
     /*---------------------------------------------------------------------*/
     /* Abstract method relating to DELAYED request response functionality. */
     /*---------------------------------------------------------------------*/
@@ -163,188 +144,77 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 	public AbstractConsumer()
 	{
 		super();
-		
-//		// Set some properties at this stage for simplicity reasons.
-//		checkACL = getConsumerEnvironment().getCheckACL();
-//		
-//		if (getConsumerEnvironment().getEventsEnabled() || getConsumerEnvironment().getDelayedEnabled())
-//		{
-//			logger.debug("Events and/or Delayed Responses enabled => start local consumer queue for "+getConsumerName());
-//			createLocalConsumerQueue();
-//		}
-//		else
-//		{
-//			logger.debug("Events AND Delayed Responses are disabled. Local consumer queues and threads are not started.");
-//		}		
 	}
 
-	/**
-	 * Utility method to easily retrieve the consumer environment configuration.
+	/*------------------------------------------------------------------------------------------------------------------------
+	 * Start of 'Dynamic' HTTP Header Field override section
 	 * 
-	 * @return See desc
+	 * The following set of methods are used for a more configurable way how some HTTP header in relation to data model
+	 * are set. The BaseConsumer class caters for some more generic HTTP header overrides. The ones listed here are
+	 * are specific for Object Services only. They do not need to be available for Functional or any other service types.
+	 * By default the following HTTP Header fields are retrieved from the consumer's property file and put in corresponding
+	 * HTTP Header Fields:
+	 * 
+	 * env.schema.dm.domain,env.schema.dm.version,env.schema.dm.json.type ==> HTTP Header: content-profile, accept-profile
+	 * 
+	 * There are situations where and application may need a more 'dynamic' behaviour where the above values are determined
+	 * at runtime, based on other circumstances and therefore these properties must be retrieved from an other source than the
+	 * consumer's property file. In such a case the methods below can be overwritten to make them dynamic and controlled by
+	 * the implementation rather than driven by the consumer's property file. If any of the methods below is overwritten then
+	 * the value of the over riding method is set in the corresponding HTTP Header field if the return value of the method 
+	 * is not null or an empty string.
+	 *------------------------------------------------------------------------------------------------------------------------*/
+
+	/**
+	 * If the property env.schema.enabled in the consumer's property file is set to true then this method returns the SchemaInfo 
+	 * made up of the following properties in the consumer's property file:<br/>
+	 * - env.schema.dm.domain <br/>
+	 * - env.schema.dm.version <br/>
+	 * - env.schema.dm.json.type <br/><br/>
+	 *  
+	 * If the env.schema.enabled in the consumer's property file is set to false then null is returned as it is assumed that schema
+	 * negotiation is not enabled for the given consumer.<br/><br/>
+	 * 
+	 * The value returned, if any, is assumed to be the schema negotiation value to be set in the content-profile HTTP Header of
+	 * requests that have a payload as part of the request.
+	 * 
+	 * @return See desc.
 	 */
-//	public ConsumerEnvironment getConsumerEnvironment()
-//	{
-//	  return (ConsumerEnvironment)ConsumerEnvironmentManager.getInstance().getEnvironmentInfo();
-//	}
+	public SchemaInfo getRequestDMSchemaInfo()
+	{
+	    if (getConsumerEnvironment().isSchemaNegotiationEnabled())
+	    {
+	        return getConsumerEnvironment().getDataModelSchemaInfo();
+	    }
+	    else
+	    {
+	        return null;
+	    }
+	}
 	
-//  /**
-//   * Utility method to easily retrieve the property file content for a consumer.
-//   * 
-//   * @return See desc
-//   */
-//	public AdvancedProperties getServiceProperties()
-//	{
-//	  return ConsumerEnvironmentManager.getInstance().getServiceProperties();
-//	}
-	
-//	/*------------------------------------------------------------------------------------------------------------------------
-//	 * Start of 'Dynamic' HTTP Header Field override section
-//	 * 
-//	 * The following set of methods are used for a more configurable way how some HTTP header parameters are set.
-//	 * By default the following HTTP Header fields are retrieved from the consumer's property file and put in corresponding
-//	 * HTTP Header Fields:
-//	 * 
-//	 * Property                      HTTP Header
-//	 * ------------------------------------------------
-//	 * adapter.generator.id          generatorId
-//	 * env.application.key           applicationKey
-//	 * env.userToken                 authenticatedUser
-//	 * env.mediaType                 Content-Type, Accept
-//	 * adapter.mustUseAdvisoryIDs    mustUseAdvisory
-//	 * adapter.compression.enabled   Content-Encoding, Accept-Encoding
-//	 * 
-//	 * Only properties that are not null or empty string will be set in the corresponding HTTP Header.
-//	 *
-//	 * There are situations where and application may need a more 'dynamic' behaviour where the above values are determined
-//	 * at runtime, based on other circumstances and therefore these properties must be retrieved from an other source than the
-//	 * consumer's property file. In such a case the methods below can be overwritten to make them dynamic and controlled by
-//	 * the implementation rather than driven by the consumer's property file. If any of the methods below is overwritten then
-//	 * the value of the over riding method is set in the corresponding HTTP Header field if the return value of the method 
-//	 * is not null or an empty string.
-//	 *------------------------------------------------------------------------------------------------------------------------*/
-//	
-//	/**
-//	 * This method returns the value of the adapter.generator.id property from the consumer's property file. If that
-//	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
-//	 * 
-//	 * @return The adapter.generator.id property from the consumer's property file
-//	 */
-//	public String getGeneratorID()
-//	{
-//		return getConsumerEnvironment().getGeneratorID();
-//	}
-//	
-//	/**
-//	 * This method returns the value of the env.application.key property from the consumer's property file. If that
-//	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
-//	 * 
-//	 * @return The env.application.key property from the consumer's property file
-//	 */
-//	public String getApplicationKey()
-//	{
-//		return getConsumerEnvironment().getEnvironmentKey().getApplicationKey();
-//	}
-//
-//	/**
-//	 * This method returns the value of the env.userToken property from the consumer's property file. If that
-//	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
-//	 * 
-//	 * @return The env.userToken property from the consumer's property file
-//	 */
-//	public String getAuthentictedUser()
-//	{
-//		return getConsumerEnvironment().getEnvironmentKey().getUserToken();
-//	}
-//	
-//	/**
-//	 * This method returns the value of the env.mediaType property from the consumer's property file. If that
-//	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
-//	 * 
-//	 * @return The env.mediaType property from the consumer's property file
-//	 */
-//	public MediaType getRequestMediaType()
-//	{
-//		return getConsumerEnvironment().getMediaType();
-//	}
-//	
-//	/**
-//	 * This method returns the value of the env.mediaType property from the consumer's property file. If that
-//	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
-//	 * 
-//	 * @return The env.mediaType property from the consumer's property file
-//	 */
-//	public MediaType getResponseMediaType()
-//	{
-//		return getConsumerEnvironment().getMediaType();
-//	}
-//	
-//	/**
-//	 * This method returns the value of the adapter.mustUseAdvisoryIDs property from the consumer's property file. If that
-//	 * needs to be overridden by a specific implementation then the specific sub-class should override this method.
-//	 * 
-//	 * @return The adapter.mustUseAdvisoryIDs property from the consumer's property file
-//	 */
-//	public boolean getMustUseAdvisory()
-//	{
-//		return getConsumerEnvironment().getUseAdvisory();
-//	}
-//
-//	/**
-//	 * This method returns the value of the adapter.compression.enabled property from the consumer's property file. If 
-//	 * that needs to be overridden by a specific implementation then the specific sub-class should override this method.
-//	 * 
-//	 * @return The adapter.compression.enabled property from the consumer's property file
-//	 */
-//	public boolean getCompressionEnabled()
-//	{
-//		return getConsumerEnvironment().getCompressionEnabled();
-//	}
-//
-//	/*------------------------------------------------------------------------------------------------------------------------
-//	 * End of 'Dynamic' HTTP Header Field override section
-//	 *-----------------------------------------------------------------------------------------------------------------------*/ 
+    /**
+     * If the property env.schema.enabled in the consumer's property file is set to true then this method returns the SchemaInfo 
+     * made up of the following properties in the consumer's property file:<br/>
+     * - env.schema.dm.domain <br/>
+     * - env.schema.dm.version <br/>
+     * - env.schema.dm.json.type <br/><br/>
+     *  
+     * If the env.schema.enabled in the consumer's property file is set to false then null is returned as it is assumed that schema
+     * negotiation is not enabled for the given consumer.<br/><br/>
+     * 
+     * The value returned, if any, is assumed to be the schema negotiation value to be set in the accept-profile HTTP Header of
+     * requests that have a payload in the response.
+     * 
+     * @return See desc.
+     */
+    public SchemaInfo getResponseDMSchemaInfo()
+    {
+        return getRequestDMSchemaInfo();
+    }
 
-//	/**
-//	 * @return Returns the actual Class Name of this consumer
-//	 */
-//	public String getConsumerName()
-//	{
-//		return getClass().getSimpleName();
-//	}
-	
-//	/**
-//	 * @return Returns the Service Name.
-//	 */
-//	public String getServiceName()
-//	{
-//		return getMultiObjectClassInfo().getObjectName();
-//	}
-	
-//    /**
-//     * Utility method. Mainly used for useful logging messages.
-//     * 
-//     * @return Returns the Adapter Name as defined in the adapter.id property of the consumer property file concatenated with the 
-//     *         Consumer Name (class name)
-//     */
-//    public String getPrettyName()
-//    {
-//    	return getConsumerEnvironment().getAdapterName()+" - " + getConsumerName();
-//    }
-
-//    /*------------------------------*/
-//    /* Some Getter & Setter methods */
-//    /*------------------------------*/
-//    
-//    public final LocalConsumerQueue getLocalConsumerQueue()
-//    {
-//      return localConsumerQueue;
-//    }
-//
-//    public final void setLocalConsumerQueue(LocalConsumerQueue localConsumerQueue)
-//    {
-//      this.localConsumerQueue = localConsumerQueue;
-//    }
+	/*------------------------------------------------------------------------------------------------------------------------
+	 * End of 'Dynamic' HTTP Header Field override section
+	 *-----------------------------------------------------------------------------------------------------------------------*/ 
 
     /*-----------------------*/
 	/*-- Create Operations --*/
@@ -358,14 +228,6 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 	public List<BulkOperationResponse<CreateOperationStatus>> createMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
 	    nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
-
-/*	    
-		if (!initOK)
-	  	{
-			logger.error("Consumer not initialised properly. See previous error log entries.");
-			return null;
-	  	}
-*/	  	
 
 		Timer timer = new Timer();
 		timer.start();
@@ -1236,8 +1098,8 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 		    
 			return new ObjectServiceClient(ConsumerEnvironmentManager.getInstance(),
 			                           envInfo.getConnectorBaseURI(ConsumerEnvironment.ConnectorName.requestsConnector), 
-	                   				   getRequestMediaType(),
-	                   				   getResponseMediaType(),
+	                   				   new PayloadMetadata(getRequestMediaType(), getRequestDMSchemaInfo()),
+	                   				   new PayloadMetadata(getResponseMediaType(), getResponseDMSchemaInfo()),
 	                   				   getMarshaller(), 
 	                   				   getUnmarshaller(),
 	                   				   envInfo.getSecureConnection(),

@@ -194,6 +194,8 @@ ___
 - Updated framework to be used with SIF Infrastructure 3.3. This only includes the usage of the new namespace and
   Infrastructure XSDs but not new SIF 3.3 functionality such as Privacy Services, Data Model Schema negotiation etc.
   Some of the new functionality might be added in later versions of the framework.
+  
+- **Feb 24, 2020:** Added some functionality relating to schema version negotiation.
 
 **Please refer to the detailed release notes in "release/v0.15.0" to ensure that your project is upgraded properly to the new framework version.**
 

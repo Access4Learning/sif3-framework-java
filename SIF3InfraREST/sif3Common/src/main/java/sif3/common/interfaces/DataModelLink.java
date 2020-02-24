@@ -55,7 +55,7 @@ public interface DataModelLink
 
 	/**
 	 * Returns the information for the 'collection-style object'. The returned object holds the name of a 'collection-style object' 
-	 * (i.e StudentPersonal) and the physical class this maps to for the data model supported for this implementation.
+	 * (i.e StudentPersonals - note the added 's') and the physical class this maps to for the data model supported for this implementation.
 	 * 
 	 * @return See Desc.
 	 */

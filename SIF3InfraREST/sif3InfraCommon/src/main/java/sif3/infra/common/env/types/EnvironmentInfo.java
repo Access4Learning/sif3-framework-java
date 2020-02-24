@@ -27,6 +27,8 @@ import javax.ws.rs.core.MediaType;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.model.EnvironmentKey;
+import sif3.common.model.PayloadMetadata;
+import sif3.common.model.SchemaInfo;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 
 /**
@@ -67,9 +69,14 @@ public class EnvironmentInfo implements Serializable
 	private String existingSessionToken = null;
     private URI existingEnvURI = null;
     
+    // Schema negotiation properties
+    private SchemaInfo dataModelSchemaInfo = new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, null, null);
+    private SchemaInfo infraModelSchemaInfo = new SchemaInfo(SchemaInfo.MODEL_TYPE_INFRA, SchemaInfo.MODEL_DOMAIN_INFRA, null);
+    private boolean isSchemaNegotiationEnabled = false;
+    
     // Other framework specific properties
     private boolean envCreateConflictIsError = true; // Shall the HTTP Status 409 for environment creation be treated as error (true)? 
-    
+        
 	/* 
      * This is a runtime value only. But it is stored here rather than in the session because it is valid for ALL sessions of that
      * environment.
@@ -334,23 +341,61 @@ public class EnvironmentInfo implements Serializable
     	this.envCreateConflictIsError = envCreateConflictIsError;
     }
 
+    public SchemaInfo getDataModelSchemaInfo()
+    {
+        return dataModelSchemaInfo;
+    }
+
+    public void setDataModelSchemaInfo(SchemaInfo dataModelSchemaInfo)
+    {
+        this.dataModelSchemaInfo = dataModelSchemaInfo;
+    }
+
+    public SchemaInfo getInfraModelSchemaInfo()
+    {
+        return infraModelSchemaInfo;
+    }
+
+    public void setInfraModelSchemaInfo(SchemaInfo infraModelSchemaInfo)
+    {
+        this.infraModelSchemaInfo = infraModelSchemaInfo;
+    }
+
+    public boolean isSchemaNegotiationEnabled()
+    {
+        return isSchemaNegotiationEnabled;
+    }
+
+    public void setSchemaNegotiationEnabled(boolean isSchemaNegotiationEnabled)
+    {
+        this.isSchemaNegotiationEnabled = isSchemaNegotiationEnabled;
+    }
+    
+    public PayloadMetadata getInfraPayloadMetadata()
+    {
+        return new PayloadMetadata(getMediaType(), getInfraModelSchemaInfo());
+    }
+    
+    public PayloadMetadata getDataModelPayloadMetadata()
+    {
+        return new PayloadMetadata(getMediaType(), getDataModelSchemaInfo());
+    }
+
 	@Override
     public String toString()
     {
-        return "EnvironmentInfo [baseURI=" + baseURI + ", secureConnection="
-                + secureConnection + ", mediaType=" + mediaType
-                + ", charsetEncoding=" + charsetEncoding + ", adapterType="
-                + adapterType + ", checkACL=" + checkACL + ", environmentType="
-                + environmentType + ", authMethod=" + authMethod
-                + ", removeEnvOnShutdown=" + removeEnvOnShutdown
-                + ", adapterName=" + adapterName + ", environmentKey="
-                + environmentKey + ", password=" + password + ", generatorID="
-                + generatorID + ", compressionEnabled=" + compressionEnabled
-                + ", noCertificateCheck=" + noCertificateCheck
-                + ", useExistingEnv=" + useExistingEnv
-                + ", existingSessionToken=" + existingSessionToken
-                + ", existingEnvURI=" + existingEnvURI
-                + ", envCreateConflictIsError=" + envCreateConflictIsError
-                + ", connectorBaseURIs=" + connectorBaseURIs + "]";
+        return "EnvironmentInfo [baseURI=" + baseURI + ", secureConnection=" + secureConnection
+                + ", mediaType=" + mediaType + ", charsetEncoding=" + charsetEncoding
+                + ", adapterType=" + adapterType + ", checkACL=" + checkACL + ", environmentType="
+                + environmentType + ", authMethod=" + authMethod + ", removeEnvOnShutdown="
+                + removeEnvOnShutdown + ", adapterName=" + adapterName + ", environmentKey="
+                + environmentKey + ", password=" + password + ", generatorID=" + generatorID
+                + ", compressionEnabled=" + compressionEnabled + ", noCertificateCheck="
+                + noCertificateCheck + ", useExistingEnv=" + useExistingEnv
+                + ", existingSessionToken=" + existingSessionToken + ", existingEnvURI="
+                + existingEnvURI + ", dataModelSchemaInfo=" + dataModelSchemaInfo
+                + ", infraModelSchemaInfo=" + infraModelSchemaInfo + ", isSchemaNegotiationEnabled="
+                + isSchemaNegotiationEnabled + ", envCreateConflictIsError="
+                + envCreateConflictIsError + ", connectorBaseURIs=" + connectorBaseURIs + "]";
     }
 }

@@ -17,10 +17,15 @@ package sif3.infra.rest.resource;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
+import sif3.common.header.HeaderValues.ResponseAction;
+import sif3.common.model.ResponseParameters;
+import sif3.common.model.SchemaInfo;
+import sif3.common.ws.ErrorDetails;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
 
@@ -46,8 +51,8 @@ public abstract class InfraResource extends BaseResource
 		
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Request Media Type : " + getRequestMediaType());
-			logger.debug("Response Media Type: " + getResponseMediaType());
+			logger.debug("Request Media & Schema Info : " + getRequestPayloadMetadata());
+			logger.debug("Response Media & Schema Info: " + getInfraResponsePayloadMetadata());
 		}
 	}
 	
@@ -71,6 +76,16 @@ public abstract class InfraResource extends BaseResource
     public UnmarshalFactory getUnmarshaller()
     {
 	    return getInfraUnmarshaller();
+    }
+
+    public Response makeInfraErrorResponse(ErrorDetails error, ResponseAction responseAction, ResponseParameters customResponseParams)
+    {
+        return makeErrorResponse(error, responseAction, customResponseParams, getFWInfraSchemaInfo());    
+    }
+    
+    public SchemaInfo getFWInfraSchemaInfo()
+    {
+        return getEnvironmentManager().getEnvironmentInfo().getInfraModelSchemaInfo();
     }
 
 //	protected boolean isTestMode()

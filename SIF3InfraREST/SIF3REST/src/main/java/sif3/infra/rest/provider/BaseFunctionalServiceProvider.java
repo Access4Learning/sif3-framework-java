@@ -415,7 +415,7 @@ public abstract class BaseFunctionalServiceProvider extends CoreProvider impleme
         {
             // Let's get the Event Client
             String serviceName = getServiceName();
-            EventClient evtClient = new EventClient(envMgr, getRequestMediaType(), getResponseMediaType(), serviceName, getMarshaller(), getCompressionEnabled());
+            EventClient evtClient = new EventClient(envMgr, getInfraPayloadMetadata(), getInfraPayloadMetadata(), serviceName, getMarshaller(), getCompressionEnabled());
             JobEventIterator iterator = (JobEventIterator)getSIFEvents();
             if (iterator != null)
             {

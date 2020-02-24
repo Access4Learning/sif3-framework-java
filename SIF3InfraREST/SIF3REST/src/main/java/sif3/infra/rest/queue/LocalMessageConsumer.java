@@ -20,7 +20,6 @@ package sif3.infra.rest.queue;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
@@ -34,6 +33,7 @@ import sif3.common.interfaces.DelayedConsumer;
 import sif3.common.interfaces.EventConsumer;
 import sif3.common.interfaces.MinimalConsumer;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.StringPayload;
@@ -183,11 +183,11 @@ public class LocalMessageConsumer implements Runnable
         Object eventPayload = null;
         if (eventInfo.getServiceType() == ServiceType.FUNCTIONAL) 
         {
-            eventPayload = makeFunctionalServiceObject(eventInfo.getPayload(), eventInfo.getMediaType(), false, true);
+            eventPayload = makeFunctionalServiceObject(eventInfo.getPayload(), eventInfo.getPayloadMetadata(), false, true);
         }
         else
         {
-            eventPayload = makeDataModelObject(minimalConsumer, eventInfo.getPayload(), eventInfo.getMediaType());
+            eventPayload = makeDataModelObject(minimalConsumer, eventInfo.getPayload(), eventInfo.getPayloadMetadata());
         }
         if (eventPayload instanceof ErrorDetails)
         {
@@ -243,19 +243,19 @@ public class LocalMessageConsumer implements Runnable
         	    {
         	        if (!isPhaseObject)
         	        {
-                        delayedConsumer.onCreateMany(infraMapper.toStatusListFromSIFCreateString(responseInfo.getPayload(), responseInfo.getMediaType()), delayedReceipt);                             	            
+                        delayedConsumer.onCreateMany(infraMapper.toStatusListFromSIFCreateString(responseInfo.getPayload(), responseInfo.getPayloadMetadata()), delayedReceipt);                             	            
         	        }
         	        else
         	        {
         	            AbstractFunctionalServiceConsumer fsc = (AbstractFunctionalServiceConsumer)minimalConsumer;
         	            fsc.processDelayedPhaseCreate(new PhaseInfo(responseInfo.getResourceID(), responseInfo.getPhaseName()), 
-        	                                          new PhaseDataResponse(responseInfo.getPayload(), responseInfo.getMediaType(), Status.OK), 
+        	                                          new PhaseDataResponse(responseInfo.getPayload(), responseInfo.getPayloadMetadata(), Status.OK), 
         	                                          delayedReceipt);
         	        }
         	    }
         	    else
         	    {
-        	        delayedConsumer.onCreateMany(infraMapper.toStatusListFromSIFCreateString(responseInfo.getPayload(), responseInfo.getMediaType()), delayedReceipt);
+        	        delayedConsumer.onCreateMany(infraMapper.toStatusListFromSIFCreateString(responseInfo.getPayload(), responseInfo.getPayloadMetadata()), delayedReceipt);
         	    }
         	    break;
         	}
@@ -265,20 +265,20 @@ public class LocalMessageConsumer implements Runnable
                 {
                     if (!isPhaseObject)
                     {
-                        delayedConsumer.onDeleteMany(infraMapper.toStatusListFromSIFDeleteString(responseInfo.getPayload(), responseInfo.getMediaType()), delayedReceipt);
+                        delayedConsumer.onDeleteMany(infraMapper.toStatusListFromSIFDeleteString(responseInfo.getPayload(), responseInfo.getPayloadMetadata()), delayedReceipt);
                     
                     }
                     else
                     {
                         AbstractFunctionalServiceConsumer fsc = (AbstractFunctionalServiceConsumer)minimalConsumer;
                         fsc.processDelayedPhaseDelete(new PhaseInfo(responseInfo.getResourceID(), responseInfo.getPhaseName()), 
-                                                      new PhaseDataResponse(responseInfo.getPayload(), responseInfo.getMediaType(), Status.OK), 
+                                                      new PhaseDataResponse(responseInfo.getPayload(), responseInfo.getPayloadMetadata(), Status.OK), 
                                                       delayedReceipt);
                     }
                 }
                 else
                 {
-                    delayedConsumer.onDeleteMany(infraMapper.toStatusListFromSIFDeleteString(responseInfo.getPayload(), responseInfo.getMediaType()), delayedReceipt);
+                    delayedConsumer.onDeleteMany(infraMapper.toStatusListFromSIFDeleteString(responseInfo.getPayload(), responseInfo.getPayloadMetadata()), delayedReceipt);
                 }
         		break;
         	}
@@ -290,7 +290,7 @@ public class LocalMessageConsumer implements Runnable
                     {
                         AbstractFunctionalServiceConsumer fsc = (AbstractFunctionalServiceConsumer)minimalConsumer;
                         fsc.processDelayedPhaseUpdate(new PhaseInfo(responseInfo.getResourceID(), responseInfo.getPhaseName()), 
-                                                      new PhaseDataResponse(responseInfo.getPayload(), responseInfo.getMediaType(), Status.OK), 
+                                                      new PhaseDataResponse(responseInfo.getPayload(), responseInfo.getPayloadMetadata(), Status.OK), 
                                                       delayedReceipt);
                     }
                     else
@@ -300,7 +300,7 @@ public class LocalMessageConsumer implements Runnable
                 }
                 else
                 {
-                    delayedConsumer.onUpdateMany(infraMapper.toStatusListFromSIFUpdateString(responseInfo.getPayload(), responseInfo.getMediaType()), delayedReceipt);
+                    delayedConsumer.onUpdateMany(infraMapper.toStatusListFromSIFUpdateString(responseInfo.getPayload(), responseInfo.getPayloadMetadata()), delayedReceipt);
                 }
         		break;
         	}
@@ -313,12 +313,12 @@ public class LocalMessageConsumer implements Runnable
                     case OBJECT: // no code here as it is the same as the SERVICEPATH below!
                     case SERVICEPATH:
                     {
-                        payloadObject = makeDataModelObject(minimalConsumer, responseInfo.getPayload(), responseInfo.getMediaType());
+                        payloadObject = makeDataModelObject(minimalConsumer, responseInfo.getPayload(), responseInfo.getPayloadMetadata());
                         break;
                     }
                     case FUNCTIONAL:
                     {
-                        payloadObject = makeFunctionalServiceObject(responseInfo.getPayload(), responseInfo.getMediaType(), isPhaseObject, false);
+                        payloadObject = makeFunctionalServiceObject(responseInfo.getPayload(), responseInfo.getPayloadMetadata(), isPhaseObject, false);
                         break;
                     }
                     case XQUERYTEMPLATE:
@@ -356,7 +356,7 @@ public class LocalMessageConsumer implements Runnable
                     case XQUERYTEMPLATE:
                     {
                         AbstractNamedQueryConsumer nqc = (AbstractNamedQueryConsumer)minimalConsumer;
-                        nqc.processDelayedNamedQuery(new StringPayload(responseInfo.getPayload(), responseInfo.getMediaType()), paging, delayedReceipt);
+                        nqc.processDelayedNamedQuery(new StringPayload(responseInfo.getPayload(), responseInfo.getPayloadMetadata()), paging, delayedReceipt);
 
                         break;
                     }
@@ -370,7 +370,7 @@ public class LocalMessageConsumer implements Runnable
                         {
                             AbstractFunctionalServiceConsumer fsc = (AbstractFunctionalServiceConsumer)minimalConsumer;
                             fsc.processDelayedPhaseQuery(new PhaseInfo(responseInfo.getResourceID(), responseInfo.getPhaseName()), 
-                                                         new PhaseDataResponse(responseInfo.getPayload(), responseInfo.getMediaType(), Status.OK), 
+                                                         new PhaseDataResponse(responseInfo.getPayload(), responseInfo.getPayloadMetadata(), Status.OK), 
                                                          paging, delayedReceipt);
                         }
         			    break;
@@ -409,11 +409,11 @@ public class LocalMessageConsumer implements Runnable
      * returned object of this method is not a Datamodel object but an ErrorDetails object. The caller of this method MUST
      * check if the returned object is of type ErrorDetails first before doing anything with it.
      */
-    private Object makeDataModelObject(MinimalConsumer miniConsumer, String payload, MediaType mediaType)
+    private Object makeDataModelObject(MinimalConsumer miniConsumer, String payload, PayloadMetadata payloadMetadata)
     {
         try
         {
-            return miniConsumer.getUnmarshaller().unmarshal(payload, miniConsumer.getMultiObjectClassInfo().getObjectType(), mediaType);
+            return miniConsumer.getUnmarshaller().unmarshal(payload, miniConsumer.getMultiObjectClassInfo().getObjectType(), payloadMetadata.getMimeType());
         }
         catch (UnmarshalException ex)
         {
@@ -433,14 +433,14 @@ public class LocalMessageConsumer implements Runnable
      * Will only be called for Job Queries. So we know that it must be a JobCollection object. The other usage is from Phase Operations.
      * In this case we know nothing about the data model and therefore we return the raw data (string).
      */
-    private Object makeFunctionalServiceObject(String payload, MediaType mediaType, boolean isPhaseObject, boolean isEvent)
+    private Object makeFunctionalServiceObject(String payload, PayloadMetadata payloadMetadata, boolean isPhaseObject, boolean isEvent)
     {
         InfraUnmarshalFactory infraUnmarshaller = new InfraUnmarshalFactory();
         if (isEvent || !isPhaseObject) // The object is a Job Collection object
         {
             try
             {
-                return infraUnmarshaller.unmarshal(payload, JobCollectionType.class, mediaType);
+                return infraUnmarshaller.unmarshal(payload, JobCollectionType.class, payloadMetadata.getMimeType());
             }
             catch (UnmarshalException ex)
             {

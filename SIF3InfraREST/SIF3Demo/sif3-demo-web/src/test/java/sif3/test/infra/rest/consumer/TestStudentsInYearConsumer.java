@@ -9,8 +9,10 @@ import javax.ws.rs.core.MediaType;
 import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.SchemaInfo;
 import sif3.common.model.ZoneContextInfo;
 import sif3.common.ws.Response;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
@@ -19,8 +21,8 @@ import systemic.sif3.demo.rest.consumer.namedquery.StudentsInYearConsumer;
 
 public class TestStudentsInYearConsumer
 {
-//    private static final String CONSUMER_ID = "StudentConsumer";
-    private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
+    private static final String CONSUMER_ID = "StudentConsumer";
+//    private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
 
     private static final RequestType REQUEST_TYPE = RequestType.IMMEDIATE;
 //    private static final RequestType REQUEST_TYPE = RequestType.DELAYED;
@@ -97,9 +99,20 @@ public class TestStudentsInYearConsumer
             namedQueryParameters.put("Year", "Yr7");
             namedQueryParameters.put("SchoolCode", "4001");
 
-            List<Response> responses = consumer.retrieveDataFromNamedQuery(namedQueryParameters, MediaType.APPLICATION_XML_TYPE, new PagingInfo(5, 1), zoneCtxList, REQUEST_TYPE, QueryIntention.ALL, null);
+            // Example on how a specific non XML/JSON schema info can be used.
+//            PayloadMetadata payloadMetadata = new PayloadMetadata(MediaType.TEXT_PLAIN_TYPE, new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, "au", "3.4.5"));
+//            payloadMetadata.getSchemaInfo().setSchemaType("csv");
+            PayloadMetadata payloadMetadata = new PayloadMetadata(MediaType.APPLICATION_JSON_TYPE, new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, "au", "3.4.5"));
+            payloadMetadata.getSchemaInfo().setSchemaType("goessner");
+//            PayloadMetadata payloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE, new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, "au", "3.4.5"));
+//            PayloadMetadata payloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE, null);
+            List<Response> responses = consumer.retrieveDataFromNamedQuery(namedQueryParameters, payloadMetadata, new PagingInfo(5, 1), zoneCtxList, REQUEST_TYPE, QueryIntention.ALL, null);
 
-            System.out.println("Responses from attempt to Get Job:");
+            // Example how a standard XML schema can be used. Since no schema info is set the framework will use the one specified in the
+            // adpater's property file.
+//            List<Response> responses = consumer.retrieveDataFromNamedQuery(namedQueryParameters, new PayloadMetadata(MediaType.APPLICATION_XML_TYPE), new PagingInfo(5, 1), zoneCtxList, REQUEST_TYPE, QueryIntention.ALL, null);
+
+            System.out.println("Responses from attempt to Get Students in Year:");
             printResponses(responses);
         }
         catch (Exception ex)
@@ -125,7 +138,7 @@ public class TestStudentsInYearConsumer
             //
             // Get Students
             //
-//            tester.getStudentsInYear(consumer);
+            tester.getStudentsInYear(consumer);
 //            tester.getStudentsInYear(consumer2);
 
             // Put this agent to a blocking wait.....

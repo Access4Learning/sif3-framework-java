@@ -404,7 +404,7 @@ public class RemoteMessageQueueReader implements Runnable
 		baseInfo.setResourceID(pathInfo.getResourceID());
 		baseInfo.setPhaseName(pathInfo.getPhaseName());
 		baseInfo.setPayload((String)response.getDataObject());
-		baseInfo.setMediaType(response.getMediaType());
+		baseInfo.setPayloadMetadata(response.getPayloadMetadata());
 		baseInfo.setZone(getSif3Session().getZone(pathInfo.getZone()));
 		baseInfo.setContext(getSif3Session().getContext(pathInfo.getContext()));
 		baseInfo.setMessageQueueReaderID(getQueueReaderID());
@@ -453,7 +453,7 @@ public class RemoteMessageQueueReader implements Runnable
 				
 				//TODO: JH - Do we need applicationKey and authenticatedUser HTTP header here?				
 				
-				EventInfo eventInfo = new EventInfo(eventPayload, response.getMediaType(), eventAction, updateType, zone, context, metadata, getQueueReaderID());
+				EventInfo eventInfo = new EventInfo(eventPayload, response.getPayloadMetadata(), eventAction, updateType, zone, context, metadata, getQueueReaderID());
 				eventInfo.setFingerprint(getHeaderValue(response, ResponseHeaderConstants.HDR_FINGERPRINT));
 				eventInfo.setServiceType(StringUtils.isEmpty(serviceType) ? ServiceType.OBJECT : ServiceType.valueOf(serviceType));
 				

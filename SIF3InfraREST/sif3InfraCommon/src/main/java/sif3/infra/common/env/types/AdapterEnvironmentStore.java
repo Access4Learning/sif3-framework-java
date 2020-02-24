@@ -36,6 +36,7 @@ import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.CommonConstants.JobState;
 import sif3.common.CommonConstants.QueuePollingType;
 import sif3.common.CommonConstants.QueueStrategy;
+import sif3.common.CommonConstants.SchemaType;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.utils.FileAndFolderUtils;
@@ -214,6 +215,26 @@ public class AdapterEnvironmentStore implements Serializable
 			  			errors = true;
 			  		}
 			  		
+			  		// Load Schema Negotiation Properties
+                    environment.setSchemaNegotiationEnabled(adapterProperties.getPropertyAsBool("env.schema.enabled", false));
+                    if (environment.isSchemaNegotiationEnabled()) // there are a few mandatory properties required
+                    {
+                        environment.getDataModelSchemaInfo().setModelDomain(getValueAndLogError("env.schema.dm.domain", "au, nz, uk, us"));
+                        environment.getDataModelSchemaInfo().setModelVersion(getValueAndLogError("env.schema.dm.version","3.4.1, 3.3"));
+                        environment.getInfraModelSchemaInfo().setModelVersion(getValueAndLogError("env.schema.infra.version","3.3"));
+                        
+                        errors = errors ||  
+                                 environment.getDataModelSchemaInfo().getModelDomain() == null ||
+                                 environment.getDataModelSchemaInfo().getModelVersion() == null ||
+                                 environment.getInfraModelSchemaInfo().getModelVersion() == null;
+                        
+                        if (environment.getMediaType().equals(MediaType.APPLICATION_JSON_TYPE)) // we need the schema type
+                        {
+                            environment.getDataModelSchemaInfo().setSchemaType(adapterProperties.getPropertyAsString("env.schema.dm.json.type",SchemaType.goessner.name()));
+                            environment.getInfraModelSchemaInfo().setSchemaType(adapterProperties.getPropertyAsString("env.schema.infra.json.type",SchemaType.goessner.name()));                            
+                        }
+                    }
+			  		
 			  		if (!errors) // Read specific info
 					{
 						if (getEnvironment().getAdapterType() == AdapterType.CONSUMER)
@@ -240,6 +261,21 @@ public class AdapterEnvironmentStore implements Serializable
 		}
 	}
 
+	/*
+	 * This method attempts to get a String type property name and if it is missing it will log it. Null will be returned in this case
+	 */
+	private String getValueAndLogError(String propertyName, String suggestedValues)
+	{
+	    String value = adapterProperties.getPropertyAsString(propertyName, null);
+        if (StringUtils.isEmpty(value))
+        {
+            logger.error("The property '"+propertyName+"' must be set in " + getAdapterFileNameWithoutExt() + ".properties."+((suggestedValues != null) ? " Example values are: "+suggestedValues : ""));
+            return null;
+        }
+        
+        return value;
+	}
+	
 	/* Null is returned if there is an error. Error is logged. */
 	private String getServiceName(AdvancedProperties props)
 	{

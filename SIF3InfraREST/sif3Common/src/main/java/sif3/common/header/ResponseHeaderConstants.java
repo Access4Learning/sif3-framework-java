@@ -68,14 +68,21 @@ public class ResponseHeaderConstants
 	public static final String HDR_CONSUMER_ID = "connectionId"; // Used by getMessage() on queue to identify the thread that queries
     public static final String HDR_FINGERPRINT = "fingerprint";
 
+    /*-------------------------------------------------------------------*/
+    /*-- As of SIF Infra 3.3: Experimental Volume - Schema Negotiation --*/
+    /*-------------------------------------------------------------------*/
+    public static final String HDR_CONTENT_PROFILE= "Content-Profile"; // what schema the request payload is in
+    public static final String HDR_ACCEPT_PROFILE = "Accept-Profile"; // what schema the response payload should be in
+    public static final String HDR_LINK = "Link"; // Tell requester what is supported by provider
+    public static final String HDR_WARNING = "Warning"; // if provider applied another schema than requested
 	
 	// NON SIF specific but of interest
 	public static final String HDR_CONNECTION = "Connection";
 	public static final String HDR_KEEP_ALIVE = "Keep-Alive"; 
 
 	
-	 public static final String[] HEADER_NAME_ARRAY = 
-	 {
+	public static final String[] HEADER_NAME_ARRAY = 
+	{
 		 HDR_MESSAGE_ID,
 		 HDR_AUTH_TOKEN, 
 		 HDR_ENVIRONMENT_URI,
@@ -110,6 +117,12 @@ public class ResponseHeaderConstants
 		HDR_SERVICE_NAME,
 		HDR_CONSUMER_ID,
 		HDR_FINGERPRINT,
-	 };
+
+	    // Profile Negotiation
+        HDR_CONTENT_PROFILE,
+        HDR_ACCEPT_PROFILE,
+        HDR_LINK,
+        HDR_WARNING,
+	};
 
 }

@@ -55,8 +55,10 @@ import sif3.common.header.RequestHeaderConstants;
 import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.model.AuthenticationInfo;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.SchemaInfo;
 import sif3.common.model.ServiceInfo;
 import sif3.common.model.URLQueryParameter;
 import sif3.common.model.delayed.DelayedRequestReceipt;
@@ -105,8 +107,12 @@ public abstract class BaseClient
 	private Client client = null;
 	private WebResource service = null;
 //	private MediaType mediaType = MediaType.APPLICATION_XML_TYPE;
-	private MediaType requestMediaType = MediaType.APPLICATION_XML_TYPE;
-	private MediaType responseMediaType = MediaType.APPLICATION_XML_TYPE;
+//	private MediaType requestMediaType = MediaType.APPLICATION_XML_TYPE;
+//	private MediaType responseMediaType = MediaType.APPLICATION_XML_TYPE;
+	
+	private PayloadMetadata requestPayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE);
+    private PayloadMetadata responsePayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE);
+	
 	private MarshalFactory dmMarshaller = null;
 	private UnmarshalFactory dmUnmarshaller = null;
 	
@@ -139,8 +145,8 @@ public abstract class BaseClient
      *                     external security services are used and therefore the authorisation header may need to be generated for
      *                     as session after it has expired. In this case the session information of the client must be updated.
 	 * @param baseURI The base URI of this client. All URIs are for all other calls are relative to this base URL.
-	 * @param requestMediaType Media type of the request. It will be validated against the supported media types of the given dmMarshaller.
-	 * @param responseMediaType Media type of the response. It will be validated against the supported media types of the given dmUnmarshaller.
+     * @param requestPayloadMetadata Mime type and schema info of the request. Mime type will be validated against the supported mime types of the given dmMarshaller.
+     * @param responsePayloadMetadata Mime type and schema info of the response. Mime type will be validated against the supported mime types of the given dmUnmarshaller.
 	 * @param dmMarshaller Marshaller to marshal the payload of this client to appropriate representations. This marshaller must be valid
 	 *                   for the data model used with this client.
 	 * @param dmUnmarshaller Unmarshaller to unmarshal the payload of this client to appropriate representations. This unmarshaller 
@@ -150,15 +156,17 @@ public abstract class BaseClient
 	 *                             time of receiving.
 	 *                       FALSE: No compression is used.
 	 */
-	public BaseClient(ClientEnvironmentManager clientEnvMgr, URI baseURI, MediaType requestMediaType, MediaType responseMediaType, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection, boolean useCompression)
+	public BaseClient(ClientEnvironmentManager clientEnvMgr, URI baseURI, PayloadMetadata requestPayloadMetadata, PayloadMetadata responsePayloadMetadata, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection, boolean useCompression)
 	{
 		super();
 
 		setClientEnvMgr(clientEnvMgr);
 		setDataModelMarshaller(dmMarshaller);
 		setDataModelUnmarshaller(dmUnmarshaller);
-		setRequestMediaType(requestMediaType, dmMarshaller);
-		setResponseMediaType(responseMediaType, dmUnmarshaller);
+		setRequestPayloadMetadata(requestPayloadMetadata, dmMarshaller);
+		setResponsePayloadMetadata(responsePayloadMetadata, dmUnmarshaller);
+//		setRequestMediaType(requestMediaType, dmMarshaller);
+//		setResponseMediaType(responseMediaType, dmUnmarshaller);
 		setUseCompression(useCompression);
 		configureClienService(baseURI, secureConnection, getUseCompression());
 		
@@ -166,7 +174,8 @@ public abstract class BaseClient
 	}
 
 	/**
-	 * This constructor will default the media type of the marshaller (request) and unmarshaller (response) and the default service type of OBJECT.
+	 * This constructor will default the mime type of the marshaller (request) and unmarshaller (response) and the default service type of OBJECT.
+	 * It will not set any schema negotiation values.
 	 * 
      * @param clientEnvMgr This manager is used to update session related information of the client. This is mainly the case were
      *                     external security services are used and therefore the authorisation header may need to be generated for
@@ -183,7 +192,7 @@ public abstract class BaseClient
 	 */
 	public BaseClient(ClientEnvironmentManager clientEnvMgr, URI baseURI, MarshalFactory dmMarshaller, UnmarshalFactory dmUmarshaller, boolean secureConnection, boolean useCompression)
 	{
-		this(clientEnvMgr, baseURI, ((dmMarshaller != null) ? dmMarshaller.getDefault() : null), ((dmUmarshaller != null) ? dmUmarshaller.getDefault() : null), dmMarshaller, dmUmarshaller, secureConnection, useCompression);
+		this(clientEnvMgr, baseURI, null, null, dmMarshaller, dmUmarshaller, secureConnection, useCompression);
 	}
 	
 	/**
@@ -244,41 +253,87 @@ public abstract class BaseClient
 		return service;
 	}
 
-	public MediaType getRequestMediaType()
-	{
-		return requestMediaType;
-	}
+//	public MediaType getRequestMediaType()
+//	{
+//		return requestMediaType;
+//	}
 
-	/*
-	 * Sets the media type of the request. If the media type is null it will use the marshaller default media type. If the marhaller is null
-	 * as well then the requestMediaType will be set to null.
-	 */
-	public void setRequestMediaType(MediaType mediaType, MarshalFactory marshaller)
-	{
-		if ((mediaType == null) && (marshaller != null))
-		{
-			this.requestMediaType = marshaller.getDefault();
-		}
-		this.requestMediaType = mediaType;
-	}
+//	/*
+//	 * Sets the media type of the request. If the media type is null it will use the marshaller default media type. If the marhaller is null
+//	 * as well then the requestMediaType will be set to null.
+//	 */
+//	public void setRequestMediaType(MediaType mediaType, MarshalFactory marshaller)
+//	{
+//		if ((mediaType == null) && (marshaller != null))
+//		{
+//		    mediaType = marshaller.getDefault();
+//		}
+//		this.requestMediaType = mediaType;
+//	}
 	
-	public MediaType getResponseMediaType()
-	{
-		return responseMediaType;
-	}
+    public PayloadMetadata getRequestPayloadMetadata()
+    {
+        return requestPayloadMetadata;
+    }
 
-	/*
-	 * Sets the media type of the response. If the media type is null it will use the unmarshaller default media type. If the unmarshaller is null
-	 * as well then the responseMediaType will be set to null.
-	 */
-	public void setResponseMediaType(MediaType mediaType, UnmarshalFactory unmarshaller)
-	{
-		if ((mediaType == null) && (unmarshaller != null))
-		{
-			this.responseMediaType = unmarshaller.getDefault();
-		}
-		this.responseMediaType = mediaType;
-	}
+    /*
+     * If requestPayloadMedatata is null we default to XML without schema negotiation. If however requestPayloadMedatata is not null
+     * but the mime type within is null then we use the marshaller's default mime type. 
+     */
+    public void setRequestPayloadMetadata(PayloadMetadata requestPayloadMetadata, MarshalFactory marshaller)
+    {
+        if (requestPayloadMetadata == null)
+        {
+            requestPayloadMetadata = new PayloadMetadata(marshaller != null ? marshaller.getDefault() : MediaType.APPLICATION_XML_TYPE);
+        }
+        else if (requestPayloadMetadata.getMimeType() == null)
+        {
+            requestPayloadMetadata.setMimeType(marshaller != null ? marshaller.getDefault() : MediaType.APPLICATION_XML_TYPE);
+        }
+        
+        this.requestPayloadMetadata = requestPayloadMetadata;
+    }
+	
+//	public MediaType getResponseMediaType()
+//	{
+//		return responseMediaType;
+//	}
+//
+//	/*
+//	 * Sets the media type of the response. If the media type is null it will use the unmarshaller default media type. If the unmarshaller is null
+//	 * as well then the responseMediaType will be set to null.
+//	 */
+//	public void setResponseMediaType(MediaType mediaType, UnmarshalFactory unmarshaller)
+//	{
+//		if ((mediaType == null) && (unmarshaller != null))
+//		{
+//		    mediaType = unmarshaller.getDefault();
+//		}
+//		this.responseMediaType = mediaType;
+//	}
+	
+    public PayloadMetadata getResponsePayloadMetadata()
+    {
+        return responsePayloadMetadata;
+    }
+
+    /*
+     * If responsePayloadMetadata is null we default to XML without schema negotiation. If however responsePayloadMetadata is not null
+     * but the mime type within is null then we use the unmarshaller's default mime type. 
+     */
+    public void setResponsePayloadMetadata(PayloadMetadata responsePayloadMetadata, UnmarshalFactory unmarshaller)
+    {
+        if (responsePayloadMetadata == null)
+        {
+            responsePayloadMetadata = new PayloadMetadata(unmarshaller != null ? unmarshaller.getDefault() : MediaType.APPLICATION_XML_TYPE);
+        }
+        else if (responsePayloadMetadata.getMimeType() == null)
+        {
+            responsePayloadMetadata.setMimeType(unmarshaller != null ? unmarshaller.getDefault() : MediaType.APPLICATION_XML_TYPE);
+        }
+        
+        this.responsePayloadMetadata = responsePayloadMetadata;
+    }
 
 	protected ClientConfig getConfig()
     {
@@ -327,34 +382,6 @@ public abstract class BaseClient
 	protected WebResource buildURI(WebResource svc, String relURI, String resourceID, SIFZone zone, SIFContext ctx, URLQueryParameter urlQueryParams)
 	{
 	    return buildURI(svc, zone, ctx, urlQueryParams, relURI, resourceID);
-//		UriBuilder uriBuilder = svc.getUriBuilder();
-//		if (StringUtils.notEmpty(relURI))
-//		{
-//			uriBuilder.path(relURI);
-//		}
-//		if (StringUtils.notEmpty(resourceID))
-//		{
-//			uriBuilder.path(resourceID);
-//		}
-//		if ((zone != null) && (StringUtils.notEmpty(zone.getId())))
-//		{
-//			uriBuilder.matrixParam("zoneId", zone.getId());
-//		}
-//		if ((ctx != null) && (StringUtils.notEmpty(ctx.getId())))
-//		{
-//			uriBuilder.matrixParam("contextId", ctx.getId());
-//		}
-//		
-//		//Add custom URL Query Parameters.
-//		if ((urlQueryParams != null) && (urlQueryParams.getQueryParams() != null))
-//		{
-//			for (String paramName : urlQueryParams.getQueryParams().keySet())
-//			{
-//				uriBuilder = uriBuilder.queryParam(paramName, urlQueryParams.getQueryParam(paramName));
-//			}
-//		}
-//
-//		return svc.uri(uriBuilder.build());
 	}
 
 	protected WebResource buildURI(WebResource svc, SIFZone zone, SIFContext ctx, URLQueryParameter urlQueryParams, String... uriSegments)
@@ -448,8 +475,14 @@ public abstract class BaseClient
         String charEncoding = getClientEnvMgr().getEnvironmentInfo().getCharsetEncoding();
         
         // Check if we have a request & response media type. If not use the framework's value otherwise use the value given.
-        MediaType finalRequestMediaType = requestMediaType == null ? addEncoding(getRequestMediaType(), charEncoding) : requestMediaType;
-        MediaType finalResponseMediaType = responseMediaType == null ? addEncoding(getResponseMediaType(), charEncoding) : responseMediaType;
+        MediaType finalRequestMediaType = requestMediaType == null ? addEncoding(getRequestPayloadMetadata().getMimeType(), charEncoding) : requestMediaType;
+        MediaType finalResponseMediaType = responseMediaType == null ? addEncoding(getResponsePayloadMetadata().getMimeType(), charEncoding) : responseMediaType;
+
+        if (logger.isDebugEnabled())
+        {
+            logger.debug("Request Mime Type to be used: " + finalRequestMediaType.toString());
+            logger.debug("Response Mime Type to be used: " + finalResponseMediaType.toString());
+        }
         
         Builder builder = service.type(finalRequestMediaType).accept(finalResponseMediaType);
         
@@ -605,7 +638,101 @@ public abstract class BaseClient
         return hdrProperties;
     }
 
+    /**
+     * This method sets all necessary properties for the schema negotiation functionality. The appropriate headers are only set
+     * if the functionality is turned on (env.schema.enabled=true in the adapter property file).
+     * 
+     * @param hdrProperties The set of already set header properties. If null it will be created.
+     * @param hasRequestPaylaod Not all requests have a payload (HTTP GET or HTTP DELETE). TRUE indicates that the request has a
+     *                          payload and therefore appropriate profile headers are added.
+     * @param isDMResponse Indicates if the response, if any, is a local data model response.
+     *  
+     * @return A header set that is not null.
+     */
+    protected HeaderProperties addSchemaHdrProps(HeaderProperties hdrProperties, boolean hasRequestPaylaod, boolean isDMResponse)
+    {
+//        return addSchemaHdrProps(hdrProperties, hasRequestPaylaod, isDMRequest, getClientEnvMgr().getEnvironmentInfo().getDataModelSchemaInfo(), isDMResponse, getClientEnvMgr().getEnvironmentInfo().getDataModelSchemaInfo());
+        return addSchemaHdrProps(hdrProperties, hasRequestPaylaod, getRequestPayloadMetadata().getSchemaInfo(), isDMResponse, getResponsePayloadMetadata().getSchemaInfo());
+    }
 
+    /**
+     * This method sets all necessary properties for the schema negotiation functionality. The appropriate headers are only set
+     * if the functionality is turned on (env.schema.enabled=true in the adapter property file).
+     * 
+     * @param hdrProperties The set of already set header properties. If null it will be created.
+     * @param hasRequestPaylaod Not all requests have a payload (HTTP GET or HTTP DELETE). TRUE indicates that the request has a
+     *                          payload and therefore appropriate profile headers are added.
+     * @param requestSchema The schema information to be used for the request payload. If null then the default as set in the adapter's
+     *                      property file is used.
+     * @param isDMResponse Indicates if the response, if any, is a local data model response.
+     * @param responseSchema The schema information to be used for the response payload. If null then the default as set in the adapter's
+     *                      property file is used.
+     *  
+     * @return A header set that is not null.
+     */
+    protected HeaderProperties addSchemaHdrProps(HeaderProperties hdrProperties, 
+                                                 boolean hasRequestPaylaod, 
+//                                                 boolean isDMRequest,
+                                                 SchemaInfo requestSchema,
+                                                 boolean isDMResponse,
+                                                 SchemaInfo responseSchema)
+    {
+        if (hdrProperties == null)
+        {
+            hdrProperties = new HeaderProperties();
+        }
+
+        // First check if schema negotiation is turned on. 
+        if (getClientEnvMgr().getEnvironmentInfo().isSchemaNegotiationEnabled())
+        {
+            if (hasRequestPaylaod)
+            {
+                // If there is a request payload we add appropriate header. 
+                if (requestSchema == null)
+                {
+                    // If not given then we default to the adapter property value. Just in case something odd is happening we check for schema not null
+                    if (getRequestPayloadMetadata().getSchemaInfo() != null)
+                    {
+                        hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_CONTENT_PROFILE, getRequestPayloadMetadata().getSchemaInfo().getFullSchemaValue());
+                    }
+                }
+                else
+                {
+                    hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_CONTENT_PROFILE, requestSchema.getFullSchemaValue());                    
+                }
+//                // If it is a DM Request we add the DM schema info otherwise we add the infra DM schema info
+//                if (isDMRequest)
+//                {
+//                    SchemaInfo finalRequestSchema = requestSchema == null ? getClientEnvMgr().getEnvironmentInfo().getDataModelSchemaInfo() : requestSchema;
+//                    hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_CONTENT_PROFILE, finalRequestSchema.getFullSchemaValue());
+//                }
+//                else
+//                {
+//                    hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_CONTENT_PROFILE, getClientEnvMgr().getEnvironmentInfo().getInfraModelSchemaInfo().getFullSchemaValue());
+//                }
+            }
+            
+            // The response may always have some errors which is part of the infra DM, so we always must have this in the accepted response
+            // profile!
+            String acceptProfile = getClientEnvMgr().getEnvironmentInfo().getInfraModelSchemaInfo().getFullSchemaValue();
+            
+            // If the response has a DM payload we also need to add this to the accepted schema profile.
+            if (isDMResponse)
+            {
+                // For XQUERY or Func. Services/Phase requests the client may not have provided schema info even though it is 
+                // turned on in the adapter's property file. So we need to check
+                if (responseSchema != null)
+                {
+                    acceptProfile = responseSchema.getFullSchemaValue() + "," + acceptProfile;
+                }
+            }
+            hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_ACCEPT_PROFILE, acceptProfile);
+        }
+        
+        return hdrProperties;
+    }
+    
+    
 	protected HeaderProperties extractHeaderInfo(ClientResponse clientResponse)
 	{
 		HeaderProperties hdrProps = new HeaderProperties();
@@ -694,7 +821,7 @@ public abstract class BaseClient
 						try
 						{
 							// We must use the actual data model response type in the unmarshaller.
-							response.setDataObject(getDataModelUnmarshaller().unmarshal(payload, returnObjectClass, getResponseMediaType()));
+							response.setDataObject(getDataModelUnmarshaller().unmarshal(payload, returnObjectClass, getResponsePayloadMetadata().getMimeType()));
 							if (response.getDataObject() == null)// this is strange. So set the unmarshalled value.
 							{
 								response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));
@@ -746,7 +873,8 @@ public abstract class BaseClient
                 {
                     logger.debug("Payload received for Create Multiple REST Call:\n"+payload);
                 }
-                MultiOperationStatusList<CreateOperationStatus> statusList = getInfraMapper().toStatusListFromSIFCreateString(payload, getResponseMediaType());
+//                MultiOperationStatusList<CreateOperationStatus> statusList = getInfraMapper().toStatusListFromSIFCreateString(payload, getResponseMediaType());
+                MultiOperationStatusList<CreateOperationStatus> statusList = getInfraMapper().toStatusListFromSIFCreateString(payload, response.getPayloadMetadata());
                 response.setError(statusList.getError());
                 response.setOperationStatuses(statusList.getOperationStatuses());
             }           
@@ -774,7 +902,8 @@ public abstract class BaseClient
             if (response.getHasEntity())
             {
                 String payload = clientResponse.getEntity(String.class);
-                MultiOperationStatusList<OperationStatus> statusList = getInfraMapper().toStatusListFromSIFDeleteString(payload, getResponseMediaType());
+//                MultiOperationStatusList<OperationStatus> statusList = getInfraMapper().toStatusListFromSIFDeleteString(payload, getResponseMediaType());
+                MultiOperationStatusList<OperationStatus> statusList = getInfraMapper().toStatusListFromSIFDeleteString(payload, response.getPayloadMetadata());
                 response.setError(statusList.getError());
                 response.setOperationStatuses(statusList.getOperationStatuses());
                 
@@ -806,20 +935,31 @@ public abstract class BaseClient
 	    // Note: sif3Session can be null if we create an environment! In this case we cannot retrieve a default zone or context! It is not required anyway
 	    //       because create an environment is not done for a zone or context.
 	    
-	    SIFZone actualZone = (sif3Session != null) ? sif3Session.getZone(zone) : zone;
+        // Extract header properties.
+        response.setHdrProperties(extractHeaderInfo(clientResponse));
+
+        SIFZone actualZone = (sif3Session != null) ? sif3Session.getZone(zone) : zone;
 	    SIFContext actualContext = (sif3Session != null) ? sif3Session.getContext(context) : context;
 	    
 //		response.setStatus(clientResponse.getClientResponseStatus().getStatusCode());
         response.setStatus(clientResponse.getStatusInfo().getStatusCode());
 //		response.setStatusMessage(clientResponse.getClientResponseStatus().getReasonPhrase());
         response.setStatusMessage(clientResponse.getStatusInfo().getReasonPhrase());
-		response.setMediaType(clientResponse.getType());
+//		response.setMediaType(clientResponse.getType());
 		response.setContentLength(clientResponse.getLength());
 		response.setZone(actualZone);
 		response.setContext(actualContext);
+		
+		// Set Mime Type and Schema info if available (read from header)
+		PayloadMetadata payloadMetadata = new PayloadMetadata(clientResponse.getType());
+        if (payloadMetadata.getMimeType() == null) // default to unmarshaller default value
+        {
+            payloadMetadata.setMimeType(getResponsePayloadMetadata().getMimeType());
+        }
 
-		// Extract header properties.
-		response.setHdrProperties(extractHeaderInfo(clientResponse));
+		// Get schema info
+		payloadMetadata.setSchemaInfo(new SchemaInfo(response.getHdrProperties().getHeaderProperty(ResponseHeaderConstants.HDR_CONTENT_PROFILE)));
+		response.setPayloadMetadata(payloadMetadata);
 		
 		if (logger.isDebugEnabled())
 		{
@@ -854,7 +994,17 @@ public abstract class BaseClient
 				logger.debug("Returned Error Payload:\n"+errorStr);
 			}
 			
-			response.setError(getInfraMapper().toErrorFromSIFErrorString(errorStr, getInfraResponseMediaType(getResponseMediaType()), new ErrorDetails(clientResponse.getStatus(), clientResponse.getStatusInfo().getReasonPhrase())));
+//            response.setError(getInfraMapper().toErrorFromSIFErrorString(errorStr, getInfraResponseMediaType(getResponseMediaType()), new ErrorDetails(clientResponse.getStatus(), clientResponse.getStatusInfo().getReasonPhrase())));
+			PayloadMetadata payloadMetadata = null;
+			if ((response.getPayloadMetadata() != null) &&(response.getPayloadMetadata().getMimeType() != null)) // use this one as it is what the response returned
+			{
+			    payloadMetadata = response.getPayloadMetadata();
+			}
+			else // we have nothing in the response, so we use the framework indicated value as best quess.
+			{
+			    payloadMetadata = new PayloadMetadata(getInfraResponseMediaType(getResponsePayloadMetadata().getMimeType()), response.getPayloadMetadata().getSchemaInfo());
+			}
+			response.setError(getInfraMapper().toErrorFromSIFErrorString(errorStr, payloadMetadata, new ErrorDetails(clientResponse.getStatus(), clientResponse.getStatusInfo().getReasonPhrase())));
 		}
 		else // It appears we have an error but no content. So create an error object with custom message.
 		{

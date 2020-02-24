@@ -19,8 +19,6 @@ package sif3.common.interfaces;
 
 import java.util.List;
 
-import javax.ws.rs.core.MediaType;
-
 import sif3.common.CommonConstants.PhaseState;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.ServiceInvokationException;
@@ -28,6 +26,7 @@ import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ZoneContextInfo;
@@ -174,10 +173,11 @@ public interface FunctionalServiceConsumer extends MinimalConsumer
      * 
      * @param phaseInfo Hold the jobID and phase name of the job from where the data shall be retrieved. If the parameter or
      *                  any of its properties is null/empty then an IllegalArgumentException will be thrown.
-     * @param returnMimeType The mime type the response data is in. It is expected that the consumer provides that and the provider
-     *                       should attempt to marshal the data to the given mime type and return the resulting string as
-     *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
-     *                       appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
+     * @param returnPayloadMetadata The mime type and optional schema info the response data is expected to be returned as. 
+     *                              It is expected that the consumer provides that and the provider should attempt to marshal the data
+     *                              to the given mime type, potentially using the given schema info, and return the resulting string
+     *                              in the requested format. If the provider cannot marshal the data to the requested mime type then an
+     *                              appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
      * @param pagingInfo Page information to determine which results to return. Null = Return all (NOT RECOMMENDED! Might be rejected
      *                   by provider.).
      * @param queryIntention Indicating what the intention of the query and follow-up queries is. Can be set to null which
@@ -200,7 +200,7 @@ public interface FunctionalServiceConsumer extends MinimalConsumer
      * @throws IllegalArgumentException One of the parameters is invalid. See description of parameters.
      */
     public Response retrieveDataFromPhase(PhaseInfo phaseInfo,
-                                          MediaType returnMimeType, 
+                                          PayloadMetadata returnPayloadMetadata,
                                           PagingInfo pagingInfo,
                                           QueryIntention queryIntention,
                                           SIFZone zone, 
@@ -233,10 +233,11 @@ public interface FunctionalServiceConsumer extends MinimalConsumer
      *                  to the SIF Specification. If data is provided (as a String) then the mime type is set as well, by the consumer,
      *                  to indicate the format of the data. The provider can us this mime type to unmarshal the data into the 
      *                  appropriate internal structure.
-     * @param returnMimeType The mime type the response data is in. It is expected that the consumer provides that and the provider
-     *                       should attempt to marshal the data to the given mime type and return the resulting string as
-     *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
-     *                       appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
+     * @param returnPayloadMetadata The mime type and optional schema info the response data is expected to be returned as. 
+     *                              It is expected that the consumer provides that and the provider should attempt to marshal the data
+     *                              to the given mime type, potentially using the given schema info, and return the resulting string
+     *                              in the requested format. If the provider cannot marshal the data to the requested mime type then an
+     *                              appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
      * @param useAdvisory If new IDs for the created data shall be allocated or used as given. In some cases that may not be applicable
      *                    but if it is then this parameter indicates the expected behaviour.
      * @param zone The Zone for which the request is being issued. Can be Null (default Zone)
@@ -257,7 +258,7 @@ public interface FunctionalServiceConsumer extends MinimalConsumer
      */
     public Response createDataInPhase(PhaseInfo phaseInfo, 
                                       PhaseDataRequest phaseDataRequest,
-                                      MediaType returnMimeType,
+                                      PayloadMetadata returnPayloadMetadata,
                                       boolean useAdvisory, 
                                       SIFZone zone, 
                                       SIFContext context, 
@@ -288,10 +289,11 @@ public interface FunctionalServiceConsumer extends MinimalConsumer
      *                  to the SIF Specification. If data is provided (as a String) then the mime type is set as well, by the consumer,
      *                  to indicate the format of the data. The provider can us this mime type to unmarshal the data into the 
      *                  appropriate internal structure.
-     * @param returnMimeType The mime type the response data is in. It is expected that the consumer provides that and the provider
-     *                       should attempt to marshal the data to the given mime type and return the resulting string as
-     *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
-     *                       appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
+     * @param returnPayloadMetadata The mime type and optional schema info the response data is expected to be returned as. 
+     *                              It is expected that the consumer provides that and the provider should attempt to marshal the data
+     *                              to the given mime type, potentially using the given schema info, and return the resulting string
+     *                              in the requested format. If the provider cannot marshal the data to the requested mime type then an
+     *                              appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
      * @param zone The Zone for which the request is being issued. Can be Null (default Zone)
      * @param context The Context for which the the request is being issued. Can be Null (default Zone)
      * @param requestType Indicating if IMMEDIATE or DELAYED request is desired.
@@ -310,7 +312,7 @@ public interface FunctionalServiceConsumer extends MinimalConsumer
      */
     public Response updateDataInPhase(PhaseInfo phaseInfo, 
                                       PhaseDataRequest phaseDataRequest,
-                                      MediaType returnMimeType,
+                                      PayloadMetadata returnPayloadMetadata,
                                       SIFZone zone, 
                                       SIFContext context, 
                                       RequestType requestType,
@@ -340,10 +342,11 @@ public interface FunctionalServiceConsumer extends MinimalConsumer
      *                  to the SIF Specification. If data is provided (as a String) then the mime type is set as well, by the consumer,
      *                  to indicate the format of the data. The provider can us this mime type to unmarshal the data into the 
      *                  appropriate internal structure.
-     * @param returnMimeType The mime type the response data is in. It is expected that the consumer provides that and the provider
-     *                       should attempt to marshal the data to the given mime type and return the resulting string as
-     *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
-     *                       appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
+     * @param returnPayloadMetadata The mime type and optional schema info the response data is expected to be returned as. 
+     *                              It is expected that the consumer provides that and the provider should attempt to marshal the data
+     *                              to the given mime type, potentially using the given schema info, and return the resulting string
+     *                              in the requested format. If the provider cannot marshal the data to the requested mime type then an
+     *                              appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
      * @param zone The Zone for which the request is being issued. Can be Null (default Zone)
      * @param context The Context for which the the request is being issued. Can be Null (default Zone)
      * @param requestType Indicating if IMMEDIATE or DELAYED request is desired.
@@ -362,7 +365,7 @@ public interface FunctionalServiceConsumer extends MinimalConsumer
      */
     public Response deleteDataInPhase(PhaseInfo phaseInfo, 
                                       PhaseDataRequest phaseDataRequest,
-                                      MediaType returnMimeType,
+                                      PayloadMetadata returnPayloadMetadata,
                                       SIFZone zone, 
                                       SIFContext context, 
                                       RequestType requestType,
