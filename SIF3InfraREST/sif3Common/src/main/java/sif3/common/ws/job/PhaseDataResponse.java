@@ -17,9 +17,9 @@
 
 package sif3.common.ws.job;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.StringPayload;
 
 /**
@@ -37,9 +37,9 @@ public class PhaseDataResponse extends StringPayload
         this(null, null, null);
     }
     
-    public PhaseDataResponse(String data, MediaType mimeType, Status status)
+    public PhaseDataResponse(String data, PayloadMetadata payloadMetadata, Status status)
     {
-        super(data, mimeType);
+        super(data, payloadMetadata);
         setStatus(status);
     }
 

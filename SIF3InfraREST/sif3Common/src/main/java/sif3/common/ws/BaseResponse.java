@@ -18,9 +18,8 @@ package sif3.common.ws;
 
 import java.io.Serializable;
 
-import javax.ws.rs.core.MediaType;
-
 import sif3.common.header.HeaderProperties;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.delayed.DelayedRequestReceipt;
@@ -42,7 +41,8 @@ public class BaseResponse implements Serializable
 	private boolean hasEntity = false;
 	private ErrorDetails error = null;
 	private HeaderProperties hdrProperties = null;
-	private MediaType mediaType = null;
+//	private MediaType mediaType = null;
+	private PayloadMetadata payloadMetadata = null;
 	private int contentLength = -1;
 	private SIFZone zone;
 	private SIFContext context;
@@ -127,20 +127,20 @@ public class BaseResponse implements Serializable
 		this.hdrProperties = hdrProperties;
 	}
 
-	/**
-	 * HTTP media type.
-	 * 
-	 * @return See desc.
-	 */
-	public MediaType getMediaType()
-	{
-		return this.mediaType;
-	}
-
-	public void setMediaType(MediaType mediaType)
-	{
-		this.mediaType = mediaType;
-	}
+//	/**
+//	 * HTTP media type.
+//	 * 
+//	 * @return See desc.
+//	 */
+//	public MediaType getMediaType()
+//	{
+//		return this.mediaType;
+//	}
+//
+//	public void setMediaType(MediaType mediaType)
+//	{
+//		this.mediaType = mediaType;
+//	}
 
 	/**
 	 * Standard HTTP Header property that indicates the length in bytes of the content, if any,
@@ -153,7 +153,17 @@ public class BaseResponse implements Serializable
 		return this.contentLength;
 	}
 
-	public void setContentLength(int contentLength)
+	public PayloadMetadata getPayloadMetadata()
+    {
+        return payloadMetadata;
+    }
+
+    public void setPayloadMetadata(PayloadMetadata payloadMetadata)
+    {
+        this.payloadMetadata = payloadMetadata;
+    }
+
+    public void setContentLength(int contentLength)
 	{
 		this.contentLength = contentLength;
 	}
@@ -216,16 +226,13 @@ public class BaseResponse implements Serializable
         this.delayedReceipt = delayedReceipt;
     }
 
-	/* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    @Override
+	@Override
     public String toString()
     {
         return "BaseResponse [status=" + status + ", statusMessage=" + statusMessage
                 + ", hasEntity=" + hasEntity + ", error=" + error + ", hdrProperties="
-                + hdrProperties + ", mediaType=" + mediaType + ", contentLength=" + contentLength
-                + ", zone=" + zone + ", context=" + context + ", delayedReceipt=" + delayedReceipt
-                + "]";
+                + hdrProperties + ", payloadMetadata=" + payloadMetadata + ", contentLength="
+                + contentLength + ", zone=" + zone + ", context=" + context + ", delayedReceipt="
+                + delayedReceipt + "]";
     }
 }
