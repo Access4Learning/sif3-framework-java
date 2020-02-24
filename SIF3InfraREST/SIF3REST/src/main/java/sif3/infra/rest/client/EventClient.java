@@ -20,7 +20,6 @@ package sif3.infra.rest.client;
 
 import java.net.URI;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import com.sun.jersey.api.client.ClientResponse;
@@ -37,6 +36,7 @@ import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.header.RequestHeaderConstants;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
@@ -63,12 +63,22 @@ public class EventClient extends BaseClient
 	 * and all methods of this class will have no effect (i.e. are ignored when calling).
 	 * 
      * @param clientEnvMgr Session manager to access the clients session information.
+     * @param requestPayloadMedatata Mime type and schema info of the request. Mime type will be validated against the supported mime types of the given dmMarshaller.
+     * @param responsePayloadMetadata Mime type and schema info of the response. Mime type will be validated against the supported mime types of the given dmUnmarshaller.
 	 * @param serviceName The serviceName for which the event is. This is generally the SIF Object name such as StudentPersonals (plural form!)
+     * @param dmMarshaller Marshaller to marshal the payload of this client to appropriate representations. This marshaller must be valid
+     *                   for the data model used with this client.
 	 * @param useCompression TRUE: Payload (request & response) shall be compressed before sending or de-compressed at the
 	 *                             time of receiving.
 	 *                       FALSE: No compression is used.
 	 */
-	public EventClient(ClientEnvironmentManager clientEnvMgr, MediaType requestMediaType, MediaType responseMediaType, String serviceName, MarshalFactory dmMarshaller, boolean useCompression)
+//	public EventClient(ClientEnvironmentManager clientEnvMgr, MediaType requestMediaType, MediaType responseMediaType, String serviceName, MarshalFactory dmMarshaller, boolean useCompression)
+    public EventClient(ClientEnvironmentManager clientEnvMgr, 
+                       PayloadMetadata requestPayloadMedatata, 
+                       PayloadMetadata responsePayloadMetadata, 
+                       String serviceName, 
+                       MarshalFactory dmMarshaller, 
+                       boolean useCompression)
 	{
 		super(clientEnvMgr);
 		if ((getClientEnvMgr() == null) || (getClientEnvMgr().getEnvironmentInfo() == null))
@@ -98,8 +108,8 @@ public class EventClient extends BaseClient
 		{
 			this.serviceName = serviceName;
 			setDataModelMarshaller(dmMarshaller);
-			setRequestMediaType(requestMediaType, dmMarshaller);
-			setResponseMediaType(responseMediaType, null);
+			setRequestPayloadMetadata(requestPayloadMedatata, dmMarshaller);
+			setResponsePayloadMetadata(responsePayloadMetadata, null);
 			setUseCompression(useCompression);
 			configureClienService(eventConnector, getProviderEnvironment().getSecureConnection(), getUseCompression());
 		}
@@ -144,7 +154,7 @@ public class EventClient extends BaseClient
 			try
 			{
 				// Don't set zone & context here. They are header parameters in the case of events.
-			    String payloadStr = getDataModelMarshaller().marshal(event.getSIFObjectList(), getRequestMediaType());
+			    String payloadStr = getDataModelMarshaller().marshal(event.getSIFObjectList(), getRequestPayloadMetadata().getMimeType());
 				HeaderProperties headerProps = getEventHeaders(event.getEventAction(),	event.getUpdateType(), event.getFingerprint(), zone, context, serviceType, customHdrFields);
 				
 				Builder builder = setRequestHeaderAndMediaTypes(service, headerProps, false, false, true);
@@ -190,6 +200,7 @@ public class EventClient extends BaseClient
 
 		// Add properties for the authentication header.
 		hdrProperties.addHeaderProperties(createAuthenticationHdr(false, null));
+        hdrProperties = addSchemaHdrProps(hdrProperties, true, false);
 		
 		// Add event specific properties
 		hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_MESSAGE_TYPE, HeaderValues.MessageType.EVENT.name());

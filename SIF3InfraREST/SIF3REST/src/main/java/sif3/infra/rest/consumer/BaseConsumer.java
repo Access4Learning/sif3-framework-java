@@ -411,7 +411,7 @@ public abstract class BaseConsumer implements MinimalConsumer
        }
        hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, serviceType.name());
        
-       // Set values of consumer property file or their overridden value. Note thsetHeaderProperty() method will do the check
+       // Set values of consumer property file or their overridden value. Note the setHeaderProperty() method will do the check
        // for null, so no need to do this here.
        hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY, getApplicationKey());
        hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTHENTICATED_USER, getAuthentictedUser());

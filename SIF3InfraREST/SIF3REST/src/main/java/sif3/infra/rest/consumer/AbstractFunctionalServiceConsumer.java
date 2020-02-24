@@ -21,7 +21,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
@@ -50,6 +49,7 @@ import sif3.common.model.ACL.AccessType;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.EventMetadata;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
@@ -870,7 +870,7 @@ public abstract class AbstractFunctionalServiceConsumer extends BaseConsumer imp
      */
     @Override
     public Response retrieveDataFromPhase(PhaseInfo phaseInfo, 
-                                          MediaType returnMimeType,
+                                          PayloadMetadata returnPayloadMetadata,
                                           PagingInfo pagingInfo,
                                           QueryIntention queryIntention,
                                           SIFZone zone, 
@@ -903,7 +903,7 @@ public abstract class AbstractFunctionalServiceConsumer extends BaseConsumer imp
             // Add query intention to headers.
             addQueryIntentionToHeaders(hdrProps, queryIntention);
 
-            response = getClient(getConsumerEnvironment()).retrieveDataFromPhase(phaseInfo, returnMimeType, pagingInfo, hdrProps, urlQueryParameter, zone, context, requestType);
+            response = getClient(getConsumerEnvironment()).retrieveDataFromPhase(phaseInfo, returnPayloadMetadata, pagingInfo, hdrProps, urlQueryParameter, zone, context, requestType);
 
             // Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
             finaliseDelayedReceipt(response.getDelayedReceipt(), getServiceURLNamePlural(), ServiceType.FUNCTIONAL, ResponseAction.QUERY);
@@ -925,7 +925,7 @@ public abstract class AbstractFunctionalServiceConsumer extends BaseConsumer imp
     @Override
     public Response createDataInPhase(PhaseInfo phaseInfo, 
                                       PhaseDataRequest phaseDataRequest,
-                                      MediaType returnMimeType, 
+                                      PayloadMetadata returnPayloadMetadata,
                                       boolean useAdvisory, 
                                       SIFZone zone, 
                                       SIFContext context,
@@ -951,7 +951,7 @@ public abstract class AbstractFunctionalServiceConsumer extends BaseConsumer imp
         ErrorDetails error = checkAccessToFunctionalService(getServiceURLNamePlural(), zone, context, requestType);
         if (error == null) //all good => Send request
         {
-            response = getClient(getConsumerEnvironment()).createDataInPhase(phaseInfo, phaseDataRequest, returnMimeType, useAdvisory, getHeaderProperties(true, customParameters), urlQueryParameter, zone, context, requestType);
+            response = getClient(getConsumerEnvironment()).createDataInPhase(phaseInfo, phaseDataRequest, returnPayloadMetadata, useAdvisory, getHeaderProperties(true, customParameters), urlQueryParameter, zone, context, requestType);
 
             // Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
             finaliseDelayedReceipt(response.getDelayedReceipt(), getServiceURLNamePlural(), ServiceType.FUNCTIONAL, ResponseAction.CREATE);
@@ -973,7 +973,7 @@ public abstract class AbstractFunctionalServiceConsumer extends BaseConsumer imp
     @Override
     public Response updateDataInPhase(PhaseInfo phaseInfo, 
                                       PhaseDataRequest phaseDataRequest,
-                                      MediaType returnMimeType, 
+                                      PayloadMetadata returnPayloadMetadata,
                                       SIFZone zone, 
                                       SIFContext context, 
                                       RequestType requestType,
@@ -998,7 +998,7 @@ public abstract class AbstractFunctionalServiceConsumer extends BaseConsumer imp
         ErrorDetails error = checkAccessToFunctionalService(getServiceURLNamePlural(), zone, context, requestType);
         if (error == null) //all good => Send request
         {
-            response = getClient(getConsumerEnvironment()).updateDataInPhase(phaseInfo, phaseDataRequest, returnMimeType, getHeaderProperties(false, customParameters), urlQueryParameter, zone, context, requestType);
+            response = getClient(getConsumerEnvironment()).updateDataInPhase(phaseInfo, phaseDataRequest, returnPayloadMetadata, getHeaderProperties(false, customParameters), urlQueryParameter, zone, context, requestType);
 
             // Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
             finaliseDelayedReceipt(response.getDelayedReceipt(), getServiceURLNamePlural(), ServiceType.FUNCTIONAL, ResponseAction.UPDATE);
@@ -1020,7 +1020,7 @@ public abstract class AbstractFunctionalServiceConsumer extends BaseConsumer imp
     @Override
     public Response deleteDataInPhase(PhaseInfo phaseInfo, 
                                       PhaseDataRequest phaseDataRequest,
-                                      MediaType returnMimeType, 
+                                      PayloadMetadata returnPayloadMetadata,
                                       SIFZone zone, 
                                       SIFContext context, 
                                       RequestType requestType,
@@ -1045,7 +1045,7 @@ public abstract class AbstractFunctionalServiceConsumer extends BaseConsumer imp
         ErrorDetails error = checkAccessToFunctionalService(getServiceURLNamePlural(), zone, context, requestType);
         if (error == null) //all good => Send request
         {
-            response = getClient(getConsumerEnvironment()).deleteDataInPhase(phaseInfo, phaseDataRequest, returnMimeType, getHeaderProperties(false, customParameters), urlQueryParameter, zone, context, requestType);
+            response = getClient(getConsumerEnvironment()).deleteDataInPhase(phaseInfo, phaseDataRequest, returnPayloadMetadata, getHeaderProperties(false, customParameters), urlQueryParameter, zone, context, requestType);
 
             // Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
             finaliseDelayedReceipt(response.getDelayedReceipt(), getServiceURLNamePlural(), ServiceType.FUNCTIONAL, ResponseAction.DELETE);

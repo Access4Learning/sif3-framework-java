@@ -45,7 +45,14 @@ public class SubscriptionClient extends BaseClient
 {
 	public SubscriptionClient(ClientEnvironmentManager clientEnvMgr)
 	{
-		super(clientEnvMgr, clientEnvMgr.getEnvironmentInfo().getConnectorBaseURI(ConnectorName.subscriptions), clientEnvMgr.getEnvironmentInfo().getMediaType(), clientEnvMgr.getEnvironmentInfo().getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), clientEnvMgr.getEnvironmentInfo().getSecureConnection(), clientEnvMgr.getEnvironmentInfo().getCompressionEnabled());
+		super(clientEnvMgr, 
+		      clientEnvMgr.getEnvironmentInfo().getConnectorBaseURI(ConnectorName.subscriptions), 
+              clientEnvMgr.getEnvironmentInfo().getInfraPayloadMetadata(),
+              clientEnvMgr.getEnvironmentInfo().getInfraPayloadMetadata(), 
+		      new InfraMarshalFactory(), 
+		      new InfraUnmarshalFactory(), 
+		      clientEnvMgr.getEnvironmentInfo().getSecureConnection(), 
+		      clientEnvMgr.getEnvironmentInfo().getCompressionEnabled());
 	}
 	
 	public Response getSubscriptions() throws ServiceInvokationException
@@ -55,6 +62,7 @@ public class SubscriptionClient extends BaseClient
 		{
 			service = buildURI(service, null);
 			HeaderProperties hdrProperties = getHeaderProperties();		
+            hdrProperties = addSchemaHdrProps(hdrProperties, false, false);
 			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).get(ClientResponse.class);
 
 			return setResponse(service, clientResponse, SubscriptionCollectionType.class, hdrProperties, null, null, false, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
@@ -74,6 +82,7 @@ public class SubscriptionClient extends BaseClient
 		{
 			service = buildURI(service, null, subscriptionID, null, null, null);
 			HeaderProperties hdrProperties = getHeaderProperties();		
+            hdrProperties = addSchemaHdrProps(hdrProperties, false, false);
 			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).get(ClientResponse.class);
 
 			return setResponse(service, clientResponse, SubscriptionType.class, hdrProperties, null, null, false, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
@@ -130,7 +139,8 @@ public class SubscriptionClient extends BaseClient
 		
 			service = buildURI(service, null);
 			HeaderProperties hdrProperties = getHeaderProperties();		
-			String payloadStr = getInfraMarshaller().marshal(subscriptionInfo, getRequestMediaType());
+            hdrProperties = addSchemaHdrProps(hdrProperties, true, false);
+			String payloadStr = getInfraMarshaller().marshal(subscriptionInfo, getRequestPayloadMetadata().getMimeType());
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("subscribe: Payload to send:\n"+payloadStr);
@@ -164,6 +174,7 @@ public class SubscriptionClient extends BaseClient
 		{
 			service = buildURI(service, null, subscriptionID, null, null, null);
 			HeaderProperties hdrProperties = getHeaderProperties();		
+            hdrProperties = addSchemaHdrProps(hdrProperties, false, false);
 		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).delete(ClientResponse.class);
 
 			return setResponse(service, clientResponse, null, hdrProperties, null, null, false, Status.NO_CONTENT);
