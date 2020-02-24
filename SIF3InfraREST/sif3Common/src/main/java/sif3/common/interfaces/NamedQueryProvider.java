@@ -17,13 +17,12 @@
 
 package sif3.common.interfaces;
 
-import javax.ws.rs.core.MediaType;
-
 import sif3.common.exception.DataTooLargeException;
 import sif3.common.exception.PersistenceException;
 import sif3.common.exception.SIFException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.QueryTemplateInfo;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.ResponseParameters;
@@ -77,10 +76,11 @@ public interface NamedQueryProvider extends DataModelLink
      *                             sets the HTTP Header of a well defined SIF3 HTTP Header (i.e. providerId, timestamp) then the framework
      *                             may override these with its own value to ensure the correct use and workings of the framework. It is the
      *                             developer who will populate the object. When it is passed to this method it not null but empty.
-     * @param returnMimeType The mime type the response data is in. It is expected that the consumer provides that and the provider
-     *                       should attempt to marshal the data to the given mime type and return the resulting string as
-     *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
-     *                       UnsupportedMediaTypeExcpetion must be raised.
+     * @param returnPayloadMetadata The mime type and optional schema info the response data is expected to be returned as. 
+     *                              It is expected that the consumer provides that and the provider should attempt to marshal the data
+     *                              to the given mime type, potentially using the given schema info, and return the resulting string
+     *                              in the requested format. If the provider cannot marshal the data to the requested mime type then an
+     *                              UnsupportedMediaTypeExcpetion must be raised.
      *                       
      * @return The response data (result set) with its mime type. It can be null indicating no or no further data available. 
      *         The returned string should be the marshalled value of the result set and it should be in the mime type as 
@@ -99,8 +99,8 @@ public interface NamedQueryProvider extends DataModelLink
                                       SIFContext context, 
                                       PagingInfo pagingInfo, 
                                       RequestMetadata metadata, 
-                                      ResponseParameters customResponseParams, 
-                                      MediaType returnMimeType)
+                                      ResponseParameters customResponseParams,
+                                      PayloadMetadata returnPayloadMetadata)
             throws PersistenceException, UnsupportedMediaTypeExcpetion, DataTooLargeException, SIFException;
 
     /*-------------------------------*/
