@@ -135,6 +135,12 @@ public class CommonConstants
      * ACLs are applied in many places. This enum defines the plaves where they can apply.
      */
     public enum RightType {SERVICE, PHASE, STATE};
+    
+    /*
+     * Valid schema types for schema negotiation.
+     */
+    public static enum SchemaType {goessner, pesc, xml};
+
 
     /*------------------------------------------------------------------------------------*/
 	/* URL Query Parameter names in relation to security (special case for SIF Express) --*/
