@@ -46,7 +46,13 @@ public class MessageClient extends BaseClient
 {
 	public MessageClient(ClientEnvironmentManager clientEnvMgr, URI queueURI)
 	{
-		super(clientEnvMgr, queueURI, clientEnvMgr.getEnvironmentInfo().getMediaType(), clientEnvMgr.getEnvironmentInfo().getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), clientEnvMgr.getEnvironmentInfo().getSecureConnection(), clientEnvMgr.getEnvironmentInfo().getCompressionEnabled());
+		super(clientEnvMgr, queueURI, 
+	          clientEnvMgr.getEnvironmentInfo().getInfraPayloadMetadata(),
+	          clientEnvMgr.getEnvironmentInfo().getInfraPayloadMetadata(), 
+		      new InfraMarshalFactory(), 
+		      new InfraUnmarshalFactory(), 
+		      clientEnvMgr.getEnvironmentInfo().getSecureConnection(), 
+		      clientEnvMgr.getEnvironmentInfo().getCompressionEnabled());
 	}
 
 	/*
@@ -128,6 +134,7 @@ public class MessageClient extends BaseClient
 	{
 	    // Add Authentication info to existing header properties
 		HeaderProperties hdrProperties = createAuthenticationHdr(false, null);
+        hdrProperties = addSchemaHdrProps(hdrProperties, false, false);
 //		if (StringUtils.notEmpty(consumerInstanceID))
 //		{
 			hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_CONSUMER_ID, String.valueOf(consumerInstanceID));

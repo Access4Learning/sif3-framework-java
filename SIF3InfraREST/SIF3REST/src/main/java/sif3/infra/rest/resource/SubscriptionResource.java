@@ -109,18 +109,18 @@ public class SubscriptionResource extends InfraResource
 			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
-				return makeErrorResponse(error, ResponseAction.QUERY, null);
+				return makeInfraErrorResponse(error, ResponseAction.QUERY, null);
 			}
 			SubscriptionCollectionType subscriptions = infraObjectFactory.createSubscriptionCollectionType();
 			for (SubscriptionType subscription : subscriptionsSet.values())
 			{
 				subscriptions.getSubscription().add(subscription);
 			}
-			return makeResponse(subscriptions, Status.OK.getStatusCode(), false, ResponseAction.QUERY, null, getInfraMarshaller());				
+			return makeResponse(subscriptions, false, Status.OK.getStatusCode(), false, ResponseAction.QUERY, null, getInfraMarshaller(), getFWInfraSchemaInfo());				
 		}
 		else
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Subscriptions not supported.", "This DIRECT Environment implementation does not support subscriptions, yet."), ResponseAction.QUERY, null);
+			return makeInfraErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Subscriptions not supported.", "This DIRECT Environment implementation does not support subscriptions, yet."), ResponseAction.QUERY, null);
 		}
 	} 
 	
@@ -145,21 +145,21 @@ public class SubscriptionResource extends InfraResource
 			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
-				return makeErrorResponse(error, ResponseAction.QUERY, null);
+				return makeInfraErrorResponse(error, ResponseAction.QUERY, null);
 			}
 			SubscriptionType subscription = subscriptionsSet.get(subscriptionID);
 			if (subscription != null)
 			{
-				return makeResponse(subscription, Status.OK.getStatusCode(), false, ResponseAction.QUERY, null, getInfraMarshaller());				
+				return makeResponse(subscription, false, Status.OK.getStatusCode(), false, ResponseAction.QUERY, null, getInfraMarshaller(), getFWInfraSchemaInfo());				
 			}
 			else
 			{
-				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Subscription with ID = "+subscriptionID+" does not exist."), ResponseAction.QUERY, null);				
+				return makeInfraErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Subscription with ID = "+subscriptionID+" does not exist."), ResponseAction.QUERY, null);				
 			}
 		}
 		else
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Subscriptions not supported.", "This DIRECT Environment implementation does not support subscriptions, yet."), ResponseAction.QUERY, null);
+			return makeInfraErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Subscriptions not supported.", "This DIRECT Environment implementation does not support subscriptions, yet."), ResponseAction.QUERY, null);
 		}
 	} 
 
@@ -182,32 +182,32 @@ public class SubscriptionResource extends InfraResource
 			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
-				return makeErrorResponse(error, ResponseAction.CREATE, null);
+				return makeInfraErrorResponse(error, ResponseAction.CREATE, null);
 			}
 			try
 			{
-				SubscriptionType inputSubscription = (SubscriptionType)getInfraUnmarshaller().unmarshal(payload, SubscriptionType.class, getRequestMediaType());
+				SubscriptionType inputSubscription = (SubscriptionType)getInfraUnmarshaller().unmarshal(payload, SubscriptionType.class, getRequestPayloadMetadata().getMimeType());
 				inputSubscription.setId(UUIDGenerator.getUUID());
 				subscriptionsSet.put(inputSubscription.getId(), inputSubscription);
 				
-				return makeResponse(inputSubscription, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, null, getInfraMarshaller());
+				return makeResponse(inputSubscription, false, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, null, getInfraMarshaller(), getFWInfraSchemaInfo());
 			}
 			catch (UnmarshalException ex)
 			{
 				logger.error("Failed to unmarshal payload into an SubscriptionType: "+ ex.getMessage(), ex);
 				logger.error("Subscription Payload: "+ payload);
-				return makeErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal subscription payload: "+ ex.getMessage()), ResponseAction.CREATE, null);
+				return makeInfraErrorResponse( new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to unmarshal subscription payload: "+ ex.getMessage()), ResponseAction.CREATE, null);
 			}
 			catch (UnsupportedMediaTypeExcpetion ex)
 			{
 				logger.error("Failed to unmarshal payload into an SubscriptionType: "+ ex.getMessage(), ex);
 				logger.error("Subscription Payload: "+ payload);
-				return makeErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal subscription payload: "+ ex.getMessage()), ResponseAction.CREATE, null);
+				return makeInfraErrorResponse( new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to unmarshal subscription payload: "+ ex.getMessage()), ResponseAction.CREATE, null);
 			}
 		}
 		else
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Subscriptions not supported.", "This DIRECT Environment implementation does not support subscriptions, yet."), ResponseAction.CREATE, null);
+			return makeInfraErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Subscriptions not supported.", "This DIRECT Environment implementation does not support subscriptions, yet."), ResponseAction.CREATE, null);
 		}
 	} 
 
@@ -232,22 +232,22 @@ public class SubscriptionResource extends InfraResource
 			ErrorDetails error = validSession(getAuthInfo(), false, null);
 			if (error != null) // Not allowed to access!
 			{
-				return makeErrorResponse(error, ResponseAction.DELETE, null);
+				return makeInfraErrorResponse(error, ResponseAction.DELETE, null);
 			}
 			SubscriptionType subscription = subscriptionsSet.get(subscriptionID);
 			if (subscription != null)
 			{
 				subscriptionsSet.remove(subscriptionID);
-				return makeResopnseWithNoContent(false, ResponseAction.DELETE, null);				
+				return makeResopnseWithNoContent(false, false, ResponseAction.DELETE, null);				
 			}
 			else
 			{
-				return makeErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Subscription with ID = "+subscriptionID+" does not exist."), ResponseAction.DELETE, null);				
+				return makeInfraErrorResponse(new ErrorDetails(Status.NOT_FOUND.getStatusCode(), "Subscription with ID = "+subscriptionID+" does not exist."), ResponseAction.DELETE, null);				
 			}
 		}
 		else
 		{
-			return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Subscriptions not supported.", "This DIRECT Environment implementation does not support subscriptions, yet."), ResponseAction.DELETE, null);
+			return makeInfraErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Subscriptions not supported.", "This DIRECT Environment implementation does not support subscriptions, yet."), ResponseAction.DELETE, null);
 		}
 	}
 }

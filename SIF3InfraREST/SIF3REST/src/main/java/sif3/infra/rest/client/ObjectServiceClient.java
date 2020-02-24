@@ -18,7 +18,6 @@ package sif3.infra.rest.client;
 import java.net.URI;
 import java.util.List;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import com.sun.jersey.api.client.ClientResponse;
@@ -33,6 +32,7 @@ import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.URLQueryParameter;
@@ -60,8 +60,8 @@ public class ObjectServiceClient extends BaseClient
 	 * 
      * @param clientEnvMgr Session manager to access the clients session information.
 	 * @param baseURI The base URI of this client. All URIs are for all other calls are relative to this base URL.
-	 * @param requestMediaType Media type of the request. It will be validated against the supported media types of the given dmMarshaller.
-	 * @param responseMediaType Media type of the response. It will be validated against the supported media types of the given dmUnmarshaller.
+     * @param requestPayloadMedatata Mime type and schema info of the request. Mime type will be validated against the supported mime types of the given dmMarshaller.
+     * @param responsePayloadMetadata Mime type and schema info of the response. Mime type will be validated against the supported mime types of the given dmUnmarshaller.
 	 * @param dmMarshaller Marshaller to marshal the payload of this client to appropriate representations. This marshaller must be valid
 	 *                   for the data model used with this client.
 	 * @param dmUnmarshaller Unmarshaller to unmarshal the payload of this client to appropriate representations. This unmarshaller 
@@ -71,29 +71,31 @@ public class ObjectServiceClient extends BaseClient
 	 *                             time of receiving.
 	 *                       FALSE: No compression is used.
 	 */
-	public ObjectServiceClient(ClientEnvironmentManager clientEnvMgr, URI baseURI, MediaType requestMediaType, MediaType responseMediaType, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection, boolean useCompression)
+//	public ObjectServiceClient(ClientEnvironmentManager clientEnvMgr, URI baseURI, MediaType requestMediaType, MediaType responseMediaType, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection, boolean useCompression)
+    public ObjectServiceClient(ClientEnvironmentManager clientEnvMgr, URI baseURI, PayloadMetadata requestPayloadMedatata, PayloadMetadata responsePayloadMetadata, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection, boolean useCompression)
 	{
-		super(clientEnvMgr, baseURI, requestMediaType, responseMediaType, dmMarshaller, dmUnmarshaller, secureConnection, useCompression);
+//		super(clientEnvMgr, baseURI, requestMediaType, responseMediaType, dmMarshaller, dmUnmarshaller, secureConnection, useCompression);
+        super(clientEnvMgr, baseURI, requestPayloadMedatata, responsePayloadMetadata, dmMarshaller, dmUnmarshaller, secureConnection, useCompression);
 	}
 
-	/**
-	 * This constructor will default the media type of the marshaller (request) and unmarshaller (response) and the default service type of OBJECT.
-	 * 
-     * @param clientEnvMgr Session manager to access the clients session information.
-	 * @param baseURI The base URI of this client. All URIs are for all other calls are relative to this base URL.
-	 * @param dmMarshaller Marshaller to marshal the payload of this client to appropriate representations. This marshaller must be valid
-	 *                   for the data model used with this client.
-	 * @param dmUnmarshaller Unmarshaller to unmarshal the payload of this client to appropriate representations. This unmarshaller 
-	 *                     must be valid for the data model used with this client.
-	 * @param secureConnection TRUE: Use HTTPS, FALSE use HTTP.
-	 * @param useCompression TRUE: Payloads (request & response) shall be compressed before sending or de-compressed at the
-	 *                             time of receiving.
-	 *                       FALSE: No compression is used.
-	 */
-	public ObjectServiceClient(ClientEnvironmentManager clientEnvMgr, URI baseURI, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection, boolean useCompression)
-	{
-		super(clientEnvMgr, baseURI, dmMarshaller, dmUnmarshaller, secureConnection, useCompression);
-	}
+//	/**
+//	 * This constructor will default the media type of the marshaller (request) and unmarshaller (response) and the default service type of OBJECT.
+//	 * 
+//     * @param clientEnvMgr Session manager to access the clients session information.
+//	 * @param baseURI The base URI of this client. All URIs are for all other calls are relative to this base URL.
+//	 * @param dmMarshaller Marshaller to marshal the payload of this client to appropriate representations. This marshaller must be valid
+//	 *                   for the data model used with this client.
+//	 * @param dmUnmarshaller Unmarshaller to unmarshal the payload of this client to appropriate representations. This unmarshaller 
+//	 *                     must be valid for the data model used with this client.
+//	 * @param secureConnection TRUE: Use HTTPS, FALSE use HTTP.
+//	 * @param useCompression TRUE: Payloads (request & response) shall be compressed before sending or de-compressed at the
+//	 *                             time of receiving.
+//	 *                       FALSE: No compression is used.
+//	 */
+//	public ObjectServiceClient(ClientEnvironmentManager clientEnvMgr, URI baseURI, MarshalFactory dmMarshaller, UnmarshalFactory dmUnmarshaller, boolean secureConnection, boolean useCompression)
+//	{
+//		super(clientEnvMgr, baseURI, dmMarshaller, dmUnmarshaller, secureConnection, useCompression);
+//	}
 
 	/*----------------------------------*/
 	/*-- Operations on Single Objects --*/
@@ -127,6 +129,7 @@ public class ObjectServiceClient extends BaseClient
 		{
 			service = buildURI(service, relURI, resourceID, zone, context, urlQueryParams);
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
+	        hdrProperties = addSchemaHdrProps(hdrProperties, false, true);
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).get(ClientResponse.class);
 
 			return setResponse(service, response, returnObjectClass, hdrProperties, zone, context, true, Status.OK, Status.NOT_MODIFIED);
@@ -167,7 +170,7 @@ public class ObjectServiceClient extends BaseClient
 		try
 		{
 			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
-			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestMediaType());
+			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestPayloadMetadata().getMimeType());
 
 			if (logger.isDebugEnabled())
 			{
@@ -175,6 +178,7 @@ public class ObjectServiceClient extends BaseClient
 			}
 			
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
+			hdrProperties = addSchemaHdrProps(hdrProperties, true, true);
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, true).post(ClientResponse.class, payloadStr);
 
 			return setResponse(service, response, returnObjectClass, hdrProperties, zone, context, true, Status.CREATED, Status.CONFLICT);
@@ -215,7 +219,7 @@ public class ObjectServiceClient extends BaseClient
 		try
 		{
 			service = buildURI(service, relURI, resourceID, zone, context, urlQueryParams);
-			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestMediaType());
+			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestPayloadMetadata().getMimeType());
 
 			if (logger.isDebugEnabled())
 			{
@@ -223,6 +227,7 @@ public class ObjectServiceClient extends BaseClient
 			}
 			
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, true, true);
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, true).put(ClientResponse.class, payloadStr);
 
 			return setResponse(service, response, null, hdrProperties, zone, context, true, Status.NO_CONTENT);
@@ -262,6 +267,7 @@ public class ObjectServiceClient extends BaseClient
 			service = buildURI(service, relURI, resourceID, zone, context, urlQueryParams);
 			
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, false, false);
 		    ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).delete(ClientResponse.class);
 
 			return setResponse(service, response, null, hdrProperties, zone, context, true, Status.NO_CONTENT);
@@ -308,6 +314,8 @@ public class ObjectServiceClient extends BaseClient
 		{
 			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
+			hdrProperties = addSchemaHdrProps(hdrProperties, false, true);
+
 			addPagingInfoToHeaders(pagingInfo, hdrProperties);
 			addDelayedInfo(hdrProperties, zone, context, serviceName, serviceType, requestType);
 			
@@ -354,9 +362,11 @@ public class ObjectServiceClient extends BaseClient
 		try
 		{
 			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
-		    String payloadStr = getDataModelMarshaller().marshal(exampleObject, getRequestMediaType());
+		    String payloadStr = getDataModelMarshaller().marshal(exampleObject, getRequestPayloadMetadata().getMimeType());
 
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
+	        hdrProperties = addSchemaHdrProps(hdrProperties, true, true);
+
 			addPagingInfoToHeaders(pagingInfo, hdrProperties);
 			addDelayedInfo(hdrProperties, zone, context, serviceName, ServiceType.OBJECT, requestType);
 
@@ -409,7 +419,7 @@ public class ObjectServiceClient extends BaseClient
 		try
 		{
 			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
-		    String payloadStr = getDataModelMarshaller().marshal(payload, getRequestMediaType());
+		    String payloadStr = getDataModelMarshaller().marshal(payload, getRequestPayloadMetadata().getMimeType());
 
 			if (logger.isDebugEnabled())
 			{
@@ -417,6 +427,8 @@ public class ObjectServiceClient extends BaseClient
 			}
 			
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
+	        hdrProperties = addSchemaHdrProps(hdrProperties, true, false);
+
 			addDelayedInfo(hdrProperties, zone, context, serviceName, ServiceType.OBJECT, requestType);
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, requestType, true, true, true).post(ClientResponse.class, payloadStr);
 
@@ -459,13 +471,14 @@ public class ObjectServiceClient extends BaseClient
 		{
 			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
 
-			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestMediaType());
+			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestPayloadMetadata().getMimeType());
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("updateMany: Payload to send:\n"+payloadStr);
 			}
 
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);			
+            hdrProperties = addSchemaHdrProps(hdrProperties, true, false);
 			addDelayedInfo(hdrProperties, zone, context, serviceName, ServiceType.OBJECT, requestType);
 
 			// Set specific header so that PUT method knows that an UPDATE and not a DELETE is required! 
@@ -526,9 +539,10 @@ public class ObjectServiceClient extends BaseClient
 			    deleteRequest.getDeletes().getDelete().add(id);
 			  }
 			}
-			String payloadStr = getInfraMarshaller().marshal(deleteRequest, getRequestMediaType());
+			String payloadStr = getInfraMarshaller().marshal(deleteRequest, getRequestPayloadMetadata().getMimeType());
 			
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, true, false);
 			addDelayedInfo(hdrProperties, zone, context, serviceName, ServiceType.OBJECT, requestType);
 
 			// Set specific header so that PUT method knows that a DELETE and not an UPDATE is required! 
@@ -582,6 +596,7 @@ public class ObjectServiceClient extends BaseClient
         {
             service = buildURI(service, relURI, null, zone, context, urlQueryParams);
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, false, true);
             addPagingInfoToHeaders(pagingInfo, hdrProperties);
             
             ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, RequestType.IMMEDIATE, true, true, false).head();
@@ -599,64 +614,6 @@ public class ObjectServiceClient extends BaseClient
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-//	private BulkOperationResponse<CreateOperationStatus> setCreateBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
-//	{
-//		BulkOperationResponse<CreateOperationStatus> response = new BulkOperationResponse<CreateOperationStatus>();
-//		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, true, requestType, service.getURI().toString());
-//		if ((clientResponse.getStatusInfo().getStatusCode() == Status.OK.getStatusCode()) || 
-//            (clientResponse.getStatusInfo().getStatusCode() == Status.CREATED.getStatusCode()) ||
-//			(clientResponse.getStatusInfo().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
-//			(clientResponse.getStatusInfo().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
-//		{
-//			if (response.getHasEntity())
-//			{
-//				String payload = clientResponse.getEntity(String.class);
-//				MultiOperationStatusList<CreateOperationStatus> statusList = getInfraMapper().toStatusListFromSIFCreateString(payload, getResponseMediaType());
-//				response.setError(statusList.getError());
-//				response.setOperationStatuses(statusList.getOperationStatuses());
-//			}			
-//		}
-//		else// We are dealing with an error case.
-//		{
-//			setErrorResponse(response, clientResponse);
-//		}
-//		
-//		if (logger.isDebugEnabled())
-//		{
-//			logger.debug("Response from REST Call:\n"+response);
-//		}
-//		return response;
-//	}
-
-//	private BulkOperationResponse<OperationStatus> setDeleteBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
-//	{
-//		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
-//		setBaseResponseData(response, clientResponse, requestHeaders, zone, context, true, requestType, service.getURI().toString());
-//		if ((clientResponse.getStatusInfo().getStatusCode() == Status.OK.getStatusCode()) || 
-//			(clientResponse.getStatusInfo().getStatusCode() == Status.ACCEPTED.getStatusCode()) ||
-//			(clientResponse.getStatusInfo().getStatusCode() == Status.NO_CONTENT.getStatusCode()))
-//		{
-//			if (response.getHasEntity())
-//			{
-//				String payload = clientResponse.getEntity(String.class);
-//				MultiOperationStatusList<OperationStatus> statusList = getInfraMapper().toStatusListFromSIFDeleteString(payload, getResponseMediaType());
-//				response.setError(statusList.getError());
-//				response.setOperationStatuses(statusList.getOperationStatuses());
-//				
-//			}			
-//		}
-//		else// We are dealing with an error case.
-//		{
-//			setErrorResponse(response, clientResponse);
-//		}
-//		
-//		if (logger.isDebugEnabled())
-//		{
-//			logger.debug("Response from REST Call:\n"+response);
-//		}
-//		return response;
-//	}
-
 	private BulkOperationResponse<OperationStatus> setUpdateBulkResponse(WebResource service, ClientResponse clientResponse, SIFZone zone, SIFContext context, RequestType requestType, HeaderProperties requestHeaders)
 	{
 		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
@@ -672,8 +629,8 @@ public class ObjectServiceClient extends BaseClient
                 {
                     logger.debug("Payload received for Update Multiple REST Call:\n"+payload);
                 }
-
-				MultiOperationStatusList<OperationStatus> statusList = getInfraMapper().toStatusListFromSIFUpdateString(payload, getResponseMediaType());
+                
+				MultiOperationStatusList<OperationStatus> statusList = getInfraMapper().toStatusListFromSIFUpdateString(payload, response.getPayloadMetadata());
 				response.setError(statusList.getError());
 				response.setOperationStatuses(statusList.getOperationStatuses());
 			}			
@@ -689,39 +646,4 @@ public class ObjectServiceClient extends BaseClient
 		}
 		return response;
 	}
-	
-//	private void addPagingInfoToHeaders(PagingInfo pagingInfo, HeaderProperties hdrProperties)
-//	{	
-//		if (pagingInfo != null)
-//		{
-//		  	Map<String, String> queryParameters = pagingInfo.getRequestValues();
-//			for (String key : queryParameters.keySet())
-//			{
-//			  hdrProperties.setHeaderProperty(key, queryParameters.get(key));
-//			}
-//		}
-//	}
-//	
-//	private void addDelayedInfo(HeaderProperties hdrProperties, SIFZone zone, SIFContext context, String serviceName, ServiceType serviceType, RequestType requestType)
-//	{
-//		if (requestType == RequestType.DELAYED)
-//		{
-//			ServiceInfo serviceInfo = getSIF3Session().getServiceInfoForService(zone, context, serviceName, serviceType);
-//			if (serviceInfo != null)
-//			{
-//				if ((serviceInfo.getRemoteQueueInfo() != null) && (serviceInfo.getRemoteQueueInfo().getQueueID() != null))
-//				{
-//					hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_QUEUE_ID, serviceInfo.getRemoteQueueInfo().getQueueID());
-//				}
-//				else // should not be the case if all is called properly but you never know...
-//				{
-//					logger.error("No SIF Queue configured environment with Service Name = "+serviceName+", Service Type = "+serviceType+", Zone = "+zone.getId()+" and Context = "+context.getId());
-//				}
-//			}
-//			else // should not be the case if all is called properly but you never know... 
-//			{
-//				logger.error("No valid service listed in environment ACL for Service Name = "+serviceName+", Service Type = "+serviceType+", Zone = "+zone.getId()+" and Context = "+context.getId());
-//			}
-//		}
-//	}
 }

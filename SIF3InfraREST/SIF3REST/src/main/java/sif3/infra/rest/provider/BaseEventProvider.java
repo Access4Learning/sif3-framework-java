@@ -28,6 +28,7 @@ import sif3.common.interfaces.EventProvider;
 import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.ACL.AccessRight;
 import sif3.common.model.ACL.AccessType;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
@@ -100,7 +101,12 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 		{
 			// Let's get the Event Client
 		    String serviceName = getServiceName();
-			EventClient evtClient = new EventClient(envMgr, getRequestMediaType(), getResponseMediaType(), serviceName, getMarshaller(), getCompressionEnabled());
+			EventClient evtClient = new EventClient(envMgr, 
+                                                    new PayloadMetadata(getRequestMediaType(), getRequestDMSchemaInfo()),
+                                                    new PayloadMetadata(getResponseMediaType(), getResponseDMSchemaInfo()),
+			                                        serviceName, 
+			                                        getMarshaller(), 
+			                                        getCompressionEnabled());
 			SIFEventIterator<L> iterator = getSIFEvents();
 			if (iterator != null)
 			{

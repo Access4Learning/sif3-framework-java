@@ -19,7 +19,6 @@ package sif3.infra.rest.client;
 
 import java.util.HashMap;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import com.sun.jersey.api.client.ClientResponse;
@@ -32,6 +31,7 @@ import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.QueryTemplateInfo;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
@@ -56,7 +56,14 @@ public class NameQueryClient extends BaseClient
      */
     public NameQueryClient(ClientEnvironmentManager clientEnvMgr)
     {
-        super(clientEnvMgr, clientEnvMgr.getEnvironmentInfo().getConnectorBaseURI(ConnectorName.requestsConnector), clientEnvMgr.getEnvironmentInfo().getMediaType(), clientEnvMgr.getEnvironmentInfo().getMediaType(), null, null, clientEnvMgr.getEnvironmentInfo().getSecureConnection(), clientEnvMgr.getEnvironmentInfo().getCompressionEnabled());
+        super(clientEnvMgr, 
+              clientEnvMgr.getEnvironmentInfo().getConnectorBaseURI(ConnectorName.requestsConnector), 
+              null,
+              null,
+              null,
+              null, 
+              clientEnvMgr.getEnvironmentInfo().getSecureConnection(), 
+              clientEnvMgr.getEnvironmentInfo().getCompressionEnabled());
     }
 
 //    public String getQueryName()
@@ -79,10 +86,11 @@ public class NameQueryClient extends BaseClient
      * 
      * @param queryTemplateInfo Hold the query name and query parameters of the named query service from where the data shall be 
      *                          retrieved. The parameter and the queryTemplateInfo.queryName property must not be null/empty.
-     * @param returnMimeType The mime type the response data is in. It is expected that the consumer provides that and the provider
-     *                       should attempt to marshal the data to the given mime type and return the resulting string as
-     *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
-     *                       appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
+     * @param returnPayloadMetadata The mime type and optional schema info the response data is expected to be returned as. 
+     *                              It is expected that the consumer provides that and the provider should attempt to marshal the data
+     *                              to the given mime type, potentially using the given schema info, and return the resulting string
+     *                              in the requested format. If the provider cannot marshal the data to the requested mime type then an
+     *                              appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
      * @param pagingInfo Page information to determine which results to return. Null = Return all (NOT RECOMMENDED! Might be rejected
      *                   by provider.).
      * @param hdrProperties Header Properties to be added to the header of the request. Can be null.
@@ -100,7 +108,14 @@ public class NameQueryClient extends BaseClient
      *         
      * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
      */
-    public Response retrieveDataFromNamedQuery(QueryTemplateInfo queryTemplateInfo, MediaType returnMimeType, PagingInfo pagingInfo, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, SIFZone zone, SIFContext context, RequestType requestType)
+    public Response retrieveDataFromNamedQuery(QueryTemplateInfo queryTemplateInfo, 
+                                               PayloadMetadata returnPayloadMetadata, 
+                                               PagingInfo pagingInfo, 
+                                               HeaderProperties hdrProperties, 
+                                               URLQueryParameter urlQueryParams, 
+                                               SIFZone zone, 
+                                               SIFContext context, 
+                                               RequestType requestType)
             throws ServiceInvokationException
     {
         if ((queryTemplateInfo == null) || StringUtils.isEmpty(queryTemplateInfo.getQueryName())) 
@@ -126,11 +141,12 @@ public class NameQueryClient extends BaseClient
             
             service = buildURI(service, zone, context, urlQueryParams, queryTemplateInfo.getQueryName());
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, false, null, true, returnPayloadMetadata.getSchemaInfo());
             hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, ServiceType.XQUERYTEMPLATE.name());
             addPagingInfoToHeaders(pagingInfo, hdrProperties);
             addDelayedInfo(hdrProperties, zone, context, queryTemplateInfo.getQueryName(), ServiceType.XQUERYTEMPLATE, requestType);
             
-            ClientResponse response = setRequestHeaderAndMediaTypes(service, returnMimeType, returnMimeType, hdrProperties, requestType, true, true, false).get(ClientResponse.class);
+            ClientResponse response = setRequestHeaderAndMediaTypes(service, returnPayloadMetadata.getMimeType(), returnPayloadMetadata.getMimeType(), hdrProperties, requestType, true, true, false).get(ClientResponse.class);
 
             return setResponse(service, response, String.class, hdrProperties, zone, context, requestType, true, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT, Status.ACCEPTED);
         }
