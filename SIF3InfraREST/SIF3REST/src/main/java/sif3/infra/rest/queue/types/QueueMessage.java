@@ -20,10 +20,9 @@ package sif3.infra.rest.queue.types;
 import java.io.Serializable;
 import java.util.HashMap;
 
-import javax.ws.rs.core.MediaType;
-
 import sif3.common.header.HeaderValues.MessageType;
 import sif3.common.header.HeaderValues.ServiceType;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 
@@ -46,7 +45,8 @@ public class QueueMessage implements Serializable
     private HashMap<String, String> metadata = new HashMap<String, String>(); // metadata managed by developer.
     
     // Data about message and its origin
-    private MediaType mediaType; // indicates what format the payload string is in.
+    private PayloadMetadata payloadMetadata;
+    //    private MediaType mediaType; // indicates what format the payload string is in.
     private SIFZone zone;
     private SIFContext context;
     private String fingerprint = null;
@@ -57,26 +57,26 @@ public class QueueMessage implements Serializable
       this(null, null, null, null, null, null, null);
     }
     
-    public QueueMessage(String payload, MediaType mediaType)
+    public QueueMessage(String payload, PayloadMetadata payloadMetadata)
     {
-      this(payload, mediaType, null, null, null, null, null);
+      this(payload, payloadMetadata, null, null, null, null, null);
     }
 
-    public QueueMessage(String payload, MediaType mediaType, ServiceType serviceType, MessageType messageType)
+    public QueueMessage(String payload, PayloadMetadata payloadMetadata, ServiceType serviceType, MessageType messageType)
     {
-      this(payload, mediaType, serviceType, messageType, null, null, null);
+      this(payload, payloadMetadata, serviceType, messageType, null, null, null);
     }
 
-    public QueueMessage(String payload, MediaType mediaType, ServiceType serviceType, MessageType messageType, SIFZone zone, SIFContext context)
+    public QueueMessage(String payload, PayloadMetadata payloadMetadata, ServiceType serviceType, MessageType messageType, SIFZone zone, SIFContext context)
     {
-        this(payload, mediaType, serviceType, messageType, zone, context, null);     
+        this(payload, payloadMetadata, serviceType, messageType, zone, context, null);     
     }
     
-    public QueueMessage(String payload, MediaType mediaType, ServiceType serviceType, MessageType messageType, SIFZone zone, SIFContext context, String messageQueueReaderID)
+    public QueueMessage(String payload, PayloadMetadata payloadMetadata, ServiceType serviceType, MessageType messageType, SIFZone zone, SIFContext context, String messageQueueReaderID)
     {
       super();
       setPayload(payload);
-      setMediaType(mediaType);
+      setPayloadMetadata(payloadMetadata);
       setServiceType(serviceType);
       setMessageType(messageType);
       setZone(zone);
@@ -148,22 +148,32 @@ public class QueueMessage implements Serializable
         this.metadata = metadata;
     }
     
-    /**
-     * @return the mediaType
-     */
-    public MediaType getMediaType()
-    {
-        return mediaType;
-    }
+//    /**
+//     * @return the mediaType
+//     */
+//    public MediaType getMediaType()
+//    {
+//        return mediaType;
+//    }
+//    
+//    /**
+//     * @param mediaType the mediaType to set
+//     */
+//    public void setMediaType(MediaType mediaType)
+//    {
+//        this.mediaType = mediaType;
+//    }
     
-    /**
-     * @param mediaType the mediaType to set
-     */
-    public void setMediaType(MediaType mediaType)
+    public PayloadMetadata getPayloadMetadata()
     {
-        this.mediaType = mediaType;
+        return payloadMetadata;
     }
-    
+
+    public void setPayloadMetadata(PayloadMetadata payloadMetadata)
+    {
+        this.payloadMetadata = payloadMetadata;
+    }
+
     /**
      * @return the zone
      */
@@ -226,9 +236,9 @@ public class QueueMessage implements Serializable
     public String toString()
     {
         return "QueueMessage [messageType=" + messageType + ", serviceType=" + serviceType
-                + ", payload=" + payload + ", metadata=" + metadata + ", mediaType=" + mediaType
-                + ", zone=" + zone + ", context=" + context + ", fingerprint=" + fingerprint
-                + ", messageQueueReaderID=" + messageQueueReaderID + "]";
+                + ", payload=" + payload + ", metadata=" + metadata + ", payloadMetadata="
+                + payloadMetadata + ", zone=" + zone + ", context=" + context + ", fingerprint="
+                + fingerprint + ", messageQueueReaderID=" + messageQueueReaderID + "]";
     }
 
 }

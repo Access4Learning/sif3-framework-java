@@ -19,12 +19,12 @@ package sif3.infra.rest.mapper;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
@@ -53,13 +53,13 @@ public class InfraDataModelMapper implements Serializable
     
 	private InfraUnmarshalFactory infraUnmarshaller = new InfraUnmarshalFactory();
 
-	public ErrorDetails toErrorFromSIFErrorString(String payload, MediaType mediaType, ErrorDetails defaultError)
+	public ErrorDetails toErrorFromSIFErrorString(String payload, PayloadMetadata payloadMetadata, ErrorDetails defaultError)
 	{
 		ErrorDetails errorDetails = new ErrorDetails();
 		try
 		{
 			//Because ErrorType is a Infrastructure thing we must ensure we use a valid Infrastructure Unmarshaller Media Type
-			ErrorType error = (ErrorType)getInfraUnmarshaller().unmarshal(payload, ErrorType.class, mediaType);
+			ErrorType error = (ErrorType)getInfraUnmarshaller().unmarshal(payload, ErrorType.class, payloadMetadata.getMimeType());
 			if (error == null) // this is strange. So set the unmarshalled value.
 			{
 				errorDetails = new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not unmarshal payload into ErrorType object. See error description for payload details.", payload);
@@ -93,13 +93,13 @@ public class InfraDataModelMapper implements Serializable
 		return errorDetails;
 	}
 
-	public MultiOperationStatusList<CreateOperationStatus> toStatusListFromSIFCreateString(String payload, MediaType mediaType)
+	public MultiOperationStatusList<CreateOperationStatus> toStatusListFromSIFCreateString(String payload, PayloadMetadata payloadMetadata)
 	{
 		MultiOperationStatusList<CreateOperationStatus> statusList = new MultiOperationStatusList<CreateOperationStatus>();  
 		try
 		{						
 			//Because CreateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-			CreateResponseType createManyResponse = (CreateResponseType)getInfraUnmarshaller().unmarshal(payload, CreateResponseType.class, mediaType);
+			CreateResponseType createManyResponse = (CreateResponseType)getInfraUnmarshaller().unmarshal(payload, CreateResponseType.class, payloadMetadata.getMimeType());
 			if (createManyResponse == null)// this is strange. So set the unmarshalled value.
 			{
 				statusList.setError(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not unmarshal multi-create payload. See error description for payload details.", payload));
@@ -134,13 +134,13 @@ public class InfraDataModelMapper implements Serializable
 		return statusList;
 	}
 
-	public MultiOperationStatusList<OperationStatus> toStatusListFromSIFUpdateString(String payload, MediaType mediaType)
+	public MultiOperationStatusList<OperationStatus> toStatusListFromSIFUpdateString(String payload, PayloadMetadata payloadMetadata)
 	{
 		MultiOperationStatusList<OperationStatus> statusList = new MultiOperationStatusList<OperationStatus>();  
 		try
 		{						
 			//Because UpdateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-			UpdateResponseType updateManyResponse = (UpdateResponseType)getInfraUnmarshaller().unmarshal(payload, UpdateResponseType.class, mediaType);
+			UpdateResponseType updateManyResponse = (UpdateResponseType)getInfraUnmarshaller().unmarshal(payload, UpdateResponseType.class, payloadMetadata.getMimeType());
 			if (updateManyResponse == null)// this is strange. So set the unmarshalled value.
 			{
 				statusList.setError(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not unmarshal multi-update payload. See error description for payload details.", payload));							
@@ -175,13 +175,13 @@ public class InfraDataModelMapper implements Serializable
 		return statusList;
 	}
 
-	public MultiOperationStatusList<OperationStatus> toStatusListFromSIFDeleteString(String payload, MediaType mediaType)
+	public MultiOperationStatusList<OperationStatus> toStatusListFromSIFDeleteString(String payload, PayloadMetadata payloadMetadata)
 	{
 		MultiOperationStatusList<OperationStatus> statusList = new MultiOperationStatusList<OperationStatus>();  
 		try
 		{						
 			//Because DeleteResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-			DeleteResponseType deleteManyResponse = (DeleteResponseType)getInfraUnmarshaller().unmarshal(payload, DeleteResponseType.class, mediaType);
+			DeleteResponseType deleteManyResponse = (DeleteResponseType)getInfraUnmarshaller().unmarshal(payload, DeleteResponseType.class, payloadMetadata.getMimeType());
 			if (deleteManyResponse == null)// this is strange. So set the unmarshalled value.
 			{
 				statusList.setError(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not unmarshal multi-delete payload. See error description for payload details.", payload));							

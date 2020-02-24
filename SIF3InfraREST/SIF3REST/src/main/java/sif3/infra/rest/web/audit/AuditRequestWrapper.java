@@ -30,6 +30,7 @@ import java.util.Map;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import javax.ws.rs.core.MediaType;
 
 import sif3.common.CommonConstants;
 import sif3.common.model.audit.AuditRecord;
@@ -160,13 +161,18 @@ public class AuditRequestWrapper extends HttpServletRequestWrapper implements Ht
 			{
 				auditRecord.getSifData().setContext(resource.getSifContext().getId());
 			}
-			if (resource.getRequestMediaType() != null)
+			if (resource.getRequestPayloadMetadata() != null)
 			{
-				auditRecord.getRequestData().setMediaType(resource.getRequestMediaType());
+				auditRecord.getRequestData().setMediaType(resource.getRequestPayloadMetadata().getMimeType());
 			}
-			if (resource.getResponseMediaType() != null)
+			
+			// We don't really know if the response is a DM or Infra response however the request indictated the response media
+			// type and this is captured in the infra or DM payload information so we can just use one of them. The framework does
+			// not yet support that theer can be different media types for the different data models.
+			MediaType finalMimeType = resource.getResponseMediaType(true);
+			if (finalMimeType != null)
 			{
-				auditRecord.getResponseData().setMediaType(resource.getResponseMediaType());
+				auditRecord.getResponseData().setMediaType(finalMimeType);
 			}
 
 			if (resource.getEnvironmentManager() != null)
