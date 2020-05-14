@@ -1,137 +1,141 @@
-<StudentPersonal  xmlns="http://www.sifassociation.org/datamodel/au/3.4">
-  <AlertMessages>
-    <AlertMessage Type="Legal">Mother is legal guardian</AlertMessage>
-  </AlertMessages>
-  <MedicalAlertMessages>
-    <MedicalAlertMessage Severity="Severe">Student has Peanut Allergy</MedicalAlertMessage>
-    <MedicalAlertMessage Severity="Moderate">Student has Diabetes</MedicalAlertMessage>
-  </MedicalAlertMessages>
-  <LocalId>S1234567</LocalId>
-  <StateProvinceId>ABC1234</StateProvinceId>
-  <ElectronicIdList>
-    <ElectronicId Type="03">ZZZZZZ21</ElectronicId>
-    <ElectronicId Type="03">ZZZZZZ22</ElectronicId>
-  </ElectronicIdList>
-  <OtherIdList>
-    <OtherId Type="freetext">888rdgf</OtherId>
-    <OtherId Type="Disability ID">1234</OtherId>
-  </OtherIdList>
-  <PersonInfo>
-    <Name Type="LGL">
-      <FamilyName>Smith</FamilyName>
-      <GivenName>JŒRG</GivenName>
-      <FullName>JŒRG Smith</FullName>
-    </Name>
-    <OtherNames>
-      <Name Type="AKA">
-        <FamilyName>Anderson</FamilyName>
-        <GivenName>Samuel</GivenName>
-        <FullName>Samuel Anderson</FullName>
-      </Name>
-      <Name Type="PRF">
-        <FamilyName>Rowinski</FamilyName>
-        <GivenName>Sam</GivenName>
-        <FullName>Sam Rowinski</FullName>
-      </Name>
-    </OtherNames>
-    <Demographics>
-      <IndigenousStatus>3</IndigenousStatus>
-      <Sex>1</Sex>
-      <BirthDate>1990-09-26</BirthDate>
-      <BirthDateVerification>1004</BirthDateVerification>
-      <PlaceOfBirth>Clayton</PlaceOfBirth>
-      <StateOfBirth>VIC</StateOfBirth>
-      <CountryOfBirth>1101</CountryOfBirth>
-      <CountriesOfCitizenship>
-        <CountryOfCitizenship>8104</CountryOfCitizenship>
-        <CountryOfCitizenship>1101</CountryOfCitizenship>
-      </CountriesOfCitizenship>
-      <CountriesOfResidency>
-        <CountryOfResidency>8104</CountryOfResidency>
-        <CountryOfResidency>1101</CountryOfResidency>
-      </CountriesOfResidency>
-      <CountryArrivalDate>1990-09-26</CountryArrivalDate>
-      <AustralianCitizenshipStatus>1</AustralianCitizenshipStatus>
-      <EnglishProficiency>
-        <Code>1</Code>
-      </EnglishProficiency>
-      <LanguageList>
-        <Language>
-          <Code>0001</Code>
-          <LanguageType>1</LanguageType>
-        </Language>
-      </LanguageList>
-      <DwellingArrangement>
-        <Code>1671</Code>
-      </DwellingArrangement>
-      <Religion>
-        <Code>2013</Code>
-      </Religion>
-      <ReligiousEventList>
-        <ReligiousEvent>
-          <Type>Baptism</Type>
-          <Date>2000-09-01</Date>
-        </ReligiousEvent>
-        <ReligiousEvent>
-          <Type>Christmas</Type>
-          <Date>2009-12-24</Date>
-        </ReligiousEvent>
-      </ReligiousEventList>
-      <ReligiousRegion>The Religion Region</ReligiousRegion>
-      <PermanentResident>P</PermanentResident>
-      <VisaSubClass>101</VisaSubClass>
-      <VisaStatisticalCode>05</VisaStatisticalCode>
-    </Demographics>
-    <AddressList>
-      <Address Type="0123" Role="2382">
-        <Street>
-          <Line1>Unit1/10</Line1>
-          <Line2>Barkley Street</Line2>
-        </Street>
-        <City>Yarra Glenn</City>
-        <StateProvince>VIC</StateProvince>
-        <Country>1101</Country>
-        <PostalCode>9999</PostalCode>
-      </Address>
-      <Address Type="0123A" Role="013A">
-        <Street>
-          <Line1>34 Term Address Street</Line1>
-        </Street>
-        <City>Home Town</City>
-        <StateProvince>WA</StateProvince>
-        <Country>1101</Country>
-        <PostalCode>9999</PostalCode>
-      </Address>
-    </AddressList>
-    <PhoneNumberList>
-      <PhoneNumber Type="0096">
-        <Number>03 9637-2289</Number>
-        <Extension>72289</Extension>
-        <ListedStatus>Y</ListedStatus>
-      </PhoneNumber>
-      <PhoneNumber Type="0888">
-        <Number>0437-765-234</Number>
-        <ListedStatus>N</ListedStatus>
-      </PhoneNumber>
-    </PhoneNumberList>
-    <EmailList>
-      <Email Type="01">fsmith@yahoo.com</Email>
-      <Email Type="02">freddy@gmail.com</Email>
-    </EmailList>
-  </PersonInfo>
-  <ProjectedGraduationYear>2014</ProjectedGraduationYear>
-  <OnTimeGraduationYear>2012</OnTimeGraduationYear>
-  <MostRecent>
-    <SchoolLocalId>S1234567</SchoolLocalId>
-    <HomeroomLocalId>hr12345</HomeroomLocalId>
-    <YearLevel>
-      <Code>P</Code>
-    </YearLevel>
-  </MostRecent>
-  <AcceptableUsePolicy>Y</AcceptableUsePolicy>
-  <EconomicDisadvantage>N</EconomicDisadvantage>
-  <ESL>U</ESL>
-  <YoungCarersRole>N</YoungCarersRole>
-  <Disability>N</Disability>
-  <IntegrationAide>N</IntegrationAide> 
+<StudentPersonal xmlns="http://www.sifassociation.org/datamodel/au/3.4" RefId="164da5d9bcbf4cf8a058ba0b0efde9ba">
+	<AlertMessages>
+		<AlertMessage Type="Legal">Mother is legal guardian</AlertMessage>
+		<AlertMessage>Second element</AlertMessage>
+		<AlertMessage/>
+	</AlertMessages>
+	<MedicalAlertMessages>
+		<MedicalAlertMessage Severity="Severe">Student has Peanut
+			Allergy</MedicalAlertMessage>
+		<MedicalAlertMessage Severity="Moderate">Student has Diabetes
+		</MedicalAlertMessage>
+	</MedicalAlertMessages>
+	<LocalId>S1234567</LocalId>
+	<StateProvinceId>ABC1234</StateProvinceId>
+	<ElectronicIdList>
+		<ElectronicId Type="03">ZZZZZZ21</ElectronicId>
+		<ElectronicId Type="03">ZZZZZZ22</ElectronicId>
+	</ElectronicIdList>
+	<OtherIdList>
+		<OtherId Type="freetext">888rdgf</OtherId>
+		<OtherId Type="Disability ID">1234</OtherId>
+	</OtherIdList>
+	<PersonInfo>
+		<Name Type="LGL">
+			<FamilyName>Smith</FamilyName>
+			<GivenName>JŒRG</GivenName>
+			<FullName>JŒRG Smith</FullName>
+		</Name>
+		<OtherNames>
+			<Name Type="AKA">
+				<FamilyName>Anderson</FamilyName>
+				<GivenName>Samuel</GivenName>
+				<FullName>Samuel Anderson</FullName>
+			</Name>
+			<Name Type="PRF">
+				<FamilyName>Rowinski</FamilyName>
+				<GivenName>Sam</GivenName>
+				<FullName>Sam Rowinski</FullName>
+			</Name>
+		</OtherNames>
+		<Demographics>
+			<IndigenousStatus>3</IndigenousStatus>
+			<Sex>1</Sex>
+			<BirthDate>1990-09-26</BirthDate>
+			<BirthDateVerification>1004</BirthDateVerification>
+			<PlaceOfBirth>Clayton</PlaceOfBirth>
+			<StateOfBirth>VIC</StateOfBirth>
+			<CountryOfBirth>1101</CountryOfBirth>
+			<CountriesOfCitizenship>
+				<CountryOfCitizenship>8104</CountryOfCitizenship>
+				<CountryOfCitizenship>1101</CountryOfCitizenship>
+			</CountriesOfCitizenship>
+			<CountriesOfResidency>
+				<CountryOfResidency>8104</CountryOfResidency>
+				<CountryOfResidency>1101</CountryOfResidency>
+			</CountriesOfResidency>
+			<CountryArrivalDate>1990-09-26</CountryArrivalDate>
+			<AustralianCitizenshipStatus>1</AustralianCitizenshipStatus>
+			<EnglishProficiency>
+				<Code>1</Code>
+			</EnglishProficiency>
+			<LanguageList>
+				<Language>
+					<Code>0001</Code>
+					<LanguageType>1</LanguageType>
+				</Language>
+			</LanguageList>
+			<DwellingArrangement>
+				<Code>1671</Code>
+			</DwellingArrangement>
+			<Religion>
+				<Code>2013</Code>
+			</Religion>
+			<ReligiousEventList>
+				<ReligiousEvent>
+					<Type>Baptism</Type>
+					<Date>2000-09-01</Date>
+				</ReligiousEvent>
+				<ReligiousEvent>
+					<Type>Christmas</Type>
+					<Date>2009-12-24</Date>
+				</ReligiousEvent>
+			</ReligiousEventList>
+			<ReligiousRegion>The Religion Region</ReligiousRegion>
+			<PermanentResident>P</PermanentResident>
+			<VisaSubClass>101</VisaSubClass>
+			<VisaStatisticalCode>05</VisaStatisticalCode>
+		</Demographics>
+		<AddressList>
+			<Address Type="0123" Role="2382">
+				<Street>
+					<Line1>Unit1/10</Line1>
+					<Line2>Barkley Street</Line2>
+				</Street>
+				<City>Yarra Glenn</City>
+				<StateProvince>VIC</StateProvince>
+				<Country>1101</Country>
+				<PostalCode>9999</PostalCode>
+			</Address>
+			<Address Type="0123A" Role="013A">
+				<Street>
+					<Line1>34 Term Address Street</Line1>
+				</Street>
+				<City>Home Town</City>
+				<StateProvince>WA</StateProvince>
+				<Country>1101</Country>
+				<PostalCode>9999</PostalCode>
+			</Address>
+		</AddressList>
+		<PhoneNumberList>
+			<PhoneNumber Type="0096">
+				<Number>03 9637-2289</Number>
+				<Extension>72289</Extension>
+				<ListedStatus>Y</ListedStatus>
+			</PhoneNumber>
+			<PhoneNumber Type="0888">
+				<Number>0437-765-234</Number>
+				<ListedStatus>N</ListedStatus>
+			</PhoneNumber>
+		</PhoneNumberList>
+		<EmailList>
+			<Email Type="01">fsmith@yahoo.com</Email>
+			<Email Type="02">freddy@gmail.com</Email>
+		</EmailList>
+	</PersonInfo>
+	<ProjectedGraduationYear>2014</ProjectedGraduationYear>
+	<OnTimeGraduationYear>2012</OnTimeGraduationYear>
+	<MostRecent>
+		<SchoolLocalId>S1234567</SchoolLocalId>
+		<HomeroomLocalId>hr12345</HomeroomLocalId>
+		<YearLevel>
+			<Code>P</Code>
+		</YearLevel>
+	</MostRecent>
+	<AcceptableUsePolicy>Y</AcceptableUsePolicy>
+	<EconomicDisadvantage>N</EconomicDisadvantage>
+	<ESL>U</ESL>
+	<YoungCarersRole>N</YoungCarersRole>
+	<Disability>N</Disability>
+	<IntegrationAide>N</IntegrationAide>
 </StudentPersonal>
