@@ -190,7 +190,7 @@ public class JobResource extends InfraResource
         JobType payloadJob = null;
         try
         {
-            payloadJob = (JobType)getInfraUnmarshaller().unmarshal(payload, JobType.class, getRequestPayloadMetadata().getMimeType());
+            payloadJob = (JobType)getInfraUnmarshaller().unmarshal(payload, JobType.class, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
         }
         catch (Exception ex)
         {
@@ -257,7 +257,7 @@ public class JobResource extends InfraResource
         JobCollectionType payloadJobs = null;
         try
         {
-            payloadJobs = (JobCollectionType)getInfraUnmarshaller().unmarshal(payload, JobCollectionType.class, getRequestPayloadMetadata().getMimeType());
+            payloadJobs = (JobCollectionType)getInfraUnmarshaller().unmarshal(payload, JobCollectionType.class, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
         }
         catch (Exception ex)
         {
@@ -1022,7 +1022,7 @@ public class JobResource extends InfraResource
         StateType state = null;
         try
         {
-            state = (StateType)getInfraUnmarshaller().unmarshal(payload, StateType.class, getRequestPayloadMetadata().getMimeType());
+            state = (StateType)getInfraUnmarshaller().unmarshal(payload, StateType.class, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
             if (state.getType() == null) // not a valid value! Most likely invalid state string received.
             {
                 return makeInfraErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Invalid state recieved.","The consumer has provided an invlaid phase state. Valid values are: "+getValidPhaseStates(),"Provider"), ResponseAction.CREATE, responseParam);                

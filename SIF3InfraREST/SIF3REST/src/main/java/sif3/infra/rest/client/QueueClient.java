@@ -207,7 +207,7 @@ public class QueueClient extends BaseClient
 			service = buildURI(service, null);
 			HeaderProperties hdrProperties = getHeaderProperties();		
             hdrProperties = addSchemaHdrProps(hdrProperties, true, false);
-			String payloadStr = getInfraMarshaller().marshal(inputQueue, getRequestPayloadMetadata().getMimeType());
+			String payloadStr = getInfraMarshaller().marshal(inputQueue, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("createQueue: Payload to send:\n"+payloadStr);

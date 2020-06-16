@@ -59,7 +59,7 @@ public class InfraDataModelMapper implements Serializable
 		try
 		{
 			//Because ErrorType is a Infrastructure thing we must ensure we use a valid Infrastructure Unmarshaller Media Type
-			ErrorType error = (ErrorType)getInfraUnmarshaller().unmarshal(payload, ErrorType.class, payloadMetadata.getMimeType());
+			ErrorType error = (ErrorType)getInfraUnmarshaller().unmarshal(payload, ErrorType.class, payloadMetadata.getMimeType(), payloadMetadata.getSchemaType());
 			if (error == null) // this is strange. So set the unmarshalled value.
 			{
 				errorDetails = new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not unmarshal payload into ErrorType object. See error description for payload details.", payload);
@@ -99,7 +99,7 @@ public class InfraDataModelMapper implements Serializable
 		try
 		{						
 			//Because CreateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-			CreateResponseType createManyResponse = (CreateResponseType)getInfraUnmarshaller().unmarshal(payload, CreateResponseType.class, payloadMetadata.getMimeType());
+			CreateResponseType createManyResponse = (CreateResponseType)getInfraUnmarshaller().unmarshal(payload, CreateResponseType.class, payloadMetadata.getMimeType(), payloadMetadata.getSchemaType());
 			if (createManyResponse == null)// this is strange. So set the unmarshalled value.
 			{
 				statusList.setError(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not unmarshal multi-create payload. See error description for payload details.", payload));
@@ -140,7 +140,7 @@ public class InfraDataModelMapper implements Serializable
 		try
 		{						
 			//Because UpdateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-			UpdateResponseType updateManyResponse = (UpdateResponseType)getInfraUnmarshaller().unmarshal(payload, UpdateResponseType.class, payloadMetadata.getMimeType());
+			UpdateResponseType updateManyResponse = (UpdateResponseType)getInfraUnmarshaller().unmarshal(payload, UpdateResponseType.class, payloadMetadata.getMimeType(), payloadMetadata.getSchemaType());
 			if (updateManyResponse == null)// this is strange. So set the unmarshalled value.
 			{
 				statusList.setError(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not unmarshal multi-update payload. See error description for payload details.", payload));							
@@ -181,7 +181,7 @@ public class InfraDataModelMapper implements Serializable
 		try
 		{						
 			//Because DeleteResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
-			DeleteResponseType deleteManyResponse = (DeleteResponseType)getInfraUnmarshaller().unmarshal(payload, DeleteResponseType.class, payloadMetadata.getMimeType());
+			DeleteResponseType deleteManyResponse = (DeleteResponseType)getInfraUnmarshaller().unmarshal(payload, DeleteResponseType.class, payloadMetadata.getMimeType(), payloadMetadata.getSchemaType());
 			if (deleteManyResponse == null)// this is strange. So set the unmarshalled value.
 			{
 				statusList.setError(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not unmarshal multi-delete payload. See error description for payload details.", payload));							

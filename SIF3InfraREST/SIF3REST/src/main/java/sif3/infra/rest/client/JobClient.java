@@ -147,7 +147,7 @@ public class JobClient extends BaseClient
         WebResource service = getService();
         try
         {
-            String payloadStr = getInfraMarshaller().marshal(job, getRequestPayloadMetadata().getMimeType());
+            String payloadStr = getInfraMarshaller().marshal(job, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
             if (logger.isDebugEnabled())
             {
                 logger.debug("createJob: Payload to send:\n"+payloadStr);
@@ -218,7 +218,7 @@ public class JobClient extends BaseClient
         WebResource service = getService();
         try
         {
-            String payloadStr = getInfraMarshaller().marshal(jobs, getRequestPayloadMetadata().getMimeType());
+            String payloadStr = getInfraMarshaller().marshal(jobs, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
             if (logger.isDebugEnabled())
             {
                 logger.debug("createJob: Payload to send:\n"+payloadStr);
@@ -410,7 +410,7 @@ public class JobClient extends BaseClient
                     deleteRequest.getDeletes().getDelete().add(id);
                 }
             }
-            String payloadStr = getInfraMarshaller().marshal(deleteRequest, getRequestPayloadMetadata().getMimeType());
+            String payloadStr = getInfraMarshaller().marshal(deleteRequest, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
             
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
             hdrProperties = addSchemaHdrProps(hdrProperties, true, false);
@@ -828,7 +828,7 @@ public class JobClient extends BaseClient
             // Create the phase state object
             StateType newPhaseState = new StateType();
             newPhaseState.setType(PhaseStateType.valueOf(newState.name()));
-            String payloadStr = getInfraMarshaller().marshal(newPhaseState, getRequestPayloadMetadata().getMimeType());
+            String payloadStr = getInfraMarshaller().marshal(newPhaseState, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
             if (logger.isDebugEnabled())
             {
                 logger.debug("Phase State: Payload to send:\n"+payloadStr);

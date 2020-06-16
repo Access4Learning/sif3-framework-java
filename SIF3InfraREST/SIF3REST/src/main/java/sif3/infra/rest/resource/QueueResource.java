@@ -218,7 +218,7 @@ public class QueueResource extends InfraResource
 			}
 			try
 			{
-				QueueType inputQueue = (QueueType)getInfraUnmarshaller().unmarshal(payload, QueueType.class, getRequestPayloadMetadata().getMimeType());
+				QueueType inputQueue = (QueueType)getInfraUnmarshaller().unmarshal(payload, QueueType.class, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 				QueueType outputQueue = createQueue(inputQueue);
 				
 				queues.put(outputQueue.getId(), outputQueue);

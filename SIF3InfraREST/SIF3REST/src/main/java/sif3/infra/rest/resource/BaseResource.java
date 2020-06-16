@@ -800,7 +800,7 @@ public abstract class BaseResource
 	    List<String> resourceIDs = new ArrayList<String>();
 	    if (deletePayload != null)
 	    {
-	    	DeleteRequestType deletes = (DeleteRequestType)infraUnmarshaller.unmarshal(deletePayload, DeleteRequestType.class, getRequestPayloadMetadata().getMimeType());
+	    	DeleteRequestType deletes = (DeleteRequestType)infraUnmarshaller.unmarshal(deletePayload, DeleteRequestType.class, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 	    	if ((deletes.getDeletes() != null) && (deletes.getDeletes().getDelete() != null))
 	    	{
 	    		for (DeleteIdType id : deletes.getDeletes().getDelete())
@@ -1875,12 +1875,20 @@ public abstract class BaseResource
 				{
 					// We may deal with an error here. We must ensure that the media type for the response is valid.
 					MediaType finalMediaType = getResponseMediaType(isDMResponse);
+					SchemaInfo finalSchemaInfo = getResponseSchemaInfo(isDMResponse);
 					
 					if (isError)// deal with the error => marshaller is the infrastructure marshaller. 
 					{
 						// If the client wants a media type that is not ok with the infra structure marshaller then the best we can do,
 						// and hope the client can recover, is to use the marshaller's default media type.
-						finalMediaType = (marshaller.isSupported(finalMediaType)) ?  finalMediaType : marshaller.getDefault();
+					    if (!marshaller.isSupported(finalMediaType))
+					    {
+					        finalMediaType = marshaller.getDefault(); // We use the default since it was not supported. 
+					        
+					        // For schema info we should set it to null in this case.
+					        finalSchemaInfo = null;
+					        
+					    }
 					}
         			
 					boolean isAlreadyMarshalled = (data instanceof String); // indicates that data is already marshalled.
@@ -1888,7 +1896,7 @@ public abstract class BaseResource
 					String payload = null;
 					if (!isAlreadyMarshalled) // if not marshalled then do it now
 					{
-					    payload = marshaller.marshal(data, finalMediaType);
+					    payload = marshaller.marshal(data, finalMediaType, ((finalSchemaInfo == null) ? null : finalSchemaInfo.getSchemaTypeAsEnum()));
 					}
 					//System.out.println("==============================\nRespopnse Payload:\n"+payload+"\nSize String= "+payload.length()+"\nSize Bytes = "+payload.getBytes("UTF-8").length+"\n==============================");				
 					

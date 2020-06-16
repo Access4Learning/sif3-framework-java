@@ -140,7 +140,7 @@ public class SubscriptionClient extends BaseClient
 			service = buildURI(service, null);
 			HeaderProperties hdrProperties = getHeaderProperties();		
             hdrProperties = addSchemaHdrProps(hdrProperties, true, false);
-			String payloadStr = getInfraMarshaller().marshal(subscriptionInfo, getRequestPayloadMetadata().getMimeType());
+			String payloadStr = getInfraMarshaller().marshal(subscriptionInfo, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("subscribe: Payload to send:\n"+payloadStr);

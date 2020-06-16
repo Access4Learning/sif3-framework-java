@@ -170,7 +170,7 @@ public class ObjectServiceClient extends BaseClient
 		try
 		{
 			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
-			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestPayloadMetadata().getMimeType());
+			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 
 			if (logger.isDebugEnabled())
 			{
@@ -219,7 +219,7 @@ public class ObjectServiceClient extends BaseClient
 		try
 		{
 			service = buildURI(service, relURI, resourceID, zone, context, urlQueryParams);
-			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestPayloadMetadata().getMimeType());
+			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 
 			if (logger.isDebugEnabled())
 			{
@@ -362,7 +362,7 @@ public class ObjectServiceClient extends BaseClient
 		try
 		{
 			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
-		    String payloadStr = getDataModelMarshaller().marshal(exampleObject, getRequestPayloadMetadata().getMimeType());
+		    String payloadStr = getDataModelMarshaller().marshal(exampleObject, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
 	        hdrProperties = addSchemaHdrProps(hdrProperties, true, true);
@@ -419,7 +419,7 @@ public class ObjectServiceClient extends BaseClient
 		try
 		{
 			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
-		    String payloadStr = getDataModelMarshaller().marshal(payload, getRequestPayloadMetadata().getMimeType());
+		    String payloadStr = getDataModelMarshaller().marshal(payload, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 
 			if (logger.isDebugEnabled())
 			{
@@ -471,7 +471,7 @@ public class ObjectServiceClient extends BaseClient
 		{
 			service = buildURI(service, relURI, null, zone, context, urlQueryParams);
 
-			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestPayloadMetadata().getMimeType());
+			String payloadStr = getDataModelMarshaller().marshal(payload, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("updateMany: Payload to send:\n"+payloadStr);
@@ -539,7 +539,7 @@ public class ObjectServiceClient extends BaseClient
 			    deleteRequest.getDeletes().getDelete().add(id);
 			  }
 			}
-			String payloadStr = getInfraMarshaller().marshal(deleteRequest, getRequestPayloadMetadata().getMimeType());
+			String payloadStr = getInfraMarshaller().marshal(deleteRequest, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 			
 			hdrProperties = addAuthenticationHdrProps(hdrProperties);
             hdrProperties = addSchemaHdrProps(hdrProperties, true, false);

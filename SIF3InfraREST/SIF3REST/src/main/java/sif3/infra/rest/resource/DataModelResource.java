@@ -264,7 +264,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			Object returnObj = provider.createSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestPayloadMetadata().getMimeType()), getAdvisory(), getNotNullSIFZone(), getNotNullSIFContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+			Object returnObj = provider.createSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType()), getAdvisory(), getNotNullSIFZone(), getNotNullSIFContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
 
 			return makeResponse(returnObj, true, Status.CREATED.getStatusCode(), false, ResponseAction.CREATE, responseParam, provider.getMarshaller(), getResponseSchemaInfo(true));
 		}
@@ -613,7 +613,7 @@ public class DataModelResource extends BaseResource
 	
 		try
 		{
-			if (provider.updateSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestPayloadMetadata().getMimeType()), resourceID, getNotNullSIFZone(), getNotNullSIFContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam))
+			if (provider.updateSingle(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType()), resourceID, getNotNullSIFZone(), getNotNullSIFContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam))
 			{
 				return makeResopnseWithNoContent(false, true, ResponseAction.UPDATE, responseParam);
 			}
@@ -944,7 +944,7 @@ public class DataModelResource extends BaseResource
             }
             else
             {
-    	    	List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestPayloadMetadata().getMimeType()), getNotNullSIFZone(), getNotNullSIFContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+    	    	List<OperationStatus> statusList = provider.updateMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType()), getNotNullSIFZone(), getNotNullSIFContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
     	      
     	    	if (statusList != null)
     	    	{
@@ -1036,7 +1036,7 @@ public class DataModelResource extends BaseResource
             }
             else
             {
-    			List<CreateOperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestPayloadMetadata().getMimeType()), getAdvisory(), getNotNullSIFZone(), getNotNullSIFContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
+    			List<CreateOperationStatus> statusList = provider.createMany(provider.getUnmarshaller().unmarshal(payload, provider.getMultiObjectClassInfo().getObjectType(), getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType()), getAdvisory(), getNotNullSIFZone(), getNotNullSIFContext(), getRequestMetadata(getSIF3SessionForRequest(), false), responseParam);
     			
     			if (statusList != null)
     			{
@@ -1090,7 +1090,7 @@ public class DataModelResource extends BaseResource
             }
             else
             {
-                Object returnObj = QueryProvider.class.cast(provider).retrieveByQBE(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestPayloadMetadata().getMimeType()), getNotNullSIFZone(), getNotNullSIFContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true), responseParam);
+                Object returnObj = QueryProvider.class.cast(provider).retrieveByQBE(provider.getUnmarshaller().unmarshal(payload, provider.getSingleObjectClassInfo().getObjectType(), getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType()), getNotNullSIFZone(), getNotNullSIFContext(), pagingInfo, getRequestMetadata(getSIF3SessionForRequest(), true), responseParam);
 			
                 return makePagedResponse(returnObj, true, pagingInfo, false, ResponseAction.QUERY, responseParam, provider.getMarshaller());
 	        }

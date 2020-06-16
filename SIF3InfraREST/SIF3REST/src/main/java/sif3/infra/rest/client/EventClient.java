@@ -154,7 +154,7 @@ public class EventClient extends BaseClient
 			try
 			{
 				// Don't set zone & context here. They are header parameters in the case of events.
-			    String payloadStr = getDataModelMarshaller().marshal(event.getSIFObjectList(), getRequestPayloadMetadata().getMimeType());
+			    String payloadStr = getDataModelMarshaller().marshal(event.getSIFObjectList(), getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 				HeaderProperties headerProps = getEventHeaders(event.getEventAction(),	event.getUpdateType(), event.getFingerprint(), zone, context, serviceType, customHdrFields);
 				
 				Builder builder = setRequestHeaderAndMediaTypes(service, headerProps, false, false, true);
