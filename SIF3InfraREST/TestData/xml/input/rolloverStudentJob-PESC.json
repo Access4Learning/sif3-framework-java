@@ -1,0 +1,63 @@
+{"job":{
+  "name" : "rolloverStudent",
+  "description" : "Rollover Student from year X to year Y",
+  "state" : "NOTSTARTED",
+  "stateDescription" : "Not Started",
+  "timeout" : "P3D",
+  "phases" : {
+    "phase" : [ {
+      "name" : "oldYearEnrolment",
+      "states" : {
+        "state" : [ {
+          "type" : "NOTSTARTED",
+          "created" : "2016-03-09T09:00:00",
+          "lastModified" : "2016-03-09T09:00:01",
+          "description" : "Not yet started"
+        } ]
+      },
+      "required" : true,
+      "rights" : {
+        "right" : [ {
+          "value" : "APPROVED",
+          "type" : "UPDATE"
+        } ]
+      },
+      "statesRights" : {
+        "right" : [ {
+          "value" : "APPROVED",
+          "type" : "QUERY"
+        }, {
+          "value" : "APPROVED",
+          "type" : "CREATE"
+        } ]
+      }
+    }, {
+      "name" : "newYearEnrolment",
+      "states" : {
+        "state" : [ {
+          "type" : "NOTSTARTED"
+        } ]
+      },
+      "required" : true,
+      "rights" : {
+        "right" : [ {
+          "value" : "APPROVED",
+          "type" : "CREATE"
+        } ]
+      },
+      "statesRights" : {
+        "right" : [ {
+          "value" : "APPROVED",
+          "type" : "QUERY"
+        }, {
+          "value" : "APPROVED",
+          "type" : "CREATE"
+        } ]
+      }
+    } ]
+  },
+  "initialization" : {
+    "phaseName" : "initial-parameters",
+    "payload" : "<?xml version=\"1.0\" encoding=\"UTF-16\"?>\n<payload xmlns=\"http://www.sifassociation.org/infrastructure/3.3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"propertiesType\"><property name=\"contextId\">future</property><property name=\"initiator\">user1</property><property name=\"from\">vendora</property><property name=\"to\">3pi</property><property name=\"year\">2018</property>\n\t\t</payload>"
+  }
+}}

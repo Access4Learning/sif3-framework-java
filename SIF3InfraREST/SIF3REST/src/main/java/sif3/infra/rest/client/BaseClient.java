@@ -821,7 +821,7 @@ public abstract class BaseClient
 						try
 						{
 							// We must use the actual data model response type in the unmarshaller.
-							response.setDataObject(getDataModelUnmarshaller().unmarshal(payload, returnObjectClass, getResponsePayloadMetadata().getMimeType()));
+							response.setDataObject(getDataModelUnmarshaller().unmarshal(payload, returnObjectClass, getResponsePayloadMetadata().getMimeType(), getResponsePayloadMetadata().getSchemaType()));
 							if (response.getDataObject() == null)// this is strange. So set the unmarshalled value.
 							{
 								response.setError(new ErrorDetails(response.getStatus(), "Could not unmarshal payload. See error description for payload details.", payload));

@@ -12,11 +12,9 @@
 			<states>
 				<state> 
 					<type>NOTSTARTED</type>
-					<!-- 
 					<created>2016-03-09T09:00:00</created>
-					<lastModified>2016-03-09T09:00:01</lastModified>
+					<lastModified>2016-03-09T09:00:01+08:00</lastModified>
 					<description>Not yet started</description>
-					 -->
 				</state>
 			</states>
 			<required>true</required>

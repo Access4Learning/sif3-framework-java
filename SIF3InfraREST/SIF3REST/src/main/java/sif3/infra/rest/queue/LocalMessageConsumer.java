@@ -413,7 +413,7 @@ public class LocalMessageConsumer implements Runnable
     {
         try
         {
-            return miniConsumer.getUnmarshaller().unmarshal(payload, miniConsumer.getMultiObjectClassInfo().getObjectType(), payloadMetadata.getMimeType());
+            return miniConsumer.getUnmarshaller().unmarshal(payload, miniConsumer.getMultiObjectClassInfo().getObjectType(), payloadMetadata.getMimeType(), payloadMetadata.getSchemaType());
         }
         catch (UnmarshalException ex)
         {
@@ -440,7 +440,7 @@ public class LocalMessageConsumer implements Runnable
         {
             try
             {
-                return infraUnmarshaller.unmarshal(payload, JobCollectionType.class, payloadMetadata.getMimeType());
+                return infraUnmarshaller.unmarshal(payload, JobCollectionType.class, payloadMetadata.getMimeType(), payloadMetadata.getSchemaType());
             }
             catch (UnmarshalException ex)
             {

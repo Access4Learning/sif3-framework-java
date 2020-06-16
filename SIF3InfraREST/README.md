@@ -1,5 +1,5 @@
 # License
-> Copyright 2014 - 2016 Systemic Pty Ltd
+> Copyright 2014 - 2020 Systemic Pty Ltd
 > 
 > Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 > 
@@ -196,6 +196,8 @@ ___
   Some of the new functionality might be added in later versions of the framework.
   
 - **Feb 24, 2020:** Added some functionality relating to schema version negotiation.
+- **Jun 16, 2020:** Added support for PESC-JSON notation. See details in the detailed release notes.
+
 
 **Please refer to the detailed release notes in "release/v0.15.0" to ensure that your project is upgraded properly to the new framework version.**
 

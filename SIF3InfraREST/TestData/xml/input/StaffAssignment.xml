@@ -1,0 +1,36 @@
+<StaffAssignment RefId="D3E34B35-9D75-101A-8C3D-00AA001A1652" xmlns="http://www.sifassociation.org/datamodel/au/3.4">
+	<SchoolInfoRefId>A8C3D3E3-4B35-9D75-101D-00AA001A1652</SchoolInfoRefId>
+	<SchoolYear>2008</SchoolYear>
+	<StaffPersonalRefId>D3E34B35-9D75-101A-8C3D-00AA001A1651
+	</StaffPersonalRefId>
+	<Description>VCE English Teacher</Description>
+	<PrimaryAssignment>Y</PrimaryAssignment>
+	<JobStartDate>2000-09-05</JobStartDate>
+	<JobEndDate>2001-06-25</JobEndDate>
+	<JobFTE>1.00</JobFTE>
+	<JobFunction>Teacher</JobFunction>
+	<StaffSubjectList>
+		<StaffSubject>
+			<!--PreferenceNumber>1</PreferenceNumber-->
+			<SubjectLocalId>English</SubjectLocalId>
+		</StaffSubject>
+		<StaffSubject>
+			<PreferenceNumber>2</PreferenceNumber>
+			<SubjectLocalId>Mathematics</SubjectLocalId>
+		</StaffSubject>
+		<StaffSubject>
+			<PreferenceNumber>3</PreferenceNumber>
+			<SubjectLocalId>Science</SubjectLocalId>
+		</StaffSubject>
+	</StaffSubjectList>
+	<YearLevels>
+		<YearLevel>
+			<Code>11</Code>
+		</YearLevel>
+		<YearLevel>
+			<Code>12</Code>
+		</YearLevel>
+	</YearLevels>
+	<CasualReliefTeacher>N</CasualReliefTeacher>
+	<AvailableForTimetable>Y</AvailableForTimetable>
+</StaffAssignment>

@@ -18,11 +18,15 @@
 
 package systemic.sif3.demo.rest.consumer;
 
+import javax.ws.rs.core.MediaType;
+
 import sif.dd.au30.model.StudentPersonalCollectionType;
+import sif3.common.CommonConstants.SchemaType;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.model.SIFEvent;
+import sif3.common.model.SchemaInfo;
 import systemic.sif3.demo.rest.ModelObjectConstants;
 
 /**
@@ -67,7 +71,47 @@ public class StudentPersonalConsumer extends AUDataModelEventConsumer<StudentPer
 //    	return MediaType.APPLICATION_JSON_TYPE;
 //    }
     
+    /*
+     * Example how to override the response schema type from the consumer's property file.
+     */
+//    @Override
+//    public SchemaInfo getResponseDMSchemaInfo()
+//    {
+//        // same as for request
+//        return getRequestDMSchemaInfo();
+//    }
+
+    /*
+     * Example how to override the request media type from the consumer's property file.
+     */
+//    @Override
+//    public MediaType getRequestMediaType()
+//    {
+//        return MediaType.APPLICATION_JSON_TYPE;
+//    }
     
+    /*
+     * Example how to override the request schema type from the consumer's property file.
+     */
+//    @Override
+//    public SchemaInfo getRequestDMSchemaInfo()
+//    {
+//        if (getConsumerEnvironment().isSchemaNegotiationEnabled())
+//        {
+//            //Make a proper copy to ensure that the default is not overwritten for other consumers and infrastructure
+//            SchemaInfo schemaInfo = new SchemaInfo(getConsumerEnvironment().getDataModelSchemaInfo().getModelType(),
+//                                                   getConsumerEnvironment().getDataModelSchemaInfo().getModelDomain(),
+//                                                   getConsumerEnvironment().getDataModelSchemaInfo().getModelVersion());
+//            // lets do PESC JSON      
+//            schemaInfo.setSchemaType(SchemaType.pesc.name());
+//            return schemaInfo;
+//        }
+//        else
+//        {
+//            return null;
+//        }
+//    }
+
     /*
      * Example how to override the compression property from the consumer's property file.
      */

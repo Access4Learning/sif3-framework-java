@@ -28,6 +28,7 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sif3.common.CommonConstants.SchemaType;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
@@ -63,7 +64,13 @@ public class CSVUnmarshaller implements UnmarshalFactory
 		return payload.toString();
 	}
 
-	/* (non-Javadoc)
+    @Override
+    public Object unmarshalFromJSON(String payload, Class<?> clazz, SchemaType jsonSchema) throws UnmarshalException, UnsupportedMediaTypeExcpetion
+    {
+        return payload.toString();
+    }
+
+    /* (non-Javadoc)
 	 * @see sif3.infra.common.conversion.UnmarshalFactory#unmarschal(java.lang.String, java.lang.Class, javax.ws.rs.core.MediaType)
 	 */
 	@Override
@@ -78,7 +85,22 @@ public class CSVUnmarshaller implements UnmarshalFactory
 		throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot unmarshal the given input from this media type.");
 	}
 	
-	/*
+    /* (non-Javadoc)
+     * @see sif3.common.conversion.UnmarshalFactory#unmarshal(java.lang.String, java.lang.Class, javax.ws.rs.core.MediaType, sif3.common.CommonConstants.SchemaType)
+     */
+    @Override
+    public Object unmarshal(String payload, Class<?> clazz, MediaType mediaType, SchemaType jsonSchema) throws UnmarshalException, UnsupportedMediaTypeExcpetion
+    {
+        if (isSupported(mediaType))
+        {
+            return payload;
+        }
+
+        // If we get here then we deal with an unknown media type
+        throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot unmarshal the given input from this media type.");
+    }
+
+    /*
 	 * (non-Javadoc)
 	 * @see sif3.common.conversion.MediaTypeOperations#getDefault()
 	 */
@@ -118,4 +140,9 @@ public class CSVUnmarshaller implements UnmarshalFactory
     {
 	    return supportedMediaTypes;
     }
+
+    /* (non-Javadoc)
+     * @see sif3.common.conversion.UnmarshalFactory#unmarshalFromJSON(java.lang.String, java.lang.Class, sif3.common.CommonConstants.SchemaType)
+     */
+
 }

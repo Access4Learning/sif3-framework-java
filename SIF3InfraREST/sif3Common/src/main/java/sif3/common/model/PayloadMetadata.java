@@ -21,6 +21,8 @@ import java.io.Serializable;
 
 import javax.ws.rs.core.MediaType;
 
+import sif3.common.CommonConstants.SchemaType;
+
 /**
  * This class simply holds some information about a payload (request or response). The metadata consists of the mime type
  * as well as optional data model schema information as of SIF 3.3.
@@ -69,6 +71,27 @@ public class PayloadMetadata implements Serializable
     public void setSchemaInfo(SchemaInfo schemaInfo)
     {
         this.schemaInfo = schemaInfo;
+    }
+    
+    /**
+     * Convenience method to get the SchemaType (xml, goessner, pesc) from the SchemaInfo. If schemaInfo is null then
+     * the returned schemaType will be null as well. If it is not null then this method will return what is in the schemaType
+     * property of the SchemaInfo object. Since this SchemaInfo class holds the schemaType as a string it is possible that the 
+     * value cannot be mapped to one of the listed enums. In this case null will be returned. Also if the schemaType property 
+     * of the SchemaInfo class is null then null will be returned as well.
+     * 
+     * @return See desc.
+     */
+    public SchemaType getSchemaType()
+    {
+        if (getSchemaInfo() == null)
+        {
+            return null;
+        }
+        else
+        {
+            return getSchemaInfo().getSchemaTypeAsEnum();
+        }
     }
 
     @Override

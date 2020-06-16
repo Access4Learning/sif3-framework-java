@@ -88,7 +88,7 @@ public class EnvironmentClient extends BaseClient
 		try
 		{
 			service = buildURI(service, null);
-			String payloadStr = getDataModelMarshaller().marshal(template, getRequestPayloadMetadata().getMimeType());
+			String payloadStr = getDataModelMarshaller().marshal(template, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 
 			if (logger.isDebugEnabled())
 			{

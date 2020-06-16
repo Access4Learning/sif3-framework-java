@@ -20,6 +20,7 @@ package sif3.common.model;
 import java.io.Serializable;
 
 import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.CommonConstants.SchemaType;
 
 /**
  * This POJO simply holds information about the payload schema as defined in the SIF Infra 3.3 - Versions.pdf. It provides
@@ -129,6 +130,33 @@ public class SchemaInfo implements Serializable
     public String getSchemaType()
     {
         return schemaType;
+    }
+    
+    /**
+     * This method attempts to return the SchemaType as an as listed in the CommonConstants.SchemaType enumeration. Since this class
+     * holds the schemaType as a string it is possible that the value cannot be mapped to one of the listed enums. In this case null
+     * will be returned. Also if the schemaType property of this class is null then null will be returned as well.
+     * 
+     * The intend of this class is to provide higher layers of the framework a convenience method for more typed functionality 
+     * rather than string comparisons in cases where it deals with XML or JSON.
+     * 
+     * @return See desc.
+     */
+    public SchemaType getSchemaTypeAsEnum()
+    {
+        if (getSchemaType() == null)
+        {
+            return null;
+        }
+        
+        try
+        {
+            return SchemaType.valueOf(getSchemaType().toLowerCase());
+        }
+        catch (Exception ex) // mapping was not possible
+        {
+            return null;
+        }
     }
 
     public void setSchemaType(String schemaType)

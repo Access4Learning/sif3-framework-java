@@ -1,0 +1,28 @@
+<StudentPersonal RefId="CC114B35-9D75-101A-8C3D-A2345D1A1652" xmlns="http://www.sifassociation.org/datamodel/au/3.4">
+	<AlertMessages>
+		<AlertMessage Type="Legal">Mother is legal guardian</AlertMessage>
+		<AlertMessage>Second element</AlertMessage>
+		<AlertMessage/>
+	</AlertMessages>
+	<LocalId>S1234567</LocalId>
+	<PersonInfo>
+		<Name Type="LGL">
+			<FamilyName>Smith</FamilyName>
+			<GivenName>JŒRG</GivenName>
+			<FullName>JŒRG Smith</FullName>
+		</Name>
+		<Demographics>
+			<Sex>1</Sex>
+			<BirthDate>1990-09-26</BirthDate>
+			<StateOfBirth>VIC</StateOfBirth>
+			<CountriesOfCitizenship>
+				<CountryOfCitizenship>8104</CountryOfCitizenship>
+				<CountryOfCitizenship>1101</CountryOfCitizenship>
+			</CountriesOfCitizenship>
+		</Demographics>
+	</PersonInfo>
+	<ProjectedGraduationYear>2014</ProjectedGraduationYear>
+	<OnTimeGraduationYear>2012</OnTimeGraduationYear>	
+	<AcceptableUsePolicy>Y</AcceptableUsePolicy>
+	<EconomicDisadvantage>N</EconomicDisadvantage>
+</StudentPersonal>

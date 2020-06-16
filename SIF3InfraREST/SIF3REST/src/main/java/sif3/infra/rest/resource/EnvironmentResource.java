@@ -125,7 +125,7 @@ public class EnvironmentResource extends InfraResource
 		  
 			if (StringUtils.notEmpty(payload))
 			{
-				inputEnv = (EnvironmentType) getInfraUnmarshaller().unmarshal(payload, EnvironmentType.class, getRequestPayloadMetadata().getMimeType());
+				inputEnv = (EnvironmentType) getInfraUnmarshaller().unmarshal(payload, EnvironmentType.class, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 			}
 			else // check if we have the environment information as URL query parameters
 			{

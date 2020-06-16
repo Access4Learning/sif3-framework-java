@@ -21,6 +21,7 @@ package sif3.infra.common.test.utils;
 import javax.xml.bind.JAXBElement;
 
 import sif.dd.au30.model.StudentPersonalType;
+import sif3.common.CommonConstants.SchemaType;
 import sif3.common.exception.MarshalException;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.utils.JAXBUtils;
@@ -160,12 +161,12 @@ public class TestJAXBUtils
 
   private EnvironmentType getEnvironmentFromJSONFile() throws UnmarshalException
   {
-    return (EnvironmentType) JAXBUtils.unmarshalFromJSONIntoObject(getEnvironmentJSONFile(), EnvironmentType.class);
+    return (EnvironmentType) JAXBUtils.unmarshalFromJSONIntoObject(getEnvironmentJSONFile(), EnvironmentType.class, SchemaType.goessner);
   }
 
     private void writeEnvironmentToJSONFile(EnvironmentType environment) throws MarshalException
     {
-        writeEnvironmentToFile(JAXBUtils.marshalToJSON(objFactory.createEnvironment(environment)), OUTPUT_ENV_FILE_NAME_JSON);
+        writeEnvironmentToFile(JAXBUtils.marshalToJSON(objFactory.createEnvironment(environment), SchemaType.goessner), OUTPUT_ENV_FILE_NAME_JSON);
     }
   
 	private void testLists() throws MarshalException
@@ -206,7 +207,7 @@ public class TestJAXBUtils
 	    EnvironmentType env = getEnvironment();
 	    JAXBElement<EnvironmentType> envJAXB = objFactory.createEnvironment(env);
 	    
-	    return JAXBUtils.marshalToJSON(envJAXB);
+	    return JAXBUtils.marshalToJSON(envJAXB, SchemaType.goessner);
 	 }
 	
 	private void testFromXML() throws UnmarshalException, MarshalException

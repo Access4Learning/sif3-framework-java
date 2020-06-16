@@ -19,20 +19,20 @@ package sif3.test.infra.rest.consumer;
 import java.util.ArrayList;
 import java.util.List;
 
+import au.com.systemic.framework.utils.FileReaderWriter;
+import au.com.systemic.framework.utils.Timer;
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
 import sif.dd.au30.model.NameOfRecordType;
 import sif.dd.au30.model.ObjectFactory;
 import sif.dd.au30.model.StudentPersonalCollectionType;
 import sif.dd.au30.model.StudentPersonalType;
-import sif3.common.CommonConstants;
 import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.QueryCriteria;
-import sif3.common.model.SIFContext;
-import sif3.common.model.SIFZone;
+import sif3.common.model.SchemaInfo;
 import sif3.common.model.ServicePathPredicate;
 import sif3.common.model.ZoneContextInfo;
 import sif3.common.utils.UUIDGenerator;
@@ -43,8 +43,6 @@ import sif3.common.ws.Response;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.rest.consumer.ConsumerLoader;
 import systemic.sif3.demo.rest.consumer.StudentPersonalConsumer;
-import au.com.systemic.framework.utils.FileReaderWriter;
-import au.com.systemic.framework.utils.Timer;
 
 /**
  * @author Joerg Huber
@@ -63,6 +61,7 @@ public class TestStudentPersonalConsumer
 //    private static final String CONSUMER_ID = "HITSStudentConsumer";
 //	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
 //	private static final String CONSUMER_ID = "QueueTestConsumer";
+//  private static final String CONSUMER_ID = "BrokeredWebSISConsumer";
 
 	
 	private static final RequestType REQUEST_TYPE = RequestType.IMMEDIATE;
@@ -87,7 +86,8 @@ public class TestStudentPersonalConsumer
 					{
 						if (response.getHasEntity())
 						{
-							System.out.println("Data Object Response "+i+": "+consumer.getMarshaller().marshal(response.getDataObject(), consumer.getResponseMediaType()));
+						    SchemaInfo schemaInfo = consumer.getResponseDMSchemaInfo();
+							System.out.println("Data Object Response "+i+": "+consumer.getMarshaller().marshal(response.getDataObject(), consumer.getResponseMediaType(), ((schemaInfo == null) ? null : schemaInfo.getSchemaTypeAsEnum())));
 						}
 						else // in delayed we may have delayed receipt
 						{

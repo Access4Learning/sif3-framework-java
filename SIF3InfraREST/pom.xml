@@ -41,7 +41,7 @@
 		<sifInfraVersion>3.3</sifInfraVersion>
 		
 		<!-- The Data Model version used for Tests and Demo code. -->
-		<sifTestDMVersion>3.4.5</sifTestDMVersion>
+		<sifTestDMVersion>3.4.6</sifTestDMVersion>
 
 		<!-- Final Jar name of all sub-modules follows a certain naming convention that includes the SIF infrastructure version. -->
 		<jarName.prefix>sif${sifInfraVersion}</jarName.prefix>
