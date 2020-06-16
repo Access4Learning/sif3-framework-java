@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import au.com.systemic.framework.utils.DateUtils;
+import sif3.common.CommonConstants.SchemaType;
 import sif3.common.model.EventMetadata;
 import sif3.common.model.PagingInfo;
 import sif3.common.model.SIFContext;
@@ -186,7 +187,7 @@ public abstract class BaseFunctionalConsumer extends AbstractFunctionalServiceCo
             
             if (writePayload)
             {
-                out.write(getMarshaller().marshal(sifEvent.getSIFObjectList(), MediaType.APPLICATION_XML_TYPE));
+                out.write(getMarshaller().marshal(sifEvent.getSIFObjectList(), MediaType.APPLICATION_XML_TYPE, SchemaType.xml));
             }
             recordNum++;
             recordCounters.put(filename, recordNum);

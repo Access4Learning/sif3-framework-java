@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import au.com.systemic.framework.utils.DateUtils;
 import sif.dd.au30.conversion.DataModelMarshalFactory;
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
+import sif3.common.CommonConstants.SchemaType;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.model.EventMetadata;
@@ -195,7 +196,7 @@ public abstract class AUDataModelEventConsumer<L> extends AbstractEventConsumer<
             out.write(RECORD_MARKER);
             if (writePayload)
             {
-            	out.write(getMarshaller().marshal(sifEvent.getSIFObjectList(), MediaType.APPLICATION_XML_TYPE));
+            	out.write(getMarshaller().marshal(sifEvent.getSIFObjectList(), MediaType.APPLICATION_XML_TYPE, SchemaType.xml));
             }
             recordNum++;
             recordCounters.put(filename, recordNum);
