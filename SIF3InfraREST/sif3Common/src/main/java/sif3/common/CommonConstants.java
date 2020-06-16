@@ -142,6 +142,12 @@ public class CommonConstants
     public static enum SchemaType {goessner, pesc, xml};
 
 
+    /*
+     * Naming conventions used in various data models.
+     */
+    public static enum PropertyStrategy {UpperCamelCase, LowerCamelCase, MixedUpperLower};
+
+    
     /*------------------------------------------------------------------------------------*/
 	/* URL Query Parameter names in relation to security (special case for SIF Express) --*/
 	/*------------------------------------------------------------------------------------*/
