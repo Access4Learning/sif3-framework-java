@@ -5,10 +5,8 @@
 		<AlertMessage/>
 	</AlertMessages>
 	<MedicalAlertMessages>
-		<MedicalAlertMessage Severity="Severe">Student has Peanut
-			Allergy</MedicalAlertMessage>
-		<MedicalAlertMessage Severity="Moderate">Student has Diabetes
-		</MedicalAlertMessage>
+		<MedicalAlertMessage Severity="Severe">Student has Peanut Allergy</MedicalAlertMessage>
+		<MedicalAlertMessage Severity="Moderate">Student has Diabetes</MedicalAlertMessage>
 	</MedicalAlertMessages>
 	<LocalId>S1234567</LocalId>
 	<StateProvinceId>ABC1234</StateProvinceId>
