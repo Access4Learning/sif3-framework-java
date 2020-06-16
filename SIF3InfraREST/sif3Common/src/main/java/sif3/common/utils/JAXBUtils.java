@@ -46,6 +46,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import au.com.systemic.framework.utils.Timer;
+import sif3.common.CommonConstants.SchemaType;
+import sif3.common.conversion.jaxb.pesc.PESCMappingConvention;
+import sif3.common.conversion.jaxb.pesc.PESCSerializer;
 import sif3.common.exception.MarshalException;
 import sif3.common.exception.UnmarshalException;
 
@@ -59,9 +62,15 @@ public class JAXBUtils
 
 	/* Make JAXBContext a singleton. Otherwise creating the JAXBContext every time is very slow! */
 	private static HashMap<String, JAXBContext> jaxbCtx = new HashMap<String, JAXBContext>();
+	
+	// This is a time costly init, so we only want to do it once.
+	private static PESCSerializer serializer = null;
+	private static Object lock = new Object();
 
-	private static String JSON_VALUE_KEY = "#text";
-	private static String JSON_ATTRIBUTE_KEY = "@";
+	private static String JSON_VALUE_KEY_GOESSNER = "#text";
+	private static String JSON_VALUE_KEY_PESC_UPPER = "Value";
+	private static String JSON_VALUE_KEY_PESC_LOWER = "value";
+	private static String JSON_ATTRIBUTE_KEY_GOESSNER = "@";
 
     /**
 	 * This method unmarshals the given XML String into an object of the class indicated with the 'clazz' parameter.
@@ -148,7 +157,7 @@ public class JAXBUtils
 	 * 
 	 * @throws UnmarshalException Failed to unmarshal the string. See message of exception for more details.
 	 */
-	public static <T> T unmarshalFromJSONIntoObject(String jsonStr, Class<T> clazz) throws UnmarshalException
+	public static <T> T unmarshalFromJSONIntoObject(String jsonStr, Class<T> clazz, SchemaType jsonSchema) throws UnmarshalException
 	{
 		Timer timer = null;
 		if (logger.isDebugEnabled())
@@ -156,7 +165,7 @@ public class JAXBUtils
 			timer = new Timer();
 			timer.start();
 		}
-		JAXBElement<T> elem = unmarshalFromJSON(jsonStr, clazz);
+		JAXBElement<T> elem = unmarshalFromJSON(jsonStr, clazz, jsonSchema);
 		if (logger.isDebugEnabled())
 		{
 			timer.finish();
@@ -175,8 +184,13 @@ public class JAXBUtils
 	 * 
 	 * @throws MarshalException Failure to marshal the given object to a JSON string.
 	 */
-	public static String marshalToJSON(JAXBElement<?> object) throws MarshalException
+	public static String marshalToJSON(JAXBElement<?> object, SchemaType jsonSchema) throws MarshalException
 	{
+        if ((jsonSchema == null) || (jsonSchema == SchemaType.xml)) // default to goessner
+        {
+            jsonSchema = SchemaType.goessner;
+        }
+        
 		Timer timer = null;
 		if (logger.isDebugEnabled())
 		{
@@ -184,31 +198,26 @@ public class JAXBUtils
 			timer.start();
 		}
 		StringWriter sw = new StringWriter();
-
-		try
+		
+		if (jsonSchema == SchemaType.pesc)
 		{
-	        Class<?> clazz = object.getValue().getClass();
-			Marshaller marshaller = getContext(clazz).createMarshaller();
-
-			synchronized (marshaller)
-			{
-				marshaller.marshal(object, getJSONStreamWriter(clazz, sw));
-			}
+		    marshalToPESCJSON(object, sw);
 		}
-		catch (JAXBException ex)
+		else // assume goessner
 		{
-			throw new MarshalException("Failed to marshal to JSON: " + ex.getMessage(), ex);
+		    marshalToGoessnerJSON(object, sw);
 		}
+		
+        if (logger.isDebugEnabled())
+        {
+            timer.finish();
+            logger.debug("Time taken to marshal " + object.getValue().getClass().getSimpleName()+ " to JSON: " + timer.timeTaken() + "ms");
+        }
 
-		if (logger.isDebugEnabled())
-		{
-			timer.finish();
-			logger.debug("Time taken to marshal " + object.getValue().getClass().getSimpleName()+ " to JSON: " + timer.timeTaken() + "ms");
-		}
-
-		return sw.toString();
+        return sw.toString();
 	}
     
+
     /**
      * This is a convenience method so that JAXB Contexts can be initialised at any time. This proves to be
      * particular useful to avoid lengthy startup times for some classes when they hit the marshaller and
@@ -263,7 +272,7 @@ public class JAXBUtils
 		return elem;
 	}
 
-	private static <T> JAXBElement<T> unmarshalFromJSON(String jsonStr, Class<T> clazz) throws UnmarshalException
+	private static <T> JAXBElement<T> unmarshalFromJSON(String jsonStr, Class<T> clazz, SchemaType jsonSchema) throws UnmarshalException
 	{
 		JAXBElement<T> elem = null;
 		try
@@ -271,7 +280,7 @@ public class JAXBUtils
 			Unmarshaller unmarshaller = getContext(clazz).createUnmarshaller();
 			synchronized (unmarshaller)
 			{
-				elem = unmarshaller.unmarshal(getJSONStreamReader(jsonStr, clazz), clazz);
+				elem = unmarshaller.unmarshal(getJSONStreamReader(jsonStr, clazz, jsonSchema), clazz);
 			}
 		}
 		catch (Exception ex)
@@ -282,22 +291,96 @@ public class JAXBUtils
 		return elem;
 	}
 
+    private static void marshalToPESCJSON(JAXBElement<?> jaxbObject, StringWriter sw) throws MarshalException
+    {
+        initPESCSerializer();
+        try
+        {
+            synchronized (serializer)
+            {
+                serializer.marshalToJSON(jaxbObject, sw);
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new MarshalException("Failed to marshal to PESC JSON: " + ex.getMessage(), ex);
+        }
+    }
+
+    private static void marshalToGoessnerJSON(JAXBElement<?> jaxbObject, StringWriter sw) throws MarshalException
+    {
+        try
+        {
+            Class<?> clazz = jaxbObject.getValue().getClass();
+            Marshaller marshaller = getContext(clazz).createMarshaller();
+
+            synchronized (marshaller)
+            {
+                marshaller.marshal(jaxbObject, getJSONStreamWriter(clazz, sw));
+            }
+        }
+        catch (JAXBException ex)
+        {
+            throw new MarshalException("Failed to marshal to Goessner JSON: " + ex.getMessage(), ex);
+        }
+    }
+
+    /* This is only used to do the Goessner JSON */
 	private static XMLStreamWriter getJSONStreamWriter(Class<?> clazz, Writer writer)
 	{
 		Configuration jsonConfiguration = getJSONConfiguration(clazz);
+        jsonConfiguration.setAttributeKey(JSON_ATTRIBUTE_KEY_GOESSNER);
 		MappedNamespaceConvention jsonConvention = new MappedNamespaceConvention(jsonConfiguration);
 		MappedXMLStreamWriter result = new MappedXMLStreamWriter(jsonConvention, writer);
-		result.setValueKey(JSON_VALUE_KEY);
+		result.setValueKey(JSON_VALUE_KEY_GOESSNER);
 		return result;
 	}
 
-	private static XMLStreamReader getJSONStreamReader(String jsonStr, Class<?> clazz) throws JSONException, XMLStreamException
+	private static XMLStreamReader getJSONStreamReader(String jsonStr, Class<?> clazz, SchemaType jsonSchema) throws JSONException, XMLStreamException
 	{
+        if ((jsonSchema == null) || (jsonSchema == SchemaType.xml)) // default to goessner
+	    {
+	        jsonSchema = SchemaType.goessner;
+	    }
+	    
 		Configuration jsonConfiguration = getJSONConfiguration(clazz);
-		MappedNamespaceConvention jsonConvention = new MappedNamespaceConvention(jsonConfiguration);
+		MappedNamespaceConvention jsonConvention = null;
+		String valueKey = JSON_VALUE_KEY_GOESSNER;
+		if (jsonSchema == SchemaType.pesc)
+		{
+		    jsonConfiguration.setSupressAtAttributes(true);  // PESC doesn't use '@' for attribute indicator.
+		    jsonConvention = new PESCMappingConvention(jsonConfiguration);
+		    valueKey = JSON_VALUE_KEY_PESC_LOWER; //default
+		    
+		    // Because we do not know what naming schema is used we have to inspect the jsonStr until we find an alpha char and then
+		    // check for is case.
+		    if (jsonStr != null)
+		    {
+		        for (int i = 0; i<jsonStr.length(); i++)
+		        {
+		            if (Character.isUpperCase(jsonStr.charAt(i)))
+		            {
+		                valueKey = JSON_VALUE_KEY_PESC_UPPER;
+		                break;
+		            }
+		            else if (Character.isLowerCase(jsonStr.charAt(i)))
+		            {
+		                valueKey = JSON_VALUE_KEY_PESC_LOWER;
+                        break;
+		            }
+		        }
+		    }
+		}
+		else
+		{
+		    jsonConfiguration.setAttributeKey(JSON_ATTRIBUTE_KEY_GOESSNER); // Goessner does use '@' for attribute indicator.
+		    jsonConvention = new MappedNamespaceConvention(jsonConfiguration);
+		    valueKey = JSON_VALUE_KEY_GOESSNER;
+		}
+		        
 		JSONObject jsonObject = new JSONObject(jsonStr);
 		MappedXMLStreamReader result = new MappedXMLStreamReader(jsonObject, jsonConvention);
-		result.setValueKey(JSON_VALUE_KEY);
+		result.setValueKey(valueKey);
 		return result;
 	}
 
@@ -312,7 +395,7 @@ public class JAXBUtils
 		}
 		namespaceMapping.put("http://www.w3.org/2001/XMLSchema-instance", "xsi");
 		result.setXmlToJsonNamespaces(namespaceMapping);
-		result.setAttributeKey(JSON_ATTRIBUTE_KEY);
+//		result.setAttributeKey(JSON_ATTRIBUTE_KEY_GOESSNER);
 		result.setTypeConverter(new SimpleConverter());
 		return result;
 	}
@@ -327,10 +410,22 @@ public class JAXBUtils
 		}
 		return result;
 	}
+	
+	private synchronized static void initPESCSerializer()
+	{
+	    if (serializer == null)
+	    {
+            synchronized (lock)
+            {
+                logger.debug("Start Initialise PESC Serialiser");
+                serializer = new PESCSerializer();
+                logger.debug("Finished Initialise PESC Serialiser");
+            }
+	    }
+	}
 
     private synchronized static JAXBContext getContext(Class<?> clazz) throws JAXBException
     {
-//    	JAXBContext ctx = jaxbCtx.get(clazz.getSimpleName());
         String className = clazz.getName();
         JAXBContext ctx = jaxbCtx.get(className);
 		if (ctx == null)
