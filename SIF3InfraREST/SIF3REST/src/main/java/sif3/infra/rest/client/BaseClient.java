@@ -106,9 +106,6 @@ public abstract class BaseClient
 	private ClientConfig config = null;
 	private Client client = null;
 	private WebResource service = null;
-//	private MediaType mediaType = MediaType.APPLICATION_XML_TYPE;
-//	private MediaType requestMediaType = MediaType.APPLICATION_XML_TYPE;
-//	private MediaType responseMediaType = MediaType.APPLICATION_XML_TYPE;
 	
 	private PayloadMetadata requestPayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE);
     private PayloadMetadata responsePayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE);
@@ -165,8 +162,6 @@ public abstract class BaseClient
 		setDataModelUnmarshaller(dmUnmarshaller);
 		setRequestPayloadMetadata(requestPayloadMetadata, dmMarshaller);
 		setResponsePayloadMetadata(responsePayloadMetadata, dmUnmarshaller);
-//		setRequestMediaType(requestMediaType, dmMarshaller);
-//		setResponseMediaType(responseMediaType, dmUnmarshaller);
 		setUseCompression(useCompression);
 		configureClienService(baseURI, secureConnection, getUseCompression());
 		
@@ -253,24 +248,6 @@ public abstract class BaseClient
 		return service;
 	}
 
-//	public MediaType getRequestMediaType()
-//	{
-//		return requestMediaType;
-//	}
-
-//	/*
-//	 * Sets the media type of the request. If the media type is null it will use the marshaller default media type. If the marhaller is null
-//	 * as well then the requestMediaType will be set to null.
-//	 */
-//	public void setRequestMediaType(MediaType mediaType, MarshalFactory marshaller)
-//	{
-//		if ((mediaType == null) && (marshaller != null))
-//		{
-//		    mediaType = marshaller.getDefault();
-//		}
-//		this.requestMediaType = mediaType;
-//	}
-	
     public PayloadMetadata getRequestPayloadMetadata()
     {
         return requestPayloadMetadata;
@@ -293,24 +270,6 @@ public abstract class BaseClient
         
         this.requestPayloadMetadata = requestPayloadMetadata;
     }
-	
-//	public MediaType getResponseMediaType()
-//	{
-//		return responseMediaType;
-//	}
-//
-//	/*
-//	 * Sets the media type of the response. If the media type is null it will use the unmarshaller default media type. If the unmarshaller is null
-//	 * as well then the responseMediaType will be set to null.
-//	 */
-//	public void setResponseMediaType(MediaType mediaType, UnmarshalFactory unmarshaller)
-//	{
-//		if ((mediaType == null) && (unmarshaller != null))
-//		{
-//		    mediaType = unmarshaller.getDefault();
-//		}
-//		this.responseMediaType = mediaType;
-//	}
 	
     public PayloadMetadata getResponsePayloadMetadata()
     {
@@ -472,11 +431,11 @@ public abstract class BaseClient
 	                                                boolean includeFingerprint, 
 	                                                boolean hasPayload)
 	{
-        String charEncoding = getClientEnvMgr().getEnvironmentInfo().getCharsetEncoding();
+//        String charEncoding = getClientEnvMgr().getEnvironmentInfo().getCharsetEncoding();
         
         // Check if we have a request & response media type. If not use the framework's value otherwise use the value given.
-        MediaType finalRequestMediaType = requestMediaType == null ? addEncoding(getRequestPayloadMetadata().getMimeType(), charEncoding) : requestMediaType;
-        MediaType finalResponseMediaType = responseMediaType == null ? addEncoding(getResponsePayloadMetadata().getMimeType(), charEncoding) : responseMediaType;
+        MediaType finalRequestMediaType = requestMediaType == null ? getRequestPayloadMetadata().getMimeTypeAndEncoding() : requestMediaType;
+        MediaType finalResponseMediaType = responseMediaType == null ? getResponsePayloadMetadata().getMimeTypeAndEncoding() : responseMediaType;
 
         if (logger.isDebugEnabled())
         {
@@ -651,7 +610,6 @@ public abstract class BaseClient
      */
     protected HeaderProperties addSchemaHdrProps(HeaderProperties hdrProperties, boolean hasRequestPaylaod, boolean isDMResponse)
     {
-//        return addSchemaHdrProps(hdrProperties, hasRequestPaylaod, isDMRequest, getClientEnvMgr().getEnvironmentInfo().getDataModelSchemaInfo(), isDMResponse, getClientEnvMgr().getEnvironmentInfo().getDataModelSchemaInfo());
         return addSchemaHdrProps(hdrProperties, hasRequestPaylaod, getRequestPayloadMetadata().getSchemaInfo(), isDMResponse, getResponsePayloadMetadata().getSchemaInfo());
     }
 
@@ -672,7 +630,6 @@ public abstract class BaseClient
      */
     protected HeaderProperties addSchemaHdrProps(HeaderProperties hdrProperties, 
                                                  boolean hasRequestPaylaod, 
-//                                                 boolean isDMRequest,
                                                  SchemaInfo requestSchema,
                                                  boolean isDMResponse,
                                                  SchemaInfo responseSchema)
@@ -700,21 +657,11 @@ public abstract class BaseClient
                 {
                     hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_CONTENT_PROFILE, requestSchema.getFullSchemaValue());                    
                 }
-//                // If it is a DM Request we add the DM schema info otherwise we add the infra DM schema info
-//                if (isDMRequest)
-//                {
-//                    SchemaInfo finalRequestSchema = requestSchema == null ? getClientEnvMgr().getEnvironmentInfo().getDataModelSchemaInfo() : requestSchema;
-//                    hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_CONTENT_PROFILE, finalRequestSchema.getFullSchemaValue());
-//                }
-//                else
-//                {
-//                    hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_CONTENT_PROFILE, getClientEnvMgr().getEnvironmentInfo().getInfraModelSchemaInfo().getFullSchemaValue());
-//                }
             }
             
             // The response may always have some errors which is part of the infra DM, so we always must have this in the accepted response
             // profile!
-            String acceptProfile = getClientEnvMgr().getEnvironmentInfo().getInfraModelSchemaInfo().getFullSchemaValue();
+            String acceptProfile = getClientEnvMgr().getEnvironmentInfo().getInfraPayloadMetadata().getSchemaInfo().getFullSchemaValue();
             
             // If the response has a DM payload we also need to add this to the accepted schema profile.
             if (isDMResponse)
@@ -873,7 +820,6 @@ public abstract class BaseClient
                 {
                     logger.debug("Payload received for Create Multiple REST Call:\n"+payload);
                 }
-//                MultiOperationStatusList<CreateOperationStatus> statusList = getInfraMapper().toStatusListFromSIFCreateString(payload, getResponseMediaType());
                 MultiOperationStatusList<CreateOperationStatus> statusList = getInfraMapper().toStatusListFromSIFCreateString(payload, response.getPayloadMetadata());
                 response.setError(statusList.getError());
                 response.setOperationStatuses(statusList.getOperationStatuses());
@@ -902,11 +848,9 @@ public abstract class BaseClient
             if (response.getHasEntity())
             {
                 String payload = clientResponse.getEntity(String.class);
-//                MultiOperationStatusList<OperationStatus> statusList = getInfraMapper().toStatusListFromSIFDeleteString(payload, getResponseMediaType());
                 MultiOperationStatusList<OperationStatus> statusList = getInfraMapper().toStatusListFromSIFDeleteString(payload, response.getPayloadMetadata());
                 response.setError(statusList.getError());
                 response.setOperationStatuses(statusList.getOperationStatuses());
-                
             }           
         }
         else// We are dealing with an error case.
@@ -941,11 +885,8 @@ public abstract class BaseClient
         SIFZone actualZone = (sif3Session != null) ? sif3Session.getZone(zone) : zone;
 	    SIFContext actualContext = (sif3Session != null) ? sif3Session.getContext(context) : context;
 	    
-//		response.setStatus(clientResponse.getClientResponseStatus().getStatusCode());
         response.setStatus(clientResponse.getStatusInfo().getStatusCode());
-//		response.setStatusMessage(clientResponse.getClientResponseStatus().getReasonPhrase());
         response.setStatusMessage(clientResponse.getStatusInfo().getReasonPhrase());
-//		response.setMediaType(clientResponse.getType());
 		response.setContentLength(clientResponse.getLength());
 		response.setZone(actualZone);
 		response.setContext(actualContext);
@@ -994,7 +935,6 @@ public abstract class BaseClient
 				logger.debug("Returned Error Payload:\n"+errorStr);
 			}
 			
-//            response.setError(getInfraMapper().toErrorFromSIFErrorString(errorStr, getInfraResponseMediaType(getResponseMediaType()), new ErrorDetails(clientResponse.getStatus(), clientResponse.getStatusInfo().getReasonPhrase())));
 			PayloadMetadata payloadMetadata = null;
 			if ((response.getPayloadMetadata() != null) &&(response.getPayloadMetadata().getMimeType() != null)) // use this one as it is what the response returned
 			{
@@ -1104,18 +1044,6 @@ public abstract class BaseClient
 		return getInfraUnmarshaller().isSupported(indicatedMediaType) ? indicatedMediaType : getInfraUnmarshaller().getDefault();
 	}
 	
-	private MediaType addEncoding(MediaType mediaType, String charEncoding)
-	{
-	    if (StringUtils.notEmpty(charEncoding))
-	    {
-	       return MediaType.valueOf(mediaType.toString()+"; charset="+charEncoding);
-	    }
-	    else // no charEncoding desired.
-	    {
-	        return mediaType;
-	    }
-	}
-
 	/*
 	 * By default this method tries to create an AuthenticationInfo object based on the information that is in the current SIF3 Session
 	 * of the client. It will take the userName, sessionToken etc from there. If there is no session available (i.e. first time the client 

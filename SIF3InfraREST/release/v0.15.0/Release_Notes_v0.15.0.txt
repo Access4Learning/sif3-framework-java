@@ -1,5 +1,5 @@
 ==============================================================
-Release Notes for v0.15.0 of SIF3 Framework (June 16, 2020)
+Release Notes for v0.15.0 of SIF3 Framework (July 27, 2020)
 ==============================================================
 
 Bug Fixes
@@ -20,10 +20,13 @@ New Functionality
   model library that is produced with the SIF3DMGenerator project then **you must rebuild** the data model library with the
   SIF3DMGenerator project to ensure compatibility. Please refer to the **Summary - Usage with SIF3 Framework**" section in the 
   README.md file of the SIF3DMGenerator project (https://github.com/Access4Learning/SIF3DMGenerator-Java/tree/master/SIF3DMGenerator).
+- Further enabled split of infra datamodel and local datamodel in terms of mime type. It is now possible to use XML for one model
+  and JSON for the other.
 
 Changed Functionality
 ---------------------
 - Updated framework to use SIF 3.3 Infrastructure namespace and data model.
+- Updated Quartz from version 2.3.0 to 2.3.2 to address security vulnerability.
 
 Removed Artifacts/Functionality
 -------------------------------
@@ -124,6 +127,35 @@ latest version of the SIF3DMGenerator otherwise you will get incompatibility wit
 Please refer to the **Summary - Usage with SIF3 Framework**" section in the README.md file of the SIF3DMGenerator project 
 (https://github.com/Access4Learning/SIF3DMGenerator-Java/tree/master/SIF3DMGenerator) to ensure you re-build with the correct version.
 
+Changes to BaseConsumer & CoreProvider
+--------------------------------------
+The BaseConsumer & CoreProvider had a getRequestMediaType() and getResponseMediaType() method that could be overridden to use 
+media types other than XML or JSON. These two methods have been replaced with a set of 4 methods called:
+
+  - getDataModelRequestPayloadMetadata()
+  - getDataModelResponsePayloadMetadata()
+  - getInfraRequestPayloadMetadata()
+  - getInfraResponsePayloadMetadata()
+  
+This was necessary to enable schema negotiation functionality as well as enable a clearer split between infrastructure media type
+and data model media type. If you haven't a consumer or provider that did override the original methods then you will not be required
+to do anything and your code will still compile and build. However if you have overridden the original methods for any adapter
+then your code will show an error now, as these methods no longer exist. Your error can be fixed by simply implement the new methods.
+
+For example if your getRequestMediaType() override looked like this:
+
+    public MediaType getRequestMediaType() {
+        return getMarshaller().getDefault();
+    }
+    
+You need to change the two getDataModelRequestPayloadMetadata() and getInfraRequestPayloadMetadata() to:
+
+    public PayloadMetadata getDataModelRequestPayloadMetadata() {
+	    return new PayloadMetadata(getMarshaller().getDefault());
+    }
+
+A similar approach is used for the 'ResponseMediaType' methods. An example can also be found in the 
+systemic.sif3.demo.rest.consumer.CSVStudentConsumer class.
 
 Data Model Upgrade
 ------------------

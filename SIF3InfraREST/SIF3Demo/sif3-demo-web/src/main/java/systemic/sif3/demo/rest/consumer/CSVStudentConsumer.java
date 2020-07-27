@@ -20,8 +20,7 @@ package systemic.sif3.demo.rest.consumer;
 
 import java.util.Date;
 
-import javax.ws.rs.core.MediaType;
-
+import au.com.systemic.framework.utils.DateUtils;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.conversion.UnmarshalFactory;
@@ -29,6 +28,7 @@ import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.model.EventMetadata;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
@@ -41,7 +41,6 @@ import sif3.common.ws.model.MultiOperationStatusList;
 import sif3.infra.rest.consumer.AbstractEventConsumer;
 import systemic.sif3.demo.rest.conversion.CSVMarshaller;
 import systemic.sif3.demo.rest.conversion.CSVUnmarshaller;
-import au.com.systemic.framework.utils.DateUtils;
 
 /**
  * @author Joerg Huber
@@ -138,20 +137,31 @@ public class CSVStudentConsumer extends AbstractEventConsumer<String>
     //---------------------------//
     //-- Override Media Types! --//
     //---------------------------//
+	@Override
+    public PayloadMetadata getDataModelRequestPayloadMetadata()
+    {
+	    // Override the Framework default mime type with the marshaller's mime type which should indicate CSV type (text/plain).
+	    // The implementation below assumes no schema negotiation is turned on. If it is turned on then appropriate values
+	    // need to be set as well.
+	    return new PayloadMetadata(getMarshaller().getDefault(), "UTF-8");
+	    
+	    // Example if schema negotiation is turned on.
+//	    return new PayloadMetadata(getMarshaller().getDefault(), "UTF-8", new SchemaInfo("data", "us", "1.0"));
+	    
+    }
+    
     @Override
-    public MediaType getRequestMediaType()
-	{
-		return getMarshaller().getDefault(); // Marshaling when sending -> request
-//    	return MediaType.APPLICATION_JSON_TYPE;
-	}
-	
-    @Override
-	public MediaType getResponseMediaType()
-	{
-		return getUnmarshaller().getDefault(); // Unmarshaling when receiving -> response
-//    	return MediaType.APPLICATION_JSON_TYPE;
-	}
+    public PayloadMetadata getDataModelResponsePayloadMetadata()
+    {
+        //Override the Framework default mime type with the unmarshaller's mime type which should indicate CSV type (text/plain) 
+        // The implementation below assumes no schema negotiation is turned on. If it is turned on then appropriate values
+        // need to be set as well.
+        return new PayloadMetadata(getUnmarshaller().getDefault(), "UTF-8");
 
+        // Example if schema negotiation is turned on.
+//      return new PayloadMetadata(getUnmarshaller().getDefault(), "UTF-8", new SchemaInfo("data", "us", "1.0"));
+    }
+    
 	/* (non-Javadoc)
      * @see sif3.common.interfaces.EventConsumer#createEventObject(java.lang.Object, sif3.common.header.HeaderValues.EventAction, sif3.common.header.HeaderValues.UpdateType)
      */

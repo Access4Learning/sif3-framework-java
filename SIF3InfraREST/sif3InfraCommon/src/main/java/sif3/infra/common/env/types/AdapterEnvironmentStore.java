@@ -39,6 +39,7 @@ import sif3.common.CommonConstants.QueueStrategy;
 import sif3.common.CommonConstants.SchemaType;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues.UpdateType;
+import sif3.common.model.SchemaInfo;
 import sif3.common.utils.FileAndFolderUtils;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
 
@@ -174,7 +175,6 @@ public class AdapterEnvironmentStore implements Serializable
 					environment = (isConsumer) ? new ConsumerEnvironment(serviceName) : new ProviderEnvironment(serviceName);
 					environment.setAdapterType(isConsumer ? AdapterType.CONSUMER : AdapterType.PROVIDER);
 					environment.setCheckACL(adapterProperties.getPropertyAsBool("adapter.checkACL", true));
-//					environment.setEventsSupported(adapterProperties.getPropertyAsBool("env.events.supported", false));
 					environment.setRemoveEnvOnShutdown(adapterProperties.getPropertyAsBool("adapter.deleteEnvironment.onShutdown", false));
 					environment.setGeneratorID(adapterProperties.getPropertyAsString("adapter.generator.id", null));
 					environment.setEnvCreateConflictIsError(adapterProperties.getPropertyAsBool("env.create.conflictIsError", true));
@@ -204,36 +204,46 @@ public class AdapterEnvironmentStore implements Serializable
 						}
 					}
 					
-			  		// Media Type
-			  		environment.setMediaType(convertMediaType(adapterProperties.getPropertyAsString("env.mediaType", null)));
-			  		
-			  		// Charset Encoding to be used with media type
-                    environment.setCharsetEncoding(adapterProperties.getPropertyAsString("env.mediaType.charset", null));
+					// Media Type
+					environment.getDataModelPayloadMetadata().setMimeType(convertMediaType(adapterProperties.getPropertyAsString("env.mediaType","dm", null)));
+                    environment.getInfraPayloadMetadata().setMimeType(convertMediaType(adapterProperties.getPropertyAsString("env.mediaType","infra", null)));
+
+                    // Charset Encoding
+                    environment.getDataModelPayloadMetadata().setCharsetEncoding(adapterProperties.getPropertyAsString("env.mediaType.charset","dm", null));
+                    environment.getInfraPayloadMetadata().setCharsetEncoding(adapterProperties.getPropertyAsString("env.mediaType.charset","infra", null));
+
+                    // Load Schema Negotiation Properties if enabled
+                    environment.setSchemaNegotiationEnabled(adapterProperties.getPropertyAsBool("env.schema.enabled", false));
+                    if (environment.isSchemaNegotiationEnabled()) // there are a few mandatory properties required
+                    {
+                        // DM setup
+                        environment.getDataModelPayloadMetadata().setSchemaInfo(new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, null, null));
+                        environment.getDataModelPayloadMetadata().getSchemaInfo().setModelDomain(getValueAndLogError("env.schema.dm.domain", "au, nz, uk, us"));
+                        environment.getDataModelPayloadMetadata().getSchemaInfo().setModelVersion(getValueAndLogError("env.schema.dm.version","3.4.1, 3.3"));
+                        if (environment.getDataModelPayloadMetadata().getMimeType().equals(MediaType.APPLICATION_JSON_TYPE)) // we need the schema type
+                        {
+                            environment.getDataModelPayloadMetadata().getSchemaInfo().setSchemaType(adapterProperties.getPropertyAsString("env.schema.dm.json.type",SchemaType.goessner.name()));
+                        }
+               
+                        // Infra setup
+                        environment.getInfraPayloadMetadata().setSchemaInfo(new SchemaInfo(SchemaInfo.MODEL_TYPE_INFRA, SchemaInfo.MODEL_DOMAIN_INFRA, null));
+                        environment.getInfraPayloadMetadata().getSchemaInfo().setModelVersion(getValueAndLogError("env.schema.infra.version","3.3"));
+                        if (environment.getInfraPayloadMetadata().getMimeType().equals(MediaType.APPLICATION_JSON_TYPE)) // we need the schema type
+                        {
+                            environment.getInfraPayloadMetadata().getSchemaInfo().setSchemaType(adapterProperties.getPropertyAsString("env.schema.infra.json.type",SchemaType.goessner.name()));                            
+                        }
+                        
+                        errors = errors ||  
+                                 environment.getDataModelPayloadMetadata().getSchemaInfo().getModelDomain() == null ||
+                                 environment.getDataModelPayloadMetadata().getSchemaInfo().getModelVersion() == null ||
+                                 environment.getInfraPayloadMetadata().getSchemaInfo().getModelVersion() == null;                        
+                    }
 
 			  		if (!loadExistingEnvInfo(adapterProperties))
 			  		{
 			  			errors = true;
 			  		}
 			  		
-			  		// Load Schema Negotiation Properties
-                    environment.setSchemaNegotiationEnabled(adapterProperties.getPropertyAsBool("env.schema.enabled", false));
-                    if (environment.isSchemaNegotiationEnabled()) // there are a few mandatory properties required
-                    {
-                        environment.getDataModelSchemaInfo().setModelDomain(getValueAndLogError("env.schema.dm.domain", "au, nz, uk, us"));
-                        environment.getDataModelSchemaInfo().setModelVersion(getValueAndLogError("env.schema.dm.version","3.4.1, 3.3"));
-                        environment.getInfraModelSchemaInfo().setModelVersion(getValueAndLogError("env.schema.infra.version","3.3"));
-                        
-                        errors = errors ||  
-                                 environment.getDataModelSchemaInfo().getModelDomain() == null ||
-                                 environment.getDataModelSchemaInfo().getModelVersion() == null ||
-                                 environment.getInfraModelSchemaInfo().getModelVersion() == null;
-                        
-                        if (environment.getMediaType().equals(MediaType.APPLICATION_JSON_TYPE)) // we need the schema type
-                        {
-                            environment.getDataModelSchemaInfo().setSchemaType(adapterProperties.getPropertyAsString("env.schema.dm.json.type",SchemaType.goessner.name()));
-                            environment.getInfraModelSchemaInfo().setSchemaType(adapterProperties.getPropertyAsString("env.schema.infra.json.type",SchemaType.goessner.name()));                            
-                        }
-                    }
 			  		
 			  		if (!errors) // Read specific info
 					{
@@ -610,7 +620,6 @@ public class AdapterEnvironmentStore implements Serializable
 
         // Allow access_token or URL
         envInfo.setAllowAuthOnURL(adapterProperties.getPropertyAsBool("adapter.authTokenOnURL.allowed", false));
-        
         
         // Functional Service Properties
         envInfo.setJobEnabled(adapterProperties.getPropertyAsBool("job.enabled", false));

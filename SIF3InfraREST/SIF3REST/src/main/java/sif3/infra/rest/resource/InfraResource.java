@@ -85,7 +85,7 @@ public abstract class InfraResource extends BaseResource
     
     public SchemaInfo getFWInfraSchemaInfo()
     {
-        return getEnvironmentManager().getEnvironmentInfo().getInfraModelSchemaInfo();
+        return getEnvironmentManager().getEnvironmentInfo().getInfraPayloadMetadata().getSchemaInfo();
     }
 
 //	protected boolean isTestMode()

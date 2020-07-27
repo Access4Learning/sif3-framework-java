@@ -175,7 +175,8 @@ public abstract class AbstractNamedQueryConsumer extends BaseConsumer implements
         Timer timer = new Timer();
         timer.start();
 
-        returnPayloadMetadata.setMimeType((returnPayloadMetadata.getMimeType() == null) ? getResponseMediaType() : returnPayloadMetadata.getMimeType());
+        // If mime type is not set in the returnPayload we use the framework datamodel mime type.
+        returnPayloadMetadata.setMimeType((returnPayloadMetadata.getMimeType() == null) ? getDataModelResponsePayloadMetadata().getMimeType() : returnPayloadMetadata.getMimeType());
         QueryTemplateInfo queryInfo = new QueryTemplateInfo(getNamedQueryName(), namedQueryParameters);
         URLQueryParameter urlQueryParameters = customParameters != null ? customParameters.getQueryParams() : null;
         List<Response> responses = new ArrayList<Response>();
@@ -301,7 +302,6 @@ public abstract class AbstractNamedQueryConsumer extends BaseConsumer implements
         // Clean up the specific consumer implementation
         shutdown();
     }
-    
     
     /*----------------------------*/
     /*-- Other required methods --*/
