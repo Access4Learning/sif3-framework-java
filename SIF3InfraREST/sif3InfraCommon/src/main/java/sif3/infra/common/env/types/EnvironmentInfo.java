@@ -28,7 +28,6 @@ import sif3.common.CommonConstants.AdapterType;
 import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.model.EnvironmentKey;
 import sif3.common.model.PayloadMetadata;
-import sif3.common.model.SchemaInfo;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 
 /**
@@ -48,30 +47,29 @@ public class EnvironmentInfo implements Serializable
 	 */
 	public enum EnvironmentType {DIRECT, BROKERED};
 
-    private URI       baseURI                = null; // URI to broker
+    private URI       baseURI               = null; // URI to broker
     private boolean   secureConnection      = false;
-   	private MediaType mediaType             = MediaType.APPLICATION_XML_TYPE;
-   	private String charsetEncoding          = null;
+    
+    PayloadMetadata dmPayloadMetadata       = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE);
+    PayloadMetadata infraPayloadMetadata    = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE);
+
     private AdapterType adapterType         = null;
     private boolean checkACL                = true;
     private EnvironmentType environmentType = null;
-    private String authMethod = AuthenticationType.Basic.name();
-    private boolean removeEnvOnShutdown = false;
-    private String adapterName = null; ; // consumerName 
-    private EnvironmentKey environmentKey = new EnvironmentKey();
+    private String authMethod               = AuthenticationType.Basic.name();
+    private boolean removeEnvOnShutdown     = false;
+    private String adapterName              = null; ; // consumerName 
+    private EnvironmentKey environmentKey   = new EnvironmentKey();
     private String    password              = null;
-    private String generatorID  = null; // Value to be used for the generatorId HTTP Header field. 
-    private boolean compressionEnabled = false;
-    private boolean noCertificateCheck = false; // by default we want certificates checked.
+    private String generatorID              = null; // Value to be used for the generatorId HTTP Header field. 
+    private boolean compressionEnabled      = false;
+    private boolean noCertificateCheck      = false; // by default we want certificates checked.
     
     // Properties for using an existing environment.
-    private boolean useExistingEnv = false;
-	private String existingSessionToken = null;
-    private URI existingEnvURI = null;
+    private boolean useExistingEnv          = false;
+	private String existingSessionToken     = null;
+    private URI existingEnvURI              = null;
     
-    // Schema negotiation properties
-    private SchemaInfo dataModelSchemaInfo = new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, null, null);
-    private SchemaInfo infraModelSchemaInfo = new SchemaInfo(SchemaInfo.MODEL_TYPE_INFRA, SchemaInfo.MODEL_DOMAIN_INFRA, null);
     private boolean isSchemaNegotiationEnabled = false;
     
     // Other framework specific properties
@@ -214,39 +212,6 @@ public class EnvironmentInfo implements Serializable
     	this.authMethod = authMethod;
     }
 
-//	// authMethod: Valid values are what is listed in AuthenticationUtils.AuthenticationMethod (case sensitive!!!)
-//	public void setAuthMethod(String authMethod)
-//    {
-//		try
-//		{
-//			this.authMethod = AuthenticationMethod.valueOf(authMethod);
-//		}
-//		catch (Exception ex)
-//		{
-//			this.authMethod = AuthenticationMethod.Basic;
-//		}
-//    }
-
-	public MediaType getMediaType()
-	{
-		return mediaType;
-	}
-
-	public void setMediaType(MediaType mediaType)
-	{
-		this.mediaType = mediaType;
-	}
-	
-    public String getCharsetEncoding()
-    {
-        return charsetEncoding;
-    }
-
-    public void setCharsetEncoding(String charsetEncoding)
-    {
-        this.charsetEncoding = charsetEncoding;
-    }
-
 	public boolean getRemoveEnvOnShutdown()
 	{
 		return removeEnvOnShutdown;
@@ -341,26 +306,6 @@ public class EnvironmentInfo implements Serializable
     	this.envCreateConflictIsError = envCreateConflictIsError;
     }
 
-    public SchemaInfo getDataModelSchemaInfo()
-    {
-        return dataModelSchemaInfo;
-    }
-
-    public void setDataModelSchemaInfo(SchemaInfo dataModelSchemaInfo)
-    {
-        this.dataModelSchemaInfo = dataModelSchemaInfo;
-    }
-
-    public SchemaInfo getInfraModelSchemaInfo()
-    {
-        return infraModelSchemaInfo;
-    }
-
-    public void setInfraModelSchemaInfo(SchemaInfo infraModelSchemaInfo)
-    {
-        this.infraModelSchemaInfo = infraModelSchemaInfo;
-    }
-
     public boolean isSchemaNegotiationEnabled()
     {
         return isSchemaNegotiationEnabled;
@@ -371,31 +316,41 @@ public class EnvironmentInfo implements Serializable
         this.isSchemaNegotiationEnabled = isSchemaNegotiationEnabled;
     }
     
-    public PayloadMetadata getInfraPayloadMetadata()
-    {
-        return new PayloadMetadata(getMediaType(), getInfraModelSchemaInfo());
-    }
-    
     public PayloadMetadata getDataModelPayloadMetadata()
     {
-        return new PayloadMetadata(getMediaType(), getDataModelSchemaInfo());
+        return dmPayloadMetadata;
     }
 
-	@Override
+    public void setDataModelPayloadMetadata(PayloadMetadata dmPayloadMetadata)
+    {
+        this.dmPayloadMetadata = dmPayloadMetadata;
+    }
+
+    public PayloadMetadata getInfraPayloadMetadata()
+    {
+        return infraPayloadMetadata;
+    }
+
+    public void setInfraPayloadMetadata(PayloadMetadata infraPayloadMetadata)
+    {
+        this.infraPayloadMetadata = infraPayloadMetadata;
+    }
+    
+    @Override
     public String toString()
     {
         return "EnvironmentInfo [baseURI=" + baseURI + ", secureConnection=" + secureConnection
-                + ", mediaType=" + mediaType + ", charsetEncoding=" + charsetEncoding
-                + ", adapterType=" + adapterType + ", checkACL=" + checkACL + ", environmentType="
-                + environmentType + ", authMethod=" + authMethod + ", removeEnvOnShutdown="
-                + removeEnvOnShutdown + ", adapterName=" + adapterName + ", environmentKey="
-                + environmentKey + ", password=" + password + ", generatorID=" + generatorID
-                + ", compressionEnabled=" + compressionEnabled + ", noCertificateCheck="
-                + noCertificateCheck + ", useExistingEnv=" + useExistingEnv
-                + ", existingSessionToken=" + existingSessionToken + ", existingEnvURI="
-                + existingEnvURI + ", dataModelSchemaInfo=" + dataModelSchemaInfo
-                + ", infraModelSchemaInfo=" + infraModelSchemaInfo + ", isSchemaNegotiationEnabled="
+                + ", dmPayloadMetadata=" + dmPayloadMetadata + ", infraPayloadMetadata="
+                + infraPayloadMetadata + ", adapterType=" + adapterType + ", checkACL=" + checkACL
+                + ", environmentType=" + environmentType + ", authMethod=" + authMethod
+                + ", removeEnvOnShutdown=" + removeEnvOnShutdown + ", adapterName=" + adapterName
+                + ", environmentKey=" + environmentKey + ", password=" + password + ", generatorID="
+                + generatorID + ", compressionEnabled=" + compressionEnabled
+                + ", noCertificateCheck=" + noCertificateCheck + ", useExistingEnv="
+                + useExistingEnv + ", existingSessionToken=" + existingSessionToken
+                + ", existingEnvURI=" + existingEnvURI + ", isSchemaNegotiationEnabled="
                 + isSchemaNegotiationEnabled + ", envCreateConflictIsError="
                 + envCreateConflictIsError + ", connectorBaseURIs=" + connectorBaseURIs + "]";
     }
+
 }
