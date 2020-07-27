@@ -28,9 +28,11 @@ import sif.dd.au30.model.StudentPersonalCollectionType;
 import sif.dd.au30.model.StudentPersonalType;
 import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
+import sif3.common.CommonConstants.SchemaType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.SchemaInfo;
 import sif3.common.model.ServicePathPredicate;
@@ -86,8 +88,10 @@ public class TestStudentPersonalConsumer
 					{
 						if (response.getHasEntity())
 						{
-						    SchemaInfo schemaInfo = consumer.getResponseDMSchemaInfo();
-							System.out.println("Data Object Response "+i+": "+consumer.getMarshaller().marshal(response.getDataObject(), consumer.getResponseMediaType(), ((schemaInfo == null) ? null : schemaInfo.getSchemaTypeAsEnum())));
+						    PayloadMetadata responsePayloadMetadata = consumer.getDataModelResponsePayloadMetadata();
+						    SchemaInfo schemaInfo = responsePayloadMetadata.getSchemaInfo();
+                            SchemaType schemaType = (schemaInfo == null) ? null : schemaInfo.getSchemaTypeAsEnum();
+							System.out.println("Data Object Response "+i+": "+consumer.getMarshaller().marshal(response.getDataObject(), responsePayloadMetadata.getMimeType(), schemaType));
 						}
 						else // in delayed we may have delayed receipt
 						{
