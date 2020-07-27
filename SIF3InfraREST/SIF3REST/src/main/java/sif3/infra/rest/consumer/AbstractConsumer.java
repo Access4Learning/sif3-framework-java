@@ -40,12 +40,10 @@ import sif3.common.model.ACL.AccessRight;
 import sif3.common.model.ACL.AccessType;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
-import sif3.common.model.PayloadMetadata;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.QueryPredicate;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
-import sif3.common.model.SchemaInfo;
 import sif3.common.model.ServiceInfo;
 import sif3.common.model.URLQueryParameter;
 import sif3.common.model.ZoneContextInfo;
@@ -146,76 +144,6 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 		super();
 	}
 
-	/*------------------------------------------------------------------------------------------------------------------------
-	 * Start of 'Dynamic' HTTP Header Field override section
-	 * 
-	 * The following set of methods are used for a more configurable way how some HTTP header in relation to data model
-	 * are set. The BaseConsumer class caters for some more generic HTTP header overrides. The ones listed here are
-	 * are specific for Object Services only. They do not need to be available for Functional or any other service types.
-	 * By default the following HTTP Header fields are retrieved from the consumer's property file and put in corresponding
-	 * HTTP Header Fields:
-	 * 
-	 * env.schema.dm.domain,env.schema.dm.version,env.schema.dm.json.type ==> HTTP Header: content-profile, accept-profile
-	 * 
-	 * There are situations where and application may need a more 'dynamic' behaviour where the above values are determined
-	 * at runtime, based on other circumstances and therefore these properties must be retrieved from an other source than the
-	 * consumer's property file. In such a case the methods below can be overwritten to make them dynamic and controlled by
-	 * the implementation rather than driven by the consumer's property file. If any of the methods below is overwritten then
-	 * the value of the over riding method is set in the corresponding HTTP Header field if the return value of the method 
-	 * is not null or an empty string.
-	 *------------------------------------------------------------------------------------------------------------------------*/
-
-	/**
-	 * If the property env.schema.enabled in the consumer's property file is set to true then this method returns the SchemaInfo 
-	 * made up of the following properties in the consumer's property file:<br/>
-	 * - env.schema.dm.domain <br/>
-	 * - env.schema.dm.version <br/>
-	 * - env.schema.dm.json.type <br/><br/>
-	 *  
-	 * If the env.schema.enabled in the consumer's property file is set to false then null is returned as it is assumed that schema
-	 * negotiation is not enabled for the given consumer.<br/><br/>
-	 * 
-	 * The value returned, if any, is assumed to be the schema negotiation value to be set in the content-profile HTTP Header of
-	 * requests that have a payload as part of the request.
-	 * 
-	 * @return See desc.
-	 */
-	public SchemaInfo getRequestDMSchemaInfo()
-	{
-	    if (getConsumerEnvironment().isSchemaNegotiationEnabled())
-	    {
-	        return getConsumerEnvironment().getDataModelSchemaInfo();
-	    }
-	    else
-	    {
-	        return null;
-	    }
-	}
-	
-    /**
-     * If the property env.schema.enabled in the consumer's property file is set to true then this method returns the SchemaInfo 
-     * made up of the following properties in the consumer's property file:<br/>
-     * - env.schema.dm.domain <br/>
-     * - env.schema.dm.version <br/>
-     * - env.schema.dm.json.type <br/><br/>
-     *  
-     * If the env.schema.enabled in the consumer's property file is set to false then null is returned as it is assumed that schema
-     * negotiation is not enabled for the given consumer.<br/><br/>
-     * 
-     * The value returned, if any, is assumed to be the schema negotiation value to be set in the accept-profile HTTP Header of
-     * requests that have a payload in the response.
-     * 
-     * @return See desc.
-     */
-    public SchemaInfo getResponseDMSchemaInfo()
-    {
-        return getRequestDMSchemaInfo();
-    }
-
-	/*------------------------------------------------------------------------------------------------------------------------
-	 * End of 'Dynamic' HTTP Header Field override section
-	 *-----------------------------------------------------------------------------------------------------------------------*/ 
-
     /*-----------------------*/
 	/*-- Create Operations --*/
 	/*-----------------------*/
@@ -282,13 +210,7 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 	{
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
         nullMethodCheck(getSingleObjectClassInfo(), "getSingleObjectClassInfo()");
-/*
-        if (!initOK)
-	    {
-	      logger.error("Consumer not initialised properly. See previous error log entries.");
-	      return null;
-	    }
-*/
+
 	    Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -341,13 +263,7 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 	public List<BulkOperationResponse<OperationStatus>> deleteMany(List<String> resourceIDs, List<ZoneContextInfo> zoneCtxList, RequestType requestType, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
-/*
-	    if (!initOK)
-	    {
-	      logger.error("Consumer not initialised properly. See previous error log entries.");
-	      return null;
-	    }
-*/
+
 	    Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -400,13 +316,7 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 	public List<Response> deleteSingle(String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
-/*        
-	    if (!initOK)
-	    {
-	      logger.error("Consumer not initialised properly. See previous error log entries.");
-	      return null;
-	    }
-*/
+
 	    Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -460,13 +370,7 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 	{
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
         nullMethodCheck(getSingleObjectClassInfo(), "getSingleObjectClassInfo()");
-/*        
-		if (!initOK)
-		{
-			logger.error("Consumer not initialised properly. See previous error log entries.");
-			return null;
-		}
-*/
+
 		Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -515,13 +419,7 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 	public List<Response> retrieve(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention, CustomParameters customParameters) throws PersistenceException, ServiceInvokationException
 	{
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
-/*        
-		if (!initOK)
-		{
-			logger.error("Consumer not initialised properly. See previous error log entries.");
-			return null;
-		}
-*/
+
 		Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -581,13 +479,7 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 	public List<Response> retrieveByServicePath(QueryCriteria queryCriteria, PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, RequestType requestType, QueryIntention queryIntention, CustomParameters customParameters) throws PersistenceException, ServiceInvokationException
 	{
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
-/*        
-		if (!initOK)
-		{
-			logger.error("Consumer not initialised properly. See previous error log entries.");
-			return null;
-		}
-*/
+
 		Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -659,14 +551,8 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 								        CustomParameters customParameters) throws PersistenceException, ServiceInvokationException
 	{
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
-/*        
-		if (!initOK)
-		{
-			logger.error("Consumer not initialised properly. See previous error log entries.");
-			return null;
-		}
-*/
-		Timer timer = new Timer();
+
+        Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
 		List<Response> responses = new ArrayList<Response>();
@@ -736,13 +622,7 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 	public List<BulkOperationResponse<OperationStatus>> updateMany(Object data, List<ZoneContextInfo> zoneCtxList, RequestType requestType, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
-/*
-        if (!initOK)
-        {
-          logger.error("Consumer not initialised properly. See previous error log entries.");
-          return null;
-        }
-*/
+
     	Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -795,13 +675,7 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 	public List<Response> updateSingle(Object data, String resourceID, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws IllegalArgumentException, PersistenceException, ServiceInvokationException
 	{
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
-/*        
-		if (!initOK)
-		{
-			logger.error("Consumer not initialised properly. See previous error log entries.");
-			return null;
-		}
-*/
+
     	Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -869,13 +743,7 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
     public List<Response> getServiceInfo(PagingInfo pagingInfo, List<ZoneContextInfo> zoneCtxList, CustomParameters customParameters) throws PersistenceException, ServiceInvokationException
     {
         nullMethodCheck(getMultiObjectClassInfo(), "getMultiObjectClassInfo()");
-/*
-        if (!initOK)
-		{
-			logger.error("Consumer not initialised properly. See previous error log entries.");
-			return null;
-		}
-*/
+
 		Timer timer = new Timer();
 		timer.start();
 		URLQueryParameter urlQueryParameter = customParameters != null ? customParameters.getQueryParams() : null;
@@ -973,55 +841,6 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 		processDelayedError(error, receipt);
 	}
 	
-	/*------------------------------------------------------------------------------------*/
-    /*-- Methods for Local Queues and Threads for Delayed Response and Event management --*/
-    /*------------------------------------------------------------------------------------*/
-
-	/**
-     * Only creates the local consumer queue if it doesn't already exist. The queue (new or existing) is then returned.
-     * 
-     * @return See desc.
-     */
-//    public final LocalConsumerQueue createLocalConsumerQueue()
-//    {
-//        if (getLocalConsumerQueue() == null)
-//        {
-//            // Create local queue with the capacity indicated with the consumer config
-//            logger.debug("Create Local Queue for "+getConsumerName());
-//
-//            // Use the local queue as a trigger of threads rather than actual queueing of messages. Use 1 as the minimum
-//            setLocalConsumerQueue(new LocalConsumerQueue(1, getClass().getSimpleName() + "LocalQueue", getClass().getSimpleName()));
-//            startListenerThreads();
-//        }
-//        return getLocalConsumerQueue();
-//    }
-
-    /*
-     * Will initialise the threads and add them to the local consumer queue.
-     */
-//    private void startListenerThreads()
-//    {
-//        // Start up all consumers for this subscriber.
-//        int numThreads = getNumOfConsumerThreads();
-//        logger.debug("Start "+numThreads+" "+getConsumerName()+" threads.");
-//        logger.debug("Total number of threads before starting Local Queue for "+getConsumerName()+" "+Thread.activeCount());
-//        service = Executors.newFixedThreadPool(numThreads);
-//        for (int i = 0; i < numThreads; i++)
-//        {
-//            String consumerID = getConsumerName()+" "+(i+1);
-//            logger.debug("Start Consumer "+consumerID);
-//            LocalMessageConsumer consumer = new LocalMessageConsumer(getLocalConsumerQueue(), consumerID, this);
-//            service.execute(consumer);
-//        }
-//        logger.debug(numThreads+" "+getConsumerName()+" initilaised and started.");
-//        logger.debug("Total number of threads after starting Local Queue for "+getConsumerName()+" "+Thread.activeCount());
-//    }
-
-//    private final int getNumOfConsumerThreads()
-//    {
-//        return getServiceProperties().getPropertyAsInt("consumer.local.workerThread", getClass().getSimpleName(), 1);
-//    }
-
     /*----------------------------*/
     /*-- Other required methods --*/
     /*----------------------------*/
@@ -1058,25 +877,6 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 	    // Get all ServicePath Services
         allServices.addAll(getAllApprovedServicesForRights(getMultiObjectClassInfo().getObjectName(), ServiceType.SERVICEPATH, AccessRight.QUERY));
 
-//		SIF3Session sif3Session = ConsumerEnvironmentManager.getInstance().getSIF3Session();
-//		List<ServiceInfo> allServices = new ArrayList<ServiceInfo>(); 
-//		
-//		// Get OBJECT Services
-//		List<ServiceInfo> services = sif3Session.getServiceInfoForService(getMultiObjectClassInfo().getObjectName(), ServiceType.OBJECT);
-//		for (ServiceInfo serviceInfo : services)
-//		{
-//			if (serviceInfo.getRights().hasRight(AccessRight.CREATE, AccessType.APPROVED) ||
-//			    serviceInfo.getRights().hasRight(AccessRight.UPDATE, AccessType.APPROVED) ||
-//			    serviceInfo.getRights().hasRight(AccessRight.DELETE, AccessType.APPROVED) ||
-//			    serviceInfo.getRights().hasRight(AccessRight.QUERY, AccessType.APPROVED) )
-//			{
-//				allServices.add(serviceInfo);
-//			}
-//		}
-//		
-//		// Now get SERVICEPATHs. They are only valid for QUERY permissions. No events or other types.
-//		allServices.addAll(sif3Session.getServiceInfoForService(getMultiObjectClassInfo().getObjectName(), ServiceType.SERVICEPATH, AccessRight.QUERY, AccessType.APPROVED));
-		
 		return filterApprovedCRUDServices(allServices);
 	}	
 	
@@ -1097,64 +897,21 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
             nullMethodCheck(getUnmarshaller(), "getUnmarshaller()");
 		    
 			return new ObjectServiceClient(ConsumerEnvironmentManager.getInstance(),
-			                           envInfo.getConnectorBaseURI(ConsumerEnvironment.ConnectorName.requestsConnector), 
-	                   				   new PayloadMetadata(getRequestMediaType(), getRequestDMSchemaInfo()),
-	                   				   new PayloadMetadata(getResponseMediaType(), getResponseDMSchemaInfo()),
-	                   				   getMarshaller(), 
-	                   				   getUnmarshaller(),
-	                   				   envInfo.getSecureConnection(),
-	                   				   getCompressionEnabled());
+			                               envInfo.getConnectorBaseURI(ConsumerEnvironment.ConnectorName.requestsConnector), 
+			                               getDataModelRequestPayloadMetadata(),
+			                               getDataModelResponsePayloadMetadata(),
+			                               getMarshaller(), 
+			                               getUnmarshaller(),
+			                               envInfo.getSecureConnection(),
+			                               getCompressionEnabled());
 		}
 	}
 		
-//	private SIF3Session getSIF3Session()
-//	{
-//	  return ConsumerEnvironmentManager.getInstance().getSIF3Session();
-//	}
-
-//	private HeaderProperties getHeaderProperties(boolean isCreateOperation, HeaderValues.ServiceType serviceType, CustomParameters customParameters) 
-//	{
-//	   HeaderProperties hdrProps = new HeaderProperties();
-//	   
-//	   // First we add all Custom HTTP Headers. We add SIF defined HTTP header later. This will also ensure that we
-//	   // will override custom properties with SIF defined properties.
-//	   if ((customParameters != null) && (customParameters.getHttpHeaderParams() != null))
-//	   {
-//		   hdrProps = customParameters.getHttpHeaderParams();
-//	   }
-//	    
-//	   // Now we set SIF defined HTTP headers...
-//	   	    
-//	   // Set the remaining header fields for this type of request
-//	   if (isCreateOperation)
-//	   {
-//	      hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, (getMustUseAdvisory() ? "true" : "false"));
-//	   }
-//	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, serviceType.name());
-//	   
-//	   // Set values of consumer property file or their overridden value. Note thsetHeaderProperty() method will do the check
-//	   // for null, so no need to do this here.
-//	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_APPLICATION_KEY, getApplicationKey());
-//	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTHENTICATED_USER, getAuthentictedUser());
-//	   hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_GENERATOR_ID, getGeneratorID());
-//	   	    
-//	   return hdrProps;
-//	}
-	
 	private HeaderProperties getHeaderProperties(boolean isCreateOperation, CustomParameters customParameters)
 	{
 	  return getHeaderProperties(isCreateOperation, ServiceType.OBJECT, customParameters);
 	}
 	
-//	private void setErrorDetails(BaseResponse response, ErrorDetails errorDetails)
-//	{
-//		response.setStatus(errorDetails.getErrorCode());
-//		response.setStatusMessage(errorDetails.getMessage());
-//		response.setError(errorDetails);
-//		response.setContentLength(0);
-//		response.setHasEntity(false);
-//	}
-
 	/*
 	 * Will perform hasAccess() and requestTypeSupported() checks. This is a convenience method, so that not each operation has to
 	 * call the two methods sequentially and manage all the flow.
@@ -1163,63 +920,6 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 	{
 	  return allClientChecks(getMultiObjectClassInfo().getObjectName(), null, right, accessType, zone, context, requestType);
 	}
-	
-//	private ErrorDetails allClientChecks(String serviceName, AccessRight right, AccessType accessType, SIFZone zone, SIFContext context, RequestType requestType)
-//	{
-//		ErrorDetails error = hasAccess(serviceName, right, accessType, zone, context);
-//		if ((error == null) && (requestType != null))
-//		{
-//			error = requestTypeEnabled(requestType);
-//		}	
-//		return error;
-//	}
-		
-//	private ErrorDetails hasAccess(String serviceName, AccessRight right, AccessType accessType, SIFZone zone, SIFContext context)
-//	{
-//		ErrorDetails error = null;
-//		if (checkACL)
-//		{
-//			if (!getSIF3Session().hasAccess(right, accessType, serviceName, null, zone, context))
-//			{
-//				String zoneID = (zone == null) ? "Default" : zone.getId();
-//				String contextID = (context == null) ? "Default" : context.getId();
-//				error = new ErrorDetails(Status.FORBIDDEN.getStatusCode(), "Consumer is not authorized to issue the requested operation.", right.name()+ " access is not set to "+accessType.name()+" for the service " + serviceName +" and the given zone ("+zoneID+") and context ("+contextID+") in the environment "+getSIF3Session().getEnvironmentName(), "Client side check.");			
-//			}
-//		}
-//		return error;
-//	}
-	
-//	private ErrorDetails requestTypeEnabled(RequestType requestType)
-//	{
-//		ErrorDetails error = null;
-//		
-//		if ((requestType == RequestType.DELAYED) && (!getConsumerEnvironment().getDelayedEnabled()))
-//		{
-//			error = new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Client side Check: DELAYED requests are not enabled.");
-//		}
-//		return error;
-//	}
-
-//	private Response createErrorResponse(ErrorDetails error)
-//	{
-//		Response response = new Response();
-//		setErrorDetails(response, error);
-//		return response;	
-//	}
-	
-//	private BulkOperationResponse<CreateOperationStatus> makeBulkErrorResponseForCreates(ErrorDetails error)
-//	{
-//		BulkOperationResponse<CreateOperationStatus> response = new BulkOperationResponse<CreateOperationStatus>();
-//		setErrorDetails(response, error);
-//		return response;	
-//	}
-//	
-//	private BulkOperationResponse<OperationStatus> makeBulkErrorResponse(ErrorDetails error)
-//	{
-//		BulkOperationResponse<OperationStatus> response = new BulkOperationResponse<OperationStatus>();
-//		setErrorDetails(response, error);
-//		return response;	
-//	}
 	
 	private String getServiceName(QueryCriteria queryCriteria)
 	{
@@ -1250,81 +950,4 @@ public abstract class AbstractConsumer extends BaseConsumer implements Consumer,
 		}
 		return result;
 	}
-	
-//    private List<ZoneContextInfo> getFinalZoneCtxList( List<ZoneContextInfo> zoneCtxList, SIF3Session sif3Session)
-//	{
-//		List<ZoneContextInfo> finalZoneContextList = null;
-//		
-//		if (zoneCtxList == null)
-//		{
-//			finalZoneContextList = new ArrayList<ZoneContextInfo>();
-//		}
-//		else
-//		{
-//			finalZoneContextList = zoneCtxList;
-//		}
-//		
-//		if (finalZoneContextList.size() == 0) //add default context and zone
-//		{
-//		    // Set zone and context to null which will ensure that the matrix params won't be set and therefore the provider will assume default context & zone
-//            finalZoneContextList.add(new ZoneContextInfo((SIFZone)null, (SIFContext)null));
-//		}
-//		
-//		// Check all entries and if 'null' is used as zone or context then we assign the default.
-//		for (ZoneContextInfo zoneCtxInfo : finalZoneContextList)
-//		{
-//			// If zone or zone ID is null then we set the default zone.
-//			if ((zoneCtxInfo.getZone() == null) || StringUtils.isEmpty(zoneCtxInfo.getZone().getId()))
-//			{
-//                zoneCtxInfo.setZone(null); // won't set matrix parameter which means default zone
-//			}
-//			// If context or context ID is null then we set the default zone.
-//			if ((zoneCtxInfo.getContext() == null) || StringUtils.isEmpty(zoneCtxInfo.getContext().getId()))
-//			{
-//				zoneCtxInfo.setContext(null); // won't set matrix parameter which means default context
-//			}
-//		}
-//		
-//		return finalZoneContextList;
-//	}
-	
-	/*
-	 * This method sets the remaining properties in the receipt for delayed responses. There are a few fields that cannot be set at the ObjectServiceClient as
-	 * they are not known or cannot be determined in there but are well known in the abstract consumer.
-	 */
-//	private void finaliseDelayedReceipt(DelayedRequestReceipt delayedReceipt, String serviceName, ServiceType serviceType, ResponseAction requestedAction)
-//	{
-//		if (delayedReceipt != null)
-//		{
-//            //delayedReceipt.setRequestDate(requestDate);
-//            delayedReceipt.setServiceName(serviceName);
-//            delayedReceipt.setServiceType(serviceType);
-//            delayedReceipt.setRequestedAction(requestedAction);
-//		}
-//	}
-	
-
-//	private void nullMethodCheck(Object objectToCheck, String methodName) throws IllegalArgumentException
-//	{
-//    	if (objectToCheck == null)
-//        {
-//            throw new IllegalArgumentException(methodName+" method not implemented correctly. Returns null which is invalid.");
-//        }
-//	}
-
-	
-    /*
-     * This method checks if the test.testmode in the consumer's property file is set to TRUE.
-     */
-//    @SuppressWarnings("unused")
-//    private boolean isTestMode()
-//    {
-//        if (testMode == null)
-//        {
-//            AdvancedProperties props = getServiceProperties();
-//            testMode = props.getPropertyAsBool("test.testmode", false);
-//        }
-//        return testMode;
-//    }
-
 }
