@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
@@ -40,6 +39,7 @@ import sif3.common.interfaces.MinimalConsumer;
 import sif3.common.model.ACL.AccessRight;
 import sif3.common.model.ACL.AccessType;
 import sif3.common.model.CustomParameters;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.ServiceInfo;
@@ -193,12 +193,22 @@ public abstract class BaseConsumer implements MinimalConsumer
      * By default the following HTTP Header fields are retrieved from the consumer's property file and put in corresponding
      * HTTP Header Fields:
      * 
-     * Property                      HTTP Header
-     * ------------------------------------------------
+     * Property                      HTTP Header                            Method
+     * ------------------------------------------------------------------------------------------------
      * adapter.generator.id          generatorId
      * env.application.key           applicationKey
      * env.userToken                 authenticatedUser
-     * env.mediaType                 Content-Type, Accept
+     * 
+     * env.mediaType.dm          -.
+     * env.mediaType.charset.dm  -'-> Content-Type, Accept            -.
+     * env.schema.dm.domain      -.                                    |-> DataModelPayloadMetadata
+     * env.schema.dm.version      |-> content-profile, accept-profile -' 
+     * env.schema.dm.json.type   -'
+     * 
+     * env.mediaType.infra          -.
+     * env.mediaType.charset.infra  -'-> Content-Type, Accept            -.
+     * env.schema.infra.version     -.                                    |-> InfraPayloadMetadata
+     * env.schema.infra.json.type   -'-> content-profile, accept-profile -'
      * adapter.mustUseAdvisoryIDs    mustUseAdvisory
      * adapter.compression.enabled   Content-Encoding, Accept-Encoding
      * 
@@ -246,27 +256,47 @@ public abstract class BaseConsumer implements MinimalConsumer
     }
     
     /**
-     * This method returns the value of the env.mediaType property from the consumer's property file. If that
-     * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+     * This method returns the values from the consumer's property file for:<br/><br/>
+     * - env.mediaType.dm<br/>
+     * - env.mediaType.charset.dm<br/>
+     * - env.schema.dm.domain,env.schema.dm.version,env.schema.dm.json.type (used for schema negotiation)<br/>
+     * <br/>
+     * These values are all encapsulated in the PayloadMetadata object. If any of these values need to be overridden by a 
+     * specific implementation then the specific consumer sub-class should override this method.
      * 
-     * @return The env.mediaType property from the consumer's property file
+     * @return See description
      */
-    public MediaType getRequestMediaType()
+    public PayloadMetadata getDataModelRequestPayloadMetadata()
     {
-        return getConsumerEnvironment().getMediaType();
+        return getConsumerEnvironment().getDataModelPayloadMetadata();
+    }
+    
+    public PayloadMetadata getDataModelResponsePayloadMetadata()
+    {
+        return getConsumerEnvironment().getDataModelPayloadMetadata();
     }
     
     /**
-     * This method returns the value of the env.mediaType property from the consumer's property file. If that
-     * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+     * This method returns the values from the consumer's property file for:<br/><br/>
+     * - env.mediaType.infra<br/>
+     * - env.mediaType.charset.infra<br/>
+     * - env.schema.infra.version,env.schema.infra.json.type (used for schema negotiation)<br/>
+     * <br/>
+     * These values are all encapsulated in the PayloadMetadata object. If any of these values need to be overridden by a 
+     * specific implementation then the specific consumer sub-class should override this method.
      * 
-     * @return The env.mediaType property from the consumer's property file
+     * @return See description
      */
-    public MediaType getResponseMediaType()
+    public PayloadMetadata getInfraRequestPayloadMetadata()
     {
-        return getConsumerEnvironment().getMediaType();
+        return getConsumerEnvironment().getInfraPayloadMetadata();
     }
     
+    public PayloadMetadata getInfraResponsePayloadMetadata()
+    {
+        return getConsumerEnvironment().getInfraPayloadMetadata();
+    }
+   
     /**
      * This method returns the value of the adapter.mustUseAdvisoryIDs property from the consumer's property file. If that
      * needs to be overridden by a specific implementation then the specific sub-class should override this method.
