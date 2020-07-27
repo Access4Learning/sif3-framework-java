@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.ws.rs.core.MediaType;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +45,6 @@ import sif3.common.model.RequestParameters;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
-import sif3.common.model.SchemaInfo;
 import sif3.common.model.ServiceInfo;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.ws.BaseResponse;
@@ -259,17 +256,24 @@ public abstract class CoreProvider implements Runnable
      * By default the following HTTP Header fields are retrieved from the provider's property file and put in corresponding
      * HTTP Header Fields of each event:
      * 
-     * Property                      HTTP Header
-     * ----------------------------------------------------------------
+     * Property                      HTTP Header                            Method
+     * ----------------------------------------------------------------------------------------------
      * adapter.generator.id          generatorId
      * env.application.key           applicationKey
      * env.userToken                 authenticatedUser
-     * env.mediaType                 Content-Type, Accept
      * adapter.compression.enabled   Content-Encoding, Accept-Encoding
-     * env.schema.dm.domain    -.
-     * env.schema.dm.version    |->  content-profile, accept-profile
-     * env.schema.dm.json.type -'
      * 
+     * env.mediaType.dm          -.
+     * env.mediaType.charset.dm  -'-> Content-Type, Accept            -.
+     * env.schema.dm.domain      -.                                    |-> DataModelPayloadMetadata
+     * env.schema.dm.version      |-> content-profile, accept-profile -' 
+     * env.schema.dm.json.type   -'
+     * 
+     * env.mediaType.infra          -.
+     * env.mediaType.charset.infra  -'-> Content-Type, Accept            -.
+     * env.schema.infra.version     -.                                    |-> InfraPayloadMetadata
+     * env.schema.infra.json.type   -'-> content-profile, accept-profile -'
+     *
      * Only properties that are not null or empty string will be set in the corresponding HTTP Header.
      *
      * There are situations where and application may need a more 'dynamic' behaviour where the above values are determined
@@ -314,74 +318,47 @@ public abstract class CoreProvider implements Runnable
     }
     
     /**
-     * This method returns the value of the env.mediaType property from the provider's property file. If that
-     * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+     * This method returns the values from the provider's property file for:<br/><br/>
+     * - env.mediaType.dm<br/>
+     * - env.mediaType.charset.dm<br/>
+     * - env.schema.dm.domain,env.schema.dm.version,env.schema.dm.json.type (used for schema negotiation)<br/>
+     * <br/>
+     * These values are all encapsulated in the PayloadMetadata object. If any of these values need to be overridden by a 
+     * specific implementation then the specific provider sub-class should override this method.
      * 
-     * @return The env.mediaType property from the provider's property file
+     * @return See description
      */
-    public MediaType getRequestMediaType()
+    public PayloadMetadata getDataModelRequestPayloadMetadata()
     {
-        return getProviderEnvironment().getMediaType();
+        return getProviderEnvironment().getDataModelPayloadMetadata();
     }
     
-    /**
-     * This method returns the value of the env.mediaType property from the provider's property file. If that
-     * needs to be overridden by a specific implementation then the specific sub-class should override this method.
-     * 
-     * @return The env.mediaType property from the provider's property file
-     */
-    public MediaType getResponseMediaType()
+    public PayloadMetadata getDataModelResponsePayloadMetadata()
     {
-        return getProviderEnvironment().getMediaType();
-    }
-    
-    /**
-     * If the property env.schema.enabled in the provider's property file is set to true then this method returns the SchemaInfo 
-     * made up of the following properties in the provider's property file:<br/>
-     * - env.schema.dm.domain <br/>
-     * - env.schema.dm.version <br/>
-     * - env.schema.dm.json.type <br/><br/>
-     *  
-     * If the env.schema.enabled in the provider's property file is set to false then null is returned as it is assumed that schema
-     * negotiation is not enabled for the given provider.<br/><br/>
-     * 
-     * The value returned, if any, is assumed to be the schema negotiation value to be set in the content-profile HTTP Header of
-     * requests that have a payload as part of the request.
-     * 
-     * @return See desc.
-     */
-    public SchemaInfo getRequestDMSchemaInfo()
-    {
-        if (getProviderEnvironment().isSchemaNegotiationEnabled())
-        {
-            return getProviderEnvironment().getDataModelSchemaInfo();
-        }
-        else
-        {
-            return null;
-        }
-    }
-    
-    /**
-     * If the property env.schema.enabled in the provider's property file is set to true then this method returns the SchemaInfo 
-     * made up of the following properties in the provider's property file:<br/>
-     * - env.schema.dm.domain <br/>
-     * - env.schema.dm.version <br/>
-     * - env.schema.dm.json.type <br/><br/>
-     *  
-     * If the env.schema.enabled in the provider's property file is set to false then null is returned as it is assumed that schema
-     * negotiation is not enabled for the given provider.<br/><br/>
-     * 
-     * The value returned, if any, is assumed to be the schema negotiation value to be set in the accept-profile HTTP Header of
-     * requests that have a payload in the response.
-     * 
-     * @return See desc.
-     */
-    public SchemaInfo getResponseDMSchemaInfo()
-    {
-        return getRequestDMSchemaInfo();
+        return getProviderEnvironment().getDataModelPayloadMetadata();
     }
 
+    /**
+     * This method returns the values from the provider's property file for:<br/><br/>
+     * - env.mediaType.infra<br/>
+     * - env.mediaType.charset.infra<br/>
+     * - env.schema.infra.version,env.schema.infra.json.type (used for schema negotiation)<br/>
+     * <br/>
+     * These values are all encapsulated in the PayloadMetadata object. If any of these values need to be overridden by a 
+     * specific implementation then the specific consumer sub-class should override this method.
+     * 
+     * @return See description
+     */
+    public PayloadMetadata getInfraRequestPayloadMetadata()
+    {
+        return getProviderEnvironment().getInfraPayloadMetadata();
+    }
+    
+    public PayloadMetadata getInfraResponsePayloadMetadata()
+    {
+        return getProviderEnvironment().getInfraPayloadMetadata();
+    }
+        
     /**
      * This method returns the value of the adapter.compression.enabled property from the provider's property file. If 
      * that needs to be overridden by a specific implementation then the specific sub-class should override this method.
@@ -407,24 +384,6 @@ public abstract class CoreProvider implements Runnable
      * End of 'Dynamic' HTTP Header Field override section
      *-----------------------------------------------------------------------------------------------------------------------*/ 
 
-    /*------------------------------------------------------------------------------------------------------------------------
-     * Some convenience methods
-     *-----------------------------------------------------------------------------------------------------------------------*/ 
-    protected PayloadMetadata getDMPayloadMetadata()
-    {
-        return new PayloadMetadata(getRequestMediaType(), getRequestDMSchemaInfo());
-    }
-    
-    protected PayloadMetadata getInfraPayloadMetadata()
-    {
-        return new PayloadMetadata(getRequestMediaType(), getProviderEnvironment().getInfraModelSchemaInfo());
-    }
-    
-    /*------------------------------------------------------------------------------------------------------------------------
-     * End convenience methods
-     *-----------------------------------------------------------------------------------------------------------------------*/ 
-    
-    
     public void finaliseCoreProvider()
     {
         logger.debug("Finalise in CoreProvider for "+getClass().getSimpleName() +" called.");
