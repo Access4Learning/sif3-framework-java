@@ -156,8 +156,6 @@ public abstract class BaseResource
     private List<PayloadMetadata> dmResponsePayloadMetadata = new ArrayList<PayloadMetadata>();
     private List<PayloadMetadata> infraResponsePayloadMetadata = new ArrayList<PayloadMetadata>();
 
-    //	private MediaType requestMediaType = null;
-//	private MediaType responseMediaType = null;
 	private MediaType urlPostfixMimeType = null;
 	private AbstractSecurityService securityService = null;
 	private ServiceType serviceType = null;
@@ -328,27 +326,10 @@ public abstract class BaseResource
         this.serviceType = serviceType;
     }
 
-//    /*
-//	 * If the request media type is not set it will try to get the media type from the URL Postfix. If that is not set either then XML is returned
-//	 */
-//	public MediaType getRequestMediaType()
-//    {
-//		return this.requestMediaType;
-//    }
-	
     public PayloadMetadata getRequestPayloadMetadata()
     {
         return this.requestPayloadMetadata;
     }
-
-//   /*
-//   * If the response media type is not set it will try to get the media type from the URL Postfix. If that it is 
-//   * not set either then XML is returned
-//   */
-//	public MediaType getResponseMediaType()
-//    {
-//		return this.responseMediaType;
-//    }
 
     public List<PayloadMetadata> getDmResponsePayloadMetadata()
     {
@@ -1689,17 +1670,25 @@ public abstract class BaseResource
 		return sifError;
 	}
 	
+	/*
+	 * This method will set applicable headers only if provider is Schema Aware (schema negotiation is enabled). We need to state 
+	 * the DM and Infra datamodel because the consumer may have requested something we cannot deal with so we indicate what the 
+	 * valid datamodel and infra models are.
+	 */
 	private void setAcceptSchemaHeader(SchemaInfo dmSchemaInfo, HeaderProperties allHeaders)
 	{
-        // The accept header always has to indicate what infrastructure it supports.
-        String acceptProfile = getEnvironmentManager().getEnvironmentInfo().getInfraModelSchemaInfo().getFullSchemaValue();
-        
-        // If it also supports a DM schema then we need to indicate this.
-        if (dmSchemaInfo != null)
+	    if (isSchemaAware())
         {
-            acceptProfile = dmSchemaInfo.getFullSchemaValue() + "," + acceptProfile;
+            // The accept header always has to indicate what infrastructure it supports.
+            String acceptProfile = getEnvironmentManager().getEnvironmentInfo().getInfraPayloadMetadata().getSchemaInfo().getFullSchemaValue();
+            
+            // If it also supports a DM schema then we need to indicate this.
+            if (dmSchemaInfo != null)
+            {
+                acceptProfile = dmSchemaInfo.getFullSchemaValue() + "," + acceptProfile;
+            }
+            allHeaders.setHeaderProperty(RequestHeaderConstants.HDR_ACCEPT_PROFILE, acceptProfile);
         }
-        allHeaders.setHeaderProperty(RequestHeaderConstants.HDR_ACCEPT_PROFILE, acceptProfile);
 	}
 	
     private void setContentSchemaHeader(SchemaInfo schemaInfo, HeaderProperties allHeaders)
@@ -1739,43 +1728,37 @@ public abstract class BaseResource
         return getResponseSchemaInfo(dmSchema ? getDmResponsePayloadMetadata() : getInfraResponsePayloadMetadata(), dmSchema);
     }
     
-    /*
-     * We have lists of response headers relating to accept content type from the original request. As with profile values we
-     * can only have one media type in the content type of the response, so we take the first one in the list. If it is not 
-     * given we take the frameworks default value.
+    /**
+     * Retrieve the most applicable response media type for either the local data model or the infrastructure data model. This will
+     * be based on the original request. There can only be one media type for the response payload, so we attempt to get the first 
+     * one if there were multiple set in the original request (unlikely case though). If none is given we use the framework value.
+
+     * @param dmSchema TRUE: Get the mime type for the locale data model. FALSE: Get the mime type for the infrastructure data model
+     * 
+     * @return The mime type indicated by the original request for either the data model or the infrastructure. In most cases that 
+     *         is the same but for functional services or dynamic queries they could be different.
      */
-    private MediaType getResponseMediaType(List<PayloadMetadata> payloadMetadataList)
+    public MediaType getResponseMediaType(boolean dmSchema)
     {
+        List<PayloadMetadata> payloadMetadataList = dmSchema ? getDmResponsePayloadMetadata() : getInfraResponsePayloadMetadata();
+        PayloadMetadata fwPayloadMetadata = getFWDefaultPayloadMetadata(dmSchema);
+        
         if ((payloadMetadataList != null) && (payloadMetadataList.size() > 0) && (payloadMetadataList.get(0).getMimeType() != null))
         {
             return payloadMetadataList.get(0).getMimeType();
         }
         else
         {
-            return getEnvironmentManager().getEnvironmentInfo().getMediaType();
+            return fwPayloadMetadata.getMimeType();
         }        
     }
+    
+    private PayloadMetadata getFWDefaultPayloadMetadata(boolean dmSchema)
+    {
+        return (dmSchema) ? getEnvironmentManager().getEnvironmentInfo().getDataModelPayloadMetadata() 
+                          : getEnvironmentManager().getEnvironmentInfo().getInfraPayloadMetadata();
+    }
 
-    /**
-     * Retrieve the most applicable response media type for either the local data model or the infrastructure data model. This will
-     * based around the original request. There can only be one media type for the response payload, se we attempt to get the first one
-     * if there were multiple set in the original request (unlikely case though).
-     *  
-     * @param dmSchema TRUE: Get the mime type for the locale data model. FALSE: Get the mime type for the infrastructure data model
-     * 
-     * @return The mime type indicated by the original request for either the data model or the infrastructure. In most cases that os the
-     *         same but for functional services or dynamic queries they could be different.
-     */
-    public MediaType getResponseMediaType(boolean dmSchema)
-    {
-        return getResponseMediaType(dmSchema ? getDmResponsePayloadMetadata() : getInfraResponsePayloadMetadata());
-    }
-    
-    private SchemaInfo getFWDefaultSchemaInfo(boolean dmSchema)
-    {
-        return (dmSchema) ? getEnvironmentManager().getEnvironmentInfo().getDataModelSchemaInfo() : getEnvironmentManager().getEnvironmentInfo().getInfraModelSchemaInfo();
-    }
-    
     // This is the situation where the request has not set a schema info. Here we need to be careful. Since the request has
     // not set the schema info but we do have a mime type, so we need to cater for the correct schema info. If the mime type
     // states application/xml we know that the schema info should reflect a XML info even tough the default of the framework
@@ -1784,13 +1767,16 @@ public abstract class BaseResource
     private SchemaInfo getBestFitSchamaInfo(boolean dmSchema)
     {
         MediaType expectedResponseMimeType = getResponseMediaType(dmSchema);
-        if (getEnvironmentManager().getEnvironmentInfo().getMediaType().isCompatible(expectedResponseMimeType)) // all ok
+        MediaType fwMediaType = dmSchema ? getEnvironmentManager().getEnvironmentInfo().getDataModelPayloadMetadata().getMimeType() 
+                                         : getEnvironmentManager().getEnvironmentInfo().getInfraPayloadMetadata().getMimeType();
+        
+        if (fwMediaType.isCompatible(expectedResponseMimeType)) // all ok
         {
-            return getFWDefaultSchemaInfo(dmSchema);
+            return getFWDefaultPayloadMetadata(dmSchema).getSchemaInfo(); //getFWDefaultSchemaInfo(dmSchema);
         }
         else // the request indicated mime type is different to the FW default, we need to honour the request one
         {
-            SchemaInfo schemaInfo = getFWDefaultSchemaInfo(dmSchema);
+            SchemaInfo schemaInfo = getFWDefaultPayloadMetadata(dmSchema).getSchemaInfo(); //getFWDefaultSchemaInfo(dmSchema);
             if (expectedResponseMimeType.isCompatible(MediaType.APPLICATION_XML_TYPE))
             {
                 // This means the schema info of the framework is JSON. This also means that the schemaType indicates either
@@ -1863,10 +1849,7 @@ public abstract class BaseResource
 				
     				// Also we set the supported Schemas if schema negotiation is enabled. We need to state the DM and Infra data model
     				// because the consumer requested something we cannot deal with
-    				if (isSchemaAware())
-    				{
-    				    setAcceptSchemaHeader(acceptDMSchemaInfo, allHeaders);
-    				}
+    				setAcceptSchemaHeader(acceptDMSchemaInfo, allHeaders);
 				}
 			}
 			else // ok we do NOT deal with a unsupported media type.
@@ -2016,10 +1999,6 @@ public abstract class BaseResource
 		{
 			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+" into unsupported media type '"+getResponseMediaType(isDMResponse)+"'."), responseAction, customResponseParams, acceptDMSchemaInfo);
 		}
-//        catch (UnsupportedEncodingException ex)
-//        {
-//            return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+" into unsupported media type encoding '"+getResponseMediaType()+"'."), responseAction);
-//        }
 	}
 		
 	/*----------------------------------------------------------*/
@@ -2351,8 +2330,7 @@ public abstract class BaseResource
 	    {
 	    	// Check if we have an Authentication Method as well
 		    String authMethodStr = getQueryParameters().getQueryParam(CommonConstants.AUTH_METHOD);
-//		    String authMethod = null;
-		    
+  
 		    authMethodStr = (StringUtils.notEmpty(authMethodStr)) ? authMethodStr.trim() : null;
 
 	    	if (authMethodStr == null) // check what is in the provider's config file
