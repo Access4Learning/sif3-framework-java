@@ -21,6 +21,7 @@ import java.io.Serializable;
 
 import javax.ws.rs.core.MediaType;
 
+import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants.SchemaType;
 
 /**
@@ -34,35 +35,76 @@ public class PayloadMetadata implements Serializable
     private static final long serialVersionUID = 6371320607299424528L;
     
     private MediaType mimeType = null;
+    private String charsetEncoding = null;
     private SchemaInfo schemaInfo = null;
     
     public PayloadMetadata()
     {
-        this(null, null);
+        this(null, null, null);
     }
     
     public PayloadMetadata(MediaType mimeType)
     {
-        this(mimeType, null);
+        this(mimeType, null, null);
     }
     
+    public PayloadMetadata(MediaType mimeType, String charsetEncoding)
+    {
+        this(mimeType, charsetEncoding, null);
+    }
+
     public PayloadMetadata(MediaType mimeType, SchemaInfo schemaInfo)
+    {
+        this(mimeType, null, schemaInfo);
+    }
+
+    public PayloadMetadata(MediaType mimeType, String charsetEncoding, SchemaInfo schemaInfo)
     {
         super();
         setMimeType(mimeType);
         setSchemaInfo(schemaInfo);
+        setCharsetEncoding(charsetEncoding);
     }
 
     public MediaType getMimeType()
     {
         return mimeType;
     }
-    
+
+    /**
+     * This method returns the mime type including the charset encoding. It will follow the standard mime type notation
+     * as defined by the W3C for mime types. For example if the mime type is set to application/xml and the encoding is UTF-8 this 
+     * method will return actual mime type as "application/xml; charset=UTF-8".
+     * 
+     * @return
+     */
+    public MediaType getMimeTypeAndEncoding()
+    {
+        if (StringUtils.notEmpty(getCharsetEncoding()))
+        {
+           return MediaType.valueOf(getMimeType().toString()+"; charset="+getCharsetEncoding());
+        }
+        else // no charEncoding set.
+        {
+            return getMimeType();
+        }
+    }
+
     public void setMimeType(MediaType mimeType)
     {
         this.mimeType = mimeType;
     }
     
+    public String getCharsetEncoding()
+    {
+        return charsetEncoding;
+    }
+
+    public void setCharsetEncoding(String charsetEncoding)
+    {
+        this.charsetEncoding = charsetEncoding;
+    }
+
     public SchemaInfo getSchemaInfo()
     {
         return schemaInfo;
@@ -97,6 +139,7 @@ public class PayloadMetadata implements Serializable
     @Override
     public String toString()
     {
-        return "PayloadMetadata [mimeType=" + mimeType + ", schemaInfo=" + schemaInfo + "]";
+        return "PayloadMetadata [mimeType=" + mimeType + ", charsetEncoding=" + charsetEncoding
+                + ", schemaInfo=" + schemaInfo + "]";
     }
 }
