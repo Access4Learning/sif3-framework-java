@@ -68,7 +68,7 @@ public class TestRolloverStudentConsumer
     private static final String UPDATE_PHASE_PAYLOAD = BASE_PATH+"/CreatePhasePayload.xml";
     private static final String DELETE_PHASE_PAYLOAD = BASE_PATH+"/DeletePhasePayload.xml";
     
-    private static final String JOB_ID = "44f97a1d-83b9-4d22-9a22-cfcaba6d27d4";
+    private static final String JOB_ID = "dbe3dcec-cf9f-40d2-848e-8819b8d96f7b";
    private static final String CONSUMER_ID = "StudentConsumer";
 //    private static final String CONSUMER_ID = "HITSStudentConsumer";
 //    private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
@@ -457,8 +457,8 @@ public class TestRolloverStudentConsumer
 //            PayloadMetadata responsePayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE, new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, "AU-Custom", "3.3.4"));
             SchemaInfo schemaInfo = new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, "au", "3.3.4");
 //            schemaInfo.setSchemaType(CommonConstants.SchemaType.goessner.name());
-//            PayloadMetadata responsePayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_JSON_TYPE, schemaInfo);
-            PayloadMetadata responsePayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE, schemaInfo);
+            PayloadMetadata responsePayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_JSON_TYPE, schemaInfo);
+//            PayloadMetadata responsePayloadMetadata = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE, schemaInfo);
  
             Response response = consumer.createDataInPhase(new PhaseInfo(JOB_ID, phaseName), new PhaseDataRequest(payload, requestPayloadMetadata), responsePayloadMetadata, false, null, null, REQUEST_TYPE, null);
             
@@ -546,7 +546,7 @@ public class TestRolloverStudentConsumer
             //
             // Job Operations
             //
-//            tester.createJob(consumer);
+            tester.createJob(consumer);
 //            tester.createJobs(consumer);
 
             
@@ -570,7 +570,7 @@ public class TestRolloverStudentConsumer
 //            tester.createDataInPhase(consumer, "oldYearEnrolment"); // normally no rights for this on.
 //            tester.createDataInPhase(consumer, "newYearEnrolment");
 //            tester.updateDataInPhase(consumer, "oldYearEnrolment");
-            tester.deleteDataInPhase(consumer, "oldYearEnrolment");
+//            tester.deleteDataInPhase(consumer, "oldYearEnrolment");
 
             // Put this agent to a blocking wait.....
             if (true)
