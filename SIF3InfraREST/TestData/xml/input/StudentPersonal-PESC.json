@@ -2,22 +2,22 @@
 	{
 	  "AlertMessages" : {
 	    "AlertMessage" : [ {
-	      "Value" : "Mother is legal guardian",
+	      "value" : "Mother is legal guardian",
 	      "Type" : "Legal"
 	    }, {
-	      "Value" : "Second element"
+	      "value" : "Second element"
 	    }, {
-	      "Value" : ""
+	      "value" : ""
 	    } ]
 	  },
 	  "LocalId" : "S1234567",
 	  "StateProvinceId" : "ABC1234",
 	  "OtherIdList" : {
 	    "OtherId" : [ {
-	      "Value" : "888rdgf",
+	      "value" : "888rdgf",
 	      "Type" : "freetext"
 	    }, {
-	      "Value" : "1234",
+	      "value" : "1234",
 	      "Type" : "Disability ID"
 	    } ]
 	  },
@@ -124,10 +124,10 @@
 	    },
 	    "EmailList" : {
 	      "Email" : [ {
-	        "Value" : "fsmith@yahoo.com",
+	        "value" : "fsmith@yahoo.com",
 	        "Type" : "01"
 	      }, {
-	        "Value" : "freddy@gmail.com",
+	        "value" : "freddy@gmail.com",
 	        "Type" : "02"
 	      } ]
 	    }
