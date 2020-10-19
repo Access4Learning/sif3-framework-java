@@ -198,7 +198,7 @@ ___
 - **Feb 24, 2020:** Added some functionality relating to schema version negotiation.
 - **Jun 16, 2020:** Added support for PESC-JSON notation. See details in the detailed release notes.
 - **Jul 27, 2020:** Separated infra and DM mime types further to allow using XML for one and JSON for the other in the same adapter. 
-
+- **Oct 19, 2020:** Enforced lower case "value" in PESC-JSON notation regardless of naming convention for capitalisation. 
 
 **Please refer to the detailed release notes in "release/v0.15.0" to ensure that your project is upgraded properly to the new framework version.**
 

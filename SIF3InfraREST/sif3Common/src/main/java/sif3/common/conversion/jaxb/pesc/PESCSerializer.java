@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import au.com.systemic.framework.utils.Timer;
 import sif3.common.conversion.jackson.serializer.EnumToJSON;
 import sif3.common.conversion.jackson.serializer.GregorianCalendarToJSON;
+import sif3.common.conversion.jackson.serializer.PESCNamingStrategy;
 import sif3.common.conversion.jackson.serializer.StringToJSON;
 import sif3.common.exception.MarshalException;
 
@@ -50,6 +51,9 @@ public class PESCSerializer implements Serializable
 {
     protected final static Logger logger = LoggerFactory.getLogger(PESCSerializer.class);
     private static final long serialVersionUID = 3919042726570296711L;
+    
+    // We only need to create this once.
+    private static PESCNamingStrategy pescNamingStrategy = new PESCNamingStrategy();
     
     private ObjectMapper pescMapper = getPESCMarshalObjectMapper();
 
@@ -114,7 +118,7 @@ public class PESCSerializer implements Serializable
         //       jaxbElement.getName().getLocalPart(). This name also helps to determine if the object to marshal uses
         //       upper-case or lower-case element names.
         String objectName = jaxbObject.getName().getLocalPart();
-        mapper.setPropertyNamingStrategy(Character.isUpperCase(objectName.charAt(0)) ? PropertyNamingStrategy.UPPER_CAMEL_CASE : PropertyNamingStrategy.LOWER_CAMEL_CASE);
+        mapper.setPropertyNamingStrategy(Character.isUpperCase(objectName.charAt(0)) ? pescNamingStrategy : PropertyNamingStrategy.LOWER_CAMEL_CASE);
         if (logger.isDebugEnabled())
         {
             logger.debug("Object Name: " + objectName+" => Use "+mapper.getPropertyNamingStrategy().toString());
