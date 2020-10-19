@@ -68,8 +68,7 @@ public class JAXBUtils
 	private static Object lock = new Object();
 
 	private static String JSON_VALUE_KEY_GOESSNER = "#text";
-	private static String JSON_VALUE_KEY_PESC_UPPER = "Value";
-	private static String JSON_VALUE_KEY_PESC_LOWER = "value";
+	private static String JSON_VALUE_KEY_PESC = "value";
 	private static String JSON_ATTRIBUTE_KEY_GOESSNER = "@";
 
     /**
@@ -350,26 +349,7 @@ public class JAXBUtils
 		{
 		    jsonConfiguration.setSupressAtAttributes(true);  // PESC doesn't use '@' for attribute indicator.
 		    jsonConvention = new PESCMappingConvention(jsonConfiguration);
-		    valueKey = JSON_VALUE_KEY_PESC_LOWER; //default
-		    
-		    // Because we do not know what naming schema is used we have to inspect the jsonStr until we find an alpha char and then
-		    // check for is case.
-		    if (jsonStr != null)
-		    {
-		        for (int i = 0; i<jsonStr.length(); i++)
-		        {
-		            if (Character.isUpperCase(jsonStr.charAt(i)))
-		            {
-		                valueKey = JSON_VALUE_KEY_PESC_UPPER;
-		                break;
-		            }
-		            else if (Character.isLowerCase(jsonStr.charAt(i)))
-		            {
-		                valueKey = JSON_VALUE_KEY_PESC_LOWER;
-                        break;
-		            }
-		        }
-		    }
+		    valueKey = JSON_VALUE_KEY_PESC;
 		}
 		else
 		{
