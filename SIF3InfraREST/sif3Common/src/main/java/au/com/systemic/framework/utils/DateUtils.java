@@ -453,4 +453,32 @@ public class DateUtils
   {
 	  return ISO_8601_SECFRACT.format(date); 
   }
+  
+  /**
+   * This method attempts to return a date from the given dateString. The dateString is expected to be in ISO8601 format.
+   * It attempts to get the date assuming ISO8601 with fractions of seconds but if that fails it will try to get it
+   * without fraction of seconds. If that should fail as well then null is returned.
+   * 
+   * @param dateString Format must be yyyy-MM-dd'T'HH:mm:ss.SSS'Z' or yyyy-MM-dd'T'HH:mm:ss'Z'
+   * 
+   * @return See description.
+   */
+  public static Date getDateFromISO8601(String dateString)
+  {
+      try
+      {
+          return stringToDate(dateString, ISO_8601_SECFRACT);
+      }
+      catch (Exception ex)
+      {
+          try
+          {
+              return stringToDate(dateString, ISO_8601);
+          }
+          catch (Exception innerEx)
+          {
+              return null;
+          }
+      }
+  }
 }
