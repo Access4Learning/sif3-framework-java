@@ -191,14 +191,12 @@ ___
 **Please refer to the detailed release notes in "release/v0.14.1" to ensure that your project is upgraded properly to the new framework version.**
 
 ## Version from Jul 29, 2019: v0.15.0 - Upgrade to SIF 3.3 Infrastructure
-- Updated framework to be used with SIF Infrastructure 3.3. This only includes the usage of the new namespace and
-  Infrastructure XSDs but not new SIF 3.3 functionality such as Privacy Services, Data Model Schema negotiation etc.
-  Some of the new functionality might be added in later versions of the framework.
-  
+- **Jul 29, 2019:** Updated framework to be used with SIF Infrastructure 3.3. This only includes the usage of the new namespace and Infrastructure XSDs.
 - **Feb 24, 2020:** Added some functionality relating to schema version negotiation.
 - **Jun 16, 2020:** Added support for PESC-JSON notation. See details in the detailed release notes.
 - **Jul 27, 2020:** Separated infra and DM mime types further to allow using XML for one and JSON for the other in the same adapter. 
-- **Oct 19, 2020:** Enforced lower case "value" in PESC-JSON notation regardless of naming convention for capitalisation. 
+- **Oct 19, 2020:** Enforced lower case "value" in PESC-JSON notation regardless of naming convention for capitalisation.
+- **Oct 26, 2020:** Enable timestamp HTTP Header age check for SIF_HMACSHA256 authentication. 
 
 **Please refer to the detailed release notes in "release/v0.15.0" to ensure that your project is upgraded properly to the new framework version.**
 
