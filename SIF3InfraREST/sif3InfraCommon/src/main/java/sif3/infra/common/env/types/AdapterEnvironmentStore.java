@@ -531,6 +531,9 @@ public class AdapterEnvironmentStore implements Serializable
     {
     	boolean errorsFound = false;
 
+    	// Read max age of timestamp. Used in DIRECT environments for SIF_HMACSHA256 authentication.
+    	envInfo.setMaxTimestampAgeMinutes(props.getPropertyAsInt("env.timestamp.max.age", CommonConstants.DEFAULT_TIMESTAMP_AGE_MINUTES));
+    	
 		envInfo.setEventsSupported(props.getPropertyAsBool("env.events.supported", false));
 
     	// The following properties are required if it is a BROKERED environment. For DIRECT environments these values
