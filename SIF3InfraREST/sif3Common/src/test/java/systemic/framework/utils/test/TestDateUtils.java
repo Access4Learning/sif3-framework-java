@@ -58,6 +58,16 @@ public class TestDateUtils
 	    System.out.println("Local Time = "+localTime+";  GMT Time = "+gmtTime);
 	}
 	
+	private static void testISO8601StringToDate()
+	{
+	    String dateString = DateUtils.nowAsISO8601();
+	    
+	    System.out.println("Date ISO8610 date string = "+dateString+" without fraction of seconds: "+DateUtils.getDateFromISO8601(dateString));
+
+	    dateString = DateUtils.nowAsISO8601withSecFraction();
+	    System.out.println("Date ISO8610 date string = "+dateString+"  fraction of seconds: "+DateUtils.getDateFromISO8601(dateString));
+	}
+	
 	public static void main(String[] args)
 	{
         System.out.println("Local Time Zone: " + local);
@@ -79,5 +89,7 @@ public class TestDateUtils
 		System.out.println("Current Date & Time in ISO 8601 with Sec Fractions: " + DateUtils.nowAsISO8601withSecFraction());
 		
 		timeZoneTest();
+		
+		testISO8601StringToDate();
 	}
 }

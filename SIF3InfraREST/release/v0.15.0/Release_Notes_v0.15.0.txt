@@ -1,5 +1,5 @@
 ==============================================================
-Release Notes for v0.15.0 of SIF3 Framework (July 27, 2020)
+Release Notes for v0.15.0 of SIF3 Framework (Oct 26, 2020)
 ==============================================================
 
 Bug Fixes
@@ -22,6 +22,7 @@ New Functionality
   README.md file of the SIF3DMGenerator project (https://github.com/Access4Learning/SIF3DMGenerator-Java/tree/master/SIF3DMGenerator).
 - Further enabled split of infra datamodel and local datamodel in terms of mime type. It is now possible to use XML for one model
   and JSON for the other.
+- Enable timestamp HTTP Header age check for SIF_HMACSHA256 authentication.
 
 Changed Functionality
 ---------------------

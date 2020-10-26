@@ -76,6 +76,9 @@ public class CommonConstants
 	/* Used in 'blocking' ExecutorService to allow a max sleep time before shutdown is checked */
     public final static long MAX_SLEEP_MILLISEC = 5 * MILISEC; 
 
+    /* Default max age of the timestamp HTTP header for SIF_HMACSHA256 authentication */
+    public static final int DEFAULT_TIMESTAMP_AGE_MINUTES = 30;
+    
 	/*-----------------------------------------------------------*/
 	/* Constants defined by SIF3 Spec.                           */
 	/*-----------------------------------------------------------*/

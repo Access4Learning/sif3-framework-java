@@ -116,7 +116,9 @@ import sif3.infra.rest.resource.audit.AuditableResource;
 public abstract class BaseResource
 {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-	
+
+    private static String PROVIDER_CHECK = "Provider Check.";
+
 	/* Below variables are for testing purposes only */
     private static Boolean testMode = null;
     /* End Testing variables */
@@ -1007,7 +1009,7 @@ public abstract class BaseResource
 	{
 		if ((getAuthInfo().getSecurityServiceInfo() == null) || StringUtils.isEmpty(getAuthInfo().getSecurityServiceInfo().getAuthenticationMethod()))
 		{
-			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No Authentication Method set. Choose between Basic, SIF_HMACSHA256 or External Security as Authentication Method. Refer to SIF3 Specification for details.", "Provider side check.");
+			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No Authentication Method set. Choose between Basic, SIF_HMACSHA256 or External Security as Authentication Method. Refer to SIF3 Specification for details.", PROVIDER_CHECK);
 		}
 
 		if (getAuthInfo().getSecurityServiceInfo().getAuthenticationType() == AuthenticationType.Other)
@@ -1018,7 +1020,7 @@ public abstract class BaseResource
 
 	    if (StringUtils.isEmpty(getAuthInfo().getPassword()))
 	    {
-	    	return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Not authorized. Password Invalid.", "Password is not provided.");
+	    	return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Not authorized. Password is not provided.", PROVIDER_CHECK);
 	    }
 	    
 	    String authToken = AuthenticationUtils.getFullBase64Token(getAuthInfo());
@@ -1033,13 +1035,38 @@ public abstract class BaseResource
 	    {
 			// Get the timestamp which is required for the hashing.
 			String timestamp = getTimestampFromRequest();
+			
 			if (StringUtils.notEmpty(timestamp))
 			{
+                int maxAgeMinutes = getProviderEnvironment().getMaxTimestampAgeMinutes();
+                if (maxAgeMinutes != 0) // perform age check
+                {
+                    // Convert timestamp to date.
+                    Date timestampDate = DateUtils.getDateFromISO8601(timestamp);
+                    if (timestampDate == null) // invalid date format!
+                    {
+                        return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "HTTP header 'timestamp' must be ISO8601 formatted (e.g. yyyy-MM-ddTHH:mm:ss.SSSZ).", PROVIDER_CHECK);
+                    }
+                    
+                    // Now we check for age
+                    long currentDate = (new Date()).getTime();
+                    long maxAgeDate = currentDate - (maxAgeMinutes * DateUtils.MINUTE_IN_MILLI_SECOND);
+                    if (timestampDate.getTime() < maxAgeDate) // too old!
+                    {
+                        return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "HTTP header 'timestamp' ("+timestamp+") is older than "+maxAgeMinutes+" minutes.", PROVIDER_CHECK);
+                    }
+                    else if (timestampDate.getTime() > currentDate) // also ensure that it is not a future date
+                    {
+                        return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "HTTP header 'timestamp' ("+timestamp+") is a future date and time.", PROVIDER_CHECK);
+                    }
+                }
+
+                // If we get here then all checks succeeded.
 				newAuthToken = AuthenticationUtils.getSIFHMACSHA256AuthToken(userToken, password, timestamp);
 			}
 			else
 			{
-				return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "For SIF_HMACSHA256 authentication the HTTP request must have a timestamp in the HTTP header. Refer to SIF3 Specification for details.");
+				return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "For SIF_HMACSHA256 authentication the HTTP request must have a timestamp in the HTTP header. Refer to SIF3 Specification for details.", PROVIDER_CHECK);
 			}
 	    }
 	    
@@ -1047,7 +1074,7 @@ public abstract class BaseResource
 	    //System.out.println("Auth Token To Compare with: "+newAuthToken);  
 	    if (!authToken.equals(newAuthToken))
 	    {
-	    	return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Authorization token in request doesn't match expected authorization token in session.");
+	    	return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Authorization token in request doesn't match expected authorization token in session.", PROVIDER_CHECK);
 	    }
 
 		// If we get here all validation has succeeded. We do not return any error.
