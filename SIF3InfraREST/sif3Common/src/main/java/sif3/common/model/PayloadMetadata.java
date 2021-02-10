@@ -76,7 +76,7 @@ public class PayloadMetadata implements Serializable
      * as defined by the W3C for mime types. For example if the mime type is set to application/xml and the encoding is UTF-8 this 
      * method will return actual mime type as "application/xml; charset=UTF-8".
      * 
-     * @return
+     * @return See description. 
      */
     public MediaType getMimeTypeAndEncoding()
     {
