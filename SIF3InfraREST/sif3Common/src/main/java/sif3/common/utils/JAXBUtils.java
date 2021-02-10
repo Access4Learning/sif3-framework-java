@@ -45,6 +45,7 @@ import org.codehaus.jettison.mapped.SimpleConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import au.com.systemic.framework.utils.StringUtils;
 import au.com.systemic.framework.utils.Timer;
 import sif3.common.CommonConstants.SchemaType;
 import sif3.common.conversion.jaxb.pesc.PESCMappingConvention;
@@ -216,7 +217,64 @@ public class JAXBUtils
         return sw.toString();
 	}
     
+    public static String getObjectNamespace(Class<?> clazz)
+    {
+        String result = null;
+        XmlType typeAnnotation = clazz.getAnnotation(XmlType.class);
+        if (typeAnnotation != null)
+        {
+            result = typeAnnotation.namespace();
+        }
+        return result;
+    }
 
+    /**
+     * This method takes the 'payload' and checks if the datamodel namespace given in the 'payload' is different to the
+     * 'mappedToVersionNum'. If they are then all occurrences of the namespace version number in 'payload' are replaced 
+     * with the 'mappedToVersionNum' and the new new payload is returned.
+     * If any parameters are null or empty then no action is taken (e.g. original payload is returned). 
+     * Also if the mappedToVersionNum is the same as the version number in the payload then no action is taken 
+     * (e.g. original payload is returned).
+     * 
+     * @param payload The payload where the namespace version number may need to be replaced.
+     * @param dmBaseNamespaceURL The base URL of the namespace, not including the version number but a trailing '/'. 
+     * @param mappedToVersionNum The version number to map the namespace to.
+     * 
+     * @return See description.
+     */
+    public static String mapNamespaceVersion(String payload, String dmBaseNamespaceURL, String mappedToVersionNum)
+    {
+        if ((payload != null) && (dmBaseNamespaceURL != null) && (mappedToVersionNum != null))
+        {
+            // First we try to retrieve the version number in the payload
+            int startPos = payload.indexOf(dmBaseNamespaceURL);
+            if (startPos >= 0) //Found occurrence of base namespace URL
+            {
+                // find everything after that base namespace string until either ' or " is found
+                startPos = startPos + dmBaseNamespaceURL.length();
+                int endPos = startPos;
+                char currentChar = payload.charAt(endPos);
+                while ((currentChar != '\"') && (currentChar != '\''))
+                {
+                    endPos++;
+                    currentChar = payload.charAt(endPos);
+                }
+                
+                // Current namespace version is the string between startPos and endPos
+                String currentNamespaceNumber = payload.substring(startPos, endPos);
+                
+                // only replace if different versions
+                if (StringUtils.notEmpty(currentNamespaceNumber) && !mappedToVersionNum.equals(currentNamespaceNumber))
+                {
+                    logger.debug("Namespace version mapping is required. Map version "+currentNamespaceNumber + " to version " + mappedToVersionNum);
+                    payload = payload.replaceAll(dmBaseNamespaceURL+currentNamespaceNumber, dmBaseNamespaceURL+mappedToVersionNum);
+                }
+            }
+        }
+        
+        return payload;
+    }
+    
     /**
      * This is a convenience method so that JAXB Contexts can be initialised at any time. This proves to be
      * particular useful to avoid lengthy startup times for some classes when they hit the marshaller and
@@ -380,17 +438,6 @@ public class JAXBUtils
 		return result;
 	}
 
-	private static String getObjectNamespace(Class<?> clazz)
-	{
-		String result = null;
-		XmlType typeAnnotation = clazz.getAnnotation(XmlType.class);
-		if (typeAnnotation != null)
-		{
-			result = typeAnnotation.namespace();
-		}
-		return result;
-	}
-	
 	private synchronized static void initPESCSerializer()
 	{
 	    if (serializer == null)
