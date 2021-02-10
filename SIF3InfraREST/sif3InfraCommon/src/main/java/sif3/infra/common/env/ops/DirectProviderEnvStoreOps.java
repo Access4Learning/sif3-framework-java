@@ -570,6 +570,9 @@ public class DirectProviderEnvStoreOps extends AdapterBaseEnvStoreOperations
 							sif3Session.setPassword(appEnvTemplate.getPassword());
 						}
 						
+						// Maybe infra version mapping has been enabled or changed to a different version
+						sif3Session.setInfraVersion(appEnvTemplate.getInfraVersion());
+						
 						// The SolutionID might not have been set by the input environment but is given by the environment template lookup or
 						// the environment template.
 						if (StringUtils.notEmpty(appEnvTemplate.getSolutionID())) // use env template lookup as first priority
