@@ -1,5 +1,5 @@
 # License
-> Copyright 2014 - 2020 Systemic Pty Ltd
+> Copyright 2014 - 2021 Systemic Pty Ltd
 > 
 > Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 > 
@@ -197,6 +197,7 @@ ___
 - **Jul 27, 2020:** Separated infra and DM mime types further to allow using XML for one and JSON for the other in the same adapter. 
 - **Oct 19, 2020:** Enforced lower case "value" in PESC-JSON notation regardless of naming convention for capitalisation.
 - **Oct 26, 2020:** Enable timestamp HTTP Header age check for SIF_HMACSHA256 authentication. 
+- **Feb 09, 2021:** Enable infrastructure namespace version mapping which allows the framework to run with any infrastructure version. Refer to section 5.16 in the developer's guide.   
 
 **Please refer to the detailed release notes in "release/v0.15.0" to ensure that your project is upgraded properly to the new framework version.**
 

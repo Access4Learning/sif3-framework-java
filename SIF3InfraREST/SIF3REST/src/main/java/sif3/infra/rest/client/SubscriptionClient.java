@@ -141,6 +141,13 @@ public class SubscriptionClient extends BaseClient
 			HeaderProperties hdrProperties = getHeaderProperties();		
             hdrProperties = addSchemaHdrProps(hdrProperties, true, false);
 			String payloadStr = getInfraMarshaller().marshal(subscriptionInfo, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
+
+	         // We may have to map infra version number
+            if (mayRequireMapping())
+            {
+                payloadStr = mapInfraNamespaceVersionToEndpointVersion(payloadStr);
+            }
+
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("subscribe: Payload to send:\n"+payloadStr);

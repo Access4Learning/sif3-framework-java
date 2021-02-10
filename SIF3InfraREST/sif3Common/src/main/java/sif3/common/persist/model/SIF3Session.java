@@ -47,7 +47,8 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	private long sessionID;
 	private String adapterName;
 	private String password;
-	private String sessionToken;
+	private String infraVersion = null;
+    private String sessionToken;
 	private String environmentID;
 	private String fingerprint;
     private String adapterType; //CONSUMER, PROVIDER, ENVIRONMENT_PROVIDER
@@ -100,6 +101,16 @@ public class SIF3Session extends EnvironmentKey implements Serializable
 	public void setPassword(String password)
     {
     	this.password = password;
+    }
+
+    public String getInfraVersion()
+    {
+        return infraVersion;
+    }
+
+    public void setInfraVersion(String infraVersion)
+    {
+        this.infraVersion = infraVersion;
     }
 
 	public String getSessionToken()
@@ -417,13 +428,12 @@ public class SIF3Session extends EnvironmentKey implements Serializable
     public String toString()
     {
         return "SIF3Session [sessionID=" + sessionID + ", adapterName=" + adapterName
-                + ", password=" + password + ", sessionToken=" + sessionToken + ", environmentID="
-                + environmentID + ", fingerprint=" + fingerprint + ", adapterType=" + adapterType
-                + ", securityToken=" + securityToken + ", securityTokenExpiry="
-                + securityTokenExpiry + ", environmentXML=" + environmentXML + ", queueStrategy="
-                + queueStrategy + ", created=" + created + ", lastAccessed=" + lastAccessed
-                + ", defaultZone=" + defaultZone + ", authenticationMethod=" + authenticationMethod
-                + ", services=" + services + ", toString()=" + super.toString() + "]";
+                + ", password=" + password + ", infraVersion=" + infraVersion + ", sessionToken="
+                + sessionToken + ", environmentID=" + environmentID + ", fingerprint=" + fingerprint
+                + ", adapterType=" + adapterType + ", securityToken=" + securityToken
+                + ", securityTokenExpiry=" + securityTokenExpiry + ", environmentXML="
+                + environmentXML + ", queueStrategy=" + queueStrategy + ", created=" + created
+                + ", lastAccessed=" + lastAccessed + ", toString()=" + super.toString() + "]";
     }	
     
 	/*---------------------*/

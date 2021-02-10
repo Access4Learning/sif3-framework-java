@@ -33,7 +33,8 @@ public class AppEnvironmentTemplate extends EnvironmentKey implements Serializab
 	private long appTemplateID;
 	private String password = null;
 	private String authMethod = null;
-	private EnvironmentTemplate environmentTemplate;
+	private String infraVersion = null;
+    private EnvironmentTemplate environmentTemplate;
 
 	public AppEnvironmentTemplate()
 	{
@@ -74,6 +75,16 @@ public class AppEnvironmentTemplate extends EnvironmentKey implements Serializab
 		this.authMethod = authMethod;
 	}
 
+    public String getInfraVersion()
+    {
+        return infraVersion;
+    }
+
+    public void setInfraVersion(String infraVersion)
+    {
+        this.infraVersion = infraVersion;
+    }
+
 	public EnvironmentTemplate getEnvironmentTemplate()
 	{
 		return environmentTemplate;
@@ -87,8 +98,9 @@ public class AppEnvironmentTemplate extends EnvironmentKey implements Serializab
 	@Override
     public String toString()
     {
-	    return "AppEnvironmentTemplate [appTemplateID=" + this.appTemplateID + ", password="
-	            + this.password + ", authMethod=" + this.authMethod + ", environmentTemplate="
-	            + this.environmentTemplate + ", toString()=" + super.toString() + "]";
+        return "AppEnvironmentTemplate [appTemplateID=" + appTemplateID + ", password=" + password
+                + ", authMethod=" + authMethod + ", infraVersion=" + infraVersion
+                + ", environmentTemplate=" + environmentTemplate + ", toString()="
+                + super.toString() + "]";
     }
 }

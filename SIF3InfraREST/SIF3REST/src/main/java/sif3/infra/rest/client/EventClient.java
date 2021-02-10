@@ -40,7 +40,9 @@ import sif3.common.model.PayloadMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFEvent;
 import sif3.common.model.SIFZone;
+import sif3.common.utils.JAXBUtils;
 import sif3.common.ws.BaseResponse;
+import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.common.env.types.ProviderEnvironment;
 import sif3.infra.common.interfaces.ClientEnvironmentManager;
@@ -154,8 +156,20 @@ public class EventClient extends BaseClient
 			try
 			{
 				// Don't set zone & context here. They are header parameters in the case of events.
-			  String payloadStr = getDataModelMarshaller().marshal(event.getSIFObjectList(), getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
-				HeaderProperties headerProps = getEventHeaders(event.getEventAction(),	event.getUpdateType(), event.getFingerprint(), zone, context, serviceType, customHdrFields);
+			    String payloadStr = getDataModelMarshaller().marshal(event.getSIFObjectList(), getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
+
+			    if (getDataModelMarshaller() instanceof InfraMarshalFactory)
+			    {
+			        String mappedVersion =  getClientEnvMgr().getEnvironmentInfo().getMappedInfraVersion();
+                    if (StringUtils.notEmpty(mappedVersion)) // potentially we need to map
+                    {
+                        logger.debug("Infra Namespace mapping might be required. Requested Namespace for events is: "+mappedVersion);
+                        payloadStr = JAXBUtils.mapNamespaceVersion(payloadStr, getClientEnvMgr().getEnvironmentInfo().getBaseInfraNamespace(), mappedVersion);
+                    }
+			    }
+			    
+			    // Set necessary headers
+			    HeaderProperties headerProps = getEventHeaders(event.getEventAction(),	event.getUpdateType(), event.getFingerprint(), zone, context, serviceType, customHdrFields);
 				
 				Builder builder = setRequestHeaderAndMediaTypes(service, headerProps, false, false, true);
 				logger.debug("Send "+serviceName+" Event to Zone = "+((zone == null) ? "default" : zone.getId())+" and Context = "+((context == null) ? "DEFAULT" : context.getId()));

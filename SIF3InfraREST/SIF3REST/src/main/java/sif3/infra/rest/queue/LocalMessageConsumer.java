@@ -40,9 +40,11 @@ import sif3.common.model.StringPayload;
 import sif3.common.model.ZoneContextInfo;
 import sif3.common.model.delayed.DelayedResponseReceipt;
 import sif3.common.model.job.PhaseInfo;
+import sif3.common.utils.JAXBUtils;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.job.PhaseDataResponse;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
+import sif3.infra.common.env.types.EnvironmentInfo;
 import sif3.infra.common.model.JobCollectionType;
 import sif3.infra.rest.consumer.AbstractFunctionalServiceConsumer;
 import sif3.infra.rest.consumer.AbstractNamedQueryConsumer;
@@ -69,8 +71,9 @@ public class LocalMessageConsumer implements Runnable
 	private LocalConsumerQueue localQueue;
 	private String consumerID;
 	private MinimalConsumer minimalConsumer;
-	private InfraDataModelMapper infraMapper = new InfraDataModelMapper();
+	private InfraDataModelMapper infraMapper = null;
     private boolean shutdownFlag = false;
+    private EnvironmentInfo environmentInfo;
 
 	/**
 	 * This method initialises a Consumer to be able to receive and process messages from the local event queue. The 'consumer' parameter is 
@@ -79,12 +82,15 @@ public class LocalMessageConsumer implements Runnable
 	 * @param localQueue The local queue on which this consumer will be listening on.
 	 * @param consumerID A name of the consumer. Mainly needed for nice debug and error reporting.
 	 * @param minimalConsumer An instance of consumer that will process the message.
+	 * @param environmentInfo Environment info of the consumer for which the consumer queue config applies.
 	 */
-	public LocalMessageConsumer(LocalConsumerQueue localQueue, String consumerID, MinimalConsumer minimalConsumer)
+	public LocalMessageConsumer(LocalConsumerQueue localQueue, String consumerID, MinimalConsumer minimalConsumer, EnvironmentInfo environmentInfo)
 	{
 		this.localQueue = localQueue;
 		this.consumerID = consumerID;
 		this.minimalConsumer = minimalConsumer;
+		this.environmentInfo = environmentInfo;
+		this.infraMapper = new InfraDataModelMapper(this.environmentInfo);
 	}
 	
 	/**
@@ -440,6 +446,9 @@ public class LocalMessageConsumer implements Runnable
         {
             try
             {
+                // Potentially map to framework Infrastructure version.
+                payload = JAXBUtils.mapNamespaceVersion(payload, environmentInfo.getBaseInfraNamespace(), environmentInfo.getFrameworkInfraVersion());
+               
                 return infraUnmarshaller.unmarshal(payload, JobCollectionType.class, payloadMetadata.getMimeType(), payloadMetadata.getSchemaType());
             }
             catch (UnmarshalException ex)

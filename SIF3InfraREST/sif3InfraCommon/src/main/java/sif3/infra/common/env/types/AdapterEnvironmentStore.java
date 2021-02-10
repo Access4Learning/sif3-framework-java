@@ -41,6 +41,7 @@ import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues.UpdateType;
 import sif3.common.model.SchemaInfo;
 import sif3.common.utils.FileAndFolderUtils;
+import sif3.common.utils.JAXBUtils;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
 
 /**
@@ -244,6 +245,17 @@ public class AdapterEnvironmentStore implements Serializable
 			  			errors = true;
 			  		}
 			  		
+			  		// Read infrastructure mappings
+			  		environment.setBaseInfraNamespace(adapterProperties.getPropertyAsString("namespcase.infra.baseURL", CommonConstants.BASE_INFRA_NAMESPACE));
+                    environment.setFrameworkInfraVersion(getFWInfaVersion(adapterProperties));
+                    
+                    String mappedVersion = adapterProperties.getPropertyAsString("namespace.infra.mapToVersion", environment.getFrameworkInfraVersion());
+                    // If Framework version and mapped version are the same we set mapped to null indication no mapping required
+                    if (environment.getFrameworkInfraVersion().equals(mappedVersion))
+                    {
+                        mappedVersion = null;
+                    }
+			  		environment.setMappedInfraVersion(mappedVersion);
 			  		
 			  		if (!errors) // Read specific info
 					{
@@ -410,6 +422,15 @@ public class AdapterEnvironmentStore implements Serializable
 		}
 		return true;
 	}
+    
+    private String getFWInfaVersion(AdvancedProperties adapterProperties)
+    {
+        // Framework Namespace version can be taken from Infra Datamodel environment object  
+        String fullInfraNamespace = JAXBUtils.getObjectNamespace(sif3.infra.common.model.EnvironmentType.class);
+        
+        // The version is the part after the last '/'
+        return fullInfraNamespace.substring(fullInfraNamespace.lastIndexOf('/')+1);
+    }
     
     /*
      * This method load information in relation to existing environments. If bits are missing or don't make sense then

@@ -218,6 +218,7 @@ public class QueueResource extends InfraResource
 			}
 			try
 			{
+			    payload = mapToFrameworkInfraVersion(payload);
 				QueueType inputQueue = (QueueType)getInfraUnmarshaller().unmarshal(payload, QueueType.class, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 				QueueType outputQueue = createQueue(inputQueue);
 				

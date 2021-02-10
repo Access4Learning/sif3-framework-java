@@ -27,9 +27,9 @@ import sif3.infra.common.env.types.AdapterEnvironmentStore;
  */
 public class TestAdapterEnvStore
 {
-	private static final String PROP_FILE_NAME = "StudentProvider";
+//	private static final String PROP_FILE_NAME = "StudentProvider";
 //	private static final String PROP_FILE_NAME = "BrokeredSISProvider";
-//	private static final String PROP_FILE_NAME = "StudentConsumer";
+	private static final String PROP_FILE_NAME = "StudentConsumer";
 //  private static final String PROP_FILE_NAME = "BrokeredAttTrackerConsumer";
 	
 	private AdapterEnvironmentStore testGetEnvironmentStore(String propFileName)
@@ -45,6 +45,8 @@ public class TestAdapterEnvStore
 		
 		AdapterEnvironmentStore envStore = tester.testGetEnvironmentStore(PROP_FILE_NAME);
 		System.out.println("Adapter Environment Store for "+PROP_FILE_NAME+":\n"+envStore);
+		
+		System.out.println("Infra Namespace version mapping required = "+envStore.getEnvironment().mapInfraVersion());
 		
 		System.out.println("End Testing AdapterEnvironmentStore.");
 	}
