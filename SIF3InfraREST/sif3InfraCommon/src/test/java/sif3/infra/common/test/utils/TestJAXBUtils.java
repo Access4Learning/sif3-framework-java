@@ -275,6 +275,13 @@ public class TestJAXBUtils
         StudentPersonalType student = (StudentPersonalType) JAXBUtils.unmarshalFromXMLIntoObject(inputStudentXML, StudentPersonalType.class);
         System.out.println("Student Name: "+ student.getPersonInfo().getName().getGivenName().getValue());
     }
+    
+    
+    private String testGetDataModelNamespace()
+    {
+        // Attempt to get the namespace of a specific object
+        return JAXBUtils.getObjectNamespace(EnvironmentType.class);
+    }
 	
 	public static void main(String[] args)
 	{
@@ -295,12 +302,14 @@ public class TestJAXBUtils
 //      System.out.println("Environment JSON:\n" + envStrJSON);
 		  
 		  
-		  tester.testXMLToObjectToXML();
+//		  tester.testXMLToObjectToXML();
 //		  tester.testXMLToObjectToJSON();
 //			tester.testJSONToObjectToJSON();
 //			tester.testJSONToObjectToXML();
 //		  tester.testStudentUnicodeString();
 //		  tester.testStudentUnicodeFile();
+		  
+		  System.out.println("Infra Namespace: "+ tester.testGetDataModelNamespace());
 		}
 		catch (Exception ex)
 		{
