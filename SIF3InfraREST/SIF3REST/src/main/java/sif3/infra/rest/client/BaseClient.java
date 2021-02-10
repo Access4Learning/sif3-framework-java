@@ -68,6 +68,7 @@ import sif3.common.persist.model.ExternalSecurityService;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.security.AbstractSecurityService;
 import sif3.common.security.SecurityServiceFactory;
+import sif3.common.utils.JAXBUtils;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.BaseResponse;
 import sif3.common.ws.BulkOperationResponse;
@@ -120,7 +121,7 @@ public abstract class BaseClient
 	private boolean useCompression = false;
 	private ClientEnvironmentManager clientEnvMgr = null;
 	
-	private InfraDataModelMapper infraMapper = new InfraDataModelMapper();
+	private InfraDataModelMapper infraMapper = null;
 
 	/**
      * Constructor<br/>
@@ -133,6 +134,7 @@ public abstract class BaseClient
 	{
 		super();
         setClientEnvMgr(clientEnvMgr);
+        infraMapper = new InfraDataModelMapper(clientEnvMgr.getEnvironmentInfo());
 	}
 	
 	/**
@@ -164,6 +166,7 @@ public abstract class BaseClient
 		setResponsePayloadMetadata(responsePayloadMetadata, dmUnmarshaller);
 		setUseCompression(useCompression);
 		configureClienService(baseURI, secureConnection, getUseCompression());
+        infraMapper = new InfraDataModelMapper(clientEnvMgr.getEnvironmentInfo());
 		
 		logger.debug("Base URI for Call is: "+getBaseURI().toASCIIString());
 	}
@@ -728,7 +731,43 @@ public abstract class BaseClient
         }
     }
 	
-	/*
+    /*
+     * This method takes the given infrastructure data model payload and maps the namespace to the frameworks namespace,
+     * so that it can be marshalled properly.
+     */
+    protected String mapToFrameworkInfraVersion(String payload)
+    {
+//        logger.debug("Potentially map infranamespace version ...");
+        return JAXBUtils.mapNamespaceVersion(payload, getClientEnvMgr().getEnvironmentInfo().getBaseInfraNamespace(), getClientEnvMgr().getEnvironmentInfo().getFrameworkInfraVersion());
+    }
+
+    /**
+     * Checks if there is a infrastructure data model version mapping set. If it is then the version number will be
+     * returned. If none is set then null is returned.
+     * 
+     * @return See desc.
+     */
+    protected boolean mayRequireMapping()
+    {
+        return StringUtils.notEmpty(getClientEnvMgr().getEnvironmentInfo().getMappedInfraVersion());
+    }
+    
+    protected String mapInfraNamespaceVersionToEndpointVersion(String payload)
+    {
+        // We may have to map infra version number
+        String mappedVersionNum = getClientEnvMgr().getEnvironmentInfo().getMappedInfraVersion();
+        if (StringUtils.notEmpty(mappedVersionNum) && (payload != null))
+        {
+            logger.debug("Infra Namespace mapping might be required. Requested Namespace is: "+mappedVersionNum);
+            return JAXBUtils.mapNamespaceVersion(payload, getClientEnvMgr().getEnvironmentInfo().getBaseInfraNamespace(), mappedVersionNum);
+        }
+        else
+        {
+            return payload;
+        }
+    }
+
+    /*
      * Convenience method for calls that do not support DELAYED request/responses.
      */
     protected Response setResponse(WebResource service, ClientResponse clientResponse, Class<?> returnObjectClass, HeaderProperties requestHdrProps, SIFZone zone, SIFContext context, boolean zoneCtxSupported, Status... successStatusCodes)
@@ -767,6 +806,13 @@ public abstract class BaseClient
 					{
 						try
 						{
+						    // if we deal with infrastructure objects we may want to change the infra version to framework version
+						    if (getDataModelUnmarshaller() instanceof InfraUnmarshalFactory)
+						    {
+						        payload = mapToFrameworkInfraVersion(payload);
+						        //logger.debug("Payload after potential mapping: "+payload);
+						    }
+						    
 							// We must use the actual data model response type in the unmarshaller.
 							response.setDataObject(getDataModelUnmarshaller().unmarshal(payload, returnObjectClass, getResponsePayloadMetadata().getMimeType(), getResponsePayloadMetadata().getSchemaType()));
 							if (response.getDataObject() == null)// this is strange. So set the unmarshalled value.

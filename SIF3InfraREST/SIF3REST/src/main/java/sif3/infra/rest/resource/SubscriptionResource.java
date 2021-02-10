@@ -186,6 +186,7 @@ public class SubscriptionResource extends InfraResource
 			}
 			try
 			{
+                payload = mapToFrameworkInfraVersion(payload);
 				SubscriptionType inputSubscription = (SubscriptionType)getInfraUnmarshaller().unmarshal(payload, SubscriptionType.class, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 				inputSubscription.setId(UUIDGenerator.getUUID());
 				subscriptionsSet.put(inputSubscription.getId(), inputSubscription);

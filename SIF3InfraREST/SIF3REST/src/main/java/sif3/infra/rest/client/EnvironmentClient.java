@@ -59,7 +59,6 @@ public class EnvironmentClient extends BaseClient
 	 */
 	public EnvironmentClient(ClientEnvironmentManager clientEnvMgr, URI environmentURI, EnvironmentInfo envInfo)
 	{
-//		super(clientEnvMgr, environmentURI, envInfo.getMediaType(), envInfo.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), envInfo.getSecureConnection(), envInfo.getCompressionEnabled());
         super(clientEnvMgr, environmentURI, 
               envInfo.getInfraPayloadMetadata(),
               envInfo.getInfraPayloadMetadata(), 
@@ -89,6 +88,12 @@ public class EnvironmentClient extends BaseClient
 		{
 			service = buildURI(service, null);
 			String payloadStr = getDataModelMarshaller().marshal(template, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
+
+			// We may have to map infra version number
+			if (mayRequireMapping())
+			{
+			    payloadStr = mapInfraNamespaceVersionToEndpointVersion(payloadStr);
+			}
 
 			if (logger.isDebugEnabled())
 			{
@@ -159,7 +164,6 @@ public class EnvironmentClient extends BaseClient
 		}
 	}
 	
-
 	/**
 	 * This method will remove an environment given by the URI in the constructor. If the environment is removed it will return
 	 * true. In all other cases false will be returned and one has to assume the environment may still exist on the 

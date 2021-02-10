@@ -25,11 +25,13 @@ import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.model.PayloadMetadata;
+import sif3.common.utils.JAXBUtils;
 import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
 import sif3.common.ws.OperationStatus;
 import sif3.common.ws.model.MultiOperationStatusList;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
+import sif3.infra.common.env.types.EnvironmentInfo;
 import sif3.infra.common.model.CreateResponseType;
 import sif3.infra.common.model.CreateType;
 import sif3.infra.common.model.DeleteResponseType;
@@ -51,14 +53,36 @@ public class InfraDataModelMapper implements Serializable
 {
     private static final long serialVersionUID = -6153907819365178L;
     
+    
 	private InfraUnmarshalFactory infraUnmarshaller = new InfraUnmarshalFactory();
+	private EnvironmentInfo envInfo = null;
 
-	public ErrorDetails toErrorFromSIFErrorString(String payload, PayloadMetadata payloadMetadata, ErrorDetails defaultError)
+    public InfraDataModelMapper(EnvironmentInfo envInfo)
+    {
+        super();
+        setEnvInfo(envInfo);
+    }
+
+    public EnvironmentInfo getEnvInfo()
+    {
+        return envInfo;
+    }
+
+    public void setEnvInfo(EnvironmentInfo envInfo)
+    {
+        this.envInfo = envInfo;
+    }
+	
+    public ErrorDetails toErrorFromSIFErrorString(String payload, PayloadMetadata payloadMetadata, ErrorDetails defaultError)
 	{
 		ErrorDetails errorDetails = new ErrorDetails();
 		try
 		{
-			//Because ErrorType is a Infrastructure thing we must ensure we use a valid Infrastructure Unmarshaller Media Type
+		    // We may have to map the infra version to the framework version
+		    payload = mapToFrameworkInfraVersion(payload);
+		    //System.out.println("Payload after potential mapping: "+payload);
+		    
+		    //Because ErrorType is a Infrastructure thing we must ensure we use a valid Infrastructure Unmarshaller Media Type
 			ErrorType error = (ErrorType)getInfraUnmarshaller().unmarshal(payload, ErrorType.class, payloadMetadata.getMimeType(), payloadMetadata.getSchemaType());
 			if (error == null) // this is strange. So set the unmarshalled value.
 			{
@@ -98,7 +122,10 @@ public class InfraDataModelMapper implements Serializable
 		MultiOperationStatusList<CreateOperationStatus> statusList = new MultiOperationStatusList<CreateOperationStatus>();  
 		try
 		{						
-			//Because CreateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
+            // We may have to map the infra version to the framework version
+            payload = mapToFrameworkInfraVersion(payload);
+
+            //Because CreateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
 			CreateResponseType createManyResponse = (CreateResponseType)getInfraUnmarshaller().unmarshal(payload, CreateResponseType.class, payloadMetadata.getMimeType(), payloadMetadata.getSchemaType());
 			if (createManyResponse == null)// this is strange. So set the unmarshalled value.
 			{
@@ -139,7 +166,10 @@ public class InfraDataModelMapper implements Serializable
 		MultiOperationStatusList<OperationStatus> statusList = new MultiOperationStatusList<OperationStatus>();  
 		try
 		{						
-			//Because UpdateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
+            // We may have to map the infra version to the framework version
+            payload = mapToFrameworkInfraVersion(payload);
+
+            //Because UpdateResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
 			UpdateResponseType updateManyResponse = (UpdateResponseType)getInfraUnmarshaller().unmarshal(payload, UpdateResponseType.class, payloadMetadata.getMimeType(), payloadMetadata.getSchemaType());
 			if (updateManyResponse == null)// this is strange. So set the unmarshalled value.
 			{
@@ -180,7 +210,10 @@ public class InfraDataModelMapper implements Serializable
 		MultiOperationStatusList<OperationStatus> statusList = new MultiOperationStatusList<OperationStatus>();  
 		try
 		{						
-			//Because DeleteResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
+            // We may have to map the infra version to the framework version
+            payload = mapToFrameworkInfraVersion(payload);
+
+            //Because DeleteResponseType is a Infrastructure thing we must ensure we use the Infrastructure Unmarshaller
 			DeleteResponseType deleteManyResponse = (DeleteResponseType)getInfraUnmarshaller().unmarshal(payload, DeleteResponseType.class, payloadMetadata.getMimeType(), payloadMetadata.getSchemaType());
 			if (deleteManyResponse == null)// this is strange. So set the unmarshalled value.
 			{
@@ -219,7 +252,6 @@ public class InfraDataModelMapper implements Serializable
 	/*---------------------*/
 	/*-- Private Methods --*/
 	/*---------------------*/
-
 	private int toInt(String intStr)
 	{
 		try
@@ -245,4 +277,14 @@ public class InfraDataModelMapper implements Serializable
 	{
 		return infraUnmarshaller;
 	}
+
+    /*
+     * This method takes the given infrastructure data model payload and maps the namespace to the frameworks namespace,
+     * so that it can be marshalled properly.
+     */
+    private String mapToFrameworkInfraVersion(String payload)
+    {
+        return JAXBUtils.mapNamespaceVersion(payload, getEnvInfo().getBaseInfraNamespace(), getEnvInfo().getFrameworkInfraVersion());
+    }
+
 }

@@ -399,7 +399,7 @@ public abstract class BaseConsumer implements MinimalConsumer
         {
             String consumerID = getConsumerName()+" "+(i+1);
             logger.debug("Start Consumer "+consumerID);
-            LocalMessageConsumer consumer = new LocalMessageConsumer(getLocalConsumerQueue(), consumerID, this);
+            LocalMessageConsumer consumer = new LocalMessageConsumer(getLocalConsumerQueue(), consumerID, this, getConsumerEnvironment());
             service.getLinkedClasses().add(consumer);
             service.getService().execute(consumer);
        }

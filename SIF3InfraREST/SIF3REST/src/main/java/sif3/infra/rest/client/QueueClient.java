@@ -208,6 +208,13 @@ public class QueueClient extends BaseClient
 			HeaderProperties hdrProperties = getHeaderProperties();		
             hdrProperties = addSchemaHdrProps(hdrProperties, true, false);
 			String payloadStr = getInfraMarshaller().marshal(inputQueue, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
+
+	        // We may have to map infra version number
+            if (mayRequireMapping())
+            {
+                payloadStr = mapInfraNamespaceVersionToEndpointVersion(payloadStr);
+            }
+			
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("createQueue: Payload to send:\n"+payloadStr);
