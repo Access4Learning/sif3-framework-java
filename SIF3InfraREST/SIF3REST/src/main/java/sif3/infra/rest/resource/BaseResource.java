@@ -76,6 +76,7 @@ import sif3.common.persist.model.ExternalSecurityService;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.security.AbstractSecurityService;
 import sif3.common.utils.AuthenticationUtils;
+import sif3.common.utils.JAXBUtils;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
@@ -783,6 +784,7 @@ public abstract class BaseResource
 	    List<String> resourceIDs = new ArrayList<String>();
 	    if (deletePayload != null)
 	    {
+	        deletePayload = mapToFrameworkInfraVersion(deletePayload);
 	    	DeleteRequestType deletes = (DeleteRequestType)infraUnmarshaller.unmarshal(deletePayload, DeleteRequestType.class, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 	    	if ((deletes.getDeletes() != null) && (deletes.getDeletes().getDelete() != null))
 	    	{
@@ -852,6 +854,15 @@ public abstract class BaseResource
 	{
 	    return new ResponseParameters(getProviderEnvironment().getCustomResponseHeaders());
 	}   
+	
+    /*
+     * This method takes the given infrastructure data model payload and maps the namespace to the frameworks namespace,
+     * so that it can be marshalled properly.
+     */
+    protected String mapToFrameworkInfraVersion(String payload)
+    {
+        return JAXBUtils.mapNamespaceVersion(payload, getProviderEnvironment().getBaseInfraNamespace(), getProviderEnvironment().getFrameworkInfraVersion());
+    }
 
 	/*---------------------------------*/
 	/*-- Security Validation Methods --*/
@@ -1729,16 +1740,25 @@ public abstract class BaseResource
      * default to the first one and assume it is the correct one, similar as we do with the media type. Note this can be null
      * where the consumer has not indicated what it can deal with. In such a case we need to get the framework's default value.
      */
-    private SchemaInfo getResponseSchemaInfo(List<PayloadMetadata> payloadMetadataList, boolean dmSchema)
+    private SchemaInfo getResponseSchemaInfo(List<PayloadMetadata> payloadMetadataList, boolean dmSchema, String mappedVersionNumber)
     {
+        SchemaInfo finalSchemaInfo = null;
         if ((payloadMetadataList != null) && (payloadMetadataList.size() > 0) && (payloadMetadataList.get(0).getSchemaInfo() != null))
         {
-            return payloadMetadataList.get(0).getSchemaInfo();
+            finalSchemaInfo = payloadMetadataList.get(0).getSchemaInfo();
         }
         else // no schema info found so we try to determine best fit
         {
-            return getBestFitSchamaInfo(dmSchema);
+            finalSchemaInfo = getBestFitSchamaInfo(dmSchema);
         }
+        // if we deal with a infrastructure payload then we may have applied a version number mapping which in turn means the
+        // schema info needs to reflect that as well!
+        if ((!dmSchema) && StringUtils.notEmpty(mappedVersionNumber) && (finalSchemaInfo != null))
+        {
+            finalSchemaInfo.setModelVersion(mappedVersionNumber);
+        }
+        
+        return finalSchemaInfo;
     }
     
     /**
@@ -1746,14 +1766,36 @@ public abstract class BaseResource
      * first indicated one will be returned assuming it is set. If it isn't set the FW settings will be use.
      * 
      * @param dmSchema TRUE: Get the schema for the locale data model. FALSE: Get the schema for the infrastructure data model
+     * @param mappedVersionNumber If set then the schema version might be overridden with that number instead of the framework
+     *                            version number. Can be null which mean no overriding will occur.
      * 
      * @return The schema indicated by the original request for either the data model or the infrastructure. In most cases that is the
      *         same but for functional services or dynamic queries they could be different.
      */
-    public SchemaInfo getResponseSchemaInfo(boolean dmSchema)
+    public SchemaInfo getResponseSchemaInfo(boolean dmSchema, String mappedVersionNumber)
     {
-        return getResponseSchemaInfo(dmSchema ? getDmResponsePayloadMetadata() : getInfraResponsePayloadMetadata(), dmSchema);
+        return getResponseSchemaInfo(dmSchema ? getDmResponsePayloadMetadata() : getInfraResponsePayloadMetadata(), dmSchema, mappedVersionNumber);
     }
+    
+    /**
+     * Checks if there is a infrastructure data model version mapping set. If it is then the version number will be
+     * returned. If none is set then null is returned.
+     * 
+     * @return See desc.
+     */
+    public String getMappedInfraVersionNumber()
+    {
+        if (isDirectEnvironment())
+        {
+            SIF3Session session = getSIF3SessionForRequest(); // can return null if there is no authorisation header!
+            return (session != null) ? session.getInfraVersion() : null;
+        }
+        else
+        {
+            return getEnvironmentManager().getEnvironmentInfo().getMappedInfraVersion();
+        }
+    }
+
     
     /**
      * Retrieve the most applicable response media type for either the local data model or the infrastructure data model. This will
@@ -1852,6 +1894,11 @@ public abstract class BaseResource
 	{
 		ResponseBuilder response = null;
 		HeaderProperties allHeaders = ((customResponseParams != null) && (customResponseParams.getHttpHeaderParams() != null)) ? customResponseParams.getHttpHeaderParams() : new HeaderProperties();   
+
+		// Is there version mapping for infrastructure? Never do it for locale DM
+		String mappedVersion = isDMResponse ? null : getMappedInfraVersionNumber();
+		
+		getMappedInfraVersionNumber();
 		try
 		{
 			// Special case to avoid infinite loop: We deal with an error and the Status Code is of UNSUPPORTED_MEDIA_TYPE. This means we attempted
@@ -1885,7 +1932,7 @@ public abstract class BaseResource
 				{
 					// We may deal with an error here. We must ensure that the media type for the response is valid.
 					MediaType finalMediaType = getResponseMediaType(isDMResponse);
-					SchemaInfo finalSchemaInfo = getResponseSchemaInfo(isDMResponse);
+					SchemaInfo finalSchemaInfo = getResponseSchemaInfo(isDMResponse, mappedVersion);
 					
 					if (isError)// deal with the error => marshaller is the infrastructure marshaller. 
 					{
@@ -1907,6 +1954,15 @@ public abstract class BaseResource
 					if (!isAlreadyMarshalled) // if not marshalled then do it now
 					{
 					    payload = marshaller.marshal(data, finalMediaType, ((finalSchemaInfo == null) ? null : finalSchemaInfo.getSchemaTypeAsEnum()));
+
+	                    if (!isDMResponse) // we deal with infrastructure data model
+	                    {
+	                        if (StringUtils.notEmpty(mappedVersion)) // potentially we need to map
+	                        {
+	                            logger.debug("Infra Namespace mapping might be required. Requested Namespace is: "+mappedVersion);
+	                            payload = JAXBUtils.mapNamespaceVersion(payload, getEnvironmentManager().getEnvironmentInfo().getBaseInfraNamespace(), mappedVersion);
+	                        }
+	                    }
 					}
 					//System.out.println("==============================\nRespopnse Payload:\n"+payload+"\nSize String= "+payload.length()+"\nSize Bytes = "+payload.getBytes("UTF-8").length+"\n==============================");				
 					
@@ -1922,7 +1978,7 @@ public abstract class BaseResource
                     // Check if also need to set schema info header.
                     if (isSchemaAware())
                     {
-                        setContentSchemaHeader(getResponseSchemaInfo(isDMResponse), allHeaders);
+                        setContentSchemaHeader(getResponseSchemaInfo(isDMResponse, mappedVersion), allHeaders);
                     }
 				}
 				else // we have no data
@@ -1950,9 +2006,9 @@ public abstract class BaseResource
     					{
                             if (isSchemaAware())
                             {
-                                //TODO: JH - The full implementation should also hold the "Link" header to indictate the potential 
-                                //           Infra data model where this response is a DM response (see section 3.3 of Vesrions Spec).
-                                setContentSchemaHeader(getResponseSchemaInfo(isDMResponse), allHeaders);
+                                //TODO: JH - The full implementation should also hold the "Link" header to indicate the potential 
+                                //           Infra data model where this response is a DM response (see section 3.3 of Versions Spec).
+                                setContentSchemaHeader(getResponseSchemaInfo(isDMResponse, mappedVersion), allHeaders);
                             }
     					}
 				    }

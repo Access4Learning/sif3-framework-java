@@ -25,6 +25,7 @@ import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.model.ResponseParameters;
 import sif3.common.model.SchemaInfo;
+import sif3.common.utils.JAXBUtils;
 import sif3.common.ws.ErrorDetails;
 import sif3.infra.common.conversion.InfraMarshalFactory;
 import sif3.infra.common.conversion.InfraUnmarshalFactory;
@@ -87,7 +88,7 @@ public abstract class InfraResource extends BaseResource
     {
         return getEnvironmentManager().getEnvironmentInfo().getInfraPayloadMetadata().getSchemaInfo();
     }
-
+    
 //	protected boolean isTestMode()
 //	{
 //		if (testMode == null)

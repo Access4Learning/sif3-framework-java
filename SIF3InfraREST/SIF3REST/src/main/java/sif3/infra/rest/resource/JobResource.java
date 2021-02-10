@@ -190,6 +190,7 @@ public class JobResource extends InfraResource
         JobType payloadJob = null;
         try
         {
+            payload = mapToFrameworkInfraVersion(payload);
             payloadJob = (JobType)getInfraUnmarshaller().unmarshal(payload, JobType.class, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
         }
         catch (Exception ex)
@@ -257,6 +258,7 @@ public class JobResource extends InfraResource
         JobCollectionType payloadJobs = null;
         try
         {
+            payload = mapToFrameworkInfraVersion(payload);
             payloadJobs = (JobCollectionType)getInfraUnmarshaller().unmarshal(payload, JobCollectionType.class, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
         }
         catch (Exception ex)
@@ -669,20 +671,20 @@ public class JobResource extends InfraResource
                 ex.getErrorDetails().setScope("Provider ("+getJobNamePlural()+")");
             }
             ex.getErrorDetails().setDescription("Cannot retrieve data for phase "+phaseName+". Reason: "+ex.getErrorDetails().getDescription());
-            return makeErrorResponse(ex.getErrorDetails(), ResponseAction.QUERY, responseParam, getResponseSchemaInfo(true));
+            return makeErrorResponse(ex.getErrorDetails(), ResponseAction.QUERY, responseParam, getResponseSchemaInfo(true, null));
         }
         
         FunctionalServiceProvider provider = getFSProvider();
         if (provider == null) // error already logged but we must return an error response for the caller
         {
-            return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Missing Functional Service Provider", "No Provider for "+getJobNamePlural()+" available.", "Provider"), ResponseAction.QUERY, responseParam, getResponseSchemaInfo(true));
+            return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Missing Functional Service Provider", "No Provider for "+getJobNamePlural()+" available.", "Provider"), ResponseAction.QUERY, responseParam, getResponseSchemaInfo(true, null));
         }
         
         RequestMetadata requestMetadata = getRequestMetadata(getSIF3SessionForRequest(), true);
         ErrorDetails error = checkPhasePermission(jobInfo, phaseName, AccessRight.QUERY, provider, requestMetadata.getFingerprint(), true, false);
         if (error != null) // Not allowed to access!
         {
-            return makeErrorResponse(error, ResponseAction.QUERY, responseParam, getResponseSchemaInfo(true));
+            return makeErrorResponse(error, ResponseAction.QUERY, responseParam, getResponseSchemaInfo(true, null));
         }
         
         // If all of the above is ok then we can start the real work...
@@ -704,11 +706,11 @@ public class JobResource extends InfraResource
         }
         catch (PersistenceException ex)
         {
-            return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not retrieve data from Job Phase.", "Failed to retrieve data for Job Phase "+getJobNamePlural()+"/"+phaseName+" with Paging Information: "+pagingInfo+" (Job ID = "+jobID+"). Problem reported: "+ex.getMessage(), "Provider ("+provider.getClass().getSimpleName()+")"), ResponseAction.QUERY, responseParam, getResponseSchemaInfo(true));         
+            return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not retrieve data from Job Phase.", "Failed to retrieve data for Job Phase "+getJobNamePlural()+"/"+phaseName+" with Paging Information: "+pagingInfo+" (Job ID = "+jobID+"). Problem reported: "+ex.getMessage(), "Provider ("+provider.getClass().getSimpleName()+")"), ResponseAction.QUERY, responseParam, getResponseSchemaInfo(true, null));         
         }
         catch (UnsupportedMediaTypeExcpetion ex)
         {
-            return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not retrieve data from Job Phase.", "Failed to retrieve data for Job Phase "+getJobNamePlural()+"/"+phaseName+" with Paging Information: "+pagingInfo+" (Job ID = "+jobID+"). Requested Mime type "+getResponseMediaType(true).toString()+" is not supported: "+ex.getMessage(), "Provider ("+provider.getClass().getSimpleName()+")"), ResponseAction.QUERY, responseParam, getResponseSchemaInfo(true));           
+            return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not retrieve data from Job Phase.", "Failed to retrieve data for Job Phase "+getJobNamePlural()+"/"+phaseName+" with Paging Information: "+pagingInfo+" (Job ID = "+jobID+"). Requested Mime type "+getResponseMediaType(true).toString()+" is not supported: "+ex.getMessage(), "Provider ("+provider.getClass().getSimpleName()+")"), ResponseAction.QUERY, responseParam, getResponseSchemaInfo(true, null));           
         }
         catch (SIFException ex)
         {
@@ -716,7 +718,7 @@ public class JobResource extends InfraResource
             {
                 ex.getErrorDetails().setScope("Provider ("+getJobNamePlural()+")");
             }
-            return makeErrorResponse(ex.getErrorDetails(), ResponseAction.QUERY, responseParam, getResponseSchemaInfo(true));
+            return makeErrorResponse(ex.getErrorDetails(), ResponseAction.QUERY, responseParam, getResponseSchemaInfo(true, null));
         }
     }
 
@@ -750,20 +752,20 @@ public class JobResource extends InfraResource
                 ex.getErrorDetails().setScope("Provider ("+getJobNamePlural()+")");
             }
             ex.getErrorDetails().setDescription("Cannot create data for phase "+phaseName+". Reason: "+ex.getErrorDetails().getDescription());
-            return makeErrorResponse(ex.getErrorDetails(), ResponseAction.CREATE, responseParam, getResponseSchemaInfo(true));
+            return makeErrorResponse(ex.getErrorDetails(), ResponseAction.CREATE, responseParam, getResponseSchemaInfo(true, null));
         }
         
         FunctionalServiceProvider provider = getFSProvider();
         if (provider == null) // error already logged but we must return an error response for the caller
         {
-            return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Missing Functional Service Provider", "No Provider for "+getJobNamePlural()+" available.", "Provider"), ResponseAction.CREATE, responseParam, getResponseSchemaInfo(true));
+            return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Missing Functional Service Provider", "No Provider for "+getJobNamePlural()+" available.", "Provider"), ResponseAction.CREATE, responseParam, getResponseSchemaInfo(true, null));
         }
         
         RequestMetadata requestMetadata = getRequestMetadata(getSIF3SessionForRequest(), false);
         ErrorDetails error = checkPhasePermission(jobInfo, phaseName, AccessRight.CREATE, provider, requestMetadata.getFingerprint(), true, false);
         if (error != null) // Not allowed to access!
         {
-            return makeErrorResponse(error, ResponseAction.CREATE, responseParam, getResponseSchemaInfo(true));
+            return makeErrorResponse(error, ResponseAction.CREATE, responseParam, getResponseSchemaInfo(true, null));
         }
         
         // If all of the above is ok then we can start the real work...
@@ -776,15 +778,15 @@ public class JobResource extends InfraResource
                 finalStatus = response.getStatus();
             }
             
-            return makeResponse((response != null ? response.getData() : null), true, finalStatus.getStatusCode(), false, ResponseAction.CREATE, responseParam, null, getResponseSchemaInfo(true));
+            return makeResponse((response != null ? response.getData() : null), true, finalStatus.getStatusCode(), false, ResponseAction.CREATE, responseParam, null, getResponseSchemaInfo(true, null));
         }
         catch (PersistenceException ex)
         {
-            return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not create data in Job Phase.", "Failed to create data for Job Phase "+getJobNamePlural()+"/"+phaseName+" (Job ID = "+jobID+"). Problem reported: "+ex.getMessage(), "Provider ("+provider.getClass().getSimpleName()+")"), ResponseAction.CREATE, responseParam, getResponseSchemaInfo(true));         
+            return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not create data in Job Phase.", "Failed to create data for Job Phase "+getJobNamePlural()+"/"+phaseName+" (Job ID = "+jobID+"). Problem reported: "+ex.getMessage(), "Provider ("+provider.getClass().getSimpleName()+")"), ResponseAction.CREATE, responseParam, getResponseSchemaInfo(true, null));         
         }
         catch (UnsupportedMediaTypeExcpetion ex)
         {
-            return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not create data in Job Phase.", "Failed to create data for Job Phase "+getJobNamePlural()+"/"+phaseName+" (Job ID = "+jobID+"). Requested Mime type "+getResponseMediaType(true).toString()+" is not supported: "+ex.getMessage(), "Provider ("+provider.getClass().getSimpleName()+")"), ResponseAction.CREATE, responseParam, getResponseSchemaInfo(true));           
+            return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not create data in Job Phase.", "Failed to create data for Job Phase "+getJobNamePlural()+"/"+phaseName+" (Job ID = "+jobID+"). Requested Mime type "+getResponseMediaType(true).toString()+" is not supported: "+ex.getMessage(), "Provider ("+provider.getClass().getSimpleName()+")"), ResponseAction.CREATE, responseParam, getResponseSchemaInfo(true, null));           
         }
         catch (SIFException ex)
         {
@@ -792,7 +794,7 @@ public class JobResource extends InfraResource
             {
                 ex.getErrorDetails().setScope("Provider ("+getJobNamePlural()+")");
             }
-            return makeErrorResponse(ex.getErrorDetails(), ResponseAction.CREATE, responseParam, getResponseSchemaInfo(true));
+            return makeErrorResponse(ex.getErrorDetails(), ResponseAction.CREATE, responseParam, getResponseSchemaInfo(true, null));
         }
     }
     
@@ -839,20 +841,20 @@ public class JobResource extends InfraResource
                 ex.getErrorDetails().setScope("Provider ("+getJobNamePlural()+")");
             }
             ex.getErrorDetails().setDescription("Cannot "+right.name()+" data for phase "+phaseName+". Reason: "+ex.getErrorDetails().getDescription());
-            return makeErrorResponse(ex.getErrorDetails(), responseAction, responseParam, getResponseSchemaInfo(true));
+            return makeErrorResponse(ex.getErrorDetails(), responseAction, responseParam, getResponseSchemaInfo(true, null));
         }
         
         FunctionalServiceProvider provider = getFSProvider();
         if (provider == null) // error already logged but we must return an error response for the caller
         {
-            return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Missing Functional Service Provider", "No Provider for "+getJobNamePlural()+" available.", "Provider"), responseAction, responseParam, getResponseSchemaInfo(true));
+            return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Missing Functional Service Provider", "No Provider for "+getJobNamePlural()+" available.", "Provider"), responseAction, responseParam, getResponseSchemaInfo(true, null));
         }
         
         RequestMetadata requestMetadata = getRequestMetadata(getSIF3SessionForRequest(), false);
         ErrorDetails error = checkPhasePermission(jobInfo, phaseName, right, provider, requestMetadata.getFingerprint(), true, false);
         if (error != null) // Not allowed to access!
         {
-            return makeErrorResponse(error, responseAction, responseParam, getResponseSchemaInfo(true));
+            return makeErrorResponse(error, responseAction, responseParam, getResponseSchemaInfo(true, null));
         }
         
         // If all of the above is ok then we can start the real work...
@@ -876,15 +878,15 @@ public class JobResource extends InfraResource
                 finalStatus = response.getStatus();
             }
             
-            return makeResponse((response != null ? response.getData() : null), true, finalStatus.getStatusCode(), false, responseAction, responseParam, null, getResponseSchemaInfo(true));
+            return makeResponse((response != null ? response.getData() : null), true, finalStatus.getStatusCode(), false, responseAction, responseParam, null, getResponseSchemaInfo(true, null));
         }
         catch (PersistenceException ex)
         {
-            return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not "+responseAction.name()+" data in Job Phase.", "Failed to "+responseAction.name()+" data for Job Phase "+getJobNamePlural()+"/"+phaseName+" (Job ID = "+jobID+"). Problem reported: "+ex.getMessage(), "Provider ("+provider.getClass().getSimpleName()+")"), responseAction, responseParam, getResponseSchemaInfo(true));         
+            return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Could not "+responseAction.name()+" data in Job Phase.", "Failed to "+responseAction.name()+" data for Job Phase "+getJobNamePlural()+"/"+phaseName+" (Job ID = "+jobID+"). Problem reported: "+ex.getMessage(), "Provider ("+provider.getClass().getSimpleName()+")"), responseAction, responseParam, getResponseSchemaInfo(true, null));         
         }
         catch (UnsupportedMediaTypeExcpetion ex)
         {
-            return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not "+responseAction.name()+" data in Job Phase.", "Failed to "+responseAction.name()+" data for Job Phase "+getJobNamePlural()+"/"+phaseName+" (Job ID = "+jobID+"). Requested Mime type "+getResponseMediaType(true).toString()+" is not supported: "+ex.getMessage(), "Provider ("+provider.getClass().getSimpleName()+")"), responseAction, responseParam, getResponseSchemaInfo(true));           
+            return makeErrorResponse(new ErrorDetails(Status.BAD_REQUEST.getStatusCode(), "Could not "+responseAction.name()+" data in Job Phase.", "Failed to "+responseAction.name()+" data for Job Phase "+getJobNamePlural()+"/"+phaseName+" (Job ID = "+jobID+"). Requested Mime type "+getResponseMediaType(true).toString()+" is not supported: "+ex.getMessage(), "Provider ("+provider.getClass().getSimpleName()+")"), responseAction, responseParam, getResponseSchemaInfo(true, null));           
         }
         catch (SIFException ex)
         {
@@ -892,7 +894,7 @@ public class JobResource extends InfraResource
             {
                 ex.getErrorDetails().setScope("Provider ("+getJobNamePlural()+")");
             }
-            return makeErrorResponse(ex.getErrorDetails(), responseAction, responseParam, getResponseSchemaInfo(true));
+            return makeErrorResponse(ex.getErrorDetails(), responseAction, responseParam, getResponseSchemaInfo(true, null));
         }
     }
     
@@ -1022,6 +1024,7 @@ public class JobResource extends InfraResource
         StateType state = null;
         try
         {
+            payload = mapToFrameworkInfraVersion(payload);
             state = (StateType)getInfraUnmarshaller().unmarshal(payload, StateType.class, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
             if (state.getType() == null) // not a valid value! Most likely invalid state string received.
             {

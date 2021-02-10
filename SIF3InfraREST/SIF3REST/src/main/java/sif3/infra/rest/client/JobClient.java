@@ -148,6 +148,13 @@ public class JobClient extends BaseClient
         try
         {
             String payloadStr = getInfraMarshaller().marshal(job, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
+
+            // We may have to map infra version number
+            if (mayRequireMapping())
+            {
+                payloadStr = mapInfraNamespaceVersionToEndpointVersion(payloadStr);
+            }
+
             if (logger.isDebugEnabled())
             {
                 logger.debug("createJob: Payload to send:\n"+payloadStr);
@@ -219,6 +226,11 @@ public class JobClient extends BaseClient
         try
         {
             String payloadStr = getInfraMarshaller().marshal(jobs, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
+            // We may have to map infra version number
+            if (mayRequireMapping())
+            {
+                payloadStr = mapInfraNamespaceVersionToEndpointVersion(payloadStr);
+            }
             if (logger.isDebugEnabled())
             {
                 logger.debug("createJob: Payload to send:\n"+payloadStr);
@@ -411,6 +423,12 @@ public class JobClient extends BaseClient
                 }
             }
             String payloadStr = getInfraMarshaller().marshal(deleteRequest, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
+
+            // We may have to map infra version number
+            if (mayRequireMapping())
+            {
+                payloadStr = mapInfraNamespaceVersionToEndpointVersion(payloadStr);
+            }
             
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
             hdrProperties = addSchemaHdrProps(hdrProperties, true, false);
@@ -829,6 +847,12 @@ public class JobClient extends BaseClient
             StateType newPhaseState = new StateType();
             newPhaseState.setType(PhaseStateType.valueOf(newState.name()));
             String payloadStr = getInfraMarshaller().marshal(newPhaseState, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
+
+            // We may have to map infra version number
+            if (mayRequireMapping())
+            {
+                payloadStr = mapInfraNamespaceVersionToEndpointVersion(payloadStr);
+            }
             if (logger.isDebugEnabled())
             {
                 logger.debug("Phase State: Payload to send:\n"+payloadStr);

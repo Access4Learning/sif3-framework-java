@@ -125,6 +125,7 @@ public class EnvironmentResource extends InfraResource
 		  
 			if (StringUtils.notEmpty(payload))
 			{
+			    payload = mapToFrameworkInfraVersion(payload);
 				inputEnv = (EnvironmentType) getInfraUnmarshaller().unmarshal(payload, EnvironmentType.class, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 			}
 			else // check if we have the environment information as URL query parameters
@@ -264,11 +265,7 @@ public class EnvironmentResource extends InfraResource
 			return makeInfraErrorResponse(new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), "Not Authorized.", ex.getMessage()), ResponseAction.QUERY, getInitialCustomResponseParameters());
 		}
 		
-		// token already validated by getBearerTokenInfo() method above
-//		ErrorDetails errors = validSession(getAuthInfo(), false, tokenInfo);
-		
 		ErrorDetails errors = validateSession(false);
-		
 		if (errors == null)
 		{
   			// If we get here then a session exists for the given security token and is now in the session 
