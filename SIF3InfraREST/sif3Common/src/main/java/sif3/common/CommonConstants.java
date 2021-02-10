@@ -86,6 +86,8 @@ public class CommonConstants
 	
 	/* default context */
 	public static final SIFContext DEFAULT_CONTEXT = new SIFContext(DEFAULT_CONTEXT_NAME, true);
+	
+	public static final String BASE_INFRA_NAMESPACE = "http://www.sifassociation.org/infrastructure/";
 
 	/*----------------------------------------------------------------------*/
 	/* Paging related Enum Types that can be either header or query params. */
