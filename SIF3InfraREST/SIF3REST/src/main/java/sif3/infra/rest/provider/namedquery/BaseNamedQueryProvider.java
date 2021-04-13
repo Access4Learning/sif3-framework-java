@@ -66,7 +66,6 @@ public abstract class BaseNamedQueryProvider extends CoreProvider implements Nam
     @Override
     public MarshalFactory getMarshaller()
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -76,7 +75,6 @@ public abstract class BaseNamedQueryProvider extends CoreProvider implements Nam
     @Override
     public UnmarshalFactory getUnmarshaller()
     {
-        // TODO Auto-generated method stub
         return null;
     }
 

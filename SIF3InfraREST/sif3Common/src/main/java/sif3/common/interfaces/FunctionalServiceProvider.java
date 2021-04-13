@@ -18,8 +18,6 @@
 
 package sif3.common.interfaces;
 
-import javax.ws.rs.core.MediaType;
-
 import sif3.common.CommonConstants.JobState;
 import sif3.common.CommonConstants.PhaseState;
 import sif3.common.exception.DataTooLargeException;
@@ -29,6 +27,7 @@ import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
@@ -141,17 +140,18 @@ public interface FunctionalServiceProvider extends DataModelLink
      *                             sets the HTTP Header of a well defined SIF3 HTTP Header (i.e. providerId, timestamp) then the framework
      *                             may override these with its own value to ensure the correct use and workings of the framework. It is the
      *                             developer who will populate the object. When it is passed to this method it not null but empty.
-     * @param returnMimeType The mime type the response data is in. It is expected that the consumer provides that and the provider
-     *                       should attempt to marshal the data to the given mime type and return the resulting string as
-     *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
-     *                       UnsupportedMediaTypeExcpetion must be raised.
+     * @param returnPayloadMetadata The mime type and optional schema info the response data is expected to be returned as. 
+     *                              It is expected that the consumer provides that and the provider should attempt to marshal the data
+     *                              to the given mime type, potentially using the given schema info, and return the resulting string
+     *                              in the requested format. If the provider cannot marshal the data to the requested mime type then an
+     *                              UnsupportedMediaTypeExcpetion must be raised.
      *                       
      * @return The response data (result set) with its mime type. It can be null indicating no or no further data available. 
      *         The returned string should be the marshalled value of the result set and it should be in the mime type as 
      *         indicated in the returnMimeType parameter. The status of the return value will be set by the framework and will be
      *         either HTTP 200 (OK) when data is returned or HTTP 204 (No Content) if there is no further data available.
      *                       
-     * @throws UnsupportedMediaTypeExcpetion The provider cannot support the requested return media type.
+     * @throws UnsupportedMediaTypeExcpetion The provider cannot support the requested return media type and/or schema.
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
      * @throws DataTooLargeException If the data that shall be returned is too large due to the values in the paging info.
@@ -163,8 +163,8 @@ public interface FunctionalServiceProvider extends DataModelLink
                                                    SIFContext context, 
                                                    PagingInfo pagingInfo, 
                                                    RequestMetadata metadata, 
-                                                   ResponseParameters customResponseParams, 
-                                                   MediaType returnMimeType)
+                                                   ResponseParameters customResponseParams,
+                                                   PayloadMetadata returnPayloadMetadata)
             throws PersistenceException, UnsupportedMediaTypeExcpetion, DataTooLargeException, SIFException;
     
     /**
@@ -199,11 +199,11 @@ public interface FunctionalServiceProvider extends DataModelLink
      *                             sets the HTTP Header of a well defined SIF3 HTTP Header (i.e. providerId, timestamp) then the framework
      *                             may override these with its own value to ensure the correct use and workings of the framework. It is the
      *                             developer who will populate the object. When it is passed to this method it not null but empty.
-     * @param returnMimeType The mime type the PhaseDataResponse.data is in. It is expected that the consumer provides that and 
-     *                       the provider if it expects data to be returned as part of this operation. The provider should attempt 
-     *                       to marshal the PhaseDataResponse.data to the given mime type and return the resulting data as
-     *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
-     *                       UnsupportedMediaTypeExcpetion must be raised.
+     * @param returnPayloadMetadata The mime type and optional schema info PhaseDataResponse.data is expected to be returned as. 
+     *                              It is expected that the consumer provides that and the provider should attempt to marshal the 
+     *                              PhaseDataResponse.data to the given mime type, potentially using the given schema info, and return 
+     *                              the resulting string in the requested format. If the provider cannot marshal the data to the requested 
+     *                              mime type then an UnsupportedMediaTypeExcpetion must be raised.
      * 
      * @return The response data of this operation with its mime type. It can be null if no data shall be returned. In this case
      *         the HTTP Status of 201 (Created) will be returned to the consumer. The returned PhaseDataResponse.data string if not
@@ -212,7 +212,7 @@ public interface FunctionalServiceProvider extends DataModelLink
      *         
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
-     * @throws UnsupportedMediaTypeExcpetion The provider cannot support the requested media type.
+     * @throws UnsupportedMediaTypeExcpetion The provider cannot support the requested media type and/or schema.
      * @throws SIFException Any other exception the implementation of that class wants to throw. This will be translated into proper
      *                      SIF Error message that will be returned to the consumer.
      */
@@ -222,8 +222,8 @@ public interface FunctionalServiceProvider extends DataModelLink
                                                SIFZone zone, 
                                                SIFContext context, 
                                                RequestMetadata metadata, 
-                                               ResponseParameters customResponseParams, 
-                                               MediaType returnMimeType) 
+                                               ResponseParameters customResponseParams,
+                                               PayloadMetadata returnPayloadMetadata) 
             throws PersistenceException, UnsupportedMediaTypeExcpetion, SIFException;
 
     /**
@@ -256,11 +256,11 @@ public interface FunctionalServiceProvider extends DataModelLink
      *                             sets the HTTP Header of a well defined SIF3 HTTP Header (i.e. providerId, timestamp) then the framework
      *                             may override these with its own value to ensure the correct use and workings of the framework. It is the
      *                             developer who will populate the object. When it is passed to this method it not null but empty.
-     * @param returnMimeType The mime type the PhaseDataResponse.data is in. It is expected that the consumer provides that and 
-     *                       the provider if it expects data to be returned as part of this operation. The provider should attempt 
-     *                       to marshal the PhaseDataResponse.data to the given mime type and return the resulting data as
-     *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
-     *                       UnsupportedMediaTypeExcpetion must be raised.
+     * @param returnPayloadMetadata The mime type and optional schema info PhaseDataResponse.data is expected to be returned as. 
+     *                              It is expected that the consumer provides that and the provider should attempt to marshal the 
+     *                              PhaseDataResponse.data to the given mime type, potentially using the given schema info, and return 
+     *                              the resulting string in the requested format. If the provider cannot marshal the data to the requested 
+     *                              mime type then an UnsupportedMediaTypeExcpetion must be raised.
      * 
      * @return The response data of this operation with its mime type. It can be null if no data shall be returned. In this case
      *         the HTTP Status of 200 (Ok) will be returned to the consumer. The returned PhaseDataResponse.data string if not
@@ -269,7 +269,7 @@ public interface FunctionalServiceProvider extends DataModelLink
      *         
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
-     * @throws UnsupportedMediaTypeExcpetion The provider cannot support the requested media type.
+     * @throws UnsupportedMediaTypeExcpetion The provider cannot support the requested media type and/or schema.
      * @throws SIFException Any other exception the implementation of that class wants to throw. This will be translated into proper
      *                      SIF Error message that will be returned to the consumer.
      */
@@ -279,7 +279,7 @@ public interface FunctionalServiceProvider extends DataModelLink
                                                SIFContext context, 
                                                RequestMetadata metadata, 
                                                ResponseParameters customResponseParams, 
-                                               MediaType returnMimeType) 
+                                               PayloadMetadata returnPayloadMetadata) 
             throws PersistenceException, UnsupportedMediaTypeExcpetion, SIFException;
 
     /**
@@ -312,11 +312,11 @@ public interface FunctionalServiceProvider extends DataModelLink
      *                             sets the HTTP Header of a well defined SIF3 HTTP Header (i.e. providerId, timestamp) then the framework
      *                             may override these with its own value to ensure the correct use and workings of the framework. It is the
      *                             developer who will populate the object. When it is passed to this method it not null but empty.
-     * @param returnMimeType The mime type the PhaseDataResponse.data is in. It is expected that the consumer provides that and 
-     *                       the provider if it expects data to be returned as part of this operation. The provider should attempt 
-     *                       to marshal the PhaseDataResponse.data to the given mime type and return the resulting data as
-     *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
-     *                       UnsupportedMediaTypeExcpetion must be raised.
+     * @param returnPayloadMetadata The mime type and optional schema info PhaseDataResponse.data is expected to be returned as. 
+     *                              It is expected that the consumer provides that and the provider should attempt to marshal the 
+     *                              PhaseDataResponse.data to the given mime type, potentially using the given schema info, and return 
+     *                              the resulting string in the requested format. If the provider cannot marshal the data to the requested 
+     *                              mime type then an UnsupportedMediaTypeExcpetion must be raised.
      * 
      * @return The response data of this operation with its mime type. It can be null if no data shall be returned. In this case
      *         the HTTP Status of 204 (No Content) will be returned to the consumer. The returned PhaseDataResponse.data string if not
@@ -325,7 +325,7 @@ public interface FunctionalServiceProvider extends DataModelLink
      *         
      * @throws PersistenceException Persistence Store could not be accessed successfully. An error log entry is performed and the 
      *                              message of the exceptions holds some info.
-     * @throws UnsupportedMediaTypeExcpetion The provider cannot support the requested media type.
+     * @throws UnsupportedMediaTypeExcpetion The provider cannot support the requested media type and/or schema.
      * @throws SIFException Any other exception the implementation of that class wants to throw. This will be translated into proper
      *                      SIF Error message that will be returned to the consumer.
      */
@@ -335,7 +335,7 @@ public interface FunctionalServiceProvider extends DataModelLink
                                                SIFContext context, 
                                                RequestMetadata metadata, 
                                                ResponseParameters customResponseParams, 
-                                               MediaType returnMimeType) 
+                                               PayloadMetadata returnPayloadMetadata) 
             throws PersistenceException, UnsupportedMediaTypeExcpetion, SIFException;
 	
 	/*----------------------------------------------------------------------------------*/

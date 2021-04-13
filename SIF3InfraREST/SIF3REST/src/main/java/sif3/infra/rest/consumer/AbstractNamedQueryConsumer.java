@@ -40,14 +40,17 @@ import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.HeaderValues.ResponseAction;
 import sif3.common.header.HeaderValues.ServiceType;
+import sif3.common.header.ResponseHeaderConstants;
 import sif3.common.interfaces.DelayedConsumer;
 import sif3.common.interfaces.NamedQueryConsumer;
 import sif3.common.model.ACL.AccessRight;
 import sif3.common.model.ACL.AccessType;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.QueryCriteria;
 import sif3.common.model.QueryTemplateInfo;
+import sif3.common.model.SchemaInfo;
 import sif3.common.model.ServiceInfo;
 import sif3.common.model.StringPayload;
 import sif3.common.model.URLQueryParameter;
@@ -94,8 +97,8 @@ public abstract class AbstractNamedQueryConsumer extends BaseConsumer implements
      * @param responseData Holds data that is returned. Data can be empty. The data is in its raw format, that being a string. Because
      *                     the framework is data model agnostic it cannot make any assumptions what the data is. It is an entirely
      *                     implementation specific piece of knowledge. Hence only the string is passed to the consumer. It is up to the
-     *                     consumer to unmarshal the string into a suitable structure. For the unmarshal operation the mime type in this
-     *                     parameter should be used. It indicates what the data's mime type is.
+     *                     consumer to unmarshal the string into a suitable structure. For the unmarshal operation the mime type and 
+     *                     optionally the schema information in this parameter should be used. It indicates what the data's mime type is.
      * @param pagingInfo The paging information relating to the query result that is returned. Because a consumer may request
      *                   query results in pages it is necessary to pass that paging information back to the consumer as part
      *                   of this call. This may allow the consumer to determine how many pages it may expect as well as if it
@@ -122,12 +125,14 @@ public abstract class AbstractNamedQueryConsumer extends BaseConsumer implements
      * @param namedQueryParameters Holds all parameters that are applicable for the named query. The HashMap is made of name/value pairs.
      *                             It is important that the values of the parameters should be URL encoded. This parameter can be null where 
      *                             there are no Named Query parameters required.
-     * @param returnMimeType The mime type the response data shall be in. It is expected that the consumer provides that and the provider
-     *                       should attempt to marshal the response data to the given mime type and return the resulting string as
-     *                       part of this call. If the provider cannot marshal the data to the requested mime type then an appropriate error
-     *                       will be returned by the provider (eg. HTTP Status 415 - Unsupported Media Type). If this parameter is NULL the framework
-     *                       will simply use the getResponseMediaType() method to determine the response mime type. The getResponseMediaType() method,
-     *                       if not overridden, returns the value of the env.mediaType property of the consumer's property.
+     * @param returnPayloadMetadata The mime type and optional schema info the response data is expected to be returned as. 
+     *                              It is expected that the consumer provides that and the provider should attempt to marshal the data
+     *                              to the given mime type, potentially using the given schema info, and return the resulting string
+     *                              in the requested format. If the provider cannot marshal the data to the requested mime type then an
+     *                              appropriate error is returned to this consumer (eg. HTTP Status 415 - Unsupported Media Type).
+     *                              If this parameter is NULL the framework will simply use the getResponseMediaType() method to 
+     *                              determine the response mime type. The getResponseMediaType() method, if not overridden, returns the 
+     *                              value of the env.mediaType property of the consumer's property.
      * @param pagingInfo Page information to be set for the provider to determine which results to return.
      * @param zoneCtxList If this List is null or empty then it is assumed that the operation is performed for the default Zone and Context for the 
      *                    connected. If this list is not empty then the action is performed for all Zone and Context listed. If a given 
@@ -154,7 +159,7 @@ public abstract class AbstractNamedQueryConsumer extends BaseConsumer implements
      * 
      */
     public List<Response> retrieveDataFromNamedQuery(HashMap<String, String> namedQueryParameters, 
-                                                     MediaType returnMimeType, 
+                                                     PayloadMetadata returnPayloadMetadata, 
                                                      PagingInfo pagingInfo, 
                                                      List<ZoneContextInfo> zoneCtxList, 
                                                      RequestType requestType, 
@@ -170,7 +175,8 @@ public abstract class AbstractNamedQueryConsumer extends BaseConsumer implements
         Timer timer = new Timer();
         timer.start();
 
-        returnMimeType = (returnMimeType == null) ? getResponseMediaType() : returnMimeType;
+        // If mime type is not set in the returnPayload we use the framework datamodel mime type.
+        returnPayloadMetadata.setMimeType((returnPayloadMetadata.getMimeType() == null) ? getDataModelResponsePayloadMetadata().getMimeType() : returnPayloadMetadata.getMimeType());
         QueryTemplateInfo queryInfo = new QueryTemplateInfo(getNamedQueryName(), namedQueryParameters);
         URLQueryParameter urlQueryParameters = customParameters != null ? customParameters.getQueryParams() : null;
         List<Response> responses = new ArrayList<Response>();
@@ -196,7 +202,7 @@ public abstract class AbstractNamedQueryConsumer extends BaseConsumer implements
             
             if (error == null) //all good => Send request
             {
-                Response response = getClient(getConsumerEnvironment()).retrieveDataFromNamedQuery(queryInfo, returnMimeType, pagingInfo, hdrProps, urlQueryParameters, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
+                Response response = getClient(getConsumerEnvironment()).retrieveDataFromNamedQuery(queryInfo, returnPayloadMetadata, pagingInfo, hdrProps, urlQueryParameters, zoneCtx.getZone(), zoneCtx.getContext(), requestType);
 
                 // Set the missing delayed response properties. No need to check if it was delayed request as it is checked in the finaliseDelayedReceipt method.
                 finaliseDelayedReceipt(response.getDelayedReceipt(), getNamedQueryName(), ServiceType.XQUERYTEMPLATE, ResponseAction.QUERY);
@@ -249,9 +255,19 @@ public abstract class AbstractNamedQueryConsumer extends BaseConsumer implements
             // The data type should be a String. If not then we have a problem.
             if (dataObject instanceof String)
             {
+                PayloadMetadata payloadMetadata = new PayloadMetadata();
+                        
                 // Let's get the mime type. This should be in the HTTP Headers
-                MediaType mimeType = MediaType.valueOf(receipt.getHttpHeaders().getHeaderProperty(HttpHeaders.CONTENT_TYPE));
-                processDelayedNamedQuery(new StringPayload((String)dataObject, mimeType), pagingInfo, receipt);
+                payloadMetadata.setMimeType(MediaType.valueOf(receipt.getHttpHeaders().getHeaderProperty(HttpHeaders.CONTENT_TYPE)));
+                
+                // Get schema info. Should be in the HTTP Headers
+                String schemaInfoStr = receipt.getHttpHeaders().getHeaderProperty(ResponseHeaderConstants.HDR_CONTENT_PROFILE);
+                if (StringUtils.notEmpty(schemaInfoStr))
+                {
+                    payloadMetadata.setSchemaInfo(new SchemaInfo(schemaInfoStr));
+                }
+                
+                processDelayedNamedQuery(new StringPayload((String)dataObject, payloadMetadata), pagingInfo, receipt);
             }
             else // something is wrong. All we can do is log it and treat it as a delayed error
             {
@@ -286,7 +302,6 @@ public abstract class AbstractNamedQueryConsumer extends BaseConsumer implements
         // Clean up the specific consumer implementation
         shutdown();
     }
-    
     
     /*----------------------------*/
     /*-- Other required methods --*/

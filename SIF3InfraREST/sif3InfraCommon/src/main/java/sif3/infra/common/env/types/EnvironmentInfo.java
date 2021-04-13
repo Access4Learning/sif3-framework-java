@@ -24,9 +24,12 @@ import java.util.HashMap;
 
 import javax.ws.rs.core.MediaType;
 
+import au.com.systemic.framework.utils.StringUtils;
+import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.model.EnvironmentKey;
+import sif3.common.model.PayloadMetadata;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 
 /**
@@ -46,29 +49,38 @@ public class EnvironmentInfo implements Serializable
 	 */
 	public enum EnvironmentType {DIRECT, BROKERED};
 
-    private URI       baseURI                = null; // URI to broker
+    private URI       baseURI               = null; // URI to broker
     private boolean   secureConnection      = false;
-   	private MediaType mediaType             = MediaType.APPLICATION_XML_TYPE;
-   	private String charsetEncoding          = null;
+    
+    PayloadMetadata dmPayloadMetadata       = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE);
+    PayloadMetadata infraPayloadMetadata    = new PayloadMetadata(MediaType.APPLICATION_XML_TYPE);
+
     private AdapterType adapterType         = null;
     private boolean checkACL                = true;
     private EnvironmentType environmentType = null;
-    private String authMethod = AuthenticationType.Basic.name();
-    private boolean removeEnvOnShutdown = false;
-    private String adapterName = null; ; // consumerName 
-    private EnvironmentKey environmentKey = new EnvironmentKey();
+    private String authMethod               = AuthenticationType.Basic.name();
+    private boolean removeEnvOnShutdown     = false;
+    private String adapterName              = null; ; // consumerName 
+    private EnvironmentKey environmentKey   = new EnvironmentKey();
     private String    password              = null;
-    private String generatorID  = null; // Value to be used for the generatorId HTTP Header field. 
-    private boolean compressionEnabled = false;
-    private boolean noCertificateCheck = false; // by default we want certificates checked.
+    private String generatorID              = null; // Value to be used for the generatorId HTTP Header field. 
+    private boolean compressionEnabled      = false;
+    private boolean noCertificateCheck      = false; // by default we want certificates checked.
     
     // Properties for using an existing environment.
-    private boolean useExistingEnv = false;
-	private String existingSessionToken = null;
-    private URI existingEnvURI = null;
+    private boolean useExistingEnv          = false;
+	private String existingSessionToken     = null;
+    private URI existingEnvURI              = null;
+    
+    private boolean isSchemaNegotiationEnabled = false;
     
     // Other framework specific properties
     private boolean envCreateConflictIsError = true; // Shall the HTTP Status 409 for environment creation be treated as error (true)? 
+    
+    // Properties for infrastructure namespace mapping
+    private String frameworkInfraVersion = null;
+    private String mappedInfraVersion = null; // for brokered environments. Direct will use DB/session settings for each consumer
+    private String baseInfraNamespace = null;
     
 	/* 
      * This is a runtime value only. But it is stored here rather than in the session because it is valid for ALL sessions of that
@@ -207,39 +219,6 @@ public class EnvironmentInfo implements Serializable
     	this.authMethod = authMethod;
     }
 
-//	// authMethod: Valid values are what is listed in AuthenticationUtils.AuthenticationMethod (case sensitive!!!)
-//	public void setAuthMethod(String authMethod)
-//    {
-//		try
-//		{
-//			this.authMethod = AuthenticationMethod.valueOf(authMethod);
-//		}
-//		catch (Exception ex)
-//		{
-//			this.authMethod = AuthenticationMethod.Basic;
-//		}
-//    }
-
-	public MediaType getMediaType()
-	{
-		return mediaType;
-	}
-
-	public void setMediaType(MediaType mediaType)
-	{
-		this.mediaType = mediaType;
-	}
-	
-    public String getCharsetEncoding()
-    {
-        return charsetEncoding;
-    }
-
-    public void setCharsetEncoding(String charsetEncoding)
-    {
-        this.charsetEncoding = charsetEncoding;
-    }
-
 	public boolean getRemoveEnvOnShutdown()
 	{
 		return removeEnvOnShutdown;
@@ -334,23 +313,111 @@ public class EnvironmentInfo implements Serializable
     	this.envCreateConflictIsError = envCreateConflictIsError;
     }
 
-	@Override
+    public boolean isSchemaNegotiationEnabled()
+    {
+        return isSchemaNegotiationEnabled;
+    }
+
+    public void setSchemaNegotiationEnabled(boolean isSchemaNegotiationEnabled)
+    {
+        this.isSchemaNegotiationEnabled = isSchemaNegotiationEnabled;
+    }
+    
+    public PayloadMetadata getDataModelPayloadMetadata()
+    {
+        return dmPayloadMetadata;
+    }
+
+    public void setDataModelPayloadMetadata(PayloadMetadata dmPayloadMetadata)
+    {
+        this.dmPayloadMetadata = dmPayloadMetadata;
+    }
+
+    public PayloadMetadata getInfraPayloadMetadata()
+    {
+        return infraPayloadMetadata;
+    }
+
+    public void setInfraPayloadMetadata(PayloadMetadata infraPayloadMetadata)
+    {
+        this.infraPayloadMetadata = infraPayloadMetadata;
+    }
+    
+    public String getFrameworkInfraVersion()
+    {
+        return frameworkInfraVersion;
+    }
+
+    public void setFrameworkInfraVersion(String frameworkInfraVersion)
+    {
+        this.frameworkInfraVersion = frameworkInfraVersion;
+    }
+
+    public String getMappedInfraVersion()
+    {
+        return mappedInfraVersion;
+    }
+
+    public void setMappedInfraVersion(String mappedInfraVersion)
+    {
+        this.mappedInfraVersion = mappedInfraVersion;
+    }
+    
+    public boolean mapInfraVersion()
+    {
+        if (getEnvironmentType() == EnvironmentType.BROKERED)
+        {
+            return mappedInfraVersion != null;
+        }
+        else
+        {
+            if (getAdapterType() == AdapterType.CONSUMER)
+            {
+                return mappedInfraVersion != null;
+            }
+            else 
+            {
+                // Direct Provider => We need session info of consumer to determine mapping. 
+                // So we assume a 'TRUE' but that should not be used.
+                return Boolean.TRUE;
+            }
+        }
+    }
+
+    public String getBaseInfraNamespace()
+    {
+        return baseInfraNamespace;
+    }
+
+    public void setBaseInfraNamespace(String baseInfraNamespace)
+    {
+        if (StringUtils.isEmpty(baseInfraNamespace))
+        {
+            this.baseInfraNamespace = CommonConstants.BASE_INFRA_NAMESPACE;
+        }
+        else
+        {
+            this.baseInfraNamespace = baseInfraNamespace;
+        }
+    }
+    
+    @Override
     public String toString()
     {
-        return "EnvironmentInfo [baseURI=" + baseURI + ", secureConnection="
-                + secureConnection + ", mediaType=" + mediaType
-                + ", charsetEncoding=" + charsetEncoding + ", adapterType="
-                + adapterType + ", checkACL=" + checkACL + ", environmentType="
-                + environmentType + ", authMethod=" + authMethod
-                + ", removeEnvOnShutdown=" + removeEnvOnShutdown
-                + ", adapterName=" + adapterName + ", environmentKey="
-                + environmentKey + ", password=" + password + ", generatorID="
+        return "EnvironmentInfo [baseURI=" + baseURI + ", secureConnection=" + secureConnection
+                + ", dmPayloadMetadata=" + dmPayloadMetadata + ", infraPayloadMetadata="
+                + infraPayloadMetadata + ", adapterType=" + adapterType + ", checkACL=" + checkACL
+                + ", environmentType=" + environmentType + ", authMethod=" + authMethod
+                + ", removeEnvOnShutdown=" + removeEnvOnShutdown + ", adapterName=" + adapterName
+                + ", environmentKey=" + environmentKey + ", password=" + password + ", generatorID="
                 + generatorID + ", compressionEnabled=" + compressionEnabled
-                + ", noCertificateCheck=" + noCertificateCheck
-                + ", useExistingEnv=" + useExistingEnv
-                + ", existingSessionToken=" + existingSessionToken
-                + ", existingEnvURI=" + existingEnvURI
-                + ", envCreateConflictIsError=" + envCreateConflictIsError
-                + ", connectorBaseURIs=" + connectorBaseURIs + "]";
+                + ", noCertificateCheck=" + noCertificateCheck + ", useExistingEnv="
+                + useExistingEnv + ", existingSessionToken=" + existingSessionToken
+                + ", existingEnvURI=" + existingEnvURI + ", isSchemaNegotiationEnabled="
+                + isSchemaNegotiationEnabled + ", envCreateConflictIsError="
+                + envCreateConflictIsError + ", frameworkInfraVersion=" + frameworkInfraVersion
+                + ", mappedInfraVersion=" + mappedInfraVersion + ", baseInfraNamespace="
+                + baseInfraNamespace + ", connectorBaseURIs=" + connectorBaseURIs + "]";
     }
+
 }

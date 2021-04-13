@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
- * The Consumer Environment Service is the gateway to all other services. It scopes the Consumer’s possible interactions with the infrastructure and any Provider Services accessible from it.  The Environment Service provides the set of (possibly customized) information the Application needs to interoperate successfully.
+ * The Consumer Environment Service is the gateway to all other services. It scopes the Consumer's possible interactions with the infrastructure and any Provider Services accessible from it. The Environment Service provides the set of (possibly customized) information the Application needs to interoperate successfully.
  * 
  * <p>Java class for environmentType complex type.
  * 
@@ -26,17 +26,17 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="fingerprint" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
  *         &lt;element name="sessionToken" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
  *         &lt;element name="solutionId" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
- *         &lt;element name="defaultZone" type="{http://www.sifassociation.org/infrastructure/3.2.1}zoneType" minOccurs="0"/>
+ *         &lt;element name="defaultZone" type="{http://www.sifassociation.org/infrastructure/3.3}zoneType" minOccurs="0"/>
  *         &lt;element name="authenticationMethod" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
  *         &lt;element name="instanceId" type="{http://www.w3.org/2001/XMLSchema}token" minOccurs="0"/>
  *         &lt;element name="userToken" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="consumerName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="applicationInfo" type="{http://www.sifassociation.org/infrastructure/3.2.1}applicationInfoType" minOccurs="0"/>
- *         &lt;element name="infrastructureServices" type="{http://www.sifassociation.org/infrastructure/3.2.1}infrastructureServicesType" minOccurs="0"/>
- *         &lt;element name="provisionedZones" type="{http://www.sifassociation.org/infrastructure/3.2.1}provisionedZonesType" minOccurs="0"/>
+ *         &lt;element name="applicationInfo" type="{http://www.sifassociation.org/infrastructure/3.3}applicationInfoType" minOccurs="0"/>
+ *         &lt;element name="infrastructureServices" type="{http://www.sifassociation.org/infrastructure/3.3}infrastructureServicesType" minOccurs="0"/>
+ *         &lt;element name="provisionedZones" type="{http://www.sifassociation.org/infrastructure/3.3}provisionedZonesType" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="type" type="{http://www.sifassociation.org/infrastructure/3.2.1}environmentTypeType" />
- *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.2.1}uuidType" />
+ *       &lt;attribute name="type" type="{http://www.sifassociation.org/infrastructure/3.3}environmentTypeType" />
+ *       &lt;attribute name="id" type="{http://www.sifassociation.org/infrastructure/3.3}uuidType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -45,7 +45,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "environmentType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "environmentType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "fingerprint",
     "sessionToken",
     "solutionId",
@@ -60,37 +60,37 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class EnvironmentType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String fingerprint;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String sessionToken;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String solutionId;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected ZoneType defaultZone;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String authenticationMethod;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "token")
     protected String instanceId;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected String userToken;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected String consumerName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected ApplicationInfoType applicationInfo;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected InfrastructureServicesType infrastructureServices;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected ProvisionedZonesType provisionedZones;
     @XmlAttribute(name = "type")
     protected EnvironmentTypeType type;

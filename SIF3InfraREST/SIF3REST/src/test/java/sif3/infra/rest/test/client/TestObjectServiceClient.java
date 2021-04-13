@@ -24,6 +24,7 @@ import sif.dd.au30.model.StudentPersonalType;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.UnmarshalFactory;
 import sif3.common.header.HeaderProperties;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.URLQueryParameter;
 import sif3.common.ws.Response;
 import sif3.infra.common.conversion.InfraMarshalFactory;
@@ -58,7 +59,8 @@ public class TestObjectServiceClient
 		try
 		{
 			System.out.println("Connect to: "+BASE_URL);
-			ObjectServiceClient client = new ObjectServiceClient(ConsumerEnvironmentManager.getInstance(), new URI(BASE_URL), marshaller, unmarshaller, false, false);
+//			ObjectServiceClient client = new ObjectServiceClient(ConsumerEnvironmentManager.getInstance(), new URI(BASE_URL), marshaller, unmarshaller, false, false);
+            ObjectServiceClient client = new ObjectServiceClient(ConsumerEnvironmentManager.getInstance(), new URI(BASE_URL), new PayloadMetadata(marshaller.getDefault()), new PayloadMetadata(unmarshaller.getDefault()), marshaller, unmarshaller, false, false);
 
 			HeaderProperties hdrProps = new HeaderProperties();
 //			hdrProps.setHeaderProperty(RequestHeaderConstants.HDR_AUTH_TOKEN, AUTH_TOKEN);

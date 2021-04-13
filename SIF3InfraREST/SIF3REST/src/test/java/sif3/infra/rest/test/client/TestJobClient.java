@@ -25,13 +25,11 @@ import au.com.systemic.framework.utils.FileReaderWriter;
 import sif3.common.CommonConstants.PhaseState;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues.RequestType;
-import sif3.common.model.AttributeValue;
 import sif3.common.model.PagingInfo;
-import sif3.common.model.SIFZone;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.URLQueryParameter;
 import sif3.common.model.job.JobCreateRequestParameter;
 import sif3.common.model.job.PhaseInfo;
-import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.BulkOperationResponse;
 import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.OperationStatus;
@@ -357,7 +355,7 @@ public class TestJobClient
             HeaderProperties hdrProps = new HeaderProperties();
             URLQueryParameter urlQueryParams = new URLQueryParameter();
             
-            Response response = client.retrieveDataFromPhase(new PhaseInfo(JOB_ID, "oldYearEnrolment"), MediaType.APPLICATION_XML_TYPE, new PagingInfo(5,  1), hdrProps, urlQueryParams, null, null, RequestType.IMMEDIATE);
+            Response response = client.retrieveDataFromPhase(new PhaseInfo(JOB_ID, "oldYearEnrolment"), new PayloadMetadata(MediaType.APPLICATION_XML_TYPE), new PagingInfo(5,  1), hdrProps, urlQueryParams, null, null, RequestType.IMMEDIATE);
             
             if (response.hasError())
             {
@@ -388,7 +386,7 @@ public class TestJobClient
             HeaderProperties hdrProps = new HeaderProperties();
             URLQueryParameter urlQueryParams = new URLQueryParameter();
             
-            Response response = client.createDataInPhase(new PhaseInfo(JOB_ID, "oldYearEnrolment"), new PhaseDataRequest(payload, MediaType.APPLICATION_XML_TYPE), MediaType.APPLICATION_XML_TYPE, true, hdrProps, urlQueryParams, null, null, RequestType.IMMEDIATE);
+            Response response = client.createDataInPhase(new PhaseInfo(JOB_ID, "oldYearEnrolment"), new PhaseDataRequest(payload, new PayloadMetadata(MediaType.APPLICATION_XML_TYPE)), new PayloadMetadata(MediaType.APPLICATION_XML_TYPE), true, hdrProps, urlQueryParams, null, null, RequestType.IMMEDIATE);
             
             if (response.hasError())
             {
@@ -419,7 +417,7 @@ public class TestJobClient
             HeaderProperties hdrProps = new HeaderProperties();
             URLQueryParameter urlQueryParams = new URLQueryParameter();
             
-            Response response = client.updateDataInPhase(new PhaseInfo(JOB_ID, "oldYearEnrolment"), new PhaseDataRequest(payload, MediaType.APPLICATION_XML_TYPE), MediaType.APPLICATION_XML_TYPE, hdrProps, urlQueryParams, null, null, RequestType.IMMEDIATE);
+            Response response = client.updateDataInPhase(new PhaseInfo(JOB_ID, "oldYearEnrolment"), new PhaseDataRequest(payload, new PayloadMetadata(MediaType.APPLICATION_XML_TYPE)), new PayloadMetadata(MediaType.APPLICATION_XML_TYPE), hdrProps, urlQueryParams, null, null, RequestType.IMMEDIATE);
             
             if (response.hasError())
             {
@@ -450,7 +448,7 @@ public class TestJobClient
             HeaderProperties hdrProps = new HeaderProperties();
             URLQueryParameter urlQueryParams = new URLQueryParameter();
             
-            Response response = client.deleteDataInPhase(new PhaseInfo(JOB_ID, "oldYearEnrolment"), new PhaseDataRequest(payload, MediaType.APPLICATION_XML_TYPE), MediaType.APPLICATION_XML_TYPE, hdrProps, urlQueryParams, null, null, RequestType.IMMEDIATE);
+            Response response = client.deleteDataInPhase(new PhaseInfo(JOB_ID, "oldYearEnrolment"), new PhaseDataRequest(payload, new PayloadMetadata(MediaType.APPLICATION_XML_TYPE)), new PayloadMetadata(MediaType.APPLICATION_XML_TYPE), hdrProps, urlQueryParams, null, null, RequestType.IMMEDIATE);
             
             if (response.hasError())
             {

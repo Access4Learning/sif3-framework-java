@@ -1,5 +1,5 @@
 # License
-> Copyright 2014 - 2016 Systemic Pty Ltd
+> Copyright 2014 - 2021 Systemic Pty Ltd
 > 
 > Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 > 
@@ -186,9 +186,20 @@ ___
 
 ## Version from Feb 14, 2019: v0.14.1 - Various minor changes & additions
 - Added supporting methods for Dynamic Query functionality.
-- Some minor bug fixes. 
+- Some minor bug fixes.
 
-**Please refer to the detailed release notes in "release/v0.14.1" carefully to ensure that your project is upgraded properly to the new framework version.**
+**Please refer to the detailed release notes in "release/v0.14.1" to ensure that your project is upgraded properly to the new framework version.**
+
+## Version from Jul 29, 2019: v0.15.0 - Upgrade to SIF 3.3 Infrastructure
+- **Jul 29, 2019:** Updated framework to be used with SIF Infrastructure 3.3. This only includes the usage of the new namespace and Infrastructure XSDs.
+- **Feb 24, 2020:** Added some functionality relating to schema version negotiation.
+- **Jun 16, 2020:** Added support for PESC-JSON notation. See details in the detailed release notes.
+- **Jul 27, 2020:** Separated infra and DM mime types further to allow using XML for one and JSON for the other in the same adapter. 
+- **Oct 19, 2020:** Enforced lower case "value" in PESC-JSON notation regardless of naming convention for capitalisation.
+- **Oct 26, 2020:** Enable timestamp HTTP Header age check for SIF_HMACSHA256 authentication. 
+- **Feb 09, 2021:** Enable infrastructure namespace version mapping which allows the framework to run with any infrastructure version. Refer to section 5.16 in the developer's guide.   
+
+**Please refer to the detailed release notes in "release/v0.15.0" to ensure that your project is upgraded properly to the new framework version.**
 
 # Download Instructions
 How to download this project:

@@ -1,0 +1,152 @@
+{"StudentPersonal":
+	{
+	  "AlertMessages" : {
+	    "AlertMessage" : [ {
+	      "value" : "Mother is legal guardian",
+	      "Type" : "Legal"
+	    }, {
+	      "value" : "Second element"
+	    }, {
+	      "value" : ""
+	    } ]
+	  },
+	  "LocalId" : "S1234567",
+	  "StateProvinceId" : "ABC1234",
+	  "OtherIdList" : {
+	    "OtherId" : [ {
+	      "value" : "888rdgf",
+	      "Type" : "freetext"
+	    }, {
+	      "value" : "1234",
+	      "Type" : "Disability ID"
+	    } ]
+	  },
+	  "PersonInfo" : {
+	    "Name" : {
+	      "FamilyName" : "Smith",
+	      "GivenName" : "JŒRG",
+	      "FullName" : "JŒRG Smith",
+	      "Type" : "LGL"
+	    },
+	    "OtherNames" : {
+	      "Name" : [ {
+	        "FamilyName" : "Anderson",
+	        "GivenName" : "Samuel",
+	        "FullName" : "Samuel Anderson",
+	        "Type" : "AKA"
+	      }, {
+	        "FamilyName" : "Rowinski",
+	        "GivenName" : "Sam",
+	        "FullName" : "Sam Rowinski",
+	        "Type" : "PRF"
+	      } ]
+	    },
+	    "Demographics" : {
+	      "IndigenousStatus" : "3",
+	      "Sex" : "1",
+	      "BirthDate" : "1990-09-26",
+	      "BirthDateVerification" : "1004",
+	      "PlaceOfBirth" : "Clayton",
+	      "StateOfBirth" : "VIC",
+	      "CountryOfBirth" : "1101",
+	      "CountriesOfCitizenship" : {
+	        "CountryOfCitizenship" : [ "8104", "1101" ]
+	      },
+	      "CountriesOfResidency" : {
+	        "CountryOfResidency" : [ "8104", "1101" ]
+	      },
+	      "CountryArrivalDate" : "1990-09-26",
+	      "AustralianCitizenshipStatus" : "1",
+	      "EnglishProficiency" : {
+	        "Code" : "1"
+	      },
+	      "LanguageList" : {
+	        "Language" : [ {
+	          "Code" : "0001",
+	          "LanguageType" : "1"
+	        } ]
+	      },
+	      "DwellingArrangement" : {
+	        "Code" : "1671"
+	      },
+	      "Religion" : {
+	        "Code" : "2013"
+	      },
+	      "ReligiousEventList" : {
+	        "ReligiousEvent" : [ {
+	          "Type" : "Baptism",
+	          "Date" : "2000-09-01"
+	        }, {
+	          "Type" : "Christmas",
+	          "Date" : "2009-12-24"
+	        } ]
+	      },
+	      "ReligiousRegion" : "The Religion Region",
+	      "PermanentResident" : "P",
+	      "VisaSubClass" : "101",
+	      "VisaStatisticalCode" : "05"
+	    },
+	    "AddressList" : {
+	      "Address" : [ {
+	        "Street" : {
+	          "Line1" : "Unit1/10",
+	          "Line2" : "Barkley Street"
+	        },
+	        "City" : "Yarra Glenn",
+	        "StateProvince" : "VIC",
+	        "Country" : "1101",
+	        "PostalCode" : "9999",
+	        "Type" : "0123",
+	        "Role" : "2382"
+	      }, {
+	        "Street" : {
+	          "Line1" : "34 Term Address Street"
+	        },
+	        "City" : "Home Town",
+	        "StateProvince" : "WA",
+	        "Country" : "1101",
+	        "PostalCode" : "9999",
+	        "Type" : "0123A",
+	        "Role" : "013A"
+	      } ]
+	    },
+	    "PhoneNumberList" : {
+	      "PhoneNumber" : [ {
+	        "Number" : "03 9637-2289",
+	        "Extension" : "72289",
+	        "ListedStatus" : "Y",
+	        "Type" : "0096"
+	      }, {
+	        "Number" : "0437-765-234",
+	        "ListedStatus" : "N",
+	        "Type" : "0888"
+	      } ]
+	    },
+	    "EmailList" : {
+	      "Email" : [ {
+	        "value" : "fsmith@yahoo.com",
+	        "Type" : "01"
+	      }, {
+	        "value" : "freddy@gmail.com",
+	        "Type" : "02"
+	      } ]
+	    }
+	  },
+	  "ProjectedGraduationYear" : "2014",
+	  "OnTimeGraduationYear" : "2012",
+	  "MostRecent" : {
+	    "SchoolLocalId" : "S1234567",
+	    "HomeroomLocalId" : "hr12345",
+	    "YearLevel" : {
+	      "Code" : "P"
+	    }
+	  },
+	  "AcceptableUsePolicy" : "Y",
+	  "EconomicDisadvantage" : "N",
+	  "Esl" : "U",
+	  "YoungCarersRole" : "N",
+	  "Disability" : "N",
+	  "IntegrationAide" : "N",
+	  "RefId" : "CC114B35-9D75-101A-8C3D-A2345D1A1652"
+	}
+}

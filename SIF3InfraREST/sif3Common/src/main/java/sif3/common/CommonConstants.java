@@ -76,6 +76,9 @@ public class CommonConstants
 	/* Used in 'blocking' ExecutorService to allow a max sleep time before shutdown is checked */
     public final static long MAX_SLEEP_MILLISEC = 5 * MILISEC; 
 
+    /* Default max age of the timestamp HTTP header for SIF_HMACSHA256 authentication */
+    public static final int DEFAULT_TIMESTAMP_AGE_MINUTES = 30;
+    
 	/*-----------------------------------------------------------*/
 	/* Constants defined by SIF3 Spec.                           */
 	/*-----------------------------------------------------------*/
@@ -83,6 +86,8 @@ public class CommonConstants
 	
 	/* default context */
 	public static final SIFContext DEFAULT_CONTEXT = new SIFContext(DEFAULT_CONTEXT_NAME, true);
+	
+	public static final String BASE_INFRA_NAMESPACE = "http://www.sifassociation.org/infrastructure/";
 
 	/*----------------------------------------------------------------------*/
 	/* Paging related Enum Types that can be either header or query params. */
@@ -135,7 +140,19 @@ public class CommonConstants
      * ACLs are applied in many places. This enum defines the plaves where they can apply.
      */
     public enum RightType {SERVICE, PHASE, STATE};
+    
+    /*
+     * Valid schema types for schema negotiation.
+     */
+    public static enum SchemaType {goessner, pesc, xml};
 
+
+    /*
+     * Naming conventions used in various data models.
+     */
+    public static enum PropertyStrategy {UpperCamelCase, LowerCamelCase, MixedUpperLower};
+
+    
     /*------------------------------------------------------------------------------------*/
 	/* URL Query Parameter names in relation to security (special case for SIF Express) --*/
 	/*------------------------------------------------------------------------------------*/

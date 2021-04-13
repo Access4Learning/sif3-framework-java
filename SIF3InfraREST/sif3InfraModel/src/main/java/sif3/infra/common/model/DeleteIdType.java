@@ -11,6 +11,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * 
+ * 
  * <p>Java class for deleteIdType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -28,7 +30,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "deleteIdType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+@XmlType(name = "deleteIdType", namespace = "http://www.sifassociation.org/infrastructure/3.3")
 public class DeleteIdType {
 
     @XmlAttribute(name = "id", required = true)

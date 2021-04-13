@@ -36,9 +36,12 @@ import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.CommonConstants.JobState;
 import sif3.common.CommonConstants.QueuePollingType;
 import sif3.common.CommonConstants.QueueStrategy;
+import sif3.common.CommonConstants.SchemaType;
 import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues.UpdateType;
+import sif3.common.model.SchemaInfo;
 import sif3.common.utils.FileAndFolderUtils;
+import sif3.common.utils.JAXBUtils;
 import sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType;
 
 /**
@@ -173,7 +176,6 @@ public class AdapterEnvironmentStore implements Serializable
 					environment = (isConsumer) ? new ConsumerEnvironment(serviceName) : new ProviderEnvironment(serviceName);
 					environment.setAdapterType(isConsumer ? AdapterType.CONSUMER : AdapterType.PROVIDER);
 					environment.setCheckACL(adapterProperties.getPropertyAsBool("adapter.checkACL", true));
-//					environment.setEventsSupported(adapterProperties.getPropertyAsBool("env.events.supported", false));
 					environment.setRemoveEnvOnShutdown(adapterProperties.getPropertyAsBool("adapter.deleteEnvironment.onShutdown", false));
 					environment.setGeneratorID(adapterProperties.getPropertyAsString("adapter.generator.id", null));
 					environment.setEnvCreateConflictIsError(adapterProperties.getPropertyAsBool("env.create.conflictIsError", true));
@@ -203,16 +205,57 @@ public class AdapterEnvironmentStore implements Serializable
 						}
 					}
 					
-			  		// Media Type
-			  		environment.setMediaType(convertMediaType(adapterProperties.getPropertyAsString("env.mediaType", null)));
-			  		
-			  		// Charset Encoding to be used with media type
-                    environment.setCharsetEncoding(adapterProperties.getPropertyAsString("env.mediaType.charset", null));
+					// Media Type
+					environment.getDataModelPayloadMetadata().setMimeType(convertMediaType(adapterProperties.getPropertyAsString("env.mediaType","dm", null)));
+                    environment.getInfraPayloadMetadata().setMimeType(convertMediaType(adapterProperties.getPropertyAsString("env.mediaType","infra", null)));
+
+                    // Charset Encoding
+                    environment.getDataModelPayloadMetadata().setCharsetEncoding(adapterProperties.getPropertyAsString("env.mediaType.charset","dm", null));
+                    environment.getInfraPayloadMetadata().setCharsetEncoding(adapterProperties.getPropertyAsString("env.mediaType.charset","infra", null));
+
+                    // Load Schema Negotiation Properties if enabled
+                    environment.setSchemaNegotiationEnabled(adapterProperties.getPropertyAsBool("env.schema.enabled", false));
+                    if (environment.isSchemaNegotiationEnabled()) // there are a few mandatory properties required
+                    {
+                        // DM setup
+                        environment.getDataModelPayloadMetadata().setSchemaInfo(new SchemaInfo(SchemaInfo.MODEL_TYPE_DM, null, null));
+                        environment.getDataModelPayloadMetadata().getSchemaInfo().setModelDomain(getValueAndLogError("env.schema.dm.domain", "au, nz, uk, us"));
+                        environment.getDataModelPayloadMetadata().getSchemaInfo().setModelVersion(getValueAndLogError("env.schema.dm.version","3.4.1, 3.3"));
+                        if (environment.getDataModelPayloadMetadata().getMimeType().equals(MediaType.APPLICATION_JSON_TYPE)) // we need the schema type
+                        {
+                            environment.getDataModelPayloadMetadata().getSchemaInfo().setSchemaType(adapterProperties.getPropertyAsString("env.schema.dm.json.type",SchemaType.goessner.name()));
+                        }
+               
+                        // Infra setup
+                        environment.getInfraPayloadMetadata().setSchemaInfo(new SchemaInfo(SchemaInfo.MODEL_TYPE_INFRA, SchemaInfo.MODEL_DOMAIN_INFRA, null));
+                        environment.getInfraPayloadMetadata().getSchemaInfo().setModelVersion(getValueAndLogError("env.schema.infra.version","3.3"));
+                        if (environment.getInfraPayloadMetadata().getMimeType().equals(MediaType.APPLICATION_JSON_TYPE)) // we need the schema type
+                        {
+                            environment.getInfraPayloadMetadata().getSchemaInfo().setSchemaType(adapterProperties.getPropertyAsString("env.schema.infra.json.type",SchemaType.goessner.name()));                            
+                        }
+                        
+                        errors = errors ||  
+                                 environment.getDataModelPayloadMetadata().getSchemaInfo().getModelDomain() == null ||
+                                 environment.getDataModelPayloadMetadata().getSchemaInfo().getModelVersion() == null ||
+                                 environment.getInfraPayloadMetadata().getSchemaInfo().getModelVersion() == null;                        
+                    }
 
 			  		if (!loadExistingEnvInfo(adapterProperties))
 			  		{
 			  			errors = true;
 			  		}
+			  		
+			  		// Read infrastructure mappings
+			  		environment.setBaseInfraNamespace(adapterProperties.getPropertyAsString("namespcase.infra.baseURL", CommonConstants.BASE_INFRA_NAMESPACE));
+                    environment.setFrameworkInfraVersion(getFWInfaVersion(adapterProperties));
+                    
+                    String mappedVersion = adapterProperties.getPropertyAsString("namespace.infra.mapToVersion", environment.getFrameworkInfraVersion());
+                    // If Framework version and mapped version are the same we set mapped to null indication no mapping required
+                    if (environment.getFrameworkInfraVersion().equals(mappedVersion))
+                    {
+                        mappedVersion = null;
+                    }
+			  		environment.setMappedInfraVersion(mappedVersion);
 			  		
 			  		if (!errors) // Read specific info
 					{
@@ -240,6 +283,21 @@ public class AdapterEnvironmentStore implements Serializable
 		}
 	}
 
+	/*
+	 * This method attempts to get a String type property name and if it is missing it will log it. Null will be returned in this case
+	 */
+	private String getValueAndLogError(String propertyName, String suggestedValues)
+	{
+	    String value = adapterProperties.getPropertyAsString(propertyName, null);
+        if (StringUtils.isEmpty(value))
+        {
+            logger.error("The property '"+propertyName+"' must be set in " + getAdapterFileNameWithoutExt() + ".properties."+((suggestedValues != null) ? " Example values are: "+suggestedValues : ""));
+            return null;
+        }
+        
+        return value;
+	}
+	
 	/* Null is returned if there is an error. Error is logged. */
 	private String getServiceName(AdvancedProperties props)
 	{
@@ -365,6 +423,15 @@ public class AdapterEnvironmentStore implements Serializable
 		return true;
 	}
     
+    private String getFWInfaVersion(AdvancedProperties adapterProperties)
+    {
+        // Framework Namespace version can be taken from Infra Datamodel environment object  
+        String fullInfraNamespace = JAXBUtils.getObjectNamespace(sif3.infra.common.model.EnvironmentType.class);
+        
+        // The version is the part after the last '/'
+        return fullInfraNamespace.substring(fullInfraNamespace.lastIndexOf('/')+1);
+    }
+    
     /*
      * This method load information in relation to existing environments. If bits are missing or don't make sense then
      * an error is logged and false is returned.
@@ -485,6 +552,9 @@ public class AdapterEnvironmentStore implements Serializable
     {
     	boolean errorsFound = false;
 
+    	// Read max age of timestamp. Used in DIRECT environments for SIF_HMACSHA256 authentication.
+    	envInfo.setMaxTimestampAgeMinutes(props.getPropertyAsInt("env.timestamp.max.age", CommonConstants.DEFAULT_TIMESTAMP_AGE_MINUTES));
+    	
 		envInfo.setEventsSupported(props.getPropertyAsBool("env.events.supported", false));
 
     	// The following properties are required if it is a BROKERED environment. For DIRECT environments these values
@@ -574,7 +644,6 @@ public class AdapterEnvironmentStore implements Serializable
 
         // Allow access_token or URL
         envInfo.setAllowAuthOnURL(adapterProperties.getPropertyAsBool("adapter.authTokenOnURL.allowed", false));
-        
         
         // Functional Service Properties
         envInfo.setJobEnabled(adapterProperties.getPropertyAsBool("job.enabled", false));

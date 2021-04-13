@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * A “deleteRequest” element, which consists of multiple, “delete” object ids. Since REST conventions do not support payloads on HTTP DELETE messages, all multi-object Delete Requests are conveyed via an HTTP PUT message containing an additional HTTP Header Field value of methodOverride set to DELETE.
+ * A "deleteRequest" element, which consists of multiple, "delete" object ids. Since REST conventions do not support payloads on HTTP DELETE messages, all multi-object Delete Requests are conveyed via an HTTP PUT message containing an additional HTTP Header Field value of methodOverride set to DELETE.
  * 
  * <p>Java class for deleteRequestType complex type.
  * 
@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="deletes" type="{http://www.sifassociation.org/infrastructure/3.2.1}deleteIdCollection"/>
+ *         &lt;element name="deletes" type="{http://www.sifassociation.org/infrastructure/3.3}deleteIdCollectionType"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,23 +29,23 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "deleteRequestType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "deleteRequestType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "deletes"
 })
 public class DeleteRequestType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
-    protected DeleteIdCollection deletes;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
+    protected DeleteIdCollectionType deletes;
 
     /**
      * Gets the value of the deletes property.
      * 
      * @return
      *     possible object is
-     *     {@link DeleteIdCollection }
+     *     {@link DeleteIdCollectionType }
      *     
      */
-    public DeleteIdCollection getDeletes() {
+    public DeleteIdCollectionType getDeletes() {
         return deletes;
     }
 
@@ -54,10 +54,10 @@ public class DeleteRequestType {
      * 
      * @param value
      *     allowed object is
-     *     {@link DeleteIdCollection }
+     *     {@link DeleteIdCollectionType }
      *     
      */
-    public void setDeletes(DeleteIdCollection value) {
+    public void setDeletes(DeleteIdCollectionType value) {
         this.deletes = value;
     }
 

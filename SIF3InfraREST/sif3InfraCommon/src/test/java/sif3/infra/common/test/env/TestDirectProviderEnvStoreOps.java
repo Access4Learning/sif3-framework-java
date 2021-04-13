@@ -196,9 +196,9 @@ public class TestDirectProviderEnvStoreOps extends TestBase
 //		tester.testExistEnvironmentTemplate();
 //        tester.testExistJobTemplate();
 //		tester.testLoadEnvironmentTemplate();
-	    tester.testLoadJobTemplate();
+//	    tester.testLoadJobTemplate();
 //		tester.testExistEnvInWorkstore();
-//		tester.testLoadEnvironmentFromWorkstore();
+		tester.testLoadEnvironmentFromWorkstore();
 //		tester.testCreateEnvironment();
 //		tester.testCreateSession();
 //		tester.testRemoveEnvFromWorkstoreByEnvID();

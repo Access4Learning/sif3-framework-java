@@ -28,6 +28,7 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sif3.common.CommonConstants.SchemaType;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.exception.MarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
@@ -62,6 +63,16 @@ public class CSVMarshaller implements MarshalFactory
 	{
 		return obj.toString();
 	}
+	
+    /* (non-Javadoc)
+     * @see sif3.common.conversion.MarshalFactory#marshalToJSON(java.lang.Object, sif3.common.CommonConstants.SchemaType)
+     */
+    @Override
+    public String marshalToJSON(Object obj, SchemaType jsonSchema) throws MarshalException, UnsupportedMediaTypeExcpetion
+    {
+        return obj.toString();
+    }
+
 
 	/* (non-Javadoc)
 	 * @see sif3.infra.common.conversion.MarshalFactory#marschal(java.lang.Object, javax.ws.rs.core.MediaType)
@@ -69,15 +80,29 @@ public class CSVMarshaller implements MarshalFactory
 	@Override
 	public String marshal(Object obj, MediaType mediaType) throws MarshalException, UnsupportedMediaTypeExcpetion
 	{
-		if (isSupported(mediaType))
-		{
-			return obj.toString();
-		}
-		// If we get here then we deal with an unknown media type
-		throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot marshal the given input to this media type.");
+        if (isSupported(mediaType))
+        {
+            return obj.toString();
+        }
+        // If we get here then we deal with an unknown media type
+        throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot marshal the given input to this media type.");
 	}
 	
-	/*
+    /* (non-Javadoc)
+     * @see sif3.common.conversion.MarshalFactory#marshal(java.lang.Object, javax.ws.rs.core.MediaType, sif3.common.CommonConstants.SchemaType)
+     */
+    @Override
+    public String marshal(Object obj, MediaType mediaType, SchemaType jsonSchema) throws MarshalException, UnsupportedMediaTypeExcpetion
+    {
+        if (isSupported(mediaType))
+        {
+            return obj.toString();
+        }
+        // If we get here then we deal with an unknown media type
+        throw new UnsupportedMediaTypeExcpetion("Unsupported media type: " + mediaType + ". Cannot marshal the given input to this media type.");
+    }
+
+    /*
 	 * (non-Javadoc)
 	 * @see sif3.common.conversion.MediaTypeOperations#getDefault()
 	 */
@@ -117,5 +142,7 @@ public class CSVMarshaller implements MarshalFactory
     {
 	    return supportedMediaTypes;
     }
+
+
 
 }

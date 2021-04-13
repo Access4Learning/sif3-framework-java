@@ -20,8 +20,6 @@ package systemic.sif3.demo.rest.provider;
 
 import java.util.List;
 
-import javax.ws.rs.core.MediaType;
-
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.ModelObjectInfo;
 import sif3.common.conversion.UnmarshalFactory;
@@ -31,6 +29,7 @@ import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.interfaces.SIFEventIterator;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
@@ -193,17 +192,30 @@ public class CSVStudentProvider extends  BaseEventProvider<String>
     /*------------------------------------*/
     /*-- Media Type Override for Events --*/
     /*------------------------------------*/
-	@Override
-    public MediaType getRequestMediaType()
-	{
-		return getMarshaller().getDefault();
-	}
-	
-	@Override
-	public MediaType getResponseMediaType()
-	{
-		return getUnmarshaller().getDefault();
-	}    
+    @Override
+    public PayloadMetadata getDataModelRequestPayloadMetadata()
+    {
+        // Override the Framework default mime type with the marshaller's mime type which should indicate CSV type (text/plain).
+        // The implementation below assumes no schema negotiation is turned on. If it is turned on then appropriate values
+        // need to be set as well.
+        return new PayloadMetadata(getMarshaller().getDefault(), "UTF-8");
+        
+        // Example if schema negotiation is turned on.
+//      return new PayloadMetadata(getMarshaller().getDefault(), "UTF-8", new SchemaInfo("data", "us", "1.0"));
+        
+    }
+    
+    @Override
+    public PayloadMetadata getDataModelResponsePayloadMetadata()
+    {
+        //Override the Framework default mime type with the unmarshaller's mime type which should indicate CSV type (text/plain) 
+        // The implementation below assumes no schema negotiation is turned on. If it is turned on then appropriate values
+        // need to be set as well.
+        return new PayloadMetadata(getUnmarshaller().getDefault(), "UTF-8");
+
+        // Example if schema negotiation is turned on.
+//      return new PayloadMetadata(getUnmarshaller().getDefault(), "UTF-8", new SchemaInfo("data", "us", "1.0"));
+    }
     
     /*--------------------------------------*/
     /*-- Other required Interface Methods --*/

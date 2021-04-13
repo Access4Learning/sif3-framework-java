@@ -21,6 +21,7 @@ package sif3.infra.common.env.types;
 import java.net.URI;
 import java.util.HashSet;
 
+import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.AuthenticationType;
 import sif3.common.CommonConstants.JobState;
 import sif3.common.header.HeaderProperties;
@@ -36,6 +37,7 @@ import sif3.common.header.HeaderValues.UpdateType;
 public class ProviderEnvironment extends EnvironmentInfo
 {
     private static final long serialVersionUID = 6469968451023182574L;
+       
     public static final String JOB_HOUSEKEEPING_CRON = "0 0 2 * * ?"; // once a day at 2am
     
 	private boolean              connected              = false;
@@ -46,7 +48,8 @@ public class ProviderEnvironment extends EnvironmentInfo
 	private UpdateType           defaultUpdateType      = UpdateType.FULL; // Default value for update events.
 	private boolean              autoCreateEnvironment  = false;
 	private String accessTokenAuthMethod = AuthenticationType.Basic.name(); // Default Auth Method if accessToken is used.
-	private boolean              allowAuthOnURL         = false;
+	private int maxTimestampAgeMinutes = CommonConstants.DEFAULT_TIMESTAMP_AGE_MINUTES;
+    private boolean              allowAuthOnURL         = false;
 	private HeaderProperties     customResponseHeaders  = new HeaderProperties(); 
 	
 	// Functional Service Properties
@@ -179,6 +182,16 @@ public class ProviderEnvironment extends EnvironmentInfo
     	this.accessTokenAuthMethod = accessTokenAuthMethod;
     }
 
+    public int getMaxTimestampAgeMinutes()
+    {
+        return maxTimestampAgeMinutes;
+    }
+
+    public void setMaxTimestampAgeMinutes(int maxTimestampAgeMinutes)
+    {
+        this.maxTimestampAgeMinutes = maxTimestampAgeMinutes;
+    }
+
     public boolean getAllowAuthOnURL()
     {
         return allowAuthOnURL;
@@ -281,9 +294,10 @@ public class ProviderEnvironment extends EnvironmentInfo
                 + ", connectorBaseURI=" + connectorBaseURI + ", eventsSupported=" + eventsSupported
                 + ", defaultUpdateType=" + defaultUpdateType + ", autoCreateEnvironment="
                 + autoCreateEnvironment + ", accessTokenAuthMethod=" + accessTokenAuthMethod
-                + ", allowAuthOnURL=" + allowAuthOnURL + ", customResponseHeaders="
-                + customResponseHeaders + ", jobEnabled=" + jobEnabled + ", jobEndStates="
-                + jobEndStates + ", jobEventFrequency=" + jobEventFrequency + ", jobEventKeepDays="
+                + ", maxTimestampAgeMinutes=" + maxTimestampAgeMinutes + ", allowAuthOnURL="
+                + allowAuthOnURL + ", customResponseHeaders=" + customResponseHeaders
+                + ", jobEnabled=" + jobEnabled + ", jobEndStates=" + jobEndStates
+                + ", jobEventFrequency=" + jobEventFrequency + ", jobEventKeepDays="
                 + jobEventKeepDays + ", jobKeepDays=" + jobKeepDays + ", jobHousekeepingCron="
                 + jobHousekeepingCron + ", toString()=" + super.toString() + "]";
     }

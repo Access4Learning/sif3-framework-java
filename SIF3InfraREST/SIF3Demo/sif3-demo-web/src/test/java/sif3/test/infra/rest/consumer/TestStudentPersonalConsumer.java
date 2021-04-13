@@ -19,20 +19,22 @@ package sif3.test.infra.rest.consumer;
 import java.util.ArrayList;
 import java.util.List;
 
+import au.com.systemic.framework.utils.FileReaderWriter;
+import au.com.systemic.framework.utils.Timer;
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
 import sif.dd.au30.model.NameOfRecordType;
 import sif.dd.au30.model.ObjectFactory;
 import sif.dd.au30.model.StudentPersonalCollectionType;
 import sif.dd.au30.model.StudentPersonalType;
-import sif3.common.CommonConstants;
 import sif3.common.header.HeaderValues.QueryIntention;
 import sif3.common.header.HeaderValues.RequestType;
+import sif3.common.CommonConstants.SchemaType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.CustomParameters;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.QueryCriteria;
-import sif3.common.model.SIFContext;
-import sif3.common.model.SIFZone;
+import sif3.common.model.SchemaInfo;
 import sif3.common.model.ServicePathPredicate;
 import sif3.common.model.ZoneContextInfo;
 import sif3.common.utils.UUIDGenerator;
@@ -43,8 +45,6 @@ import sif3.common.ws.Response;
 import sif3.infra.common.env.mgr.ConsumerEnvironmentManager;
 import sif3.infra.rest.consumer.ConsumerLoader;
 import systemic.sif3.demo.rest.consumer.StudentPersonalConsumer;
-import au.com.systemic.framework.utils.FileReaderWriter;
-import au.com.systemic.framework.utils.Timer;
 
 /**
  * @author Joerg Huber
@@ -63,6 +63,7 @@ public class TestStudentPersonalConsumer
 //    private static final String CONSUMER_ID = "HITSStudentConsumer";
 //	private static final String CONSUMER_ID = "BrokeredAttTrackerConsumer";
 //	private static final String CONSUMER_ID = "QueueTestConsumer";
+//  private static final String CONSUMER_ID = "BrokeredWebSISConsumer";
 
 	
 	private static final RequestType REQUEST_TYPE = RequestType.IMMEDIATE;
@@ -87,7 +88,10 @@ public class TestStudentPersonalConsumer
 					{
 						if (response.getHasEntity())
 						{
-							System.out.println("Data Object Response "+i+": "+consumer.getMarshaller().marshal(response.getDataObject(), consumer.getResponseMediaType()));
+						    PayloadMetadata responsePayloadMetadata = consumer.getDataModelResponsePayloadMetadata();
+						    SchemaInfo schemaInfo = responsePayloadMetadata.getSchemaInfo();
+                            SchemaType schemaType = (schemaInfo == null) ? null : schemaInfo.getSchemaTypeAsEnum();
+							System.out.println("Data Object Response "+i+": "+consumer.getMarshaller().marshal(response.getDataObject(), responsePayloadMetadata.getMimeType(), schemaType));
 						}
 						else // in delayed we may have delayed receipt
 						{
@@ -315,8 +319,8 @@ public class TestStudentPersonalConsumer
 			params.addURLQueryParameter("ChangedSince", "01/05/2015"); // will not url encode
 			params.addURLQueryParameter("myURLQueryParam", "show in provider");
 			
-			params.addURLQueryParameter(CommonConstants.WHERE_CALUSE, "[(studentssections/section=\"CIS 101\")]", false);
-			params.addURLQueryParameter(CommonConstants.ORDER_CALUSE, "[primarysortfield=asc;secondarysortfield=desc]", true);
+//			params.addURLQueryParameter(CommonConstants.WHERE_CALUSE, "[(studentssections/section=\"CIS 101\")]", false);
+//			params.addURLQueryParameter(CommonConstants.ORDER_CALUSE, "[primarysortfield=asc;secondarysortfield=desc]", true);
 
 			List<ZoneContextInfo> envZoneCtxList = null;
 			envZoneCtxList = new ArrayList<ZoneContextInfo>();
@@ -520,7 +524,7 @@ public class TestStudentPersonalConsumer
 			StudentPersonalConsumer consumer = tester.getConsumer();
   		
 //            tester.getStudent(consumer);
-//            tester.getStudents(consumer, true);
+            tester.getStudents(consumer, true);
 //            tester.getStudentsByServicePath("SchoolInfos", "24ed508e1ed04bba82198233efa55859", consumer);
 //            tester.getStudentsByServicePath("TeachingGroups", "64A309DA063A2E35B359D75101A8C3D1", consumer);
 //            tester.getStudentsByServicePath("RoomInfos", "24ed508e1ed04bba82198233efa55859", consumer);

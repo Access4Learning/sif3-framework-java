@@ -46,7 +46,6 @@ import sif3.infra.common.interfaces.EnvironmentManager;
 @Path("/eventsConnector{mimeType:(\\.[^/]*?)?}")
 public class EventResource extends BaseResource
 {
-	@SuppressWarnings("unused")
     public EventResource(@Context UriInfo uriInfo,
 			             @Context HttpHeaders requestHeaders,
 			             @Context Request request,
@@ -54,8 +53,9 @@ public class EventResource extends BaseResource
 	{
 		super(uriInfo, requestHeaders, request, "", null, null);
 		determineMediaTypes(null, null, false);
-		logger.debug("Request Media Type : " + getRequestMediaType());
-		logger.debug("Response Media Type: " + getResponseMediaType());
+		logger.debug("Request Media & Schema Info: " + getRequestPayloadMetadata());
+		logger.debug("Response Media & Schema Info DM: " + getDmResponsePayloadMetadata());
+        logger.debug("Response Media & Schema Info Infra: " + getInfraResponsePayloadMetadata());
 	}
 
 	/*----------------------*/
@@ -85,7 +85,12 @@ public class EventResource extends BaseResource
 			logger.debug("Create Event (REST POST) with input data: " + eventPayload);
 		}
 		
-		return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Events not supported.", "This DIRECT Environment implementation does not support events, yet."), ResponseAction.CREATE, null);
+		return makeErrorResponse(new ErrorDetails(Status.SERVICE_UNAVAILABLE.getStatusCode(), 
+		                                          "Events not supported.", 
+		                                          "This DIRECT Environment implementation does not support events, yet."), 
+		                         ResponseAction.CREATE, 
+		                         null, 
+		                         null);
 	}
 
 	@Override

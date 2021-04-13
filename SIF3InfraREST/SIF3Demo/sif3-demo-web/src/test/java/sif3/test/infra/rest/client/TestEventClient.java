@@ -22,6 +22,7 @@ import java.net.URI;
 
 import javax.ws.rs.core.MediaType;
 
+import au.com.systemic.framework.utils.FileReaderWriter;
 import sif.dd.au30.conversion.DataModelMarshalFactory;
 import sif.dd.au30.conversion.DataModelUnmarshalFactory;
 import sif.dd.au30.model.StudentPersonalCollectionType;
@@ -32,13 +33,14 @@ import sif3.common.header.HeaderProperties;
 import sif3.common.header.HeaderValues.EventAction;
 import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.RequestHeaderConstants;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.SIFEvent;
+import sif3.common.model.SchemaInfo;
 import sif3.infra.common.env.mgr.BrokeredProviderEnvironmentManager;
 import sif3.infra.common.env.types.AdapterEnvironmentStore;
 import sif3.infra.common.env.types.ConsumerEnvironment.ConnectorName;
 import sif3.infra.rest.client.EventClient;
 import systemic.sif3.demo.rest.conversion.CSVMarshaller;
-import au.com.systemic.framework.utils.FileReaderWriter;
 
 /**
  * @author Joerg Huber
@@ -141,7 +143,12 @@ public class TestEventClient
 //		ProviderEnvironment env = (ProviderEnvironment)store.getEnvironment();
 		
 		BrokeredProviderEnvironmentManager.getInstance().getEnvironmentInfo().addConnectorBaseURI(ConnectorName.eventsConnector, getEventConnectorURI());
-		return new EventClient(BrokeredProviderEnvironmentManager.getInstance(), MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_PLAIN_TYPE, "CSVStudents", new CSVMarshaller(), false);
+		return new EventClient(BrokeredProviderEnvironmentManager.getInstance(), 
+		                       new PayloadMetadata(MediaType.TEXT_PLAIN_TYPE, new SchemaInfo("urn:sif:data/us/3.3+xpress-csv")), 
+		                       new PayloadMetadata(MediaType.TEXT_PLAIN_TYPE, new SchemaInfo("urn:sif:data/us/3.3+xpress-csv")), 
+		                       "CSVStudents", 
+		                       new CSVMarshaller(), 
+		                       false);
 //		return new EventClient(env, env.getMediaType(), env.getMediaType(), getSIF3Session(), "StudentPersonals", marshaller);
 	}
 	

@@ -30,6 +30,7 @@ import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 import sif3.common.exception.UnsupportedQueryException;
 import sif3.common.header.HeaderProperties;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
@@ -114,11 +115,11 @@ public class RolloverStudentsProvider extends BaseFunctionalServiceProvider
                                                    PagingInfo pagingInfo, 
                                                    RequestMetadata metadata, 
                                                    ResponseParameters customResponseParams, 
-                                                   MediaType returnMimeType)
+                                                   PayloadMetadata returnPayloadMetadata)
             throws PersistenceException, UnsupportedMediaTypeExcpetion, DataTooLargeException, SIFException
     {
         logger.debug("retrieveDataFromPhase for Functional Service "+getMultiObjectClassInfo().getObjectName()+" and jobID = "+phaseInfo.getJobID()+" and phase "+phaseInfo.getPhaseName()+" called.");
-        logger.debug("Requested Return Mime Type: "+returnMimeType.toString()+"\nPaging Info: "+pagingInfo);
+        logger.debug("Requested Return Mime Type & Schema: "+returnPayloadMetadata+"\nPaging Info: "+pagingInfo);
         
         // Generally the implementation would check here what needs to be returned for the given phase.
         // General flow would be:
@@ -142,14 +143,14 @@ public class RolloverStudentsProvider extends BaseFunctionalServiceProvider
         
         if (phaseInfo.getPhaseName().equalsIgnoreCase("oldYearEnrolment"))
         {
-            if (!returnMimeType.isCompatible(MediaType.APPLICATION_XML_TYPE))
+            if (!returnPayloadMetadata.getMimeType().isCompatible(MediaType.APPLICATION_XML_TYPE))
             {
-                throw new UnsupportedMediaTypeExcpetion(returnMimeType.toString()+" is not accepted. Valid mime type is "+ MediaType.APPLICATION_XML_TYPE.toString());
+                throw new UnsupportedMediaTypeExcpetion(returnPayloadMetadata.getMimeType().toString()+" is not accepted. Valid mime type is "+ MediaType.APPLICATION_XML_TYPE.toString());
             }
             
             //make up some dummy data..
             PhaseDataResponse response = new PhaseDataResponse();
-            response.setMimeType(returnMimeType);
+            response.setPayloadMetadata(returnPayloadMetadata);
             response.setData( 
             "<EnrolmentData xmlns=\"http://www.au/enrolmentUseCase/3.4.2\">\n"+
             "  <schoolYear>\n"+
@@ -180,12 +181,13 @@ public class RolloverStudentsProvider extends BaseFunctionalServiceProvider
                                                SIFContext context, 
                                                RequestMetadata metadata, 
                                                ResponseParameters customResponseParams, 
-                                               MediaType returnMimeType)
+                                               PayloadMetadata returnPayloadMetadata)
             throws PersistenceException, UnsupportedMediaTypeExcpetion, SIFException
     {
         logger.debug("createDataInPhase for Functional Service "+getMultiObjectClassInfo().getObjectName()+" and jobID = "+phaseInfo.getJobID()+" and phase "+phaseInfo.getPhaseName()+" called.");
-        logger.debug("\nData:\n"+phaseData.getData()+"\nData Mime Type: "+phaseData.getMimeType().toString()+"\nUse Advisory: "+useAdvisory);
-        
+        logger.debug("\nData:\n"+phaseData.getData()+"\nUse Advisory: "+useAdvisory+"\nPayload Metadata: "+phaseData.getPayloadMetadata());
+        logger.debug("Requested Return Mime Type & Schema: "+returnPayloadMetadata);
+
         // Generally the implementation would check here what needs to be done to create data for the given phase.
         // General flow would be:
         // 1) Check the phase for the given job and based on this...
@@ -213,14 +215,14 @@ public class RolloverStudentsProvider extends BaseFunctionalServiceProvider
         
         if (phaseInfo.getPhaseName().equalsIgnoreCase("oldYearEnrolment"))
         {
-            if (!returnMimeType.isCompatible(MediaType.APPLICATION_XML_TYPE))
+            if (!returnPayloadMetadata.getMimeType().isCompatible(MediaType.APPLICATION_XML_TYPE))
             {
-                throw new UnsupportedMediaTypeExcpetion(returnMimeType.toString()+" is not accepted. Valid mime type is "+ MediaType.APPLICATION_XML_TYPE.toString());
+                throw new UnsupportedMediaTypeExcpetion(returnPayloadMetadata.getMimeType().toString()+" is not accepted. Valid mime type is "+ MediaType.APPLICATION_XML_TYPE.toString());
             }
             
             //make up some dummy data..
             PhaseDataResponse response = new PhaseDataResponse();
-            response.setMimeType(returnMimeType);
+            response.setPayloadMetadata(returnPayloadMetadata);
             response.setStatus(Status.OK); // This is an override of the default of 201!
             response.setData( 
             "<EnrolmentData xmlns=\"http://www.au/enrolmentUseCase/3.4.2\">\n"+
@@ -254,11 +256,12 @@ public class RolloverStudentsProvider extends BaseFunctionalServiceProvider
                                                SIFContext context, 
                                                RequestMetadata metadata, 
                                                ResponseParameters customResponseParams, 
-                                               MediaType returnMimeType)
+                                               PayloadMetadata returnPayloadMetadata)
             throws PersistenceException, UnsupportedMediaTypeExcpetion, SIFException
     {
         logger.debug("updateDataInPhase for Functional Service "+getMultiObjectClassInfo().getObjectName()+" and jobID = "+phaseInfo.getJobID()+" and phase "+phaseInfo.getPhaseName()+" called.");
-        logger.debug("\nData:\n"+phaseData.getData()+"\nData Mime Type: "+phaseData.getMimeType().toString());
+        logger.debug("\nData:\n"+phaseData.getData()+"\nPayload Metadata: "+phaseData.getPayloadMetadata());
+        logger.debug("Requested Return Mime Type & Schema: "+returnPayloadMetadata);
 
         // Generally the implementation would check here what needs to be done to update data for the given phase.
         // General flow would be:
@@ -299,12 +302,12 @@ public class RolloverStudentsProvider extends BaseFunctionalServiceProvider
                                                SIFContext context, 
                                                RequestMetadata metadata, 
                                                ResponseParameters customResponseParams, 
-                                               MediaType returnMimeType)
+                                               PayloadMetadata returnPayloadMetadata)
             throws PersistenceException, UnsupportedMediaTypeExcpetion, SIFException
     {
         logger.debug("deleteDataInPhase for Functional Service "+getMultiObjectClassInfo().getObjectName()+" and jobID = "+phaseInfo.getJobID()+" and phase "+phaseInfo.getPhaseName()+" called.");
-        logger.debug("\nData:\n"+phaseData.getData()+"\nData Mime Type: "+phaseData.getMimeType().toString());
-
+        logger.debug("\nData:\n"+phaseData.getData()+"\nPayload Metadata: "+phaseData.getPayloadMetadata());
+        logger.debug("Requested Return Mime Type & Schema: "+returnPayloadMetadata);
 
         // Generally the implementation would check here what needs to be done to delete data for the given phase.
         // General flow would be:

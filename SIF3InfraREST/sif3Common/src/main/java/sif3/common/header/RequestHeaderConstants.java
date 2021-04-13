@@ -73,7 +73,13 @@ public class RequestHeaderConstants
 	public static final String HDR_ZONE_ID = CommonConstants.MATRIX_ZONE_ID;
 	public static final String HDR_EVENT_ACTION = "eventAction"; // CREATE, UPDATE, DELETE (see HeaderValues.EventAction)
 	public static final String HDR_CONSUMER_ID = "connectionId"; // Used by getMessage() on queue to identify the thread that queries 
-	
+
+	/*-------------------------------------------------------------------*/
+    /*-- As of SIF Infra 3.3: Experimental Volume - Schema Negotiation --*/
+    /*-------------------------------------------------------------------*/
+    public static final String HDR_CONTENT_PROFILE= "Content-Profile"; // what schema the request payload is in
+    public static final String HDR_ACCEPT_PROFILE = "Accept-Profile"; // what schema the response payload should be in
+    
 	public static final String[] HEADER_NAME_ARRAY = 
 	{
 		// General Fields
@@ -110,6 +116,10 @@ public class RequestHeaderConstants
 		HDR_UPDATE_TYPE,
 		HDR_SERVICE_NAME,
 		HDR_CONSUMER_ID,
+		
+		// Profile Negotiation
+		HDR_CONTENT_PROFILE,
+		HDR_ACCEPT_PROFILE,
 	};
 
 }

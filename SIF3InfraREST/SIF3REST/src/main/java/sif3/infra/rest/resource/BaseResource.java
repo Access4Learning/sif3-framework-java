@@ -42,6 +42,7 @@ import au.com.systemic.framework.utils.StringUtils;
 import sif3.common.CommonConstants;
 import sif3.common.CommonConstants.AdapterType;
 import sif3.common.CommonConstants.AuthenticationType;
+import sif3.common.CommonConstants.SchemaType;
 import sif3.common.conversion.MarshalFactory;
 import sif3.common.conversion.MediaTypeOperations;
 import sif3.common.conversion.UnmarshalFactory;
@@ -61,10 +62,12 @@ import sif3.common.model.ACL.AccessRight;
 import sif3.common.model.ACL.AccessType;
 import sif3.common.model.AuthenticationInfo;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.ResponseParameters;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
+import sif3.common.model.SchemaInfo;
 import sif3.common.model.URLQueryParameter;
 import sif3.common.model.security.InternalSecurityServiceConstants;
 import sif3.common.model.security.SecurityServiceInfo;
@@ -73,6 +76,7 @@ import sif3.common.persist.model.ExternalSecurityService;
 import sif3.common.persist.model.SIF3Session;
 import sif3.common.security.AbstractSecurityService;
 import sif3.common.utils.AuthenticationUtils;
+import sif3.common.utils.JAXBUtils;
 import sif3.common.utils.UUIDGenerator;
 import sif3.common.ws.CreateOperationStatus;
 import sif3.common.ws.ErrorDetails;
@@ -89,8 +93,8 @@ import sif3.infra.common.model.CreatesType;
 import sif3.infra.common.model.DeleteIdType;
 import sif3.infra.common.model.DeleteRequestType;
 import sif3.infra.common.model.DeleteResponseType;
-import sif3.infra.common.model.DeleteStatus;
-import sif3.infra.common.model.DeleteStatusCollection;
+import sif3.infra.common.model.DeleteStatusCollectionType;
+import sif3.infra.common.model.DeleteStatusType;
 import sif3.infra.common.model.EnvironmentType;
 import sif3.infra.common.model.ErrorType;
 import sif3.infra.common.model.ObjectFactory;
@@ -113,7 +117,9 @@ import sif3.infra.rest.resource.audit.AuditableResource;
 public abstract class BaseResource
 {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-	
+
+    private static String PROVIDER_CHECK = "Provider Check.";
+
 	/* Below variables are for testing purposes only */
     private static Boolean testMode = null;
     /* End Testing variables */
@@ -141,8 +147,18 @@ public abstract class BaseResource
 	private String relativeServicePath = null; 
 	private AuthenticationInfo authInfo = null;
 	private URLQueryParameter queryParameters= null;
-	private MediaType requestMediaType = null;
-	private MediaType responseMediaType = null;
+	
+	// There is only one request payload information given
+	private PayloadMetadata requestPayloadMetadata = null;  //new PayloadMetadata(MediaType.APPLICATION_XML_TYPE);
+	
+    // The response schema info can be made up of multiple values. Data model, infrastructure and even multiple of each!
+	// So we really need a list of schema info type. However the framework can only really support one infrastructure type at the
+	// time, so it is not quite sure how this is best resolved if the requestor indicates a version that is not compatible with the
+	// framework version. According to the schema negotiation spec this could result in a "warning: 214 - Transformation Applied" 
+	// header and then still return the info of the framework.
+    private List<PayloadMetadata> dmResponsePayloadMetadata = new ArrayList<PayloadMetadata>();
+    private List<PayloadMetadata> infraResponsePayloadMetadata = new ArrayList<PayloadMetadata>();
+
 	private MediaType urlPostfixMimeType = null;
 	private AbstractSecurityService securityService = null;
 	private ServiceType serviceType = null;
@@ -313,21 +329,57 @@ public abstract class BaseResource
         this.serviceType = serviceType;
     }
 
-    /*
-	 * If the request media type is not set it will try to get the media type from the URL Postfix. If that is not set either then XML is returned
-	 */
-	public MediaType getRequestMediaType()
+    public PayloadMetadata getRequestPayloadMetadata()
     {
-		return this.requestMediaType;
+        return this.requestPayloadMetadata;
     }
 
-  /*
-   * If the response media type is not set it will try to get the media type from the URL Postfix. If that it is 
-   * not set either then XML is returned
-   */
-	public MediaType getResponseMediaType()
+    public List<PayloadMetadata> getDmResponsePayloadMetadata()
     {
-		return this.responseMediaType;
+        return dmResponsePayloadMetadata;
+    }
+
+    /**
+     * In functional services as well as eXtended Queries the response can be of a specific mime type and schema. It is set by the
+     * consumer what it expects and it could be different to standard Object Services. So, while the request may indicate some
+     * specific value for the over arching service the actual returned payload is set as part of the response by the provider
+     * implementation rather than the framework. There must be a way to over write the default framework bahviour by the provider
+     * to set the actual response mime type and optional schema info. This method can be used to achieve that.
+     * 
+     * @param payloadMetadata The payload metadata to be used in the actula repsonse.
+     */
+    public void setMainDmResponsePayloadMetadata(PayloadMetadata payloadMetadata)
+    {
+        // Currently the framework only supports one data model at the time, so there are assumptions in this class that the
+        // first element in the potential datamodel schema list is the one to be returned in appropriate headers. So we set this here.
+        getDmResponsePayloadMetadata().add(0, payloadMetadata);
+    }
+
+    
+    public List<PayloadMetadata> getInfraResponsePayloadMetadata()
+    {
+        return infraResponsePayloadMetadata;
+    }
+
+    /**
+     * The request can indicate multiple mime types and schema info for the response. However this framework in its current form
+     * can only deal with a single response mime type and schema info. Hence the most applicable one will be returned. In most cases
+     * consumers will only indicate one value anyway, so it is assumed that this should work just about always.
+     *  
+     * @param useDatamodel TRUE: Return the first DM Paylaod info. FALSE: Return the first Infra Paylaod info
+     * 
+     * @return Null if no response payload info is available otherwise the first element of given payload info as described in 
+     *         the parameter useDatamodel.
+     */
+    public PayloadMetadata getFirstResponsePayloadMetadata(boolean useDatamodel)
+    {
+        List<PayloadMetadata> payloadList = useDatamodel ? getDmResponsePayloadMetadata() : getInfraResponsePayloadMetadata();
+        if ((payloadList != null) && (payloadList.size() > 0))
+        {
+            return payloadList.get(0);
+        }
+        
+        return null;
     }
 
 	public AbstractSecurityService getSecurityService()
@@ -443,6 +495,11 @@ public abstract class BaseResource
 		return getEnvironmentManager().getEnvironmentInfo().getAdapterName();
 	}
 	
+	public boolean isSchemaAware()
+	{
+	    return getEnvironmentManager().getEnvironmentInfo().isSchemaNegotiationEnabled();
+	}
+
 	/*---------------------------------*/
 	/*-- Security Validation Methods --*/
 	/*---------------------------------*/
@@ -509,50 +566,69 @@ public abstract class BaseResource
 	 * @param error Error Information to be put into the REST Response.
 	 * @param responseAction Action to be set in the appropriate HTTP header.
      * @param customResponseParams headers that might be added to the response. Can be null.
+     * @param acceptDMSchemaInfo The schema accepted where we have invalid media types from the request.
 	 * 
 	 * @return REST Response Object.
 	 */
-	public Response makeErrorResponse(ErrorDetails error, ResponseAction responseAction, ResponseParameters customResponseParams)
+	public Response makeErrorResponse(ErrorDetails error, ResponseAction responseAction, ResponseParameters customResponseParams, SchemaInfo acceptDMSchemaInfo)
 	{
-		return makeResponse(makeError(error), error.getErrorCode(), true, responseAction, customResponseParams, infraMarshaller);	
+		return makeResponse(makeError(error), false, error.getErrorCode(), true, responseAction, customResponseParams, infraMarshaller, acceptDMSchemaInfo);	
 	}
 	
 	/**
 	 * Create a HTTP Response without any content. It will set some header properties as defined in the SIF3 spec.
 	 *  
 	 * @param isError TRUE: Indicates that the Response is an error response otherwise it is assumed it is a standard response.
+     * @param isDMResponse TRUE: Payload is data model. FALSE: Payload is infrastructure
+     * @param responseAction Indicates what the response is in regards to the original request (e.g. QUERY, CREATE, HEAD etc).
+     * @param customResponseParams A set of headers to be set by the provider. Can be null.
 	 * 
 	 * @return A HTTP Response to be sent back to the client.
 	 */
-	public Response makeResopnseWithNoContent(boolean isError, ResponseAction responseAction, ResponseParameters customResponseParams)
+	public Response makeResopnseWithNoContent(boolean isError, boolean isDMResponse, ResponseAction responseAction, ResponseParameters customResponseParams)
 	{
-		return makeFullResponse(null, Status.NO_CONTENT.getStatusCode(), null, isError, responseAction, customResponseParams, null);
+		return makeFullResponse(null, isDMResponse, Status.NO_CONTENT.getStatusCode(), null, isError, responseAction, customResponseParams, null, null);
 	}
 
 	/**
      * Create a HTTP Response without any content and a HTTP Status of 200 (OK). It will set some header properties as defined 
      * in the SIF3 spec.
      *  
+     * @param isDMResponse TRUE: Payload is data model. FALSE: Payload is infrastructure
+     * @param responseAction Indicates what the response is in regards to the original request (e.g. QUERY, CREATE, HEAD etc).
+     * @param customResponseParams A set of headers to be set by the provider. Can be null.
+     *
      * @return A HTTP Response to be sent back to the client.
      */
-    public Response makeOKResopnseWithNoContent(ResponseAction responseAction, ResponseParameters customResponseParams)
+    public Response makeOKResopnseWithNoContent(boolean isDMResponse, ResponseAction responseAction, ResponseParameters customResponseParams)
     {
-        return makeFullResponse(null, Status.NO_CONTENT.getStatusCode(), null, false, responseAction, customResponseParams, null);
+        return makeFullResponse(null, isDMResponse, Status.NO_CONTENT.getStatusCode(), null, false, responseAction, customResponseParams, null, null);
     }
 
 	/**
-	 * This method creates a HTTP response that adheres to the SIF3 specification. 
+	 * This method creates a HTTP response that adheres to the SIF3 specification. It sets the paging info to null. 
 	 * 
 	 * @param data The data (payload) that shall be put into the response.
+     * @param isDMResponse TRUE: Payload is data model. FALSE: Payload is infrastructure
 	 * @param status The status of the response.
-	 * @param isError Indicator if the response is an error or a standard response.
+	 * @param isError Indicator if the response is an error or a standard response. Will always default to Infra data model behaviour
+	 * @param responseAction Indicates what the response is in regards to the original request (e.g. QUERY, CREATE, HEAD etc).
+	 * @param customResponseParams A set of headers to be set by the provider. Can be null.
 	 * @param marshaller The marshaller that converts the 'data' into a valid media type.
+	 * @param acceptDMSchemaInfo The schema accepted where we have invalid media types from the request.
 	 * 
 	 * @return A HTTP Response to be sent back to the client.
 	 */
-	public Response makeResponse(Object data, int status, boolean isError, ResponseAction responseAction, ResponseParameters customResponseParams, MarshalFactory marshaller)
+	public Response makeResponse(Object data, 
+	                             boolean isDMResponse, 
+	                             int status, 
+	                             boolean isError, 
+	                             ResponseAction responseAction, 
+	                             ResponseParameters customResponseParams, 
+	                             MarshalFactory marshaller, 
+	                             SchemaInfo acceptDMSchemaInfo)
 	{
-		return makeFullResponse(data, status, null, isError, responseAction, customResponseParams, marshaller);
+		return makeFullResponse(data, (isDMResponse && !isError), status, null, isError, responseAction, customResponseParams, marshaller, acceptDMSchemaInfo);
 	}
 	
 	/**
@@ -560,6 +636,7 @@ public abstract class BaseResource
 	 * appropriate headers in the response. 
 	 * 
 	 * @param data The data (payload) that shall be put into the response.
+     * @param isDMResponse TRUE: Payload is data model. FALSE: Payload is infrastructure
 	 * @param pagingInfo Paging Information to be added to the response header.
 	 * @param isError Indicator if the response is an error or a standard response.
      * @param responseAction Indicator if the response action is QUERY or HEAD or something eles.
@@ -568,9 +645,15 @@ public abstract class BaseResource
 	 * 
 	 * @return A HTTP Response to be sent back to the client.
 	 */
-    public Response makePagedResponse(Object data, PagingInfo pagingInfo, boolean isError, ResponseAction responseAction, ResponseParameters customResponseParams, MarshalFactory marshaller)
+    public Response makePagedResponse(Object data, 
+                                      boolean isDMResponse, 
+                                      PagingInfo pagingInfo, 
+                                      boolean isError, 
+                                      ResponseAction responseAction, 
+                                      ResponseParameters customResponseParams, 
+                                      MarshalFactory marshaller)
 	{
-		return makeFullResponse(data, Status.OK.getStatusCode(), pagingInfo, isError, responseAction, customResponseParams, marshaller);
+		return makeFullResponse(data, isDMResponse, Status.OK.getStatusCode(), pagingInfo, isError, responseAction, customResponseParams, marshaller, null);
 	}
 	
 	/*
@@ -578,7 +661,7 @@ public abstract class BaseResource
 	 */
 	protected Response makeDelayedAcceptResponse(ResponseAction responseAction)
 	{
-	    return makeFullResponse(null, Status.ACCEPTED.getStatusCode(), null, false, responseAction, null, null);
+	    return makeFullResponse(null, true, Status.ACCEPTED.getStatusCode(), null, false, responseAction, null, null, null);
 	}
 
 	/**
@@ -608,7 +691,7 @@ public abstract class BaseResource
 			}	
 			creates.add(createType);
 		}
-		return makeResponse(createManyResponse, overallStatus.getStatusCode(), false, ResponseAction.CREATE, customResponseParams, infraMarshaller);
+		return makeResponse(createManyResponse, false, overallStatus.getStatusCode(), false, ResponseAction.CREATE, customResponseParams, infraMarshaller, null);
 	}
 	
 	/**
@@ -637,7 +720,7 @@ public abstract class BaseResource
 			}	
 			updates.add(updateType);
 		}
-		return makeResponse(updateManyResponse, overallStatus.getStatusCode(), false, ResponseAction.UPDATE, customResponseParams, infraMarshaller);
+		return makeResponse(updateManyResponse, false, overallStatus.getStatusCode(), false, ResponseAction.UPDATE, customResponseParams, infraMarshaller, null);
 	}
 
 	/**
@@ -652,12 +735,12 @@ public abstract class BaseResource
 	public Response makeDeleteMultipleResponse(List<OperationStatus> operationStatusList, Status overallStatus, ResponseParameters customResponseParams)
 	{
 		DeleteResponseType deleteManyResponse = infraObjectFactory.createDeleteResponseType();
-		deleteManyResponse.setDeletes(new DeleteStatusCollection());
-		List<DeleteStatus> deletes = deleteManyResponse.getDeletes().getDelete();
+		deleteManyResponse.setDeletes(new DeleteStatusCollectionType());
+		List<DeleteStatusType> deletes = deleteManyResponse.getDeletes().getDelete();
 		
 		for (OperationStatus opStatus : operationStatusList)
 		{
-			DeleteStatus deleteStatus = new DeleteStatus();
+		    DeleteStatusType deleteStatus = new DeleteStatusType();
 			deleteStatus.setId(opStatus.getResourceID());
 			deleteStatus.setStatusCode(Integer.toString(opStatus.getStatus()));
 			if (opStatus.getError() != null)
@@ -666,7 +749,7 @@ public abstract class BaseResource
 			}	
 			deletes.add(deleteStatus);
 		}
-		return makeResponse(deleteManyResponse, overallStatus.getStatusCode(), false, ResponseAction.DELETE, customResponseParams, infraMarshaller);
+		return makeResponse(deleteManyResponse, false, overallStatus.getStatusCode(), false, ResponseAction.DELETE, customResponseParams, infraMarshaller, null);
 	}
 	
 	/*
@@ -674,7 +757,7 @@ public abstract class BaseResource
 	 */
     public Response makeNotImplementedResponse(ResponseAction responseAction, ResponseParameters customResponseParams)
     {
-        return makeErrorResponse(new ErrorDetails(CommonConstants.NOT_IMPLEMENTED, "Not Implemented, yet", "This functionality is not yet supported by this provider.", "Provider"), responseAction , customResponseParams);
+        return makeErrorResponse(new ErrorDetails(CommonConstants.NOT_IMPLEMENTED, "Not Implemented, yet", "This functionality is not yet supported by this provider.", "Provider"), responseAction , customResponseParams, null);
     }
 
 	/*-----------------------*/
@@ -701,7 +784,8 @@ public abstract class BaseResource
 	    List<String> resourceIDs = new ArrayList<String>();
 	    if (deletePayload != null)
 	    {
-	    	DeleteRequestType deletes = (DeleteRequestType)infraUnmarshaller.unmarshal(deletePayload, DeleteRequestType.class, getRequestMediaType());
+	        deletePayload = mapToFrameworkInfraVersion(deletePayload);
+	    	DeleteRequestType deletes = (DeleteRequestType)infraUnmarshaller.unmarshal(deletePayload, DeleteRequestType.class, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
 	    	if ((deletes.getDeletes() != null) && (deletes.getDeletes().getDelete() != null))
 	    	{
 	    		for (DeleteIdType id : deletes.getDeletes().getDelete())
@@ -770,6 +854,15 @@ public abstract class BaseResource
 	{
 	    return new ResponseParameters(getProviderEnvironment().getCustomResponseHeaders());
 	}   
+	
+    /*
+     * This method takes the given infrastructure data model payload and maps the namespace to the frameworks namespace,
+     * so that it can be marshalled properly.
+     */
+    protected String mapToFrameworkInfraVersion(String payload)
+    {
+        return JAXBUtils.mapNamespaceVersion(payload, getProviderEnvironment().getBaseInfraNamespace(), getProviderEnvironment().getFrameworkInfraVersion());
+    }
 
 	/*---------------------------------*/
 	/*-- Security Validation Methods --*/
@@ -927,7 +1020,7 @@ public abstract class BaseResource
 	{
 		if ((getAuthInfo().getSecurityServiceInfo() == null) || StringUtils.isEmpty(getAuthInfo().getSecurityServiceInfo().getAuthenticationMethod()))
 		{
-			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No Authentication Method set. Choose between Basic, SIF_HMACSHA256 or External Security as Authentication Method. Refer to SIF3 Specification for details.", "Provider side check.");
+			return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "No Authentication Method set. Choose between Basic, SIF_HMACSHA256 or External Security as Authentication Method. Refer to SIF3 Specification for details.", PROVIDER_CHECK);
 		}
 
 		if (getAuthInfo().getSecurityServiceInfo().getAuthenticationType() == AuthenticationType.Other)
@@ -938,7 +1031,7 @@ public abstract class BaseResource
 
 	    if (StringUtils.isEmpty(getAuthInfo().getPassword()))
 	    {
-	    	return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Not authorized. Password Invalid.", "Password is not provided.");
+	    	return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Not authorized. Password is not provided.", PROVIDER_CHECK);
 	    }
 	    
 	    String authToken = AuthenticationUtils.getFullBase64Token(getAuthInfo());
@@ -953,13 +1046,38 @@ public abstract class BaseResource
 	    {
 			// Get the timestamp which is required for the hashing.
 			String timestamp = getTimestampFromRequest();
+			
 			if (StringUtils.notEmpty(timestamp))
 			{
+                int maxAgeMinutes = getProviderEnvironment().getMaxTimestampAgeMinutes();
+                if (maxAgeMinutes != 0) // perform age check
+                {
+                    // Convert timestamp to date.
+                    Date timestampDate = DateUtils.getDateFromISO8601(timestamp);
+                    if (timestampDate == null) // invalid date format!
+                    {
+                        return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "HTTP header 'timestamp' must be ISO8601 formatted (e.g. yyyy-MM-ddTHH:mm:ss.SSSZ).", PROVIDER_CHECK);
+                    }
+                    
+                    // Now we check for age
+                    long currentDate = (new Date()).getTime();
+                    long maxAgeDate = currentDate - (maxAgeMinutes * DateUtils.MINUTE_IN_MILLI_SECOND);
+                    if (timestampDate.getTime() < maxAgeDate) // too old!
+                    {
+                        return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "HTTP header 'timestamp' ("+timestamp+") is older than "+maxAgeMinutes+" minutes.", PROVIDER_CHECK);
+                    }
+                    else if (timestampDate.getTime() > currentDate) // also ensure that it is not a future date
+                    {
+                        return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "HTTP header 'timestamp' ("+timestamp+") is a future date and time.", PROVIDER_CHECK);
+                    }
+                }
+
+                // If we get here then all checks succeeded.
 				newAuthToken = AuthenticationUtils.getSIFHMACSHA256AuthToken(userToken, password, timestamp);
 			}
 			else
 			{
-				return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "For SIF_HMACSHA256 authentication the HTTP request must have a timestamp in the HTTP header. Refer to SIF3 Specification for details.");
+				return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "For SIF_HMACSHA256 authentication the HTTP request must have a timestamp in the HTTP header. Refer to SIF3 Specification for details.", PROVIDER_CHECK);
 			}
 	    }
 	    
@@ -967,7 +1085,7 @@ public abstract class BaseResource
 	    //System.out.println("Auth Token To Compare with: "+newAuthToken);  
 	    if (!authToken.equals(newAuthToken))
 	    {
-	    	return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Authorization token in request doesn't match expected authorization token in session.");
+	    	return new ErrorDetails(Status.UNAUTHORIZED.getStatusCode(), NOT_AUTHORIZED, "Authorization token in request doesn't match expected authorization token in session.", PROVIDER_CHECK);
 	    }
 
 		// If we get here all validation has succeeded. We do not return any error.
@@ -1346,14 +1464,15 @@ public abstract class BaseResource
 	}
 
 	/*
-	 * This method should be called in the constructors of each resource. It is intended to determine the media type of the request as well as
-	 * the response. The media types are being determined firstly on the HTTP header and secondly on the URL Postfix.
+	 * This method should be called in the constructors of each resource. It is intended to determine the media type and schema negotiation
+	 * information of the request as well as the response. The media types are being determined firstly on the HTTP header and secondly 
+	 * on the URL Postfix. Schema info is only determined by HTTP headers.
 	 */
 	protected void determineMediaTypes(MarshalFactory marshaller, UnmarshalFactory unmarshaller, boolean useDefaults)
 	{
 		// Get values from HTTP headers
-		requestMediaType  = getMediaTypeFromStr(getAllHTTPHeaderProperties().getHeaderProperty(HttpHeaders.CONTENT_TYPE.toLowerCase()), HttpHeaders.CONTENT_TYPE);
-		responseMediaType = getMediaTypeFromStr(getAllHTTPHeaderProperties().getHeaderProperty(HttpHeaders.ACCEPT.toLowerCase()), HttpHeaders.ACCEPT);
+		MediaType requestMediaType  = getMediaTypeFromStr(getAllHTTPHeaderProperties().getHeaderProperty(HttpHeaders.CONTENT_TYPE.toLowerCase()), HttpHeaders.CONTENT_TYPE);
+		MediaType responseMediaType = getMediaTypeFromStr(getAllHTTPHeaderProperties().getHeaderProperty(HttpHeaders.ACCEPT.toLowerCase()), HttpHeaders.ACCEPT);
 
 		if (logger.isDebugEnabled())
 		{
@@ -1371,8 +1490,30 @@ public abstract class BaseResource
 		}
 
 		responseMediaType = validateAndExtractMimeType(marshaller, responseMediaType, urlPostfixMimeType, useDefaults);
+		
+		// Get Schema info if enabled and available.
+		SchemaInfo requestSchemaInfo = null;
+		ArrayList<SchemaInfo> dmSchemaInfo = null;
+		ArrayList<SchemaInfo> infraSchemaInfo = null;
+        if (getEnvironmentManager().getEnvironmentInfo().isSchemaNegotiationEnabled())
+        {
+            requestSchemaInfo = new SchemaInfo(getAllHTTPHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_CONTENT_PROFILE.toLowerCase()));
+
+            dmSchemaInfo = new ArrayList<SchemaInfo>();
+            infraSchemaInfo = new  ArrayList<SchemaInfo>();
+
+            extractSchemaInforFromHeader(dmSchemaInfo, infraSchemaInfo);
+        }
+
+        // Set the final payload metadata for request and response.
+		requestPayloadMetadata = new PayloadMetadata(requestMediaType, requestSchemaInfo);
+		
+		// Assign values to appropriate lists. There has to be at least one value for DM and Infra even if no schema info is given, we
+		// still have the mime type.
+		populatePayloadMetadata(dmResponsePayloadMetadata, dmSchemaInfo, responseMediaType);
+        populatePayloadMetadata(infraResponsePayloadMetadata, infraSchemaInfo, responseMediaType);
 	}
-	
+
     protected boolean isBrokeredEnvironment()
     {
         return (getEnvironmentManager().getEnvironmentType() == sif3.infra.common.env.types.EnvironmentInfo.EnvironmentType.BROKERED);
@@ -1481,7 +1622,8 @@ public abstract class BaseResource
 		if (!marshalOps.isSupported(mediaTypeToTest)) // Not supported => try the URL postfix
 		{
 			// Check if we have a URL media type 
-			if (urlPostfixMimeType != null)
+//            if (urlPostfixMimeType != null)
+			if (urlMediaType != null)
 			{
 				if (marshalOps.isSupported(urlMediaType))
     			{
@@ -1496,7 +1638,8 @@ public abstract class BaseResource
 		{
 			if (mediaTypeToTest.isWildcardSubtype())
 			{
-				return (urlPostfixMimeType != null) ?  urlPostfixMimeType : marshalOps.getDefault();
+				return (urlMediaType != null) ?  urlMediaType : marshalOps.getDefault();
+//                return (urlPostfixMimeType != null) ?  urlPostfixMimeType : marshalOps.getDefault();
 			}
 			else
 			{
@@ -1504,6 +1647,46 @@ public abstract class BaseResource
 			}
 		}		
 	}
+	
+    private void extractSchemaInforFromHeader(ArrayList<SchemaInfo> dmSchemaInfo, ArrayList<SchemaInfo> infraSchemaInfo)
+    {
+        String responseSchemaInfoStr = getAllHTTPHeaderProperties().getHeaderProperty(RequestHeaderConstants.HDR_ACCEPT_PROFILE.toLowerCase());
+        
+        // If not empty then we have values to extract. They can be a comma separated list.
+        if (StringUtils.notEmpty(responseSchemaInfoStr))
+        {
+            String[] schemaArray = responseSchemaInfoStr.split(",");
+            for (String schemaStr : schemaArray)
+            {
+                SchemaInfo schemaInfo = new SchemaInfo(schemaStr.trim());
+                
+                //check if it is a data model or infra schema info
+                if (SchemaInfo.MODEL_TYPE_DM.equalsIgnoreCase(schemaInfo.getModelType()))
+                {
+                    dmSchemaInfo.add(schemaInfo);
+                }
+                else if (SchemaInfo.MODEL_TYPE_INFRA.equalsIgnoreCase(schemaInfo.getModelType()))
+                {
+                    infraSchemaInfo.add(schemaInfo);
+                }
+            }
+        }
+    }
+    
+    private void populatePayloadMetadata(List<PayloadMetadata> payloadMetadataList, ArrayList<SchemaInfo> schemaInfoList, MediaType mediaType)
+    {
+        if ((schemaInfoList == null) || (schemaInfoList.size() == 0))
+        {
+            payloadMetadataList.add(new PayloadMetadata(mediaType));
+        }
+        else
+        {
+            for (SchemaInfo schemaInfo : schemaInfoList)
+            {
+                payloadMetadataList.add(new PayloadMetadata(mediaType, schemaInfo));
+            }
+        }
+    }
 	
 	private void extractQueryParameters()
 	{
@@ -1513,7 +1696,7 @@ public abstract class BaseResource
 	/*--------------------------------------------------*/
 	/*-- Private Methods related to response creation --*/
 	/*--------------------------------------------------*/
-	private ErrorType makeError(ErrorDetails error)
+	protected ErrorType makeError(ErrorDetails error)
 	{
 		ErrorType sifError = infraObjectFactory.createErrorType();
 		sifError.setId(UUIDGenerator.getUUID());
@@ -1525,10 +1708,197 @@ public abstract class BaseResource
 		return sifError;
 	}
 	
-	private Response makeFullResponse(Object data, int status, PagingInfo pagingInfo, boolean isError, ResponseAction responseAction, ResponseParameters customResponseParams, MarshalFactory marshaller)
+	/*
+	 * This method will set applicable headers only if provider is Schema Aware (schema negotiation is enabled). We need to state 
+	 * the DM and Infra datamodel because the consumer may have requested something we cannot deal with so we indicate what the 
+	 * valid datamodel and infra models are.
+	 */
+	private void setAcceptSchemaHeader(SchemaInfo dmSchemaInfo, HeaderProperties allHeaders)
+	{
+	    if (isSchemaAware())
+        {
+            // The accept header always has to indicate what infrastructure it supports.
+            String acceptProfile = getEnvironmentManager().getEnvironmentInfo().getInfraPayloadMetadata().getSchemaInfo().getFullSchemaValue();
+            
+            // If it also supports a DM schema then we need to indicate this.
+            if (dmSchemaInfo != null)
+            {
+                acceptProfile = dmSchemaInfo.getFullSchemaValue() + "," + acceptProfile;
+            }
+            allHeaders.setHeaderProperty(RequestHeaderConstants.HDR_ACCEPT_PROFILE, acceptProfile);
+        }
+	}
+	
+    private void setContentSchemaHeader(SchemaInfo schemaInfo, HeaderProperties allHeaders)
+    {
+        allHeaders.setHeaderProperty(RequestHeaderConstants.HDR_CONTENT_PROFILE, schemaInfo.getFullSchemaValue());                    
+    }
+    
+    /*
+     * The accept profile header of the original request may have indicated multiple supported schemas, hence a List<SchemaInfo>. 
+     * However actual content of a response must be one particular schema. We don't really know what it is, so we
+     * default to the first one and assume it is the correct one, similar as we do with the media type. Note this can be null
+     * where the consumer has not indicated what it can deal with. In such a case we need to get the framework's default value.
+     */
+    private SchemaInfo getResponseSchemaInfo(List<PayloadMetadata> payloadMetadataList, boolean dmSchema, String mappedVersionNumber)
+    {
+        SchemaInfo finalSchemaInfo = null;
+        if ((payloadMetadataList != null) && (payloadMetadataList.size() > 0) && (payloadMetadataList.get(0).getSchemaInfo() != null))
+        {
+            finalSchemaInfo = payloadMetadataList.get(0).getSchemaInfo();
+        }
+        else // no schema info found so we try to determine best fit
+        {
+            finalSchemaInfo = getBestFitSchamaInfo(dmSchema);
+        }
+        // if we deal with a infrastructure payload then we may have applied a version number mapping which in turn means the
+        // schema info needs to reflect that as well!
+        if ((!dmSchema) && StringUtils.notEmpty(mappedVersionNumber) && (finalSchemaInfo != null))
+        {
+            finalSchemaInfo.setModelVersion(mappedVersionNumber);
+        }
+        
+        return finalSchemaInfo;
+    }
+    
+    /**
+     * Returns the request's indicated acceptable response schema. Note at this point the framework only supports one at most, so the
+     * first indicated one will be returned assuming it is set. If it isn't set the FW settings will be use.
+     * 
+     * @param dmSchema TRUE: Get the schema for the locale data model. FALSE: Get the schema for the infrastructure data model
+     * @param mappedVersionNumber If set then the schema version might be overridden with that number instead of the framework
+     *                            version number. Can be null which mean no overriding will occur.
+     * 
+     * @return The schema indicated by the original request for either the data model or the infrastructure. In most cases that is the
+     *         same but for functional services or dynamic queries they could be different.
+     */
+    public SchemaInfo getResponseSchemaInfo(boolean dmSchema, String mappedVersionNumber)
+    {
+        return getResponseSchemaInfo(dmSchema ? getDmResponsePayloadMetadata() : getInfraResponsePayloadMetadata(), dmSchema, mappedVersionNumber);
+    }
+    
+    /**
+     * Checks if there is a infrastructure data model version mapping set. If it is then the version number will be
+     * returned. If none is set then null is returned.
+     * 
+     * @return See desc.
+     */
+    public String getMappedInfraVersionNumber()
+    {
+        if (isDirectEnvironment())
+        {
+            SIF3Session session = getSIF3SessionForRequest(); // can return null if there is no authorisation header!
+            return (session != null) ? session.getInfraVersion() : null;
+        }
+        else
+        {
+            return getEnvironmentManager().getEnvironmentInfo().getMappedInfraVersion();
+        }
+    }
+
+    
+    /**
+     * Retrieve the most applicable response media type for either the local data model or the infrastructure data model. This will
+     * be based on the original request. There can only be one media type for the response payload, so we attempt to get the first 
+     * one if there were multiple set in the original request (unlikely case though). If none is given we use the framework value.
+
+     * @param dmSchema TRUE: Get the mime type for the locale data model. FALSE: Get the mime type for the infrastructure data model
+     * 
+     * @return The mime type indicated by the original request for either the data model or the infrastructure. In most cases that 
+     *         is the same but for functional services or dynamic queries they could be different.
+     */
+    public MediaType getResponseMediaType(boolean dmSchema)
+    {
+        List<PayloadMetadata> payloadMetadataList = dmSchema ? getDmResponsePayloadMetadata() : getInfraResponsePayloadMetadata();
+        PayloadMetadata fwPayloadMetadata = getFWDefaultPayloadMetadata(dmSchema);
+        
+        if ((payloadMetadataList != null) && (payloadMetadataList.size() > 0) && (payloadMetadataList.get(0).getMimeType() != null))
+        {
+            return payloadMetadataList.get(0).getMimeType();
+        }
+        else
+        {
+            return fwPayloadMetadata.getMimeType();
+        }        
+    }
+    
+    private PayloadMetadata getFWDefaultPayloadMetadata(boolean dmSchema)
+    {
+        return (dmSchema) ? getEnvironmentManager().getEnvironmentInfo().getDataModelPayloadMetadata() 
+                          : getEnvironmentManager().getEnvironmentInfo().getInfraPayloadMetadata();
+    }
+
+    // This is the situation where the request has not set a schema info. Here we need to be careful. Since the request has
+    // not set the schema info but we do have a mime type, so we need to cater for the correct schema info. If the mime type
+    // states application/xml we know that the schema info should reflect a XML info even tough the default of the framework
+    // may indicate JSON or vice versa. So we need to inspect the mime type first and potentially override the FW default if it
+    // is different
+    private SchemaInfo getBestFitSchamaInfo(boolean dmSchema)
+    {
+        MediaType expectedResponseMimeType = getResponseMediaType(dmSchema);
+        MediaType fwMediaType = dmSchema ? getEnvironmentManager().getEnvironmentInfo().getDataModelPayloadMetadata().getMimeType() 
+                                         : getEnvironmentManager().getEnvironmentInfo().getInfraPayloadMetadata().getMimeType();
+        
+        if (fwMediaType.isCompatible(expectedResponseMimeType)) // all ok
+        {
+            return getFWDefaultPayloadMetadata(dmSchema).getSchemaInfo(); //getFWDefaultSchemaInfo(dmSchema);
+        }
+        else // the request indicated mime type is different to the FW default, we need to honour the request one
+        {
+            SchemaInfo schemaInfo = getFWDefaultPayloadMetadata(dmSchema).getSchemaInfo(); //getFWDefaultSchemaInfo(dmSchema);
+            if (expectedResponseMimeType.isCompatible(MediaType.APPLICATION_XML_TYPE))
+            {
+                // This means the schema info of the framework is JSON. This also means that the schemaType indicates either
+                // goessner or pesc but it should be XML so we override it.
+                return new SchemaInfo(schemaInfo.getModelType(), schemaInfo.getModelDomain(), schemaInfo.getModelVersion());
+            }
+            else if (expectedResponseMimeType.isCompatible(MediaType.APPLICATION_JSON_TYPE))
+            {
+                // This means the schema info of the framework is XML. This also means that the schemaType indicates either
+                // xml or something else but it should be goessner (default JSON type) so we override it.
+                SchemaInfo overrideSchemaInfo = new SchemaInfo(schemaInfo.getModelType(), schemaInfo.getModelDomain(), schemaInfo.getModelVersion());
+                overrideSchemaInfo.setSchemaType(SchemaType.goessner.name());
+                return overrideSchemaInfo;
+            }
+            else // this is not a default SIF mime type, so we cannot really decide on anything and therefore we don't set anything
+            {
+                return null;
+            }
+        }
+    }
+	
+	/*
+	 * @param data Data to be returned. Can be marshalled (String type) or unmarshalled or null.
+	 * @param isDMResponse TRUE: The data is a datamodel payload. FALSE: It is an infrastructure payload.
+	 * @param status Final HTTP status to be returned.
+	 * @param pagingInfo Paging info, can be null, to be returned.
+	 * @param isError Indicates if the payload is an error type. May requires some special marshalling where a DM was expected.
+	 * @param responseAction The action of the response. This is a SIF header.
+	 * @param customResponseParams Some custom headers the provider may have set outside of the SIF spec.
+	 * @param marshaller The marshaller to be used to serialise the payload (data) if it is not null/ 
+	 * @param acceptDMSchemaInfo If not null then it is expected that the payload is data model payload and this info is used to set
+	 *                           appropriate schema info headers. It is used if isDMResponse is TRUE otherwise the framework's infra
+	 *                           Schema Info is used.
+	 * 
+	 * @return A response object with all necessary properties set for it to be returned via JAXRS.
+	 */
+	private Response makeFullResponse(Object data,
+	                                  boolean isDMResponse,
+	                                  int status, 
+	                                  PagingInfo pagingInfo, 
+	                                  boolean isError, 
+	                                  ResponseAction responseAction, 
+	                                  ResponseParameters customResponseParams, 
+	                                  MarshalFactory marshaller, 
+	                                  SchemaInfo acceptDMSchemaInfo)
 	{
 		ResponseBuilder response = null;
 		HeaderProperties allHeaders = ((customResponseParams != null) && (customResponseParams.getHttpHeaderParams() != null)) ? customResponseParams.getHttpHeaderParams() : new HeaderProperties();   
+
+		// Is there version mapping for infrastructure? Never do it for locale DM
+		String mappedVersion = isDMResponse ? null : getMappedInfraVersionNumber();
+		
+		getMappedInfraVersionNumber();
 		try
 		{
 			// Special case to avoid infinite loop: We deal with an error and the Status Code is of UNSUPPORTED_MEDIA_TYPE. This means we attempted
@@ -1541,23 +1911,41 @@ public abstract class BaseResource
 				// Set the media types that are accepted by this object provider. Note this may not be the 'marshaller' given to this method since 
 				// it could be the 'infrastructure' data model in case of an error! The getMarshaller() method is the one that gives access to
 				// the actual data model marshaller and this is the one to use in setting the accepted media types.
-				Set<MediaType> mediaTypes = getMarshaller().getSupportedMediaTypes();
-				for (Iterator<MediaType> iter = mediaTypes.iterator(); iter.hasNext();)
+				
+				// There is the possibility that no marshaller is set (eg. for named queries) so we need to deal with this.
+				if (getMarshaller() != null)
 				{
-					response = response.header(HttpHeaders.ACCEPT, iter.next());					
+    				Set<MediaType> mediaTypes = getMarshaller().getSupportedMediaTypes();
+    				for (Iterator<MediaType> iter = mediaTypes.iterator(); iter.hasNext();)
+    				{
+    					response = response.header(HttpHeaders.ACCEPT, iter.next());					
+    				}
+				
+    				// Also we set the supported Schemas if schema negotiation is enabled. We need to state the DM and Infra data model
+    				// because the consumer requested something we cannot deal with
+    				setAcceptSchemaHeader(acceptDMSchemaInfo, allHeaders);
 				}
 			}
-			else // ok we do not deal with a unsupported media type.
+			else // ok we do NOT deal with a unsupported media type.
 			{
 				if (data != null)
 				{
 					// We may deal with an error here. We must ensure that the media type for the response is valid.
-					MediaType finalMediaType = getResponseMediaType();
+					MediaType finalMediaType = getResponseMediaType(isDMResponse);
+					SchemaInfo finalSchemaInfo = getResponseSchemaInfo(isDMResponse, mappedVersion);
+					
 					if (isError)// deal with the error => marshaller is the infrastructure marshaller. 
 					{
 						// If the client wants a media type that is not ok with the infra structure marshaller then the best we can do,
 						// and hope the client can recover, is to use the marshaller's default media type.
-						finalMediaType = (marshaller.isSupported(finalMediaType)) ?  finalMediaType : marshaller.getDefault();
+					    if (!marshaller.isSupported(finalMediaType))
+					    {
+					        finalMediaType = marshaller.getDefault(); // We use the default since it was not supported. 
+					        
+					        // For schema info we should set it to null in this case.
+					        finalSchemaInfo = null;
+					        
+					    }
 					}
         			
 					boolean isAlreadyMarshalled = (data instanceof String); // indicates that data is already marshalled.
@@ -1565,7 +1953,16 @@ public abstract class BaseResource
 					String payload = null;
 					if (!isAlreadyMarshalled) // if not marshalled then do it now
 					{
-					    payload = marshaller.marshal(data, finalMediaType);
+					    payload = marshaller.marshal(data, finalMediaType, ((finalSchemaInfo == null) ? null : finalSchemaInfo.getSchemaTypeAsEnum()));
+
+	                    if (!isDMResponse) // we deal with infrastructure data model
+	                    {
+	                        if (StringUtils.notEmpty(mappedVersion)) // potentially we need to map
+	                        {
+	                            logger.debug("Infra Namespace mapping might be required. Requested Namespace is: "+mappedVersion);
+	                            payload = JAXBUtils.mapNamespaceVersion(payload, getEnvironmentManager().getEnvironmentInfo().getBaseInfraNamespace(), mappedVersion);
+	                        }
+	                    }
 					}
 					//System.out.println("==============================\nRespopnse Payload:\n"+payload+"\nSize String= "+payload.length()+"\nSize Bytes = "+payload.getBytes("UTF-8").length+"\n==============================");				
 					
@@ -1577,6 +1974,12 @@ public abstract class BaseResource
 					response = Response.status(status).entity(isAlreadyMarshalled ? data : payload);
 					
                     allHeaders.setHeaderProperty(HttpHeaders.CONTENT_TYPE, finalMediaType.toString());
+                    
+                    // Check if also need to set schema info header.
+                    if (isSchemaAware())
+                    {
+                        setContentSchemaHeader(getResponseSchemaInfo(isDMResponse, mappedVersion), allHeaders);
+                    }
 				}
 				else // we have no data
 				{
@@ -1596,6 +1999,17 @@ public abstract class BaseResource
     					else
     					{
     						response = Response.status(status);
+    					}
+    					
+    					// Need to set schema info for HEAD.
+    					if ((responseAction != null) && (responseAction == ResponseAction.HEAD))
+    					{
+                            if (isSchemaAware())
+                            {
+                                //TODO: JH - The full implementation should also hold the "Link" header to indicate the potential 
+                                //           Infra data model where this response is a DM response (see section 3.3 of Versions Spec).
+                                setContentSchemaHeader(getResponseSchemaInfo(isDMResponse, mappedVersion), allHeaders);
+                            }
     					}
 				    }
 				}
@@ -1662,16 +2076,12 @@ public abstract class BaseResource
 		}
 		catch (MarshalException ex)
 		{
-			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+": "+ex.getMessage()), responseAction, customResponseParams);
+			return makeErrorResponse(new ErrorDetails(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+": "+ex.getMessage()), responseAction, customResponseParams, null);
 		}
 		catch (UnsupportedMediaTypeExcpetion ex)
 		{
-			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+" into unsupported media type '"+getResponseMediaType()+"'."), responseAction, customResponseParams);
+			return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+" into unsupported media type '"+getResponseMediaType(isDMResponse)+"'."), responseAction, customResponseParams, acceptDMSchemaInfo);
 		}
-//        catch (UnsupportedEncodingException ex)
-//        {
-//            return makeErrorResponse(new ErrorDetails(Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), "Failed to marshal "+data.getClass().getSimpleName()+" into unsupported media type encoding '"+getResponseMediaType()+"'."), responseAction);
-//        }
 	}
 		
 	/*----------------------------------------------------------*/
@@ -2003,8 +2413,7 @@ public abstract class BaseResource
 	    {
 	    	// Check if we have an Authentication Method as well
 		    String authMethodStr = getQueryParameters().getQueryParam(CommonConstants.AUTH_METHOD);
-//		    String authMethod = null;
-		    
+  
 		    authMethodStr = (StringUtils.notEmpty(authMethodStr)) ? authMethodStr.trim() : null;
 
 	    	if (authMethodStr == null) // check what is in the provider's config file

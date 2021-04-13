@@ -7,11 +7,13 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * 
+ * 
  * <p>Java class for infrastructureServiceType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -19,8 +21,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * <pre>
  * &lt;complexType name="infrastructureServiceType">
  *   &lt;simpleContent>
- *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>token">
- *       &lt;attribute name="name" type="{http://www.sifassociation.org/infrastructure/3.2.1}infrastructureServiceNamesType" />
+ *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>normalizedString">
+ *       &lt;attribute name="name" type="{http://www.sifassociation.org/infrastructure/3.3}infrastructureServiceNamesType" />
  *     &lt;/extension>
  *   &lt;/simpleContent>
  * &lt;/complexType>
@@ -29,14 +31,14 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "infrastructureServiceType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "infrastructureServiceType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "value"
 })
 public class InfrastructureServiceType {
 
     @XmlValue
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
-    @XmlSchemaType(name = "token")
+    @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
+    @XmlSchemaType(name = "normalizedString")
     protected String value;
     @XmlAttribute(name = "name")
     protected InfrastructureServiceNamesType name;

@@ -6,11 +6,11 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
+ * 
+ * 
  * <p>Java class for productIdentityType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
@@ -20,27 +20,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="vendorName" minOccurs="0">
- *           &lt;simpleType>
- *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
- *               &lt;maxLength value="256"/>
- *             &lt;/restriction>
- *           &lt;/simpleType>
- *         &lt;/element>
- *         &lt;element name="productName">
- *           &lt;simpleType>
- *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
- *               &lt;maxLength value="256"/>
- *             &lt;/restriction>
- *           &lt;/simpleType>
- *         &lt;/element>
- *         &lt;element name="productVersion" minOccurs="0">
- *           &lt;simpleType>
- *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}token">
- *               &lt;maxLength value="80"/>
- *             &lt;/restriction>
- *           &lt;/simpleType>
- *         &lt;/element>
+ *         &lt;element name="vendorName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="productName" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="productVersion" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="iconURI" type="{http://www.w3.org/2001/XMLSchema}anyURI" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -51,7 +33,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "productIdentityType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "productIdentityType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "vendorName",
     "productName",
     "productVersion",
@@ -59,16 +41,13 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 })
 public class ProductIdentityType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected String vendorName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     protected String productName;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
-    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     protected String productVersion;
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1")
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3")
     @XmlSchemaType(name = "anyURI")
     protected String iconURI;
 

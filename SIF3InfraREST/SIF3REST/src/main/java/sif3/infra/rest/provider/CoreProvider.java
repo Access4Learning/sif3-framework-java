@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.ws.rs.core.MediaType;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +39,7 @@ import sif3.common.interfaces.EventProvider;
 import sif3.common.model.ACL.AccessRight;
 import sif3.common.model.ACL.AccessType;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.RequestMetadata;
 import sif3.common.model.RequestParameters;
 import sif3.common.model.SIFContext;
@@ -257,14 +256,24 @@ public abstract class CoreProvider implements Runnable
      * By default the following HTTP Header fields are retrieved from the provider's property file and put in corresponding
      * HTTP Header Fields of each event:
      * 
-     * Property                      HTTP Header
-     * ----------------------------------------------------------------
+     * Property                      HTTP Header                            Method
+     * ----------------------------------------------------------------------------------------------
      * adapter.generator.id          generatorId
      * env.application.key           applicationKey
      * env.userToken                 authenticatedUser
-     * env.mediaType                 Content-Type, Accept
      * adapter.compression.enabled   Content-Encoding, Accept-Encoding
      * 
+     * env.mediaType.dm          -.
+     * env.mediaType.charset.dm  -'-> Content-Type, Accept            -.
+     * env.schema.dm.domain      -.                                    |-> DataModelPayloadMetadata
+     * env.schema.dm.version      |-> content-profile, accept-profile -' 
+     * env.schema.dm.json.type   -'
+     * 
+     * env.mediaType.infra          -.
+     * env.mediaType.charset.infra  -'-> Content-Type, Accept            -.
+     * env.schema.infra.version     -.                                    |-> InfraPayloadMetadata
+     * env.schema.infra.json.type   -'-> content-profile, accept-profile -'
+     *
      * Only properties that are not null or empty string will be set in the corresponding HTTP Header.
      *
      * There are situations where and application may need a more 'dynamic' behaviour where the above values are determined
@@ -309,27 +318,47 @@ public abstract class CoreProvider implements Runnable
     }
     
     /**
-     * This method returns the value of the env.mediaType property from the provider's property file. If that
-     * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+     * This method returns the values from the provider's property file for:<br/><br/>
+     * - env.mediaType.dm<br/>
+     * - env.mediaType.charset.dm<br/>
+     * - env.schema.dm.domain,env.schema.dm.version,env.schema.dm.json.type (used for schema negotiation)<br/>
+     * <br/>
+     * These values are all encapsulated in the PayloadMetadata object. If any of these values need to be overridden by a 
+     * specific implementation then the specific provider sub-class should override this method.
      * 
-     * @return The env.mediaType property from the provider's property file
+     * @return See description
      */
-    public MediaType getRequestMediaType()
+    public PayloadMetadata getDataModelRequestPayloadMetadata()
     {
-        return getProviderEnvironment().getMediaType();
+        return getProviderEnvironment().getDataModelPayloadMetadata();
     }
     
+    public PayloadMetadata getDataModelResponsePayloadMetadata()
+    {
+        return getProviderEnvironment().getDataModelPayloadMetadata();
+    }
+
     /**
-     * This method returns the value of the env.mediaType property from the provider's property file. If that
-     * needs to be overridden by a specific implementation then the specific sub-class should override this method.
+     * This method returns the values from the provider's property file for:<br/><br/>
+     * - env.mediaType.infra<br/>
+     * - env.mediaType.charset.infra<br/>
+     * - env.schema.infra.version,env.schema.infra.json.type (used for schema negotiation)<br/>
+     * <br/>
+     * These values are all encapsulated in the PayloadMetadata object. If any of these values need to be overridden by a 
+     * specific implementation then the specific consumer sub-class should override this method.
      * 
-     * @return The env.mediaType property from the provider's property file
+     * @return See description
      */
-    public MediaType getResponseMediaType()
+    public PayloadMetadata getInfraRequestPayloadMetadata()
     {
-        return getProviderEnvironment().getMediaType();
+        return getProviderEnvironment().getInfraPayloadMetadata();
     }
     
+    public PayloadMetadata getInfraResponsePayloadMetadata()
+    {
+        return getProviderEnvironment().getInfraPayloadMetadata();
+    }
+        
     /**
      * This method returns the value of the adapter.compression.enabled property from the provider's property file. If 
      * that needs to be overridden by a specific implementation then the specific sub-class should override this method.
@@ -354,7 +383,7 @@ public abstract class CoreProvider implements Runnable
     /*------------------------------------------------------------------------------------------------------------------------
      * End of 'Dynamic' HTTP Header Field override section
      *-----------------------------------------------------------------------------------------------------------------------*/ 
-    
+
     public void finaliseCoreProvider()
     {
         logger.debug("Finalise in CoreProvider for "+getClass().getSimpleName() +" called.");

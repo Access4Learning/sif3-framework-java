@@ -44,7 +44,14 @@ public class QueueClient extends BaseClient
 {
 	public QueueClient(ClientEnvironmentManager clientEnvMgr)
 	{
-		super(clientEnvMgr, clientEnvMgr.getEnvironmentInfo().getConnectorBaseURI(ConnectorName.queues), clientEnvMgr.getEnvironmentInfo().getMediaType(), clientEnvMgr.getEnvironmentInfo().getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), clientEnvMgr.getEnvironmentInfo().getSecureConnection(), clientEnvMgr.getEnvironmentInfo().getCompressionEnabled());
+		super(clientEnvMgr, 
+		      clientEnvMgr.getEnvironmentInfo().getConnectorBaseURI(ConnectorName.queues), 
+              clientEnvMgr.getEnvironmentInfo().getInfraPayloadMetadata(),
+              clientEnvMgr.getEnvironmentInfo().getInfraPayloadMetadata(), 
+		      new InfraMarshalFactory(), 
+		      new InfraUnmarshalFactory(), 
+		      clientEnvMgr.getEnvironmentInfo().getSecureConnection(), 
+		      clientEnvMgr.getEnvironmentInfo().getCompressionEnabled());
 	}
 	
 	public Response getQueues() throws ServiceInvokationException
@@ -53,7 +60,8 @@ public class QueueClient extends BaseClient
 		try
 		{
 			service = buildURI(service, null);
-			HeaderProperties hdrProperties = getHeaderProperties();		
+			HeaderProperties hdrProperties = getHeaderProperties();
+            hdrProperties = addSchemaHdrProps(hdrProperties, false, false);
 			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).get(ClientResponse.class);
 
 			return setResponse(service, clientResponse, QueueCollectionType.class, hdrProperties, null, null, false, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
@@ -73,6 +81,7 @@ public class QueueClient extends BaseClient
 		{
 			service = buildURI(service, null, queueID, null, null, null);
 			HeaderProperties hdrProperties = getHeaderProperties();		
+            hdrProperties = addSchemaHdrProps(hdrProperties, false, false);
 			ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).get(ClientResponse.class);
 
 			return setResponse(service, clientResponse, QueueType.class, hdrProperties, null, null, false, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT);
@@ -148,6 +157,7 @@ public class QueueClient extends BaseClient
 		{
 			service = buildURI(service, null, queueID, null, null, null);
 			HeaderProperties hdrProperties = getHeaderProperties();		
+            hdrProperties = addSchemaHdrProps(hdrProperties, false, false);
 		    ClientResponse clientResponse = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).delete(ClientResponse.class);
 
 			return setResponse(service, clientResponse, null, hdrProperties, null, null, false, Status.NO_CONTENT);
@@ -196,7 +206,15 @@ public class QueueClient extends BaseClient
 		{
 			service = buildURI(service, null);
 			HeaderProperties hdrProperties = getHeaderProperties();		
-			String payloadStr = getInfraMarshaller().marshal(inputQueue, getRequestMediaType());
+            hdrProperties = addSchemaHdrProps(hdrProperties, true, false);
+			String payloadStr = getInfraMarshaller().marshal(inputQueue, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
+
+	        // We may have to map infra version number
+            if (mayRequireMapping())
+            {
+                payloadStr = mapInfraNamespaceVersionToEndpointVersion(payloadStr);
+            }
+			
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("createQueue: Payload to send:\n"+payloadStr);

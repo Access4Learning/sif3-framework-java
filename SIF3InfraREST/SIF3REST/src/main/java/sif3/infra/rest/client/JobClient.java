@@ -19,7 +19,6 @@ package sif3.infra.rest.client;
 
 import java.util.List;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import com.sun.jersey.api.client.ClientResponse;
@@ -34,6 +33,7 @@ import sif3.common.header.HeaderValues.RequestType;
 import sif3.common.header.HeaderValues.ServiceType;
 import sif3.common.header.RequestHeaderConstants;
 import sif3.common.model.PagingInfo;
+import sif3.common.model.PayloadMetadata;
 import sif3.common.model.SIFContext;
 import sif3.common.model.SIFZone;
 import sif3.common.model.URLQueryParameter;
@@ -77,7 +77,14 @@ public class JobClient extends BaseClient
      */
     public JobClient(ClientEnvironmentManager clientEnvMgr, String jobNamePlural, String jobNameSingular)
     {
-        super(clientEnvMgr, clientEnvMgr.getEnvironmentInfo().getConnectorBaseURI(ConnectorName.servicesConnector), clientEnvMgr.getEnvironmentInfo().getMediaType(), clientEnvMgr.getEnvironmentInfo().getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), clientEnvMgr.getEnvironmentInfo().getSecureConnection(), clientEnvMgr.getEnvironmentInfo().getCompressionEnabled());
+        super(clientEnvMgr, 
+              clientEnvMgr.getEnvironmentInfo().getConnectorBaseURI(ConnectorName.servicesConnector),          
+              clientEnvMgr.getEnvironmentInfo().getInfraPayloadMetadata(),
+              clientEnvMgr.getEnvironmentInfo().getInfraPayloadMetadata(), 
+              new InfraMarshalFactory(), 
+              new InfraUnmarshalFactory(), 
+              clientEnvMgr.getEnvironmentInfo().getSecureConnection(), 
+              clientEnvMgr.getEnvironmentInfo().getCompressionEnabled());
         setJobNamePlural(jobNamePlural);
         setJobNameSingular(jobNameSingular);
     }
@@ -140,7 +147,14 @@ public class JobClient extends BaseClient
         WebResource service = getService();
         try
         {
-            String payloadStr = getInfraMarshaller().marshal(job, getRequestMediaType());
+            String payloadStr = getInfraMarshaller().marshal(job, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
+
+            // We may have to map infra version number
+            if (mayRequireMapping())
+            {
+                payloadStr = mapInfraNamespaceVersionToEndpointVersion(payloadStr);
+            }
+
             if (logger.isDebugEnabled())
             {
                 logger.debug("createJob: Payload to send:\n"+payloadStr);
@@ -148,6 +162,7 @@ public class JobClient extends BaseClient
 
             service = buildURI(service, zone, context, urlQueryParams, getJobNamePlural(), getJobNameSingular());
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, true, false);
             hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, ServiceType.FUNCTIONAL.name());
             hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, "true");
             ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, true).post(ClientResponse.class, payloadStr);
@@ -210,7 +225,12 @@ public class JobClient extends BaseClient
         WebResource service = getService();
         try
         {
-            String payloadStr = getInfraMarshaller().marshal(jobs, getRequestMediaType());
+            String payloadStr = getInfraMarshaller().marshal(jobs, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
+            // We may have to map infra version number
+            if (mayRequireMapping())
+            {
+                payloadStr = mapInfraNamespaceVersionToEndpointVersion(payloadStr);
+            }
             if (logger.isDebugEnabled())
             {
                 logger.debug("createJob: Payload to send:\n"+payloadStr);
@@ -218,6 +238,7 @@ public class JobClient extends BaseClient
 
             service = buildURI(service, zone, context, urlQueryParams, getJobNamePlural());
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, true, false);
             hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, ServiceType.FUNCTIONAL.name());
             hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, "true");
             addDelayedInfo(hdrProperties, zone, context, getJobNamePlural(), ServiceType.FUNCTIONAL, requestType);
@@ -262,6 +283,7 @@ public class JobClient extends BaseClient
         {
             service = buildURI(service, zone, context, urlQueryParams, getJobNamePlural(), jobID);
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, false, false);
             hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, ServiceType.FUNCTIONAL.name());
             ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).get(ClientResponse.class);
 
@@ -300,6 +322,7 @@ public class JobClient extends BaseClient
         {
             service = buildURI(service, zone, context, urlQueryParams, getJobNamePlural());
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, false, false);
             hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, ServiceType.FUNCTIONAL.name());
             addPagingInfoToHeaders(pagingInfo, hdrProperties);
             addDelayedInfo(hdrProperties, zone, context, getJobNamePlural(), ServiceType.FUNCTIONAL, requestType);
@@ -345,6 +368,7 @@ public class JobClient extends BaseClient
             service = buildURI(service, zone, context, urlQueryParams, getJobNamePlural(), jobID);
             
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, false, false);
             ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, false).delete(ClientResponse.class);
 
             return setResponse(service, response, null, hdrProperties, zone, context, true, Status.NO_CONTENT);
@@ -387,7 +411,7 @@ public class JobClient extends BaseClient
             
             //Convert List of resources to DeletesTypes
             DeleteRequestType deleteRequest = getInfraObjectFactory().createDeleteRequestType();
-            deleteRequest.setDeletes(getInfraObjectFactory().createDeleteIdCollection());
+            deleteRequest.setDeletes(getInfraObjectFactory().createDeleteIdCollectionType());
             
             if (jobIDs != null)
             {
@@ -398,9 +422,16 @@ public class JobClient extends BaseClient
                     deleteRequest.getDeletes().getDelete().add(id);
                 }
             }
-            String payloadStr = getInfraMarshaller().marshal(deleteRequest, getRequestMediaType());
+            String payloadStr = getInfraMarshaller().marshal(deleteRequest, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
+
+            // We may have to map infra version number
+            if (mayRequireMapping())
+            {
+                payloadStr = mapInfraNamespaceVersionToEndpointVersion(payloadStr);
+            }
             
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, true, false);
             addDelayedInfo(hdrProperties, zone, context, getJobNamePlural(), ServiceType.FUNCTIONAL, requestType);
 
             // Set specific header so that PUT method knows that a DELETE and not an UPDATE is required! 
@@ -448,6 +479,7 @@ public class JobClient extends BaseClient
         {
             service = buildURI(service, zone, context, urlQueryParams, getJobNamePlural());
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, false, false);
             hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, ServiceType.FUNCTIONAL.name());
             addPagingInfoToHeaders(pagingInfo, hdrProperties);
             
@@ -478,12 +510,13 @@ public class JobClient extends BaseClient
      * data to be returned is considered too large by the provider (implementation dependent) then an appropriate error is 
      * returned (HTTP Status 413 - Response too large).
      * 
-     * @param phaseInfo Hold the jobID and phase name of the job from where the data shall be retrieved. If the parameter or
+     * @param phaseInfo Hold the jobID and phase name of the job from where the data shall be retrieved. The parameter or
      *                  any of its properties must not be null/empty.
-     * @param returnMimeType The mime type the response data is in. It is expected that the consumer provides that and the provider
-     *                       should attempt to marshal the data to the given mime type and return the resulting string as
-     *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
-     *                       appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
+     * @param returnPayloadMetadata The mime type and optional schema info the response data is expected to be returned as. 
+     *                              It is expected that the consumer provides that and the provider should attempt to marshal the data
+     *                              to the given mime type, potentially using the given schema info, and return the resulting string
+     *                              in the requested format. If the provider cannot marshal the data to the requested mime type then an
+     *                              appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
      * @param pagingInfo Page information to determine which results to return. Null = Return all (NOT RECOMMENDED! Might be rejected
      *                   by provider.).
      * @param hdrProperties Header Properties to be added to the header of the request. Can be null.
@@ -501,7 +534,14 @@ public class JobClient extends BaseClient
      *         
      * @throws ServiceInvokationException Any underlying errors occurred such as failure to invoke actual web-service etc. 
      */
-    public Response retrieveDataFromPhase(PhaseInfo phaseInfo, MediaType returnMimeType, PagingInfo pagingInfo, HeaderProperties hdrProperties, URLQueryParameter urlQueryParams, SIFZone zone, SIFContext context, RequestType requestType)
+    public Response retrieveDataFromPhase(PhaseInfo phaseInfo,
+                                          PayloadMetadata returnPayloadMetadata,
+                                          PagingInfo pagingInfo, 
+                                          HeaderProperties hdrProperties, 
+                                          URLQueryParameter urlQueryParams, 
+                                          SIFZone zone, 
+                                          SIFContext context, 
+                                          RequestType requestType)
             throws ServiceInvokationException
     {
         WebResource service = getService();
@@ -509,11 +549,12 @@ public class JobClient extends BaseClient
         {
             service = buildURI(service, zone, context, urlQueryParams, getJobNamePlural(), phaseInfo.getJobID(), phaseInfo.getPhaseName());
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, false, null, true, returnPayloadMetadata.getSchemaInfo());
             hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, ServiceType.FUNCTIONAL.name());
             addPagingInfoToHeaders(pagingInfo, hdrProperties);
             addDelayedInfo(hdrProperties, zone, context, getJobNamePlural(), ServiceType.FUNCTIONAL, requestType);
             
-            ClientResponse response = setRequestHeaderAndMediaTypes(service, returnMimeType, returnMimeType, hdrProperties, requestType, true, true, false).get(ClientResponse.class);
+            ClientResponse response = setRequestHeaderAndMediaTypes(service, returnPayloadMetadata.getMimeType(), returnPayloadMetadata.getMimeType(), hdrProperties, requestType, true, true, false).get(ClientResponse.class);
 
             return setResponse(service, response, String.class, hdrProperties, zone, context, requestType, true, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT, Status.ACCEPTED);
         }
@@ -549,10 +590,11 @@ public class JobClient extends BaseClient
      *                         entirely valid according to the SIF Specification. If data is provided (as a String) then 
      *                         the mime type is set as well, by the consumer, to indicate the format of the data. The 
      *                         provider can us this mime type to unmarshal the data into the appropriate internal structure.
-     * @param returnMimeType The mime type the response data is in. It is expected that the consumer provides that and the provider
-     *                       should attempt to marshal the data to the given mime type and return the resulting string as
-     *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
-     *                       appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
+     * @param returnPayloadMetadata The mime type and optional schema info the response data is expected to be returned as. 
+     *                              It is expected that the consumer provides that and the provider should attempt to marshal the data
+     *                              to the given mime type, potentially using the given schema info, and return the resulting string
+     *                              in the requested format. If the provider cannot marshal the data to the requested mime type then an
+     *                              appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
      * @param useAdvisory If new IDs for the created data shall be allocated or used as given. In some cases that may not be applicable
      *                    but if it is then this parameter indicates the expected behaviour.
      * @param hdrProperties Header Properties to be added to the header of the request. Can be null.
@@ -571,7 +613,7 @@ public class JobClient extends BaseClient
      */
     public Response createDataInPhase(PhaseInfo phaseInfo, 
                                       PhaseDataRequest phaseDataRequest,
-                                      MediaType returnMimeType, 
+                                      PayloadMetadata returnPayloadMetadata,
                                       boolean useAdvisory, 
                                       HeaderProperties hdrProperties, 
                                       URLQueryParameter urlQueryParams, 
@@ -585,6 +627,7 @@ public class JobClient extends BaseClient
         {
             service = buildURI(service, zone, context, urlQueryParams, getJobNamePlural(), phaseInfo.getJobID(), phaseInfo.getPhaseName());
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, true, phaseDataRequest.getPayloadMetadata().getSchemaInfo(), true, returnPayloadMetadata.getSchemaInfo());
             hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_ADVISORY, String.valueOf(useAdvisory));
             hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, ServiceType.FUNCTIONAL.name());
             addDelayedInfo(hdrProperties, zone, context, getJobNamePlural(), ServiceType.FUNCTIONAL, requestType);
@@ -592,11 +635,11 @@ public class JobClient extends BaseClient
             ClientResponse response = null;
             if ((phaseDataRequest != null) && (phaseDataRequest.getData() != null))
             {
-                response = setRequestHeaderAndMediaTypes(service, phaseDataRequest.getMimeType(), returnMimeType, hdrProperties, requestType, true, true, true).post(ClientResponse.class, phaseDataRequest.getData());
+                response = setRequestHeaderAndMediaTypes(service, phaseDataRequest.getPayloadMetadata().getMimeType(), returnPayloadMetadata.getMimeType(), hdrProperties, requestType, true, true, true).post(ClientResponse.class, phaseDataRequest.getData());
             }
             else
             {
-                response = setRequestHeaderAndMediaTypes(service, null, returnMimeType, hdrProperties, requestType, true, true, false).post(ClientResponse.class);
+                response = setRequestHeaderAndMediaTypes(service, null, returnPayloadMetadata.getMimeType(), hdrProperties, requestType, true, true, false).post(ClientResponse.class);
             }
  
             return setResponse(service, response, String.class, hdrProperties, zone, context, requestType, true, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT, Status.ACCEPTED, Status.CREATED);
@@ -626,10 +669,11 @@ public class JobClient extends BaseClient
      *                         entirely valid according to the SIF Specification. If data is provided (as a String) then 
      *                         the mime type is set as well, by the consumer, to indicate the format of the data. The 
      *                         provider can us this mime type to unmarshal the data into the appropriate internal structure.
-     * @param returnMimeType The mime type the response data is in. It is expected that the consumer provides that and the provider
-     *                       should attempt to marshal the data to the given mime type and return the resulting string as
-     *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
-     *                       appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
+     * @param returnPayloadMetadata The mime type and optional schema info the response data is expected to be returned as. 
+     *                              It is expected that the consumer provides that and the provider should attempt to marshal the data
+     *                              to the given mime type, potentially using the given schema info, and return the resulting string
+     *                              in the requested format. If the provider cannot marshal the data to the requested mime type then an
+     *                              appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
      * @param hdrProperties Header Properties to be added to the header of the request. Can be null.
      * @param urlQueryParams URL query parameters to be added to the request. It is assumed that these are custom
      *                       URL query parameters. They are conveyed to the provider unchanged. URL query parameter
@@ -646,7 +690,7 @@ public class JobClient extends BaseClient
      */
     public Response updateDataInPhase(PhaseInfo phaseInfo, 
                                       PhaseDataRequest phaseDataRequest,
-                                      MediaType returnMimeType, 
+                                      PayloadMetadata returnPayloadMetadata,
                                       HeaderProperties hdrProperties, 
                                       URLQueryParameter urlQueryParams, 
                                       SIFZone zone, 
@@ -659,17 +703,18 @@ public class JobClient extends BaseClient
         {
             service = buildURI(service, zone, context, urlQueryParams, getJobNamePlural(), phaseInfo.getJobID(), phaseInfo.getPhaseName());
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, true, phaseDataRequest.getPayloadMetadata().getSchemaInfo(), true, returnPayloadMetadata.getSchemaInfo());
             hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, ServiceType.FUNCTIONAL.name());
             addDelayedInfo(hdrProperties, zone, context, getJobNamePlural(), ServiceType.FUNCTIONAL, requestType);
             
             ClientResponse response = null;
             if ((phaseDataRequest != null) && (phaseDataRequest.getData() != null))
             {
-                response = setRequestHeaderAndMediaTypes(service, phaseDataRequest.getMimeType(), returnMimeType, hdrProperties, requestType, true, true, true).put(ClientResponse.class, phaseDataRequest.getData());
+                response = setRequestHeaderAndMediaTypes(service, phaseDataRequest.getPayloadMetadata().getMimeType(), returnPayloadMetadata.getMimeType(), hdrProperties, requestType, true, true, true).put(ClientResponse.class, phaseDataRequest.getData());
             }
             else
             {
-                response = setRequestHeaderAndMediaTypes(service, null, returnMimeType, hdrProperties, requestType, true, true, false).put(ClientResponse.class);
+                response = setRequestHeaderAndMediaTypes(service, null, returnPayloadMetadata.getMimeType(), hdrProperties, requestType, true, true, false).put(ClientResponse.class);
             }
  
             return setResponse(service, response, String.class, hdrProperties, zone, context, requestType, true, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT, Status.ACCEPTED);
@@ -705,10 +750,11 @@ public class JobClient extends BaseClient
      *                         entirely valid according to the SIF Specification. If data is provided (as a String) then 
      *                         the mime type is set as well, by the consumer, to indicate the format of the data. The 
      *                         provider can us this mime type to unmarshal the data into the appropriate internal structure.
-     * @param returnMimeType The mime type the response data is in. It is expected that the consumer provides that and the provider
-     *                       should attempt to marshal the data to the given mime type and return the resulting string as
-     *                       part of this call. If the provider cannot marshal the data to the requested mime type then an
-     *                       appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
+     * @param returnPayloadMetadata The mime type and optional schema info the response data is expected to be returned as. 
+     *                              It is expected that the consumer provides that and the provider should attempt to marshal the data
+     *                              to the given mime type, potentially using the given schema info, and return the resulting string
+     *                              in the requested format. If the provider cannot marshal the data to the requested mime type then an
+     *                              appropriate error is returned to this consumer (HTTP Status 400 - Bad Request).
      * @param hdrProperties Header Properties to be added to the header of the request. Can be null.
      * @param urlQueryParams URL query parameters to be added to the request. It is assumed that these are custom
      *                       URL query parameters. They are conveyed to the provider unchanged. URL query parameter
@@ -725,7 +771,7 @@ public class JobClient extends BaseClient
      */
     public Response deleteDataInPhase(PhaseInfo phaseInfo, 
                                       PhaseDataRequest phaseDataRequest,
-                                      MediaType returnMimeType, 
+                                      PayloadMetadata returnPayloadMetadata,
                                       HeaderProperties hdrProperties, 
                                       URLQueryParameter urlQueryParams, 
                                       SIFZone zone, 
@@ -736,8 +782,10 @@ public class JobClient extends BaseClient
         WebResource service = getService();
         try
         {
+            boolean hasPhaseData = (phaseDataRequest != null) && (phaseDataRequest.getData() != null);
             service = buildURI(service, zone, context, urlQueryParams, getJobNamePlural(), phaseInfo.getJobID(), phaseInfo.getPhaseName());
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, hasPhaseData, phaseDataRequest.getPayloadMetadata().getSchemaInfo(), true, returnPayloadMetadata.getSchemaInfo());
             
             // Set specific header so that PUT method knows that a DELETE and not an UPDATE is required! 
             hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_METHOD_OVERRIDE, HeaderValues.MethodType.DELETE.name());
@@ -745,13 +793,13 @@ public class JobClient extends BaseClient
             addDelayedInfo(hdrProperties, zone, context, getJobNamePlural(), ServiceType.FUNCTIONAL, requestType);
             
             ClientResponse response = null;
-            if ((phaseDataRequest != null) && (phaseDataRequest.getData() != null))
+            if (hasPhaseData)
             {
-                response = setRequestHeaderAndMediaTypes(service, phaseDataRequest.getMimeType(), returnMimeType, hdrProperties, requestType, true, true, true).put(ClientResponse.class, phaseDataRequest.getData());
+                response = setRequestHeaderAndMediaTypes(service, phaseDataRequest.getPayloadMetadata().getMimeType(), returnPayloadMetadata.getMimeType(), hdrProperties, requestType, true, true, true).put(ClientResponse.class, phaseDataRequest.getData());
             }
             else
             {
-                response = setRequestHeaderAndMediaTypes(service, null, returnMimeType, hdrProperties, requestType, true, true, false).put(ClientResponse.class);
+                response = setRequestHeaderAndMediaTypes(service, null, returnPayloadMetadata.getMimeType(), hdrProperties, requestType, true, true, false).put(ClientResponse.class);
             }
  
             return setResponse(service, response, String.class, hdrProperties, zone, context, requestType, true, Status.OK, Status.NOT_MODIFIED, Status.NO_CONTENT, Status.ACCEPTED);
@@ -798,7 +846,13 @@ public class JobClient extends BaseClient
             // Create the phase state object
             StateType newPhaseState = new StateType();
             newPhaseState.setType(PhaseStateType.valueOf(newState.name()));
-            String payloadStr = getInfraMarshaller().marshal(newPhaseState, getRequestMediaType());
+            String payloadStr = getInfraMarshaller().marshal(newPhaseState, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
+
+            // We may have to map infra version number
+            if (mayRequireMapping())
+            {
+                payloadStr = mapInfraNamespaceVersionToEndpointVersion(payloadStr);
+            }
             if (logger.isDebugEnabled())
             {
                 logger.debug("Phase State: Payload to send:\n"+payloadStr);
@@ -807,6 +861,7 @@ public class JobClient extends BaseClient
             service = buildURI(service, zone, context, urlQueryParams, getJobNamePlural(), phaseInfo.getJobID(), phaseInfo.getPhaseName(), "states", "state");
             
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, true, false);
             hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, ServiceType.FUNCTIONAL.name());
 
             ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, true).post(ClientResponse.class, payloadStr);
@@ -852,6 +907,7 @@ public class JobClient extends BaseClient
             service = buildURI(service, zone, context, urlQueryParams, getJobNamePlural(), phaseInfo.getJobID(), phaseInfo.getPhaseName(), "states");
             
             hdrProperties = addAuthenticationHdrProps(hdrProperties);
+            hdrProperties = addSchemaHdrProps(hdrProperties, false, false);
             hdrProperties.setHeaderProperty(RequestHeaderConstants.HDR_SERVICE_TYPE, ServiceType.FUNCTIONAL.name());
 
             ClientResponse response = setRequestHeaderAndMediaTypes(service, hdrProperties, true, true, true).get(ClientResponse.class);

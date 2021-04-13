@@ -100,7 +100,12 @@ public abstract class BaseEventProvider<L> extends BaseProvider implements Event
 		{
 			// Let's get the Event Client
 		    String serviceName = getServiceName();
-			EventClient evtClient = new EventClient(envMgr, getRequestMediaType(), getResponseMediaType(), serviceName, getMarshaller(), getCompressionEnabled());
+			EventClient evtClient = new EventClient(envMgr, 
+                                                    getDataModelRequestPayloadMetadata(),
+                                                    getDataModelResponsePayloadMetadata(),
+			                                        serviceName, 
+			                                        getMarshaller(), 
+			                                        getCompressionEnabled());
 			SIFEventIterator<L> iterator = getSIFEvents();
 			if (iterator != null)
 			{

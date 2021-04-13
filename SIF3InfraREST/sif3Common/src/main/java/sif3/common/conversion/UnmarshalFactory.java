@@ -20,6 +20,7 @@ package sif3.common.conversion;
 
 import javax.ws.rs.core.MediaType;
 
+import sif3.common.CommonConstants.SchemaType;
 import sif3.common.exception.UnmarshalException;
 import sif3.common.exception.UnsupportedMediaTypeExcpetion;
 
@@ -50,7 +51,10 @@ public interface UnmarshalFactory extends MediaTypeOperations
 	
 	/**
 	 * Unmarshal the given JSON string into an object of type Class<?>. If anything goes wrong with that unmarshal method then
-	 * a UnmarshalException is returned.
+	 * a UnmarshalException is returned. This method assumes that the JSON is in Goessner notation.<br/><br/>
+	 * 
+	 * Note:<br/>
+	 * This method is for backward compatibility. Ideally the method with the SchemaType  should be used.
 	 * 
 	 * @param payload The JSON string to be unmarshalled into an object. 
 	 * @param clazz The object type to unmarshal into.
@@ -60,11 +64,33 @@ public interface UnmarshalFactory extends MediaTypeOperations
 	 * @throws UnmarshalException Failure to unmarshal the given JSON string into an object.
 	 * @throws UnsupportedMediaTypeExcpetion If JSON is not a supported format.
 	 */
+	@Deprecated
 	public Object unmarshalFromJSON(String payload, Class<?> clazz) throws UnmarshalException, UnsupportedMediaTypeExcpetion;
+
+	/**
+     * Unmarshal the given JSON string into an object of type Class<?>. If anything goes wrong with that unmarshal method then
+     * a UnmarshalException is returned. Since SIF 3.3 there are two supported JSON notations. Goessner (default) and PESC (new).
+     * The jsonSchema parameter indicates which of the two notations shall be used. If the value is null then Goessner is assumed.
+     * 
+     * @param payload The JSON string to be unmarshalled into an object. 
+     * @param clazz The object type to unmarshal into.
+	 * @param jsonSchema Indicates if Goessner or PESC notation is used.
+	 * 
+     * @return See description.
+     * 
+     * @throws UnmarshalException Failure to unmarshal the given JSON string into an object.
+     * @throws UnsupportedMediaTypeExcpetion If JSON is not a supported format.
+	 */
+    public Object unmarshalFromJSON(String payload, Class<?> clazz, SchemaType jsonSchema) throws UnmarshalException, UnsupportedMediaTypeExcpetion;
+	
 	
 	/**
 	 * Wrapper Method for the above two methods. This method can be called if the MediaType is known and based on what the input string
-	 * is (XML or JSON). This unmarshal method must only support 'application/xml and application/json.
+	 * is (XML or JSON). This unmarshal method must only support 'application/xml and application/json. This method assumes that the 
+	 * JSON is in Goessner notation.<br/><br/>
+     * 
+     * Note:<br/>
+     * This method is for backward compatibility. Ideally the method with the SchemaType should be used.
 	 * 
 	 * @param payload The string to marshal into an object.
 	 * @param clazz The object type to unmarshal into.
@@ -75,5 +101,25 @@ public interface UnmarshalFactory extends MediaTypeOperations
 	 * @throws UnmarshalException Failure to unmarshal the given string into an object.
 	 * @throws UnsupportedMediaTypeExcpetion If the media type requested is not a supported format.
 	 */
+    @Deprecated
 	public Object unmarshal(String payload, Class<?> clazz, MediaType mediaType) throws UnmarshalException, UnsupportedMediaTypeExcpetion;
+
+    /**
+     * Wrapper Method for the above two methods. This method can be called if the MediaType is known and based on what the input string
+     * is (XML or JSON). This unmarshal method must only support 'application/xml and application/json. Since SIF 3.3 there are two 
+     * supported JSON notations. Goessner (default) and PESC (new). The jsonSchema parameter indicates which of the two notations 
+     * shall be used if the mediaType is application/json. If the value is null then Goessner is assumed. If mediaType is 
+     * anything else then the jsonSchema parameter can be ignored.
+     * 
+     * @param payload The string to marshal into an object.
+     * @param clazz The object type to unmarshal into.
+     * @param mediaType Indicates what the object shall be unmarshalled from (JSON or XML).
+     * @param jsonSchema Indicates if Goessner or PESC notation shall be used if mediaType indicates JSON.
+       * 
+     * @return See description.
+     * 
+     * @throws UnmarshalException Failure to unmarshal the given string into an object.
+     * @throws UnsupportedMediaTypeExcpetion If the media type requested is not a supported format.
+     */
+	public Object unmarshal(String payload, Class<?> clazz, MediaType mediaType, SchemaType jsonSchema) throws UnmarshalException, UnsupportedMediaTypeExcpetion;
 }

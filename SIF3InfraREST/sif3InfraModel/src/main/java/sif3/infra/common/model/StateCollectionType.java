@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="state" type="{http://www.sifassociation.org/infrastructure/3.2.1}stateType" maxOccurs="unbounded"/>
+ *         &lt;element name="state" type="{http://www.sifassociation.org/infrastructure/3.3}stateType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,12 +29,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "stateCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "stateCollectionType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "state"
 })
 public class StateCollectionType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
     protected List<StateType> state;
 
     /**

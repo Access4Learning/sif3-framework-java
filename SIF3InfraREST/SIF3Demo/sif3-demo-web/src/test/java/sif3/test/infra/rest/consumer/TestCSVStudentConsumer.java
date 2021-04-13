@@ -20,11 +20,14 @@ import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
+import au.com.systemic.framework.utils.FileReaderWriter;
+import sif3.common.CommonConstants.SchemaType;
+import sif3.common.model.PayloadMetadata;
+import sif3.common.model.SchemaInfo;
 import sif3.common.ws.Response;
 import sif3.infra.rest.consumer.ConsumerLoader;
 import systemic.sif3.demo.rest.consumer.CSVStudentConsumer;
 import systemic.sif3.demo.rest.conversion.CSVUnmarshaller;
-import au.com.systemic.framework.utils.FileReaderWriter;
 
 /**
  * @author Joerg Huber
@@ -33,8 +36,8 @@ import au.com.systemic.framework.utils.FileReaderWriter;
 public class TestCSVStudentConsumer
 {
 //	private final static String PATH = "/Users/crub/dev/nsip/Users/crub/dev/nsip/sif3-framework-java-dev";
-	private final static String PATH = "C:/DEV/eclipseWorkspace/SIF3InfraREST";
-//	private final static String PATH = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST";
+//	private final static String PATH = "C:/DEV/eclipseWorkspace/SIF3InfraREST";
+	private final static String PATH = "C:/Development/GitHubRepositories/SIF3InfraRest/SIF3InfraREST";
   
 	private final static String CSV_FILE_NAME = PATH + "/TestData/csv/input/CSVStudents.csv";
 	private static final String CONSUMER_ID = "StudentConsumer";
@@ -53,11 +56,14 @@ public class TestCSVStudentConsumer
 					{
 						System.out.println("Error for Response "+i+": "+response.getError());
 					}
-					else // We should have a student personal
+					else // We should have a student CSV data
 					{
 						if (response.getHasEntity())
 						{
-							System.out.println("Data Object Response "+i+": "+consumer.getMarshaller().marshal(response.getDataObject(), consumer.getResponseMediaType()));
+						    PayloadMetadata responsePayloadMetadata = consumer.getDataModelResponsePayloadMetadata();
+						    SchemaInfo schemaInfo =  responsePayloadMetadata.getSchemaInfo();
+						    SchemaType schemaType = (schemaInfo == null) ? null : schemaInfo.getSchemaTypeAsEnum();
+							System.out.println("Data Object Response "+i+": "+consumer.getMarshaller().marshal(response.getDataObject(), responsePayloadMetadata.getMimeType(), schemaType));
 						}
 						else
 						{
@@ -124,7 +130,7 @@ public class TestCSVStudentConsumer
 		{
 			CSVStudentConsumer consumer = tester.getConsumer();
  
-  			//tester.createCSV(consumer);
+  			tester.createCSV(consumer);
   
   			System.out.println("Finalise Consumer (i.e. disconnect and remove environment).");
   			consumer.finalise();

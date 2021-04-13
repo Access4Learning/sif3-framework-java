@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * An HTTP Response with a status of 200 (success). It contains a payload consisting of a single “deleteResponse” element.
+ * An HTTP Response with a status of 200 (success). It contains a payload consisting of a single "deleteResponse" element.
  * 
  * <p>Java class for deleteResponseType complex type.
  * 
@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="deletes" type="{http://www.sifassociation.org/infrastructure/3.2.1}deleteStatusCollection"/>
+ *         &lt;element name="deletes" type="{http://www.sifassociation.org/infrastructure/3.3}deleteStatusCollectionType"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,23 +29,23 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "deleteResponseType", namespace = "http://www.sifassociation.org/infrastructure/3.2.1", propOrder = {
+@XmlType(name = "deleteResponseType", namespace = "http://www.sifassociation.org/infrastructure/3.3", propOrder = {
     "deletes"
 })
 public class DeleteResponseType {
 
-    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.2.1", required = true)
-    protected DeleteStatusCollection deletes;
+    @XmlElement(namespace = "http://www.sifassociation.org/infrastructure/3.3", required = true)
+    protected DeleteStatusCollectionType deletes;
 
     /**
      * Gets the value of the deletes property.
      * 
      * @return
      *     possible object is
-     *     {@link DeleteStatusCollection }
+     *     {@link DeleteStatusCollectionType }
      *     
      */
-    public DeleteStatusCollection getDeletes() {
+    public DeleteStatusCollectionType getDeletes() {
         return deletes;
     }
 
@@ -54,10 +54,10 @@ public class DeleteResponseType {
      * 
      * @param value
      *     allowed object is
-     *     {@link DeleteStatusCollection }
+     *     {@link DeleteStatusCollectionType }
      *     
      */
-    public void setDeletes(DeleteStatusCollection value) {
+    public void setDeletes(DeleteStatusCollectionType value) {
         this.deletes = value;
     }
 

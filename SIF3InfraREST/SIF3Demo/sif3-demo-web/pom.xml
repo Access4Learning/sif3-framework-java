@@ -9,7 +9,7 @@
 	<groupId>sif3.framework</groupId>
 	<artifactId>sif3-demo-web</artifactId>
 	<packaging>war</packaging>
-	<version>0.14.1-Demo</version>
+	<version>0.15.0</version>
 	<name>SIF3 Demo Provider</name>
 	
 	<!-- =============================== -->
@@ -42,7 +42,7 @@
 		<dependency>
 			<groupId>sif3.framework</groupId>
 			<artifactId>sif3-infra-rest</artifactId>
-			<version>0.14.1-beta</version>
+			<version>0.15.0</version>
 		</dependency>
 
 		<!-- ====================== -->
@@ -52,7 +52,7 @@
 		<dependency>
 			<groupId>sifau</groupId>
 			<artifactId>sif3-au-datamodel</artifactId>
-			<version>3.4.4</version>
+			<version>3.4.6</version>
 		</dependency>
 
 		<!-- =============================== -->

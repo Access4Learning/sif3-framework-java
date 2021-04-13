@@ -90,11 +90,11 @@ public class TestAuthUtils
 	private void testHMACSHA256Token()
 	{
 //		String username = "TestSIS";
-		String username = "27677240-0c2e-4e65-a47f-e3454e5234a1";
-		String password = "bijObw7aBbTB";
+		String username = "64e70d3d-a0a1-4b82-aeeb-78d902cdf2fc";
+		String password = "Password1";
 //		String username = "new";
 //		String password = "guest";
-///		String now = "2013-06-22T23:52-07";
+//		String now = "2020-10-26T01:52:25.915Z";
 		String now = DateUtils.getISO8601withSecFraction(new Date());
 
 		long startTime = (new Date()).getTime();

@@ -59,7 +59,13 @@ public class EnvironmentClient extends BaseClient
 	 */
 	public EnvironmentClient(ClientEnvironmentManager clientEnvMgr, URI environmentURI, EnvironmentInfo envInfo)
 	{
-		super(clientEnvMgr, environmentURI, envInfo.getMediaType(), envInfo.getMediaType(), new InfraMarshalFactory(), new InfraUnmarshalFactory(), envInfo.getSecureConnection(), envInfo.getCompressionEnabled());
+        super(clientEnvMgr, environmentURI, 
+              envInfo.getInfraPayloadMetadata(),
+              envInfo.getInfraPayloadMetadata(), 
+              new InfraMarshalFactory(), 
+              new InfraUnmarshalFactory(), 
+              envInfo.getSecureConnection(), 
+              envInfo.getCompressionEnabled());
 		this.envInfo = envInfo;
 	}
 	
@@ -81,7 +87,13 @@ public class EnvironmentClient extends BaseClient
 		try
 		{
 			service = buildURI(service, null);
-			String payloadStr = getDataModelMarshaller().marshal(template, getRequestMediaType());
+			String payloadStr = getDataModelMarshaller().marshal(template, getRequestPayloadMetadata().getMimeType(), getRequestPayloadMetadata().getSchemaType());
+
+			// We may have to map infra version number
+			if (mayRequireMapping())
+			{
+			    payloadStr = mapInfraNamespaceVersionToEndpointVersion(payloadStr);
+			}
 
 			if (logger.isDebugEnabled())
 			{
@@ -96,6 +108,8 @@ public class EnvironmentClient extends BaseClient
 			    pseudoSIF3Session.setSecurityTokenExpiry(tokenInfo.getTokenExpiryDate());
 			}
 			HeaderProperties requestHdrProps = createAuthenticationHdr(true, pseudoSIF3Session);
+			requestHdrProps = addSchemaHdrProps(requestHdrProps, true, false);
+
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, requestHdrProps, true, true, true).post(ClientResponse.class, payloadStr);
 
 			if (envInfo.getEnvCreateConflictIsError())
@@ -137,6 +151,7 @@ public class EnvironmentClient extends BaseClient
 			// Since we have a pseudo session we must check if there is a need to pass along a TokenInfo. Only needed if
 			// Authentication method is 'Bearer' which also means that the security token should be set in the pseudo session!
 			HeaderProperties requestHdrProps = createAuthenticationHdr(false, pseudoSIF3Session);
+            requestHdrProps = addSchemaHdrProps(requestHdrProps, false, false);
 			ClientResponse response = setRequestHeaderAndMediaTypes(service, requestHdrProps, true, true, false).get(ClientResponse.class);                
 
 			return setResponse(service, response, EnvironmentType.class, requestHdrProps, null, null, false, Status.OK, Status.NOT_MODIFIED);
@@ -149,7 +164,6 @@ public class EnvironmentClient extends BaseClient
 		}
 	}
 	
-
 	/**
 	 * This method will remove an environment given by the URI in the constructor. If the environment is removed it will return
 	 * true. In all other cases false will be returned and one has to assume the environment may still exist on the 
@@ -164,6 +178,7 @@ public class EnvironmentClient extends BaseClient
 		{
 			service = buildURI(service, null);
 			HeaderProperties requestHdrProps = createAuthenticationHdr(false, null);
+            requestHdrProps = addSchemaHdrProps(requestHdrProps, false, false);
 		    ClientResponse remoteResponse = setRequestHeaderAndMediaTypes(service, requestHdrProps, true, true, false).delete(ClientResponse.class);
 
 		    Response response = setResponse(service, remoteResponse, null, requestHdrProps, null, null, false, Status.NO_CONTENT);    
